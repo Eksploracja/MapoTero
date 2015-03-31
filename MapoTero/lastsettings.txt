@@ -1,0 +1,22 @@
+folder segmentow
+\download\
+chkgmi
+False
+chkmap
+False
+chkwldpoints
+False
+chkjpgw
+False
+dolna
+\download\dolna\
+gorna
+\download\gorna\
+polaczone
+\download\polaczone\
+XYswitched
+False
+chkTB
+False
+chkNrSeg
+False
