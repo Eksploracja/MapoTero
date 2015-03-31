@@ -222,6 +222,7 @@
     <Content Include="lastsettings.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="Licence_GNU_GPL.txt" />
     <Content Include="MapoTero.ico" />
     <Content Include="warstwy\administracyjna.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
