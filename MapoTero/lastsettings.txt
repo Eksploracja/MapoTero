@@ -20,3 +20,7 @@ chkTB
 False
 chkNrSeg
 False
+iloscProbPobrania
+3
+przerwaMiedzyProbami
+5

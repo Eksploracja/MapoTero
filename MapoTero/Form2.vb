@@ -19,7 +19,8 @@ Public Class Form2
         Me.Location = New Point(200, 150)
 
 
-
+		TextBox1.Text = Module1.iloscProbPobrania
+        TextBox2.Text = Module1.przerwaMiedzyProbami
         CheckBox1.Checked = Module1.CheckMap 'wyprowadza stan checkboxów do zmiennych
         CheckBox2.Checked = Module1.CheckGmi
         CheckBox4.Checked = Module1.CheckWldPoints
@@ -178,6 +179,8 @@ Public Class Form2
 
     Private Sub Button1_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles Button1.Click
         wspolnaNazwaKwadratu = TextBox6.Text
+		iloscProbPobrania = Val(TextBox1.Text)
+        przerwaMiedzyProbami = Val(TextBox2.Text)
         Module1.plik_lastsettings()
 
         Me.Close()

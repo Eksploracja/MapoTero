@@ -777,6 +777,10 @@ brakConfTxt:
         Input(1, CheckTB)
         Input(1, zmiennaNaSztuke)
         Input(1, CheckNrSeg)
+		Input(1, zmiennaNaSztuke)
+        Input(1, iloscProbPobrania)
+        Input(1, zmiennaNaSztuke)
+        Input(1, przerwaMiedzyProbami)
         FileClose(1)
 brakpliku:
     End Sub
