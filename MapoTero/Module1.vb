@@ -44,6 +44,8 @@ Module Module1
     Public folderWarstwa1 As String             'folder warstwy dolnej
     Public folderWarstwa2 As String             'folder warstwy górnej
     Public folderWynikowy As String             'folder złączonych warstw
+    Public iloscProbPobrania As Integer = 3   'docelowa ilość prób
+    Public przerwaMiedzyProbami As Integer = 5 'odstęp między kolejnymi próbami w sekundach
 
     Public format As String                     'jpeg / png / svg+xml
     Public rozszerzenie As String               'jpg / png / svg
@@ -161,15 +163,15 @@ Module Module1
             GoTo errorhandler
         End If
 
-        'OBSŁUGA BŁĘDÓW - koniec
+        'OBSŁUGA BŁĘDÓW - koniec (edit 1.04.2015 by Kazik)
 
-        Dim przechowajFormat As String = format     'po odwołaniu się do form2 pitolił się format
-        If pobierz = True Then
-            iloscProbPobrania = Val(Form2.TextBox1.Text)
-            przerwaMiedzyProbami = Val(Form2.TextBox2.Text)
-        End If
-        format = przechowajFormat
-        Form1.ToolStripStatusLabel2.Text = "." & format
+        'Dim przechowajFormat As String = format     'po odwołaniu się do form2 pitolił się format
+        'If pobierz = True Then
+        '   iloscProbPobrania = Val(Form2.TextBox1.Text)
+        '   przerwaMiedzyProbami = Val(Form2.TextBox2.Text)
+        ' End If
+        'format = przechowajFormat
+        'Form1.ToolStripStatusLabel2.Text = "." & format
 
 
 
@@ -209,6 +211,7 @@ Module Module1
 
 
 
+        Dim nrKwadratu As Integer
 
 pobieranieJeszczeRaz:
 
@@ -235,10 +238,7 @@ pobieranieJeszczeRaz:
 
                 Dim nrKwadratu_seg As String = pionPix.ToString("D2") & "_" & pozPix.ToString("D2")                'domyślna numeracja typu _wiersz_kolumna
 
-                Dim nrKwadratu As Integer
-
                 nrKwadratu = nrKwadratu + 1
-
 
                 'jeśli dla TB to inne nazwy plikówdouble
                 Select Case CheckTB
@@ -277,10 +277,14 @@ pobieranieJeszczeRaz:
                 strUrlparts(4) = Px & ","
 
                 strUrlparts(5) = Py & "&format=image/" & format & "&styles=&width="
+                'Edit 1.04.2015 by Kazik - likwiduję wpis "-1" dla zachowania  rozdzielczości pobieranego segmentu zgodnie z zadaną w formularzu
+                'strUrlparts(6) = Form1.TextBox9.Text - 1 & "&height="
 
-                strUrlparts(6) = Form1.TextBox9.Text - 1 & "&height="
+                'strUrlparts(7) = Form1.TextBox9.Text - 1
 
-                strUrlparts(7) = Form1.TextBox9.Text - 1
+                strUrlparts(6) = Form1.TextBox9.Text & "&height="
+
+                strUrlparts(7) = Form1.TextBox9.Text
 
                 'składa pozycje tablicy w link
                 strUrl = ""
@@ -558,6 +562,11 @@ errorhandler:
 
         PrintLine(1, "chkNrSeg")
         PrintLine(1, CheckNrSeg)
+        PrintLine(1, "iloscProbPobrania")
+        PrintLine(1, iloscProbPobrania)
+        PrintLine(1, "przerwaMiedzyProbami")
+        PrintLine(1, przerwaMiedzyProbami)
+
         FileClose(1)
 
     End Sub
