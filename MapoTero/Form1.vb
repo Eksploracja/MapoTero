@@ -29,7 +29,7 @@ Public Class Form1
 
     Private Sub Form1_Load(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MyBase.Load
 
-        Me.TopMost = True 'Kazik 6.04.2015 - test hierarchii okien
+        Me.TopMost = True  'Kazik 6.04.2015 - test hierarchii okien
         'wyświetla nazwę i wersję 
         Me.Text = My.Application.Info.Title & " " & My.Application.Info.Version.ToString
 
