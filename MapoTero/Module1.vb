@@ -34,7 +34,7 @@ Module Module1
     Public ileSegHoriz As Integer
     Public ileSegVert As Integer
     Public wspolnaNazwaKwadratu As String       'wspólna część nazwy kwadratów - bez kolejnych numerów
-    Public nazwaKwadratu As String              'nazwa i numer kwadratu
+    Public nazwaKwadratu As String           'nazwa i numer kwadratu
     Public pion As Integer                      'zmienna do pętli odliczającej kwadraty (zamiast "i")
     Public poz As Integer
     Public nrKwadratu As String                 'numer segmentu
@@ -76,6 +76,8 @@ Module Module1
 
 
 
+
+
     Public Sub proceduraGlowna()
 
         Dim width As Long             'rozmiary mapy w pixelach
@@ -97,7 +99,6 @@ Module Module1
         End If
 
 
-
         'OBSŁUGA BŁĘDÓW - czy wpisano ilość m/pix
 
         If Form1.TextBox10.Text = "" Then
@@ -114,11 +115,10 @@ Module Module1
         ElseIf Val(Form1.TextBox9.Text) < 1 Then
             MsgBox("Długość boku segmentu musi być większa od zera.")
             GoTo errorhandler
+        ElseIf Val(Form1.TextBox9.Text) > 2048 Then
+            MsgBox("Długość boku segmentu musi być mniejsza od 2048px")
+            GoTo errorhandler
 
-            ' ElseIf Val(TextBox9.Text) > 500 Then
-            '    TextBox9.Text = "500"
-            '    MsgBox("Długość boku tymczasem ograniczona do 500 pix.")
-            '   GoTo errorhandler
         End If
 
         'OBSŁUGA BŁĘDÓW - koniec
@@ -232,11 +232,11 @@ pobieranieJeszczeRaz:
 
             For poz = 1 To ileSegHoriz
 
-                Dim pionPix As Long = pion    'TB
-                Dim pozPix As Long = poz      'TB
+                Dim pionPix As Long = (pion * Form1.TextBox9.Text) - Form1.TextBox9.Text     'TB
+                Dim pozPix As Long = (poz * Form1.TextBox9.Text) - Form1.TextBox9.Text       'TB
                 Dim nrKwadratuPix As String = "_" & pozPix & "_" & pionPix                  'stosowany w mapach TB
 
-                Dim nrKwadratu_seg As String = pionPix.ToString("D2") & "_" & pozPix.ToString("D2")                'domyślna numeracja typu _wiersz_kolumna
+                Dim nrKwadratu_seg As String = pion.ToString("D2") & "_" & poz.ToString("D2")                'domyślna numeracja typu _wiersz_kolumna
 
                 nrKwadratu = nrKwadratu + 1
 
@@ -245,14 +245,21 @@ pobieranieJeszczeRaz:
                     Case True
                         nazwaKwadratu = wspolnaNazwaKwadratu & nrKwadratuPix
                     Case False
-                        nazwaKwadratu = wspolnaNazwaKwadratu & nrKwadratu_seg
+                        If CheckNrSeg = True Then nazwaKwadratu = wspolnaNazwaKwadratu & nrKwadratu.ToString("D2")
+
+                        If CheckNrSeg = False Then nazwaKwadratu = wspolnaNazwaKwadratu & nrKwadratu_seg
+
                 End Select
 
                 Select Case CheckNrSeg
                     Case True
                         nazwaKwadratu = wspolnaNazwaKwadratu & nrKwadratu.ToString("D2")
                     Case False
-                        nazwaKwadratu = wspolnaNazwaKwadratu & nrKwadratu_seg
+
+                        If CheckTB = True Then nazwaKwadratu = wspolnaNazwaKwadratu & nrKwadratuPix
+
+                        If CheckTB = False Then nazwaKwadratu = wspolnaNazwaKwadratu & nrKwadratu_seg
+                       
                 End Select
 
                 Form1.ToolStripStatusLabel3.Text = nazwaKwadratu
@@ -580,13 +587,13 @@ errorhandler:
                 folderSegmentow = Form1.FolderBrowserDialog1.SelectedPath & "\"
 
             End If
+            'Edit Kazik 6.04.2015 - likwidacja podwójnego komunikatu o niewybraniu warstwy
+            'Else
 
-        Else
-
-            If warstwy(0) = "" Then
-                MsgBox("Nie wybrano żadnej warstwy.")
-                GoTo errorhandler
-            End If
+            'If warstwy(0) = "" Then
+            'MsgBox("Nie wybrano żadnej warstwy.")
+            'GoTo errorhandler
+            'End If
 
         End If
 
@@ -621,6 +628,7 @@ errorhandler:
         WriteLine(1, wspolnaNazwaKwadratu)
         WriteLine(1, pobierajPowyzejOstatniego)
         FileClose(1)
+
 
 
         If pobierz = False Then
