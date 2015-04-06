@@ -847,6 +847,7 @@ Partial Class Form1
         Me.MenuStrip1.PerformLayout()
         Me.ResumeLayout(False)
         Me.PerformLayout()
+        Me.TopMost = True 'Kazik 6.04.2015 - test hierarchii okien
 
     End Sub
     Friend WithEvents Button1 As System.Windows.Forms.Button

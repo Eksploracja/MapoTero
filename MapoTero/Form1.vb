@@ -24,11 +24,12 @@ Imports System.Windows.Forms
 Public Class Form1
 
     Public form1loaded As Boolean = False   'wskazuje, że form1 została już załadowana
-
+    Public Property TopMost As Boolean           'Kazik 6.04.2015 - test hierarchii okien
 
 
     Private Sub Form1_Load(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MyBase.Load
 
+        Me.TopMost = True 'Kazik 6.04.2015 - test hierarchii okien
         'wyświetla nazwę i wersję 
         Me.Text = My.Application.Info.Title & " " & My.Application.Info.Version.ToString
 
@@ -981,7 +982,9 @@ errorhandler:
         WriteLine(1, warstwy(10))
         WriteLine(1, warstwy(11))
         WriteLine(1, nrWarstwy)
-
+        WriteLine(1, format)
+        WriteLine(1, wspolnaNazwaKwadratu)
+        WriteLine(1, pobierajPowyzejOstatniego)
 
 
         FileClose(1)
