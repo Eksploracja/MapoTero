@@ -27,13 +27,13 @@ Module Module1
     Private Declare Sub Sleep Lib "kernel32" (ByVal dwMilliseconds As Long)
 
     Public adresSerwera As String
-    Public warstwy(11) As String                'tablica przechowująca nazwy warstw
+    Public warstwy(11) As String                 'tablica przechowująca nazwy warstw
     Public nrWarstwy As Integer                 'zmienia się w miarę wybierania kolejnych warstw, po to aby wyznaczać im kolejne miejsca w tabeli
     Public strUrlparts(8) As String             'tablica zbierająca części do stworzenia linku
     Public strUrl As String                     'zmienna zawierająca link
     Public ileSegHoriz As Integer
     Public ileSegVert As Integer
-    Public wspolnaNazwaKwadratu As String       'wspólna część nazwy kwadratów - bez kolejnych numerów
+    Public wspolnaNazwaKwadratu As String = ""       'wspólna część nazwy kwadratów - bez kolejnych numerów
     Public nazwaKwadratu As String           'nazwa i numer kwadratu
     Public pion As Integer                      'zmienna do pętli odliczającej kwadraty (zamiast "i")
     Public poz As Integer
@@ -600,7 +600,7 @@ errorhandler:
 
         'wyświetla nazwę kwadratu na pasku stanu
         Form1.ToolStripStatusLabel1.Text = folderSegmentow
-
+        
 
         'tworzy plik z danymi sesji
         FileOpen(1, myPath & "\download\conf.txt", OpenMode.Output)
@@ -626,12 +626,7 @@ errorhandler:
         WriteLine(1, warstwy(11))
         WriteLine(1, nrWarstwy)
         WriteLine(1, format)
-        If wspolnaNazwaKwadratu = "#ERROR 448#" Then
-            WriteLine(1, "")
-        Else
-            WriteLine(1, wspolnaNazwaKwadratu)
-        End If
-
+        WriteLine(1, wspolnaNazwaKwadratu)
         WriteLine(1, pobierajPowyzejOstatniego)
         FileClose(1)
 

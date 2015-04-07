@@ -871,8 +871,6 @@ brakpliku:
         If EOF(1) Then
             'jeśli  jest to plik starego typu to progrma przyjmuje domyślne wartości zmiennych
             wspolnaNazwaKwadratu = "PictureBox"
-        ElseIf wspolnaNazwaKwadratu = "#ERROR 448#" Then
-            wspolnaNazwaKwadratu = ""
         Else
         Input(1, wspolnaNazwaKwadratu)
         End If
@@ -1018,12 +1016,7 @@ errorhandler:
         WriteLine(1, warstwy(11))
         WriteLine(1, nrWarstwy)
         WriteLine(1, format)
-        If wspolnaNazwaKwadratu = "#ERROR 448#" Then
-            WriteLine(1, "")
-        Else
-            WriteLine(1, wspolnaNazwaKwadratu)
-        End If
-
+        WriteLine(1, wspolnaNazwaKwadratu)
         WriteLine(1, pobierajPowyzejOstatniego)
         FileClose(1)
 
