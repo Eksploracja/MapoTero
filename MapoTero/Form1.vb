@@ -23,13 +23,42 @@ Imports System.Windows.Forms
 
 Public Class Form1
 
+    '// API DLA USTAWIANIA POZYCJI OKNA
+    Public Declare Function SetWindowPos Lib "user32.dll" ( _
+       ByVal hWnd As IntPtr, ByVal hWndInsertAfter As IntPtr, ByVal X As Int32, _
+       ByVal Y As Int32, ByVal cx As Int32, ByVal cy As Int32, ByVal uFlags As Int32) As Boolean
+
+    Public Const HWND_BOTTOM As Long = 1     '// POD WSZYSTKIMI OKNAMI
+    Public Const HWND_NOTOPMOST As Long = -2 '// POD PIERWSZYM OKNEM
+    Public Const HWND_TOP As Long = 0        '// NAD PIERWSZYM OKNEM
+    Public Const HWND_TOPMOST As Long = -1   '// NAD WSZYSTKIMI OKNAMI
+    Public Const SWP_NOSIZE As Long = 1
+    Public Const SWP_NOMOVE As Long = 2
+    Public Const SWP_NOZORDER As Long = 4
+    Public Const SWP_NOREDRAW As Long = 8
+    Public Const SWP_NOACTIVATE As Long = 16
+    Public Const SWP_FRAMECHANGED As Long = 32
+    Public Const SWP_SHOWWINDOW As Long = 64
+    Public Const SWP_HIDEWINDOW As Long = 128
+    Public Const SWP_NOCOPYBITS As Long = 256
+    Public Const SWP_NOOWNERZORDER As Long = 512
+    Public Const SWP_NOSENDCHANGING As Long = 1024
+
+
     Public form1loaded As Boolean = False   'wskazuje, że form1 została już załadowana
-    Public Property TopMost As Boolean           'Kazik 6.04.2015 - test hierarchii okien
+
+    Sub SetFormOrder(ByVal Form1 As Form, Pozycja As Long)      'hierarchia okna
+        SetWindowPos( _
+             Form1.Handle, New IntPtr(Pozycja), Form1.Left, Form1.Top, _
+             Form1.Width, Form1.Height, SWP_SHOWWINDOW Or SWP_FRAMECHANGED Or SWP_NOACTIVATE)
+    End Sub
 
 
     Private Sub Form1_Load(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MyBase.Load
 
-        Me.TopMost = True  'Kazik 6.04.2015 - test hierarchii okien
+        '// ustawiamy prawdziwy TOP MOST
+        Call SetFormOrder(Me, HWND_TOP)
+
         'wyświetla nazwę i wersję 
         Me.Text = My.Application.Info.Title & " " & My.Application.Info.Version.ToString
 
@@ -736,6 +765,9 @@ errorhandler:
     Private Sub WybierzFolderyWarstwDoZłożeniaToolStripMenuItem_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles WybierzFolderyWarstwDoZłożeniaToolStripMenuItem.Click
         Form2.Show()
     End Sub
+    Private Sub Instrukcja_obslugi_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles InstrukcjaObsługiToolStripMenuItem.Click
+        Instrukcja_obslugi.Show()
+    End Sub
 
     Private Sub wczytaj_lastsettings()
         On Error GoTo brakpliku
@@ -839,9 +871,12 @@ brakpliku:
         If EOF(1) Then
             'jeśli  jest to plik starego typu to progrma przyjmuje domyślne wartości zmiennych
             wspolnaNazwaKwadratu = "PictureBox"
+        ElseIf wspolnaNazwaKwadratu = "#ERROR 448#" Then
+            wspolnaNazwaKwadratu = ""
         Else
-            Input(1, wspolnaNazwaKwadratu)
+        Input(1, wspolnaNazwaKwadratu)
         End If
+
 
         If EOF(1) Then
             'jeśli  jest to plik starego typu to progrma przyjmuje domyślne wartości zmiennych
@@ -867,7 +902,7 @@ brakpliku:
             combobox1index = 0
 
             last = Form2.ComboBox1.Items.Count - 1
-			Do Until Form2.ComboBox1.Items.Item(combobox1index) = formatNaProbe Or combobox1index < last
+            Do Until Form2.ComboBox1.Items.Item(combobox1index) = formatNaProbe Or combobox1index < last
                 combobox1index = combobox1index + 1
             Loop
 
@@ -983,10 +1018,13 @@ errorhandler:
         WriteLine(1, warstwy(11))
         WriteLine(1, nrWarstwy)
         WriteLine(1, format)
-        WriteLine(1, wspolnaNazwaKwadratu)
+        If wspolnaNazwaKwadratu = "#ERROR 448#" Then
+            WriteLine(1, "")
+        Else
+            WriteLine(1, wspolnaNazwaKwadratu)
+        End If
+
         WriteLine(1, pobierajPowyzejOstatniego)
-
-
         FileClose(1)
 
 

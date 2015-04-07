@@ -42,6 +42,7 @@ Partial Class Form2
         Me.Label1 = New System.Windows.Forms.Label()
         Me.CheckBox1 = New System.Windows.Forms.CheckBox()
         Me.GroupBox1 = New System.Windows.Forms.GroupBox()
+        Me.CheckBox7 = New System.Windows.Forms.CheckBox()
         Me.CheckBox4 = New System.Windows.Forms.CheckBox()
         Me.CheckBox2 = New System.Windows.Forms.CheckBox()
         Me.GroupBox2 = New System.Windows.Forms.GroupBox()
@@ -70,7 +71,6 @@ Partial Class Form2
         Me.Label6 = New System.Windows.Forms.Label()
         Me.Label5 = New System.Windows.Forms.Label()
         Me.CheckBox5 = New System.Windows.Forms.CheckBox()
-        Me.CheckBox7 = New System.Windows.Forms.CheckBox()
         Me.GroupBox1.SuspendLayout()
         Me.GroupBox2.SuspendLayout()
         Me.GroupBoxWarstwy.SuspendLayout()
@@ -123,6 +123,16 @@ Partial Class Form2
         Me.GroupBox1.TabIndex = 3
         Me.GroupBox1.TabStop = False
         Me.GroupBox1.Text = "Kalibruj segmenty"
+        '
+        'CheckBox7
+        '
+        Me.CheckBox7.AutoSize = True
+        Me.CheckBox7.Location = New System.Drawing.Point(8, 76)
+        Me.CheckBox7.Name = "CheckBox7"
+        Me.CheckBox7.Size = New System.Drawing.Size(132, 17)
+        Me.CheckBox7.TabIndex = 5
+        Me.CheckBox7.Text = "plik .jpgw /nowy QGIS"
+        Me.CheckBox7.UseVisualStyleBackColor = True
         '
         'CheckBox4
         '
@@ -195,48 +205,48 @@ Partial Class Form2
         '
         'TextBox3
         '
-        Me.TextBox3.Location = New System.Drawing.Point(96, 28)
+        Me.TextBox3.Location = New System.Drawing.Point(146, 28)
         Me.TextBox3.Name = "TextBox3"
-        Me.TextBox3.Size = New System.Drawing.Size(467, 20)
+        Me.TextBox3.Size = New System.Drawing.Size(417, 20)
         Me.TextBox3.TabIndex = 4
         '
         'TextBox4
         '
-        Me.TextBox4.Location = New System.Drawing.Point(96, 51)
+        Me.TextBox4.Location = New System.Drawing.Point(146, 51)
         Me.TextBox4.Name = "TextBox4"
-        Me.TextBox4.Size = New System.Drawing.Size(467, 20)
+        Me.TextBox4.Size = New System.Drawing.Size(417, 20)
         Me.TextBox4.TabIndex = 5
         '
         'TextBox5
         '
-        Me.TextBox5.Location = New System.Drawing.Point(96, 74)
+        Me.TextBox5.Location = New System.Drawing.Point(146, 74)
         Me.TextBox5.Name = "TextBox5"
-        Me.TextBox5.Size = New System.Drawing.Size(467, 20)
+        Me.TextBox5.Size = New System.Drawing.Size(417, 20)
         Me.TextBox5.TabIndex = 6
         '
         'ButtonDolna
         '
         Me.ButtonDolna.Location = New System.Drawing.Point(15, 25)
         Me.ButtonDolna.Name = "ButtonDolna"
-        Me.ButtonDolna.Size = New System.Drawing.Size(75, 23)
+        Me.ButtonDolna.Size = New System.Drawing.Size(122, 23)
         Me.ButtonDolna.TabIndex = 7
-        Me.ButtonDolna.Text = "dolna"
+        Me.ButtonDolna.Text = "dolna (podkładowa)"
         Me.ButtonDolna.UseVisualStyleBackColor = True
         '
         'ButtonGorna
         '
         Me.ButtonGorna.Location = New System.Drawing.Point(15, 49)
         Me.ButtonGorna.Name = "ButtonGorna"
-        Me.ButtonGorna.Size = New System.Drawing.Size(75, 23)
+        Me.ButtonGorna.Size = New System.Drawing.Size(122, 23)
         Me.ButtonGorna.TabIndex = 8
-        Me.ButtonGorna.Text = "górna"
+        Me.ButtonGorna.Text = "górna (nakładana)"
         Me.ButtonGorna.UseVisualStyleBackColor = True
         '
         'ButtonPolaczone
         '
         Me.ButtonPolaczone.Location = New System.Drawing.Point(15, 72)
         Me.ButtonPolaczone.Name = "ButtonPolaczone"
-        Me.ButtonPolaczone.Size = New System.Drawing.Size(75, 23)
+        Me.ButtonPolaczone.Size = New System.Drawing.Size(122, 23)
         Me.ButtonPolaczone.TabIndex = 9
         Me.ButtonPolaczone.Text = "połączone"
         Me.ButtonPolaczone.UseVisualStyleBackColor = True
@@ -254,7 +264,8 @@ Partial Class Form2
         Me.GroupBoxWarstwy.Size = New System.Drawing.Size(579, 107)
         Me.GroupBoxWarstwy.TabIndex = 10
         Me.GroupBoxWarstwy.TabStop = False
-        Me.GroupBoxWarstwy.Text = "Katalogi warstw do połączenia"
+        Me.GroupBoxWarstwy.Text = "Katalogi warstw do połączenia (opcjonalne narzędzie nakładania dwóch warstw segme" & _
+    "ntów png)"
         '
         'Button1
         '
@@ -281,9 +292,9 @@ Partial Class Form2
         Me.Label4.AutoSize = True
         Me.Label4.Location = New System.Drawing.Point(15, 34)
         Me.Label4.Name = "Label4"
-        Me.Label4.Size = New System.Drawing.Size(95, 13)
+        Me.Label4.Size = New System.Drawing.Size(152, 13)
         Me.Label4.TabIndex = 13
-        Me.Label4.Text = "nazwa segmentów"
+        Me.Label4.Text = "przedrostek nazwy segmentów"
         '
         'TextBox6
         '
@@ -306,7 +317,7 @@ Partial Class Form2
         Me.GroupBox3.Size = New System.Drawing.Size(625, 338)
         Me.GroupBox3.TabIndex = 15
         Me.GroupBox3.TabStop = False
-        Me.GroupBox3.Text = "Ustawienia programu (lastsettings)"
+        Me.GroupBox3.Text = "Ustawienia programu (lastsettings.txt)"
         '
         'GroupBox6
         '
@@ -363,7 +374,7 @@ Partial Class Form2
         Me.GroupBox4.Size = New System.Drawing.Size(259, 338)
         Me.GroupBox4.TabIndex = 16
         Me.GroupBox4.TabStop = False
-        Me.GroupBox4.Text = "Ustawienia sesji (conf)"
+        Me.GroupBox4.Text = "Ustawienia sesji (conf.txt)"
         '
         'Label7
         '
@@ -400,16 +411,6 @@ Partial Class Form2
         Me.CheckBox5.Size = New System.Drawing.Size(15, 14)
         Me.CheckBox5.TabIndex = 17
         Me.CheckBox5.UseVisualStyleBackColor = True
-        '
-        'CheckBox7
-        '
-        Me.CheckBox7.AutoSize = True
-        Me.CheckBox7.Location = New System.Drawing.Point(8, 76)
-        Me.CheckBox7.Name = "CheckBox7"
-        Me.CheckBox7.Size = New System.Drawing.Size(132, 17)
-        Me.CheckBox7.TabIndex = 5
-        Me.CheckBox7.Text = "plik .jpgw /nowy QGIS"
-        Me.CheckBox7.UseVisualStyleBackColor = True
         '
         'Form2
         '

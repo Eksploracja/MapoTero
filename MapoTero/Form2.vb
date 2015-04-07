@@ -15,11 +15,50 @@
 
 Public Class Form2
 
+
+
+
+
+    '// API DLA USTAWIANIA POZYCJI OKNA
+    Public Declare Function SetWindowPos Lib "user32.dll" ( _
+       ByVal hWnd As IntPtr, ByVal hWndInsertAfter As IntPtr, ByVal X As Int32, _
+       ByVal Y As Int32, ByVal cx As Int32, ByVal cy As Int32, ByVal uFlags As Int32) As Boolean
+
+    Public Const HWND_BOTTOM As Long = 1     '// POD WSZYSTKIMI OKNAMI
+    Public Const HWND_NOTOPMOST As Long = -2 '// POD PIERWSZYM OKNEM
+    Public Const HWND_TOP As Long = 0        '// NAD PIERWSZYM OKNEM
+    Public Const HWND_TOPMOST As Long = -1   '// NAD WSZYSTKIMI OKNAMI
+    Public Const SWP_NOSIZE As Long = 1
+    Public Const SWP_NOMOVE As Long = 2
+    Public Const SWP_NOZORDER As Long = 4
+    Public Const SWP_NOREDRAW As Long = 8
+    Public Const SWP_NOACTIVATE As Long = 16
+    Public Const SWP_FRAMECHANGED As Long = 32
+    Public Const SWP_SHOWWINDOW As Long = 64
+    Public Const SWP_HIDEWINDOW As Long = 128
+    Public Const SWP_NOCOPYBITS As Long = 256
+    Public Const SWP_NOOWNERZORDER As Long = 512
+    Public Const SWP_NOSENDCHANGING As Long = 1024
+
+
+    Sub SetFormOrder(ByVal MojaForma As Form, Pozycja As Long)
+        SetWindowPos( _
+             MojaForma.Handle, New IntPtr(Pozycja), MojaForma.Left, MojaForma.Top, _
+             MojaForma.Width, MojaForma.Height, SWP_SHOWWINDOW Or SWP_FRAMECHANGED Or SWP_NOACTIVATE)
+    End Sub
+
+
+
+
+
     Private Sub Form2_Load(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MyBase.Load
+        '// ustawiamy prawdziwy TOP MOST
+        Call SetFormOrder(Me, HWND_TOP)
+
         Me.Location = New Point(200, 150)
 
 
-		TextBox1.Text = Module1.iloscProbPobrania
+        TextBox1.Text = Module1.iloscProbPobrania
         TextBox2.Text = Module1.przerwaMiedzyProbami
         CheckBox1.Checked = Module1.CheckMap 'wyprowadza stan checkboxów do zmiennych
         CheckBox2.Checked = Module1.CheckGmi
@@ -129,7 +168,7 @@ Public Class Form2
                 Module1.CheckTB = True
                 Form1.TextBox9.Text = TBbok
 
-                
+
 
             Case CheckState.Unchecked
                 GroupBox1.Enabled = True
@@ -139,7 +178,7 @@ Public Class Form2
                 CheckBox5.Enabled = True
                 CheckBox8.Enabled = True
 
-   
+
         End Select
     End Sub
     Private Sub ButtonDolna_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles ButtonDolna.Click
@@ -179,7 +218,7 @@ Public Class Form2
 
     Private Sub Button1_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles Button1.Click
         wspolnaNazwaKwadratu = TextBox6.Text
-		iloscProbPobrania = Val(TextBox1.Text)
+        iloscProbPobrania = Val(TextBox1.Text)
         przerwaMiedzyProbami = Val(TextBox2.Text)
         Module1.plik_lastsettings()
 

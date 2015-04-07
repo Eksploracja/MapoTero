@@ -74,9 +74,9 @@ Partial Class Form1
         Me.Label15 = New System.Windows.Forms.Label()
         Me.Label16 = New System.Windows.Forms.Label()
         Me.GroupBox3 = New System.Windows.Forms.GroupBox()
-        Me.Button4 = New System.Windows.Forms.Button()
         Me.Label23 = New System.Windows.Forms.Label()
         Me.Label24 = New System.Windows.Forms.Label()
+        Me.Button4 = New System.Windows.Forms.Button()
         Me.Label25 = New System.Windows.Forms.Label()
         Me.Label26 = New System.Windows.Forms.Label()
         Me.Label27 = New System.Windows.Forms.Label()
@@ -106,12 +106,13 @@ Partial Class Form1
         Me.UsuńPusteSegmentyToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.WarstwyToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.NakładanieWarstwNaSiebieToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
-        Me.SKŁADAJWARSTWYToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.WybierzFolderyWarstwDoZłożeniaToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.SKŁADAJWARSTWYToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.UstawieniaToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.OtwórzOknoUstawieńToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.HelpToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.AboutToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.InstrukcjaObsługiToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.PomocPomorskieForumEksploracyjneToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.GeoportalToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.MenuStrip1 = New System.Windows.Forms.MenuStrip()
@@ -472,15 +473,6 @@ Partial Class Form1
         Me.GroupBox3.TabStop = False
         Me.GroupBox3.Text = "Wybrane warstwy"
         '
-        'Button4
-        '
-        Me.Button4.Location = New System.Drawing.Point(112, 234)
-        Me.Button4.Name = "Button4"
-        Me.Button4.Size = New System.Drawing.Size(74, 22)
-        Me.Button4.TabIndex = 246
-        Me.Button4.Text = "Resetuj"
-        Me.Button4.UseVisualStyleBackColor = True
-        '
         'Label23
         '
         Me.Label23.AutoSize = True
@@ -498,6 +490,15 @@ Partial Class Form1
         Me.Label24.Size = New System.Drawing.Size(16, 13)
         Me.Label24.TabIndex = 225
         Me.Label24.Text = "8)"
+        '
+        'Button4
+        '
+        Me.Button4.Location = New System.Drawing.Point(112, 234)
+        Me.Button4.Name = "Button4"
+        Me.Button4.Size = New System.Drawing.Size(74, 22)
+        Me.Button4.TabIndex = 246
+        Me.Button4.Text = "Resetuj"
+        Me.Button4.UseVisualStyleBackColor = True
         '
         'Label25
         '
@@ -720,47 +721,48 @@ Partial Class Form1
         '
         Me.ZapiszToolStripMenuItem.Name = "ZapiszToolStripMenuItem"
         Me.ZapiszToolStripMenuItem.ShortcutKeys = CType((System.Windows.Forms.Keys.Alt Or System.Windows.Forms.Keys.Z), System.Windows.Forms.Keys)
-        Me.ZapiszToolStripMenuItem.Size = New System.Drawing.Size(177, 22)
-        Me.ZapiszToolStripMenuItem.Text = "zapisz"
+        Me.ZapiszToolStripMenuItem.Size = New System.Drawing.Size(277, 22)
+        Me.ZapiszToolStripMenuItem.Text = "zapisz ustawienia sesji (conf.txt)"
         '
         'WczytajToolStripMenuItem1
         '
         Me.WczytajToolStripMenuItem1.Name = "WczytajToolStripMenuItem1"
         Me.WczytajToolStripMenuItem1.ShortcutKeys = CType((System.Windows.Forms.Keys.Alt Or System.Windows.Forms.Keys.W), System.Windows.Forms.Keys)
-        Me.WczytajToolStripMenuItem1.Size = New System.Drawing.Size(177, 22)
-        Me.WczytajToolStripMenuItem1.Text = "wczytaj"
+        Me.WczytajToolStripMenuItem1.Size = New System.Drawing.Size(277, 22)
+        Me.WczytajToolStripMenuItem1.Text = "wczytaj ustawienia sesji (conf.txt)"
         '
         'UsuńPusteSegmentyToolStripMenuItem
         '
         Me.UsuńPusteSegmentyToolStripMenuItem.Name = "UsuńPusteSegmentyToolStripMenuItem"
-        Me.UsuńPusteSegmentyToolStripMenuItem.Size = New System.Drawing.Size(177, 22)
+        Me.UsuńPusteSegmentyToolStripMenuItem.ShortcutKeys = CType((System.Windows.Forms.Keys.Alt Or System.Windows.Forms.Keys.U), System.Windows.Forms.Keys)
+        Me.UsuńPusteSegmentyToolStripMenuItem.Size = New System.Drawing.Size(277, 22)
         Me.UsuńPusteSegmentyToolStripMenuItem.Text = "usuń puste segmenty"
         '
         'WarstwyToolStripMenuItem
         '
         Me.WarstwyToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.NakładanieWarstwNaSiebieToolStripMenuItem})
         Me.WarstwyToolStripMenuItem.Name = "WarstwyToolStripMenuItem"
-        Me.WarstwyToolStripMenuItem.Size = New System.Drawing.Size(62, 20)
-        Me.WarstwyToolStripMenuItem.Text = "Warstwy"
+        Me.WarstwyToolStripMenuItem.Size = New System.Drawing.Size(66, 20)
+        Me.WarstwyToolStripMenuItem.Text = "Narzędzia"
         '
         'NakładanieWarstwNaSiebieToolStripMenuItem
         '
-        Me.NakładanieWarstwNaSiebieToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.SKŁADAJWARSTWYToolStripMenuItem, Me.WybierzFolderyWarstwDoZłożeniaToolStripMenuItem})
+        Me.NakładanieWarstwNaSiebieToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.WybierzFolderyWarstwDoZłożeniaToolStripMenuItem, Me.SKŁADAJWARSTWYToolStripMenuItem})
         Me.NakładanieWarstwNaSiebieToolStripMenuItem.Name = "NakładanieWarstwNaSiebieToolStripMenuItem"
-        Me.NakładanieWarstwNaSiebieToolStripMenuItem.Size = New System.Drawing.Size(210, 22)
-        Me.NakładanieWarstwNaSiebieToolStripMenuItem.Text = "Nakładanie warstw na siebie"
-        '
-        'SKŁADAJWARSTWYToolStripMenuItem
-        '
-        Me.SKŁADAJWARSTWYToolStripMenuItem.Name = "SKŁADAJWARSTWYToolStripMenuItem"
-        Me.SKŁADAJWARSTWYToolStripMenuItem.Size = New System.Drawing.Size(245, 22)
-        Me.SKŁADAJWARSTWYToolStripMenuItem.Text = "SKŁADAJ WARSTWY"
+        Me.NakładanieWarstwNaSiebieToolStripMenuItem.Size = New System.Drawing.Size(265, 22)
+        Me.NakładanieWarstwNaSiebieToolStripMenuItem.Text = "Nakładanie dwóch warstw png na siebie"
         '
         'WybierzFolderyWarstwDoZłożeniaToolStripMenuItem
         '
         Me.WybierzFolderyWarstwDoZłożeniaToolStripMenuItem.Name = "WybierzFolderyWarstwDoZłożeniaToolStripMenuItem"
         Me.WybierzFolderyWarstwDoZłożeniaToolStripMenuItem.Size = New System.Drawing.Size(245, 22)
         Me.WybierzFolderyWarstwDoZłożeniaToolStripMenuItem.Text = "Wybierz foldery warstw do złożenia"
+        '
+        'SKŁADAJWARSTWYToolStripMenuItem
+        '
+        Me.SKŁADAJWARSTWYToolStripMenuItem.Name = "SKŁADAJWARSTWYToolStripMenuItem"
+        Me.SKŁADAJWARSTWYToolStripMenuItem.Size = New System.Drawing.Size(245, 22)
+        Me.SKŁADAJWARSTWYToolStripMenuItem.Text = "SKŁADAJ WARSTWY (.png)"
         '
         'UstawieniaToolStripMenuItem
         '
@@ -772,12 +774,13 @@ Partial Class Form1
         'OtwórzOknoUstawieńToolStripMenuItem
         '
         Me.OtwórzOknoUstawieńToolStripMenuItem.Name = "OtwórzOknoUstawieńToolStripMenuItem"
-        Me.OtwórzOknoUstawieńToolStripMenuItem.Size = New System.Drawing.Size(181, 22)
+        Me.OtwórzOknoUstawieńToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F6
+        Me.OtwórzOknoUstawieńToolStripMenuItem.Size = New System.Drawing.Size(200, 22)
         Me.OtwórzOknoUstawieńToolStripMenuItem.Text = "Otwórz okno ustawień"
         '
         'HelpToolStripMenuItem
         '
-        Me.HelpToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.AboutToolStripMenuItem, Me.PomocPomorskieForumEksploracyjneToolStripMenuItem, Me.GeoportalToolStripMenuItem})
+        Me.HelpToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.AboutToolStripMenuItem, Me.InstrukcjaObsługiToolStripMenuItem, Me.PomocPomorskieForumEksploracyjneToolStripMenuItem, Me.GeoportalToolStripMenuItem})
         Me.HelpToolStripMenuItem.Name = "HelpToolStripMenuItem"
         Me.HelpToolStripMenuItem.Size = New System.Drawing.Size(40, 20)
         Me.HelpToolStripMenuItem.Text = "Help"
@@ -785,20 +788,28 @@ Partial Class Form1
         'AboutToolStripMenuItem
         '
         Me.AboutToolStripMenuItem.Name = "AboutToolStripMenuItem"
+        Me.AboutToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F1
         Me.AboutToolStripMenuItem.Size = New System.Drawing.Size(284, 22)
         Me.AboutToolStripMenuItem.Text = "About"
+        '
+        'InstrukcjaObsługiToolStripMenuItem
+        '
+        Me.InstrukcjaObsługiToolStripMenuItem.Name = "InstrukcjaObsługiToolStripMenuItem"
+        Me.InstrukcjaObsługiToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F2
+        Me.InstrukcjaObsługiToolStripMenuItem.Size = New System.Drawing.Size(284, 22)
+        Me.InstrukcjaObsługiToolStripMenuItem.Text = "Podstawowa instrukcja obsługi"
         '
         'PomocPomorskieForumEksploracyjneToolStripMenuItem
         '
         Me.PomocPomorskieForumEksploracyjneToolStripMenuItem.Name = "PomocPomorskieForumEksploracyjneToolStripMenuItem"
-        Me.PomocPomorskieForumEksploracyjneToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F1
+        Me.PomocPomorskieForumEksploracyjneToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F3
         Me.PomocPomorskieForumEksploracyjneToolStripMenuItem.Size = New System.Drawing.Size(284, 22)
         Me.PomocPomorskieForumEksploracyjneToolStripMenuItem.Text = "Pomoc - Pomorskie Forum Eksploracyjne"
         '
         'GeoportalToolStripMenuItem
         '
         Me.GeoportalToolStripMenuItem.Name = "GeoportalToolStripMenuItem"
-        Me.GeoportalToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F2
+        Me.GeoportalToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F4
         Me.GeoportalToolStripMenuItem.Size = New System.Drawing.Size(284, 22)
         Me.GeoportalToolStripMenuItem.Text = "Geoportal"
         '
@@ -833,6 +844,7 @@ Partial Class Form1
         Me.MainMenuStrip = Me.MenuStrip1
         Me.MaximizeBox = False
         Me.Name = "Form1"
+        'Me.TopMost = False
         Me.GroupBox1.ResumeLayout(False)
         Me.GroupBox1.PerformLayout()
         Me.GroupBox2.ResumeLayout(False)
@@ -847,7 +859,6 @@ Partial Class Form1
         Me.MenuStrip1.PerformLayout()
         Me.ResumeLayout(False)
         Me.PerformLayout()
-        Me.TopMost = True 'Kazik 6.04.2015 - test hierarchii okien
 
     End Sub
     Friend WithEvents Button1 As System.Windows.Forms.Button
@@ -927,5 +938,6 @@ Partial Class Form1
     Friend WithEvents Label27 As System.Windows.Forms.Label
     Friend WithEvents Label28 As System.Windows.Forms.Label
     Friend WithEvents Button4 As System.Windows.Forms.Button
+    Friend WithEvents InstrukcjaObsługiToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
 
 End Class
