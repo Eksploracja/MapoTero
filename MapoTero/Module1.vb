@@ -366,7 +366,8 @@ pobieranieJeszczeRaz:
         Form1.ComboBox3.Enabled = True
         Form1.ListBox1.Enabled = True
 
-        MsgBox("Zakończono pobieranie.")
+        System.Windows.Forms.MessageBox.Show("Zakończono pobieranie", "Tytuł")
+
 
 errorhandler:
 
@@ -602,7 +603,7 @@ errorhandler:
 
 
         'tworzy plik z danymi sesji
-        FileOpen(1, folderSegmentow & "conf.txt", OpenMode.Output)
+        FileOpen(1, myPath & "\download\conf.txt", OpenMode.Output)
         WriteLine(1, folderSegmentow)
         WriteLine(1, Form1.ComboBox3.Text)
         WriteLine(1, Form1.TextBox1.Text)
@@ -625,20 +626,23 @@ errorhandler:
         WriteLine(1, warstwy(11))
         WriteLine(1, nrWarstwy)
         WriteLine(1, format)
-        WriteLine(1, wspolnaNazwaKwadratu)
+        If wspolnaNazwaKwadratu = "#ERROR 448#" Then
+            WriteLine(1, "")
+        Else
+            WriteLine(1, wspolnaNazwaKwadratu)
+        End If
+
         WriteLine(1, pobierajPowyzejOstatniego)
         FileClose(1)
-
-
 
         If pobierz = False Then
             MsgBox("Plik z parametrami sesji zapisany.")
         End If
 
-        If folderSegmentow <> "" Then
+        'If folderSegmentow <> "" Then
 
-            Process.Start(folderSegmentow)
-        End If
+        'Process.Start(folderSegmentow)
+        'End If
 
 errorhandler:
     End Sub
