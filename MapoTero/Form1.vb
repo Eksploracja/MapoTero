@@ -92,8 +92,8 @@ Public Class Form1
 
 
 
-        rozszerzenie = "jpg"
-        format = "jpeg"
+        'rozszerzenie = "jpg"
+        'format = "jpeg"
 
         wczytaj_lastsettings()
 
@@ -887,24 +887,24 @@ brakpliku:
 
 
         If formatNaProbe <> Module1.format Then
-            MsgBox("Ustawiłeś rozszerzenie pobieranych plików na " & "." & Module1.format & Chr(13) & Chr(10) & _
-                    "podczas gdy rozszerzenie z wczytanej sesji to " & "." & formatNaProbe & Chr(13) & Chr(10) & _
-                    Chr(13) & Chr(10) & _
-                    "Program zamienił rozszerzenie na ." & formatNaProbe, , "ZMIENIONO ROZSZERZENIE")
+            'MsgBox("Ustawiłeś rozszerzenie pobieranych plików na " & "." & Module1.format & Chr(13) & Chr(10) & _
+            '"podczas gdy rozszerzenie z wczytanej sesji to " & "." & formatNaProbe & Chr(13) & Chr(10) & _
+            'Chr(13) & Chr(10) & _
+            '"Program zamienił rozszerzenie na ." & formatNaProbe, , "ZMIENIONO ROZSZERZENIE")
             Module1.format = formatNaProbe
 
 
-            Dim combobox1index As Integer
-            Dim last As Integer
+            'Dim combobox1index As Integer
+            'Dim last As Integer
 
-            combobox1index = 0
+            'combobox1index = 0
 
-            last = Form2.ComboBox1.Items.Count - 1
-            Do Until Form2.ComboBox1.Items.Item(combobox1index) = formatNaProbe Or combobox1index < last
-                combobox1index = combobox1index + 1
-            Loop
+            'last = Form2.ComboBox1.Items.Count - 1
+            'Do Until Form2.ComboBox1.Items.Item(combobox1index) = formatNaProbe Or combobox1index < last
+            'combobox1index = combobox1index + 1
+            'Loop
 
-            Form2.ComboBox1.SelectedIndex = combobox1index
+            'Form2.ComboBox1.SelectedIndex = combobox1index
 
         End If
 
@@ -1025,7 +1025,7 @@ errorhandler:
 
     End Sub
 
-    Private Sub UsuńPusteSegmentyToolStripMenuItem_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles UsuńPusteSegmentyToolStripMenuItem.Click
+    Private Sub UsuńPusteSegmentyToolStripMenuItem_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles UsuwaniePustychSegmentówToolStripMenuItem.Click
         Form5.Show()
     End Sub
 

@@ -68,7 +68,7 @@ Public Class Form2
         CheckBox6.Checked = Module1.CheckTB
         CheckBox7.Checked = Module1.CheckJpgw
         CheckBox8.Checked = Module1.CheckNrSeg
-        ComboBox1.Text = Module1.format
+        'ustawienie odpowiedniej warosci Combobox1 odbywa sie przy jego inicjalizacji
         TextBox3.Text = Module1.folderWarstwa1
         TextBox4.Text = Module1.folderWarstwa2
         TextBox5.Text = Module1.folderWynikowy
