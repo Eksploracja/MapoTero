@@ -89,7 +89,7 @@ Partial Class Form2
         Me.ComboBox1.Name = "ComboBox1"
         Me.ComboBox1.Size = New System.Drawing.Size(152, 21)
         Me.ComboBox1.TabIndex = 0
-        Me.ComboBox1.Text = "jpeg"
+        Me.ComboBox1.Text = Module1.format
         '
         'Label1
         '

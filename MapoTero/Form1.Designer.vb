@@ -103,7 +103,6 @@ Partial Class Form1
         Me.SesjaToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.ZapiszToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.WczytajToolStripMenuItem1 = New System.Windows.Forms.ToolStripMenuItem()
-        Me.UsuńPusteSegmentyToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.WarstwyToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.NakładanieWarstwNaSiebieToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.WybierzFolderyWarstwDoZłożeniaToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
@@ -116,6 +115,9 @@ Partial Class Form1
         Me.PomocPomorskieForumEksploracyjneToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.GeoportalToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.MenuStrip1 = New System.Windows.Forms.MenuStrip()
+        Me.Label29 = New System.Windows.Forms.Label()
+        Me.Label30 = New System.Windows.Forms.Label()
+        Me.UsuwaniePustychSegmentówToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.GroupBox1.SuspendLayout()
         Me.GroupBox2.SuspendLayout()
         Me.GroupBox3.SuspendLayout()
@@ -360,6 +362,8 @@ Partial Class Form1
         '
         'GroupBox2
         '
+        Me.GroupBox2.Controls.Add(Me.Label30)
+        Me.GroupBox2.Controls.Add(Me.Label29)
         Me.GroupBox2.Controls.Add(Me.ListBox1)
         Me.GroupBox2.Controls.Add(Me.ComboBox3)
         Me.GroupBox2.Location = New System.Drawing.Point(8, 52)
@@ -372,9 +376,9 @@ Partial Class Form1
         'ListBox1
         '
         Me.ListBox1.FormattingEnabled = True
-        Me.ListBox1.Location = New System.Drawing.Point(6, 66)
+        Me.ListBox1.Location = New System.Drawing.Point(6, 79)
         Me.ListBox1.Name = "ListBox1"
-        Me.ListBox1.Size = New System.Drawing.Size(184, 186)
+        Me.ListBox1.Size = New System.Drawing.Size(184, 173)
         Me.ListBox1.TabIndex = 216
         '
         'ComboBox3
@@ -697,7 +701,7 @@ Partial Class Form1
         Me.GroupBox5.Size = New System.Drawing.Size(143, 153)
         Me.GroupBox5.TabIndex = 244
         Me.GroupBox5.TabStop = False
-        Me.GroupBox5.Text = "Obszar mapy"
+        Me.GroupBox5.Text = "Opcjonalna manipulacja zakresem mapy"
         '
         'Button3
         '
@@ -711,7 +715,7 @@ Partial Class Form1
         '
         'SesjaToolStripMenuItem
         '
-        Me.SesjaToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.ZapiszToolStripMenuItem, Me.WczytajToolStripMenuItem1, Me.UsuńPusteSegmentyToolStripMenuItem})
+        Me.SesjaToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.ZapiszToolStripMenuItem, Me.WczytajToolStripMenuItem1})
         Me.SesjaToolStripMenuItem.Name = "SesjaToolStripMenuItem"
         Me.SesjaToolStripMenuItem.ShortcutKeys = CType((System.Windows.Forms.Keys.Alt Or System.Windows.Forms.Keys.S), System.Windows.Forms.Keys)
         Me.SesjaToolStripMenuItem.Size = New System.Drawing.Size(98, 20)
@@ -731,16 +735,9 @@ Partial Class Form1
         Me.WczytajToolStripMenuItem1.Size = New System.Drawing.Size(277, 22)
         Me.WczytajToolStripMenuItem1.Text = "wczytaj ustawienia sesji (conf.txt)"
         '
-        'UsuńPusteSegmentyToolStripMenuItem
-        '
-        Me.UsuńPusteSegmentyToolStripMenuItem.Name = "UsuńPusteSegmentyToolStripMenuItem"
-        Me.UsuńPusteSegmentyToolStripMenuItem.ShortcutKeys = CType((System.Windows.Forms.Keys.Alt Or System.Windows.Forms.Keys.U), System.Windows.Forms.Keys)
-        Me.UsuńPusteSegmentyToolStripMenuItem.Size = New System.Drawing.Size(277, 22)
-        Me.UsuńPusteSegmentyToolStripMenuItem.Text = "usuń puste segmenty"
-        '
         'WarstwyToolStripMenuItem
         '
-        Me.WarstwyToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.NakładanieWarstwNaSiebieToolStripMenuItem})
+        Me.WarstwyToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.NakładanieWarstwNaSiebieToolStripMenuItem, Me.UsuwaniePustychSegmentówToolStripMenuItem})
         Me.WarstwyToolStripMenuItem.Name = "WarstwyToolStripMenuItem"
         Me.WarstwyToolStripMenuItem.Size = New System.Drawing.Size(66, 20)
         Me.WarstwyToolStripMenuItem.Text = "Narzędzia"
@@ -822,6 +819,30 @@ Partial Class Form1
         Me.MenuStrip1.TabIndex = 230
         Me.MenuStrip1.Text = "MenuStrip1"
         '
+        'Label29
+        '
+        Me.Label29.AutoSize = True
+        Me.Label29.Location = New System.Drawing.Point(6, 23)
+        Me.Label29.Name = "Label29"
+        Me.Label29.Size = New System.Drawing.Size(68, 13)
+        Me.Label29.TabIndex = 216
+        Me.Label29.Text = "Rodzaj mapy"
+        '
+        'Label30
+        '
+        Me.Label30.AutoSize = True
+        Me.Label30.Location = New System.Drawing.Point(6, 66)
+        Me.Label30.Name = "Label30"
+        Me.Label30.Size = New System.Drawing.Size(79, 13)
+        Me.Label30.TabIndex = 217
+        Me.Label30.Text = "Warstwy mapy:"
+        '
+        'UsuwaniePustychSegmentówToolStripMenuItem
+        '
+        Me.UsuwaniePustychSegmentówToolStripMenuItem.Name = "UsuwaniePustychSegmentówToolStripMenuItem"
+        Me.UsuwaniePustychSegmentówToolStripMenuItem.Size = New System.Drawing.Size(265, 22)
+        Me.UsuwaniePustychSegmentówToolStripMenuItem.Text = "Usuwanie pustych segmentów"
+        '
         'Form1
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
@@ -844,10 +865,10 @@ Partial Class Form1
         Me.MainMenuStrip = Me.MenuStrip1
         Me.MaximizeBox = False
         Me.Name = "Form1"
-        'Me.TopMost = False
         Me.GroupBox1.ResumeLayout(False)
         Me.GroupBox1.PerformLayout()
         Me.GroupBox2.ResumeLayout(False)
+        Me.GroupBox2.PerformLayout()
         Me.GroupBox3.ResumeLayout(False)
         Me.GroupBox3.PerformLayout()
         Me.StatusStrip1.ResumeLayout(False)
@@ -930,7 +951,6 @@ Partial Class Form1
     Friend WithEvents MenuStrip1 As System.Windows.Forms.MenuStrip
     Friend WithEvents ComboBox3 As System.Windows.Forms.ComboBox
     Friend WithEvents ListBox1 As System.Windows.Forms.ListBox
-    Friend WithEvents UsuńPusteSegmentyToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents Label23 As System.Windows.Forms.Label
     Friend WithEvents Label24 As System.Windows.Forms.Label
     Friend WithEvents Label25 As System.Windows.Forms.Label
@@ -939,5 +959,8 @@ Partial Class Form1
     Friend WithEvents Label28 As System.Windows.Forms.Label
     Friend WithEvents Button4 As System.Windows.Forms.Button
     Friend WithEvents InstrukcjaObsługiToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
+    Friend WithEvents Label30 As System.Windows.Forms.Label
+    Friend WithEvents Label29 As System.Windows.Forms.Label
+    Friend WithEvents UsuwaniePustychSegmentówToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
 
 End Class
