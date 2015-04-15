@@ -37,6 +37,7 @@ Partial Class Form2
     'Do not modify it using the code editor.
     <System.Diagnostics.DebuggerStepThrough()> _
     Private Sub InitializeComponent()
+        Me.components = New System.ComponentModel.Container()
         Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(Form2))
         Me.ComboBox1 = New System.Windows.Forms.ComboBox()
         Me.Label1 = New System.Windows.Forms.Label()
@@ -63,7 +64,7 @@ Partial Class Form2
         Me.TextBox6 = New System.Windows.Forms.TextBox()
         Me.GroupBox3 = New System.Windows.Forms.GroupBox()
         Me.GroupBox6 = New System.Windows.Forms.GroupBox()
-        Me.CheckBox8 = New System.Windows.Forms.CheckBox()
+        Me.ComboBox2 = New System.Windows.Forms.ComboBox()
         Me.GroupBox5 = New System.Windows.Forms.GroupBox()
         Me.CheckBox6 = New System.Windows.Forms.CheckBox()
         Me.GroupBox4 = New System.Windows.Forms.GroupBox()
@@ -71,6 +72,7 @@ Partial Class Form2
         Me.Label6 = New System.Windows.Forms.Label()
         Me.Label5 = New System.Windows.Forms.Label()
         Me.CheckBox5 = New System.Windows.Forms.CheckBox()
+        Me.ToolTip1 = New System.Windows.Forms.ToolTip(Me.components)
         Me.GroupBox1.SuspendLayout()
         Me.GroupBox2.SuspendLayout()
         Me.GroupBoxWarstwy.SuspendLayout()
@@ -89,7 +91,7 @@ Partial Class Form2
         Me.ComboBox1.Name = "ComboBox1"
         Me.ComboBox1.Size = New System.Drawing.Size(152, 21)
         Me.ComboBox1.TabIndex = 0
-        Me.ComboBox1.Text = Module1.format
+        Me.ToolTip1.SetToolTip(Me.ComboBox1, "format pobieranych segmentów map")
         '
         'Label1
         '
@@ -123,6 +125,9 @@ Partial Class Form2
         Me.GroupBox1.TabIndex = 3
         Me.GroupBox1.TabStop = False
         Me.GroupBox1.Text = "Kalibruj segmenty"
+        Me.ToolTip1.SetToolTip(Me.GroupBox1, "Opcjonalne zaopatrywanie każdego pobranego segmentu rastrowego w dodatkowy plik k" & _
+        "alibracyjny, umożliwiający wyświetlenie  segmentów w programach GIS/GPS z zachow" & _
+        "aniem ""georeferencji""")
         '
         'CheckBox7
         '
@@ -132,6 +137,7 @@ Partial Class Form2
         Me.CheckBox7.Size = New System.Drawing.Size(132, 17)
         Me.CheckBox7.TabIndex = 5
         Me.CheckBox7.Text = "plik .jpgw /nowy QGIS"
+        Me.ToolTip1.SetToolTip(Me.CheckBox7, "plik .jpgw obsługuje jedynie segmenty pobierane w formacie jpeg")
         Me.CheckBox7.UseVisualStyleBackColor = True
         '
         'CheckBox4
@@ -166,6 +172,8 @@ Partial Class Form2
         Me.GroupBox2.TabIndex = 4
         Me.GroupBox2.TabStop = False
         Me.GroupBox2.Text = "Ponowne próby pobrania"
+        Me.ToolTip1.SetToolTip(Me.GroupBox2, "Domyślne ustawienia są optymalne. Określają one maksymalną liczbę zapytań wysyłan" & _
+        "ych do serwera WMS oraz odstępy czasu między nimi")
         '
         'Label3
         '
@@ -193,6 +201,7 @@ Partial Class Form2
         Me.TextBox2.TabIndex = 1
         Me.TextBox2.Text = "5"
         Me.TextBox2.TextAlign = System.Windows.Forms.HorizontalAlignment.Center
+        Me.ToolTip1.SetToolTip(Me.TextBox2, "W jakich odstępach czasowych wysyłać kolejne zapytania do serwera WMS?")
         '
         'TextBox1
         '
@@ -202,6 +211,8 @@ Partial Class Form2
         Me.TextBox1.TabIndex = 0
         Me.TextBox1.Text = "3"
         Me.TextBox1.TextAlign = System.Windows.Forms.HorizontalAlignment.Center
+        Me.ToolTip1.SetToolTip(Me.TextBox1, "Ile razy wysyłać zapytanie do serwera WMS w przypadku napotkania problemu z pobra" & _
+        "niem segmentu?")
         '
         'TextBox3
         '
@@ -209,6 +220,8 @@ Partial Class Form2
         Me.TextBox3.Name = "TextBox3"
         Me.TextBox3.Size = New System.Drawing.Size(417, 20)
         Me.TextBox3.TabIndex = 4
+        Me.ToolTip1.SetToolTip(Me.TextBox3, "Wskaż katalog w którym zapisałeś wcześniej pobrane segmenty mapy podkładowej, na " & _
+        "którą chcesz nałożyć dodatkową treść")
         '
         'TextBox4
         '
@@ -216,6 +229,8 @@ Partial Class Form2
         Me.TextBox4.Name = "TextBox4"
         Me.TextBox4.Size = New System.Drawing.Size(417, 20)
         Me.TextBox4.TabIndex = 5
+        Me.ToolTip1.SetToolTip(Me.TextBox4, "Wskaż katalog w którym zapisałeś wcześniej pobrane segmenty mapy ""nakładki"". Po s" & _
+        "caleniu tanowić ona będzie wierzchnią warstwę zalegającą na podkładowej mapie.")
         '
         'TextBox5
         '
@@ -223,6 +238,8 @@ Partial Class Form2
         Me.TextBox5.Name = "TextBox5"
         Me.TextBox5.Size = New System.Drawing.Size(417, 20)
         Me.TextBox5.TabIndex = 6
+        Me.ToolTip1.SetToolTip(Me.TextBox5, "Wskaż pusty katalog do którego zostaną zapisane wynikowe segmenty zawierające nał" & _
+        "ożone na siebie dwie mapy")
         '
         'ButtonDolna
         '
@@ -266,6 +283,9 @@ Partial Class Form2
         Me.GroupBoxWarstwy.TabStop = False
         Me.GroupBoxWarstwy.Text = "Katalogi warstw do połączenia (opcjonalne narzędzie nakładania dwóch warstw segme" & _
     "ntów png)"
+        Me.ToolTip1.SetToolTip(Me.GroupBoxWarstwy, "Ta opcja umożliwia złączenie wcześniej pobranych segmentów dwóch rodzajów map, je" & _
+        "dynie w przypadku pobrania ich w formacie png przy zachowaniu takich samych rozm" & _
+        "iarów segmentów.")
         '
         'Button1
         '
@@ -285,6 +305,8 @@ Partial Class Form2
         Me.CheckBox3.Size = New System.Drawing.Size(143, 17)
         Me.CheckBox3.TabIndex = 12
         Me.CheckBox3.Text = "zamień X i Y w zapytaniu"
+        Me.ToolTip1.SetToolTip(Me.CheckBox3, "Domyślny brak zaznaczenia jest optymalnym ustawieniem dla Geoportalu2. Opcja wyko" & _
+        "rzystywana jedynie w szczególnych sytuacjach nietypowych serwerów WMS.")
         Me.CheckBox3.UseVisualStyleBackColor = True
         '
         'Label4
@@ -303,6 +325,8 @@ Partial Class Form2
         Me.TextBox6.Size = New System.Drawing.Size(152, 20)
         Me.TextBox6.TabIndex = 14
         Me.TextBox6.Text = "segment"
+        Me.ToolTip1.SetToolTip(Me.TextBox6, "opcjonalny wspólny przedrostek którym zostaną poprzedzone numery wszystkich pobie" & _
+        "ranych segmentów map")
         '
         'GroupBox3
         '
@@ -321,7 +345,7 @@ Partial Class Form2
         '
         'GroupBox6
         '
-        Me.GroupBox6.Controls.Add(Me.CheckBox8)
+        Me.GroupBox6.Controls.Add(Me.ComboBox2)
         Me.GroupBox6.Location = New System.Drawing.Point(217, 238)
         Me.GroupBox6.Name = "GroupBox6"
         Me.GroupBox6.Size = New System.Drawing.Size(152, 71)
@@ -329,15 +353,15 @@ Partial Class Form2
         Me.GroupBox6.TabStop = False
         Me.GroupBox6.Text = "Zmiana domyślnej numeracji segmentów"
         '
-        'CheckBox8
+        'ComboBox2
         '
-        Me.CheckBox8.AutoSize = True
-        Me.CheckBox8.Location = New System.Drawing.Point(9, 29)
-        Me.CheckBox8.Name = "CheckBox8"
-        Me.CheckBox8.Size = New System.Drawing.Size(136, 17)
-        Me.CheckBox8.TabIndex = 5
-        Me.CheckBox8.Text = "numeruj kolejno 1,2,3..."
-        Me.CheckBox8.UseVisualStyleBackColor = True
+        Me.ComboBox2.FormattingEnabled = True
+        Me.ComboBox2.Items.AddRange(New Object() {"01_02_03", "1_2_3", "NrWiersza_NrKolumny"})
+        Me.ComboBox2.Location = New System.Drawing.Point(3, 32)
+        Me.ComboBox2.Name = "ComboBox2"
+        Me.ComboBox2.Size = New System.Drawing.Size(144, 21)
+        Me.ComboBox2.TabIndex = 8
+        Me.ToolTip1.SetToolTip(Me.ComboBox2, "Zmień sposób numerowania pobieranych segmentów")
         '
         'GroupBox5
         '
@@ -410,6 +434,8 @@ Partial Class Form2
         Me.CheckBox5.Name = "CheckBox5"
         Me.CheckBox5.Size = New System.Drawing.Size(15, 14)
         Me.CheckBox5.TabIndex = 17
+        Me.ToolTip1.SetToolTip(Me.CheckBox5, "Opcjonalna funkcja wykorzystywana głównie w przypadku wznawiania niedokończonych " & _
+        "operacji pobierania map")
         Me.CheckBox5.UseVisualStyleBackColor = True
         '
         'Form2
@@ -433,7 +459,6 @@ Partial Class Form2
         Me.GroupBox3.ResumeLayout(False)
         Me.GroupBox3.PerformLayout()
         Me.GroupBox6.ResumeLayout(False)
-        Me.GroupBox6.PerformLayout()
         Me.GroupBox5.ResumeLayout(False)
         Me.GroupBox5.PerformLayout()
         Me.GroupBox4.ResumeLayout(False)
@@ -472,6 +497,7 @@ Partial Class Form2
     Friend WithEvents CheckBox6 As System.Windows.Forms.CheckBox
     Friend WithEvents GroupBox5 As System.Windows.Forms.GroupBox
     Friend WithEvents GroupBox6 As System.Windows.Forms.GroupBox
-    Friend WithEvents CheckBox8 As System.Windows.Forms.CheckBox
     Friend WithEvents CheckBox7 As System.Windows.Forms.CheckBox
+    Friend WithEvents ToolTip1 As System.Windows.Forms.ToolTip
+    Friend WithEvents ComboBox2 As System.Windows.Forms.ComboBox
 End Class

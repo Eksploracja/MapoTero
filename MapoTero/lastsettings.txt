@@ -18,8 +18,8 @@ XYswitched
 False
 chkTB
 False
-chkNrSeg
-False
+numeracja
+NrWiersza_NrKolumny
 iloscProbPobrania
 3
 przerwaMiedzyProbami

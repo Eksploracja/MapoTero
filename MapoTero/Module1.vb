@@ -46,8 +46,9 @@ Module Module1
     Public folderWynikowy As String             'folder złączonych warstw
     Public iloscProbPobrania As Integer = 3   'docelowa ilość prób
     Public przerwaMiedzyProbami As Integer = 5 'odstęp między kolejnymi próbami w sekundach
+    Public numeracja As String = "NrWiersza_NrKolumny"                    'sposób numerowania segmentów
 
-    Public format As String                     'jpeg / png / svg+xml
+    Public format As String = "jpeg"                   'jpeg / png / svg+xml
     Public rozszerzenie As String               'jpg / png / svg
     Public CheckMap As Boolean = False          'tworzyć .map
     Public CheckGmi As Boolean = False          'tworzyć .gmi
@@ -55,7 +56,7 @@ Module Module1
     Public CheckJpgw As Boolean = False         'tworzyć .jpgw
     Public XYswitched As Boolean = False        'geoportal zwariował - zamienił x i y w zapytaniu
     Public CheckTB As Boolean = False           'tworzy mapy Trek Buddy
-    Public CheckNrSeg As Boolean = False        'zmienia domyślny sposób numeracji segmentów z _nrwiersza_nrkolumny na numerowanie kolejnych segmentów 1,2,3...
+    'Public CheckNrSeg As Boolean = False        'zmienia domyślny sposób numeracji segmentów z _nrwiersza_nrkolumny na numerowanie kolejnych segmentów 1,2,3...
     Public pobierajPowyzejOstatniego As Boolean = False 'określa czy przy powtórnym pobieraniu ściągać wszystko, czy tylko powyżej segmentu o największym numerze
 
     Public Lx As Long                           'używane w segmentach
@@ -240,27 +241,18 @@ pobieranieJeszczeRaz:
 
                 nrKwadratu = nrKwadratu + 1
 
-                'jeśli dla TB to inne nazwy plikówdouble
+ 'jeśli dla TB to inne nazwy plikówdouble
                 Select Case CheckTB
                     Case True
                         nazwaKwadratu = wspolnaNazwaKwadratu & nrKwadratuPix
                     Case False
-                        If CheckNrSeg = True Then nazwaKwadratu = wspolnaNazwaKwadratu & nrKwadratu.ToString("D2")
+                        If numeracja = "NrWiersza_NrKolumny" Then nazwaKwadratu = wspolnaNazwaKwadratu & nrKwadratu_seg
+                        If numeracja = "01_02_03" Then nazwaKwadratu = wspolnaNazwaKwadratu & nrKwadratu.ToString("D2")
+                        If numeracja = "1_2_3" Then nazwaKwadratu = wspolnaNazwaKwadratu & nrKwadratu
 
-                        If CheckNrSeg = False Then nazwaKwadratu = wspolnaNazwaKwadratu & nrKwadratu_seg
 
                 End Select
 
-                Select Case CheckNrSeg
-                    Case True
-                        nazwaKwadratu = wspolnaNazwaKwadratu & nrKwadratu.ToString("D2")
-                    Case False
-
-                        If CheckTB = True Then nazwaKwadratu = wspolnaNazwaKwadratu & nrKwadratuPix
-
-                        If CheckTB = False Then nazwaKwadratu = wspolnaNazwaKwadratu & nrKwadratu_seg
-                       
-                End Select
 
                 Form1.ToolStripStatusLabel3.Text = nazwaKwadratu
 
@@ -365,8 +357,8 @@ pobieranieJeszczeRaz:
 
         Form1.ComboBox3.Enabled = True
         Form1.ListBox1.Enabled = True
-
-        System.Windows.Forms.MessageBox.Show("Zakończono pobieranie", "Tytuł")
+        MsgBox("Zakończono pobieranie")
+        'System.Windows.Forms.MessageBox.Show("Zakończono pobieranie", "Tytuł")
 
 
 errorhandler:
@@ -568,8 +560,8 @@ errorhandler:
         PrintLine(1, "chkTB")
         PrintLine(1, CheckTB)
 
-        PrintLine(1, "chkNrSeg")
-        PrintLine(1, CheckNrSeg)
+        PrintLine(1, "numeracja_")
+        PrintLine(1, numeracja)
         PrintLine(1, "iloscProbPobrania")
         PrintLine(1, iloscProbPobrania)
         PrintLine(1, "przerwaMiedzyProbami")
@@ -587,23 +579,23 @@ errorhandler:
             If Form1.FolderBrowserDialog1.ShowDialog = Windows.Forms.DialogResult.OK Then
                 folderSegmentow = Form1.FolderBrowserDialog1.SelectedPath & "\"
 
-            End If
-            'Edit Kazik 6.04.2015 - likwidacja podwójnego komunikatu o niewybraniu warstwy
-            'Else
+                'End If
+                'Edit Kazik 6.04.2015 - likwidacja podwójnego komunikatu o niewybraniu warstwy
+                'Else
 
-            'If warstwy(0) = "" Then
-            'MsgBox("Nie wybrano żadnej warstwy.")
-            'GoTo errorhandler
-            'End If
+                'If warstwy(0) = "" Then
+                'MsgBox("Nie wybrano żadnej warstwy.")
+                'GoTo errorhandler
+            End If
 
         End If
 
         'wyświetla nazwę kwadratu na pasku stanu
         Form1.ToolStripStatusLabel1.Text = folderSegmentow
-        
+
 
         'tworzy plik z danymi sesji
-        FileOpen(1, myPath & "\download\conf.txt", OpenMode.Output)
+        FileOpen(1, folderSegmentow & "\conf.txt", OpenMode.Output)
         WriteLine(1, folderSegmentow)
         WriteLine(1, Form1.ComboBox3.Text)
         WriteLine(1, Form1.TextBox1.Text)

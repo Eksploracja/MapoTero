@@ -79,6 +79,8 @@ Public Class Form1
 
         Module1.folderSegmentow = myPath & "\download\"
 
+        If Directory.Exists(myPath & "\download\") = False Then Directory.CreateDirectory(myPath & "\download\")
+
         Me.SetDesktopLocation(0, 0)
 
 
@@ -152,7 +154,7 @@ Public Class Form1
 
         Button3.Enabled = True
 
-
+        folderSegmentow = ToolStripStatusLabel1.Text
         Module1.utworzPlikConf() 'na wszelki wypadek - żeby nie okazało się, że zapisuje w folderze głównym programu
 
 
@@ -248,12 +250,12 @@ errororhandler:
         TextBox11.Text = Math.Ceiling(((Val(TextBox4.Text) - Val(TextBox2.Text)) / Val(TextBox10.Text)) / Val(TextBox9.Text))
         TextBox12.Text = Math.Ceiling(((Val(TextBox3.Text) - Val(TextBox1.Text)) / Val(TextBox10.Text)) / Val(TextBox9.Text))
     End Sub
-    Private Sub TextBox5_TextChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles TextBox5.TextChanged
+    Private Sub TextBox5_TextChanged(ByVal sender As Object, ByVal e As System.EventArgs)
 
         TextBox8.Text = (Val(TextBox5.Text) / Val(TextBox10.Text)) * 1000
 
     End Sub
-    Private Sub TextBox6_TextChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles TextBox6.TextChanged
+    Private Sub TextBox6_TextChanged(ByVal sender As Object, ByVal e As System.EventArgs)
 
         TextBox7.Text = (Val(TextBox6.Text) / Val(TextBox10.Text)) * 1000
 
@@ -778,18 +780,22 @@ errorhandler:
         Dim zmiennaNaSztuke As String = ""      'do przechowania opisu zmiennej znajdującej sią poniżej opisu
         Input(1, zmiennaNaSztuke)
         Input(1, folderSegmentow)   'wczytuje ostatni folder segmentów, z niego wczytany zostanie plik conf
-        If File.Exists(myPath & "\download\conf.txt") = False Then
-brakConfTxt:
-            MsgBox("Brak folderu, do którego ostatnio pobierano lub brak w nim pliku conf.txt.", , "Wybierz folder, do którego chcesz pobierać mapy.")
-            If FolderBrowserDialog1.ShowDialog = Windows.Forms.DialogResult.OK Then
-                folderSegmentow = FolderBrowserDialog1.SelectedPath & "\"
-                If File.Exists(myPath & "\download\conf.txt") = False Then
-                    GoTo brakConfTxt
-                End If
-            Else
-                MsgBox("Przed rozpoczęciem pobierania wskaż folder z plikiem conf.txt lub zapisz nową sesję.", , "Nie wskazano właściwego folderu pobierania.")
-            End If
-        End If
+
+
+
+
+        'brakConfTxt:
+        'MsgBox("Brak folderu, do którego ostatnio pobierano lub brak w nim pliku conf.txt.", , "Wybierz folder, do którego chcesz pobierać mapy.")
+        'If FolderBrowserDialog1.ShowDialog = Windows.Forms.DialogResult.OK Then
+        'folderSegmentow = FolderBrowserDialog1.SelectedPath & "\"
+        'If File.Exists(myPath & "\download\conf.txt") = False Then
+        'GoTo brakConfTxt
+        'End If
+        'Else
+        'MsgBox("Przed rozpoczęciem pobierania wskaż folder z plikiem conf.txt lub zapisz nową sesję.", , "Nie wskazano właściwego folderu pobierania.")
+        'End If
+
+
         Input(1, zmiennaNaSztuke)
         Input(1, CheckGmi)          'wczytuje czy tworzyć gmi
         Input(1, zmiennaNaSztuke)
@@ -809,8 +815,10 @@ brakConfTxt:
         Input(1, zmiennaNaSztuke)
         Input(1, CheckTB)
         Input(1, zmiennaNaSztuke)
-        Input(1, CheckNrSeg)
-		Input(1, zmiennaNaSztuke)
+        'Input(1, CheckNrSeg)
+        'Input(1, zmiennaNaSztuke)
+        Input(1, numeracja)
+        Input(1, zmiennaNaSztuke)
         Input(1, iloscProbPobrania)
         Input(1, zmiennaNaSztuke)
         Input(1, przerwaMiedzyProbami)
@@ -827,7 +835,7 @@ brakpliku:
             If Me.FolderBrowserDialog1.ShowDialog = Windows.Forms.DialogResult.OK Then
                 folderSegmentow = Me.FolderBrowserDialog1.SelectedPath & "\"
             End If
-            If Dir(myPath & "\download\conf.txt") = "" Then
+            If Dir(folderSegmentow & "\conf.txt") = "" Then
                 MsgBox("Brak pliku w podanej lokalizacji.")
                 GoTo errorhandler
             End If
@@ -840,7 +848,7 @@ brakpliku:
 
         'zazwyczaj brak conf.txt zostanie wychwycony kilka linijek wyżej, ale przypierwszym uruchomieniu conf.txt jeszcze nie ma
         On Error GoTo errorhandler
-        FileOpen(1, myPath & "\download\conf.txt", OpenMode.Input)
+        FileOpen(1, folderSegmentow & "\conf.txt", OpenMode.Input)
         Input(1, folderSegmentow)
         Input(1, ComboBox3.Text)
         Input(1, TextBox1.Text)
@@ -908,7 +916,7 @@ brakpliku:
 
         End If
 
-        ToolStripStatusLabel2.Text = "." & rozszerzenie
+        ToolStripStatusLabel2.Text = "." & format
         Label11.Text = "1) " & warstwy(0)
         Label12.Text = "2) " & warstwy(1)
         Label13.Text = "3) " & warstwy(2)
@@ -993,7 +1001,7 @@ errorhandler:
         Button1.Enabled = True
         Button3.Enabled = False
 
-        FileOpen(1, myPath & "\download\conf.txt", OpenMode.Output)
+        FileOpen(1, folderSegmentow & "\conf.txt", OpenMode.Output)
         WriteLine(1, folderSegmentow)
         WriteLine(1, ComboBox3.Text)
         WriteLine(1, TextBox1.Text)
