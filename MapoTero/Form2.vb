@@ -67,13 +67,15 @@ Public Class Form2
         CheckBox5.Checked = Module1.pobierajPowyzejOstatniego
         CheckBox6.Checked = Module1.CheckTB
         CheckBox7.Checked = Module1.CheckJpgw
-        CheckBox8.Checked = Module1.CheckNrSeg
+        'CheckBox8.Checked = Module1.CheckNrSeg
         'ustawienie odpowiedniej warosci Combobox1 odbywa sie przy jego inicjalizacji
+
         TextBox3.Text = Module1.folderWarstwa1
         TextBox4.Text = Module1.folderWarstwa2
         TextBox5.Text = Module1.folderWynikowy
         TextBox6.Text = Module1.wspolnaNazwaKwadratu
-
+        ComboBox2.Text = Module1.numeracja
+        ComboBox1.Text = Module1.format
     End Sub
 
     Private Sub ComboBox1_SelectedIndexChanged(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles ComboBox1.SelectedIndexChanged
@@ -137,14 +139,14 @@ Public Class Form2
                 Module1.CheckJpgw = False
         End Select
     End Sub
-    Private Sub CheckBox8_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles CheckBox8.Click
-        Select Case CheckBox8.CheckState
-            Case CheckState.Checked
-                Module1.CheckNrSeg = True
-            Case CheckState.Unchecked
-                Module1.CheckNrSeg = False
-        End Select
-    End Sub
+    'Private Sub CheckBox8_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles CheckBox8.Click
+    'Select Case CheckBox8.CheckState
+    'Case CheckState.Checked
+    'Module1.CheckNrSeg = True
+    'Case CheckState.Unchecked
+    'Module1.CheckNrSeg = False
+    'End Select
+    'End Sub
 
     Private Sub CheckBox6_CheckedChanged(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles CheckBox6.CheckedChanged
         Select Case CheckBox6.CheckState
@@ -161,14 +163,14 @@ Public Class Form2
                 Module1.CheckWldPoints = False
                 GroupBox1.Enabled = False
                 Module1.CheckJpgw = False
-                CheckBox8.Checked = False
-                CheckBox8.Enabled = False
-                Module1.CheckNrSeg = False
-                CheckBox8.Checked = False
+                'CheckBox8.Checked = False
+                'CheckBox8.Enabled = False
+                'Module1.CheckNrSeg = False
+                'CheckBox8.Checked = False
                 Module1.CheckTB = True
                 Form1.TextBox9.Text = TBbok
-
-
+                ComboBox2.Enabled = False
+                Module1.numeracja = False
 
             Case CheckState.Unchecked
                 GroupBox1.Enabled = True
@@ -176,8 +178,9 @@ Public Class Form2
                 Module1.CheckTB = False
                 Form1.TextBox9.Text = "2000"
                 CheckBox5.Enabled = True
-                CheckBox8.Enabled = True
-
+                'CheckBox8.Enabled = True
+                ComboBox2.Enabled = True
+                Module1.numeracja = True
 
         End Select
     End Sub
@@ -220,10 +223,22 @@ Public Class Form2
         wspolnaNazwaKwadratu = TextBox6.Text
         iloscProbPobrania = Val(TextBox1.Text)
         przerwaMiedzyProbami = Val(TextBox2.Text)
-        Module1.plik_lastsettings()
 
+
+
+
+
+
+
+
+        Module1.plik_lastsettings()
         Me.Close()
     End Sub
 
+    Private Sub ComboBox2_SelectedIndexChanged(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles ComboBox2.SelectedIndexChanged
+        Module1.numeracja = ComboBox2.Text
 
+
+
+    End Sub
 End Class
