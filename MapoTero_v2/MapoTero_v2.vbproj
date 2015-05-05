@@ -219,9 +219,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="lastsettings.txt">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
     <Content Include="MapoTero.ico" />
     <Content Include="warstwy\administracyjna.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -292,7 +289,6 @@
     <Content Include="warstwy\warstwy.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <None Include="packages.config" />
     <None Include="Resources\MapoTero.jpg" />
   </ItemGroup>
   <ItemGroup>
