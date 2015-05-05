@@ -1,0 +1,15 @@
+http://wms.gdos.gov.pl/geoserver/wms?SERVICE=WMS&request=GetMap&version=1.1.0&SRS=EPSG:2180&layers=
+gdos_int:ObszaryChronionegoKrajobrazu
+1
+gdos_int:ObszarySpecjalnejOchrony
+1
+gdos_int:ParkiKrajobrazowe
+1
+gdos_int:ParkiNarodowe
+1
+gdos_int:Rezerwaty
+1
+gdos_int:SpecjalneObszaryOchrony
+1
+gdos_int:ZespolyPrzyrodniczoKrajobrazowe
+1
