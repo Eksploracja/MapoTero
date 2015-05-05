@@ -255,9 +255,6 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="lastsettings.txt">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
     <Content Include="MapoTero.ico" />
     <Content Include="skrypty\NoToCONS.exe">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
