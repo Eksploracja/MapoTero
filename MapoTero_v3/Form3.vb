@@ -119,7 +119,7 @@ errorhandler:
 
 
         If File.Exists(folderScalania & "\error.txt") = True Then
-            RichTextBox1.Text = "niekompletne segmenty. Nie można scalić"
+            RichTextBox1.Text = "W katalogu segmentów wykryto obecność pliku error.txt co świadczy o niekompletnym zestawie segmentów. Uzupełnij je i usuń plik error.txt"
         Else
             nazwa_sklejka = "_scalone_segmenty_" & TextBox8.Text & "x" & TextBox9.Text
 
@@ -131,9 +131,9 @@ errorhandler:
             'Sleep(1000 * 1)
             'If File.Exists(folderScalania & nazwa_sklejka & "." & ComboBox1.Text) = True Then
             If procID <> 0 Then
-                RichTextBox1.Text = "wszystko ok"
+                RichTextBox1.Text = "Segmenty zostały prawidłowo stalone i zapisane do pliku o nazwie" & " " & nazwa_sklejka
             Else
-                RichTextBox1.Text = "błąd, nie saliło"
+                RichTextBox1.Text = "Błąd. Segmenty nie zostały poprawnie scalone. Prawdopodobnie przygotowane wcześniej segmenty obszaru nie są kompletne, bądź po ich skompletowaniu nie został usunięty plik errot.txt"
             End If
         End If
 
