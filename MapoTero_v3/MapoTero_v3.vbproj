@@ -334,7 +334,6 @@
     <Content Include="warstwy\warstwy.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <None Include="packages.config" />
     <None Include="Resources\MapoTero.jpg" />
   </ItemGroup>
   <ItemGroup>
