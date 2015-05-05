@@ -54,6 +54,7 @@ Module Module1
     Public CheckGmi As Boolean = False          'tworzyć .gmi
     Public CheckWldPoints As Boolean = False    'tworzyc .wld i .points
     Public CheckJpgw As Boolean = False         'tworzyć .jpgw
+    Public CheckKml As Boolean = False         'tworzyć .kml
     Public XYswitched As Boolean = False        'geoportal zwariował - zamienił x i y w zapytaniu
     Public CheckTB As Boolean = False           'tworzy mapy Trek Buddy
     Public pobierajPowyzejOstatniego As Boolean = False 'określa czy przy powtórnym pobieraniu ściągać wszystko, czy tylko powyżej segmentu o największym numerze
@@ -313,6 +314,7 @@ pobieranieJeszczeRaz:
                                 plikGeoreferencyjny_wld()
                                 plikGeoreferencyjny_points()
                                 plikGeoreferencyjny_jpgw()
+                                plikGeoreferencyjny_kml()
 
                             End If
                         Case False
@@ -321,7 +323,8 @@ pobieranieJeszczeRaz:
                 plikGeoreferencyjny_gmi()
                 plikGeoreferencyjny_wld()
                 plikGeoreferencyjny_points()
-                plikGeoreferencyjny_jpgw()
+                            plikGeoreferencyjny_jpgw()
+                            plikGeoreferencyjny_kml()
                 plikTB_Set()
                     End Select
 
@@ -563,6 +566,8 @@ errorhandler:
         PrintLine(1, CheckWldPoints)    'zapisuje czy tworzyć wld i points
         PrintLine(1, "chkjpgw")
         PrintLine(1, CheckJpgw)          'zapisuje czy tworzyć jpgw
+        PrintLine(1, "chkkml")
+        PrintLine(1, CheckKml)          'zapisuje czy tworzyć kml
         PrintLine(1, "dolna")           'zapisuje foldery łączonych warstw
         If folderWarstwa1 = "" Then
             PrintLine(1, myPath & "\download\dolna\")
@@ -816,12 +821,12 @@ errorhandler:
 
             'tworzy plik .points
             Select Case rozszerzenie
-                Case "jpeg"
+                Case "jpg"
                     FileOpen(1, folderSegmentow & nazwaKwadratu & ".jpg.points", OpenMode.Output)
                 Case "png" & "png8" & "png24" & "png32"
                     FileOpen(1, folderSegmentow & nazwaKwadratu & ".png.points", OpenMode.Output)
-                Case "tiff"
-                    FileOpen(1, folderSegmentow & nazwaKwadratu & ".tiff.points", OpenMode.Output)
+                Case "tif"
+                    FileOpen(1, folderSegmentow & nazwaKwadratu & ".tif.points", OpenMode.Output)
                 Case "gif"
                     FileOpen(1, folderSegmentow & nazwaKwadratu & ".gif.points", OpenMode.Output)
             End Select
@@ -841,7 +846,17 @@ errorhandler:
         If CheckJpgw = True Then
 
             'tworzy plik .jpgw
-            FileOpen(4, folderSegmentow & nazwaKwadratu & ".jpgw", OpenMode.Output)
+            'FileOpen(4, folderSegmentow & nazwaKwadratu & ".jpgw", OpenMode.Output)
+            Select Case rozszerzenie
+                Case "jpg"
+                    FileOpen(4, folderSegmentow & nazwaKwadratu & ".jpgw", OpenMode.Output)
+                Case "png" & "png8" & "png24" & "png32"
+                    FileOpen(4, folderSegmentow & nazwaKwadratu & ".pngw", OpenMode.Output)
+                Case "tif"
+                    FileOpen(4, folderSegmentow & nazwaKwadratu & ".tifw", OpenMode.Output)
+                Case "gif"
+                    FileOpen(4, folderSegmentow & nazwaKwadratu & ".gifw", OpenMode.Output)
+            End Select
             Print(4, Form1.TextBox10.Text & Chr(13) & Chr(10) & _
             "0" & Chr(13) & Chr(10) & _
             "0" & Chr(13) & Chr(10) & _
@@ -873,8 +888,6 @@ errorhandler:
         Dodaj_zera = X
 
     End Function
-
-
 
     Public Sub plikGeoreferencyjny_map()
 
@@ -983,6 +996,81 @@ errorhandler:
 
         '       "Point01,xy,0," & TextBox9.Text & ",in, deg,,,N,,,E, grid,," & Ly & "," & Lx & ", N" & Chr(13) & Chr(10) & _
         '       "Point02,xy," & TextBox9.Text & ",0,in, deg,,,N,,,E, grid,," & Py & "," & Px & ", N" & Chr(13) & Chr(10) & _
+    End Sub
+
+
+    Public Sub plikGeoreferencyjny_kml()
+
+        If CheckKml = True Then
+
+            Dim bok As String = Form1.TextBox9.Text & ".000000000000000"
+
+            Dim LGsz As String  'lewy górny
+            Dim LGdl As String
+            Dim PGsz As String  'prawy górny
+            Dim PGdl As String
+            Dim PDsz As String  'prawy dolny
+            Dim PDdl As String
+            Dim LDsz As String  'lewy dolny
+            Dim LDdl As String
+
+            LGsz = Round(SzerokoscWgs_z1992(Px, Ly), 15)
+            LGdl = Round(DlugoscWgs_z1992(Px, Ly), 15)
+            PGsz = Round(SzerokoscWgs_z1992(Px, Py), 15)
+            PGdl = Round(DlugoscWgs_z1992(Px, Py), 15)
+            PDsz = Round(SzerokoscWgs_z1992(Lx, Py), 15)
+            PDdl = Round(DlugoscWgs_z1992(Lx, Py), 15)
+            LDsz = Round(SzerokoscWgs_z1992(Lx, Ly), 15)
+            LDdl = Round(DlugoscWgs_z1992(Lx, Ly), 15)
+
+            'usuwa przecinki i zamienia je na kropki
+            Dim LGszDot As String = Replace(LGsz, ",", ".")     'lewy górny
+            Dim LGdlDot As String = Replace(LGdl, ",", ".")
+            Dim PGszDot As String = Replace(PGsz, ",", ".")     'prawy górny
+            Dim PGdlDot As String = Replace(PGdl, ",", ".")
+            Dim PDszDot As String = Replace(PDsz, ",", ".")     'prawy dolny
+            Dim PDdlDot As String = Replace(PDdl, ",", ".")
+            Dim LDszDot As String = Replace(LDsz, ",", ".")     'lewy dolny
+            Dim LDdlDot As String = Replace(LDdl, ",", ".")
+
+            'sprawdza ilość znaków w zmiennej i w razie potrzeby dodaje zera na końcu
+            LGszDot = Dodaj_zera(LGszDot, 18)
+            LGdlDot = Dodaj_zera(LGdlDot, 18)
+            PGszDot = Dodaj_zera(PGszDot, 18)
+            PGdlDot = Dodaj_zera(PGdlDot, 18)
+            PDszDot = Dodaj_zera(PDszDot, 18)
+            PDdlDot = Dodaj_zera(PDdlDot, 18)
+            LDszDot = Dodaj_zera(LDszDot, 18)
+            LDdlDot = Dodaj_zera(LDdlDot, 18)
+
+
+
+
+            FileOpen(1, folderSegmentow & nazwaKwadratu & ".kml", OpenMode.Output)
+
+
+
+            Print(1, "<?xml version=" & Chr(34) & "1.0" & Chr(34) & " encoding=" & Chr(34) & "UTF-8" & Chr(34) & "?>" & Chr(13) & Chr(10) & _
+            "<kml xmlns=" & Chr(34) & "http://www.opengis.net/kml/2.2" & Chr(34) & " xmlns:gx=" & Chr(34) & "http://www.google.com/kml/ext/2.2" & Chr(34) & " xmlns:kml=" & Chr(34) & "http://www.opengis.net/kml/2.2" & Chr(34) & " xmlns:atom=" & Chr(34) & "http://www.w3.org/2005/Atom" & Chr(34) & ">" & Chr(13) & Chr(10) & _
+"<GroundOverlay>" & Chr(13) & Chr(10) & _
+            "<name>" & nazwaKwadratu & "</name>" & Chr(13) & Chr(10) & _
+            "<Icon>" & Chr(13) & Chr(10) & _
+            "<href>" & nazwaKwadratu & "." & rozszerzenie & "</href>" & Chr(13) & Chr(10) & _
+            "<viewBoundScale>" & Form1.TextBox10.Text & "</viewBoundScale>" & Chr(13) & Chr(10) & _
+            "</Icon>" & Chr(13) & Chr(10) & _
+            "<LatLonBox>" & Chr(13) & Chr(10) & _
+            "<north>" & PGszDot & "</north>" & Chr(13) & Chr(10) & _
+            "<south>" & PDszDot & "</south>" & Chr(13) & Chr(10) & _
+            "<east>" & PGdlDot & "</east>" & Chr(13) & Chr(10) & _
+            "<west>" & LGdlDot & "</west>" & Chr(13) & Chr(10) & _
+            "</LatLonBox>" & Chr(13) & Chr(10) & _
+            "</GroundOverlay>" & Chr(13) & Chr(10) & _
+            "</kml>")
+
+            FileClose(1)
+
+        End If
+
     End Sub
     Public Sub plikError()
 
