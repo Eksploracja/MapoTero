@@ -387,6 +387,8 @@ errororhandler:
         Input(1, zmiennaNaSztuke)
         Input(1, CheckJpgw)          'wczytuje czy tworzyć jpgw
         Input(1, zmiennaNaSztuke)
+        Input(1, CheckKml)          'wczytuje czy tworzyć kml
+        Input(1, zmiennaNaSztuke)
         Input(1, folderWarstwa1)    'wczytuje foldery łączonych warstw
         Input(1, zmiennaNaSztuke)
         Input(1, folderWarstwa2)

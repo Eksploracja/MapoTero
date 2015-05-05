@@ -30,7 +30,7 @@ Public Class Form2
         CheckBox5.Checked = Module1.pobierajPowyzejOstatniego
         CheckBox6.Checked = Module1.CheckTB
         CheckBox7.Checked = Module1.CheckJpgw
-        'CheckBox8.Checked = Module1.CheckNrSeg
+        CheckBox8.Checked = Module1.CheckKml
         'ustawienie odpowiedniej warosci Combobox1 odbywa sie przy jego inicjalizacji
 
         TextBox6.Text = Module1.wspolnaNazwaKwadratu
@@ -156,4 +156,16 @@ Public Class Form2
     
     
 
+    Private Sub CheckBox8_Click(sender As Object, e As EventArgs) Handles CheckBox8.Click
+
+        Select Case CheckBox8.CheckState
+            Case CheckState.Checked
+                Module1.CheckKml = True
+            Case CheckState.Unchecked
+                Module1.CheckKml = False
+        End Select
+
+
+
+    End Sub
 End Class
