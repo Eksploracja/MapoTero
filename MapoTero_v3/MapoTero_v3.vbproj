@@ -241,8 +241,8 @@
       <CustomToolNamespace>My</CustomToolNamespace>
       <LastGenOutput>Settings.Designer.vb</LastGenOutput>
     </None>
-    <Content Include="GMap.NET.Core.dll" />
-    <Content Include="GMap.NET.WindowsForms.dll" />
+    <EmbeddedResource Include="GMap.NET.Core.dll" />
+    <EmbeddedResource Include="GMap.NET.WindowsForms.dll" />
     <Content Include="skrypty\o_programie_NoToCONS.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
