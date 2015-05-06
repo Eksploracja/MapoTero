@@ -43,6 +43,7 @@ Partial Class Form2
         Me.Label1 = New System.Windows.Forms.Label()
         Me.CheckBox1 = New System.Windows.Forms.CheckBox()
         Me.GroupBox1 = New System.Windows.Forms.GroupBox()
+        Me.CheckBox8 = New System.Windows.Forms.CheckBox()
         Me.CheckBox7 = New System.Windows.Forms.CheckBox()
         Me.CheckBox4 = New System.Windows.Forms.CheckBox()
         Me.CheckBox2 = New System.Windows.Forms.CheckBox()
@@ -57,6 +58,8 @@ Partial Class Form2
         Me.TextBox6 = New System.Windows.Forms.TextBox()
         Me.GroupBox3 = New System.Windows.Forms.GroupBox()
         Me.GroupBox8 = New System.Windows.Forms.GroupBox()
+        Me.Label8 = New System.Windows.Forms.Label()
+        Me.CheckBox9 = New System.Windows.Forms.CheckBox()
         Me.GroupBox6 = New System.Windows.Forms.GroupBox()
         Me.ComboBox2 = New System.Windows.Forms.ComboBox()
         Me.GroupBox5 = New System.Windows.Forms.GroupBox()
@@ -67,7 +70,6 @@ Partial Class Form2
         Me.Label5 = New System.Windows.Forms.Label()
         Me.CheckBox5 = New System.Windows.Forms.CheckBox()
         Me.ToolTip1 = New System.Windows.Forms.ToolTip(Me.components)
-        Me.CheckBox8 = New System.Windows.Forms.CheckBox()
         Me.GroupBox1.SuspendLayout()
         Me.GroupBox2.SuspendLayout()
         Me.GroupBox3.SuspendLayout()
@@ -126,6 +128,17 @@ Partial Class Form2
         Me.ToolTip1.SetToolTip(Me.GroupBox1, "Opcjonalne zaopatrywanie każdego pobranego segmentu rastrowego w dodatkowy plik k" & _
         "alibracyjny, umożliwiający wyświetlenie  segmentów w programach GIS/GPS z zachow" & _
         "aniem ""georeferencji""")
+        '
+        'CheckBox8
+        '
+        Me.CheckBox8.AutoSize = True
+        Me.CheckBox8.Location = New System.Drawing.Point(8, 97)
+        Me.CheckBox8.Name = "CheckBox8"
+        Me.CheckBox8.Size = New System.Drawing.Size(131, 17)
+        Me.CheckBox8.TabIndex = 6
+        Me.CheckBox8.Text = "plik .kml /GoogleEarth"
+        Me.ToolTip1.SetToolTip(Me.CheckBox8, "plik .jpgw obsługuje jedynie segmenty pobierane w formacie jpeg")
+        Me.CheckBox8.UseVisualStyleBackColor = True
         '
         'CheckBox7
         '
@@ -269,20 +282,43 @@ Partial Class Form2
         '
         'GroupBox8
         '
+        Me.GroupBox8.Controls.Add(Me.Label8)
+        Me.GroupBox8.Controls.Add(Me.CheckBox9)
         Me.GroupBox8.Controls.Add(Me.CheckBox3)
-        Me.GroupBox8.Location = New System.Drawing.Point(220, 210)
+        Me.GroupBox8.Location = New System.Drawing.Point(217, 132)
         Me.GroupBox8.Name = "GroupBox8"
-        Me.GroupBox8.Size = New System.Drawing.Size(155, 70)
+        Me.GroupBox8.Size = New System.Drawing.Size(159, 94)
         Me.GroupBox8.TabIndex = 16
         Me.GroupBox8.TabStop = False
         Me.GroupBox8.Text = "Opcje niestandardowe"
         '
+        'Label8
+        '
+        Me.Label8.AutoSize = True
+        Me.Label8.Location = New System.Drawing.Point(26, 61)
+        Me.Label8.Name = "Label8"
+        Me.Label8.Size = New System.Drawing.Size(105, 13)
+        Me.Label8.TabIndex = 14
+        Me.Label8.Text = "zasięgu zaznaczenia"
+        '
+        'CheckBox9
+        '
+        Me.CheckBox9.AutoSize = True
+        Me.CheckBox9.Location = New System.Drawing.Point(8, 46)
+        Me.CheckBox9.Name = "CheckBox9"
+        Me.CheckBox9.Size = New System.Drawing.Size(123, 17)
+        Me.CheckBox9.TabIndex = 13
+        Me.CheckBox9.Text = "włącz edycję pól XY"
+        Me.ToolTip1.SetToolTip(Me.CheckBox9, "Domyślny brak zaznaczenia jest optymalnym ustawieniem dla Geoportalu2. Opcja wyko" & _
+        "rzystywana jedynie w szczególnych sytuacjach nietypowych serwerów WMS.")
+        Me.CheckBox9.UseVisualStyleBackColor = True
+        '
         'GroupBox6
         '
         Me.GroupBox6.Controls.Add(Me.ComboBox2)
-        Me.GroupBox6.Location = New System.Drawing.Point(217, 132)
+        Me.GroupBox6.Location = New System.Drawing.Point(30, 232)
         Me.GroupBox6.Name = "GroupBox6"
-        Me.GroupBox6.Size = New System.Drawing.Size(159, 71)
+        Me.GroupBox6.Size = New System.Drawing.Size(170, 71)
         Me.GroupBox6.TabIndex = 14
         Me.GroupBox6.TabStop = False
         Me.GroupBox6.Text = "Zmiana domyślnej numeracji segmentów"
@@ -372,17 +408,6 @@ Partial Class Form2
         "operacji pobierania map")
         Me.CheckBox5.UseVisualStyleBackColor = True
         '
-        'CheckBox8
-        '
-        Me.CheckBox8.AutoSize = True
-        Me.CheckBox8.Location = New System.Drawing.Point(8, 97)
-        Me.CheckBox8.Name = "CheckBox8"
-        Me.CheckBox8.Size = New System.Drawing.Size(131, 17)
-        Me.CheckBox8.TabIndex = 6
-        Me.CheckBox8.Text = "plik .kml /GoogleEarth"
-        Me.ToolTip1.SetToolTip(Me.CheckBox8, "plik .jpgw obsługuje jedynie segmenty pobierane w formacie jpeg")
-        Me.CheckBox8.UseVisualStyleBackColor = True
-        '
         'Form2
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
@@ -440,4 +465,6 @@ Partial Class Form2
     Friend WithEvents ComboBox2 As System.Windows.Forms.ComboBox
     Friend WithEvents GroupBox8 As System.Windows.Forms.GroupBox
     Friend WithEvents CheckBox8 As System.Windows.Forms.CheckBox
+    Friend WithEvents CheckBox9 As System.Windows.Forms.CheckBox
+    Friend WithEvents Label8 As System.Windows.Forms.Label
 End Class

@@ -52,6 +52,14 @@ Public Class Form1
 
 
 
+
+        
+
+
+
+
+
+
         ' pozostałe parametry
         myPath = My.Application.Info.DirectoryPath.ToString()
 
@@ -86,6 +94,7 @@ Public Class Form1
         If File.Exists(folderSegmentow & "\conf.txt") = False Then
             button6.Enabled = False
         End If
+       
 
         If File.Exists(myPath & "lastsettings.txt") = False Then
             wczytaj_lastsettings()
@@ -161,7 +170,8 @@ Public Class Form1
     End Sub
 
     Private Sub Button1_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button1.Click
-
+        RichTextBox1.ForeColor = System.Drawing.Color.Green
+        RichTextBox1.Text = "Trwa pobieranie segmentów"
 
         'w zależności od formatu obrazka odpowiednie rozszerzenie pliku
         Select Case Module1.format
@@ -197,6 +207,7 @@ Public Class Form1
 
 
         If folderSegmentow = "" Then
+            MsgBox("folder segmentów jest pusty")
             GoTo errorhandler
         End If
 
@@ -705,4 +716,11 @@ errorhandler:
     End Sub
 
 
+    Private Sub Label11_TextChanged(sender As Object, e As EventArgs) Handles Label11.TextChanged
+        If warstwy(0) <> "" Then
+            Button4.Enabled = True
+        Else
+            Button4.Enabled = False
+        End If
+    End Sub
 End Class
