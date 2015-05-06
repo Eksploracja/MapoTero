@@ -31,6 +31,7 @@ Public Class Form2
         CheckBox6.Checked = Module1.CheckTB
         CheckBox7.Checked = Module1.CheckJpgw
         CheckBox8.Checked = Module1.CheckKml
+        CheckBox9.Checked = Module1.editXY
         'ustawienie odpowiedniej warosci Combobox1 odbywa sie przy jego inicjalizacji
 
         TextBox6.Text = Module1.wspolnaNazwaKwadratu
@@ -113,6 +114,8 @@ Public Class Form2
                 Module1.CheckGmi = False
                 CheckBox3.Checked = False
                 Module1.XYswitched = False
+                CheckBox9.Checked = False
+                'Module1.editXY = False
                 CheckBox5.Checked = False
                 CheckBox5.Enabled = False
                 Module1.pobierajPowyzejOstatniego = False
@@ -144,6 +147,7 @@ Public Class Form2
         wspolnaNazwaKwadratu = TextBox6.Text
         iloscProbPobrania = Val(TextBox1.Text)
         przerwaMiedzyProbami = Val(TextBox2.Text)
+        'editXY = CheckBox9.CheckState
         Module1.plik_lastsettings()
         Me.Close()
     End Sub
@@ -166,6 +170,21 @@ Public Class Form2
         End Select
 
 
+
+    End Sub
+
+    
+
+
+    Private Sub CheckBox9_CheckedChanged(sender As Object, e As EventArgs) Handles CheckBox9.CheckedChanged
+        Module1.editXY = CheckBox9.CheckState
+
+
+        If editXY = True Then
+            Form1.GroupBox1.Enabled = True
+        Else
+            Form1.GroupBox1.Enabled = False
+        End If
 
     End Sub
 End Class

@@ -58,7 +58,7 @@ Module Module1
     Public XYswitched As Boolean = False        'geoportal zwariował - zamienił x i y w zapytaniu
     Public CheckTB As Boolean = False           'tworzy mapy Trek Buddy
     Public pobierajPowyzejOstatniego As Boolean = False 'określa czy przy powtórnym pobieraniu ściągać wszystko, czy tylko powyżej segmentu o największym numerze
-
+    Public editXY As Boolean = False          'włącza edycję pól formularza XY zasięgu mapy
 
 
     Public Lx As Long                           'używane w segmentach
@@ -107,26 +107,31 @@ Module Module1
         If Module1.CheckTB = True Then
             TBfoldery()
         End If
- 
-
+       
         'OBSŁUGA BŁĘDÓW - czy wpisano ilość m/pix
 
         If Form1.TextBox10.Text = "" Then
-            MsgBox("Nie podano ilości metrów na pixel.")
+            Form1.RichTextBox1.ForeColor = System.Drawing.Color.Red
+            Form1.RichTextBox1.Text = "Nie podano rozmiaru pojedyńczego piksela segmentu"
+
             GoTo errorhandler
         ElseIf Val(Form1.TextBox10.Text) <= 0 Then
-            MsgBox("Ilość metrów na pixel musi być większa od zera.")
+            Form1.RichTextBox1.ForeColor = System.Drawing.Color.Red
+            Form1.RichTextBox1.Text = "Rozmiar pojedyńczego piksela segmentu musi być większy od zera"
             GoTo errorhandler
         End If
 
         If Form1.TextBox9.Text = "" Then
-            MsgBox("Nie podano długości boku segmentu.")
+            Form1.RichTextBox1.ForeColor = System.Drawing.Color.Red
+            Form1.RichTextBox1.Text = "Nie podano długości boku segmentu."
             GoTo errorhandler
         ElseIf Val(Form1.TextBox9.Text) < 1 Then
-            MsgBox("Długość boku segmentu musi być większa od zera.")
+            Form1.RichTextBox1.ForeColor = System.Drawing.Color.Red
+            Form1.RichTextBox1.Text = "Długość boku segmentu musi być większa od zera."
             GoTo errorhandler
         ElseIf Val(Form1.TextBox9.Text) > 2048 Then
-            MsgBox("Długość boku segmentu musi być mniejsza od 2048px")
+            Form1.RichTextBox1.ForeColor = System.Drawing.Color.Red
+            Form1.RichTextBox1.Text = "Długość boku segmentu musi być mniejsza od 2048px."
             GoTo errorhandler
 
         End If
@@ -146,14 +151,16 @@ Module Module1
         'OBSŁUGA BŁĘDÓW - czy prawe współrzędne nie są niższe od lewych
 
         If width <= 0 Or height <= 0 Then
-            MsgBox("Niepoprawne współrzędne X, Y.")
+            Form1.RichTextBox1.ForeColor = System.Drawing.Color.Red
+            Form1.RichTextBox1.Text = "Niepoprawne współrzędne X, Y."
             GoTo errorhandler
         End If
 
         'czy wybrano chociaż jedną warstwę
         ' If nrWarstwy < 1 Then
         If warstwy(0) = "" And pobierz = True Then
-            MsgBox("Nie wybrano żadnej warstwy. Aby wybrać warstwę kliknij w jej nazwę.")
+            Form1.RichTextBox1.ForeColor = System.Drawing.Color.Red
+            Form1.RichTextBox1.Text = "Nie wybrano żadnej warstwy. Aby wybrać warstwę kliknij w jej nazwę."
             GoTo errorhandler
         End If
 
@@ -334,7 +341,8 @@ pobieranieJeszczeRaz:
                 End If
 
                 Else
-                GoTo errorhandler
+
+                    GoTo errorhandler
 
                 End If
 
@@ -371,9 +379,9 @@ pobieranieJeszczeRaz:
         Form1.ComboBox3.Enabled = True
         Form1.ListBox1.Enabled = True
 
-
         
-
+        Form1.RichTextBox1.ForeColor = System.Drawing.Color.Green
+        Form1.RichTextBox1.Text = "Zakończono pobieranie"
 
 errorhandler:
 
@@ -386,6 +394,11 @@ errorhandler:
 
         Form1.ToolStripProgressBar1.Value = 0
         Form1.ToolStripStatusLabel3.Text = ""
+
+       
+           
+
+
         'kasowanie zmiennych
 
         nrKwadratu = 0
@@ -398,17 +411,18 @@ errorhandler:
         Next
 
         If Len(Error1Linia) > 0 Then
-            MsgBox("Nie udało się ściągnąć wszystkich segmentów." & Chr(13) & Chr(10) & _
-                "Wykaz tych segmentów w pliku:" & Chr(13) & Chr(10) & _
-                folderSegmentow & "error.txt")
+            'MsgBox("Nie udało się ściągnąć wszystkich segmentów." & Chr(13) & Chr(10) & _
+            '"Wykaz tych segmentów w pliku:" & Chr(13) & Chr(10) & _
+            'folderSegmentow & "error.txt")
+            Form1.RichTextBox1.ForeColor = System.Drawing.Color.Red
+            Form1.RichTextBox1.Text = "Nie udało się ściągnąć wszystkich segmentów. Wykaz tych segmentów w pliku error.txt"
         Else
             File.Delete(folderSegmentow & "error.txt")
         End If
 
         If File.Exists(myPath & "\download\error.txt") = False Then Form1.button6.Enabled = True
-        
 
-
+       
     End Sub
 
 
@@ -467,8 +481,7 @@ errorhandler:
 
                 End Select
 
-
-
+        
 
     End Sub
 
@@ -482,28 +495,30 @@ errorhandler:
         Form1.ComboBox3.Enabled = True
         Form1.ListBox1.Enabled = True
 
-        For i = 0 To 11
-            warstwy(i) = ""
-        Next
+        'For i = 0 To 11
+        'warstwy(i) = ""
+        'Next
 
-        Form1.Label11.Text = "1) " & warstwy(0)
-        Form1.Label12.Text = "2) " & warstwy(1)
-        Form1.Label13.Text = "3) " & warstwy(2)
-        Form1.Label14.Text = "4) " & warstwy(3)
-        Form1.Label15.Text = "5) " & warstwy(4)
-        Form1.Label16.Text = "6) " & warstwy(5)
-        Form1.Label27.Text = "7) " & warstwy(6)
-        Form1.Label24.Text = "8) " & warstwy(7)
-        Form1.Label28.Text = "9) " & warstwy(8)
-        Form1.Label26.Text = "10) " & warstwy(9)
-        Form1.Label25.Text = "11) " & warstwy(10)
-        Form1.Label23.Text = "12) " & warstwy(11)
+        ' Form1.Label11.Text = "1) " & warstwy(0)
+        'Form1.Label12.Text = "2) " & warstwy(1)
+        ' Form1.Label13.Text = "3) " & warstwy(2)
+        'Form1.Label14.Text = "4) " & warstwy(3)
+        ' Form1.Label15.Text = "5) " & warstwy(4)
+        'Form1.Label16.Text = "6) " & warstwy(5)
+        'Form1.Label27.Text = "7) " & warstwy(6)
+        'Form1.Label24.Text = "8) " & warstwy(7)
+        'Form1.Label28.Text = "9) " & warstwy(8)
+        ' Form1.Label26.Text = "10) " & warstwy(9)
+        ' Form1.Label25.Text = "11) " & warstwy(10)
+        ' Form1.Label23.Text = "12) " & warstwy(11)
 
-        strUrlparts(1) = ""
+        'strUrlparts(1) = ""
 
 
         pobierz = False
 
+        Form1.RichTextBox1.ForeColor = System.Drawing.Color.Red
+        Form1.RichTextBox1.Text = "Przerwano pobieranie segmentów"
     End Sub
     'procedura resetowania wprowadzonych warstw
 
@@ -537,6 +552,8 @@ errorhandler:
 
         pobierz = True
 
+        Form1.RichTextBox1.ForeColor = System.Drawing.Color.Green
+        Form1.RichTextBox1.Text = "Zresetowano listę wprowadzonych warstw mapy wskazanych do pobrania"
     End Sub
 #Region "lastsetting.txt - tworzenie pliku z ustawieniami "
 
@@ -675,7 +692,8 @@ errorhandler:
         FileClose(1)
 
         If pobierz = False Then
-            MsgBox("Plik z parametrami sesji zapisany.")
+            Form1.RichTextBox1.ForeColor = System.Drawing.Color.Green
+            Form1.RichTextBox1.Text = "Zapisano plik z parametrami sesji"
         End If
 
         'If folderSegmentow <> "" Then
@@ -1333,6 +1351,8 @@ errorhandler:
 
 
     End Sub
+
+
 
 
 End Module

@@ -122,6 +122,7 @@ Partial Class Form1
         Me.Label10 = New System.Windows.Forms.Label()
         Me.TextBox5 = New System.Windows.Forms.TextBox()
         Me.TextBox6 = New System.Windows.Forms.TextBox()
+        Me.button6 = New System.Windows.Forms.Button()
         Me.GMapControl1 = New GMap.NET.WindowsForms.GMapControl()
         Me.RadioButton1 = New System.Windows.Forms.RadioButton()
         Me.RadioButton2 = New System.Windows.Forms.RadioButton()
@@ -132,12 +133,11 @@ Partial Class Form1
         Me.Label39 = New System.Windows.Forms.Label()
         Me.Label40 = New System.Windows.Forms.Label()
         Me.Label41 = New System.Windows.Forms.Label()
-        Me.Label46 = New System.Windows.Forms.Label()
         Me.Label63 = New System.Windows.Forms.Label()
         Me.Label65 = New System.Windows.Forms.Label()
         Me.Label66 = New System.Windows.Forms.Label()
         Me.Label67 = New System.Windows.Forms.Label()
-        Me.button6 = New System.Windows.Forms.Button()
+        Me.RichTextBox1 = New System.Windows.Forms.RichTextBox()
         Me.GroupBox1.SuspendLayout()
         Me.GroupBox2.SuspendLayout()
         Me.StatusStrip1.SuspendLayout()
@@ -151,9 +151,9 @@ Partial Class Form1
         '
         Me.Button1.BackColor = System.Drawing.SystemColors.ActiveBorder
         Me.Button1.Font = New System.Drawing.Font("Microsoft Sans Serif", 12.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
-        Me.Button1.Location = New System.Drawing.Point(786, 768)
+        Me.Button1.Location = New System.Drawing.Point(767, 523)
         Me.Button1.Name = "Button1"
-        Me.Button1.Size = New System.Drawing.Size(121, 65)
+        Me.Button1.Size = New System.Drawing.Size(105, 47)
         Me.Button1.TabIndex = 6
         Me.Button1.Tag = ""
         Me.Button1.Text = "Pobierz"
@@ -162,7 +162,7 @@ Partial Class Form1
         '
         'TextBox1
         '
-        Me.TextBox1.Location = New System.Drawing.Point(30, 91)
+        Me.TextBox1.Location = New System.Drawing.Point(24, 79)
         Me.TextBox1.Name = "TextBox1"
         Me.TextBox1.Size = New System.Drawing.Size(44, 20)
         Me.TextBox1.TabIndex = 0
@@ -170,7 +170,7 @@ Partial Class Form1
         '
         'TextBox2
         '
-        Me.TextBox2.Location = New System.Drawing.Point(117, 91)
+        Me.TextBox2.Location = New System.Drawing.Point(111, 79)
         Me.TextBox2.Name = "TextBox2"
         Me.TextBox2.Size = New System.Drawing.Size(44, 20)
         Me.TextBox2.TabIndex = 1
@@ -178,7 +178,7 @@ Partial Class Form1
         '
         'TextBox3
         '
-        Me.TextBox3.Location = New System.Drawing.Point(30, 40)
+        Me.TextBox3.Location = New System.Drawing.Point(23, 35)
         Me.TextBox3.Name = "TextBox3"
         Me.TextBox3.Size = New System.Drawing.Size(44, 20)
         Me.TextBox3.TabIndex = 2
@@ -186,7 +186,7 @@ Partial Class Form1
         '
         'TextBox4
         '
-        Me.TextBox4.Location = New System.Drawing.Point(117, 40)
+        Me.TextBox4.Location = New System.Drawing.Point(110, 35)
         Me.TextBox4.Name = "TextBox4"
         Me.TextBox4.Size = New System.Drawing.Size(44, 20)
         Me.TextBox4.TabIndex = 3
@@ -208,20 +208,22 @@ Partial Class Form1
         Me.GroupBox1.Controls.Add(Me.Label32)
         Me.GroupBox1.Controls.Add(Me.TextBox3)
         Me.GroupBox1.Controls.Add(Me.TextBox4)
-        Me.GroupBox1.Location = New System.Drawing.Point(443, 627)
+        Me.GroupBox1.Enabled = False
+        Me.GroupBox1.Location = New System.Drawing.Point(4, 519)
         Me.GroupBox1.Name = "GroupBox1"
-        Me.GroupBox1.Size = New System.Drawing.Size(198, 133)
+        Me.GroupBox1.Size = New System.Drawing.Size(198, 116)
         Me.GroupBox1.TabIndex = 207
         Me.GroupBox1.TabStop = False
         Me.GroupBox1.Text = "3. Współrzędne XY zaznaczenia"
-        Me.ToolTip1.SetToolTip(Me.GroupBox1, "Zaznacz obszar pobierania prawym klawiszem myszy na mapie, lub wpisz ręcznie jego" & _
-        " współrzędne.")
+        Me.ToolTip1.SetToolTip(Me.GroupBox1, "Zasięg pobieranej mapy - w ustawieniach programu możesz włączyć to pole do edycji" & _
+        "")
         '
         'Label33
         '
         Me.Label33.AutoSize = True
+        Me.Label33.Font = New System.Drawing.Font("Microsoft Sans Serif", 7.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
         Me.Label33.ForeColor = System.Drawing.SystemColors.ButtonShadow
-        Me.Label33.Location = New System.Drawing.Point(121, 60)
+        Me.Label33.Location = New System.Drawing.Point(113, 55)
         Me.Label33.Name = "Label33"
         Me.Label33.Size = New System.Drawing.Size(10, 13)
         Me.Label33.TabIndex = 259
@@ -230,8 +232,9 @@ Partial Class Form1
         'Label31
         '
         Me.Label31.AutoSize = True
+        Me.Label31.Font = New System.Drawing.Font("Microsoft Sans Serif", 7.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
         Me.Label31.ForeColor = System.Drawing.SystemColors.ButtonShadow
-        Me.Label31.Location = New System.Drawing.Point(37, 60)
+        Me.Label31.Location = New System.Drawing.Point(26, 55)
         Me.Label31.Name = "Label31"
         Me.Label31.Size = New System.Drawing.Size(10, 13)
         Me.Label31.TabIndex = 258
@@ -240,7 +243,7 @@ Partial Class Form1
         'Label8
         '
         Me.Label8.AutoSize = True
-        Me.Label8.Location = New System.Drawing.Point(15, 24)
+        Me.Label8.Location = New System.Drawing.Point(8, 19)
         Me.Label8.Name = "Label8"
         Me.Label8.Size = New System.Drawing.Size(148, 13)
         Me.Label8.TabIndex = 215
@@ -249,7 +252,7 @@ Partial Class Form1
         'Label7
         '
         Me.Label7.AutoSize = True
-        Me.Label7.Location = New System.Drawing.Point(12, 79)
+        Me.Label7.Location = New System.Drawing.Point(6, 67)
         Me.Label7.Name = "Label7"
         Me.Label7.Size = New System.Drawing.Size(146, 13)
         Me.Label7.TabIndex = 214
@@ -258,7 +261,7 @@ Partial Class Form1
         'Label6
         '
         Me.Label6.AutoSize = True
-        Me.Label6.Location = New System.Drawing.Point(16, 43)
+        Me.Label6.Location = New System.Drawing.Point(9, 38)
         Me.Label6.Name = "Label6"
         Me.Label6.Size = New System.Drawing.Size(14, 13)
         Me.Label6.TabIndex = 214
@@ -267,7 +270,7 @@ Partial Class Form1
         'Label5
         '
         Me.Label5.AutoSize = True
-        Me.Label5.Location = New System.Drawing.Point(102, 43)
+        Me.Label5.Location = New System.Drawing.Point(95, 38)
         Me.Label5.Name = "Label5"
         Me.Label5.Size = New System.Drawing.Size(14, 13)
         Me.Label5.TabIndex = 213
@@ -276,7 +279,7 @@ Partial Class Form1
         'Label4
         '
         Me.Label4.AutoSize = True
-        Me.Label4.Location = New System.Drawing.Point(102, 93)
+        Me.Label4.Location = New System.Drawing.Point(96, 81)
         Me.Label4.Name = "Label4"
         Me.Label4.Size = New System.Drawing.Size(14, 13)
         Me.Label4.TabIndex = 212
@@ -285,7 +288,7 @@ Partial Class Form1
         'Label3
         '
         Me.Label3.AutoSize = True
-        Me.Label3.Location = New System.Drawing.Point(15, 94)
+        Me.Label3.Location = New System.Drawing.Point(9, 82)
         Me.Label3.Name = "Label3"
         Me.Label3.Size = New System.Drawing.Size(14, 13)
         Me.Label3.TabIndex = 211
@@ -294,8 +297,9 @@ Partial Class Form1
         'Label34
         '
         Me.Label34.AutoSize = True
+        Me.Label34.Font = New System.Drawing.Font("Microsoft Sans Serif", 7.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
         Me.Label34.ForeColor = System.Drawing.SystemColors.ButtonShadow
-        Me.Label34.Location = New System.Drawing.Point(118, 111)
+        Me.Label34.Location = New System.Drawing.Point(113, 99)
         Me.Label34.Name = "Label34"
         Me.Label34.Size = New System.Drawing.Size(10, 13)
         Me.Label34.TabIndex = 257
@@ -304,8 +308,9 @@ Partial Class Form1
         'Label32
         '
         Me.Label32.AutoSize = True
+        Me.Label32.Font = New System.Drawing.Font("Microsoft Sans Serif", 7.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
         Me.Label32.ForeColor = System.Drawing.SystemColors.ButtonShadow
-        Me.Label32.Location = New System.Drawing.Point(33, 111)
+        Me.Label32.Location = New System.Drawing.Point(27, 99)
         Me.Label32.Name = "Label32"
         Me.Label32.Size = New System.Drawing.Size(10, 13)
         Me.Label32.TabIndex = 255
@@ -317,9 +322,9 @@ Partial Class Form1
         Me.GroupBox2.Controls.Add(Me.Label29)
         Me.GroupBox2.Controls.Add(Me.ListBox1)
         Me.GroupBox2.Controls.Add(Me.ComboBox3)
-        Me.GroupBox2.Location = New System.Drawing.Point(11, 627)
+        Me.GroupBox2.Location = New System.Drawing.Point(660, 25)
         Me.GroupBox2.Name = "GroupBox2"
-        Me.GroupBox2.Size = New System.Drawing.Size(221, 254)
+        Me.GroupBox2.Size = New System.Drawing.Size(212, 254)
         Me.GroupBox2.TabIndex = 210
         Me.GroupBox2.TabStop = False
         Me.GroupBox2.Text = "1. Dane źródłowe"
@@ -347,7 +352,7 @@ Partial Class Form1
         Me.ListBox1.FormattingEnabled = True
         Me.ListBox1.Location = New System.Drawing.Point(6, 72)
         Me.ListBox1.Name = "ListBox1"
-        Me.ListBox1.Size = New System.Drawing.Size(209, 173)
+        Me.ListBox1.Size = New System.Drawing.Size(198, 173)
         Me.ListBox1.TabIndex = 216
         Me.ToolTip1.SetToolTip(Me.ListBox1, "Wskaż wybraną warst klikając na nią lewym klawiszem myszki. ")
         '
@@ -357,7 +362,7 @@ Partial Class Form1
         Me.ComboBox3.Location = New System.Drawing.Point(6, 29)
         Me.ComboBox3.MaxDropDownItems = 18
         Me.ComboBox3.Name = "ComboBox3"
-        Me.ComboBox3.Size = New System.Drawing.Size(209, 21)
+        Me.ComboBox3.Size = New System.Drawing.Size(198, 21)
         Me.ComboBox3.TabIndex = 216
         Me.ComboBox3.Text = "skany_map_topograficznych"
         Me.ToolTip1.SetToolTip(Me.ComboBox3, "Spis dostępnych serwerów WMS, których definicje znajdują się w plikach tekstowych" & _
@@ -376,9 +381,9 @@ Partial Class Form1
         'StatusStrip1
         '
         Me.StatusStrip1.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.ToolStripProgressBar1, Me.ToolStripStatusLabel2, Me.ToolStripStatusLabel1, Me.ToolStripStatusLabel3})
-        Me.StatusStrip1.Location = New System.Drawing.Point(0, 884)
+        Me.StatusStrip1.Location = New System.Drawing.Point(0, 638)
         Me.StatusStrip1.Name = "StatusStrip1"
-        Me.StatusStrip1.Size = New System.Drawing.Size(914, 22)
+        Me.StatusStrip1.Size = New System.Drawing.Size(876, 22)
         Me.StatusStrip1.TabIndex = 237
         Me.StatusStrip1.Text = "StatusStrip1"
         Me.ToolTip1.SetToolTip(Me.StatusStrip1, "Informacje o aktualnym formacie plików rastrowych oraz lokalizacji katalogu ""down" & _
@@ -411,9 +416,9 @@ Partial Class Form1
         'Button3
         '
         Me.Button3.Enabled = False
-        Me.Button3.Location = New System.Drawing.Point(786, 850)
+        Me.Button3.Location = New System.Drawing.Point(767, 574)
         Me.Button3.Name = "Button3"
-        Me.Button3.Size = New System.Drawing.Size(119, 25)
+        Me.Button3.Size = New System.Drawing.Size(105, 21)
         Me.Button3.TabIndex = 245
         Me.Button3.Tag = ""
         Me.Button3.Text = "Przerwij pobieranie"
@@ -513,7 +518,7 @@ Partial Class Form1
         Me.MenuStrip1.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.SesjaToolStripMenuItem, Me.WarstwyToolStripMenuItem, Me.UstawieniaToolStripMenuItem, Me.HelpToolStripMenuItem})
         Me.MenuStrip1.Location = New System.Drawing.Point(0, 0)
         Me.MenuStrip1.Name = "MenuStrip1"
-        Me.MenuStrip1.Size = New System.Drawing.Size(914, 24)
+        Me.MenuStrip1.Size = New System.Drawing.Size(876, 24)
         Me.MenuStrip1.TabIndex = 230
         Me.MenuStrip1.Text = "MenuStrip1"
         '
@@ -523,9 +528,9 @@ Partial Class Form1
         Me.GroupBox7.Controls.Add(Me.Label1)
         Me.GroupBox7.Controls.Add(Me.Label2)
         Me.GroupBox7.Controls.Add(Me.TextBox10)
-        Me.GroupBox7.Location = New System.Drawing.Point(443, 766)
+        Me.GroupBox7.Location = New System.Drawing.Point(208, 519)
         Me.GroupBox7.Name = "GroupBox7"
-        Me.GroupBox7.Size = New System.Drawing.Size(198, 115)
+        Me.GroupBox7.Size = New System.Drawing.Size(198, 116)
         Me.GroupBox7.TabIndex = 247
         Me.GroupBox7.TabStop = False
         Me.GroupBox7.Text = "4. Opcjonalna zmiana rozmiaru segm."
@@ -577,9 +582,9 @@ Partial Class Form1
         '
         'Button4
         '
-        Me.Button4.Location = New System.Drawing.Point(108, 226)
+        Me.Button4.Location = New System.Drawing.Point(151, 208)
         Me.Button4.Name = "Button4"
-        Me.Button4.Size = New System.Drawing.Size(57, 22)
+        Me.Button4.Size = New System.Drawing.Size(52, 21)
         Me.Button4.TabIndex = 246
         Me.Button4.Tag = "Wyczyść listę wprowadzonych warstw"
         Me.Button4.Text = "Resetuj"
@@ -601,12 +606,12 @@ Partial Class Form1
         Me.GroupBox3.Controls.Add(Me.Label14)
         Me.GroupBox3.Controls.Add(Me.Label11)
         Me.GroupBox3.Controls.Add(Me.Label13)
-        Me.GroupBox3.Location = New System.Drawing.Point(251, 627)
+        Me.GroupBox3.Location = New System.Drawing.Point(662, 279)
         Me.GroupBox3.Name = "GroupBox3"
-        Me.GroupBox3.Size = New System.Drawing.Size(171, 254)
+        Me.GroupBox3.Size = New System.Drawing.Size(210, 234)
         Me.GroupBox3.TabIndex = 268
         Me.GroupBox3.TabStop = False
-        Me.GroupBox3.Text = "2. Wybrane warstwy"
+        Me.GroupBox3.Text = "2. Wybrane warstwy mapy"
         Me.ToolTip1.SetToolTip(Me.GroupBox3, """Kanapka"" warstw. Pierwsza warstwa to bazowy podkład, który można przykryć kolejn" & _
         "ymi warstwami o wyższym numerze, o ile mają one przeźroczyste tło, lub mają niep" & _
         "ełne pokrycie.")
@@ -725,7 +730,7 @@ Partial Class Form1
         'Button2
         '
         Me.Button2.Font = New System.Drawing.Font("Microsoft Sans Serif", 14.25!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
-        Me.Button2.Location = New System.Drawing.Point(9, 36)
+        Me.Button2.Location = New System.Drawing.Point(6, 28)
         Me.Button2.Margin = New System.Windows.Forms.Padding(0)
         Me.Button2.Name = "Button2"
         Me.Button2.Size = New System.Drawing.Size(23, 31)
@@ -737,7 +742,7 @@ Partial Class Form1
         'Button5
         '
         Me.Button5.Font = New System.Drawing.Font("Microsoft Sans Serif", 14.25!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
-        Me.Button5.Location = New System.Drawing.Point(9, 82)
+        Me.Button5.Location = New System.Drawing.Point(6, 74)
         Me.Button5.Margin = New System.Windows.Forms.Padding(0)
         Me.Button5.Name = "Button5"
         Me.Button5.Size = New System.Drawing.Size(23, 30)
@@ -762,9 +767,9 @@ Partial Class Form1
         Me.GroupBox4.Controls.Add(Me.Label10)
         Me.GroupBox4.Controls.Add(Me.TextBox5)
         Me.GroupBox4.Controls.Add(Me.TextBox6)
-        Me.GroupBox4.Location = New System.Drawing.Point(658, 627)
+        Me.GroupBox4.Location = New System.Drawing.Point(412, 519)
         Me.GroupBox4.Name = "GroupBox4"
-        Me.GroupBox4.Size = New System.Drawing.Size(249, 133)
+        Me.GroupBox4.Size = New System.Drawing.Size(244, 116)
         Me.GroupBox4.TabIndex = 300
         Me.GroupBox4.TabStop = False
         Me.GroupBox4.Text = "5. Wynikowy rozmiar pobieranego obszaru"
@@ -774,7 +779,7 @@ Partial Class Form1
         'Label22
         '
         Me.Label22.AutoSize = True
-        Me.Label22.Location = New System.Drawing.Point(131, 103)
+        Me.Label22.Location = New System.Drawing.Point(131, 91)
         Me.Label22.Name = "Label22"
         Me.Label22.Size = New System.Drawing.Size(38, 13)
         Me.Label22.TabIndex = 240
@@ -783,7 +788,7 @@ Partial Class Form1
         'TextBox12
         '
         Me.TextBox12.Enabled = False
-        Me.TextBox12.Location = New System.Drawing.Point(170, 99)
+        Me.TextBox12.Location = New System.Drawing.Point(170, 87)
         Me.TextBox12.Name = "TextBox12"
         Me.TextBox12.Size = New System.Drawing.Size(55, 20)
         Me.TextBox12.TabIndex = 239
@@ -792,7 +797,7 @@ Partial Class Form1
         'Label21
         '
         Me.Label21.AutoSize = True
-        Me.Label21.Location = New System.Drawing.Point(12, 101)
+        Me.Label21.Location = New System.Drawing.Point(12, 89)
         Me.Label21.Name = "Label21"
         Me.Label21.Size = New System.Drawing.Size(38, 13)
         Me.Label21.TabIndex = 238
@@ -801,7 +806,7 @@ Partial Class Form1
         'TextBox11
         '
         Me.TextBox11.Enabled = False
-        Me.TextBox11.Location = New System.Drawing.Point(53, 99)
+        Me.TextBox11.Location = New System.Drawing.Point(53, 87)
         Me.TextBox11.Name = "TextBox11"
         Me.TextBox11.Size = New System.Drawing.Size(55, 20)
         Me.TextBox11.TabIndex = 237
@@ -810,7 +815,7 @@ Partial Class Form1
         'Label20
         '
         Me.Label20.AutoSize = True
-        Me.Label20.Location = New System.Drawing.Point(24, 73)
+        Me.Label20.Location = New System.Drawing.Point(24, 66)
         Me.Label20.Name = "Label20"
         Me.Label20.Size = New System.Drawing.Size(26, 13)
         Me.Label20.TabIndex = 235
@@ -819,7 +824,7 @@ Partial Class Form1
         'Label19
         '
         Me.Label19.AutoSize = True
-        Me.Label19.Location = New System.Drawing.Point(142, 74)
+        Me.Label19.Location = New System.Drawing.Point(142, 67)
         Me.Label19.Name = "Label19"
         Me.Label19.Size = New System.Drawing.Size(26, 13)
         Me.Label19.TabIndex = 236
@@ -828,7 +833,7 @@ Partial Class Form1
         'TextBox7
         '
         Me.TextBox7.Enabled = False
-        Me.TextBox7.Location = New System.Drawing.Point(170, 70)
+        Me.TextBox7.Location = New System.Drawing.Point(170, 63)
         Me.TextBox7.Name = "TextBox7"
         Me.TextBox7.Size = New System.Drawing.Size(55, 20)
         Me.TextBox7.TabIndex = 234
@@ -837,7 +842,7 @@ Partial Class Form1
         'TextBox8
         '
         Me.TextBox8.Enabled = False
-        Me.TextBox8.Location = New System.Drawing.Point(52, 70)
+        Me.TextBox8.Location = New System.Drawing.Point(52, 63)
         Me.TextBox8.Name = "TextBox8"
         Me.TextBox8.Size = New System.Drawing.Size(55, 20)
         Me.TextBox8.TabIndex = 233
@@ -897,6 +902,17 @@ Partial Class Form1
         Me.TextBox6.TabIndex = 217
         Me.TextBox6.TextAlign = System.Windows.Forms.HorizontalAlignment.Center
         '
+        'button6
+        '
+        Me.button6.Location = New System.Drawing.Point(767, 614)
+        Me.button6.Name = "button6"
+        Me.button6.Size = New System.Drawing.Size(105, 21)
+        Me.button6.TabIndex = 299
+        Me.button6.Text = "Złącz segmenty"
+        Me.ToolTip1.SetToolTip(Me.button6, "Po zakończeniu pobierania segmentów możesz je automatycznie scalić w jeden duży p" & _
+        "lik.")
+        Me.button6.UseVisualStyleBackColor = True
+        '
         'GMapControl1
         '
         Me.GMapControl1.Bearing = 0.0!
@@ -906,7 +922,7 @@ Partial Class Form1
         Me.GMapControl1.GrayScaleMode = False
         Me.GMapControl1.HelperLineOption = GMap.NET.WindowsForms.HelperLineOptions.DontShow
         Me.GMapControl1.LevelsKeepInMemmory = 5
-        Me.GMapControl1.Location = New System.Drawing.Point(7, 34)
+        Me.GMapControl1.Location = New System.Drawing.Point(4, 26)
         Me.GMapControl1.MarkersEnabled = True
         Me.GMapControl1.MaxZoom = 17
         Me.GMapControl1.MinZoom = 3
@@ -919,7 +935,7 @@ Partial Class Form1
         Me.GMapControl1.ScaleMode = GMap.NET.WindowsForms.ScaleModes.Fractional
         Me.GMapControl1.SelectedAreaFillColor = System.Drawing.Color.FromArgb(CType(CType(33, Byte), Integer), CType(CType(65, Byte), Integer), CType(CType(105, Byte), Integer), CType(CType(225, Byte), Integer))
         Me.GMapControl1.ShowTileGridLines = False
-        Me.GMapControl1.Size = New System.Drawing.Size(900, 586)
+        Me.GMapControl1.Size = New System.Drawing.Size(652, 487)
         Me.GMapControl1.TabIndex = 249
         Me.GMapControl1.Zoom = 0.0R
         '
@@ -927,7 +943,7 @@ Partial Class Form1
         '
         Me.RadioButton1.AutoSize = True
         Me.RadioButton1.Checked = True
-        Me.RadioButton1.Location = New System.Drawing.Point(795, 37)
+        Me.RadioButton1.Location = New System.Drawing.Point(545, 29)
         Me.RadioButton1.Name = "RadioButton1"
         Me.RadioButton1.Size = New System.Drawing.Size(109, 17)
         Me.RadioButton1.TabIndex = 258
@@ -938,7 +954,7 @@ Partial Class Form1
         'RadioButton2
         '
         Me.RadioButton2.AutoSize = True
-        Me.RadioButton2.Location = New System.Drawing.Point(794, 59)
+        Me.RadioButton2.Location = New System.Drawing.Point(544, 51)
         Me.RadioButton2.Name = "RadioButton2"
         Me.RadioButton2.Size = New System.Drawing.Size(110, 17)
         Me.RadioButton2.TabIndex = 259
@@ -948,7 +964,7 @@ Partial Class Form1
         'RadioButton3
         '
         Me.RadioButton3.AutoSize = True
-        Me.RadioButton3.Location = New System.Drawing.Point(794, 81)
+        Me.RadioButton3.Location = New System.Drawing.Point(544, 73)
         Me.RadioButton3.Name = "RadioButton3"
         Me.RadioButton3.Size = New System.Drawing.Size(109, 17)
         Me.RadioButton3.TabIndex = 260
@@ -959,7 +975,7 @@ Partial Class Form1
         '
         Me.Label35.AutoSize = True
         Me.Label35.BackColor = System.Drawing.SystemColors.ActiveCaptionText
-        Me.Label35.Location = New System.Drawing.Point(752, 604)
+        Me.Label35.Location = New System.Drawing.Point(528, 499)
         Me.Label35.Name = "Label35"
         Me.Label35.Size = New System.Drawing.Size(28, 13)
         Me.Label35.TabIndex = 261
@@ -969,7 +985,7 @@ Partial Class Form1
         '
         Me.Label37.AutoSize = True
         Me.Label37.BackColor = System.Drawing.SystemColors.ActiveCaptionText
-        Me.Label37.Location = New System.Drawing.Point(679, 604)
+        Me.Label37.Location = New System.Drawing.Point(455, 499)
         Me.Label37.Name = "Label37"
         Me.Label37.Size = New System.Drawing.Size(75, 13)
         Me.Label37.TabIndex = 263
@@ -979,7 +995,7 @@ Partial Class Form1
         '
         Me.Label38.AutoSize = True
         Me.Label38.BackColor = System.Drawing.SystemColors.ActiveCaptionText
-        Me.Label38.Location = New System.Drawing.Point(679, 587)
+        Me.Label38.Location = New System.Drawing.Point(455, 482)
         Me.Label38.Name = "Label38"
         Me.Label38.Size = New System.Drawing.Size(161, 13)
         Me.Label38.TabIndex = 264
@@ -989,7 +1005,7 @@ Partial Class Form1
         '
         Me.Label39.AutoSize = True
         Me.Label39.BackColor = System.Drawing.SystemColors.ActiveCaptionText
-        Me.Label39.Location = New System.Drawing.Point(11, 585)
+        Me.Label39.Location = New System.Drawing.Point(6, 481)
         Me.Label39.Name = "Label39"
         Me.Label39.Size = New System.Drawing.Size(109, 13)
         Me.Label39.TabIndex = 265
@@ -999,7 +1015,7 @@ Partial Class Form1
         '
         Me.Label40.AutoSize = True
         Me.Label40.BackColor = System.Drawing.SystemColors.ActiveCaptionText
-        Me.Label40.Location = New System.Drawing.Point(12, 602)
+        Me.Label40.Location = New System.Drawing.Point(7, 498)
         Me.Label40.Name = "Label40"
         Me.Label40.Size = New System.Drawing.Size(31, 13)
         Me.Label40.TabIndex = 266
@@ -1009,27 +1025,17 @@ Partial Class Form1
         '
         Me.Label41.AutoSize = True
         Me.Label41.BackColor = System.Drawing.SystemColors.ActiveCaptionText
-        Me.Label41.Location = New System.Drawing.Point(51, 602)
+        Me.Label41.Location = New System.Drawing.Point(46, 498)
         Me.Label41.Name = "Label41"
         Me.Label41.Size = New System.Drawing.Size(31, 13)
         Me.Label41.TabIndex = 267
         Me.Label41.Text = "1992"
         '
-        'Label46
-        '
-        Me.Label46.AutoSize = True
-        Me.Label46.Font = New System.Drawing.Font("Microsoft Sans Serif", 6.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
-        Me.Label46.ForeColor = System.Drawing.SystemColors.ButtonShadow
-        Me.Label46.Location = New System.Drawing.Point(249, 655)
-        Me.Label46.Name = "Label46"
-        Me.Label46.Size = New System.Drawing.Size(0, 12)
-        Me.Label46.TabIndex = 274
-        '
         'Label63
         '
         Me.Label63.AutoSize = True
         Me.Label63.BackColor = System.Drawing.SystemColors.ActiveCaptionText
-        Me.Label63.Location = New System.Drawing.Point(833, 604)
+        Me.Label63.Location = New System.Drawing.Point(609, 499)
         Me.Label63.Name = "Label63"
         Me.Label63.Size = New System.Drawing.Size(31, 13)
         Me.Label63.TabIndex = 290
@@ -1038,7 +1044,7 @@ Partial Class Form1
         'Label65
         '
         Me.Label65.AutoSize = True
-        Me.Label65.Location = New System.Drawing.Point(12, 68)
+        Me.Label65.Location = New System.Drawing.Point(9, 60)
         Me.Label65.Name = "Label65"
         Me.Label65.Size = New System.Drawing.Size(13, 13)
         Me.Label65.TabIndex = 292
@@ -1048,7 +1054,7 @@ Partial Class Form1
         '
         Me.Label66.AutoSize = True
         Me.Label66.BackColor = System.Drawing.SystemColors.ActiveCaptionText
-        Me.Label66.Location = New System.Drawing.Point(800, 604)
+        Me.Label66.Location = New System.Drawing.Point(576, 499)
         Me.Label66.Name = "Label66"
         Me.Label66.Size = New System.Drawing.Size(31, 13)
         Me.Label66.TabIndex = 293
@@ -1060,29 +1066,33 @@ Partial Class Form1
         Me.Label67.BackColor = System.Drawing.SystemColors.ControlLight
         Me.Label67.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.0!, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
         Me.Label67.ForeColor = System.Drawing.SystemColors.ButtonShadow
-        Me.Label67.Location = New System.Drawing.Point(519, 3)
+        Me.Label67.Location = New System.Drawing.Point(355, 3)
         Me.Label67.Name = "Label67"
         Me.Label67.Size = New System.Drawing.Size(300, 15)
         Me.Label67.TabIndex = 297
         Me.Label67.Text = "Zaznacz na mapie obszar prawym  przyciskiem myszy"
         '
-        'button6
+        'RichTextBox1
         '
-        Me.button6.Location = New System.Drawing.Point(663, 850)
-        Me.button6.Name = "button6"
-        Me.button6.Size = New System.Drawing.Size(103, 25)
-        Me.button6.TabIndex = 299
-        Me.button6.Text = "Złącz segmenty"
-        Me.ToolTip1.SetToolTip(Me.button6, "Po zakończeniu pobierania segmentów możesz je automatycznie scalić w jeden duży p" & _
-        "lik.")
-        Me.button6.UseVisualStyleBackColor = True
+        Me.RichTextBox1.Enabled = False
+        Me.RichTextBox1.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
+        Me.RichTextBox1.ForeColor = System.Drawing.SystemColors.WindowText
+        Me.RichTextBox1.Location = New System.Drawing.Point(662, 523)
+        Me.RichTextBox1.Name = "RichTextBox1"
+        Me.RichTextBox1.Size = New System.Drawing.Size(96, 112)
+        Me.RichTextBox1.TabIndex = 301
+        Me.RichTextBox1.Text = "Komunikaty:"
         '
         'Form1
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.AutoScroll = True
-        Me.ClientSize = New System.Drawing.Size(914, 906)
+        Me.ClientSize = New System.Drawing.Size(876, 660)
+        Me.Controls.Add(Me.RichTextBox1)
+        Me.Controls.Add(Me.Label41)
+        Me.Controls.Add(Me.Label40)
+        Me.Controls.Add(Me.Label39)
         Me.Controls.Add(Me.GroupBox4)
         Me.Controls.Add(Me.button6)
         Me.Controls.Add(Me.Button3)
@@ -1093,11 +1103,7 @@ Partial Class Form1
         Me.Controls.Add(Me.Label66)
         Me.Controls.Add(Me.Label65)
         Me.Controls.Add(Me.Label63)
-        Me.Controls.Add(Me.Label46)
         Me.Controls.Add(Me.GroupBox3)
-        Me.Controls.Add(Me.Label41)
-        Me.Controls.Add(Me.Label40)
-        Me.Controls.Add(Me.Label39)
         Me.Controls.Add(Me.Label38)
         Me.Controls.Add(Me.Label37)
         Me.Controls.Add(Me.Label35)
@@ -1206,7 +1212,6 @@ Partial Class Form1
     Friend WithEvents Label14 As System.Windows.Forms.Label
     Friend WithEvents Label11 As System.Windows.Forms.Label
     Friend WithEvents Label13 As System.Windows.Forms.Label
-    Friend WithEvents Label46 As System.Windows.Forms.Label
     Friend WithEvents Label63 As System.Windows.Forms.Label
     Friend WithEvents Label65 As System.Windows.Forms.Label
     Friend WithEvents Label66 As System.Windows.Forms.Label
@@ -1231,5 +1236,6 @@ Partial Class Form1
     Friend WithEvents Label10 As System.Windows.Forms.Label
     Friend WithEvents TextBox5 As System.Windows.Forms.TextBox
     Friend WithEvents TextBox6 As System.Windows.Forms.TextBox
+    Friend WithEvents RichTextBox1 As System.Windows.Forms.RichTextBox
 
 End Class
