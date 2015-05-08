@@ -17,7 +17,9 @@ Public Class Form3
         TextBox1.Text = folderScalania
         TextBox1.Enabled = False
         GroupBox1.Enabled = False
-
+        CheckBox2.Checked = Module1.georef_scalanie_qgis
+        CheckBox3.Checked = Module1.georef_scalanie_kml
+        CheckBox4.Checked = Module1.georef_scalanie_map
         Dim zm_jpg As String = ""
 
         'procedura wczytywania parametrów macierzy z pliku conf.txt
@@ -82,7 +84,7 @@ errorhandler:
         End If
 
 
-        
+
         If File.Exists(folderScalania & "\conf.txt") = False Then
             MsgBox("Brak pliku konfiguracji 'conf.txt' w podanej lokalizacji.")
             CheckBox1.Enabled = True
@@ -112,7 +114,7 @@ errorhandler:
 
         'Procedura skleja kafle w mapę
         'Wywolanie: ..\NoToCONS.exe [Npoziom] [Npion] [Px] [TypNazwy] [Qjpg] [Path] [Prefix] [NazwaMapy] [Rozszerzenie]
-        
+
         'Dim sklejka As String
         Dim nazwa_sklejka As String = ""
 
@@ -125,13 +127,16 @@ errorhandler:
 
             Dim procID As Integer
             procID = Shell(myPath & "\skrypty\NoToCONS.exe" & " " & TextBox8.Text & " " & TextBox9.Text & " " & TextBox6.Text & " " & styl_numeracji & " " & TrackBar1.Value & " " & Chr(34) & folderScalania & Chr(34) & " " & TextBox11.Text & " " & nazwa_sklejka & " " & ComboBox1.Text, AppWinStyle.NormalFocus)
-            
 
-        'sklejka = Shell(myPath & "\skrypty\NoToCONS.exe" & " " & TextBox8.Text & " " & TextBox9.Text & " " & TextBox6.Text & " " & styl_numeracji & " " & TrackBar1.Value & " " & Chr(34) & folderScalania & Chr(34) & " " & TextBox11.Text & " " & nazwa_sklejka & " " & ComboBox1.Text, AppWinStyle.NormalFocus)
+
+            'sklejka = Shell(myPath & "\skrypty\NoToCONS.exe" & " " & TextBox8.Text & " " & TextBox9.Text & " " & TextBox6.Text & " " & styl_numeracji & " " & TrackBar1.Value & " " & Chr(34) & folderScalania & Chr(34) & " " & TextBox11.Text & " " & nazwa_sklejka & " " & ComboBox1.Text, AppWinStyle.NormalFocus)
             'Sleep(1000 * 1)
             'If File.Exists(folderScalania & nazwa_sklejka & "." & ComboBox1.Text) = True Then
             If procID <> 0 Then
                 RichTextBox1.Text = "Segmenty zostały prawidłowo stalone i zapisane do pliku o nazwie" & " " & nazwa_sklejka
+                If Module1.georef_scalanie_qgis = True Then Module1.plikGeoreferencyjny_jpgw()
+                If Module1.georef_scalanie_kml = True Then Module1.plikGeoreferencyjny_kml()
+                If Module1.georef_scalanie_map = True Then Module1.plikGeoreferencyjny_map()
             Else
                 RichTextBox1.Text = "Błąd. Segmenty nie zostały poprawnie scalone. Prawdopodobnie przygotowane wcześniej segmenty obszaru nie są kompletne, bądź po ich skompletowaniu nie został usunięty plik errot.txt"
             End If
@@ -144,12 +149,12 @@ errorhandler:
 
     Private Sub CheckBox1_CheckedChanged(sender As Object, e As EventArgs) Handles CheckBox1.CheckedChanged
         If CheckBox1.Checked = True Then
-        	GroupBox1.Enabled = True
-        	TextBox2.Enabled = False
-        	TextBox3.Enabled = False
-        	TextBox4.Enabled = False
-        	TextBox5.Enabled = False
-        	
+            GroupBox1.Enabled = True
+            TextBox2.Enabled = False
+            TextBox3.Enabled = False
+            TextBox4.Enabled = False
+            TextBox5.Enabled = False
+
         Else
             GroupBox1.Enabled = False
         End If
@@ -160,4 +165,57 @@ errorhandler:
     End Sub
 
 
+    Private Sub CheckBox2_CheckedChanged(sender As Object, e As EventArgs) Handles CheckBox2.CheckedChanged
+
+        Module1.georef_scalanie_qgis = CheckBox2.CheckState
+
+
+
+    End Sub
+
+    Private Sub CheckBox2_Click(sender As Object, e As EventArgs) Handles CheckBox2.Click
+        Select Case CheckBox2.CheckState
+            Case CheckState.Checked
+                Module1.georef_scalanie_qgis = True
+
+            Case CheckState.Unchecked
+                Module1.georef_scalanie_qgis = False
+        End Select
+    End Sub
+
+    Private Sub CheckBox3_CheckedChanged(sender As Object, e As EventArgs) Handles CheckBox3.CheckedChanged
+
+        Module1.georef_scalanie_kml = CheckBox3.CheckState
+
+
+
+    End Sub
+
+    Private Sub CheckBox3_Click(sender As Object, e As EventArgs) Handles CheckBox3.Click
+        Select Case CheckBox3.CheckState
+            Case CheckState.Checked
+                Module1.georef_scalanie_kml = True
+
+            Case CheckState.Unchecked
+                Module1.georef_scalanie_kml = False
+        End Select
+    End Sub
+
+    Private Sub CheckBox4_CheckedChanged(sender As Object, e As EventArgs) Handles CheckBox4.CheckedChanged
+
+        Module1.georef_scalanie_map = CheckBox4.CheckState
+
+
+
+    End Sub
+
+    Private Sub CheckBox4_Click(sender As Object, e As EventArgs) Handles CheckBox4.Click
+        Select Case CheckBox4.CheckState
+            Case CheckState.Checked
+                Module1.georef_scalanie_map = True
+
+            Case CheckState.Unchecked
+                Module1.georef_scalanie_map = False
+        End Select
+    End Sub
 End Class

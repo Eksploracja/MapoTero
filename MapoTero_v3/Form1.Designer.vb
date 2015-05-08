@@ -138,6 +138,7 @@ Partial Class Form1
         Me.Label66 = New System.Windows.Forms.Label()
         Me.Label67 = New System.Windows.Forms.Label()
         Me.RichTextBox1 = New System.Windows.Forms.RichTextBox()
+        Me.Label36 = New System.Windows.Forms.Label()
         Me.GroupBox1.SuspendLayout()
         Me.GroupBox2.SuspendLayout()
         Me.StatusStrip1.SuspendLayout()
@@ -162,7 +163,7 @@ Partial Class Form1
         '
         'TextBox1
         '
-        Me.TextBox1.Location = New System.Drawing.Point(24, 79)
+        Me.TextBox1.Location = New System.Drawing.Point(24, 84)
         Me.TextBox1.Name = "TextBox1"
         Me.TextBox1.Size = New System.Drawing.Size(44, 20)
         Me.TextBox1.TabIndex = 0
@@ -170,7 +171,7 @@ Partial Class Form1
         '
         'TextBox2
         '
-        Me.TextBox2.Location = New System.Drawing.Point(111, 79)
+        Me.TextBox2.Location = New System.Drawing.Point(110, 84)
         Me.TextBox2.Name = "TextBox2"
         Me.TextBox2.Size = New System.Drawing.Size(44, 20)
         Me.TextBox2.TabIndex = 1
@@ -211,7 +212,7 @@ Partial Class Form1
         Me.GroupBox1.Enabled = False
         Me.GroupBox1.Location = New System.Drawing.Point(4, 519)
         Me.GroupBox1.Name = "GroupBox1"
-        Me.GroupBox1.Size = New System.Drawing.Size(198, 116)
+        Me.GroupBox1.Size = New System.Drawing.Size(198, 123)
         Me.GroupBox1.TabIndex = 207
         Me.GroupBox1.TabStop = False
         Me.GroupBox1.Text = "3. Współrzędne XY zaznaczenia"
@@ -223,7 +224,7 @@ Partial Class Form1
         Me.Label33.AutoSize = True
         Me.Label33.Font = New System.Drawing.Font("Microsoft Sans Serif", 7.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
         Me.Label33.ForeColor = System.Drawing.SystemColors.ButtonShadow
-        Me.Label33.Location = New System.Drawing.Point(113, 55)
+        Me.Label33.Location = New System.Drawing.Point(96, 55)
         Me.Label33.Name = "Label33"
         Me.Label33.Size = New System.Drawing.Size(10, 13)
         Me.Label33.TabIndex = 259
@@ -234,7 +235,7 @@ Partial Class Form1
         Me.Label31.AutoSize = True
         Me.Label31.Font = New System.Drawing.Font("Microsoft Sans Serif", 7.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
         Me.Label31.ForeColor = System.Drawing.SystemColors.ButtonShadow
-        Me.Label31.Location = New System.Drawing.Point(26, 55)
+        Me.Label31.Location = New System.Drawing.Point(9, 55)
         Me.Label31.Name = "Label31"
         Me.Label31.Size = New System.Drawing.Size(10, 13)
         Me.Label31.TabIndex = 258
@@ -252,7 +253,7 @@ Partial Class Form1
         'Label7
         '
         Me.Label7.AutoSize = True
-        Me.Label7.Location = New System.Drawing.Point(6, 67)
+        Me.Label7.Location = New System.Drawing.Point(6, 72)
         Me.Label7.Name = "Label7"
         Me.Label7.Size = New System.Drawing.Size(146, 13)
         Me.Label7.TabIndex = 214
@@ -279,7 +280,7 @@ Partial Class Form1
         'Label4
         '
         Me.Label4.AutoSize = True
-        Me.Label4.Location = New System.Drawing.Point(96, 81)
+        Me.Label4.Location = New System.Drawing.Point(95, 86)
         Me.Label4.Name = "Label4"
         Me.Label4.Size = New System.Drawing.Size(14, 13)
         Me.Label4.TabIndex = 212
@@ -288,7 +289,7 @@ Partial Class Form1
         'Label3
         '
         Me.Label3.AutoSize = True
-        Me.Label3.Location = New System.Drawing.Point(9, 82)
+        Me.Label3.Location = New System.Drawing.Point(9, 87)
         Me.Label3.Name = "Label3"
         Me.Label3.Size = New System.Drawing.Size(14, 13)
         Me.Label3.TabIndex = 211
@@ -299,7 +300,7 @@ Partial Class Form1
         Me.Label34.AutoSize = True
         Me.Label34.Font = New System.Drawing.Font("Microsoft Sans Serif", 7.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
         Me.Label34.ForeColor = System.Drawing.SystemColors.ButtonShadow
-        Me.Label34.Location = New System.Drawing.Point(113, 99)
+        Me.Label34.Location = New System.Drawing.Point(97, 104)
         Me.Label34.Name = "Label34"
         Me.Label34.Size = New System.Drawing.Size(10, 13)
         Me.Label34.TabIndex = 257
@@ -310,7 +311,7 @@ Partial Class Form1
         Me.Label32.AutoSize = True
         Me.Label32.Font = New System.Drawing.Font("Microsoft Sans Serif", 7.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
         Me.Label32.ForeColor = System.Drawing.SystemColors.ButtonShadow
-        Me.Label32.Location = New System.Drawing.Point(27, 99)
+        Me.Label32.Location = New System.Drawing.Point(10, 104)
         Me.Label32.Name = "Label32"
         Me.Label32.Size = New System.Drawing.Size(10, 13)
         Me.Label32.TabIndex = 255
@@ -381,7 +382,7 @@ Partial Class Form1
         'StatusStrip1
         '
         Me.StatusStrip1.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.ToolStripProgressBar1, Me.ToolStripStatusLabel2, Me.ToolStripStatusLabel1, Me.ToolStripStatusLabel3})
-        Me.StatusStrip1.Location = New System.Drawing.Point(0, 638)
+        Me.StatusStrip1.Location = New System.Drawing.Point(0, 645)
         Me.StatusStrip1.Name = "StatusStrip1"
         Me.StatusStrip1.Size = New System.Drawing.Size(876, 22)
         Me.StatusStrip1.TabIndex = 237
@@ -530,7 +531,7 @@ Partial Class Form1
         Me.GroupBox7.Controls.Add(Me.TextBox10)
         Me.GroupBox7.Location = New System.Drawing.Point(208, 519)
         Me.GroupBox7.Name = "GroupBox7"
-        Me.GroupBox7.Size = New System.Drawing.Size(198, 116)
+        Me.GroupBox7.Size = New System.Drawing.Size(198, 123)
         Me.GroupBox7.TabIndex = 247
         Me.GroupBox7.TabStop = False
         Me.GroupBox7.Text = "4. Opcjonalna zmiana rozmiaru segm."
@@ -539,7 +540,7 @@ Partial Class Form1
         '
         'TextBox9
         '
-        Me.TextBox9.Location = New System.Drawing.Point(30, 80)
+        Me.TextBox9.Location = New System.Drawing.Point(30, 84)
         Me.TextBox9.Name = "TextBox9"
         Me.TextBox9.Size = New System.Drawing.Size(44, 20)
         Me.TextBox9.TabIndex = 211
@@ -551,7 +552,7 @@ Partial Class Form1
         'Label1
         '
         Me.Label1.AutoSize = True
-        Me.Label1.Location = New System.Drawing.Point(7, 65)
+        Me.Label1.Location = New System.Drawing.Point(7, 69)
         Me.Label1.Name = "Label1"
         Me.Label1.Size = New System.Drawing.Size(128, 13)
         Me.Label1.TabIndex = 213
@@ -769,7 +770,7 @@ Partial Class Form1
         Me.GroupBox4.Controls.Add(Me.TextBox6)
         Me.GroupBox4.Location = New System.Drawing.Point(412, 519)
         Me.GroupBox4.Name = "GroupBox4"
-        Me.GroupBox4.Size = New System.Drawing.Size(244, 116)
+        Me.GroupBox4.Size = New System.Drawing.Size(244, 123)
         Me.GroupBox4.TabIndex = 300
         Me.GroupBox4.TabStop = False
         Me.GroupBox4.Text = "5. Wynikowy rozmiar pobieranego obszaru"
@@ -1079,16 +1080,26 @@ Partial Class Form1
         Me.RichTextBox1.ForeColor = System.Drawing.SystemColors.WindowText
         Me.RichTextBox1.Location = New System.Drawing.Point(662, 523)
         Me.RichTextBox1.Name = "RichTextBox1"
-        Me.RichTextBox1.Size = New System.Drawing.Size(96, 112)
+        Me.RichTextBox1.Size = New System.Drawing.Size(96, 119)
         Me.RichTextBox1.TabIndex = 301
         Me.RichTextBox1.Text = "Komunikaty:"
+        '
+        'Label36
+        '
+        Me.Label36.AutoSize = True
+        Me.Label36.Location = New System.Drawing.Point(83, 499)
+        Me.Label36.Name = "Label36"
+        Me.Label36.Size = New System.Drawing.Size(36, 13)
+        Me.Label36.TabIndex = 260
+        Me.Label36.Text = "kursor"
         '
         'Form1
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.AutoScroll = True
-        Me.ClientSize = New System.Drawing.Size(876, 660)
+        Me.ClientSize = New System.Drawing.Size(876, 667)
+        Me.Controls.Add(Me.Label36)
         Me.Controls.Add(Me.RichTextBox1)
         Me.Controls.Add(Me.Label41)
         Me.Controls.Add(Me.Label40)
@@ -1237,5 +1248,6 @@ Partial Class Form1
     Friend WithEvents TextBox5 As System.Windows.Forms.TextBox
     Friend WithEvents TextBox6 As System.Windows.Forms.TextBox
     Friend WithEvents RichTextBox1 As System.Windows.Forms.RichTextBox
+    Friend WithEvents Label36 As System.Windows.Forms.Label
 
 End Class

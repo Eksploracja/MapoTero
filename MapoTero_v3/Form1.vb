@@ -356,9 +356,9 @@ errororhandler:
     End Sub
 
 
-    Private Sub Button7_Click(ByVal sender As System.Object, ByVal e As System.EventArgs)
-        Module1.plikGeoreferencyjny_map()
-    End Sub
+    'Private Sub Button7_Click(ByVal sender As System.Object, ByVal e As System.EventArgs)
+    ' Module1.plikGeoreferencyjny_map()
+    'End Sub
 
     Private Sub AboutToolStripMenuItem_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles AboutToolStripMenuItem.Click
         AboutBox1.Show()
@@ -651,10 +651,10 @@ errorhandler:
             Y1_92 = Transform.GetYU92(Y0_84, X0_84)  'lewy gorny y
             TextBox2.Text = Y1_92
 
-            Label31.Text = Round(Y1_84, 4)
-            Label32.Text = Round(Y0_84, 4)
-            Label33.Text = Round(X1_84, 4)
-            Label34.Text = Round(X0_84, 4)
+            Label31.Text = "lat= " + Convert.ToString(Round(Y1_84, 4))
+            Label32.Text = "lat= " + Convert.ToString(Round(Y0_84, 4))
+            Label33.Text = "lng= " + Convert.ToString(Round(X1_84, 4))
+            Label34.Text = "lng= " + Convert.ToString(Round(X0_84, 4))
         End If
 
 
@@ -674,14 +674,19 @@ errorhandler:
         Dim lng_92 As Integer = Transform.GetXU92(lat_mysz, lng_mysz)   'prawy gorny x
         Dim lat_92 As Integer = Transform.GetYU92(lat_mysz, lng_mysz)   'prawy gorny y
         Label41.Text = "x= " + Convert.ToString(lng_92) + "   y= " + Convert.ToString(lat_92)
-        'Dim mouseY As Double = e.Location.Y
-        'Dim mouseX As Double = e.Location.X
-        'Label36.BackColor = Color.Transparent
-        'Label36.Location = New Point(mouseX - 60, mouseY - 10)
+
+
+        Dim mouseY As Double = e.Location.Y
+        Dim mouseX As Double = e.Location.X
+        Label36.BackColor = Color.Transparent
+        Label36.Location = New Point(mouseX - 60, mouseY - 10)
         'Label43.Text = "lat= " + Convert.ToString(Round(lat_mysz, 4)) + "   lng= " + Convert.ToString(Round(lng_mysz, 4))
-        'Label36.Text = "lat= " + Convert.ToString(Round(lat_mysz, 4)) + "   lng= " + Convert.ToString(Round(lng_mysz, 4))
-
-
+        If kursorWGS84 = True Then
+            Label36.Text = "lat= " + Convert.ToString(Round(lat_mysz, 4)) + "   lng= " + Convert.ToString(Round(lng_mysz, 4))
+            Label36.Visible = True
+        Else
+            Label36.Visible = False
+        End If
 
 
 
