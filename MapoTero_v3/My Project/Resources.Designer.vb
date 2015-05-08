@@ -79,5 +79,15 @@ Namespace My.Resources
                 Return CType(obj,System.Drawing.Bitmap)
             End Get
         End Property
+        
+        '''<summary>
+        '''  Wyszukuje zlokalizowany zasób typu System.Drawing.Bitmap.
+        '''</summary>
+        Friend ReadOnly Property siatka() As System.Drawing.Bitmap
+            Get
+                Dim obj As Object = ResourceManager.GetObject("siatka", resourceCulture)
+                Return CType(obj,System.Drawing.Bitmap)
+            End Get
+        End Property
     End Module
 End Namespace

@@ -255,6 +255,9 @@
     <Content Include="Resources\kanapka_gis.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Resources\siatka.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="skrypty\o_programie_NoToCONS.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
