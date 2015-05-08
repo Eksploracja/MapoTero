@@ -82,7 +82,21 @@ Public Class Form1
         Label4.Enabled = False
         Label5.Enabled = False
         Label6.Enabled = False
+
+
+        Label31.Visible = False
+        Label32.Visible = False
+        Label33.Visible = False
+        Label34.Visible = False
+
+
+
+
         'wczytywanie ustaleń okna z lastsetting. Jeśli go nie ma, to szuka conf. Gdy go zabraknie, to sięgamy po sztywny start
+
+
+       
+
 
 
         If File.Exists(folderSegmentow & "\conf.txt") = False Then
@@ -268,7 +282,7 @@ errorhandler:
 errororhandler:
     End Sub
 
-    Private Sub TextBox2_TextChanged(ByVal sender As Object, ByVal e As System.EventArgs)
+    Private Sub TextBox2_TextChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles TextBox2.TextChanged
 
         'TextBox5.Text = (Val(TextBox4.Text) - Val(TextBox2.Text)) / 1000
         TextBox5.Text = Val(TextBox8.Text) / 1000
@@ -277,14 +291,14 @@ errororhandler:
         TextBox12.Text = Math.Ceiling(((Val(TextBox3.Text) - Val(TextBox1.Text)) / Val(TextBox10.Text)) / Val(TextBox9.Text))
 
     End Sub
-    Private Sub TextBox4_TextChanged(ByVal sender As Object, ByVal e As System.EventArgs)
+    Private Sub TextBox4_TextChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles TextBox4.TextChanged
 
         TextBox5.Text = Val(TextBox8.Text) / 1000
         TextBox8.Text = Val(TextBox11.Text) * Val(TextBox9.Text) * Val(TextBox10.Text)
         TextBox11.Text = Math.Ceiling(((Val(TextBox4.Text) - Val(TextBox2.Text)) / Val(TextBox10.Text)) / Val(TextBox9.Text))
         TextBox12.Text = Math.Ceiling(((Val(TextBox3.Text) - Val(TextBox1.Text)) / Val(TextBox10.Text)) / Val(TextBox9.Text))
     End Sub
-    Private Sub TextBox1_TextChanged(ByVal sender As Object, ByVal e As System.EventArgs)
+    Private Sub TextBox1_TextChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles TextBox1.TextChanged
 
         'TextBox6.Text = (Val(TextBox3.Text) - Val(TextBox1.Text)) / 1000
         TextBox6.Text = Val(TextBox7.Text) / 1000
@@ -292,19 +306,19 @@ errororhandler:
         TextBox11.Text = Math.Ceiling(((Val(TextBox4.Text) - Val(TextBox2.Text)) / Val(TextBox10.Text)) / Val(TextBox9.Text))
         TextBox12.Text = Math.Ceiling(((Val(TextBox3.Text) - Val(TextBox1.Text)) / Val(TextBox10.Text)) / Val(TextBox9.Text))
     End Sub
-    Private Sub TextBox3_TextChanged(ByVal sender As Object, ByVal e As System.EventArgs)
+    Private Sub TextBox3_TextChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles TextBox3.TextChanged
 
         TextBox6.Text = Val(TextBox7.Text) / 1000
         TextBox7.Text = Val(TextBox12.Text) * Val(TextBox9.Text) * Val(TextBox10.Text)
         TextBox11.Text = Math.Ceiling(((Val(TextBox4.Text) - Val(TextBox2.Text)) / Val(TextBox10.Text)) / Val(TextBox9.Text))
         TextBox12.Text = Math.Ceiling(((Val(TextBox3.Text) - Val(TextBox1.Text)) / Val(TextBox10.Text)) / Val(TextBox9.Text))
     End Sub
-    Private Sub TextBox5_TextChanged(ByVal sender As Object, ByVal e As System.EventArgs)
+    Private Sub TextBox5_TextChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles TextBox5.TextChanged
 
         TextBox8.Text = Val(TextBox11.Text) * Val(TextBox9.Text) * Val(TextBox10.Text)
 
     End Sub
-    Private Sub TextBox6_TextChanged(ByVal sender As Object, ByVal e As System.EventArgs)
+    Private Sub TextBox6_TextChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles TextBox6.TextChanged
 
         TextBox7.Text = Val(TextBox12.Text) * Val(TextBox9.Text) * Val(TextBox10.Text)
 
