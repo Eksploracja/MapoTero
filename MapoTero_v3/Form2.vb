@@ -32,6 +32,7 @@ Public Class Form2
         CheckBox7.Checked = Module1.CheckJpgw
         CheckBox8.Checked = Module1.CheckKml
         CheckBox9.Checked = Module1.editXY
+        CheckBox10.Checked = Module1.kursorWGS84
         'ustawienie odpowiedniej warosci Combobox1 odbywa sie przy jego inicjalizacji
 
         TextBox6.Text = Module1.wspolnaNazwaKwadratu
@@ -186,5 +187,12 @@ Public Class Form2
             Form1.GroupBox1.Enabled = False
         End If
 
+    End Sub
+
+    Private Sub CheckBox10_CheckedChanged(sender As Object, e As EventArgs) Handles CheckBox10.CheckedChanged
+        Module1.kursorWGS84 = CheckBox10.CheckState
+
+
+        
     End Sub
 End Class

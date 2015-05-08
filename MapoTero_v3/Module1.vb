@@ -59,7 +59,10 @@ Module Module1
     Public CheckTB As Boolean = False           'tworzy mapy Trek Buddy
     Public pobierajPowyzejOstatniego As Boolean = False 'określa czy przy powtórnym pobieraniu ściągać wszystko, czy tylko powyżej segmentu o największym numerze
     Public editXY As Boolean = False          'włącza edycję pól formularza XY zasięgu mapy
-
+    Public kursorWGS84 As Boolean = False          'wyświetla współrzędne kursora w układzie WGS84
+    Public georef_scalanie_qgis As Boolean = False        'opcja referencji qgis dla scalanych plików
+    Public georef_scalanie_kml As Boolean = False        'opcja referencji kml dla scalanych plików
+    Public georef_scalanie_map As Boolean = False        'opcja referencji map dla scalanych plików
 
     Public Lx As Long                           'używane w segmentach
     Public Ly As Long
@@ -107,7 +110,7 @@ Module Module1
         If Module1.CheckTB = True Then
             TBfoldery()
         End If
-       
+
         'OBSŁUGA BŁĘDÓW - czy wpisano ilość m/pix
 
         If Form1.TextBox10.Text = "" Then
@@ -285,8 +288,35 @@ pobieranieJeszczeRaz:
 
                 End Select
 
+
+
+               
+
+
+
+                Lx = (Val(Form1.TextBox1.Text) + ((Val(Form1.TextBox9.Text) * Val(Form1.TextBox10.Text)) * (ileSegVert - pion)))
+                Ly = (Val(Form1.TextBox2.Text) + ((Val(Form1.TextBox9.Text) * Val(Form1.TextBox10.Text)) * (poz - 1)))
                 Px = (Lx + (Val(Form1.TextBox9.Text) * Val(Form1.TextBox10.Text)))
                 Py = (Ly + (Val(Form1.TextBox9.Text) * Val(Form1.TextBox10.Text)))
+
+
+
+
+                ' Select georef_scalanie_qgis
+
+                'Case False
+                'Lx = (Val(Form1.TextBox1.Text) + ((Val(Form1.TextBox9.Text) * Val(Form1.TextBox10.Text)) * (ileSegVert - pion)))
+                'Ly = (Val(Form1.TextBox2.Text) + ((Val(Form1.TextBox9.Text) * Val(Form1.TextBox10.Text)) * (poz - 1)))
+                'Px = (Lx + (Val(Form1.TextBox9.Text) * Val(Form1.TextBox10.Text)))
+                'Py = (Ly + (Val(Form1.TextBox9.Text) * Val(Form1.TextBox10.Text)))
+                'Case True
+                ''Lx = (Val(Form1.TextBox1.Text) + ((Val(Form1.TextBox9.Text) * Val(Form1.TextBox12.Text))))
+                ''Ly = (Val(Form1.TextBox2.Text) + ((Val(Form1.TextBox9.Text) * Val(Form1.TextBox11.Text))))
+                ''Px = (Lx + (Val(Form1.TextBox9.Text) * Val(Form1.TextBox12.Text)))
+                ''Py = (Ly + (Val(Form1.TextBox9.Text) * Val(Form1.TextBox12.Text)))
+                'End Select
+
+                
 
                 strUrlparts(2) = Lx & ","               'lewy X
                 strUrlparts(3) = Ly & ","               'lewy Y
@@ -325,20 +355,20 @@ pobieranieJeszczeRaz:
 
                             End If
                         Case False
-                downloadPic()
-                plikGeoreferencyjny_map()
-                plikGeoreferencyjny_gmi()
-                plikGeoreferencyjny_wld()
-                plikGeoreferencyjny_points()
+                            downloadPic()
+                            plikGeoreferencyjny_map()
+                            plikGeoreferencyjny_gmi()
+                            plikGeoreferencyjny_wld()
+                            plikGeoreferencyjny_points()
                             plikGeoreferencyjny_jpgw()
                             plikGeoreferencyjny_kml()
-                plikTB_Set()
+                            plikTB_Set()
                     End Select
 
 
-                If proba = 1 Then
-                    plikZkoordynatami()
-                End If
+                    If proba = 1 Then
+                        plikZkoordynatami()
+                    End If
 
                 Else
 
@@ -379,7 +409,7 @@ pobieranieJeszczeRaz:
         Form1.ComboBox3.Enabled = True
         Form1.ListBox1.Enabled = True
 
-        
+
         Form1.RichTextBox1.ForeColor = System.Drawing.Color.Green
         Form1.RichTextBox1.Text = "Zakończono pobieranie"
 
@@ -395,8 +425,8 @@ errorhandler:
         Form1.ToolStripProgressBar1.Value = 0
         Form1.ToolStripStatusLabel3.Text = ""
 
-       
-           
+
+
 
 
         'kasowanie zmiennych
@@ -422,7 +452,7 @@ errorhandler:
 
         If File.Exists(myPath & "\download\error.txt") = False Then Form1.button6.Enabled = True
 
-       
+
     End Sub
 
 
@@ -456,32 +486,32 @@ errorhandler:
                 End If
 
             Case False
-                
-
-                        If Dir(folderSegmentow & nazwaKwadratu & "." & rozszerzenie) = "" Then
-
-                            'zmienne niezbędne do image.fromstream
-                            Dim requestPic As WebRequest = WebRequest.Create(strUrl)
-                            On Error Resume Next
-                            Dim responsePic As WebResponse = requestPic.GetResponse
-
-                            On Error Resume Next
-
-                            Image.FromStream(responsePic.GetResponseStream).Save(folderSegmentow & nazwaKwadratu & "." & rozszerzenie)
-                            responsePic.Close()
-
-                        End If
-                        'po instrukcji pobrania jeszcze raz sprawdza, czy plik istnieje, jeśl nie powstał (nie został ściągnięty)
-                        'to dodaje wpis do pliku error.txt
-                        If Dir(folderSegmentow & nazwaKwadratu & "." & rozszerzenie) = "" Then
-                            'dodaje wpis do pliku o błędach
-                            plikError()
-                        End If
 
 
-                End Select
+                If Dir(folderSegmentow & nazwaKwadratu & "." & rozszerzenie) = "" Then
 
-        
+                    'zmienne niezbędne do image.fromstream
+                    Dim requestPic As WebRequest = WebRequest.Create(strUrl)
+                    On Error Resume Next
+                    Dim responsePic As WebResponse = requestPic.GetResponse
+
+                    On Error Resume Next
+
+                    Image.FromStream(responsePic.GetResponseStream).Save(folderSegmentow & nazwaKwadratu & "." & rozszerzenie)
+                    responsePic.Close()
+
+                End If
+                'po instrukcji pobrania jeszcze raz sprawdza, czy plik istnieje, jeśl nie powstał (nie został ściągnięty)
+                'to dodaje wpis do pliku error.txt
+                If Dir(folderSegmentow & nazwaKwadratu & "." & rozszerzenie) = "" Then
+                    'dodaje wpis do pliku o błędach
+                    plikError()
+                End If
+
+
+        End Select
+
+
 
     End Sub
 
@@ -861,30 +891,60 @@ errorhandler:
     End Sub
     Public Sub plikGeoreferencyjny_jpgw()
 
-        If CheckJpgw = True Then
+        Select Case georef_scalanie_qgis
 
-            'tworzy plik .jpgw
-            'FileOpen(4, folderSegmentow & nazwaKwadratu & ".jpgw", OpenMode.Output)
-            Select Case rozszerzenie
-                Case "jpg"
-                    FileOpen(4, folderSegmentow & nazwaKwadratu & ".jpgw", OpenMode.Output)
-                Case "png" & "png8" & "png24" & "png32"
-                    FileOpen(4, folderSegmentow & nazwaKwadratu & ".pngw", OpenMode.Output)
-                Case "tif"
-                    FileOpen(4, folderSegmentow & nazwaKwadratu & ".tifw", OpenMode.Output)
-                Case "gif"
-                    FileOpen(4, folderSegmentow & nazwaKwadratu & ".gifw", OpenMode.Output)
-            End Select
-            Print(4, Form1.TextBox10.Text & Chr(13) & Chr(10) & _
-            "0" & Chr(13) & Chr(10) & _
-            "0" & Chr(13) & Chr(10) & _
-            "-" & Form1.TextBox10.Text & Chr(13) & Chr(10) & _
-           Ly & Chr(13) & Chr(10) & _
-            Px)
-            FileClose(4)
+            Case False
 
-        End If
+                If CheckJpgw = True Then
 
+                    'tworzy plik .jpgw
+                    'FileOpen(4, folderSegmentow & nazwaKwadratu & ".jpgw", OpenMode.Output)
+                    Select Case rozszerzenie
+                        Case "jpg"
+                            FileOpen(4, folderSegmentow & nazwaKwadratu & ".jpgw", OpenMode.Output)
+                        Case "png" & "png8" & "png24" & "png32"
+                            FileOpen(4, folderSegmentow & nazwaKwadratu & ".pngw", OpenMode.Output)
+                        Case "tif"
+                            FileOpen(4, folderSegmentow & nazwaKwadratu & ".tifw", OpenMode.Output)
+                        Case "gif"
+                            FileOpen(4, folderSegmentow & nazwaKwadratu & ".gifw", OpenMode.Output)
+                    End Select
+                    Print(4, Form1.TextBox10.Text & Chr(13) & Chr(10) & _
+                    "0" & Chr(13) & Chr(10) & _
+                    "0" & Chr(13) & Chr(10) & _
+                    "-" & Form1.TextBox10.Text & Chr(13) & Chr(10) & _
+                   Ly & Chr(13) & Chr(10) & _
+                    Px)
+                    FileClose(4)
+
+                End If
+            Case True
+                Ly = Val(Form3.TextBox5.Text)
+                Px = Val(Form3.TextBox4.Text) + (Val(Form3.TextBox9.Text) * Val(Form3.TextBox7.Text) * Val(Form3.TextBox6.Text))
+                'tworzy plik .jpgw
+                'FileOpen(4, folderSegmentow & nazwaKwadratu & ".jpgw", OpenMode.Output)
+                Select Case rozszerzenie
+                    Case "jpg"
+                        FileOpen(4, folderSegmentow & "_scalone_segmenty_" & Form3.TextBox8.Text & "x" & Form3.TextBox9.Text & ".jpgw", OpenMode.Output)
+                    Case "png" & "png8" & "png24" & "png32"
+                        FileOpen(4, "_scalone_segmenty_" & Form3.TextBox8.Text & "x" & Form3.TextBox9.Text & ".pngw", OpenMode.Output)
+                    Case "tif"
+                        FileOpen(4, "_scalone_segmenty_" & Form3.TextBox8.Text & "x" & Form3.TextBox9.Text & ".tifw", OpenMode.Output)
+                    Case "gif"
+                        FileOpen(4, "_scalone_segmenty_" & Form3.TextBox8.Text & "x" & Form3.TextBox9.Text & ".gifw", OpenMode.Output)
+                End Select
+                Print(4, Form1.TextBox10.Text & Chr(13) & Chr(10) & _
+                "0" & Chr(13) & Chr(10) & _
+                "0" & Chr(13) & Chr(10) & _
+                "-" & Form1.TextBox10.Text & Chr(13) & Chr(10) & _
+               Ly & Chr(13) & Chr(10) & _
+                Px)
+                FileClose(4)
+
+
+
+
+        End Select
     End Sub
 
     Function Dodaj_zera(ByVal X As String, ByVal L As Integer) As String
@@ -909,186 +969,372 @@ errorhandler:
 
     Public Sub plikGeoreferencyjny_map()
 
-        If CheckMap = True Then
+        Select Case georef_scalanie_map
 
-            Dim MMPLL1sz As String  'lewy górny
-            Dim MMPLL1dl As String
-            Dim MMPLL2sz As String  'prawy górny
-            Dim MMPLL2dl As String
-            Dim MMPLL3sz As String  'prawy dolny
-            Dim MMPLL3dl As String
-            Dim MMPLL4sz As String  'lewy dolny
-            Dim MMPLL4dl As String
+            Case False
+                If CheckMap = True Then
 
-            MMPLL1sz = Round(SzerokoscWgs_z1992(Px, Ly), 6)
-            MMPLL1dl = Round(DlugoscWgs_z1992(Px, Ly), 6)
-            MMPLL2sz = Round(SzerokoscWgs_z1992(Px, Py), 6)
-            MMPLL2dl = Round(DlugoscWgs_z1992(Px, Py), 6)
-            MMPLL3sz = Round(SzerokoscWgs_z1992(Lx, Py), 6)
-            MMPLL3dl = Round(DlugoscWgs_z1992(Lx, Py), 6)
-            MMPLL4sz = Round(SzerokoscWgs_z1992(Lx, Ly), 6)
-            MMPLL4dl = Round(DlugoscWgs_z1992(Lx, Ly), 6)
+                    Dim MMPLL1sz As String  'lewy górny
+                    Dim MMPLL1dl As String
+                    Dim MMPLL2sz As String  'prawy górny
+                    Dim MMPLL2dl As String
+                    Dim MMPLL3sz As String  'prawy dolny
+                    Dim MMPLL3dl As String
+                    Dim MMPLL4sz As String  'lewy dolny
+                    Dim MMPLL4dl As String
 
-            'przelicza na stopnie, minuty, sekundy i ułamki sekund
-            Dim Point01N As String = StMinSek(MMPLL1sz)
-            Dim Point01E As String = StMinSek(MMPLL1dl)
-            Dim Point02N As String = StMinSek(MMPLL2sz)
-            Dim Point02E As String = StMinSek(MMPLL2dl)
-            Dim Point03N As String = StMinSek(MMPLL3sz)
-            Dim Point03E As String = StMinSek(MMPLL3dl)
-            Dim Point04N As String = StMinSek(MMPLL4sz)
-            Dim Point04E As String = StMinSek(MMPLL4dl)
+                    MMPLL1sz = Round(SzerokoscWgs_z1992(Px, Ly), 8)
+                    MMPLL1dl = Round(DlugoscWgs_z1992(Px, Ly), 8)
+                    MMPLL2sz = Round(SzerokoscWgs_z1992(Px, Py), 8)
+                    MMPLL2dl = Round(DlugoscWgs_z1992(Px, Py), 8)
+                    MMPLL3sz = Round(SzerokoscWgs_z1992(Lx, Py), 8)
+                    MMPLL3dl = Round(DlugoscWgs_z1992(Lx, Py), 8)
+                    MMPLL4sz = Round(SzerokoscWgs_z1992(Lx, Ly), 8)
+                    MMPLL4dl = Round(DlugoscWgs_z1992(Lx, Ly), 8)
 
-            'usuwa przecinki i zamienia je na kropki
-            Dim MMPLL1szDot As String = Replace(MMPLL1sz, ",", ".")     'lewy górny
-            Dim MMPLL1dlDot As String = Replace(MMPLL1dl, ",", ".")
-            Dim MMPLL2szDot As String = Replace(MMPLL2sz, ",", ".")     'prawy górny
-            Dim MMPLL2dlDot As String = Replace(MMPLL2dl, ",", ".")
-            Dim MMPLL3szDot As String = Replace(MMPLL3sz, ",", ".")     'prawy dolny
-            Dim MMPLL3dlDot As String = Replace(MMPLL3dl, ",", ".")
-            Dim MMPLL4szDot As String = Replace(MMPLL4sz, ",", ".")     'lewy dolny
-            Dim MMPLL4dlDot As String = Replace(MMPLL4dl, ",", ".")
+                    'przelicza na stopnie, minuty, sekundy i ułamki sekund
+                    Dim Point01N As String = StMinSek(MMPLL1sz)
+                    Dim Point01E As String = StMinSek(MMPLL1dl)
+                    Dim Point02N As String = StMinSek(MMPLL2sz)
+                    Dim Point02E As String = StMinSek(MMPLL2dl)
+                    Dim Point03N As String = StMinSek(MMPLL3sz)
+                    Dim Point03E As String = StMinSek(MMPLL3dl)
+                    Dim Point04N As String = StMinSek(MMPLL4sz)
+                    Dim Point04E As String = StMinSek(MMPLL4dl)
+
+                    'usuwa przecinki i zamienia je na kropki
+                    Dim MMPLL1szDot As String = Replace(MMPLL1sz, ",", ".")     'lewy górny
+                    Dim MMPLL1dlDot As String = Replace(MMPLL1dl, ",", ".")
+                    Dim MMPLL2szDot As String = Replace(MMPLL2sz, ",", ".")     'prawy górny
+                    Dim MMPLL2dlDot As String = Replace(MMPLL2dl, ",", ".")
+                    Dim MMPLL3szDot As String = Replace(MMPLL3sz, ",", ".")     'prawy dolny
+                    Dim MMPLL3dlDot As String = Replace(MMPLL3dl, ",", ".")
+                    Dim MMPLL4szDot As String = Replace(MMPLL4sz, ",", ".")     'lewy dolny
+                    Dim MMPLL4dlDot As String = Replace(MMPLL4dl, ",", ".")
 
 
-            'tworzy plik .map
-            FileOpen(1, folderSegmentow & nazwaKwadratu & ".map", OpenMode.Output)
-            Print(1, "OziExplorer Map Data File Version 2.2" & Chr(13) & Chr(10) & _
-                 nazwaKwadratu & "." & rozszerzenie & Chr(13) & Chr(10) & _
-                 folderSegmentow & nazwaKwadratu & "." & rozszerzenie & Chr(13) & Chr(10) & _
-                 "1 ,Map Code," & Chr(13) & Chr(10) & _
-                 "WGS 84,,0.0000,0.0000," & Chr(13) & Chr(10) & _
-                 "Reserved 1" & Chr(13) & Chr(10) & _
-                 "Reserved 2" & Chr(13) & Chr(10) & _
-                 "Magnetic Variation,,,E" & Chr(13) & Chr(10) & _
-                 "Map Projection,Transverse Mercator,PolyCal,No,AutoCalOnly,No,BSBUseWPX,No" & Chr(13) & Chr(10) & _
-                 "Point01,xy,    0,    0,in, deg,  " & Point01N & ",N,  " & Point01E & ",E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
-                 "Point02,xy, " & Form1.TextBox9.Text & ",    0,in, deg,  " & Point02N & ",N,  " & Point02E & ",E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
-                 "Point03,xy, " & Form1.TextBox9.Text & ", " & Form1.TextBox9.Text & ",in, deg,  " & Point03N & ",N,  " & Point03E & ",E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
-                 "Point04,xy,    0, " & Form1.TextBox9.Text & ",in, deg,  " & Point04N & ",N,  " & Point04E & ",E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
-                 "Point05,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
-                 "Point06,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
-                 "Point07,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
-                 "Point08,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
-                 "Point09,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
-                 "Point10,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
-                 "Point11,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
-                 "Point12,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
-                 "Point13,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
-                 "Point14,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
-                 "Point15,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
-                 "Point16,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
-                 "Point17,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
-                 "Point18,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
-                 "Point19,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
-                 "Point20,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
-                 "Point21,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
-                 "Point22,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
-                 "Point23,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
-                 "Point24,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
-                 "Point25,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
-                 "Point26,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
-                 "Point27,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
-                 "Point28,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
-                 "Point29,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
-                 "Point30,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
-                 "Projection Setup,     0.000000000,    19.000000000,     0.999300000,       500000.00,     -5300000.00,,,," & Chr(13) & Chr(10) & _
-                 "Map Feature = MF ; Map Comment = MC     These follow if they exist" & Chr(13) & Chr(10) & _
-                 "Track File = TF      These follow if they exist" & Chr(13) & Chr(10) & _
-                 "Moving Map Parameters = MM?    These follow if they exist" & Chr(13) & Chr(10) & _
-                 "MM0,Yes" & Chr(13) & Chr(10) & _
-                 "MMPNUM,4" & Chr(13) & Chr(10) & _
-                 "MMPXY,1,0,0" & Chr(13) & Chr(10) & _
-                 "MMPXY,2," & Form1.TextBox9.Text & ",0" & Chr(13) & Chr(10) & _
-                 "MMPXY,3," & Form1.TextBox9.Text & "," & Form1.TextBox9.Text & Chr(13) & Chr(10) & _
-                 "MMPXY,4,0," & Form1.TextBox9.Text & Chr(13) & Chr(10) & _
-                 "MMPLL,1,  " & MMPLL1dlDot & ",  " & MMPLL1szDot & Chr(13) & Chr(10) & _
-                 "MMPLL,2,  " & MMPLL2dlDot & ",  " & MMPLL2szDot & Chr(13) & Chr(10) & _
-                 "MMPLL,3,  " & MMPLL3dlDot & ",  " & MMPLL3szDot & Chr(13) & Chr(10) & _
-                 "MMPLL,4,   " & MMPLL4dlDot & ",  " & MMPLL4szDot & Chr(13) & Chr(10) & _
-                 "MM1B,     " & Form1.TextBox10.Text & Chr(13) & Chr(10) & _
-                 "MOP,Map Open Position,0,0" & Chr(13) & Chr(10) & _
-                 "IWH,Map Image Width/Height," & Form1.TextBox9.Text & "," & Form1.TextBox9.Text)
-            FileClose(1)
+                    'tworzy plik .map
+                    FileOpen(1, folderSegmentow & nazwaKwadratu & ".map", OpenMode.Output)
+                    Print(1, "OziExplorer Map Data File Version 2.2" & Chr(13) & Chr(10) & _
+                         nazwaKwadratu & "." & rozszerzenie & Chr(13) & Chr(10) & _
+                         folderSegmentow & nazwaKwadratu & "." & rozszerzenie & Chr(13) & Chr(10) & _
+                         "1 ,Map Code," & Chr(13) & Chr(10) & _
+                         "WGS 84,,0.0000,0.0000," & Chr(13) & Chr(10) & _
+                         "Reserved 1" & Chr(13) & Chr(10) & _
+                         "Reserved 2" & Chr(13) & Chr(10) & _
+                         "Magnetic Variation,,,E" & Chr(13) & Chr(10) & _
+                         "Map Projection,Transverse Mercator,PolyCal,No,AutoCalOnly,No,BSBUseWPX,No" & Chr(13) & Chr(10) & _
+                         "Point01,xy,    0,    0,in, deg,  " & Point01N & ",N,  " & Point01E & ",E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
+                         "Point02,xy, " & Form1.TextBox9.Text & ",    0,in, deg,  " & Point02N & ",N,  " & Point02E & ",E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
+                         "Point03,xy, " & Form1.TextBox9.Text & ", " & Form1.TextBox9.Text & ",in, deg,  " & Point03N & ",N,  " & Point03E & ",E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
+                         "Point04,xy,    0, " & Form1.TextBox9.Text & ",in, deg,  " & Point04N & ",N,  " & Point04E & ",E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
+                         "Point05,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
+                         "Point06,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
+                         "Point07,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
+                         "Point08,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
+                         "Point09,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
+                         "Point10,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
+                         "Point11,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
+                         "Point12,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
+                         "Point13,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
+                         "Point14,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
+                         "Point15,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
+                         "Point16,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
+                         "Point17,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
+                         "Point18,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
+                         "Point19,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
+                         "Point20,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
+                         "Point21,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
+                         "Point22,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
+                         "Point23,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
+                         "Point24,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
+                         "Point25,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
+                         "Point26,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
+                         "Point27,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
+                         "Point28,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
+                         "Point29,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
+                         "Point30,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
+                         "Projection Setup,     0.000000000,    19.000000000,     0.999300000,       500000.00,     -5300000.00,,,," & Chr(13) & Chr(10) & _
+                         "Map Feature = MF ; Map Comment = MC     These follow if they exist" & Chr(13) & Chr(10) & _
+                         "Track File = TF      These follow if they exist" & Chr(13) & Chr(10) & _
+                         "Moving Map Parameters = MM?    These follow if they exist" & Chr(13) & Chr(10) & _
+                         "MM0,Yes" & Chr(13) & Chr(10) & _
+                         "MMPNUM,4" & Chr(13) & Chr(10) & _
+                         "MMPXY,1,0,0" & Chr(13) & Chr(10) & _
+                         "MMPXY,2," & Form1.TextBox9.Text & ",0" & Chr(13) & Chr(10) & _
+                         "MMPXY,3," & Form1.TextBox9.Text & "," & Form1.TextBox9.Text & Chr(13) & Chr(10) & _
+                         "MMPXY,4,0," & Form1.TextBox9.Text & Chr(13) & Chr(10) & _
+                         "MMPLL,1,  " & MMPLL1dlDot & ",  " & MMPLL1szDot & Chr(13) & Chr(10) & _
+                         "MMPLL,2,  " & MMPLL2dlDot & ",  " & MMPLL2szDot & Chr(13) & Chr(10) & _
+                         "MMPLL,3,  " & MMPLL3dlDot & ",  " & MMPLL3szDot & Chr(13) & Chr(10) & _
+                         "MMPLL,4,   " & MMPLL4dlDot & ",  " & MMPLL4szDot & Chr(13) & Chr(10) & _
+                         "MM1B,     " & Form1.TextBox10.Text & Chr(13) & Chr(10) & _
+                         "MOP,Map Open Position,0,0" & Chr(13) & Chr(10) & _
+                         "IWH,Map Image Width/Height," & Form1.TextBox9.Text & "," & Form1.TextBox9.Text)
+                    FileClose(1)
 
-        End If
+                End If
 
-        '       "Point01,xy,0," & TextBox9.Text & ",in, deg,,,N,,,E, grid,," & Ly & "," & Lx & ", N" & Chr(13) & Chr(10) & _
-        '       "Point02,xy," & TextBox9.Text & ",0,in, deg,,,N,,,E, grid,," & Py & "," & Px & ", N" & Chr(13) & Chr(10) & _
+            Case True
+
+                Lx = (Val(Form3.TextBox4.Text))
+                Ly = (Val(Form3.TextBox5.Text))
+                Px = Val(Form3.TextBox4.Text) + (Val(Form3.TextBox9.Text) * Val(Form3.TextBox7.Text) * Val(Form3.TextBox6.Text))
+                Py = Val(Form3.TextBox5.Text) + (Val(Form3.TextBox8.Text) * Val(Form3.TextBox7.Text) * Val(Form3.TextBox6.Text))
+
+
+                Dim MMPLL1sz As String  'lewy górny
+                Dim MMPLL1dl As String
+                Dim MMPLL2sz As String  'prawy górny
+                Dim MMPLL2dl As String
+                Dim MMPLL3sz As String  'prawy dolny
+                Dim MMPLL3dl As String
+                Dim MMPLL4sz As String  'lewy dolny
+                Dim MMPLL4dl As String
+
+                MMPLL1sz = Round(SzerokoscWgs_z1992(Px, Ly), 8)
+                MMPLL1dl = Round(DlugoscWgs_z1992(Px, Ly), 8)
+                MMPLL2sz = Round(SzerokoscWgs_z1992(Px, Py), 8)
+                MMPLL2dl = Round(DlugoscWgs_z1992(Px, Py), 8)
+                MMPLL3sz = Round(SzerokoscWgs_z1992(Lx, Py), 8)
+                MMPLL3dl = Round(DlugoscWgs_z1992(Lx, Py), 8)
+                MMPLL4sz = Round(SzerokoscWgs_z1992(Lx, Ly), 8)
+                MMPLL4dl = Round(DlugoscWgs_z1992(Lx, Ly), 8)
+
+                'przelicza na stopnie, minuty, sekundy i ułamki sekund
+                Dim Point01N As String = StMinSek(MMPLL1sz)
+                Dim Point01E As String = StMinSek(MMPLL1dl)
+                Dim Point02N As String = StMinSek(MMPLL2sz)
+                Dim Point02E As String = StMinSek(MMPLL2dl)
+                Dim Point03N As String = StMinSek(MMPLL3sz)
+                Dim Point03E As String = StMinSek(MMPLL3dl)
+                Dim Point04N As String = StMinSek(MMPLL4sz)
+                Dim Point04E As String = StMinSek(MMPLL4dl)
+
+                'usuwa przecinki i zamienia je na kropki
+                Dim MMPLL1szDot As String = Replace(MMPLL1sz, ",", ".")     'lewy górny
+                Dim MMPLL1dlDot As String = Replace(MMPLL1dl, ",", ".")
+                Dim MMPLL2szDot As String = Replace(MMPLL2sz, ",", ".")     'prawy górny
+                Dim MMPLL2dlDot As String = Replace(MMPLL2dl, ",", ".")
+                Dim MMPLL3szDot As String = Replace(MMPLL3sz, ",", ".")     'prawy dolny
+                Dim MMPLL3dlDot As String = Replace(MMPLL3dl, ",", ".")
+                Dim MMPLL4szDot As String = Replace(MMPLL4sz, ",", ".")     'lewy dolny
+                Dim MMPLL4dlDot As String = Replace(MMPLL4dl, ",", ".")
+
+
+                'tworzy plik .map
+                FileOpen(1, folderSegmentow & "_scalone_segmenty_" & Form3.TextBox8.Text & "x" & Form3.TextBox9.Text & ".map", OpenMode.Output)
+                Print(1, "OziExplorer Map Data File Version 2.2" & Chr(13) & Chr(10) & _
+                     "_scalone_segmenty_" & Form3.TextBox8.Text & "x" & Form3.TextBox9.Text & "." & rozszerzenie & Chr(13) & Chr(10) & _
+                     folderSegmentow & "_scalone_segmenty_" & Form3.TextBox8.Text & "x" & Form3.TextBox9.Text & "." & rozszerzenie & Chr(13) & Chr(10) & _
+                     "1 ,Map Code," & Chr(13) & Chr(10) & _
+                     "WGS 84,,0.0000,0.0000," & Chr(13) & Chr(10) & _
+                     "Reserved 1" & Chr(13) & Chr(10) & _
+                     "Reserved 2" & Chr(13) & Chr(10) & _
+                     "Magnetic Variation,,,E" & Chr(13) & Chr(10) & _
+                     "Map Projection,Transverse Mercator,PolyCal,No,AutoCalOnly,No,BSBUseWPX,No" & Chr(13) & Chr(10) & _
+                     "Point01,xy,    0,    0,in, deg,  " & Point01N & ",N,  " & Point01E & ",E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
+                     "Point02,xy, " & (Val(Form3.TextBox6.Text) * Val(Form3.TextBox8.Text)) & ",    0,in, deg,  " & Point02N & ",N,  " & Point02E & ",E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
+                     "Point03,xy, " & (Val(Form3.TextBox6.Text) * Val(Form3.TextBox8.Text)) & ", " & (Val(Form3.TextBox6.Text) * Val(Form3.TextBox9.Text)) & ",in, deg,  " & Point03N & ",N,  " & Point03E & ",E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
+                     "Point04,xy,    0, " & (Val(Form3.TextBox6.Text) * Val(Form3.TextBox9.Text)) & ",in, deg,  " & Point04N & ",N,  " & Point04E & ",E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
+                     "Point05,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
+                     "Point06,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
+                     "Point07,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
+                     "Point08,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
+                     "Point09,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
+                     "Point10,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
+                     "Point11,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
+                     "Point12,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
+                     "Point13,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
+                     "Point14,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
+                     "Point15,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
+                     "Point16,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
+                     "Point17,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
+                     "Point18,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
+                     "Point19,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
+                     "Point20,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
+                     "Point21,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
+                     "Point22,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
+                     "Point23,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
+                     "Point24,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
+                     "Point25,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
+                     "Point26,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
+                     "Point27,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
+                     "Point28,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
+                     "Point29,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
+                     "Point30,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
+                     "Projection Setup,     0.000000000,    19.000000000,     0.999300000,       500000.00,     -5300000.00,,,," & Chr(13) & Chr(10) & _
+                     "Map Feature = MF ; Map Comment = MC     These follow if they exist" & Chr(13) & Chr(10) & _
+                     "Track File = TF      These follow if they exist" & Chr(13) & Chr(10) & _
+                     "Moving Map Parameters = MM?    These follow if they exist" & Chr(13) & Chr(10) & _
+                     "MM0,Yes" & Chr(13) & Chr(10) & _
+                     "MMPNUM,4" & Chr(13) & Chr(10) & _
+                     "MMPXY,1,0,0" & Chr(13) & Chr(10) & _
+                     "MMPXY,2," & (Val(Form3.TextBox6.Text) * Val(Form3.TextBox8.Text)) & ",0" & Chr(13) & Chr(10) & _
+                     "MMPXY,3," & (Val(Form3.TextBox6.Text) * Val(Form3.TextBox8.Text)) & "," & (Val(Form3.TextBox6.Text) * Val(Form3.TextBox9.Text)) & Chr(13) & Chr(10) & _
+                     "MMPXY,4,0," & (Val(Form3.TextBox6.Text) * Val(Form3.TextBox9.Text)) & Chr(13) & Chr(10) & _
+                     "MMPLL,1,  " & MMPLL1dlDot & ",  " & MMPLL1szDot & Chr(13) & Chr(10) & _
+                     "MMPLL,2,  " & MMPLL2dlDot & ",  " & MMPLL2szDot & Chr(13) & Chr(10) & _
+                     "MMPLL,3,  " & MMPLL3dlDot & ",  " & MMPLL3szDot & Chr(13) & Chr(10) & _
+                     "MMPLL,4,   " & MMPLL4dlDot & ",  " & MMPLL4szDot & Chr(13) & Chr(10) & _
+                     "MM1B,     " & Form3.TextBox7.Text & Chr(13) & Chr(10) & _
+                     "MOP,Map Open Position,0,0" & Chr(13) & Chr(10) & _
+                     "IWH,Map Image Width/Height," & (Val(Form3.TextBox6.Text) * Val(Form3.TextBox8.Text)) & "," & (Val(Form3.TextBox6.Text) * Val(Form3.TextBox9.Text)))
+                FileClose(1)
+
+        End Select
+       
     End Sub
 
 
     Public Sub plikGeoreferencyjny_kml()
+        Select georef_scalanie_kml
 
-        If CheckKml = True Then
-
-            Dim bok As String = Form1.TextBox9.Text & ".000000000000000"
-
-            Dim LGsz As String  'lewy górny
-            Dim LGdl As String
-            Dim PGsz As String  'prawy górny
-            Dim PGdl As String
-            Dim PDsz As String  'prawy dolny
-            Dim PDdl As String
-            Dim LDsz As String  'lewy dolny
-            Dim LDdl As String
-
-            LGsz = Round(SzerokoscWgs_z1992(Px, Ly), 15)
-            LGdl = Round(DlugoscWgs_z1992(Px, Ly), 15)
-            PGsz = Round(SzerokoscWgs_z1992(Px, Py), 15)
-            PGdl = Round(DlugoscWgs_z1992(Px, Py), 15)
-            PDsz = Round(SzerokoscWgs_z1992(Lx, Py), 15)
-            PDdl = Round(DlugoscWgs_z1992(Lx, Py), 15)
-            LDsz = Round(SzerokoscWgs_z1992(Lx, Ly), 15)
-            LDdl = Round(DlugoscWgs_z1992(Lx, Ly), 15)
-
-            'usuwa przecinki i zamienia je na kropki
-            Dim LGszDot As String = Replace(LGsz, ",", ".")     'lewy górny
-            Dim LGdlDot As String = Replace(LGdl, ",", ".")
-            Dim PGszDot As String = Replace(PGsz, ",", ".")     'prawy górny
-            Dim PGdlDot As String = Replace(PGdl, ",", ".")
-            Dim PDszDot As String = Replace(PDsz, ",", ".")     'prawy dolny
-            Dim PDdlDot As String = Replace(PDdl, ",", ".")
-            Dim LDszDot As String = Replace(LDsz, ",", ".")     'lewy dolny
-            Dim LDdlDot As String = Replace(LDdl, ",", ".")
-
-            'sprawdza ilość znaków w zmiennej i w razie potrzeby dodaje zera na końcu
-            LGszDot = Dodaj_zera(LGszDot, 18)
-            LGdlDot = Dodaj_zera(LGdlDot, 18)
-            PGszDot = Dodaj_zera(PGszDot, 18)
-            PGdlDot = Dodaj_zera(PGdlDot, 18)
-            PDszDot = Dodaj_zera(PDszDot, 18)
-            PDdlDot = Dodaj_zera(PDdlDot, 18)
-            LDszDot = Dodaj_zera(LDszDot, 18)
-            LDdlDot = Dodaj_zera(LDdlDot, 18)
+            Case False
 
 
+                If CheckKml = True Then
+
+                    Dim bok As String = Form1.TextBox9.Text & ".000000000000000"
+
+                    Dim LGsz As String  'lewy górny
+                    Dim LGdl As String
+                    Dim PGsz As String  'prawy górny
+                    Dim PGdl As String
+                    Dim PDsz As String  'prawy dolny
+                    Dim PDdl As String
+                    Dim LDsz As String  'lewy dolny
+                    Dim LDdl As String
+
+                    LGsz = Round(SzerokoscWgs_z1992(Px, Ly), 15)
+                    LGdl = Round(DlugoscWgs_z1992(Px, Ly), 15)
+                    PGsz = Round(SzerokoscWgs_z1992(Px, Py), 15)
+                    PGdl = Round(DlugoscWgs_z1992(Px, Py), 15)
+                    PDsz = Round(SzerokoscWgs_z1992(Lx, Py), 15)
+                    PDdl = Round(DlugoscWgs_z1992(Lx, Py), 15)
+                    LDsz = Round(SzerokoscWgs_z1992(Lx, Ly), 15)
+                    LDdl = Round(DlugoscWgs_z1992(Lx, Ly), 15)
+
+                    'usuwa przecinki i zamienia je na kropki
+                    Dim LGszDot As String = Replace(LGsz, ",", ".")     'lewy górny
+                    Dim LGdlDot As String = Replace(LGdl, ",", ".")
+                    Dim PGszDot As String = Replace(PGsz, ",", ".")     'prawy górny
+                    Dim PGdlDot As String = Replace(PGdl, ",", ".")
+                    Dim PDszDot As String = Replace(PDsz, ",", ".")     'prawy dolny
+                    Dim PDdlDot As String = Replace(PDdl, ",", ".")
+                    Dim LDszDot As String = Replace(LDsz, ",", ".")     'lewy dolny
+                    Dim LDdlDot As String = Replace(LDdl, ",", ".")
+
+                    'sprawdza ilość znaków w zmiennej i w razie potrzeby dodaje zera na końcu
+                    LGszDot = Dodaj_zera(LGszDot, 18)
+                    LGdlDot = Dodaj_zera(LGdlDot, 18)
+                    PGszDot = Dodaj_zera(PGszDot, 18)
+                    PGdlDot = Dodaj_zera(PGdlDot, 18)
+                    PDszDot = Dodaj_zera(PDszDot, 18)
+                    PDdlDot = Dodaj_zera(PDdlDot, 18)
+                    LDszDot = Dodaj_zera(LDszDot, 18)
+                    LDdlDot = Dodaj_zera(LDdlDot, 18)
 
 
-            FileOpen(1, folderSegmentow & nazwaKwadratu & ".kml", OpenMode.Output)
+
+
+                    FileOpen(1, folderSegmentow & nazwaKwadratu & ".kml", OpenMode.Output)
 
 
 
-            Print(1, "<?xml version=" & Chr(34) & "1.0" & Chr(34) & " encoding=" & Chr(34) & "UTF-8" & Chr(34) & "?>" & Chr(13) & Chr(10) & _
-            "<kml xmlns=" & Chr(34) & "http://www.opengis.net/kml/2.2" & Chr(34) & " xmlns:gx=" & Chr(34) & "http://www.google.com/kml/ext/2.2" & Chr(34) & " xmlns:kml=" & Chr(34) & "http://www.opengis.net/kml/2.2" & Chr(34) & " xmlns:atom=" & Chr(34) & "http://www.w3.org/2005/Atom" & Chr(34) & ">" & Chr(13) & Chr(10) & _
-"<GroundOverlay>" & Chr(13) & Chr(10) & _
-            "<name>" & nazwaKwadratu & "</name>" & Chr(13) & Chr(10) & _
-            "<Icon>" & Chr(13) & Chr(10) & _
-            "<href>" & nazwaKwadratu & "." & rozszerzenie & "</href>" & Chr(13) & Chr(10) & _
-            "<viewBoundScale>" & Form1.TextBox10.Text & "</viewBoundScale>" & Chr(13) & Chr(10) & _
-            "</Icon>" & Chr(13) & Chr(10) & _
-            "<LatLonBox>" & Chr(13) & Chr(10) & _
-            "<north>" & PGszDot & "</north>" & Chr(13) & Chr(10) & _
-            "<south>" & PDszDot & "</south>" & Chr(13) & Chr(10) & _
-            "<east>" & PGdlDot & "</east>" & Chr(13) & Chr(10) & _
-            "<west>" & LGdlDot & "</west>" & Chr(13) & Chr(10) & _
-            "</LatLonBox>" & Chr(13) & Chr(10) & _
-            "</GroundOverlay>" & Chr(13) & Chr(10) & _
-            "</kml>")
+                    Print(1, "<?xml version=" & Chr(34) & "1.0" & Chr(34) & " encoding=" & Chr(34) & "UTF-8" & Chr(34) & "?>" & Chr(13) & Chr(10) & _
+                    "<kml xmlns=" & Chr(34) & "http://www.opengis.net/kml/2.2" & Chr(34) & " xmlns:gx=" & Chr(34) & "http://www.google.com/kml/ext/2.2" & Chr(34) & " xmlns:kml=" & Chr(34) & "http://www.opengis.net/kml/2.2" & Chr(34) & " xmlns:atom=" & Chr(34) & "http://www.w3.org/2005/Atom" & Chr(34) & ">" & Chr(13) & Chr(10) & _
+        "<GroundOverlay>" & Chr(13) & Chr(10) & _
+                    "<name>" & nazwaKwadratu & "</name>" & Chr(13) & Chr(10) & _
+                    "<Icon>" & Chr(13) & Chr(10) & _
+                    "<href>" & nazwaKwadratu & "." & rozszerzenie & "</href>" & Chr(13) & Chr(10) & _
+                    "<viewBoundScale>" & Form1.TextBox10.Text & "</viewBoundScale>" & Chr(13) & Chr(10) & _
+                    "</Icon>" & Chr(13) & Chr(10) & _
+                    "<LatLonBox>" & Chr(13) & Chr(10) & _
+                    "<north>" & PGszDot & "</north>" & Chr(13) & Chr(10) & _
+                    "<south>" & PDszDot & "</south>" & Chr(13) & Chr(10) & _
+                    "<east>" & PGdlDot & "</east>" & Chr(13) & Chr(10) & _
+                    "<west>" & LGdlDot & "</west>" & Chr(13) & Chr(10) & _
+                    "</LatLonBox>" & Chr(13) & Chr(10) & _
+                    "</GroundOverlay>" & Chr(13) & Chr(10) & _
+                    "</kml>")
 
-            FileClose(1)
+                    FileClose(1)
 
-        End If
+                End If
 
+            Case True
+
+
+                Lx = (Val(Form3.TextBox4.Text))
+                Ly = (Val(Form3.TextBox5.Text))
+                Px = Val(Form3.TextBox4.Text) + (Val(Form3.TextBox9.Text) * Val(Form3.TextBox7.Text) * Val(Form3.TextBox6.Text))
+                Py = Val(Form3.TextBox5.Text) + (Val(Form3.TextBox8.Text) * Val(Form3.TextBox7.Text) * Val(Form3.TextBox6.Text))
+
+                Dim bok As String = Form1.TextBox9.Text & ".000000000000000"
+
+                Dim LGsz As String  'lewy górny
+                Dim LGdl As String
+                Dim PGsz As String  'prawy górny
+                Dim PGdl As String
+                Dim PDsz As String  'prawy dolny
+                Dim PDdl As String
+                Dim LDsz As String  'lewy dolny
+                Dim LDdl As String
+
+                LGsz = Round(SzerokoscWgs_z1992(Px, Ly), 15)
+                LGdl = Round(DlugoscWgs_z1992(Px, Ly), 15)
+                PGsz = Round(SzerokoscWgs_z1992(Px, Py), 15)
+                PGdl = Round(DlugoscWgs_z1992(Px, Py), 15)
+                PDsz = Round(SzerokoscWgs_z1992(Lx, Py), 15)
+                PDdl = Round(DlugoscWgs_z1992(Lx, Py), 15)
+                LDsz = Round(SzerokoscWgs_z1992(Lx, Ly), 15)
+                LDdl = Round(DlugoscWgs_z1992(Lx, Ly), 15)
+
+                'usuwa przecinki i zamienia je na kropki
+                Dim LGszDot As String = Replace(LGsz, ",", ".")     'lewy górny
+                Dim LGdlDot As String = Replace(LGdl, ",", ".")
+                Dim PGszDot As String = Replace(PGsz, ",", ".")     'prawy górny
+                Dim PGdlDot As String = Replace(PGdl, ",", ".")
+                Dim PDszDot As String = Replace(PDsz, ",", ".")     'prawy dolny
+                Dim PDdlDot As String = Replace(PDdl, ",", ".")
+                Dim LDszDot As String = Replace(LDsz, ",", ".")     'lewy dolny
+                Dim LDdlDot As String = Replace(LDdl, ",", ".")
+
+                'sprawdza ilość znaków w zmiennej i w razie potrzeby dodaje zera na końcu
+                LGszDot = Dodaj_zera(LGszDot, 18)
+                LGdlDot = Dodaj_zera(LGdlDot, 18)
+                PGszDot = Dodaj_zera(PGszDot, 18)
+                PGdlDot = Dodaj_zera(PGdlDot, 18)
+                PDszDot = Dodaj_zera(PDszDot, 18)
+                PDdlDot = Dodaj_zera(PDdlDot, 18)
+                LDszDot = Dodaj_zera(LDszDot, 18)
+                LDdlDot = Dodaj_zera(LDdlDot, 18)
+
+
+                FileOpen(1, folderSegmentow & "_scalone_segmenty_" & Form3.TextBox8.Text & "x" & Form3.TextBox9.Text & ".kml", OpenMode.Output)
+
+
+                Print(1, "<?xml version=" & Chr(34) & "1.0" & Chr(34) & " encoding=" & Chr(34) & "UTF-8" & Chr(34) & "?>" & Chr(13) & Chr(10) & _
+                "<kml xmlns=" & Chr(34) & "http://www.opengis.net/kml/2.2" & Chr(34) & " xmlns:gx=" & Chr(34) & "http://www.google.com/kml/ext/2.2" & Chr(34) & " xmlns:kml=" & Chr(34) & "http://www.opengis.net/kml/2.2" & Chr(34) & " xmlns:atom=" & Chr(34) & "http://www.w3.org/2005/Atom" & Chr(34) & ">" & Chr(13) & Chr(10) & _
+    "<GroundOverlay>" & Chr(13) & Chr(10) & _
+                "<name>" & "_scalone_segmenty_" & Form3.TextBox8.Text & "x" & Form3.TextBox9.Text & "</name>" & Chr(13) & Chr(10) & _
+                "<Icon>" & Chr(13) & Chr(10) & _
+                "<href>" & "_scalone_segmenty_" & Form3.TextBox8.Text & "x" & Form3.TextBox9.Text & "." & rozszerzenie & "</href>" & Chr(13) & Chr(10) & _
+                "<viewBoundScale>" & Form1.TextBox10.Text & "</viewBoundScale>" & Chr(13) & Chr(10) & _
+                "</Icon>" & Chr(13) & Chr(10) & _
+                "<LatLonBox>" & Chr(13) & Chr(10) & _
+                "<north>" & PGszDot & "</north>" & Chr(13) & Chr(10) & _
+                "<south>" & PDszDot & "</south>" & Chr(13) & Chr(10) & _
+                "<east>" & PGdlDot & "</east>" & Chr(13) & Chr(10) & _
+                "<west>" & LGdlDot & "</west>" & Chr(13) & Chr(10) & _
+                "</LatLonBox>" & Chr(13) & Chr(10) & _
+                "</GroundOverlay>" & Chr(13) & Chr(10) & _
+                "</kml>")
+
+                FileClose(1)
+
+        End Select
     End Sub
     Public Sub plikError()
 
@@ -1248,7 +1494,7 @@ errorhandler:
 
         st = System.Math.Floor(MMPLL)       'pozostawia całości - stopnie
         min = (MMPLL - st) * 60             'od całości odejmuje ułamek i przelicza na minuty
-        min = Round(min, 4)                 'zaokrągla je do 8 miejsc po przecinku
+        min = Round(min, 6)                 'zaokrągla je do 8 miejsc po przecinku
         min = Replace(min, ",", ".")        'zamienia przecinek na kropkę
 
         StMinSek = st & ", " & min
