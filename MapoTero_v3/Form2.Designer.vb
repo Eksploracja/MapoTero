@@ -58,7 +58,7 @@ Partial Class Form2
         Me.TextBox6 = New System.Windows.Forms.TextBox()
         Me.GroupBox3 = New System.Windows.Forms.GroupBox()
         Me.GroupBox7 = New System.Windows.Forms.GroupBox()
-        Me.Label10 = New System.Windows.Forms.Label()
+        Me.CheckBox11 = New System.Windows.Forms.CheckBox()
         Me.Label9 = New System.Windows.Forms.Label()
         Me.CheckBox10 = New System.Windows.Forms.CheckBox()
         Me.Label8 = New System.Windows.Forms.Label()
@@ -74,6 +74,7 @@ Partial Class Form2
         Me.Label5 = New System.Windows.Forms.Label()
         Me.CheckBox5 = New System.Windows.Forms.CheckBox()
         Me.ToolTip1 = New System.Windows.Forms.ToolTip(Me.components)
+        Me.Label10 = New System.Windows.Forms.Label()
         Me.GroupBox1.SuspendLayout()
         Me.GroupBox2.SuspendLayout()
         Me.GroupBox3.SuspendLayout()
@@ -194,7 +195,7 @@ Partial Class Form2
         'Label3
         '
         Me.Label3.AutoSize = True
-        Me.Label3.Location = New System.Drawing.Point(15, 52)
+        Me.Label3.Location = New System.Drawing.Point(13, 50)
         Me.Label3.Name = "Label3"
         Me.Label3.Size = New System.Drawing.Size(70, 13)
         Me.Label3.TabIndex = 3
@@ -203,7 +204,7 @@ Partial Class Form2
         'Label2
         '
         Me.Label2.AutoSize = True
-        Me.Label2.Location = New System.Drawing.Point(15, 26)
+        Me.Label2.Location = New System.Drawing.Point(15, 22)
         Me.Label2.Name = "Label2"
         Me.Label2.Size = New System.Drawing.Size(53, 13)
         Me.Label2.TabIndex = 2
@@ -211,7 +212,7 @@ Partial Class Form2
         '
         'TextBox2
         '
-        Me.TextBox2.Location = New System.Drawing.Point(102, 45)
+        Me.TextBox2.Location = New System.Drawing.Point(96, 45)
         Me.TextBox2.Name = "TextBox2"
         Me.TextBox2.Size = New System.Drawing.Size(38, 20)
         Me.TextBox2.TabIndex = 1
@@ -221,7 +222,7 @@ Partial Class Form2
         '
         'TextBox1
         '
-        Me.TextBox1.Location = New System.Drawing.Point(102, 19)
+        Me.TextBox1.Location = New System.Drawing.Point(98, 18)
         Me.TextBox1.Name = "TextBox1"
         Me.TextBox1.Size = New System.Drawing.Size(38, 20)
         Me.TextBox1.TabIndex = 0
@@ -289,43 +290,46 @@ Partial Class Form2
         'GroupBox7
         '
         Me.GroupBox7.Controls.Add(Me.Label10)
+        Me.GroupBox7.Controls.Add(Me.CheckBox11)
         Me.GroupBox7.Controls.Add(Me.Label9)
         Me.GroupBox7.Controls.Add(Me.CheckBox10)
         Me.GroupBox7.Controls.Add(Me.Label8)
         Me.GroupBox7.Controls.Add(Me.CheckBox9)
-        Me.GroupBox7.Location = New System.Drawing.Point(217, 188)
+        Me.GroupBox7.Location = New System.Drawing.Point(217, 176)
         Me.GroupBox7.Name = "GroupBox7"
-        Me.GroupBox7.Size = New System.Drawing.Size(159, 115)
+        Me.GroupBox7.Size = New System.Drawing.Size(159, 127)
         Me.GroupBox7.TabIndex = 18
         Me.GroupBox7.TabStop = False
         Me.GroupBox7.Text = "Opcje widoku głównego okna"
         '
-        'Label10
+        'CheckBox11
         '
-        Me.Label10.AutoSize = True
-        Me.Label10.Location = New System.Drawing.Point(25, 89)
-        Me.Label10.Name = "Label10"
-        Me.Label10.Size = New System.Drawing.Size(78, 13)
-        Me.Label10.TabIndex = 22
-        Me.Label10.Text = "w ukł. WGS84"
+        Me.CheckBox11.AutoSize = True
+        Me.CheckBox11.Location = New System.Drawing.Point(6, 92)
+        Me.CheckBox11.Name = "CheckBox11"
+        Me.CheckBox11.Size = New System.Drawing.Size(131, 17)
+        Me.CheckBox11.TabIndex = 23
+        Me.CheckBox11.Text = "wyświetlanie współrz. "
+        Me.ToolTip1.SetToolTip(Me.CheckBox11, "umożliwia wprowadzanie z klawiatury współrzędnych XY zasięgu pobieranej mapy ")
+        Me.CheckBox11.UseVisualStyleBackColor = True
         '
         'Label9
         '
         Me.Label9.AutoSize = True
         Me.Label9.Location = New System.Drawing.Point(25, 76)
         Me.Label9.Name = "Label9"
-        Me.Label9.Size = New System.Drawing.Size(117, 13)
+        Me.Label9.Size = New System.Drawing.Size(116, 13)
         Me.Label9.TabIndex = 21
-        Me.Label9.Text = "współrzędnych kursora"
+        Me.Label9.Text = "kursora w ukł. WGS84"
         '
         'CheckBox10
         '
         Me.CheckBox10.AutoSize = True
         Me.CheckBox10.Location = New System.Drawing.Point(8, 61)
         Me.CheckBox10.Name = "CheckBox10"
-        Me.CheckBox10.Size = New System.Drawing.Size(117, 17)
+        Me.CheckBox10.Size = New System.Drawing.Size(128, 17)
         Me.CheckBox10.TabIndex = 20
-        Me.CheckBox10.Text = "włącz wyświetlanie"
+        Me.CheckBox10.Text = "wyświetlanie współrz."
         Me.ToolTip1.SetToolTip(Me.CheckBox10, "umożliwia wprowadzanie z klawiatury współrzędnych XY zasięgu pobieranej mapy ")
         Me.CheckBox10.UseVisualStyleBackColor = True
         '
@@ -343,16 +347,16 @@ Partial Class Form2
         Me.CheckBox9.AutoSize = True
         Me.CheckBox9.Location = New System.Drawing.Point(8, 30)
         Me.CheckBox9.Name = "CheckBox9"
-        Me.CheckBox9.Size = New System.Drawing.Size(123, 17)
+        Me.CheckBox9.Size = New System.Drawing.Size(114, 17)
         Me.CheckBox9.TabIndex = 18
-        Me.CheckBox9.Text = "włącz edycję pól XY"
+        Me.CheckBox9.Text = "edytowanie pól XY"
         Me.ToolTip1.SetToolTip(Me.CheckBox9, "umożliwia wprowadzanie z klawiatury współrzędnych XY zasięgu pobieranej mapy ")
         Me.CheckBox9.UseVisualStyleBackColor = True
         '
         'GroupBox8
         '
         Me.GroupBox8.Controls.Add(Me.CheckBox3)
-        Me.GroupBox8.Location = New System.Drawing.Point(217, 125)
+        Me.GroupBox8.Location = New System.Drawing.Point(217, 118)
         Me.GroupBox8.Name = "GroupBox8"
         Me.GroupBox8.Size = New System.Drawing.Size(159, 50)
         Me.GroupBox8.TabIndex = 16
@@ -454,6 +458,15 @@ Partial Class Form2
         "operacji pobierania map")
         Me.CheckBox5.UseVisualStyleBackColor = True
         '
+        'Label10
+        '
+        Me.Label10.AutoSize = True
+        Me.Label10.Location = New System.Drawing.Point(26, 111)
+        Me.Label10.Name = "Label10"
+        Me.Label10.Size = New System.Drawing.Size(107, 13)
+        Me.Label10.TabIndex = 24
+        Me.Label10.Text = "WGS84 zaznaczenia"
+        '
         'Form2
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
@@ -514,9 +527,10 @@ Partial Class Form2
     Friend WithEvents GroupBox8 As System.Windows.Forms.GroupBox
     Friend WithEvents CheckBox8 As System.Windows.Forms.CheckBox
     Friend WithEvents GroupBox7 As System.Windows.Forms.GroupBox
-    Friend WithEvents Label10 As System.Windows.Forms.Label
     Friend WithEvents Label9 As System.Windows.Forms.Label
     Friend WithEvents CheckBox10 As System.Windows.Forms.CheckBox
     Friend WithEvents Label8 As System.Windows.Forms.Label
     Friend WithEvents CheckBox9 As System.Windows.Forms.CheckBox
+    Friend WithEvents CheckBox11 As System.Windows.Forms.CheckBox
+    Friend WithEvents Label10 As System.Windows.Forms.Label
 End Class

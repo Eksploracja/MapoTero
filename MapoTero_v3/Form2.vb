@@ -33,6 +33,7 @@ Public Class Form2
         CheckBox8.Checked = Module1.CheckKml
         CheckBox9.Checked = Module1.editXY
         CheckBox10.Checked = Module1.kursorWGS84
+        CheckBox11.Checked = Module1.zaznaczenieWGS84
         'ustawienie odpowiedniej warosci Combobox1 odbywa sie przy jego inicjalizacji
 
         TextBox6.Text = Module1.wspolnaNazwaKwadratu
@@ -209,4 +210,24 @@ Public Class Form2
 
 
     End Sub
+
+    Private Sub CheckBox11_CheckedChanged(sender As Object, e As EventArgs) Handles CheckBox11.CheckedChanged
+        Module1.zaznaczenieWGS84 = CheckBox11.CheckState
+
+
+        If Module1.zaznaczenieWGS84 = True Then
+            Form1.Label31.Visible = True
+            Form1.Label32.Visible = True
+            Form1.Label33.Visible = True
+            Form1.Label34.Visible = True
+        Else
+            Form1.Label31.Visible = False
+            Form1.Label32.Visible = False
+            Form1.Label33.Visible = False
+            Form1.Label34.Visible = False
+        End If
+
+
+    End Sub
+
 End Class
