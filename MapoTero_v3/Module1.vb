@@ -547,8 +547,7 @@ errorhandler:
 
         pobierz = False
 
-        Form1.RichTextBox1.ForeColor = System.Drawing.Color.Red
-        Form1.RichTextBox1.Text = "Przerwano pobieranie segmentów"
+      
     End Sub
     'procedura resetowania wprowadzonych warstw
 
