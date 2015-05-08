@@ -181,10 +181,24 @@ Public Class Form2
         Module1.editXY = CheckBox9.CheckState
 
 
-        If editXY = True Then
-            Form1.GroupBox1.Enabled = True
+        If Module1.editXY = True Then
+            Form1.TextBox1.Enabled = True
+            Form1.TextBox2.Enabled = True
+            Form1.TextBox3.Enabled = True
+            Form1.TextBox4.Enabled = True
+            Form1.Label3.Enabled = True
+            Form1.Label4.Enabled = True
+            Form1.Label5.Enabled = True
+            Form1.Label6.Enabled = True
         Else
-            Form1.GroupBox1.Enabled = False
+            Form1.TextBox1.Enabled = False
+            Form1.TextBox2.Enabled = False
+            Form1.TextBox3.Enabled = False
+            Form1.TextBox4.Enabled = False
+            Form1.Label3.Enabled = False
+            Form1.Label4.Enabled = False
+            Form1.Label5.Enabled = False
+            Form1.Label6.Enabled = False
         End If
 
     End Sub
@@ -193,6 +207,6 @@ Public Class Form2
         Module1.kursorWGS84 = CheckBox10.CheckState
 
 
-        
+
     End Sub
 End Class
