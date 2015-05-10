@@ -34,6 +34,7 @@ Public Class Form2
         CheckBox9.Checked = Module1.editXY
         CheckBox10.Checked = Module1.kursorWGS84
         CheckBox11.Checked = Module1.zaznaczenieWGS84
+        CheckBox12.Checked = Module1.kursor_i_srodekmapy
         'ustawienie odpowiedniej warosci Combobox1 odbywa sie przy jego inicjalizacji
 
         TextBox6.Text = Module1.wspolnaNazwaKwadratu
@@ -191,6 +192,12 @@ Public Class Form2
             Form1.Label4.Enabled = True
             Form1.Label5.Enabled = True
             Form1.Label6.Enabled = True
+
+
+            Form1.RichTextBox1.ForeColor = System.Drawing.Color.Green
+            Form1.RichTextBox1.Text = "Wyłączono zaznaczanie na mapie zasięgu pobierania prawym przyciskiem myszy. Określ samodzielnie współrzędne XY zasięgu mapy i wpisz je w odpowiednie pola"
+
+            'Form1.GMapControl1.Enabled = False
         Else
             Form1.TextBox1.Enabled = False
             Form1.TextBox2.Enabled = False
@@ -200,6 +207,9 @@ Public Class Form2
             Form1.Label4.Enabled = False
             Form1.Label5.Enabled = False
             Form1.Label6.Enabled = False
+            'Form1.GMapControl1.Enabled = True
+            Form1.RichTextBox1.Text = ""
+
         End If
 
     End Sub
@@ -230,4 +240,29 @@ Public Class Form2
 
     End Sub
 
+    Private Sub CheckBox12_CheckedChanged(sender As Object, e As EventArgs) Handles CheckBox12.CheckedChanged
+        Module1.kursor_i_srodekmapy = CheckBox12.CheckState
+
+        If Module1.kursor_i_srodekmapy = False Then
+            Form1.Label39.Visible = False
+            Form1.Label40.Visible = False
+            Form1.Label41.Visible = False
+            Form1.Label35.Visible = False
+            Form1.Label37.Visible = False
+            Form1.Label38.Visible = False
+            Form1.Label63.Visible = False
+            Form1.Label66.Visible = False
+        Else
+            Form1.Label39.Visible = True
+            Form1.Label40.Visible = True
+            Form1.Label41.Visible = True
+            Form1.Label35.Visible = True
+            Form1.Label37.Visible = True
+            Form1.Label38.Visible = True
+            Form1.Label63.Visible = True
+            Form1.Label66.Visible = True
+        End If
+
+
+    End Sub
 End Class
