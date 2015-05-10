@@ -88,6 +88,7 @@ errorhandler:
         If File.Exists(folderScalania & "\conf.txt") = False Then
             MsgBox("Brak pliku konfiguracji 'conf.txt' w podanej lokalizacji.")
             CheckBox1.Enabled = True
+            RichTextBox1.ForeColor = System.Drawing.Color.Red
             RichTextBox1.Text = "We wskazanym katalogu segmentów nie odnaleziono pliku konfiguracyjnego conf.txt. Jesli został on bezpowrotnie utracony, istnieje możliwość samodzielnego zdefiniowania parametrów segmentów. W tym celu zaznacz opcję 'ręczne wprowadzanie parametrów'"
         Else
             CheckBox1.Enabled = False
@@ -102,6 +103,7 @@ errorhandler:
             If File.Exists(folderScalania & "\conf.txt") = False Then
                 MsgBox("Brak pliku konfiguracji 'conf.txt' w podanej lokalizacji.")
             Else
+                RichTextBox1.ForeColor = System.Drawing.Color.Green
                 RichTextBox1.Text = "Plik conf.txt został pomyślnie załadowany z nowej lokalizacji. Segmenty gotowe do złączenia"
             End If
             TextBox1.Text = folderScalania
@@ -121,6 +123,7 @@ errorhandler:
 
 
         If File.Exists(folderScalania & "\error.txt") = True Then
+            RichTextBox1.ForeColor = System.Drawing.Color.Red
             RichTextBox1.Text = "W katalogu segmentów wykryto obecność pliku error.txt co świadczy o niekompletnym zestawie segmentów. Uzupełnij je i usuń plik error.txt"
         Else
             nazwa_sklejka = "_scalone_segmenty_" & TextBox8.Text & "x" & TextBox9.Text
@@ -133,11 +136,13 @@ errorhandler:
             'Sleep(1000 * 1)
             'If File.Exists(folderScalania & nazwa_sklejka & "." & ComboBox1.Text) = True Then
             If procID <> 0 Then
+                RichTextBox1.ForeColor = System.Drawing.Color.Green
                 RichTextBox1.Text = "Segmenty zostały prawidłowo stalone i zapisane do pliku o nazwie" & " " & nazwa_sklejka
                 If Module1.georef_scalanie_qgis = True Then Module1.plikGeoreferencyjny_jpgw()
                 If Module1.georef_scalanie_kml = True Then Module1.plikGeoreferencyjny_kml()
                 If Module1.georef_scalanie_map = True Then Module1.plikGeoreferencyjny_map()
             Else
+                RichTextBox1.ForeColor = System.Drawing.Color.Red
                 RichTextBox1.Text = "Błąd. Segmenty nie zostały poprawnie scalone. Prawdopodobnie przygotowane wcześniej segmenty obszaru nie są kompletne, bądź po ich skompletowaniu nie został usunięty plik errot.txt"
             End If
         End If

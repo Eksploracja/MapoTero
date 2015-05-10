@@ -106,7 +106,7 @@ Public Class Form1
 
 
         If File.Exists(folderSegmentow & "\conf.txt") = False Then
-            button6.Enabled = False
+            Button8.Enabled = False
         End If
 
 
@@ -770,7 +770,7 @@ errorhandler:
         Form3.Show()
     End Sub
 
-    Private Sub button6_Click(sender As Object, e As EventArgs) Handles button6.Click
+    Private Sub button6_Click(sender As Object, e As EventArgs)
         Form3.Show()
     End Sub
 
@@ -794,4 +794,11 @@ errorhandler:
     End Sub
 
     
+    Private Sub Button7_Click(sender As Object, e As EventArgs) Handles Button7.Click
+        Process.Start(folderSegmentow)
+    End Sub
+
+    Private Sub Button8_Click(sender As Object, e As EventArgs) Handles Button8.Click
+        Form3.Show()
+    End Sub
 End Class

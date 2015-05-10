@@ -111,7 +111,7 @@ Module Module1
         Form1.Button1.Enabled = False
         Form1.ComboBox3.Enabled = False
         Form1.ListBox1.Enabled = False
-        Form1.button6.Enabled = False
+        Form1.Button8.Enabled = False
 
         If Module1.CheckTB = True Then
             TBfoldery()
@@ -456,7 +456,7 @@ errorhandler:
             File.Delete(folderSegmentow & "error.txt")
         End If
 
-        If File.Exists(myPath & "\download\error.txt") = False Then Form1.button6.Enabled = True
+        If File.Exists(myPath & "\download\error.txt") = False Then Form1.Button8.Enabled = True
 
 
     End Sub

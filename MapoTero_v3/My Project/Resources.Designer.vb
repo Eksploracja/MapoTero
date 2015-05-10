@@ -63,6 +63,26 @@ Namespace My.Resources
         '''<summary>
         '''  Wyszukuje zlokalizowany zasób typu System.Drawing.Bitmap.
         '''</summary>
+        Friend ReadOnly Property ico_folder() As System.Drawing.Bitmap
+            Get
+                Dim obj As Object = ResourceManager.GetObject("ico_folder", resourceCulture)
+                Return CType(obj,System.Drawing.Bitmap)
+            End Get
+        End Property
+        
+        '''<summary>
+        '''  Wyszukuje zlokalizowany zasób typu System.Drawing.Bitmap.
+        '''</summary>
+        Friend ReadOnly Property ico_merge() As System.Drawing.Bitmap
+            Get
+                Dim obj As Object = ResourceManager.GetObject("ico_merge", resourceCulture)
+                Return CType(obj,System.Drawing.Bitmap)
+            End Get
+        End Property
+        
+        '''<summary>
+        '''  Wyszukuje zlokalizowany zasób typu System.Drawing.Bitmap.
+        '''</summary>
         Friend ReadOnly Property kanapka_gis() As System.Drawing.Bitmap
             Get
                 Dim obj As Object = ResourceManager.GetObject("kanapka_gis", resourceCulture)
