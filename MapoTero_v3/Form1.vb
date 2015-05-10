@@ -23,8 +23,14 @@ Imports GMap.NET.MapProviders
 Imports GMap.NET.WindowsForms
 Imports GMap.NET.WindowsForms.Markers
 
+
+
+
 Public Class Form1
 
+    
+
+  
 
 
 
@@ -336,6 +342,8 @@ errororhandler:
     Private Sub TextBox10_TextChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles TextBox10.TextChanged
         TextBox5.Text = Val(TextBox8.Text) / 1000
         TextBox6.Text = Val(TextBox7.Text) / 1000
+        TextBox7.Text = Val(TextBox12.Text) * Val(TextBox9.Text) * Val(TextBox10.Text)
+        TextBox8.Text = Val(TextBox11.Text) * Val(TextBox9.Text) * Val(TextBox10.Text)
         TextBox11.Text = Math.Ceiling(((Val(TextBox4.Text) - Val(TextBox2.Text)) / Val(TextBox10.Text)) / Val(TextBox9.Text))
         TextBox12.Text = Math.Ceiling(((Val(TextBox3.Text) - Val(TextBox1.Text)) / Val(TextBox10.Text)) / Val(TextBox9.Text))
         TextBox13.Text = Val(TextBox10.Text) * Val(TextBox9.Text)
@@ -344,10 +352,10 @@ errororhandler:
 
         TextBox5.Text = Val(TextBox8.Text) / 1000
         TextBox6.Text = Val(TextBox7.Text) / 1000
-        TextBox11.Text = Math.Ceiling(((Val(TextBox4.Text) - Val(TextBox2.Text)) / Val(TextBox10.Text)) / Val(TextBox9.Text))
-        TextBox12.Text = Math.Ceiling(((Val(TextBox3.Text) - Val(TextBox1.Text)) / Val(TextBox10.Text)) / Val(TextBox9.Text))
         TextBox7.Text = Val(TextBox12.Text) * Val(TextBox9.Text) * Val(TextBox10.Text)
         TextBox8.Text = Val(TextBox11.Text) * Val(TextBox9.Text) * Val(TextBox10.Text)
+        TextBox11.Text = Math.Ceiling(((Val(TextBox4.Text) - Val(TextBox2.Text)) / Val(TextBox10.Text)) / Val(TextBox9.Text))
+        TextBox12.Text = Math.Ceiling(((Val(TextBox3.Text) - Val(TextBox1.Text)) / Val(TextBox10.Text)) / Val(TextBox9.Text))
         TextBox13.Text = Val(TextBox10.Text) * Val(TextBox9.Text)
     End Sub
 
@@ -605,6 +613,28 @@ errorhandler:
         'wczytuje nowe do wyboru
         wczytaj_warstwy_z_pliku()
 
+
+        'czyszczenie listy dotychczasowych warstw
+        nrWarstwy = 0
+        For i = 0 To 11
+            warstwy(i) = ""
+        Next
+        Label11.Text = "1) " & warstwy(0)
+        Label12.Text = "2) " & warstwy(1)
+        Label13.Text = "3) " & warstwy(2)
+        Label14.Text = "4) " & warstwy(3)
+        Label15.Text = "5) " & warstwy(4)
+        Label16.Text = "6) " & warstwy(5)
+        Label27.Text = "7) " & warstwy(6)
+        Label24.Text = "8) " & warstwy(7)
+        Label28.Text = "9) " & warstwy(8)
+        Label26.Text = "10) " & warstwy(9)
+        Label25.Text = "11) " & warstwy(10)
+        Label23.Text = "12) " & warstwy(11)
+
+        strUrlparts(1) = ""
+
+
         If warstwy(0) = "" Then
             RichTextBox1.ForeColor = System.Drawing.Color.Red
             RichTextBox1.Text = "Zmieniono rodzaj mapy. Wybierz która dokładnie jej warstwa ma zostać pobrana, klikając na nią myszką"
@@ -655,34 +685,38 @@ errorhandler:
     Private Sub GMapControl1_MouseMove(sender As Object, e As MouseEventArgs) Handles GMapControl1.MouseMove
 
         'współrzędne bbox podczas przeciągania zaznaczenia
-        If Me.GMapControl1.SelectedArea.IsEmpty = False Then
-            Dim X0_92 As Integer
-            Dim Y0_92 As Integer
-            Dim X1_92 As Integer
-            Dim Y1_92 As Integer
-            Dim X0_84 = Me.GMapControl1.SelectedArea.Lng
-            Dim Y1_84 = Me.GMapControl1.SelectedArea.Lat
-            Dim X1_84 = Me.GMapControl1.SelectedArea.Lng + Me.GMapControl1.SelectedArea.WidthLng
-            Dim Y0_84 = Me.GMapControl1.SelectedArea.Lat - Me.GMapControl1.SelectedArea.HeightLat
+        If Module1.editXY = False Then
+            If Me.GMapControl1.SelectedArea.IsEmpty = False Then
+                Dim X0_92 As Integer
+                Dim Y0_92 As Integer
+                Dim X1_92 As Integer
+                Dim Y1_92 As Integer
+                Dim X0_84 = Me.GMapControl1.SelectedArea.Lng
+                Dim Y1_84 = Me.GMapControl1.SelectedArea.Lat
+                Dim X1_84 = Me.GMapControl1.SelectedArea.Lng + Me.GMapControl1.SelectedArea.WidthLng
+                Dim Y0_84 = Me.GMapControl1.SelectedArea.Lat - Me.GMapControl1.SelectedArea.HeightLat
 
 
-            X0_92 = Transform.GetXU92(Y1_84, X1_84)   'prawy gorny x
-            TextBox3.Text = X0_92
-            Y0_92 = Transform.GetYU92(Y1_84, X1_84)  'prawy gorny y
-            TextBox4.Text = Y0_92
-            X1_92 = Transform.GetXU92(Y0_84, X0_84)   'lewy dolny x
-            TextBox1.Text = X1_92
-            Y1_92 = Transform.GetYU92(Y0_84, X0_84)  'lewy gorny y
-            TextBox2.Text = Y1_92
 
-            Label31.Text = "lat= " + Convert.ToString(Round(Y1_84, 4))
-            Label32.Text = "lat= " + Convert.ToString(Round(Y0_84, 4))
-            Label33.Text = "lng= " + Convert.ToString(Round(X1_84, 4))
-            Label34.Text = "lng= " + Convert.ToString(Round(X0_84, 4))
+                X0_92 = Transform.GetXU92(Y1_84, X1_84)   'prawy gorny x
+                TextBox3.Text = X0_92
+                Y0_92 = Transform.GetYU92(Y1_84, X1_84)  'prawy gorny y
+                TextBox4.Text = Y0_92
+                X1_92 = Transform.GetXU92(Y0_84, X0_84)   'lewy dolny x
+                TextBox1.Text = X1_92
+                Y1_92 = Transform.GetYU92(Y0_84, X0_84)  'lewy gorny y
+                TextBox2.Text = Y1_92
+
+
+                Label31.Text = "lat= " + Convert.ToString(Round(Y1_84, 4))
+                Label32.Text = "lat= " + Convert.ToString(Round(Y0_84, 4))
+                Label33.Text = "lng= " + Convert.ToString(Round(X1_84, 4))
+                Label34.Text = "lng= " + Convert.ToString(Round(X0_84, 4))
+
+            End If
+
+
         End If
-
-
-
 
 
 
@@ -758,4 +792,6 @@ errorhandler:
         TextBox7.Text = Val(TextBox12.Text) * Val(TextBox9.Text) * Val(TextBox10.Text)
         TextBox8.Text = Val(TextBox11.Text) * Val(TextBox9.Text) * Val(TextBox10.Text)
     End Sub
+
+    
 End Class

@@ -47,6 +47,9 @@ Module Module1
     Public iloscProbPobrania As Integer = 3   'docelowa ilość prób
     Public przerwaMiedzyProbami As Integer = 5 'odstęp między kolejnymi próbami w sekundach
     Public numeracja As String = "NrWiersza_NrKolumny"                    'sposób numerowania segmentów
+ 
+
+
 
     Public format As String                  'jpeg / png / svg+xml
     Public rozszerzenie As String = "jpg"              'jpg / png / svg
@@ -60,6 +63,8 @@ Module Module1
     Public pobierajPowyzejOstatniego As Boolean = False 'określa czy przy powtórnym pobieraniu ściągać wszystko, czy tylko powyżej segmentu o największym numerze
     Public editXY As Boolean = False          'włącza edycję pól formularza XY zasięgu mapy
     Public kursorWGS84 As Boolean = False          'wyświetla współrzędne kursora w układzie WGS84
+    Public kursor_i_srodekmapy As Boolean = True          'wyświetla współrzędne kursora i środka mapy
+
     Public zaznaczenieWGS84 As Boolean = False          'wyświetla współrzędne zaznaczenia w układzie WGS84
     Public georef_scalanie_qgis As Boolean = False        'opcja referencji qgis dla scalanych plików
     Public georef_scalanie_kml As Boolean = False        'opcja referencji kml dla scalanych plików

@@ -183,9 +183,9 @@ Partial Class Form1
         Me.Label30.AutoSize = True
         Me.Label30.Location = New System.Drawing.Point(6, 58)
         Me.Label30.Name = "Label30"
-        Me.Label30.Size = New System.Drawing.Size(143, 13)
+        Me.Label30.Size = New System.Drawing.Size(126, 13)
         Me.Label30.TabIndex = 217
-        Me.Label30.Text = "Wybierz warstwy danej mapy"
+        Me.Label30.Text = "Wybierz warstwę WMS-a"
         Me.ToolTip1.SetToolTip(Me.Label30, "Wskaż wybraną warst klikając na nią lewym klawiszem myszki. ")
         '
         'Label29
@@ -193,9 +193,9 @@ Partial Class Form1
         Me.Label29.AutoSize = True
         Me.Label29.Location = New System.Drawing.Point(6, 16)
         Me.Label29.Name = "Label29"
-        Me.Label29.Size = New System.Drawing.Size(144, 13)
+        Me.Label29.Size = New System.Drawing.Size(174, 13)
         Me.Label29.TabIndex = 216
-        Me.Label29.Text = "Wybierz zbiór danych (WMS)"
+        Me.Label29.Text = "Wybierz serwer WMS (rodzaj mapy)"
         Me.ToolTip1.SetToolTip(Me.Label29, "Spis dostępnych serwerów WMS, których definicje znajdują się w plikach tekstowych" & _
         " katalogu /warstwy/")
         '
@@ -484,7 +484,7 @@ Partial Class Form1
         Me.GroupBox3.Size = New System.Drawing.Size(210, 234)
         Me.GroupBox3.TabIndex = 268
         Me.GroupBox3.TabStop = False
-        Me.GroupBox3.Text = "Wybrane warstwy mapy"
+        Me.GroupBox3.Text = "Wybrane warstwy oraz ich kolejność"
         Me.ToolTip1.SetToolTip(Me.GroupBox3, """Kanapka"" warstw. Pierwsza warstwa to bazowy podkład, który można przykryć kolejn" & _
         "ymi warstwami o wyższym numerze, o ile mają one przeźroczyste tło, lub mają niep" & _
         "ełne pokrycie.")
@@ -602,10 +602,10 @@ Partial Class Form1
         '
         'PictureBox1
         '
-        Me.PictureBox1.Image = CType(resources.GetObject("PictureBox1.Image"), System.Drawing.Image)
-        Me.PictureBox1.Location = New System.Drawing.Point(81, 125)
+        Me.PictureBox1.Image = Global.MapoTero.My.Resources.Resources.kanapka_gis1
+        Me.PictureBox1.Location = New System.Drawing.Point(81, 93)
         Me.PictureBox1.Name = "PictureBox1"
-        Me.PictureBox1.Size = New System.Drawing.Size(126, 106)
+        Me.PictureBox1.Size = New System.Drawing.Size(126, 138)
         Me.PictureBox1.TabIndex = 303
         Me.PictureBox1.TabStop = False
         '
@@ -674,7 +674,7 @@ Partial Class Form1
         '
         Me.Label22.AutoSize = True
         Me.Label22.Enabled = False
-        Me.Label22.Location = New System.Drawing.Point(108, 110)
+        Me.Label22.Location = New System.Drawing.Point(105, 110)
         Me.Label22.Name = "Label22"
         Me.Label22.Size = New System.Drawing.Size(12, 13)
         Me.Label22.TabIndex = 242
@@ -684,7 +684,7 @@ Partial Class Form1
         '
         Me.Label19.AutoSize = True
         Me.Label19.Enabled = False
-        Me.Label19.Location = New System.Drawing.Point(109, 74)
+        Me.Label19.Location = New System.Drawing.Point(106, 74)
         Me.Label19.Name = "Label19"
         Me.Label19.Size = New System.Drawing.Size(12, 13)
         Me.Label19.TabIndex = 241
@@ -694,7 +694,7 @@ Partial Class Form1
         '
         Me.Label18.AutoSize = True
         Me.Label18.Enabled = False
-        Me.Label18.Location = New System.Drawing.Point(109, 43)
+        Me.Label18.Location = New System.Drawing.Point(106, 43)
         Me.Label18.Name = "Label18"
         Me.Label18.Size = New System.Drawing.Size(12, 13)
         Me.Label18.TabIndex = 240
@@ -703,7 +703,7 @@ Partial Class Form1
         'TextBox12
         '
         Me.TextBox12.Enabled = False
-        Me.TextBox12.Location = New System.Drawing.Point(127, 108)
+        Me.TextBox12.Location = New System.Drawing.Point(118, 108)
         Me.TextBox12.Name = "TextBox12"
         Me.TextBox12.Size = New System.Drawing.Size(55, 20)
         Me.TextBox12.TabIndex = 239
@@ -739,7 +739,7 @@ Partial Class Form1
         'TextBox7
         '
         Me.TextBox7.Enabled = False
-        Me.TextBox7.Location = New System.Drawing.Point(128, 72)
+        Me.TextBox7.Location = New System.Drawing.Point(119, 72)
         Me.TextBox7.Name = "TextBox7"
         Me.TextBox7.Size = New System.Drawing.Size(55, 20)
         Me.TextBox7.TabIndex = 234
@@ -759,9 +759,9 @@ Partial Class Form1
         Me.Label9.AutoSize = True
         Me.Label9.Location = New System.Drawing.Point(5, 23)
         Me.Label9.Name = "Label9"
-        Me.Label9.Size = New System.Drawing.Size(104, 13)
+        Me.Label9.Size = New System.Drawing.Size(84, 13)
         Me.Label9.TabIndex = 214
-        Me.Label9.Text = "Dł. boku w poziomie"
+        Me.Label9.Text = "Szerokość siatki"
         '
         'Label17
         '
@@ -775,11 +775,11 @@ Partial Class Form1
         'Label10
         '
         Me.Label10.AutoSize = True
-        Me.Label10.Location = New System.Drawing.Point(127, 23)
+        Me.Label10.Location = New System.Drawing.Point(118, 23)
         Me.Label10.Name = "Label10"
-        Me.Label10.Size = New System.Drawing.Size(91, 13)
+        Me.Label10.Size = New System.Drawing.Size(84, 13)
         Me.Label10.TabIndex = 215
-        Me.Label10.Text = "Dł. boku w pionie"
+        Me.Label10.Text = "Wysokość siatki"
         '
         'TextBox5
         '
@@ -793,7 +793,7 @@ Partial Class Form1
         'TextBox6
         '
         Me.TextBox6.Enabled = False
-        Me.TextBox6.Location = New System.Drawing.Point(128, 39)
+        Me.TextBox6.Location = New System.Drawing.Point(119, 39)
         Me.TextBox6.Name = "TextBox6"
         Me.TextBox6.Size = New System.Drawing.Size(55, 20)
         Me.TextBox6.TabIndex = 217
@@ -971,7 +971,7 @@ Partial Class Form1
         '
         'RichTextBox1
         '
-        Me.RichTextBox1.Enabled = False
+        Me.RichTextBox1.BackColor = System.Drawing.SystemColors.ButtonFace
         Me.RichTextBox1.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
         Me.RichTextBox1.ForeColor = System.Drawing.SystemColors.WindowText
         Me.RichTextBox1.Location = New System.Drawing.Point(662, 523)
@@ -1017,7 +1017,7 @@ Partial Class Form1
         Me.GroupBox5.Size = New System.Drawing.Size(420, 141)
         Me.GroupBox5.TabIndex = 303
         Me.GroupBox5.TabStop = False
-        Me.GroupBox5.Text = "Współrzędne XY zaznaczenia, oraz wymiary pojedyńczego segmentu"
+        Me.GroupBox5.Text = "Schemat siatki segmentów i zasięgu zaznaczenia. Rozmiar pojedyńczego segmentu"
         '
         'Label34
         '
