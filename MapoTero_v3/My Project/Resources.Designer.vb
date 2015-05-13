@@ -103,6 +103,16 @@ Namespace My.Resources
         '''<summary>
         '''  Wyszukuje zlokalizowany zasób typu System.Drawing.Bitmap.
         '''</summary>
+        Friend ReadOnly Property kosz() As System.Drawing.Bitmap
+            Get
+                Dim obj As Object = ResourceManager.GetObject("kosz", resourceCulture)
+                Return CType(obj,System.Drawing.Bitmap)
+            End Get
+        End Property
+        
+        '''<summary>
+        '''  Wyszukuje zlokalizowany zasób typu System.Drawing.Bitmap.
+        '''</summary>
         Friend ReadOnly Property MapoTero() As System.Drawing.Bitmap
             Get
                 Dim obj As Object = ResourceManager.GetObject("MapoTero", resourceCulture)

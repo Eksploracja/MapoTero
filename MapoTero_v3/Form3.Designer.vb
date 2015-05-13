@@ -69,6 +69,7 @@ Partial Class Form3
         Me.CheckBox4 = New System.Windows.Forms.CheckBox()
         Me.CheckBox3 = New System.Windows.Forms.CheckBox()
         Me.CheckBox2 = New System.Windows.Forms.CheckBox()
+        Me.CheckBox5 = New System.Windows.Forms.CheckBox()
         Me.GroupBox1.SuspendLayout()
         Me.groupBox2.SuspendLayout()
         CType(Me.TrackBar1, System.ComponentModel.ISupportInitialize).BeginInit()
@@ -406,7 +407,7 @@ Partial Class Form3
         Me.groupBox2.Controls.Add(Me.Label18)
         Me.groupBox2.Controls.Add(Me.Label14)
         Me.groupBox2.Controls.Add(Me.TrackBar1)
-        Me.groupBox2.Location = New System.Drawing.Point(344, 207)
+        Me.groupBox2.Location = New System.Drawing.Point(344, 204)
         Me.groupBox2.Name = "groupBox2"
         Me.groupBox2.Size = New System.Drawing.Size(267, 84)
         Me.groupBox2.TabIndex = 72
@@ -462,12 +463,13 @@ Partial Class Form3
         '
         'GroupBox3
         '
+        Me.GroupBox3.Controls.Add(Me.CheckBox5)
         Me.GroupBox3.Controls.Add(Me.CheckBox4)
         Me.GroupBox3.Controls.Add(Me.CheckBox3)
         Me.GroupBox3.Controls.Add(Me.CheckBox2)
         Me.GroupBox3.Location = New System.Drawing.Point(344, 101)
         Me.GroupBox3.Name = "GroupBox3"
-        Me.GroupBox3.Size = New System.Drawing.Size(267, 100)
+        Me.GroupBox3.Size = New System.Drawing.Size(267, 101)
         Me.GroupBox3.TabIndex = 75
         Me.GroupBox3.TabStop = False
         Me.GroupBox3.Text = "Pliki referencyjne scalonego arkusza"
@@ -475,7 +477,7 @@ Partial Class Form3
         'CheckBox4
         '
         Me.CheckBox4.AutoSize = True
-        Me.CheckBox4.Location = New System.Drawing.Point(6, 70)
+        Me.CheckBox4.Location = New System.Drawing.Point(6, 19)
         Me.CheckBox4.Name = "CheckBox4"
         Me.CheckBox4.Size = New System.Drawing.Size(218, 17)
         Me.CheckBox4.TabIndex = 77
@@ -485,7 +487,7 @@ Partial Class Form3
         'CheckBox3
         '
         Me.CheckBox3.AutoSize = True
-        Me.CheckBox3.Location = New System.Drawing.Point(6, 47)
+        Me.CheckBox3.Location = New System.Drawing.Point(6, 36)
         Me.CheckBox3.Name = "CheckBox3"
         Me.CheckBox3.Size = New System.Drawing.Size(220, 17)
         Me.CheckBox3.TabIndex = 76
@@ -495,12 +497,22 @@ Partial Class Form3
         'CheckBox2
         '
         Me.CheckBox2.AutoSize = True
-        Me.CheckBox2.Location = New System.Drawing.Point(6, 23)
+        Me.CheckBox2.Location = New System.Drawing.Point(6, 52)
         Me.CheckBox2.Name = "CheckBox2"
         Me.CheckBox2.Size = New System.Drawing.Size(234, 17)
         Me.CheckBox2.TabIndex = 75
         Me.CheckBox2.Text = "twórz plik referencyjny QGIS (.jpgw, pngw...)"
         Me.CheckBox2.UseVisualStyleBackColor = True
+        '
+        'CheckBox5
+        '
+        Me.CheckBox5.AutoSize = True
+        Me.CheckBox5.Location = New System.Drawing.Point(6, 69)
+        Me.CheckBox5.Name = "CheckBox5"
+        Me.CheckBox5.Size = New System.Drawing.Size(199, 17)
+        Me.CheckBox5.TabIndex = 78
+        Me.CheckBox5.Text = "twórz plik referencyjny MapInfo (.tab)"
+        Me.CheckBox5.UseVisualStyleBackColor = True
         '
         'Form3
         '
@@ -578,4 +590,5 @@ Partial Class Form3
     Friend WithEvents CheckBox3 As System.Windows.Forms.CheckBox
     Friend WithEvents CheckBox2 As System.Windows.Forms.CheckBox
     Friend WithEvents CheckBox4 As System.Windows.Forms.CheckBox
+    Friend WithEvents CheckBox5 As System.Windows.Forms.CheckBox
 End Class

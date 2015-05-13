@@ -58,6 +58,7 @@ Module Module1
     Public CheckWldPoints As Boolean = False    'tworzyc .wld i .points
     Public CheckJpgw As Boolean = False         'tworzyć .jpgw
     Public CheckKml As Boolean = False         'tworzyć .kml
+    Public CheckTab As Boolean = False         'tworzyć .tab
     Public XYswitched As Boolean = False        'geoportal zwariował - zamienił x i y w zapytaniu
     Public CheckTB As Boolean = False           'tworzy mapy Trek Buddy
     Public pobierajPowyzejOstatniego As Boolean = False 'określa czy przy powtórnym pobieraniu ściągać wszystko, czy tylko powyżej segmentu o największym numerze
@@ -69,6 +70,7 @@ Module Module1
     Public georef_scalanie_qgis As Boolean = False        'opcja referencji qgis dla scalanych plików
     Public georef_scalanie_kml As Boolean = False        'opcja referencji kml dla scalanych plików
     Public georef_scalanie_map As Boolean = False        'opcja referencji map dla scalanych plików
+    Public georef_scalanie_tab As Boolean = False        'opcja referencji map dla scalanych plików
 
     Public Lx As Long                           'używane w segmentach
     Public Ly As Long
@@ -358,6 +360,7 @@ pobieranieJeszczeRaz:
                                 plikGeoreferencyjny_points()
                                 plikGeoreferencyjny_jpgw()
                                 plikGeoreferencyjny_kml()
+                                plikGeoreferencyjny_tab()
 
                             End If
                         Case False
@@ -368,6 +371,7 @@ pobieranieJeszczeRaz:
                             plikGeoreferencyjny_points()
                             plikGeoreferencyjny_jpgw()
                             plikGeoreferencyjny_kml()
+                            plikGeoreferencyjny_tab()
                             plikTB_Set()
                     End Select
 
@@ -620,6 +624,8 @@ errorhandler:
         PrintLine(1, CheckJpgw)          'zapisuje czy tworzyć jpgw
         PrintLine(1, "chkkml")
         PrintLine(1, CheckKml)          'zapisuje czy tworzyć kml
+        PrintLine(1, "chktab")
+        PrintLine(1, CheckTab)          'zapisuje czy tworzyć kml
         PrintLine(1, "dolna")           'zapisuje foldery łączonych warstw
         If folderWarstwa1 = "" Then
             PrintLine(1, myPath & "\download\dolna\")
@@ -951,6 +957,61 @@ errorhandler:
 
         End Select
     End Sub
+
+    Public Sub plikGeoreferencyjny_tab()
+
+        Select Case georef_scalanie_tab
+
+            Case False
+
+                If CheckTab = True Then
+
+                    'tworzy plik .tab
+                    FileOpen(1, folderSegmentow & nazwaKwadratu & ".tab", OpenMode.Output)
+
+                    Print(1, "!table" & Chr(13) & Chr(10) & _
+                    "!version 300" & Chr(13) & Chr(10) & _
+                    "!charset WindowsLatin2" & Chr(13) & Chr(10) & _
+                    "Definition Table" & Chr(13) & Chr(10) & _
+                     "  File" & Chr(34) & nazwaKwadratu & "." & rozszerzenie & Chr(34) & Chr(13) & Chr(10) & _
+                     "  Type " & Chr(34) & "RASTER" & Chr(34) & Chr(13) & Chr(10) & _
+                   "  (" & Ly & "," & Px & ")" & " (0,0) Label " & Chr(34) & "Punkt 1" & Chr(34) & "," & Chr(13) & Chr(10) & _
+                   "  (" & Py & "," & Px & ")" & " (" & Form1.TextBox9.Text & ",0) " & "Label " & Chr(34) & "Punkt 2" & Chr(34) & "," & Chr(13) & Chr(10) & _
+                   "  (" & Py & "," & Lx & ")" & " (" & Form1.TextBox9.Text & "," & Form1.TextBox9.Text & ") " & "Label " & Chr(34) & "Punkt 3" & Chr(34) & "," & Chr(13) & Chr(10) & _
+                   "  (" & Ly & "," & Lx & ")" & " (0," & Form1.TextBox9.Text & ") " & "Label " & Chr(34) & "Punkt 4" & Chr(34) & "," & Chr(13) & Chr(10) & _
+                   "  CoordSys Earth Projection 8, 33, 7, 19, 0, 0.9993, 500000, -5300000" & Chr(13) & Chr(10) & _
+                   "")
+
+                    FileClose(1)
+
+                End If
+            Case True
+
+                Lx = (Val(Form3.TextBox4.Text))
+                Ly = (Val(Form3.TextBox5.Text))
+                Px = Val(Form3.TextBox4.Text) + (Val(Form3.TextBox9.Text) * Val(Form3.TextBox7.Text) * Val(Form3.TextBox6.Text))
+                Py = Val(Form3.TextBox5.Text) + (Val(Form3.TextBox8.Text) * Val(Form3.TextBox7.Text) * Val(Form3.TextBox6.Text))
+
+                FileOpen(1, folderSegmentow & "_scalone_segmenty_" & Form3.TextBox8.Text & "x" & Form3.TextBox9.Text & ".tab", OpenMode.Output)
+                Print(1, "!table" & Chr(13) & Chr(10) & _
+                   "!version 300" & Chr(13) & Chr(10) & _
+                   "!charset WindowsLatin2" & Chr(13) & Chr(10) & _
+                   "Definition Table" & Chr(13) & Chr(10) & _
+                    "  File" & Chr(34) & nazwaKwadratu & "." & format & Chr(34) & Chr(13) & Chr(10) & _
+                    "  Type " & Chr(34) & "RASTER" & Chr(34) & Chr(13) & Chr(10) & _
+                  "  (" & Ly & "," & Px & ")" & " (0,0) Label " & Chr(34) & "Punkt 1" & Chr(34) & "," & Chr(13) & Chr(10) & _
+                  "  (" & Py & "," & Px & ")" & " (" & Val(Form3.TextBox6.Text) * Val(Form3.TextBox8.Text) & ",0) " & "Label " & Chr(34) & "Punkt 2" & Chr(34) & "," & Chr(13) & Chr(10) & _
+                  "  (" & Py & "," & Lx & ")" & " (" & Val(Form3.TextBox6.Text) * Val(Form3.TextBox8.Text) & "," & Val(Form3.TextBox7.Text) * Val(Form3.TextBox9.Text) & ") " & "Label " & Chr(34) & "Punkt 3" & Chr(34) & "," & Chr(13) & Chr(10) & _
+                  "  (" & Ly & "," & Lx & ")" & " (0," & Val(Form3.TextBox7.Text) * Val(Form3.TextBox9.Text) & ") " & "Label " & Chr(34) & "Punkt 4" & Chr(34) & "," & Chr(13) & Chr(10) & _
+                  "  CoordSys Earth Projection 8, 33, 7, 19, 0, 0.9993, 500000, -5300000" & Chr(13) & Chr(10) & _
+                  "")
+
+                FileClose(1)
+               
+        End Select
+    End Sub
+
+
 
     Function Dodaj_zera(ByVal X As String, ByVal L As Integer) As String
         'funkcja dodająca odpowiednią ilość zer do ciagu znaków
