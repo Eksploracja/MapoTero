@@ -43,6 +43,7 @@ Partial Class Form2
         Me.Label1 = New System.Windows.Forms.Label()
         Me.CheckBox1 = New System.Windows.Forms.CheckBox()
         Me.GroupBox1 = New System.Windows.Forms.GroupBox()
+        Me.CheckBox13 = New System.Windows.Forms.CheckBox()
         Me.CheckBox8 = New System.Windows.Forms.CheckBox()
         Me.CheckBox7 = New System.Windows.Forms.CheckBox()
         Me.CheckBox4 = New System.Windows.Forms.CheckBox()
@@ -111,13 +112,14 @@ Partial Class Form2
         Me.CheckBox1.AutoSize = True
         Me.CheckBox1.Location = New System.Drawing.Point(8, 20)
         Me.CheckBox1.Name = "CheckBox1"
-        Me.CheckBox1.Size = New System.Drawing.Size(129, 17)
+        Me.CheckBox1.Size = New System.Drawing.Size(132, 17)
         Me.CheckBox1.TabIndex = 2
-        Me.CheckBox1.Text = "plik .map /OziExplorer"
+        Me.CheckBox1.Text = "plik .map / OziExplorer"
         Me.CheckBox1.UseVisualStyleBackColor = True
         '
         'GroupBox1
         '
+        Me.GroupBox1.Controls.Add(Me.CheckBox13)
         Me.GroupBox1.Controls.Add(Me.CheckBox8)
         Me.GroupBox1.Controls.Add(Me.CheckBox7)
         Me.GroupBox1.Controls.Add(Me.CheckBox4)
@@ -133,15 +135,24 @@ Partial Class Form2
         "alibracyjny, umożliwiający wyświetlenie  segmentów w programach GIS/GPS z zachow" & _
         "aniem ""georeferencji""")
         '
+        'CheckBox13
+        '
+        Me.CheckBox13.AutoSize = True
+        Me.CheckBox13.Location = New System.Drawing.Point(8, 67)
+        Me.CheckBox13.Name = "CheckBox13"
+        Me.CheckBox13.Size = New System.Drawing.Size(113, 17)
+        Me.CheckBox13.TabIndex = 7
+        Me.CheckBox13.Text = "plik .tab / MapInfo"
+        Me.CheckBox13.UseVisualStyleBackColor = True
+        '
         'CheckBox8
         '
         Me.CheckBox8.AutoSize = True
         Me.CheckBox8.Location = New System.Drawing.Point(8, 36)
         Me.CheckBox8.Name = "CheckBox8"
-        Me.CheckBox8.Size = New System.Drawing.Size(131, 17)
+        Me.CheckBox8.Size = New System.Drawing.Size(134, 17)
         Me.CheckBox8.TabIndex = 6
-        Me.CheckBox8.Text = "plik .kml /GoogleEarth"
-        Me.ToolTip1.SetToolTip(Me.CheckBox8, "plik .jpgw obsługuje jedynie segmenty pobierane w formacie jpeg")
+        Me.CheckBox8.Text = "plik .kml / GoogleEarth"
         Me.CheckBox8.UseVisualStyleBackColor = True
         '
         'CheckBox7
@@ -158,7 +169,7 @@ Partial Class Form2
         'CheckBox4
         '
         Me.CheckBox4.AutoSize = True
-        Me.CheckBox4.Location = New System.Drawing.Point(8, 67)
+        Me.CheckBox4.Location = New System.Drawing.Point(8, 82)
         Me.CheckBox4.Name = "CheckBox4"
         Me.CheckBox4.Size = New System.Drawing.Size(100, 17)
         Me.CheckBox4.TabIndex = 4
@@ -168,11 +179,11 @@ Partial Class Form2
         'CheckBox2
         '
         Me.CheckBox2.AutoSize = True
-        Me.CheckBox2.Location = New System.Drawing.Point(8, 83)
+        Me.CheckBox2.Location = New System.Drawing.Point(8, 97)
         Me.CheckBox2.Name = "CheckBox2"
-        Me.CheckBox2.Size = New System.Drawing.Size(139, 17)
+        Me.CheckBox2.Size = New System.Drawing.Size(142, 17)
         Me.CheckBox2.TabIndex = 3
-        Me.CheckBox2.Text = "plik .gmi /GPSTuner 5.x"
+        Me.CheckBox2.Text = "plik .gmi / GPSTuner 5.x"
         Me.CheckBox2.UseVisualStyleBackColor = True
         '
         'GroupBox2
@@ -183,7 +194,7 @@ Partial Class Form2
         Me.GroupBox2.Controls.Add(Me.TextBox1)
         Me.GroupBox2.Location = New System.Drawing.Point(190, 29)
         Me.GroupBox2.Name = "GroupBox2"
-        Me.GroupBox2.Size = New System.Drawing.Size(159, 84)
+        Me.GroupBox2.Size = New System.Drawing.Size(159, 68)
         Me.GroupBox2.TabIndex = 4
         Me.GroupBox2.TabStop = False
         Me.GroupBox2.Text = "Ponowne próby pobrania"
@@ -287,9 +298,9 @@ Partial Class Form2
         'GroupBox8
         '
         Me.GroupBox8.Controls.Add(Me.CheckBox3)
-        Me.GroupBox8.Location = New System.Drawing.Point(190, 119)
+        Me.GroupBox8.Location = New System.Drawing.Point(193, 158)
         Me.GroupBox8.Name = "GroupBox8"
-        Me.GroupBox8.Size = New System.Drawing.Size(159, 50)
+        Me.GroupBox8.Size = New System.Drawing.Size(159, 58)
         Me.GroupBox8.TabIndex = 16
         Me.GroupBox8.TabStop = False
         Me.GroupBox8.Text = "Opcje niestandardowe"
@@ -299,7 +310,7 @@ Partial Class Form2
         Me.GroupBox6.Controls.Add(Me.ComboBox2)
         Me.GroupBox6.Location = New System.Drawing.Point(11, 155)
         Me.GroupBox6.Name = "GroupBox6"
-        Me.GroupBox6.Size = New System.Drawing.Size(170, 66)
+        Me.GroupBox6.Size = New System.Drawing.Size(170, 61)
         Me.GroupBox6.TabIndex = 14
         Me.GroupBox6.TabStop = False
         Me.GroupBox6.Text = "Zmiana domyślnej numeracji segmentów"
@@ -317,7 +328,7 @@ Partial Class Form2
         'GroupBox5
         '
         Me.GroupBox5.Controls.Add(Me.CheckBox6)
-        Me.GroupBox5.Location = New System.Drawing.Point(191, 175)
+        Me.GroupBox5.Location = New System.Drawing.Point(191, 100)
         Me.GroupBox5.Name = "GroupBox5"
         Me.GroupBox5.Size = New System.Drawing.Size(158, 48)
         Me.GroupBox5.TabIndex = 13
@@ -329,9 +340,9 @@ Partial Class Form2
         Me.CheckBox6.AutoSize = True
         Me.CheckBox6.Location = New System.Drawing.Point(9, 21)
         Me.CheckBox6.Name = "CheckBox6"
-        Me.CheckBox6.Size = New System.Drawing.Size(80, 17)
+        Me.CheckBox6.Size = New System.Drawing.Size(97, 17)
         Me.CheckBox6.TabIndex = 5
-        Me.CheckBox6.Text = "twórz mapę"
+        Me.CheckBox6.Text = "twórz mapę TB"
         Me.CheckBox6.UseVisualStyleBackColor = True
         '
         'GroupBox4
@@ -511,4 +522,5 @@ Partial Class Form2
     Friend WithEvents CheckBox11 As System.Windows.Forms.CheckBox
     Friend WithEvents CheckBox10 As System.Windows.Forms.CheckBox
     Friend WithEvents CheckBox9 As System.Windows.Forms.CheckBox
+    Friend WithEvents CheckBox13 As System.Windows.Forms.CheckBox
 End Class

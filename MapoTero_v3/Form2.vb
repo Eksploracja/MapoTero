@@ -35,6 +35,7 @@ Public Class Form2
         CheckBox10.Checked = Module1.kursorWGS84
         CheckBox11.Checked = Module1.zaznaczenieWGS84
         CheckBox12.Checked = Module1.kursor_i_srodekmapy
+        CheckBox13.Checked = Module1.CheckTab
         'ustawienie odpowiedniej warosci Combobox1 odbywa sie przy jego inicjalizacji
 
         TextBox6.Text = Module1.wspolnaNazwaKwadratu
@@ -267,4 +268,12 @@ Public Class Form2
     End Sub
 
 
+    Private Sub CheckBox13_Click(sender As Object, e As EventArgs) Handles CheckBox13.Click
+        Select Case CheckBox13.CheckState
+            Case CheckState.Checked
+                Module1.CheckTab = True
+            Case CheckState.Unchecked
+                Module1.CheckTab = False
+        End Select
+    End Sub
 End Class

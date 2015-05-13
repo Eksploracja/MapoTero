@@ -160,6 +160,15 @@ errorhandler:
                     '          ReDim toDelete(ileDelete)
                     toDelete(ileDelete - 1) = Plik
                 End If
+
+                'to samo co powyżej, ale dla pliku .tab jeśli istnieje
+                Plik = (Replace(Plik, ".jpgw", ".tab"))
+                If Dir(Plik) <> "" Then
+                    ileDelete = ileDelete + 1
+                    '          ReDim toDelete(ileDelete)
+                    toDelete(ileDelete - 1) = Plik
+                End If
+
             End If
 
         Next

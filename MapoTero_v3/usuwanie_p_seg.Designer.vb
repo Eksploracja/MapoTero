@@ -158,7 +158,7 @@ Partial Class usuwanie_p_seg
         'ComboBox1
         '
         Me.ComboBox1.FormattingEnabled = True
-        Me.ComboBox1.Items.AddRange(New Object() {"jpeg", "tiff", "png", "png8", "png24", "png32", "gif", "svg+xml", "map", "gmi", "wld", "jpgw"})
+        Me.ComboBox1.Items.AddRange(New Object() {"jpeg", "tiff", "png", "png8", "png24", "png32", "gif", "svg+xml", "map", "gmi", "wld", "jpgw", "kml", "tab"})
         Me.ComboBox1.Location = New System.Drawing.Point(46, 41)
         Me.ComboBox1.Name = "ComboBox1"
         Me.ComboBox1.Size = New System.Drawing.Size(199, 21)

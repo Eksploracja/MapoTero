@@ -423,6 +423,8 @@ errororhandler:
         Input(1, zmiennaNaSztuke)
         Input(1, CheckKml)          'wczytuje czy tworzyć kml
         Input(1, zmiennaNaSztuke)
+        Input(1, CheckTab)          'wczytuje czy tworzyć tab
+        Input(1, zmiennaNaSztuke)
         Input(1, folderWarstwa1)    'wczytuje foldery łączonych warstw
         Input(1, zmiennaNaSztuke)
         Input(1, folderWarstwa2)
@@ -651,7 +653,7 @@ errorhandler:
         RichTextBox1.Text = "Przerwano pobieranie segmentów"
     End Sub
 
-    Private Sub Button4_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles Button4.Click
+    Private Sub Button4_Click(ByVal sender As System.Object, ByVal e As System.EventArgs)
         Module1.resetuj()
         Module1.utworzPlikConf()
         Button1.Enabled = True
@@ -713,6 +715,17 @@ errorhandler:
                 Label33.Text = "lng= " + Convert.ToString(Round(X1_84, 4))
                 Label34.Text = "lng= " + Convert.ToString(Round(X0_84, 4))
 
+
+                RichTextBox1.ForeColor = System.Drawing.Color.Green
+                RichTextBox1.Text = "Zaznaczyłeś obszar do pobrania o powierzchni " & Val(TextBox5.Text) * Val(TextBox6.Text) & " km2"
+
+                If Val(TextBox5.Text) * Val(TextBox6.Text) > 5000 Then
+                    RichTextBox1.ForeColor = System.Drawing.Color.Red
+                    RichTextBox1.Text = "Zaznaczyłeś obszar do pobrania o powierzchni " & Val(TextBox5.Text) * Val(TextBox6.Text) & " km2. To dużo. Poradzę sobie. Jednak uzbroj się lepiej w kubek gorącej kawy :)"
+                End If
+            Else
+                RichTextBox1.ForeColor = System.Drawing.Color.Black
+                RichTextBox1.Text = "Komunikaty:"
             End If
 
 
@@ -770,16 +783,14 @@ errorhandler:
         Form3.Show()
     End Sub
 
-    Private Sub button6_Click(sender As Object, e As EventArgs)
-        Form3.Show()
-    End Sub
+    
 
 
     Private Sub Label11_TextChanged(sender As Object, e As EventArgs) Handles Label11.TextChanged
         If warstwy(0) <> "" Then
-            Button4.Enabled = True
+            Button6.Enabled = True
         Else
-            Button4.Enabled = False
+            Button6.Enabled = False
         End If
     End Sub
 
@@ -801,4 +812,15 @@ errorhandler:
     Private Sub Button8_Click(sender As Object, e As EventArgs) Handles Button8.Click
         Form3.Show()
     End Sub
+
+    Private Sub Button6_Click(sender As Object, e As EventArgs) Handles Button6.Click
+        Module1.resetuj()
+        Module1.utworzPlikConf()
+        Button1.Enabled = True
+        Button3.Enabled = False
+    End Sub
 End Class
+
+
+
+      

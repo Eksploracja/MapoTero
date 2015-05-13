@@ -20,6 +20,7 @@ Public Class Form3
         CheckBox2.Checked = Module1.georef_scalanie_qgis
         CheckBox3.Checked = Module1.georef_scalanie_kml
         CheckBox4.Checked = Module1.georef_scalanie_map
+        CheckBox5.Checked = Module1.georef_scalanie_tab
         Dim zm_jpg As String = ""
 
         'procedura wczytywania parametrów macierzy z pliku conf.txt
@@ -141,6 +142,7 @@ errorhandler:
                 If Module1.georef_scalanie_qgis = True Then Module1.plikGeoreferencyjny_jpgw()
                 If Module1.georef_scalanie_kml = True Then Module1.plikGeoreferencyjny_kml()
                 If Module1.georef_scalanie_map = True Then Module1.plikGeoreferencyjny_map()
+                If Module1.georef_scalanie_tab = True Then Module1.plikGeoreferencyjny_tab()
             Else
                 RichTextBox1.ForeColor = System.Drawing.Color.Red
                 RichTextBox1.Text = "Błąd. Segmenty nie zostały poprawnie scalone. Prawdopodobnie przygotowane wcześniej segmenty obszaru nie są kompletne, bądź po ich skompletowaniu nie został usunięty plik errot.txt"
@@ -221,6 +223,20 @@ errorhandler:
 
             Case CheckState.Unchecked
                 Module1.georef_scalanie_map = False
+        End Select
+    End Sub
+
+    Private Sub CheckBox5_CheckedChanged(sender As Object, e As EventArgs) Handles CheckBox5.CheckedChanged
+        Module1.georef_scalanie_tab = CheckBox5.CheckState
+    End Sub
+
+    Private Sub CheckBox5_Click(sender As Object, e As EventArgs) Handles CheckBox5.Click
+        Select Case CheckBox5.CheckState
+            Case CheckState.Checked
+                Module1.georef_scalanie_tab = True
+
+            Case CheckState.Unchecked
+                Module1.georef_scalanie_tab = False
         End Select
     End Sub
 End Class
