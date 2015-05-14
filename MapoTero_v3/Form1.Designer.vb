@@ -73,7 +73,6 @@ Partial Class Form1
         Me.Label47 = New System.Windows.Forms.Label()
         Me.Label46 = New System.Windows.Forms.Label()
         Me.TextBox13 = New System.Windows.Forms.TextBox()
-        Me.Label42 = New System.Windows.Forms.Label()
         Me.TextBox9 = New System.Windows.Forms.TextBox()
         Me.Label1 = New System.Windows.Forms.Label()
         Me.Label2 = New System.Windows.Forms.Label()
@@ -113,6 +112,7 @@ Partial Class Form1
         Me.TextBox6 = New System.Windows.Forms.TextBox()
         Me.Button8 = New System.Windows.Forms.Button()
         Me.Button7 = New System.Windows.Forms.Button()
+        Me.Label42 = New System.Windows.Forms.Label()
         Me.GMapControl1 = New GMap.NET.WindowsForms.GMapControl()
         Me.RadioButton1 = New System.Windows.Forms.RadioButton()
         Me.RadioButton2 = New System.Windows.Forms.RadioButton()
@@ -143,6 +143,7 @@ Partial Class Form1
         Me.TextBox2 = New System.Windows.Forms.TextBox()
         Me.TextBox1 = New System.Windows.Forms.TextBox()
         Me.PictureBox2 = New System.Windows.Forms.PictureBox()
+        Me.Label7 = New System.Windows.Forms.Label()
         Me.GroupBox2.SuspendLayout()
         Me.StatusStrip1.SuspendLayout()
         Me.MenuStrip1.SuspendLayout()
@@ -406,19 +407,6 @@ Partial Class Form1
         Me.TextBox13.Text = "2000"
         Me.TextBox13.TextAlign = System.Windows.Forms.HorizontalAlignment.Center
         '
-        'Label42
-        '
-        Me.Label42.AutoSize = True
-        Me.Label42.Enabled = False
-        Me.Label42.Location = New System.Drawing.Point(296, 105)
-        Me.Label42.Name = "Label42"
-        Me.Label42.Size = New System.Drawing.Size(105, 13)
-        Me.Label42.TabIndex = 215
-        Me.Label42.Text = "Zasięg segmentu [m]"
-        Me.ToolTip1.SetToolTip(Me.Label42, "Rozmiar pojedyńczego segmentu - najmniejszej komórki siatki kwadtatów, na które z" & _
-        "ostanie podzielony pobierany obszar mapy.  Uwaga - maksymalna rozmiar segmentu d" & _
-        "la Geoportalu2 wynosi 2048px")
-        '
         'TextBox9
         '
         Me.TextBox9.Location = New System.Drawing.Point(246, 61)
@@ -431,7 +419,7 @@ Partial Class Form1
         'Label1
         '
         Me.Label1.AutoSize = True
-        Me.Label1.Location = New System.Drawing.Point(294, 66)
+        Me.Label1.Location = New System.Drawing.Point(293, 66)
         Me.Label1.Name = "Label1"
         Me.Label1.Size = New System.Drawing.Size(116, 13)
         Me.Label1.TabIndex = 213
@@ -443,7 +431,7 @@ Partial Class Form1
         'Label2
         '
         Me.Label2.AutoSize = True
-        Me.Label2.Location = New System.Drawing.Point(292, 26)
+        Me.Label2.Location = New System.Drawing.Point(293, 26)
         Me.Label2.Name = "Label2"
         Me.Label2.Size = New System.Drawing.Size(116, 13)
         Me.Label2.TabIndex = 214
@@ -820,6 +808,19 @@ Partial Class Form1
         Me.ToolTip1.SetToolTip(Me.Button7, "wyświetl folder segmentów")
         Me.Button7.UseVisualStyleBackColor = True
         '
+        'Label42
+        '
+        Me.Label42.AutoSize = True
+        Me.Label42.Enabled = False
+        Me.Label42.Location = New System.Drawing.Point(292, 97)
+        Me.Label42.Name = "Label42"
+        Me.Label42.Size = New System.Drawing.Size(87, 13)
+        Me.Label42.TabIndex = 215
+        Me.Label42.Text = "Terenowy zasięg"
+        Me.ToolTip1.SetToolTip(Me.Label42, "Rozmiar pojedyńczego segmentu - najmniejszej komórki siatki kwadtatów, na które z" & _
+        "ostanie podzielony pobierany obszar mapy.  Uwaga - maksymalna rozmiar segmentu d" & _
+        "la Geoportalu2 wynosi 2048px")
+        '
         'GMapControl1
         '
         Me.GMapControl1.Bearing = 0.0!
@@ -1001,6 +1002,7 @@ Partial Class Form1
         '
         'GroupBox5
         '
+        Me.GroupBox5.Controls.Add(Me.Label7)
         Me.GroupBox5.Controls.Add(Me.Label42)
         Me.GroupBox5.Controls.Add(Me.Label47)
         Me.GroupBox5.Controls.Add(Me.Label34)
@@ -1158,6 +1160,19 @@ Partial Class Form1
         Me.PictureBox2.TabIndex = 303
         Me.PictureBox2.TabStop = False
         '
+        'Label7
+        '
+        Me.Label7.AutoSize = True
+        Me.Label7.Enabled = False
+        Me.Label7.Location = New System.Drawing.Point(294, 110)
+        Me.Label7.Name = "Label7"
+        Me.Label7.Size = New System.Drawing.Size(117, 13)
+        Me.Label7.TabIndex = 316
+        Me.Label7.Text = "jednego segmentu [km]"
+        Me.ToolTip1.SetToolTip(Me.Label7, "Rozmiar pojedyńczego segmentu - najmniejszej komórki siatki kwadtatów, na które z" & _
+        "ostanie podzielony pobierany obszar mapy.  Uwaga - maksymalna rozmiar segmentu d" & _
+        "la Geoportalu2 wynosi 2048px")
+        '
         'Form1
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
@@ -1294,7 +1309,6 @@ Partial Class Form1
     Friend WithEvents RichTextBox1 As System.Windows.Forms.RichTextBox
     Friend WithEvents Label36 As System.Windows.Forms.Label
     Friend WithEvents TextBox13 As System.Windows.Forms.TextBox
-    Friend WithEvents Label42 As System.Windows.Forms.Label
     Friend WithEvents Label47 As System.Windows.Forms.Label
     Friend WithEvents Label46 As System.Windows.Forms.Label
     Friend WithEvents Label22 As System.Windows.Forms.Label
@@ -1318,5 +1332,7 @@ Partial Class Form1
     Friend WithEvents Button7 As System.Windows.Forms.Button
     Friend WithEvents Button8 As System.Windows.Forms.Button
     Friend WithEvents Button6 As System.Windows.Forms.Button
+    Friend WithEvents Label42 As System.Windows.Forms.Label
+    Friend WithEvents Label7 As System.Windows.Forms.Label
 
 End Class

@@ -66,10 +66,10 @@ Partial Class Form3
         Me.Label14 = New System.Windows.Forms.Label()
         Me.TrackBar1 = New System.Windows.Forms.TrackBar()
         Me.GroupBox3 = New System.Windows.Forms.GroupBox()
+        Me.CheckBox5 = New System.Windows.Forms.CheckBox()
         Me.CheckBox4 = New System.Windows.Forms.CheckBox()
         Me.CheckBox3 = New System.Windows.Forms.CheckBox()
         Me.CheckBox2 = New System.Windows.Forms.CheckBox()
-        Me.CheckBox5 = New System.Windows.Forms.CheckBox()
         Me.GroupBox1.SuspendLayout()
         Me.groupBox2.SuspendLayout()
         CType(Me.TrackBar1, System.ComponentModel.ISupportInitialize).BeginInit()
@@ -474,6 +474,16 @@ Partial Class Form3
         Me.GroupBox3.TabStop = False
         Me.GroupBox3.Text = "Pliki referencyjne scalonego arkusza"
         '
+        'CheckBox5
+        '
+        Me.CheckBox5.AutoSize = True
+        Me.CheckBox5.Location = New System.Drawing.Point(6, 69)
+        Me.CheckBox5.Name = "CheckBox5"
+        Me.CheckBox5.Size = New System.Drawing.Size(199, 17)
+        Me.CheckBox5.TabIndex = 78
+        Me.CheckBox5.Text = "twórz plik referencyjny MapInfo (.tab)"
+        Me.CheckBox5.UseVisualStyleBackColor = True
+        '
         'CheckBox4
         '
         Me.CheckBox4.AutoSize = True
@@ -499,20 +509,10 @@ Partial Class Form3
         Me.CheckBox2.AutoSize = True
         Me.CheckBox2.Location = New System.Drawing.Point(6, 52)
         Me.CheckBox2.Name = "CheckBox2"
-        Me.CheckBox2.Size = New System.Drawing.Size(234, 17)
+        Me.CheckBox2.Size = New System.Drawing.Size(230, 17)
         Me.CheckBox2.TabIndex = 75
-        Me.CheckBox2.Text = "twórz plik referencyjny QGIS (.jpgw, pngw...)"
+        Me.CheckBox2.Text = "twórz plik referencyjny QGIS, ArcGis (.jpgw)"
         Me.CheckBox2.UseVisualStyleBackColor = True
-        '
-        'CheckBox5
-        '
-        Me.CheckBox5.AutoSize = True
-        Me.CheckBox5.Location = New System.Drawing.Point(6, 69)
-        Me.CheckBox5.Name = "CheckBox5"
-        Me.CheckBox5.Size = New System.Drawing.Size(199, 17)
-        Me.CheckBox5.TabIndex = 78
-        Me.CheckBox5.Text = "twórz plik referencyjny MapInfo (.tab)"
-        Me.CheckBox5.UseVisualStyleBackColor = True
         '
         'Form3
         '

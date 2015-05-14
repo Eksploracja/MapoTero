@@ -28,12 +28,6 @@ Imports GMap.NET.WindowsForms.Markers
 
 Public Class Form1
 
-    
-
-  
-
-
-
     Private Property form1loaded As Boolean = False   'wskazuje, że form1 została już załadowana
 
 
@@ -55,9 +49,6 @@ Public Class Form1
 
         TBseg = 22
         TBbok = 512
-
-
-
 
         ' pozostałe parametry
         myPath = My.Application.Info.DirectoryPath.ToString()
@@ -100,11 +91,6 @@ Public Class Form1
 
         'wczytywanie ustaleń okna z lastsetting. Jeśli go nie ma, to szuka conf. Gdy go zabraknie, to sięgamy po sztywny start
 
-
-       
-
-
-
         If File.Exists(folderSegmentow & "\conf.txt") = False Then
             Button8.Enabled = False
         End If
@@ -141,18 +127,8 @@ Public Class Form1
         End If
 
 
-
-
-
-
-
         'przypisuje wartość zmiennej publicznej nrWarstwy
         nrWarstwy = 0
-
-        'TextBox7.Text = (Val(TextBox6.Text) / Val(TextBox10.Text)) * 1000
-        'TextBox8.Text = (Val(TextBox5.Text) / Val(TextBox10.Text)) * 1000
-        TextBox7.Text = Val(TextBox12.Text) * Val(TextBox9.Text) * Val(TextBox10.Text)
-        TextBox8.Text = Val(TextBox11.Text) * Val(TextBox9.Text) * Val(TextBox10.Text)
 
         wczytaj_lastsettings()
 
@@ -169,12 +145,9 @@ Public Class Form1
         End If
         ToolStripStatusLabel3.Text = ""
 
-        TextBox11.Text = Math.Ceiling(((Val(TextBox4.Text) - Val(TextBox2.Text)) / Val(TextBox10.Text)) / Val(TextBox9.Text))
-        TextBox12.Text = Math.Ceiling(((Val(TextBox3.Text) - Val(TextBox1.Text)) / Val(TextBox10.Text)) / Val(TextBox9.Text))
-        TextBox13.Text = Val(TextBox10.Text) * Val(TextBox9.Text)
-
-
+     
         form1loaded = True
+
 
     End Sub
 
@@ -240,6 +213,8 @@ errorhandler:
     'dodawanie warstw
     Private Sub ListBox1_SelectedIndexChanged(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles ListBox1.SelectedIndexChanged
 
+
+
         Dim linia As String = ""    'przechowuje linię pliku
 
         If nrWarstwy > 11 Then       'jeśli zechcesz wyznaczyć więcej warstw niż miejsca w tablicy
@@ -285,103 +260,67 @@ errorhandler:
             RichTextBox1.Text = "Wskazano warstwę: " & ListBox1.SelectedItem
         End If
 
+
 errororhandler:
     End Sub
 
     Private Sub TextBox2_TextChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles TextBox2.TextChanged
-
-        'TextBox5.Text = (Val(TextBox4.Text) - Val(TextBox2.Text)) / 1000
-        TextBox5.Text = Val(TextBox8.Text) / 1000
-        TextBox8.Text = Val(TextBox11.Text) * Val(TextBox9.Text) * Val(TextBox10.Text)
-        TextBox11.Text = Math.Ceiling(((Val(TextBox4.Text) - Val(TextBox2.Text)) / Val(TextBox10.Text)) / Val(TextBox9.Text))
-        TextBox12.Text = Math.Ceiling(((Val(TextBox3.Text) - Val(TextBox1.Text)) / Val(TextBox10.Text)) / Val(TextBox9.Text))
-
-    End Sub
+        TextBox5.Text = (Math.Ceiling(((Val(TextBox4.Text) - Val(TextBox2.Text))) / (Val(TextBox10.Text) * Val(TextBox9.Text))) * Val(TextBox9.Text) * Val(TextBox10.Text)) / 1000
+        TextBox8.Text = Val(TextBox11.Text) * Val(TextBox9.Text)
+        TextBox11.Text = Math.Ceiling(((Val(TextBox4.Text) - Val(TextBox2.Text))) / (Val(TextBox10.Text) * Val(TextBox9.Text)))
+        TextBox12.Text = Math.Ceiling(((Val(TextBox3.Text) - Val(TextBox1.Text))) / (Val(TextBox10.Text) * Val(TextBox9.Text)))
+        End Sub
     Private Sub TextBox4_TextChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles TextBox4.TextChanged
-
-        TextBox5.Text = Val(TextBox8.Text) / 1000
-        TextBox8.Text = Val(TextBox11.Text) * Val(TextBox9.Text) * Val(TextBox10.Text)
-        TextBox11.Text = Math.Ceiling(((Val(TextBox4.Text) - Val(TextBox2.Text)) / Val(TextBox10.Text)) / Val(TextBox9.Text))
-        TextBox12.Text = Math.Ceiling(((Val(TextBox3.Text) - Val(TextBox1.Text)) / Val(TextBox10.Text)) / Val(TextBox9.Text))
-    End Sub
+        TextBox5.Text = (Math.Ceiling(((Val(TextBox4.Text) - Val(TextBox2.Text))) / (Val(TextBox10.Text) * Val(TextBox9.Text))) * Val(TextBox9.Text) * Val(TextBox10.Text)) / 1000
+        TextBox8.Text = Val(TextBox11.Text) * Val(TextBox9.Text)
+        TextBox11.Text = Math.Ceiling(((Val(TextBox4.Text) - Val(TextBox2.Text))) / (Val(TextBox10.Text) * Val(TextBox9.Text)))
+        TextBox12.Text = Math.Ceiling(((Val(TextBox3.Text) - Val(TextBox1.Text))) / (Val(TextBox10.Text) * Val(TextBox9.Text)))
+        End Sub
     Private Sub TextBox1_TextChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles TextBox1.TextChanged
-
-        'TextBox6.Text = (Val(TextBox3.Text) - Val(TextBox1.Text)) / 1000
-        TextBox6.Text = Val(TextBox7.Text) / 1000
-        TextBox7.Text = Val(TextBox12.Text) * Val(TextBox9.Text) * Val(TextBox10.Text)
-        TextBox11.Text = Math.Ceiling(((Val(TextBox4.Text) - Val(TextBox2.Text)) / Val(TextBox10.Text)) / Val(TextBox9.Text))
-        TextBox12.Text = Math.Ceiling(((Val(TextBox3.Text) - Val(TextBox1.Text)) / Val(TextBox10.Text)) / Val(TextBox9.Text))
-    End Sub
+        TextBox6.Text = (Math.Ceiling(((Val(TextBox3.Text) - Val(TextBox1.Text))) / (Val(TextBox10.Text) * Val(TextBox9.Text))) * Val(TextBox9.Text) * Val(TextBox10.Text)) / 1000
+        TextBox7.Text = Val(TextBox12.Text) * Val(TextBox9.Text)
+        TextBox11.Text = Math.Ceiling(((Val(TextBox4.Text) - Val(TextBox2.Text))) / (Val(TextBox10.Text) * Val(TextBox9.Text)))
+        TextBox12.Text = Math.Ceiling(((Val(TextBox3.Text) - Val(TextBox1.Text))) / (Val(TextBox10.Text) * Val(TextBox9.Text)))
+         End Sub
     Private Sub TextBox3_TextChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles TextBox3.TextChanged
-
-        TextBox6.Text = Val(TextBox7.Text) / 1000
-        TextBox7.Text = Val(TextBox12.Text) * Val(TextBox9.Text) * Val(TextBox10.Text)
-        TextBox11.Text = Math.Ceiling(((Val(TextBox4.Text) - Val(TextBox2.Text)) / Val(TextBox10.Text)) / Val(TextBox9.Text))
-        TextBox12.Text = Math.Ceiling(((Val(TextBox3.Text) - Val(TextBox1.Text)) / Val(TextBox10.Text)) / Val(TextBox9.Text))
-    End Sub
-    Private Sub TextBox5_TextChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles TextBox5.TextChanged
-
-        TextBox8.Text = Val(TextBox11.Text) * Val(TextBox9.Text) * Val(TextBox10.Text)
-
-    End Sub
-    Private Sub TextBox6_TextChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles TextBox6.TextChanged
-
-        TextBox7.Text = Val(TextBox12.Text) * Val(TextBox9.Text) * Val(TextBox10.Text)
-
-    End Sub
-
-    Private Sub TextBox11_TextChanged(sender As Object, e As EventArgs)
-
-        TextBox8.Text = Val(TextBox11.Text) * Val(TextBox9.Text) * Val(TextBox10.Text)
-    End Sub
-
-    Private Sub TextBox12_TextChanged(sender As Object, e As EventArgs)
-        TextBox7.Text = Val(TextBox12.Text) * Val(TextBox9.Text) * Val(TextBox10.Text)
-    End Sub
-
-    Private Sub TextBox10_TextChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles TextBox10.TextChanged
-        TextBox5.Text = Val(TextBox8.Text) / 1000
-        TextBox6.Text = Val(TextBox7.Text) / 1000
-        TextBox7.Text = Val(TextBox12.Text) * Val(TextBox9.Text) * Val(TextBox10.Text)
-        TextBox8.Text = Val(TextBox11.Text) * Val(TextBox9.Text) * Val(TextBox10.Text)
-        TextBox11.Text = Math.Ceiling(((Val(TextBox4.Text) - Val(TextBox2.Text)) / Val(TextBox10.Text)) / Val(TextBox9.Text))
-        TextBox12.Text = Math.Ceiling(((Val(TextBox3.Text) - Val(TextBox1.Text)) / Val(TextBox10.Text)) / Val(TextBox9.Text))
-        TextBox13.Text = Val(TextBox10.Text) * Val(TextBox9.Text)
-    End Sub
+         TextBox6.Text = (Math.Ceiling(((Val(TextBox3.Text) - Val(TextBox1.Text))) / (Val(TextBox10.Text) * Val(TextBox9.Text))) * Val(TextBox9.Text) * Val(TextBox10.Text)) / 1000
+        TextBox7.Text = Val(TextBox12.Text) * Val(TextBox9.Text)
+        TextBox11.Text = Math.Ceiling(((Val(TextBox4.Text) - Val(TextBox2.Text))) / (Val(TextBox10.Text) * Val(TextBox9.Text)))
+        TextBox12.Text = Math.Ceiling(((Val(TextBox3.Text) - Val(TextBox1.Text))) / (Val(TextBox10.Text) * Val(TextBox9.Text)))
+        End Sub
     Private Sub TextBox9_TextChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles TextBox9.TextChanged
-
-        TextBox5.Text = Val(TextBox8.Text) / 1000
-        TextBox6.Text = Val(TextBox7.Text) / 1000
-        TextBox7.Text = Val(TextBox12.Text) * Val(TextBox9.Text) * Val(TextBox10.Text)
-        TextBox8.Text = Val(TextBox11.Text) * Val(TextBox9.Text) * Val(TextBox10.Text)
-        TextBox11.Text = Math.Ceiling(((Val(TextBox4.Text) - Val(TextBox2.Text)) / Val(TextBox10.Text)) / Val(TextBox9.Text))
-        TextBox12.Text = Math.Ceiling(((Val(TextBox3.Text) - Val(TextBox1.Text)) / Val(TextBox10.Text)) / Val(TextBox9.Text))
-        TextBox13.Text = Val(TextBox10.Text) * Val(TextBox9.Text)
+        TextBox5.Text = (Math.Ceiling(((Val(TextBox4.Text) - Val(TextBox2.Text))) / (Val(TextBox10.Text) * Val(TextBox9.Text))) * Val(TextBox9.Text) * Val(TextBox10.Text)) / 1000
+        TextBox6.Text = (Math.Ceiling(((Val(TextBox3.Text) - Val(TextBox1.Text))) / (Val(TextBox10.Text) * Val(TextBox9.Text))) * Val(TextBox9.Text) * Val(TextBox10.Text)) / 1000
+        TextBox7.Text = Math.Ceiling(((Val(TextBox3.Text) - Val(TextBox1.Text))) / (Val(TextBox10.Text) * Val(TextBox9.Text))) * Val(TextBox9.Text)
+        TextBox8.Text = Math.Ceiling(((Val(TextBox4.Text) - Val(TextBox2.Text))) / (Val(TextBox10.Text) * Val(TextBox9.Text))) * Val(TextBox9.Text)
+        TextBox11.Text = Math.Ceiling(((Val(TextBox4.Text) - Val(TextBox2.Text))) / (Val(TextBox10.Text) * Val(TextBox9.Text)))
+        TextBox12.Text = Math.Ceiling(((Val(TextBox3.Text) - Val(TextBox1.Text))) / (Val(TextBox10.Text) * Val(TextBox9.Text)))
+        TextBox13.Text = (Val(TextBox10.Text) * Val(TextBox9.Text)) / 1000
     End Sub
-
-
+    Private Sub TextBox10_TextChanged(sender As Object, e As EventArgs) Handles TextBox10.TextChanged
+        TextBox5.Text = (Math.Ceiling(((Val(TextBox4.Text) - Val(TextBox2.Text))) / (Val(TextBox10.Text) * Val(TextBox9.Text))) * Val(TextBox9.Text) * Val(TextBox10.Text)) / 1000
+        TextBox6.Text = (Math.Ceiling(((Val(TextBox3.Text) - Val(TextBox1.Text))) / (Val(TextBox10.Text) * Val(TextBox9.Text))) * Val(TextBox9.Text) * Val(TextBox10.Text)) / 1000
+        TextBox7.Text = Math.Ceiling(((Val(TextBox3.Text) - Val(TextBox1.Text))) / (Val(TextBox10.Text) * Val(TextBox9.Text))) * Val(TextBox9.Text)
+        TextBox8.Text = Math.Ceiling(((Val(TextBox4.Text) - Val(TextBox2.Text))) / (Val(TextBox10.Text) * Val(TextBox9.Text))) * Val(TextBox9.Text)
+        TextBox11.Text = Math.Ceiling(((Val(TextBox4.Text) - Val(TextBox2.Text))) / (Val(TextBox10.Text) * Val(TextBox9.Text)))
+        TextBox12.Text = Math.Ceiling(((Val(TextBox3.Text) - Val(TextBox1.Text))) / (Val(TextBox10.Text) * Val(TextBox9.Text)))
+        TextBox13.Text = (Val(TextBox10.Text) * Val(TextBox9.Text)) / 1000
+    End Sub
+    
     Private Sub ZapiszToolStripMenuItem_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles ZapiszToolStripMenuItem.Click
         Module1.utworzPlikConf()
     End Sub
 
     Private Sub WczytajToolStripMenuItem1_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles WczytajToolStripMenuItem1.Click
-
         FileClose(1) ' na wypadek gdyby był otwarty
         For i = 1 To 2 'nierozwiązany bug - dopiero po dwukrotnym wczytaniu conf, aktualizują się parametry sesji
             wczytajConf()
         Next
-
-
     End Sub
 
     Private Sub OtwórzOknoUstawieńToolStripMenuItem_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles UstawieniaToolStripMenuItem.Click
         Form2.Show()
     End Sub
-
-
-    'Private Sub Button7_Click(ByVal sender As System.Object, ByVal e As System.EventArgs)
-    ' Module1.plikGeoreferencyjny_map()
-    'End Sub
 
     Private Sub AboutToolStripMenuItem_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles AboutToolStripMenuItem.Click
         AboutBox1.Show()
@@ -391,18 +330,13 @@ errororhandler:
         pomoc_pfe.Show()
     End Sub
 
-
-
-    'Private Sub WybierzFolderyWarstwDoZłożeniaToolStripMenuItem_Click(ByVal sender As System.Object, ByVal e As System.EventArgs)
-    'Form2.Show()
-    'End Sub
     Private Sub Instrukcja_obslugi_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles InstrukcjaObsługiToolStripMenuItem.Click
         Instrukcja_Obslugi.Show()
     End Sub
 
     Private Sub wczytaj_lastsettings()
         On Error GoTo brakpliku
-
+        
         FileClose(1) 'w razie gyby był otwarty
 
         'wpisuje ostatnie ustawienia z pliku lastsettings.txt i conf.txt
@@ -447,8 +381,12 @@ errororhandler:
         Input(1, zmiennaNaSztuke)
         Input(1, Label65.Text)
         FileClose(1)
+
+        RichTextBox1.ForeColor = System.Drawing.Color.Green
+        RichTextBox1.Text = "Wczytano ostatnio zapisane ustawienia programu. Format graficzny pobieranych segmentów to " & rozszerzenie & " . Styl ich numerowania to: " & numeracja
+
 brakpliku:
-    End Sub
+          End Sub
 
     Private Sub wczytajConf()
 
@@ -559,8 +497,6 @@ brakpliku:
 
         Me.Refresh()
 
-
-
 errorhandler:
     End Sub
     'wczytanie listy plików z warstwami do combobox3
@@ -576,7 +512,6 @@ errorhandler:
             Input(1, pozycjaListy)
             ComboBox3.Items.Add(pozycjaListy)
         Loop
-
 
         FileClose(1)
 
@@ -642,7 +577,6 @@ errorhandler:
             RichTextBox1.Text = "Zmieniono rodzaj mapy. Wybierz która dokładnie jej warstwa ma zostać pobrana, klikając na nią myszką"
         End If
 
-
     End Sub
 
     Private Sub Button3_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles Button3.Click
@@ -658,7 +592,6 @@ errorhandler:
         Module1.utworzPlikConf()
         Button1.Enabled = True
         Button3.Enabled = False
-
 
     End Sub
 
@@ -682,8 +615,6 @@ errorhandler:
         Me.GMapControl1.MapProvider = GMapProviders.BingSatelliteMap
     End Sub
 
-
-
     Private Sub GMapControl1_MouseMove(sender As Object, e As MouseEventArgs) Handles GMapControl1.MouseMove
 
         'współrzędne bbox podczas przeciągania zaznaczenia
@@ -697,7 +628,6 @@ errorhandler:
                 Dim Y1_84 = Me.GMapControl1.SelectedArea.Lat
                 Dim X1_84 = Me.GMapControl1.SelectedArea.Lng + Me.GMapControl1.SelectedArea.WidthLng
                 Dim Y0_84 = Me.GMapControl1.SelectedArea.Lat - Me.GMapControl1.SelectedArea.HeightLat
-
 
 
                 X0_92 = Transform.GetXU92(Y1_84, X1_84)   'prawy gorny x
@@ -715,23 +645,16 @@ errorhandler:
                 Label33.Text = "lng= " + Convert.ToString(Round(X1_84, 4))
                 Label34.Text = "lng= " + Convert.ToString(Round(X0_84, 4))
 
+                If Val(TextBox8.Text) * Val(TextBox7.Text) < 5000000000 Then
+                    RichTextBox1.ForeColor = System.Drawing.Color.Green
+                    RichTextBox1.Text = "Zaznaczyłeś obszar do pobrania o powierzchni " & ((Math.Ceiling(((Val(TextBox4.Text) - Val(TextBox2.Text))) / (Val(TextBox10.Text) * Val(TextBox9.Text))) * Val(TextBox9.Text) * Val(TextBox10.Text)) / 1000) * ((Math.Ceiling(((Val(TextBox3.Text) - Val(TextBox1.Text))) / (Val(TextBox10.Text) * Val(TextBox9.Text))) * Val(TextBox9.Text) * Val(TextBox10.Text)) / 1000) & " km2"
 
-                RichTextBox1.ForeColor = System.Drawing.Color.Green
-                RichTextBox1.Text = "Zaznaczyłeś obszar do pobrania o powierzchni " & Val(TextBox5.Text) * Val(TextBox6.Text) & " km2"
-
-                If Val(TextBox5.Text) * Val(TextBox6.Text) > 5000 Then
+                Else
                     RichTextBox1.ForeColor = System.Drawing.Color.Red
-                    RichTextBox1.Text = "Zaznaczyłeś obszar do pobrania o powierzchni " & Val(TextBox5.Text) * Val(TextBox6.Text) & " km2. To dużo. Poradzę sobie. Jednak uzbroj się lepiej w kubek gorącej kawy :)"
+                    RichTextBox1.Text = "Zaznaczyłeś obszar do pobrania o łącznej rozdzielczości " & Val(TextBox8.Text) & "x" & Val(TextBox7.Text) & " px. To dużo. Poradzę sobie. Jednak uzbroj się lepiej w kubek gorącej kawy :)"
                 End If
-            Else
-                RichTextBox1.ForeColor = System.Drawing.Color.Black
-                RichTextBox1.Text = "Komunikaty:"
             End If
-
-
         End If
-
-
 
         'współrzędne środka mapy w wgs84
         Dim Lat_srodek As Double = Me.GMapControl1.Position.Lat
@@ -746,7 +669,6 @@ errorhandler:
         Dim lat_92 As Integer = Transform.GetYU92(lat_mysz, lng_mysz)   'prawy gorny y
         Label41.Text = "x= " + Convert.ToString(lng_92) + "   y= " + Convert.ToString(lat_92)
 
-
         Dim mouseY As Double = e.Location.Y
         Dim mouseX As Double = e.Location.X
         Label36.BackColor = Color.Transparent
@@ -758,11 +680,7 @@ errorhandler:
         Else
             Label36.Visible = False
         End If
-
-
     End Sub
-
-
 
 
     Private Sub Button2_Click(sender As Object, e As EventArgs) Handles Button2.Click
@@ -784,8 +702,6 @@ errorhandler:
     End Sub
 
     
-
-
     Private Sub Label11_TextChanged(sender As Object, e As EventArgs) Handles Label11.TextChanged
         If warstwy(0) <> "" Then
             Button6.Enabled = True
@@ -794,17 +710,7 @@ errorhandler:
         End If
     End Sub
 
-    Private Sub TextBox11_TextChanged_1(sender As Object, e As EventArgs) Handles TextBox11.TextChanged
-        TextBox7.Text = Val(TextBox12.Text) * Val(TextBox9.Text) * Val(TextBox10.Text)
-        TextBox8.Text = Val(TextBox11.Text) * Val(TextBox9.Text) * Val(TextBox10.Text)
-    End Sub
 
-    Private Sub TextBox12_TextChanged_1(sender As Object, e As EventArgs) Handles TextBox12.TextChanged
-        TextBox7.Text = Val(TextBox12.Text) * Val(TextBox9.Text) * Val(TextBox10.Text)
-        TextBox8.Text = Val(TextBox11.Text) * Val(TextBox9.Text) * Val(TextBox10.Text)
-    End Sub
-
-    
     Private Sub Button7_Click(sender As Object, e As EventArgs) Handles Button7.Click
         Process.Start(folderSegmentow)
     End Sub
@@ -819,6 +725,8 @@ errorhandler:
         Button1.Enabled = True
         Button3.Enabled = False
     End Sub
+
+
 End Class
 
 
