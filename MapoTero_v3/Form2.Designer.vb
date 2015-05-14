@@ -160,9 +160,9 @@ Partial Class Form2
         Me.CheckBox7.AutoSize = True
         Me.CheckBox7.Location = New System.Drawing.Point(8, 51)
         Me.CheckBox7.Name = "CheckBox7"
-        Me.CheckBox7.Size = New System.Drawing.Size(107, 17)
+        Me.CheckBox7.Size = New System.Drawing.Size(144, 17)
         Me.CheckBox7.TabIndex = 5
-        Me.CheckBox7.Text = "plik .jpgw / QGIS"
+        Me.CheckBox7.Text = "plik .jpgw / QGIS, ArcGis"
         Me.ToolTip1.SetToolTip(Me.CheckBox7, "plik .jpgw obsługuje jedynie segmenty pobierane w formacie jpeg")
         Me.CheckBox7.UseVisualStyleBackColor = True
         '
