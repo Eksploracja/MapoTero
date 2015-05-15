@@ -13,10 +13,10 @@ Imports System.Runtime.InteropServices
 <Assembly: AssemblyTitle("MapoTero")> 
 <Assembly: AssemblyDescription("kod: 2009-2014 pajakt, 2015 Kazik N, Paweł_gdn, AAA222; kod modułu przeliczania współrzędnych: Edward Zadorski;")> 
 <Assembly: AssemblyCompany("Pomorskie Forum Eksploracyjne")> 
-<Assembly: AssemblyProduct("")> 
+<Assembly: AssemblyProduct("Program do pobierania rastrowych map z serwerów WMS")> 
 <Assembly: AssemblyCopyright("Copyright © pajakt, 2009/2015. Powszechna Licencja Publiczna GNU-GPLv3")> 
 
-<Assembly: AssemblyTrademark("")> 
+<Assembly: AssemblyTrademark("MapoTero")> 
 
 <Assembly: ComVisible(False)> 
 
@@ -34,8 +34,8 @@ Imports System.Runtime.InteropServices
 ' by using the '*' as shown below:
 ' <Assembly: AssemblyVersion("1.0.*")> 
 
-<Assembly: AssemblyVersion("0.0.3.0")> 
-<Assembly: AssemblyFileVersion("0.0.3.0")> 
+<Assembly: AssemblyVersion("3.0.0.0")> 
+<Assembly: AssemblyFileVersion("3.0.0.0")> 
 
 <Assembly: NeutralResourcesLanguageAttribute("pl-PL")> 
 <Assembly: System.CLSCompliant(true)> 

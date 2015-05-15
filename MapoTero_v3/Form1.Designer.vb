@@ -113,6 +113,7 @@ Partial Class Form1
         Me.Button8 = New System.Windows.Forms.Button()
         Me.Button7 = New System.Windows.Forms.Button()
         Me.Label42 = New System.Windows.Forms.Label()
+        Me.Label7 = New System.Windows.Forms.Label()
         Me.GMapControl1 = New GMap.NET.WindowsForms.GMapControl()
         Me.RadioButton1 = New System.Windows.Forms.RadioButton()
         Me.RadioButton2 = New System.Windows.Forms.RadioButton()
@@ -143,7 +144,6 @@ Partial Class Form1
         Me.TextBox2 = New System.Windows.Forms.TextBox()
         Me.TextBox1 = New System.Windows.Forms.TextBox()
         Me.PictureBox2 = New System.Windows.Forms.PictureBox()
-        Me.Label7 = New System.Windows.Forms.Label()
         Me.GroupBox2.SuspendLayout()
         Me.StatusStrip1.SuspendLayout()
         Me.MenuStrip1.SuspendLayout()
@@ -377,7 +377,7 @@ Partial Class Form1
         '
         Me.Label47.AutoSize = True
         Me.Label47.Enabled = False
-        Me.Label47.Location = New System.Drawing.Point(263, 85)
+        Me.Label47.Location = New System.Drawing.Point(263, 84)
         Me.Label47.Name = "Label47"
         Me.Label47.Size = New System.Drawing.Size(13, 13)
         Me.Label47.TabIndex = 221
@@ -389,7 +389,7 @@ Partial Class Form1
         '
         Me.Label46.AutoSize = True
         Me.Label46.Enabled = False
-        Me.Label46.Location = New System.Drawing.Point(264, 46)
+        Me.Label46.Location = New System.Drawing.Point(264, 45)
         Me.Label46.Name = "Label46"
         Me.Label46.Size = New System.Drawing.Size(12, 13)
         Me.Label46.TabIndex = 220
@@ -600,11 +600,11 @@ Partial Class Form1
         '
         'PictureBox1
         '
-        Me.PictureBox1.Image = Global.MapoTero.My.Resources.Resources.kanapka_gis1
-        Me.PictureBox1.Location = New System.Drawing.Point(81, 93)
+        Me.PictureBox1.Image = Global.MapoTero.My.Resources.Resources.kanapka_gis
+        Me.PictureBox1.Location = New System.Drawing.Point(92, 91)
         Me.PictureBox1.Name = "PictureBox1"
-        Me.PictureBox1.Size = New System.Drawing.Size(126, 138)
-        Me.PictureBox1.TabIndex = 303
+        Me.PictureBox1.Size = New System.Drawing.Size(113, 138)
+        Me.PictureBox1.TabIndex = 305
         Me.PictureBox1.TabStop = False
         '
         'Button2
@@ -818,6 +818,19 @@ Partial Class Form1
         Me.Label42.TabIndex = 215
         Me.Label42.Text = "Terenowy zasięg"
         Me.ToolTip1.SetToolTip(Me.Label42, "Rozmiar pojedyńczego segmentu - najmniejszej komórki siatki kwadtatów, na które z" & _
+        "ostanie podzielony pobierany obszar mapy.  Uwaga - maksymalna rozmiar segmentu d" & _
+        "la Geoportalu2 wynosi 2048px")
+        '
+        'Label7
+        '
+        Me.Label7.AutoSize = True
+        Me.Label7.Enabled = False
+        Me.Label7.Location = New System.Drawing.Point(294, 110)
+        Me.Label7.Name = "Label7"
+        Me.Label7.Size = New System.Drawing.Size(117, 13)
+        Me.Label7.TabIndex = 316
+        Me.Label7.Text = "jednego segmentu [km]"
+        Me.ToolTip1.SetToolTip(Me.Label7, "Rozmiar pojedyńczego segmentu - najmniejszej komórki siatki kwadtatów, na które z" & _
         "ostanie podzielony pobierany obszar mapy.  Uwaga - maksymalna rozmiar segmentu d" & _
         "la Geoportalu2 wynosi 2048px")
         '
@@ -1160,19 +1173,6 @@ Partial Class Form1
         Me.PictureBox2.TabIndex = 303
         Me.PictureBox2.TabStop = False
         '
-        'Label7
-        '
-        Me.Label7.AutoSize = True
-        Me.Label7.Enabled = False
-        Me.Label7.Location = New System.Drawing.Point(294, 110)
-        Me.Label7.Name = "Label7"
-        Me.Label7.Size = New System.Drawing.Size(117, 13)
-        Me.Label7.TabIndex = 316
-        Me.Label7.Text = "jednego segmentu [km]"
-        Me.ToolTip1.SetToolTip(Me.Label7, "Rozmiar pojedyńczego segmentu - najmniejszej komórki siatki kwadtatów, na które z" & _
-        "ostanie podzielony pobierany obszar mapy.  Uwaga - maksymalna rozmiar segmentu d" & _
-        "la Geoportalu2 wynosi 2048px")
-        '
         'Form1
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
@@ -1314,7 +1314,6 @@ Partial Class Form1
     Friend WithEvents Label22 As System.Windows.Forms.Label
     Friend WithEvents Label19 As System.Windows.Forms.Label
     Friend WithEvents Label18 As System.Windows.Forms.Label
-    Friend WithEvents PictureBox1 As System.Windows.Forms.PictureBox
     Friend WithEvents GroupBox5 As System.Windows.Forms.GroupBox
     Friend WithEvents Label34 As System.Windows.Forms.Label
     Friend WithEvents Label32 As System.Windows.Forms.Label
@@ -1334,5 +1333,6 @@ Partial Class Form1
     Friend WithEvents Button6 As System.Windows.Forms.Button
     Friend WithEvents Label42 As System.Windows.Forms.Label
     Friend WithEvents Label7 As System.Windows.Forms.Label
+    Friend WithEvents PictureBox1 As System.Windows.Forms.PictureBox
 
 End Class

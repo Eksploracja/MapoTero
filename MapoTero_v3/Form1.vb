@@ -309,6 +309,8 @@ errororhandler:
     
     Private Sub ZapiszToolStripMenuItem_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles ZapiszToolStripMenuItem.Click
         Module1.utworzPlikConf()
+        RichTextBox1.ForeColor = System.Drawing.Color.Green
+        RichTextBox1.Text = "Zapisano ustawienia sesji do pliku conf.txt zlokalizowanym w folderze " & folderSegmentow
     End Sub
 
     Private Sub WczytajToolStripMenuItem1_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles WczytajToolStripMenuItem1.Click
@@ -394,6 +396,8 @@ brakpliku:
         formatNaProbe = ""
 
         If form1loaded = True Then
+            'Me.FolderBrowserDialog1.RootFolder = System.Environment.SpecialFolder.MyComputer
+            Me.FolderBrowserDialog1.SelectedPath = folderSegmentow
             If Me.FolderBrowserDialog1.ShowDialog = Windows.Forms.DialogResult.OK Then
                 folderSegmentow = Me.FolderBrowserDialog1.SelectedPath & "\"
             End If
@@ -651,7 +655,7 @@ errorhandler:
 
                 Else
                     RichTextBox1.ForeColor = System.Drawing.Color.Red
-                    RichTextBox1.Text = "Zaznaczyłeś obszar do pobrania o łącznej rozdzielczości " & Val(TextBox8.Text) & "x" & Val(TextBox7.Text) & " px. To dużo. Poradzę sobie. Jednak uzbroj się lepiej w kubek gorącej kawy :)"
+                    RichTextBox1.Text = "Zaznaczyłeś obszar do pobrania o powierzchni " & ((Math.Ceiling(((Val(TextBox4.Text) - Val(TextBox2.Text))) / (Val(TextBox10.Text) * Val(TextBox9.Text))) * Val(TextBox9.Text) * Val(TextBox10.Text)) / 1000) * ((Math.Ceiling(((Val(TextBox3.Text) - Val(TextBox1.Text))) / (Val(TextBox10.Text) * Val(TextBox9.Text))) * Val(TextBox9.Text) * Val(TextBox10.Text)) / 1000) & " km2. To dużo. Poradzę sobie. Jednak uzbroj się lepiej w kubek gorącej kawy :)"
                 End If
             End If
         End If
@@ -727,6 +731,20 @@ errorhandler:
     End Sub
 
 
+    Private Sub GMapControl1_MouseDoubleClick(ByValsender As Object, ByVal e As System.Windows.Forms.MouseEventArgs) Handles GMapControl1.MouseDoubleClick
+
+
+        Dim zoom As Integer = Me.GMapControl1.Zoom
+
+        If e.Button = MouseButtons.Right Then
+
+            Me.GMapControl1.Zoom = zoom - 1
+        Else
+            Me.GMapControl1.Zoom = zoom + 1
+        End If
+
+
+    End Sub
 End Class
 
 

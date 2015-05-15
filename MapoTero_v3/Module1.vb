@@ -226,9 +226,9 @@ Module Module1
             ElseIf numeracja = "NrWiersza_NrKolumny" Then
 
 
-                For pion = 1 To ileSegVert
+                For Module1.pion = 1 To ileSegVert
 
-                    For poz = 1 To ileSegHoriz
+                    For Module1.poz = 1 To ileSegHoriz
                         If Dir(folderSegmentow & wspolnaNazwaKwadratu & pion.ToString("D2") & "_" & poz.ToString("D2") & "." & rozszerzenie) <> "" Then
                             ostatniSegment = poz
                         End If
@@ -257,9 +257,9 @@ pobieranieJeszczeRaz:
         'stąd zaczyna się fragment linku, który jest inny dla każdego segmentu
 
 
-        For pion = 1 To ileSegVert
+        For Module1.pion = 1 To ileSegVert
 
-            For poz = 1 To ileSegHoriz
+            For Module1.poz = 1 To ileSegHoriz
 
                 Dim pionPix As Long = (pion * Form1.TextBox9.Text) - Form1.TextBox9.Text     'TB
                 Dim pozPix As Long = (poz * Form1.TextBox9.Text) - Form1.TextBox9.Text       'TB
@@ -298,7 +298,7 @@ pobieranieJeszczeRaz:
 
 
 
-               
+
 
 
 
@@ -324,7 +324,7 @@ pobieranieJeszczeRaz:
                 ''Py = (Ly + (Val(Form1.TextBox9.Text) * Val(Form1.TextBox12.Text)))
                 'End Select
 
-                
+
 
                 strUrlparts(2) = Lx & ","               'lewy X
                 strUrlparts(3) = Ly & ","               'lewy Y
