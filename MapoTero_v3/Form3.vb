@@ -99,6 +99,7 @@ errorhandler:
 
 
     Private Sub Button2_Click(sender As Object, e As EventArgs) Handles Button2.Click
+        Me.FolderBrowserDialog1.SelectedPath = folderSegmentow
         If FolderBrowserDialog1.ShowDialog = Windows.Forms.DialogResult.OK Then
             folderScalania = FolderBrowserDialog1.SelectedPath & "\"
             If File.Exists(folderScalania & "\conf.txt") = False Then

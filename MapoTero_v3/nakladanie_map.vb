@@ -61,6 +61,7 @@ Public Class nakladanie_map
 
 
     Private Sub ButtonDolna_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles ButtonDolna.Click
+        Me.FolderBrowserDialog1.SelectedPath = folderSegmentow
         If FolderBrowserDialog1.ShowDialog = Windows.Forms.DialogResult.OK Then
             folderWarstwa1 = FolderBrowserDialog1.SelectedPath & "\"
         End If
@@ -73,6 +74,7 @@ Public Class nakladanie_map
     End Sub
 
     Private Sub ButtonGorna_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles ButtonGorna.Click
+        Me.FolderBrowserDialog1.SelectedPath = folderSegmentow
         If FolderBrowserDialog1.ShowDialog = Windows.Forms.DialogResult.OK Then
             folderWarstwa2 = FolderBrowserDialog1.SelectedPath & "\"
         End If
@@ -84,6 +86,7 @@ Public Class nakladanie_map
     End Sub
 
     Private Sub ButtonPolaczone_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles ButtonPolaczone.Click
+        Me.FolderBrowserDialog1.SelectedPath = folderSegmentow
         If FolderBrowserDialog1.ShowDialog = Windows.Forms.DialogResult.OK Then
             folderWynikowy = FolderBrowserDialog1.SelectedPath & "\"
         End If
