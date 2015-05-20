@@ -14,13 +14,12 @@
 'along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 Imports System
-Imports System.Threading
 Imports System.Diagnostics
-Imports System.Net
-Imports System.IO
 Imports System.Drawing
+Imports System.IO
 Imports System.Windows.Forms
-Public Class nakladanie_map
+
+Public Class Nakladanie_Map
 
 
     Dim folderWarstwa1 As String = myPath & "\download\dolna\"           'folder warstwy dolnej

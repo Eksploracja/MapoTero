@@ -14,11 +14,7 @@
 'along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 Imports System
-Imports System.Threading
-Imports System.Diagnostics
-Imports System.Net
 Imports System.IO
-Imports System.Drawing
 Imports System.Windows.Forms
 
 Public Class usuwanie_p_seg

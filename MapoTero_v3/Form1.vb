@@ -17,14 +17,8 @@ Imports System
 Imports System.Drawing
 Imports System.IO
 Imports System.Windows.Forms
-
 Imports GMap.NET
 Imports GMap.NET.MapProviders
-Imports GMap.NET.WindowsForms
-Imports GMap.NET.WindowsForms.Markers
-
-
-
 
 Public Class Form1
 
@@ -32,35 +26,21 @@ Public Class Form1
 
 
 
+	<System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1305:SpecifyIFormatProvider", MessageId := "System.Double.ToString")> _
     Private Sub Form1_Load(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MyBase.Load
-
 
         'wyświetla nazwę i wersję 
         Me.Text = My.Application.Info.Title & " " & My.Application.Info.Version.ToString
-
-        'program działa do daty CzasMinal
-        ' Dim teraz As Date
-        ' Dim CzasMinal As New System.DateTime(2011, 6, 30)
-        ' teraz = Now
-        ' If teraz > CzasMinal Then
-        ' MsgBox("Czas minął. Pobierz nową wersję programu.")
-        ' End
-        ' End If
 
         TBseg = 22
         TBbok = 512
 
         ' pozostałe parametry
         myPath = My.Application.Info.DirectoryPath.ToString()
-
         Module1.folderSegmentow = myPath & "\download\"
-
         If Directory.Exists(myPath & "\download\") = False Then Directory.CreateDirectory(myPath & "\download\")
 
-
         Me.SetDesktopLocation(0, 0)
-
-
 
         'ustawienia startowe okna mapy
 
@@ -87,41 +67,13 @@ Public Class Form1
         Label34.Visible = False
 
 
-
-
         'wczytywanie ustaleń okna z lastsetting. Jeśli go nie ma, to szuka conf. Gdy go zabraknie, to sięgamy po sztywny start
 
         If File.Exists(folderSegmentow & "\conf.txt") = False Then
             Button8.Enabled = False
         End If
 
-
-        If File.Exists(myPath & "lastsettings.txt") = False Then
-            wczytaj_lastsettings()
-
-            Module1.x_start = Label35.Text
-            Module1.y_start = Label63.Text
-            Module1.zoom_start = Label65.Text
-            Module1.x_start = Replace(Val(Label35.Text).ToString, ",", ".")
-            Module1.y_start = Replace(Val(Label63.Text).ToString, ",", ".")
-            Module1.zoom_start = Replace(Val(Label65.Text).ToString, ",", ".")
-
-            Me.GMapControl1.Zoom = Val(Label65.Text)
-            Me.GMapControl1.Position = New PointLatLng(Val(Label35.Text.ToString), Val(Label63.Text.ToString))
-        ElseIf File.Exists(folderSegmentow & "conf.txt") = False Then
-            wczytajConf()
-
-            Module1.x_start = Label35.Text
-            Module1.y_start = Label63.Text
-            Module1.zoom_start = Label65.Text
-            Module1.x_start = Replace(Val(Label35.Text).ToString, ",", ".")
-            Module1.y_start = Replace(Val(Label63.Text).ToString, ",", ".")
-            Module1.zoom_start = Replace(Val(Label65.Text).ToString, ",", ".")
-
-            Me.GMapControl1.Zoom = Val(Label65.Text)
-            Me.GMapControl1.Position = New PointLatLng(Val(Label35.Text.ToString), Val(Label63.Text.ToString))
-        Else
-
+        If File.Exists(folderSegmentow & "\conf.txt") = False Then
             Me.GMapControl1.Position = New PointLatLng(52.3, 19.2)
             Me.GMapControl1.Zoom = 6
         End If
@@ -129,10 +81,9 @@ Public Class Form1
 
         'przypisuje wartość zmiennej publicznej nrWarstwy
         nrWarstwy = 0
-
+        wczytajConf()
         wczytaj_lastsettings()
 
-        wczytajConf()
 
         'tworzy combobox z listą dostępnych warstw
         wczytaj_warstwyTxt()
@@ -145,7 +96,6 @@ Public Class Form1
         End If
         ToolStripStatusLabel3.Text = ""
 
-     
         form1loaded = True
 
 
@@ -157,7 +107,7 @@ Public Class Form1
     End Sub
 
     Private Sub Button1_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button1.Click
-        RichTextBox1.ForeColor = System.Drawing.Color.Green
+        RichTextBox1.ForeColor = System.Drawing.Color.Black
         RichTextBox1.Text = "Trwa pobieranie segmentów"
 
         'w zależności od formatu obrazka odpowiednie rozszerzenie pliku
@@ -336,9 +286,9 @@ errororhandler:
         Instrukcja_Obslugi.Show()
     End Sub
 
-    Private Sub wczytaj_lastsettings()
+    Public Sub wczytaj_lastsettings()
         On Error GoTo brakpliku
-        
+
         FileClose(1) 'w razie gyby był otwarty
 
         'wpisuje ostatnie ustawienia z pliku lastsettings.txt i conf.txt
@@ -384,11 +334,16 @@ errororhandler:
         Input(1, Label65.Text)
         FileClose(1)
 
+        'wczytywanie ostatnio zapisanej pozycji okna mapy
+      Me.GMapControl1.Zoom = Val(Label65.Text)
+        Me.GMapControl1.Position = New PointLatLng(Val(Label35.Text.ToString), Val(Label63.Text.ToString))
+
+
         RichTextBox1.ForeColor = System.Drawing.Color.Green
-        RichTextBox1.Text = "Wczytano ostatnio zapisane ustawienia programu. Format graficzny pobieranych segmentów to " & rozszerzenie & " . Styl ich numerowania to: " & numeracja
+        RichTextBox1.Text = "Wczytano ostatnio zapisane ustawienia programu z lastsettings.txt. Styl numerowania segmentów to: " & numeracja
 
 brakpliku:
-          End Sub
+    End Sub
 
     Private Sub wczytajConf()
 
@@ -500,6 +455,10 @@ brakpliku:
         'End If
 
         Me.Refresh()
+
+
+        RichTextBox1.ForeColor = System.Drawing.Color.Green
+        RichTextBox1.Text = "Wczytano ostatnio zapisane ustawienia sesji z pliku conf.txt. Format graficzny pobieranych segmentów to " & format & " . Styl ich numerowania to: " & numeracja
 
 errorhandler:
     End Sub

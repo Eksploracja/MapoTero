@@ -74,6 +74,7 @@ Partial Class Form2
         Me.CheckBox10 = New System.Windows.Forms.CheckBox()
         Me.CheckBox9 = New System.Windows.Forms.CheckBox()
         Me.GroupBox7 = New System.Windows.Forms.GroupBox()
+        Me.Button6 = New System.Windows.Forms.Button()
         Me.GroupBox1.SuspendLayout()
         Me.GroupBox2.SuspendLayout()
         Me.GroupBox3.SuspendLayout()
@@ -89,7 +90,7 @@ Partial Class Form2
         Me.ComboBox1.AccessibleRole = System.Windows.Forms.AccessibleRole.TitleBar
         Me.ComboBox1.FormattingEnabled = True
         Me.ComboBox1.Items.AddRange(New Object() {"jpeg", "gif", "png", "png24", "png32", "png8", "svg+xml", "tiff"})
-        Me.ComboBox1.Location = New System.Drawing.Point(15, 95)
+        Me.ComboBox1.Location = New System.Drawing.Point(15, 81)
         Me.ComboBox1.Name = "ComboBox1"
         Me.ComboBox1.Size = New System.Drawing.Size(152, 21)
         Me.ComboBox1.TabIndex = 0
@@ -100,7 +101,7 @@ Partial Class Form2
         'Label1
         '
         Me.Label1.AutoSize = True
-        Me.Label1.Location = New System.Drawing.Point(15, 79)
+        Me.Label1.Location = New System.Drawing.Point(15, 65)
         Me.Label1.Name = "Label1"
         Me.Label1.Size = New System.Drawing.Size(114, 13)
         Me.Label1.TabIndex = 1
@@ -243,11 +244,11 @@ Partial Class Form2
         'Button1
         '
         Me.Button1.Font = New System.Drawing.Font("Microsoft Sans Serif", 12.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
-        Me.Button1.Location = New System.Drawing.Point(542, 273)
+        Me.Button1.Location = New System.Drawing.Point(477, 258)
         Me.Button1.Name = "Button1"
-        Me.Button1.Size = New System.Drawing.Size(103, 52)
+        Me.Button1.Size = New System.Drawing.Size(168, 39)
         Me.Button1.TabIndex = 11
-        Me.Button1.Text = "OK"
+        Me.Button1.Text = "Zapisz ustawienia"
         Me.Button1.UseVisualStyleBackColor = True
         '
         'CheckBox3
@@ -265,7 +266,7 @@ Partial Class Form2
         'Label4
         '
         Me.Label4.AutoSize = True
-        Me.Label4.Location = New System.Drawing.Point(15, 34)
+        Me.Label4.Location = New System.Drawing.Point(15, 20)
         Me.Label4.Name = "Label4"
         Me.Label4.Size = New System.Drawing.Size(152, 13)
         Me.Label4.TabIndex = 13
@@ -273,7 +274,7 @@ Partial Class Form2
         '
         'TextBox6
         '
-        Me.TextBox6.Location = New System.Drawing.Point(15, 50)
+        Me.TextBox6.Location = New System.Drawing.Point(15, 36)
         Me.TextBox6.Name = "TextBox6"
         Me.TextBox6.Size = New System.Drawing.Size(152, 20)
         Me.TextBox6.TabIndex = 14
@@ -357,7 +358,7 @@ Partial Class Form2
         Me.GroupBox4.Controls.Add(Me.ComboBox1)
         Me.GroupBox4.Location = New System.Drawing.Point(12, 19)
         Me.GroupBox4.Name = "GroupBox4"
-        Me.GroupBox4.Size = New System.Drawing.Size(269, 191)
+        Me.GroupBox4.Size = New System.Drawing.Size(269, 163)
         Me.GroupBox4.TabIndex = 16
         Me.GroupBox4.TabStop = False
         Me.GroupBox4.Text = "Ustawienia sesji (zapisane w conf.txt)"
@@ -365,7 +366,7 @@ Partial Class Form2
         'Label7
         '
         Me.Label7.AutoSize = True
-        Me.Label7.Location = New System.Drawing.Point(41, 162)
+        Me.Label7.Location = New System.Drawing.Point(41, 139)
         Me.Label7.Name = "Label7"
         Me.Label7.Size = New System.Drawing.Size(122, 13)
         Me.Label7.TabIndex = 20
@@ -374,7 +375,7 @@ Partial Class Form2
         'Label6
         '
         Me.Label6.AutoSize = True
-        Me.Label6.Location = New System.Drawing.Point(41, 148)
+        Me.Label6.Location = New System.Drawing.Point(41, 125)
         Me.Label6.Name = "Label6"
         Me.Label6.Size = New System.Drawing.Size(165, 13)
         Me.Label6.TabIndex = 19
@@ -383,7 +384,7 @@ Partial Class Form2
         'Label5
         '
         Me.Label5.AutoSize = True
-        Me.Label5.Location = New System.Drawing.Point(41, 134)
+        Me.Label5.Location = New System.Drawing.Point(41, 111)
         Me.Label5.Name = "Label5"
         Me.Label5.Size = New System.Drawing.Size(194, 13)
         Me.Label5.TabIndex = 18
@@ -392,7 +393,7 @@ Partial Class Form2
         'CheckBox5
         '
         Me.CheckBox5.AutoSize = True
-        Me.CheckBox5.Location = New System.Drawing.Point(17, 148)
+        Me.CheckBox5.Location = New System.Drawing.Point(17, 125)
         Me.CheckBox5.Name = "CheckBox5"
         Me.CheckBox5.Size = New System.Drawing.Size(15, 14)
         Me.CheckBox5.TabIndex = 17
@@ -450,18 +451,32 @@ Partial Class Form2
         Me.GroupBox7.Controls.Add(Me.CheckBox11)
         Me.GroupBox7.Controls.Add(Me.CheckBox10)
         Me.GroupBox7.Controls.Add(Me.CheckBox9)
-        Me.GroupBox7.Location = New System.Drawing.Point(12, 216)
+        Me.GroupBox7.Location = New System.Drawing.Point(12, 187)
         Me.GroupBox7.Name = "GroupBox7"
-        Me.GroupBox7.Size = New System.Drawing.Size(269, 109)
+        Me.GroupBox7.Size = New System.Drawing.Size(269, 110)
         Me.GroupBox7.TabIndex = 19
         Me.GroupBox7.TabStop = False
         Me.GroupBox7.Text = "Opcje widoku okna głównego"
+        '
+        'Button6
+        '
+        Me.Button6.Font = New System.Drawing.Font("Microsoft Sans Serif", 6.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
+        Me.Button6.Image = Global.MapoTero.My.Resources.Resources.kosz
+        Me.Button6.ImageAlign = System.Drawing.ContentAlignment.MiddleRight
+        Me.Button6.Location = New System.Drawing.Point(287, 265)
+        Me.Button6.Name = "Button6"
+        Me.Button6.Size = New System.Drawing.Size(74, 32)
+        Me.Button6.TabIndex = 305
+        Me.Button6.Text = "Resetuj ustawienia"
+        Me.Button6.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
+        Me.Button6.UseVisualStyleBackColor = True
         '
         'Form2
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(656, 338)
+        Me.ClientSize = New System.Drawing.Size(656, 310)
+        Me.Controls.Add(Me.Button6)
         Me.Controls.Add(Me.GroupBox7)
         Me.Controls.Add(Me.GroupBox4)
         Me.Controls.Add(Me.GroupBox3)
@@ -470,6 +485,7 @@ Partial Class Form2
         Me.Name = "Form2"
         Me.RightToLeftLayout = True
         Me.Text = "Ustawienia"
+        Me.ToolTip1.SetToolTip(Me, "Przywróć domyślne ustawienia programu")
         Me.TopMost = True
         Me.GroupBox1.ResumeLayout(False)
         Me.GroupBox1.PerformLayout()
@@ -523,4 +539,5 @@ Partial Class Form2
     Friend WithEvents CheckBox10 As System.Windows.Forms.CheckBox
     Friend WithEvents CheckBox9 As System.Windows.Forms.CheckBox
     Friend WithEvents CheckBox13 As System.Windows.Forms.CheckBox
+    Friend WithEvents Button6 As System.Windows.Forms.Button
 End Class

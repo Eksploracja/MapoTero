@@ -1,9 +1,5 @@
 ﻿Imports System
-Imports System.Threading
-Imports System.Diagnostics
-Imports System.Net
 Imports System.IO
-Imports System.Drawing
 Imports System.Windows.Forms
 
 Public Class Form3
@@ -12,6 +8,11 @@ Public Class Form3
 
     Dim styl_numeracji As String
     Private Sub Form3_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+
+
+
+
+
 
         folderScalania = myPath & "\download\"
         TextBox1.Text = folderScalania
@@ -51,6 +52,7 @@ Public Class Form3
         Input(1, "null") 'Input(1, warstwy(11))
 
         Input(1, zm_jpg) 'format
+
         If wspolnaNazwaKwadratu = "" Then
             Input(1, "null")
             TextBox11.Text = "\"
@@ -70,7 +72,14 @@ errorhandler:
             ComboBox1.Text = "jpg"
 
         Else
-            ComboBox1.Text = zm_jpg
+            If zm_jpg = "tiff" Then
+                ComboBox1.Text = "tif"
+
+            Else
+                ComboBox1.Text = zm_jpg
+
+            End If
+
         End If
 
         TextBox8.Text = Math.Ceiling(((Val(TextBox3.Text) - Val(TextBox5.Text)) / Val(TextBox7.Text)) / Val(TextBox6.Text))  'ile seg horiz
@@ -84,17 +93,23 @@ errorhandler:
             styl_numeracji = "2"
         End If
 
+        If File.Exists(folderScalania & "\error.txt") = False Then
 
-
-        If File.Exists(folderScalania & "\conf.txt") = False Then
-            MsgBox("Brak pliku konfiguracji 'conf.txt' w podanej lokalizacji.")
-            CheckBox1.Enabled = True
-            RichTextBox1.ForeColor = System.Drawing.Color.Red
-            RichTextBox1.Text = "We wskazanym katalogu segmentów nie odnaleziono pliku konfiguracyjnego conf.txt. Jesli został on bezpowrotnie utracony, istnieje możliwość samodzielnego zdefiniowania parametrów segmentów. W tym celu zaznacz opcję 'ręczne wprowadzanie parametrów'"
+            If File.Exists(folderScalania & "\conf.txt") = False Then
+                MsgBox("Brak pliku konfiguracji 'conf.txt' w podanej lokalizacji.")
+                CheckBox1.Enabled = True
+                RichTextBox1.ForeColor = System.Drawing.Color.Red
+                RichTextBox1.Text = "We wskazanym katalogu segmentów nie odnaleziono pliku konfiguracyjnego conf.txt. Jesli został on bezpowrotnie utracony, istnieje możliwość samodzielnego zdefiniowania parametrów segmentów. W tym celu zaznacz opcję 'ręczne wprowadzanie parametrów'"
+            Else
+                CheckBox1.Enabled = False
+                RichTextBox1.Text = "Segmenty gotowe do złączenia. Wszelkie parametry scalania zostały załadowane automatycznie z pliku conf.txt"
+            End If
         Else
-            CheckBox1.Enabled = False
-            RichTextBox1.Text = "Segmenty gotowe do złączenia. Wszelkie parametry scalania zostały załadowane automatycznie z pliku conf.txt"
+            RichTextBox1.ForeColor = System.Drawing.Color.Red
+            RichTextBox1.Text = "W katalogu segmentów wykryto obecność pliku error.txt co świadczy o niekompletnym zestawie segmentów. Uzupełnij je i usuń plik error.txt"
         End If
+
+
     End Sub
 
 
@@ -138,12 +153,13 @@ errorhandler:
             'Sleep(1000 * 1)
             'If File.Exists(folderScalania & nazwa_sklejka & "." & ComboBox1.Text) = True Then
             If procID <> 0 Then
-                RichTextBox1.ForeColor = System.Drawing.Color.Green
-                RichTextBox1.Text = "Segmenty zostały prawidłowo stalone i zapisane do pliku o nazwie" & " " & nazwa_sklejka
+                Form1.RichTextBox1.ForeColor = System.Drawing.Color.Green
+                Form1.RichTextBox1.Text = "Segmenty zostały prawidłowo stalone i zapisane do pliku o nazwie" & " " & nazwa_sklejka
                 If Module1.georef_scalanie_qgis = True Then Module1.plikGeoreferencyjny_jpgw()
                 If Module1.georef_scalanie_kml = True Then Module1.plikGeoreferencyjny_kml()
                 If Module1.georef_scalanie_map = True Then Module1.plikGeoreferencyjny_map()
                 If Module1.georef_scalanie_tab = True Then Module1.plikGeoreferencyjny_tab()
+                Me.Close()
             Else
                 RichTextBox1.ForeColor = System.Drawing.Color.Red
                 RichTextBox1.Text = "Błąd. Segmenty nie zostały poprawnie scalone. Prawdopodobnie przygotowane wcześniej segmenty obszaru nie są kompletne, bądź po ich skompletowaniu nie został usunięty plik errot.txt"
@@ -239,5 +255,13 @@ errorhandler:
             Case CheckState.Unchecked
                 Module1.georef_scalanie_tab = False
         End Select
+    End Sub
+
+    Private Sub Form3_FormClosed(sender As Object, e As FormClosedEventArgs) Handles MyBase.FormClosed
+        Module1.georef_scalanie_qgis = False
+        Module1.georef_scalanie_kml = False
+        Module1.georef_scalanie_map = False
+        Module1.georef_scalanie_tab = False
+
     End Sub
 End Class
