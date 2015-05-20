@@ -1,23 +1,25 @@
-﻿'Copyright (C) <2015>  pajakt
+﻿Imports System.IO
 
-    'This program is free software: you can redistribute it and/or modify
-    'it under the terms of the GNU General Public License as published by
-    'the Free Software Foundation, either version 3 of the License, or
-    '(at your option) any later version.
+'Copyright (C) <2015>  pajakt
 
-   'This program is distributed in the hope that it will be useful,
-    'but WITHOUT ANY WARRANTY; without even the implied warranty of
-    'MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    'GNU General Public License for more details.
+'This program is free software: you can redistribute it and/or modify
+'it under the terms of the GNU General Public License as published by
+'the Free Software Foundation, either version 3 of the License, or
+'(at your option) any later version.
 
-    'You should have received a copy of the GNU General Public License
-    'along with this program.  If not, see <http://www.gnu.org/licenses/>.
+'This program is distributed in the hope that it will be useful,
+'but WITHOUT ANY WARRANTY; without even the implied warranty of
+'MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+'GNU General Public License for more details.
+
+'You should have received a copy of the GNU General Public License
+'along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 Public Class Form2
 
 
     Private Sub Form2_Load(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MyBase.Load
-      
+
         Me.Location = New Point(200, 150)
 
 
@@ -36,12 +38,13 @@ Public Class Form2
         CheckBox11.Checked = Module1.zaznaczenieWGS84
         CheckBox12.Checked = Module1.kursor_i_srodekmapy
         CheckBox13.Checked = Module1.CheckTab
+
         'ustawienie odpowiedniej warosci Combobox1 odbywa sie przy jego inicjalizacji
 
         TextBox6.Text = Module1.wspolnaNazwaKwadratu
         ComboBox2.Text = Module1.numeracja
 
-            ComboBox1.Text = Module1.format
+        ComboBox1.Text = Module1.format
 
 
     End Sub
@@ -126,7 +129,7 @@ Public Class Form2
                 Module1.CheckWldPoints = False
                 GroupBox1.Enabled = False
                 Module1.CheckJpgw = False
-                
+
                 'Module1.CheckNrSeg = False
                 Module1.CheckTB = True
                 Form1.TextBox9.Text = TBbok
@@ -161,8 +164,8 @@ Public Class Form2
     End Sub
 
 
-    
-    
+
+
 
     Private Sub CheckBox8_Click(sender As Object, e As EventArgs) Handles CheckBox8.Click
 
@@ -177,7 +180,7 @@ Public Class Form2
 
     End Sub
 
-    
+
 
 
     Private Sub CheckBox9_CheckedChanged(sender As Object, e As EventArgs) Handles CheckBox9.CheckedChanged
@@ -276,4 +279,173 @@ Public Class Form2
                 Module1.CheckTab = False
         End Select
     End Sub
+
+    Private Sub Button6_Click(sender As Object, e As EventArgs) Handles Button6.Click
+
+
+        'File.Delete(folderSegmentow & "conf.txt")
+        File.Delete(myPath & "\lastsettings.txt")
+        Form1.RichTextBox1.ForeColor = System.Drawing.Color.Green
+        Form1.RichTextBox1.Text = "Usunięto plik conf.txt oraz lastsetting.txt"
+        
+        Form1.Label35.Text = "52.3"
+        Form1.Label63.Text = "19.2"
+        Form1.Label65.Text = "6"
+
+        'odświeżenie widoku okna mapy po wprowadzeniu nowych ustawień conf.txt
+        Module1.x_start = 52.3
+        Module1.y_start = 19.2
+        Module1.zoom_start = 6
+        
+
+        Form1.GMapControl1.Refresh()
+        Form1.GMapControl1.ReloadMap()
+        Form1.GMapControl1.Zoom = 6
+        Form1.GMapControl1.Position = New GMap.NET.PointLatLng(52.3, 19.2)
+     
+        Form1.Refresh()
+        'domyślne ustawienia
+        TextBox6.Text = "" 'wspolna nazwa kwadratu
+        ComboBox1.Text = "jpeg"  'format
+        Module1.format = "jpeg"
+        CheckBox5.Checked = False 'powtorz pobieranie od ostatniego segm
+        Module1.pobierajPowyzejOstatniego = False
+        CheckBox9.Checked = False 'edytuj pola XY zaznaczenia
+        Module1.editXY = False
+        CheckBox10.Checked = False 'wyswietl wspolrz kursora WGS
+        CheckBox11.Checked = False 'wyswietl wspolrz zaznaczenia WGS
+        CheckBox12.Checked = True 'wyswietl wspolrzedne kursora mapy
+        CheckBox1.Checked = False 'map
+        Module1.CheckMap = False
+        CheckBox8.Checked = False 'kml
+        Module1.CheckKml = False
+        CheckBox7.Checked = False 'jpgw
+        Module1.CheckJpgw = False
+        CheckBox13.Checked = False 'tab
+        Module1.CheckTab = False
+        CheckBox4.Checked = False 'wld
+        Module1.CheckWldPoints = False
+        CheckBox2.Checked = False 'gmi
+        Module1.CheckGmi = False
+        ComboBox2.Text = "NrWiersza_NrKolumny" 'numeracja
+        Module1.numeracja = "NrWiersza_NrKolumny"
+        TextBox1.Text = "3" 'ilosc prob
+        Module1.iloscProbPobrania = 3
+        TextBox2.Text = "5" 'sekund
+        Module1.przerwaMiedzyProbami = 5
+        CheckBox6.Checked = False 'tb
+        Module1.CheckTB = False
+        CheckBox3.Checked = False 'zamiana XY
+        Module1.XYswitched = False
+        'Module1.plik_lastsettings()
+        'Form1.wczytaj_lastsettings()
+        If x_start = 52.3 Then
+            If File.Exists(folderSegmentow & "conf.txt") = True Then
+                
+               
+                'tworzy plik z danymi sesji
+                FileOpen(1, folderSegmentow & "\conf.txt", OpenMode.Output)
+                WriteLine(1, folderSegmentow)
+                WriteLine(1, Form1.ComboBox3.Text)
+                WriteLine(1, Form1.TextBox1.Text)
+                WriteLine(1, Form1.TextBox2.Text)
+                WriteLine(1, Form1.TextBox3.Text)
+                WriteLine(1, Form1.TextBox4.Text)
+                WriteLine(1, Form1.TextBox9.Text)
+                WriteLine(1, Form1.TextBox10.Text)
+                WriteLine(1, warstwy(0))
+                WriteLine(1, warstwy(1))
+                WriteLine(1, warstwy(2))
+                WriteLine(1, warstwy(3))
+                WriteLine(1, warstwy(4))
+                WriteLine(1, warstwy(5))
+                WriteLine(1, warstwy(6))
+                WriteLine(1, warstwy(7))
+                WriteLine(1, warstwy(8))
+                WriteLine(1, warstwy(9))
+                WriteLine(1, warstwy(10))
+                WriteLine(1, warstwy(11))
+                WriteLine(1, nrWarstwy)
+                WriteLine(1, format)
+                WriteLine(1, wspolnaNazwaKwadratu)
+                WriteLine(1, pobierajPowyzejOstatniego)
+                WriteLine(1, "52.3")
+                WriteLine(1, "19.2")
+                WriteLine(1, "6")
+                WriteLine(1, Module1.numeracja)
+                FileClose(1)
+            End If
+
+
+
+           
+
+            FileClose(1) 'w razie gyby był otwarty
+
+            FileOpen(1, myPath & "\lastsettings.txt", OpenMode.Output)
+
+            PrintLine(1, "folder segmentow")        'zapisuje ostatni folder segmentów, z niego wczytany zostanie plik conf
+            If folderSegmentow = "" Then
+                PrintLine(1, myPath & "\download\")
+            Else
+                PrintLine(1, folderSegmentow)
+            End If
+
+            PrintLine(1, "chkgmi")
+            PrintLine(1, CheckGmi)          'zapisuje czy tworzyć gmi
+            PrintLine(1, "chkmap")
+            PrintLine(1, CheckMap)          'zapisuje czy tworzyć map
+            PrintLine(1, "chkwldpoints")
+            PrintLine(1, CheckWldPoints)    'zapisuje czy tworzyć wld i points
+            PrintLine(1, "chkjpgw")
+            PrintLine(1, CheckJpgw)          'zapisuje czy tworzyć jpgw
+            PrintLine(1, "chkkml")
+            PrintLine(1, CheckKml)          'zapisuje czy tworzyć kml
+            PrintLine(1, "chktab")
+            PrintLine(1, CheckTab)          'zapisuje czy tworzyć kml
+            PrintLine(1, "dolna")           'zapisuje foldery łączonych warstw
+            If folderWarstwa1 = "" Then
+                PrintLine(1, myPath & "\download\dolna\")
+            Else
+                PrintLine(1, folderWarstwa1)
+            End If
+
+            PrintLine(1, "gorna")
+            If folderWarstwa2 = "" Then
+                PrintLine(1, myPath & "\download\gorna\")
+            Else
+                PrintLine(1, folderWarstwa2)
+            End If
+
+            PrintLine(1, "polaczone")
+            If folderWynikowy = "" Then
+                PrintLine(1, myPath & "\download\polaczone\")
+            Else
+                PrintLine(1, folderWynikowy)
+            End If
+
+            PrintLine(1, "XYswitched")
+            PrintLine(1, XYswitched)
+
+            PrintLine(1, "numeracja_")
+            PrintLine(1, numeracja)
+            PrintLine(1, "iloscProbPobrania")
+            PrintLine(1, iloscProbPobrania)
+            PrintLine(1, "przerwaMiedzyProbami")
+            PrintLine(1, przerwaMiedzyProbami)
+
+            PrintLine(1, "x_start")
+            PrintLine(1, "52.3")
+            PrintLine(1, "y_start")
+            PrintLine(1, "19.2")
+            PrintLine(1, "zoom_start")
+            PrintLine(1, "6")
+            FileClose(1)
+
+
+
+        End If
+    End Sub
+
+    
 End Class

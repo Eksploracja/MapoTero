@@ -159,7 +159,7 @@ Partial Class usuwanie_p_seg
         '
         Me.ComboBox1.FormattingEnabled = True
         Me.ComboBox1.Items.AddRange(New Object() {"jpg", "tiff", "png", "png8", "png24", "png32", "gif", "svg+xml", "map", "gmi", "wld", "jpgw", "kml", "tab"})
-        Me.ComboBox1.Location = New System.Drawing.Point(46, 41)
+        Me.ComboBox1.Location = New System.Drawing.Point(46, 42)
         Me.ComboBox1.Name = "ComboBox1"
         Me.ComboBox1.Size = New System.Drawing.Size(199, 21)
         Me.ComboBox1.TabIndex = 14
@@ -169,7 +169,7 @@ Partial Class usuwanie_p_seg
         '
         Me.Label8.AutoSize = True
         Me.Label8.Font = New System.Drawing.Font("Microsoft Sans Serif", 12.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
-        Me.Label8.Location = New System.Drawing.Point(42, 9)
+        Me.Label8.Location = New System.Drawing.Point(42, 19)
         Me.Label8.Name = "Label8"
         Me.Label8.Size = New System.Drawing.Size(220, 20)
         Me.Label8.TabIndex = 15

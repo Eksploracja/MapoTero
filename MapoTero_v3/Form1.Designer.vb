@@ -436,8 +436,8 @@ Partial Class Form1
         Me.Label2.Size = New System.Drawing.Size(116, 13)
         Me.Label2.TabIndex = 214
         Me.Label2.Text = "Rozmiar piksela [m/pix]"
-        Me.ToolTip1.SetToolTip(Me.Label2, "Domyślna wartość zapewnia optymalną jakość pobranego obrazu. Im większy rozmiar p" & _
-        "ojedynczego piksela, tym gorsza jakość obrazu.")
+        Me.ToolTip1.SetToolTip(Me.Label2, "Domyślna wartość jest optymalna. Im większy rozmiar piksela, tym gorsza jakość ob" & _
+        "razu, ale jednocześnie tym większy jego przestrzenny zasięg.")
         '
         'TextBox10
         '

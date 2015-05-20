@@ -66,6 +66,7 @@ Module Module1
     Public kursorWGS84 As Boolean = False          'wyświetla współrzędne kursora w układzie WGS84
     Public kursor_i_srodekmapy As Boolean = True          'wyświetla współrzędne kursora i środka mapy
 
+
     Public zaznaczenieWGS84 As Boolean = False          'wyświetla współrzędne zaznaczenia w układzie WGS84
     Public georef_scalanie_qgis As Boolean = False        'opcja referencji qgis dla scalanych plików
     Public georef_scalanie_kml As Boolean = False        'opcja referencji kml dla scalanych plików
@@ -726,9 +727,9 @@ errorhandler:
         WriteLine(1, format)
         WriteLine(1, wspolnaNazwaKwadratu)
         WriteLine(1, pobierajPowyzejOstatniego)
-        WriteLine(1, x_start_lastset)
-        WriteLine(1, y_start_lastset)
-        WriteLine(1, zoom_start_lastset)
+            WriteLine(1, x_start_lastset)
+            WriteLine(1, y_start_lastset)
+            WriteLine(1, zoom_start_lastset)
         WriteLine(1, Module1.numeracja)
         FileClose(1)
 
@@ -913,7 +914,7 @@ errorhandler:
                     Select Case rozszerzenie
                         Case "jpg"
                             FileOpen(4, folderSegmentow & nazwaKwadratu & ".jpgw", OpenMode.Output)
-                        Case "png" & "png8" & "png24" & "png32"
+                        Case "png" ' & "png8" & "png24" & "png32"
                             FileOpen(4, folderSegmentow & nazwaKwadratu & ".pngw", OpenMode.Output)
                         Case "tif"
                             FileOpen(4, folderSegmentow & nazwaKwadratu & ".tifw", OpenMode.Output)
@@ -937,12 +938,12 @@ errorhandler:
                 Select Case rozszerzenie
                     Case "jpg"
                         FileOpen(4, folderSegmentow & "_scalone_segmenty_" & Form3.TextBox8.Text & "x" & Form3.TextBox9.Text & ".jpgw", OpenMode.Output)
-                    Case "png" & "png8" & "png24" & "png32"
-                        FileOpen(4, "_scalone_segmenty_" & Form3.TextBox8.Text & "x" & Form3.TextBox9.Text & ".pngw", OpenMode.Output)
+                    Case "png" ' & "png8" & "png24" & "png32"
+                        FileOpen(4, folderSegmentow & "_scalone_segmenty_" & Form3.TextBox8.Text & "x" & Form3.TextBox9.Text & ".pngw", OpenMode.Output)
                     Case "tif"
-                        FileOpen(4, "_scalone_segmenty_" & Form3.TextBox8.Text & "x" & Form3.TextBox9.Text & ".tifw", OpenMode.Output)
+                        FileOpen(4, folderSegmentow & "_scalone_segmenty_" & Form3.TextBox8.Text & "x" & Form3.TextBox9.Text & ".tifw", OpenMode.Output)
                     Case "gif"
-                        FileOpen(4, "_scalone_segmenty_" & Form3.TextBox8.Text & "x" & Form3.TextBox9.Text & ".gifw", OpenMode.Output)
+                        FileOpen(4, folderSegmentow & "_scalone_segmenty_" & Form3.TextBox8.Text & "x" & Form3.TextBox9.Text & ".gifw", OpenMode.Output)
                 End Select
                 Print(4, Form1.TextBox10.Text & Chr(13) & Chr(10) & _
                 "0" & Chr(13) & Chr(10) & _
@@ -1261,7 +1262,7 @@ errorhandler:
 
                 If CheckKml = True Then
 
-                    Dim bok As String = Form1.TextBox9.Text & ".000000000000000"
+                    'Dim bok As String = Form1.TextBox9.Text & ".000000000000000"
 
                     Dim LGsz As String  'lewy górny
                     Dim LGdl As String
@@ -1337,7 +1338,7 @@ errorhandler:
                 Px = Val(Form3.TextBox4.Text) + (Val(Form3.TextBox9.Text) * Val(Form3.TextBox7.Text) * Val(Form3.TextBox6.Text))
                 Py = Val(Form3.TextBox5.Text) + (Val(Form3.TextBox8.Text) * Val(Form3.TextBox7.Text) * Val(Form3.TextBox6.Text))
 
-                Dim bok As String = Form1.TextBox9.Text & ".000000000000000"
+                'Dim bok As String = Form1.TextBox9.Text & ".000000000000000"
 
                 Dim LGsz As String  'lewy górny
                 Dim LGdl As String
