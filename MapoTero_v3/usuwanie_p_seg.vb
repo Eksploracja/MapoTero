@@ -22,6 +22,7 @@ Public Class usuwanie_p_seg
     Private Property TestRozszerzenia As String
 
 
+
     Private Sub ComboBox1_SelectedIndexChanged(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles ComboBox1.SelectedIndexChanged
 
         Dim Plik As String
@@ -36,8 +37,9 @@ Public Class usuwanie_p_seg
         TextBox1.Text = ""
         TextBox2.Text = ""
         TextBox3.Text = ""
+        TextBox5.Text = ""
         TextBox6.Text = ""
-
+        Label9.Text = "Liczba wszystkich plików " & ComboBox1.Text
         'przegląda wszystkie pliki w wybranym folderze i poddaje je odpowiednim czynnościom
         Dim files() As String = Directory.GetFiles(folderSegmentow)
         For Each Plik In files
@@ -67,6 +69,8 @@ Public Class usuwanie_p_seg
             End If
 
         Next
+
+
 
         If ilePlikow = 0 Then GoTo errorhandler
 
@@ -178,9 +182,57 @@ errorhandler:
 
 
         TextBox4.Text = 0
-
+        TextBox5.Text = ileDelete
         Button1.Enabled = True
 
 
     End Sub
+
+    
+
+
+    Private Sub TextBox4_TextChanged(sender As Object, e As EventArgs) Handles TextBox4.TextChanged
+        Dim Rozmiar As Single
+        Dim Plik As String
+        Dim toDelete(10000) As String          'pliki do usunięcie
+        Dim ileDelete As Long                       'ile plików do usunięcia
+        Label9.Text = "Liczba wszystkich plików " & ComboBox1.Text
+        Button1.Enabled = False
+
+        'przegląda wszystkie pliki w wybranym folderze i poddaje je odpowiednim czynnościom
+        Dim files() As String = Directory.GetFiles(folderSegmentow)
+        For Each Plik In files
+
+            Application.DoEvents()
+
+            'sprawdza czy rozszerzenie pliku jest zgodne z zadanym
+            TestRozszerzenia = Microsoft.VisualBasic.Right(Plik, Len(ComboBox1.Text))
+
+            Rozmiar = Int(FileLen(Plik) / 1024)                                'sprawdza rozmiar pliku
+
+            If TestRozszerzenia = ComboBox1.Text And Rozmiar < TextBox4.Text Then
+
+                ileDelete = ileDelete + 1           'jeśli warunek spełniony to zwiększa się ileDelete
+                '  ReDim toDelete(ileDelete)           'i zwiększa się rozmiar tablicy na pliki do usunięcia
+                toDelete(ileDelete - 1) = Plik      'po czym plik jest umieszczany w tablicy
+
+
+             
+
+            End If
+
+        Next
+
+
+       
+
+
+
+        TextBox5.Text = ileDelete
+        Button1.Enabled = True
+
+
+    End Sub
+
+
 End Class

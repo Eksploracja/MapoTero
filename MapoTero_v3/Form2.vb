@@ -302,7 +302,10 @@ Public Class Form2
         Form1.GMapControl1.ReloadMap()
         Form1.GMapControl1.Zoom = 6
         Form1.GMapControl1.Position = New GMap.NET.PointLatLng(52.3, 19.2)
-     
+
+
+        Form1.ComboBox3.Text = "skany_map_topograficznych"
+
         Form1.Refresh()
         'domyślne ustawienia
         TextBox6.Text = "" 'wspolna nazwa kwadratu
@@ -337,48 +340,13 @@ Public Class Form2
         Module1.CheckTB = False
         CheckBox3.Checked = False 'zamiana XY
         Module1.XYswitched = False
-        'Module1.plik_lastsettings()
-        'Form1.wczytaj_lastsettings()
+        
+        Form1.TextBox9.Text = "2000"
+        Form1.TextBox10.Text = "2"
+
         If x_start = 52.3 Then
-            If File.Exists(folderSegmentow & "conf.txt") = True Then
-                
-               
-                'tworzy plik z danymi sesji
-                FileOpen(1, folderSegmentow & "\conf.txt", OpenMode.Output)
-                WriteLine(1, folderSegmentow)
-                WriteLine(1, Form1.ComboBox3.Text)
-                WriteLine(1, Form1.TextBox1.Text)
-                WriteLine(1, Form1.TextBox2.Text)
-                WriteLine(1, Form1.TextBox3.Text)
-                WriteLine(1, Form1.TextBox4.Text)
-                WriteLine(1, Form1.TextBox9.Text)
-                WriteLine(1, Form1.TextBox10.Text)
-                WriteLine(1, warstwy(0))
-                WriteLine(1, warstwy(1))
-                WriteLine(1, warstwy(2))
-                WriteLine(1, warstwy(3))
-                WriteLine(1, warstwy(4))
-                WriteLine(1, warstwy(5))
-                WriteLine(1, warstwy(6))
-                WriteLine(1, warstwy(7))
-                WriteLine(1, warstwy(8))
-                WriteLine(1, warstwy(9))
-                WriteLine(1, warstwy(10))
-                WriteLine(1, warstwy(11))
-                WriteLine(1, nrWarstwy)
-                WriteLine(1, format)
-                WriteLine(1, wspolnaNazwaKwadratu)
-                WriteLine(1, pobierajPowyzejOstatniego)
-                WriteLine(1, "52.3")
-                WriteLine(1, "19.2")
-                WriteLine(1, "6")
-                WriteLine(1, Module1.numeracja)
-                FileClose(1)
-            End If
-
-
-
            
+
 
             FileClose(1) 'w razie gyby był otwarty
 
