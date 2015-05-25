@@ -56,13 +56,15 @@ Partial Class usuwanie_p_seg
         Me.TextBox6 = New System.Windows.Forms.TextBox()
         Me.RichTextBox1 = New System.Windows.Forms.RichTextBox()
         Me.ToolTip1 = New System.Windows.Forms.ToolTip(Me.components)
+        Me.TextBox5 = New System.Windows.Forms.TextBox()
         Me.Label6 = New System.Windows.Forms.Label()
+        Me.Label7 = New System.Windows.Forms.Label()
         Me.SuspendLayout()
         '
         'TextBox1
         '
         Me.TextBox1.Enabled = False
-        Me.TextBox1.Location = New System.Drawing.Point(252, 129)
+        Me.TextBox1.Location = New System.Drawing.Point(227, 156)
         Me.TextBox1.Name = "TextBox1"
         Me.TextBox1.Size = New System.Drawing.Size(84, 20)
         Me.TextBox1.TabIndex = 0
@@ -71,7 +73,7 @@ Partial Class usuwanie_p_seg
         'Label1
         '
         Me.Label1.AutoSize = True
-        Me.Label1.Location = New System.Drawing.Point(43, 133)
+        Me.Label1.Location = New System.Drawing.Point(18, 160)
         Me.Label1.Name = "Label1"
         Me.Label1.Size = New System.Drawing.Size(142, 13)
         Me.Label1.TabIndex = 1
@@ -80,7 +82,7 @@ Partial Class usuwanie_p_seg
         'Label2
         '
         Me.Label2.AutoSize = True
-        Me.Label2.Location = New System.Drawing.Point(43, 159)
+        Me.Label2.Location = New System.Drawing.Point(18, 186)
         Me.Label2.Name = "Label2"
         Me.Label2.Size = New System.Drawing.Size(140, 13)
         Me.Label2.TabIndex = 3
@@ -89,7 +91,7 @@ Partial Class usuwanie_p_seg
         'TextBox2
         '
         Me.TextBox2.Enabled = False
-        Me.TextBox2.Location = New System.Drawing.Point(252, 155)
+        Me.TextBox2.Location = New System.Drawing.Point(227, 182)
         Me.TextBox2.Name = "TextBox2"
         Me.TextBox2.Size = New System.Drawing.Size(84, 20)
         Me.TextBox2.TabIndex = 2
@@ -98,7 +100,7 @@ Partial Class usuwanie_p_seg
         'Label3
         '
         Me.Label3.AutoSize = True
-        Me.Label3.Location = New System.Drawing.Point(43, 185)
+        Me.Label3.Location = New System.Drawing.Point(18, 212)
         Me.Label3.Name = "Label3"
         Me.Label3.Size = New System.Drawing.Size(101, 13)
         Me.Label3.TabIndex = 5
@@ -107,7 +109,7 @@ Partial Class usuwanie_p_seg
         'TextBox3
         '
         Me.TextBox3.Enabled = False
-        Me.TextBox3.Location = New System.Drawing.Point(252, 181)
+        Me.TextBox3.Location = New System.Drawing.Point(227, 208)
         Me.TextBox3.Name = "TextBox3"
         Me.TextBox3.Size = New System.Drawing.Size(84, 20)
         Me.TextBox3.TabIndex = 4
@@ -117,7 +119,7 @@ Partial Class usuwanie_p_seg
         '
         Me.Label4.AutoSize = True
         Me.Label4.Font = New System.Drawing.Font("Microsoft Sans Serif", 12.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
-        Me.Label4.Location = New System.Drawing.Point(42, 226)
+        Me.Label4.Location = New System.Drawing.Point(17, 257)
         Me.Label4.Name = "Label4"
         Me.Label4.Size = New System.Drawing.Size(203, 20)
         Me.Label4.TabIndex = 6
@@ -127,7 +129,7 @@ Partial Class usuwanie_p_seg
         '
         Me.Label5.AutoSize = True
         Me.Label5.Font = New System.Drawing.Font("Microsoft Sans Serif", 12.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
-        Me.Label5.Location = New System.Drawing.Point(136, 258)
+        Me.Label5.Location = New System.Drawing.Point(110, 291)
         Me.Label5.Name = "Label5"
         Me.Label5.Size = New System.Drawing.Size(28, 20)
         Me.Label5.TabIndex = 8
@@ -135,7 +137,7 @@ Partial Class usuwanie_p_seg
         '
         'TextBox4
         '
-        Me.TextBox4.Location = New System.Drawing.Point(46, 258)
+        Me.TextBox4.Location = New System.Drawing.Point(21, 292)
         Me.TextBox4.Name = "TextBox4"
         Me.TextBox4.Size = New System.Drawing.Size(84, 20)
         Me.TextBox4.TabIndex = 7
@@ -147,19 +149,19 @@ Partial Class usuwanie_p_seg
         'Button1
         '
         Me.Button1.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
-        Me.Button1.Location = New System.Drawing.Point(251, 253)
+        Me.Button1.Location = New System.Drawing.Point(229, 284)
         Me.Button1.Name = "Button1"
         Me.Button1.Size = New System.Drawing.Size(84, 33)
         Me.Button1.TabIndex = 11
-        Me.Button1.Text = "OK"
+        Me.Button1.Text = "Usuń"
         Me.ToolTip1.SetToolTip(Me.Button1, "Usuń wskazane segmenty")
         Me.Button1.UseVisualStyleBackColor = True
         '
         'ComboBox1
         '
         Me.ComboBox1.FormattingEnabled = True
-        Me.ComboBox1.Items.AddRange(New Object() {"jpg", "tiff", "png", "png8", "png24", "png32", "gif", "svg+xml", "map", "gmi", "wld", "jpgw", "kml", "tab"})
-        Me.ComboBox1.Location = New System.Drawing.Point(46, 42)
+        Me.ComboBox1.Items.AddRange(New Object() {"jpg", "tif", "png", "png8", "png24", "png32", "gif", "svg+xml", "map", "gmi", "wld", "jpgw", "kml", "tab"})
+        Me.ComboBox1.Location = New System.Drawing.Point(21, 42)
         Me.ComboBox1.Name = "ComboBox1"
         Me.ComboBox1.Size = New System.Drawing.Size(199, 21)
         Me.ComboBox1.TabIndex = 14
@@ -169,25 +171,25 @@ Partial Class usuwanie_p_seg
         '
         Me.Label8.AutoSize = True
         Me.Label8.Font = New System.Drawing.Font("Microsoft Sans Serif", 12.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
-        Me.Label8.Location = New System.Drawing.Point(42, 19)
+        Me.Label8.Location = New System.Drawing.Point(17, 19)
         Me.Label8.Name = "Label8"
-        Me.Label8.Size = New System.Drawing.Size(220, 20)
+        Me.Label8.Size = New System.Drawing.Size(226, 20)
         Me.Label8.TabIndex = 15
-        Me.Label8.Text = "Podaj rozszerzenie plików:"
+        Me.Label8.Text = "Określ rozszerzenie plików:"
         '
         'Label9
         '
         Me.Label9.AutoSize = True
-        Me.Label9.Location = New System.Drawing.Point(42, 107)
+        Me.Label9.Location = New System.Drawing.Point(17, 107)
         Me.Label9.Name = "Label9"
-        Me.Label9.Size = New System.Drawing.Size(71, 13)
+        Me.Label9.Size = New System.Drawing.Size(142, 13)
         Me.Label9.TabIndex = 17
-        Me.Label9.Text = "Liczba plików"
+        Me.Label9.Text = "Liczba wszystkich plików jpg"
         '
         'TextBox6
         '
         Me.TextBox6.Enabled = False
-        Me.TextBox6.Location = New System.Drawing.Point(252, 103)
+        Me.TextBox6.Location = New System.Drawing.Point(227, 103)
         Me.TextBox6.Name = "TextBox6"
         Me.TextBox6.Size = New System.Drawing.Size(84, 20)
         Me.TextBox6.TabIndex = 16
@@ -196,27 +198,50 @@ Partial Class usuwanie_p_seg
         '
         'RichTextBox1
         '
-        Me.RichTextBox1.Location = New System.Drawing.Point(367, 9)
+        Me.RichTextBox1.Location = New System.Drawing.Point(327, 9)
         Me.RichTextBox1.Name = "RichTextBox1"
         Me.RichTextBox1.ReadOnly = True
-        Me.RichTextBox1.Size = New System.Drawing.Size(298, 307)
+        Me.RichTextBox1.Size = New System.Drawing.Size(314, 307)
         Me.RichTextBox1.TabIndex = 18
         Me.RichTextBox1.Text = resources.GetString("RichTextBox1.Text")
+        '
+        'TextBox5
+        '
+        Me.TextBox5.Enabled = False
+        Me.TextBox5.Location = New System.Drawing.Point(227, 130)
+        Me.TextBox5.Name = "TextBox5"
+        Me.TextBox5.Size = New System.Drawing.Size(84, 20)
+        Me.TextBox5.TabIndex = 20
+        Me.TextBox5.Text = "0"
+        Me.TextBox5.TextAlign = System.Windows.Forms.HorizontalAlignment.Right
+        Me.ToolTip1.SetToolTip(Me.TextBox5, "Sprawdź rozmiar przykładowego ""pustego"" segmentu i wprowadź tą wartość powiększon" & _
+        "ą o ok. 10%")
         '
         'Label6
         '
         Me.Label6.AutoSize = True
-        Me.Label6.Location = New System.Drawing.Point(42, 83)
+        Me.Label6.Location = New System.Drawing.Point(17, 83)
         Me.Label6.Name = "Label6"
         Me.Label6.Size = New System.Drawing.Size(304, 13)
         Me.Label6.TabIndex = 19
         Me.Label6.Text = "Statystyki plików o określonym rozszerzeniu (katalog download)"
         '
+        'Label7
+        '
+        Me.Label7.AutoSize = True
+        Me.Label7.Location = New System.Drawing.Point(18, 137)
+        Me.Label7.Name = "Label7"
+        Me.Label7.Size = New System.Drawing.Size(205, 13)
+        Me.Label7.TabIndex = 21
+        Me.Label7.Text = "Liczba plików zaznaczonych do usunięcia"
+        '
         'usuwanie_p_seg
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(674, 328)
+        Me.ClientSize = New System.Drawing.Size(652, 328)
+        Me.Controls.Add(Me.Label7)
+        Me.Controls.Add(Me.TextBox5)
         Me.Controls.Add(Me.Label6)
         Me.Controls.Add(Me.RichTextBox1)
         Me.Controls.Add(Me.Label9)
@@ -263,6 +288,8 @@ Partial Class usuwanie_p_seg
     Friend WithEvents RichTextBox1 As System.Windows.Forms.RichTextBox
     Friend WithEvents ToolTip1 As System.Windows.Forms.ToolTip
     Friend WithEvents Label6 As System.Windows.Forms.Label
+    Friend WithEvents TextBox5 As System.Windows.Forms.TextBox
+    Friend WithEvents Label7 As System.Windows.Forms.Label
 
 
 End Class

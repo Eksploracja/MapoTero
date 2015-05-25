@@ -209,8 +209,36 @@ errorhandler:
             RichTextBox1.ForeColor = System.Drawing.Color.Green
             RichTextBox1.Text = "Wskazano warstwę: " & ListBox1.SelectedItem
         End If
+        'tymczasowe komunikaty informujące o wybraniu WMS HGIS, który posiada zabójcze ograniczenia rozdzielczości
+        Select Case ListBox1.SelectedItem
+            Case "m25k"
+                TextBox9.Text = 250
+                RichTextBox1.ForeColor = System.Drawing.Color.Blue
+                RichTextBox1.Text = "Wybrałeś warstwę niemieckiej mapy topograficznej 1:25 000 Messtischblatt. Pokrywa ona swoim zasięgiem terytorium Zaboru Pruskiego. Wskazany WMS portalu hgis.cartomatic.pl, który posiada ograniczenia maksymalnego rozmiaru segmentu 256px."
+            Case "wig25k"
+                TextBox9.Text = 250
+                RichTextBox1.ForeColor = System.Drawing.Color.Blue
+                RichTextBox1.Text = "Wybrałeś warstwę polskiej mapy topograficznej 1:25 000 Wojskowego Instytutu Geograficznego. Pokrywa ona głównie środkową i północną część terytorium II RP. Wybrany WMS historycznych map hgis.cartomatic.pl,który posiada ograniczenia maksymalnego rozmiaru segmentu 256px."
 
+            Case "wig100k"
+                TextBox9.Text = 250
+                RichTextBox1.ForeColor = System.Drawing.Color.Blue
+                RichTextBox1.Text = "Wybrałeś warstwę polskiej mapy topograficznej 1:100 000 Wojskowego Instytutu Geograficznego. Pokrywa ona terytorium II RP. Wybrany WMS historycznych map hgis.cartomatic.pl,który posiada ograniczenia maksymalnego rozmiaru segmentu 256px."
+            Case "kdr"
+                TextBox9.Text = 250
+                RichTextBox1.ForeColor = System.Drawing.Color.Blue
+                RichTextBox1.Text = "Wybrałeś warstwę niemieckiej mapy topograficznej 1:100 000  Karte des Deutschen Reiches. Obejmuje ona terytorium Zaboru Pruskiego. Wybrany WMS historycznych map hgis.cartomatic.pl posiada ograniczenia maksymalnego rozmiaru segmentu 256px."
+            Case "kdr_gb"
+                TextBox9.Text = 250
+                RichTextBox1.ForeColor = System.Drawing.Color.Blue
+                RichTextBox1.Text = "Wybrałeś warstwę niemieckiej mapy topograficznej 1:100 000  Grossblatt. Obejmuje ona większość terytorium IIIRP. Wybrany WMS historycznych map hgis.cartomatic.pl posiada ograniczenia maksymalnego rozmiaru segmentu 256px."
+        End Select
+        If ListBox1.SelectedItem = "m25k" Or ListBox1.SelectedItem = "wig100k" Then
 
+            TextBox9.Text = 250
+            RichTextBox1.ForeColor = System.Drawing.Color.Green
+            RichTextBox1.Text = "Wybrałeś WMS historycznych map hgis.cartomatic.pl,który posiada ograniczenia maksymalnego rozmiaru segmentu 256px."
+        End If
 errororhandler:
     End Sub
 

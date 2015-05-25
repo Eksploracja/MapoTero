@@ -176,17 +176,7 @@ Module Module1
             GoTo errorhandler
         End If
 
-        'OBSŁUGA BŁĘDÓW - koniec (edit 1.04.2015 by Kazik)
 
-        'Dim przechowajFormat As String = format     'po odwołaniu się do form2 pitolił się format
-        'If pobierz = True Then
-        '   iloscProbPobrania = Val(Form2.TextBox1.Text)
-        '   przerwaMiedzyProbami = Val(Form2.TextBox2.Text)
-        ' End If
-        'format = przechowajFormat
-        'Form1.ToolStripStatusLabel2.Text = "." & format
-
-        'zapisywanie w tablicy składowych linku
         strUrlparts(0) = adresSerwera
 
         For i = 0 To nrWarstwy - 1
@@ -686,13 +676,7 @@ errorhandler:
             If Form1.FolderBrowserDialog1.ShowDialog = Windows.Forms.DialogResult.OK Then
                 folderSegmentow = Form1.FolderBrowserDialog1.SelectedPath & "\"
 
-                'End If
-                'Edit Kazik 6.04.2015 - likwidacja podwójnego komunikatu o niewybraniu warstwy
-                'Else
 
-                'If warstwy(0) = "" Then
-                'MsgBox("Nie wybrano żadnej warstwy.")
-                'GoTo errorhandler
             End If
 
         End If
