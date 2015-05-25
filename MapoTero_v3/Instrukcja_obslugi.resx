@@ -120,18 +120,12 @@
   <data name="RichTextBox1.Text" xml:space="preserve">
     <value>1. Wybierz z listy po lewej stronie okna programu warstwę mapy, którą chcesz pobrać klikając na nią jeden raz lewym klawiszem myszy. Nazwa prawidłowo zaznaczonej warstwy wyświetli się w polu "Wybrane warstwy";
 
-2. Określ zasięg pobieranego arkusza mapy, podając współrzędne XY lewego dolnego oraz prawego górnego narożnika obszaru. W tym celu wejdź na Geoportal2 http://mapy.geoportal.gov.pl/imap/  . W prawym górnym jego narożniku kliknij na ikonkę ustawienia widoczności "Pełny". Wówczas w dolnej części okna zobaczysz współrzędne XY położenia kursora myszy;
-    
-3. Określ współrzędne XY lewego dolnego oraz prawego górnego narożnika obszaru, który zamierzasz pobrać. Następnie przepisz je do formularza MapoTero o nazwie "Podaj zakres mapy";
-    
-4. Formularze "Metrów na pixel" i "Bok segmentu [px]" wypełniają się automatycznie. Nie zmieniaj ich, chyba że chcesz zmniejszyć rozdzielczość poszczególnych segmentów.Dopuszczalny rozmiar pojedyńczego segmentu to 2048px;
+2. Zaznacz na mapie prawym przyciskiem myszki zasięg obszaru do pobrania,
 
-5. Kliknij button "Pobierz". Rozpocznie się wówczas zapis segmentów map do katalogu "download". Pomyślnie zakończone pobieranie zostanie zakomunikowane w nowym okienku "Zakończono pobieranie";
+3. Kliknij button "Pobierz". Rozpocznie się wówczas zapis segmentów map do katalogu "download". 
 
-6. Pobrane segmenty map zapisują się w podkatalogu /download/
+4. Pobrane segmenty map zapisują się w podkatalogu /download/
 ----------------------------------------------------------------------
-
-Szczegółowa instrukcja obsługi do przedostatniej wersji programu MapoTero v2.5 www.adamv0.republika.pl/www/2gpsprogmapotero.html oraz instrukcja wideo na Youtube www.youtube.com/watch?v=CU7XWbPPf_Y
 
 Forum dyskusyjneMapoTero www.forum.eksploracja.pl/viewforum.php?f=205
 
