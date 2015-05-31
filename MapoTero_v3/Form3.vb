@@ -28,7 +28,7 @@ Public Class Form3
         On Error GoTo errorhandler
         FileClose(1) 'w razie gyby był otwarty
 
-        FileOpen(1, folderSegmentow & "\conf.txt", OpenMode.Input)
+        FileOpen(1, folderScalania & "\conf.txt", OpenMode.Input)
         Input(1, "folderSegmentow")
         Input(1, "rodzaj mapy")
         Input(1, TextBox4.Text)
@@ -114,7 +114,7 @@ errorhandler:
 
 
     Private Sub Button2_Click(sender As Object, e As EventArgs) Handles Button2.Click
-        Me.FolderBrowserDialog1.SelectedPath = folderSegmentow
+        Me.FolderBrowserDialog1.SelectedPath = myPath & "\download\"
         If FolderBrowserDialog1.ShowDialog = Windows.Forms.DialogResult.OK Then
             folderScalania = FolderBrowserDialog1.SelectedPath & "\"
             If File.Exists(folderScalania & "\conf.txt") = False Then

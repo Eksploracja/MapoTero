@@ -261,7 +261,6 @@ Partial Class usuwanie_p_seg
         Me.Icon = CType(resources.GetObject("$this.Icon"), System.Drawing.Icon)
         Me.Name = "usuwanie_p_seg"
         Me.Text = "Usuwanie pustych segmentów"
-        Me.TopMost = True
         Me.ResumeLayout(False)
         Me.PerformLayout()
 
