@@ -650,7 +650,7 @@ errorhandler:
         Dim mouseY As Double = e.Location.Y
         Dim mouseX As Double = e.Location.X
         Label36.BackColor = Color.Transparent
-        Label36.Location = New Point(mouseX - 60, mouseY - 10)
+        Label36.Location = New Point(mouseX - 140, mouseY - 10)
         'Label43.Text = "lat= " + Convert.ToString(Round(lat_mysz, 4)) + "   lng= " + Convert.ToString(Round(lng_mysz, 4))
         If kursorWGS84 = True Then
             Label36.Text = "lat= " + Convert.ToString(Round(lat_mysz, 4)) + "   lng= " + Convert.ToString(Round(lng_mysz, 4))
