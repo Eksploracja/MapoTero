@@ -79,6 +79,7 @@ Partial Class Form1
         Me.TextBox10 = New System.Windows.Forms.TextBox()
         Me.ToolTip1 = New System.Windows.Forms.ToolTip(Me.components)
         Me.GroupBox3 = New System.Windows.Forms.GroupBox()
+        Me.Button6 = New System.Windows.Forms.Button()
         Me.Label23 = New System.Windows.Forms.Label()
         Me.Label24 = New System.Windows.Forms.Label()
         Me.Label25 = New System.Windows.Forms.Label()
@@ -91,6 +92,7 @@ Partial Class Form1
         Me.Label14 = New System.Windows.Forms.Label()
         Me.Label11 = New System.Windows.Forms.Label()
         Me.Label13 = New System.Windows.Forms.Label()
+        Me.PictureBox1 = New System.Windows.Forms.PictureBox()
         Me.Button2 = New System.Windows.Forms.Button()
         Me.Button5 = New System.Windows.Forms.Button()
         Me.GroupBox4 = New System.Windows.Forms.GroupBox()
@@ -110,6 +112,9 @@ Partial Class Form1
         Me.TextBox6 = New System.Windows.Forms.TextBox()
         Me.Label42 = New System.Windows.Forms.Label()
         Me.Label7 = New System.Windows.Forms.Label()
+        Me.Button4 = New System.Windows.Forms.Button()
+        Me.Button8 = New System.Windows.Forms.Button()
+        Me.Button7 = New System.Windows.Forms.Button()
         Me.GMapControl1 = New GMap.NET.WindowsForms.GMapControl()
         Me.RadioButton1 = New System.Windows.Forms.RadioButton()
         Me.RadioButton2 = New System.Windows.Forms.RadioButton()
@@ -139,27 +144,27 @@ Partial Class Form1
         Me.Label3 = New System.Windows.Forms.Label()
         Me.TextBox2 = New System.Windows.Forms.TextBox()
         Me.TextBox1 = New System.Windows.Forms.TextBox()
-        Me.Button4 = New System.Windows.Forms.Button()
-        Me.Button8 = New System.Windows.Forms.Button()
-        Me.Button7 = New System.Windows.Forms.Button()
         Me.PictureBox2 = New System.Windows.Forms.PictureBox()
-        Me.Button6 = New System.Windows.Forms.Button()
-        Me.PictureBox1 = New System.Windows.Forms.PictureBox()
+        Me.Panel2 = New System.Windows.Forms.Panel()
+        Me.Panel3 = New System.Windows.Forms.Panel()
         Me.GroupBox2.SuspendLayout()
         Me.StatusStrip1.SuspendLayout()
         Me.MenuStrip1.SuspendLayout()
         Me.GroupBox3.SuspendLayout()
+        CType(Me.PictureBox1, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.GroupBox4.SuspendLayout()
         Me.GroupBox5.SuspendLayout()
         CType(Me.PictureBox2, System.ComponentModel.ISupportInitialize).BeginInit()
-        CType(Me.PictureBox1, System.ComponentModel.ISupportInitialize).BeginInit()
+        Me.Panel2.SuspendLayout()
+        Me.Panel3.SuspendLayout()
         Me.SuspendLayout()
         '
         'Button1
         '
+        Me.Button1.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.Button1.BackColor = System.Drawing.SystemColors.ActiveBorder
         Me.Button1.Font = New System.Drawing.Font("Microsoft Sans Serif", 12.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
-        Me.Button1.Location = New System.Drawing.Point(767, 594)
+        Me.Button1.Location = New System.Drawing.Point(110, 569)
         Me.Button1.Name = "Button1"
         Me.Button1.Size = New System.Drawing.Size(105, 36)
         Me.Button1.TabIndex = 6
@@ -174,7 +179,7 @@ Partial Class Form1
         Me.GroupBox2.Controls.Add(Me.Label29)
         Me.GroupBox2.Controls.Add(Me.ListBox1)
         Me.GroupBox2.Controls.Add(Me.ComboBox3)
-        Me.GroupBox2.Location = New System.Drawing.Point(660, 25)
+        Me.GroupBox2.Location = New System.Drawing.Point(5, 3)
         Me.GroupBox2.Name = "GroupBox2"
         Me.GroupBox2.Size = New System.Drawing.Size(212, 254)
         Me.GroupBox2.TabIndex = 210
@@ -233,9 +238,9 @@ Partial Class Form1
         'StatusStrip1
         '
         Me.StatusStrip1.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.ToolStripProgressBar1, Me.ToolStripStatusLabel2, Me.ToolStripStatusLabel1, Me.ToolStripStatusLabel3})
-        Me.StatusStrip1.Location = New System.Drawing.Point(0, 660)
+        Me.StatusStrip1.Location = New System.Drawing.Point(0, 662)
         Me.StatusStrip1.Name = "StatusStrip1"
-        Me.StatusStrip1.Size = New System.Drawing.Size(876, 22)
+        Me.StatusStrip1.Size = New System.Drawing.Size(878, 22)
         Me.StatusStrip1.TabIndex = 237
         Me.StatusStrip1.Text = "StatusStrip1"
         Me.ToolTip1.SetToolTip(Me.StatusStrip1, "Informacje o aktualnym formacie plików rastrowych oraz lokalizacji katalogu ""down" & _
@@ -267,8 +272,9 @@ Partial Class Form1
         '
         'Button3
         '
+        Me.Button3.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.Button3.Enabled = False
-        Me.Button3.Location = New System.Drawing.Point(767, 636)
+        Me.Button3.Location = New System.Drawing.Point(110, 613)
         Me.Button3.Name = "Button3"
         Me.Button3.Size = New System.Drawing.Size(105, 21)
         Me.Button3.TabIndex = 245
@@ -370,7 +376,7 @@ Partial Class Form1
         Me.MenuStrip1.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.SesjaToolStripMenuItem, Me.WarstwyToolStripMenuItem, Me.UstawieniaToolStripMenuItem, Me.HelpToolStripMenuItem})
         Me.MenuStrip1.Location = New System.Drawing.Point(0, 0)
         Me.MenuStrip1.Name = "MenuStrip1"
-        Me.MenuStrip1.Size = New System.Drawing.Size(876, 24)
+        Me.MenuStrip1.Size = New System.Drawing.Size(878, 24)
         Me.MenuStrip1.TabIndex = 230
         Me.MenuStrip1.Text = "MenuStrip1"
         '
@@ -469,7 +475,7 @@ Partial Class Form1
         Me.GroupBox3.Controls.Add(Me.Label11)
         Me.GroupBox3.Controls.Add(Me.Label13)
         Me.GroupBox3.Controls.Add(Me.PictureBox1)
-        Me.GroupBox3.Location = New System.Drawing.Point(662, 279)
+        Me.GroupBox3.Location = New System.Drawing.Point(5, 258)
         Me.GroupBox3.Name = "GroupBox3"
         Me.GroupBox3.Size = New System.Drawing.Size(210, 234)
         Me.GroupBox3.TabIndex = 268
@@ -478,6 +484,15 @@ Partial Class Form1
         Me.ToolTip1.SetToolTip(Me.GroupBox3, """Kanapka"" warstw. Pierwsza warstwa to bazowy podkład, który można przykryć kolejn" & _
         "ymi warstwami o wyższym numerze, o ile mają one przeźroczyste tło, lub mają niep" & _
         "ełne pokrycie.")
+        '
+        'Button6
+        '
+        Me.Button6.Image = Global.MapoTero.My.Resources.Resources.kosz
+        Me.Button6.Location = New System.Drawing.Point(4, 209)
+        Me.Button6.Name = "Button6"
+        Me.Button6.Size = New System.Drawing.Size(26, 22)
+        Me.Button6.TabIndex = 304
+        Me.Button6.UseVisualStyleBackColor = True
         '
         'Label23
         '
@@ -590,6 +605,15 @@ Partial Class Form1
         Me.Label13.TabIndex = 220
         Me.Label13.Text = "3)"
         '
+        'PictureBox1
+        '
+        Me.PictureBox1.Image = Global.MapoTero.My.Resources.Resources.kanapka_gis
+        Me.PictureBox1.Location = New System.Drawing.Point(92, 91)
+        Me.PictureBox1.Name = "PictureBox1"
+        Me.PictureBox1.Size = New System.Drawing.Size(113, 138)
+        Me.PictureBox1.TabIndex = 305
+        Me.PictureBox1.TabStop = False
+        '
         'Button2
         '
         Me.Button2.Font = New System.Drawing.Font("Microsoft Sans Serif", 14.25!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
@@ -631,7 +655,7 @@ Partial Class Form1
         Me.GroupBox4.Controls.Add(Me.TextBox5)
         Me.GroupBox4.Controls.Add(Me.TextBox6)
         Me.GroupBox4.Enabled = False
-        Me.GroupBox4.Location = New System.Drawing.Point(435, 519)
+        Me.GroupBox4.Location = New System.Drawing.Point(434, 3)
         Me.GroupBox4.Name = "GroupBox4"
         Me.GroupBox4.Size = New System.Drawing.Size(221, 141)
         Me.GroupBox4.TabIndex = 300
@@ -795,16 +819,55 @@ Partial Class Form1
         "ostanie podzielony pobierany obszar mapy.  Uwaga - maksymalna rozmiar segmentu d" & _
         "la Geoportalu2 wynosi 2048px")
         '
+        'Button4
+        '
+        Me.Button4.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.Button4.Font = New System.Drawing.Font("Microsoft Sans Serif", 6.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
+        Me.Button4.Image = Global.MapoTero.My.Resources.Resources.marker_ico
+        Me.Button4.Location = New System.Drawing.Point(39, 569)
+        Me.Button4.Margin = New System.Windows.Forms.Padding(0)
+        Me.Button4.Name = "Button4"
+        Me.Button4.Size = New System.Drawing.Size(30, 30)
+        Me.Button4.TabIndex = 306
+        Me.ToolTip1.SetToolTip(Me.Button4, "wyświetl rzeczywisty zasięg pobieranego obszaru, uwzględniający rozmiar siatki se" & _
+        "gmentów")
+        Me.Button4.UseVisualStyleBackColor = True
+        '
+        'Button8
+        '
+        Me.Button8.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.Button8.Image = Global.MapoTero.My.Resources.Resources.ico_merge
+        Me.Button8.Location = New System.Drawing.Point(5, 603)
+        Me.Button8.Margin = New System.Windows.Forms.Padding(0)
+        Me.Button8.Name = "Button8"
+        Me.Button8.Size = New System.Drawing.Size(30, 30)
+        Me.Button8.TabIndex = 305
+        Me.ToolTip1.SetToolTip(Me.Button8, "złącz pobrane segmenty w jeden arkusz")
+        Me.Button8.UseVisualStyleBackColor = True
+        '
+        'Button7
+        '
+        Me.Button7.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.Button7.Image = Global.MapoTero.My.Resources.Resources.ico_folder
+        Me.Button7.Location = New System.Drawing.Point(5, 569)
+        Me.Button7.Margin = New System.Windows.Forms.Padding(0)
+        Me.Button7.Name = "Button7"
+        Me.Button7.Size = New System.Drawing.Size(30, 30)
+        Me.Button7.TabIndex = 304
+        Me.ToolTip1.SetToolTip(Me.Button7, "wyświetl folder segmentów")
+        Me.Button7.UseVisualStyleBackColor = True
+        '
         'GMapControl1
         '
         Me.GMapControl1.Bearing = 0.0!
         Me.GMapControl1.CanDragMap = True
         Me.GMapControl1.Cursor = System.Windows.Forms.Cursors.Hand
+        Me.GMapControl1.Dock = System.Windows.Forms.DockStyle.Fill
         Me.GMapControl1.EmptyTileColor = System.Drawing.Color.Navy
         Me.GMapControl1.GrayScaleMode = False
         Me.GMapControl1.HelperLineOption = GMap.NET.WindowsForms.HelperLineOptions.DontShow
         Me.GMapControl1.LevelsKeepInMemmory = 5
-        Me.GMapControl1.Location = New System.Drawing.Point(4, 26)
+        Me.GMapControl1.Location = New System.Drawing.Point(0, 24)
         Me.GMapControl1.MarkersEnabled = True
         Me.GMapControl1.MaxZoom = 17
         Me.GMapControl1.MinZoom = 3
@@ -817,12 +880,13 @@ Partial Class Form1
         Me.GMapControl1.ScaleMode = GMap.NET.WindowsForms.ScaleModes.Fractional
         Me.GMapControl1.SelectedAreaFillColor = System.Drawing.Color.FromArgb(CType(CType(33, Byte), Integer), CType(CType(65, Byte), Integer), CType(CType(105, Byte), Integer), CType(CType(225, Byte), Integer))
         Me.GMapControl1.ShowTileGridLines = False
-        Me.GMapControl1.Size = New System.Drawing.Size(652, 487)
+        Me.GMapControl1.Size = New System.Drawing.Size(661, 491)
         Me.GMapControl1.TabIndex = 249
         Me.GMapControl1.Zoom = 0.0R
         '
         'RadioButton1
         '
+        Me.RadioButton1.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.RadioButton1.AutoSize = True
         Me.RadioButton1.Checked = True
         Me.RadioButton1.Location = New System.Drawing.Point(545, 29)
@@ -835,6 +899,7 @@ Partial Class Form1
         '
         'RadioButton2
         '
+        Me.RadioButton2.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.RadioButton2.AutoSize = True
         Me.RadioButton2.Location = New System.Drawing.Point(544, 51)
         Me.RadioButton2.Name = "RadioButton2"
@@ -845,6 +910,7 @@ Partial Class Form1
         '
         'RadioButton3
         '
+        Me.RadioButton3.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.RadioButton3.AutoSize = True
         Me.RadioButton3.Location = New System.Drawing.Point(544, 73)
         Me.RadioButton3.Name = "RadioButton3"
@@ -855,6 +921,7 @@ Partial Class Form1
         '
         'Label35
         '
+        Me.Label35.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.Label35.AutoSize = True
         Me.Label35.BackColor = System.Drawing.SystemColors.ActiveCaptionText
         Me.Label35.Location = New System.Drawing.Point(528, 499)
@@ -865,6 +932,7 @@ Partial Class Form1
         '
         'Label37
         '
+        Me.Label37.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.Label37.AutoSize = True
         Me.Label37.BackColor = System.Drawing.SystemColors.ActiveCaptionText
         Me.Label37.Location = New System.Drawing.Point(455, 499)
@@ -875,6 +943,7 @@ Partial Class Form1
         '
         'Label38
         '
+        Me.Label38.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.Label38.AutoSize = True
         Me.Label38.BackColor = System.Drawing.SystemColors.ActiveCaptionText
         Me.Label38.Location = New System.Drawing.Point(455, 482)
@@ -885,6 +954,7 @@ Partial Class Form1
         '
         'Label39
         '
+        Me.Label39.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
         Me.Label39.AutoSize = True
         Me.Label39.BackColor = System.Drawing.SystemColors.ActiveCaptionText
         Me.Label39.Location = New System.Drawing.Point(6, 481)
@@ -895,6 +965,7 @@ Partial Class Form1
         '
         'Label40
         '
+        Me.Label40.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
         Me.Label40.AutoSize = True
         Me.Label40.BackColor = System.Drawing.SystemColors.ActiveCaptionText
         Me.Label40.Location = New System.Drawing.Point(7, 498)
@@ -905,6 +976,7 @@ Partial Class Form1
         '
         'Label41
         '
+        Me.Label41.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
         Me.Label41.AutoSize = True
         Me.Label41.BackColor = System.Drawing.SystemColors.ActiveCaptionText
         Me.Label41.Location = New System.Drawing.Point(46, 498)
@@ -915,6 +987,7 @@ Partial Class Form1
         '
         'Label63
         '
+        Me.Label63.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.Label63.AutoSize = True
         Me.Label63.BackColor = System.Drawing.SystemColors.ActiveCaptionText
         Me.Label63.Location = New System.Drawing.Point(609, 499)
@@ -934,6 +1007,7 @@ Partial Class Form1
         '
         'Label66
         '
+        Me.Label66.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.Label66.AutoSize = True
         Me.Label66.BackColor = System.Drawing.SystemColors.ActiveCaptionText
         Me.Label66.Location = New System.Drawing.Point(576, 499)
@@ -956,10 +1030,11 @@ Partial Class Form1
         '
         'RichTextBox1
         '
+        Me.RichTextBox1.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.RichTextBox1.BackColor = System.Drawing.SystemColors.ButtonFace
         Me.RichTextBox1.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
         Me.RichTextBox1.ForeColor = System.Drawing.SystemColors.WindowText
-        Me.RichTextBox1.Location = New System.Drawing.Point(662, 523)
+        Me.RichTextBox1.Location = New System.Drawing.Point(5, 500)
         Me.RichTextBox1.Name = "RichTextBox1"
         Me.RichTextBox1.Size = New System.Drawing.Size(210, 65)
         Me.RichTextBox1.TabIndex = 301
@@ -967,6 +1042,7 @@ Partial Class Form1
         '
         'Label36
         '
+        Me.Label36.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
         Me.Label36.AutoSize = True
         Me.Label36.Location = New System.Drawing.Point(83, 499)
         Me.Label36.Name = "Label36"
@@ -998,7 +1074,7 @@ Partial Class Form1
         Me.GroupBox5.Controls.Add(Me.TextBox2)
         Me.GroupBox5.Controls.Add(Me.TextBox1)
         Me.GroupBox5.Controls.Add(Me.PictureBox2)
-        Me.GroupBox5.Location = New System.Drawing.Point(6, 519)
+        Me.GroupBox5.Location = New System.Drawing.Point(5, 3)
         Me.GroupBox5.Name = "GroupBox5"
         Me.GroupBox5.Size = New System.Drawing.Size(418, 141)
         Me.GroupBox5.TabIndex = 303
@@ -1125,41 +1201,6 @@ Partial Class Form1
         Me.TextBox1.TabIndex = 304
         Me.TextBox1.Text = "682000"
         '
-        'Button4
-        '
-        Me.Button4.Font = New System.Drawing.Font("Microsoft Sans Serif", 6.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
-        Me.Button4.Image = Global.MapoTero.My.Resources.Resources.marker_ico
-        Me.Button4.Location = New System.Drawing.Point(695, 593)
-        Me.Button4.Margin = New System.Windows.Forms.Padding(0)
-        Me.Button4.Name = "Button4"
-        Me.Button4.Size = New System.Drawing.Size(30, 30)
-        Me.Button4.TabIndex = 306
-        Me.ToolTip1.SetToolTip(Me.Button4, "wyświetl rzeczywisty zasięg pobieranego obszaru, uwzględniający rozmiar siatki se" & _
-        "gmentów")
-        Me.Button4.UseVisualStyleBackColor = True
-        '
-        'Button8
-        '
-        Me.Button8.Image = Global.MapoTero.My.Resources.Resources.ico_merge
-        Me.Button8.Location = New System.Drawing.Point(662, 626)
-        Me.Button8.Margin = New System.Windows.Forms.Padding(0)
-        Me.Button8.Name = "Button8"
-        Me.Button8.Size = New System.Drawing.Size(30, 30)
-        Me.Button8.TabIndex = 305
-        Me.ToolTip1.SetToolTip(Me.Button8, "złącz pobrane segmenty w jeden arkusz")
-        Me.Button8.UseVisualStyleBackColor = True
-        '
-        'Button7
-        '
-        Me.Button7.Image = Global.MapoTero.My.Resources.Resources.ico_folder
-        Me.Button7.Location = New System.Drawing.Point(662, 593)
-        Me.Button7.Margin = New System.Windows.Forms.Padding(0)
-        Me.Button7.Name = "Button7"
-        Me.Button7.Size = New System.Drawing.Size(30, 30)
-        Me.Button7.TabIndex = 304
-        Me.ToolTip1.SetToolTip(Me.Button7, "wyświetl folder segmentów")
-        Me.Button7.UseVisualStyleBackColor = True
-        '
         'PictureBox2
         '
         Me.PictureBox2.Image = Global.MapoTero.My.Resources.Resources.siatka
@@ -1169,49 +1210,47 @@ Partial Class Form1
         Me.PictureBox2.TabIndex = 303
         Me.PictureBox2.TabStop = False
         '
-        'Button6
+        'Panel2
         '
-        Me.Button6.Image = Global.MapoTero.My.Resources.Resources.kosz
-        Me.Button6.Location = New System.Drawing.Point(4, 209)
-        Me.Button6.Name = "Button6"
-        Me.Button6.Size = New System.Drawing.Size(26, 22)
-        Me.Button6.TabIndex = 304
-        Me.Button6.UseVisualStyleBackColor = True
+        Me.Panel2.Controls.Add(Me.GroupBox2)
+        Me.Panel2.Controls.Add(Me.Button4)
+        Me.Panel2.Controls.Add(Me.GroupBox3)
+        Me.Panel2.Controls.Add(Me.Button8)
+        Me.Panel2.Controls.Add(Me.RichTextBox1)
+        Me.Panel2.Controls.Add(Me.Button7)
+        Me.Panel2.Controls.Add(Me.Button1)
+        Me.Panel2.Controls.Add(Me.Button3)
+        Me.Panel2.Dock = System.Windows.Forms.DockStyle.Right
+        Me.Panel2.Location = New System.Drawing.Point(661, 24)
+        Me.Panel2.Name = "Panel2"
+        Me.Panel2.Size = New System.Drawing.Size(217, 638)
+        Me.Panel2.TabIndex = 307
         '
-        'PictureBox1
+        'Panel3
         '
-        Me.PictureBox1.Image = Global.MapoTero.My.Resources.Resources.kanapka_gis
-        Me.PictureBox1.Location = New System.Drawing.Point(92, 91)
-        Me.PictureBox1.Name = "PictureBox1"
-        Me.PictureBox1.Size = New System.Drawing.Size(113, 138)
-        Me.PictureBox1.TabIndex = 305
-        Me.PictureBox1.TabStop = False
+        Me.Panel3.Controls.Add(Me.GroupBox5)
+        Me.Panel3.Controls.Add(Me.GroupBox4)
+        Me.Panel3.Dock = System.Windows.Forms.DockStyle.Bottom
+        Me.Panel3.Location = New System.Drawing.Point(0, 515)
+        Me.Panel3.Name = "Panel3"
+        Me.Panel3.Size = New System.Drawing.Size(661, 147)
+        Me.Panel3.TabIndex = 308
         '
         'Form1
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.AutoScroll = True
-        Me.ClientSize = New System.Drawing.Size(876, 682)
-        Me.Controls.Add(Me.Button4)
-        Me.Controls.Add(Me.Button8)
-        Me.Controls.Add(Me.Button7)
-        Me.Controls.Add(Me.GroupBox5)
+        Me.ClientSize = New System.Drawing.Size(878, 684)
         Me.Controls.Add(Me.Label36)
-        Me.Controls.Add(Me.RichTextBox1)
         Me.Controls.Add(Me.Label41)
         Me.Controls.Add(Me.Label40)
         Me.Controls.Add(Me.Label39)
-        Me.Controls.Add(Me.GroupBox4)
-        Me.Controls.Add(Me.Button3)
-        Me.Controls.Add(Me.Button1)
-        Me.Controls.Add(Me.Label67)
         Me.Controls.Add(Me.Button5)
         Me.Controls.Add(Me.Button2)
         Me.Controls.Add(Me.Label66)
         Me.Controls.Add(Me.Label65)
         Me.Controls.Add(Me.Label63)
-        Me.Controls.Add(Me.GroupBox3)
         Me.Controls.Add(Me.Label38)
         Me.Controls.Add(Me.Label37)
         Me.Controls.Add(Me.Label35)
@@ -1219,15 +1258,16 @@ Partial Class Form1
         Me.Controls.Add(Me.RadioButton2)
         Me.Controls.Add(Me.RadioButton1)
         Me.Controls.Add(Me.GMapControl1)
+        Me.Controls.Add(Me.Panel3)
+        Me.Controls.Add(Me.Panel2)
+        Me.Controls.Add(Me.Label67)
         Me.Controls.Add(Me.StatusStrip1)
         Me.Controls.Add(Me.Panel1)
-        Me.Controls.Add(Me.GroupBox2)
         Me.Controls.Add(Me.MenuStrip1)
         Me.DoubleBuffered = True
         Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle
         Me.Icon = CType(resources.GetObject("$this.Icon"), System.Drawing.Icon)
         Me.MainMenuStrip = Me.MenuStrip1
-        Me.MaximizeBox = False
         Me.Name = "Form1"
         Me.GroupBox2.ResumeLayout(False)
         Me.GroupBox2.PerformLayout()
@@ -1237,12 +1277,14 @@ Partial Class Form1
         Me.MenuStrip1.PerformLayout()
         Me.GroupBox3.ResumeLayout(False)
         Me.GroupBox3.PerformLayout()
+        CType(Me.PictureBox1, System.ComponentModel.ISupportInitialize).EndInit()
         Me.GroupBox4.ResumeLayout(False)
         Me.GroupBox4.PerformLayout()
         Me.GroupBox5.ResumeLayout(False)
         Me.GroupBox5.PerformLayout()
         CType(Me.PictureBox2, System.ComponentModel.ISupportInitialize).EndInit()
-        CType(Me.PictureBox1, System.ComponentModel.ISupportInitialize).EndInit()
+        Me.Panel2.ResumeLayout(False)
+        Me.Panel3.ResumeLayout(False)
         Me.ResumeLayout(False)
         Me.PerformLayout()
 
@@ -1350,5 +1392,7 @@ Partial Class Form1
     Friend WithEvents Label7 As System.Windows.Forms.Label
     Friend WithEvents PictureBox1 As System.Windows.Forms.PictureBox
     Friend WithEvents Button4 As System.Windows.Forms.Button
+    Friend WithEvents Panel2 As System.Windows.Forms.Panel
+    Friend WithEvents Panel3 As System.Windows.Forms.Panel
 
 End Class
