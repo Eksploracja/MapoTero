@@ -532,7 +532,6 @@ Partial Class Form3
         Me.Icon = CType(resources.GetObject("$this.Icon"), System.Drawing.Icon)
         Me.Name = "Form3"
         Me.Text = "Złączanie segmentów w jeden plik"
-        Me.TopMost = True
         Me.GroupBox1.ResumeLayout(False)
         Me.GroupBox1.PerformLayout()
         Me.groupBox2.ResumeLayout(False)

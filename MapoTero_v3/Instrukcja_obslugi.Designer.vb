@@ -43,7 +43,6 @@ Partial Class Instrukcja_Obslugi
         Me.Icon = CType(resources.GetObject("$this.Icon"), System.Drawing.Icon)
         Me.Name = "Instrukcja_Obslugi"
         Me.Text = "Skrócona instrukcja obsługi programu"
-        Me.TopMost = True
         Me.ResumeLayout(False)
 
     End Sub

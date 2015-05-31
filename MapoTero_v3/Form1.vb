@@ -19,6 +19,9 @@ Imports System.IO
 Imports System.Windows.Forms
 Imports GMap.NET
 Imports GMap.NET.MapProviders
+Imports GMap.NET.WindowsForms.Markers
+Imports GMap.NET.WindowsForms.ToolTips
+Imports GMap.NET.WindowsForms
 
 Public Class Form1
 
@@ -26,7 +29,7 @@ Public Class Form1
 
 
 
-	<System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1305:SpecifyIFormatProvider", MessageId := "System.Double.ToString")> _
+    <System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1305:SpecifyIFormatProvider", MessageId:="System.Double.ToString")> _
     Private Sub Form1_Load(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MyBase.Load
 
         'wyświetla nazwę i wersję 
@@ -130,7 +133,7 @@ Public Class Form1
                 'Module1.rozszerzenie = "svg"
                 '==> dopóki svg nie działa będzie tak:
                 MsgBox("Ten format jeszcze nie działa :o(", , "Zmień format.")
-                Form2.Show()
+                Form2.ShowDialog()
                 GoTo errorhandler
 
         End Select
@@ -247,25 +250,25 @@ errororhandler:
         TextBox8.Text = Val(TextBox11.Text) * Val(TextBox9.Text)
         TextBox11.Text = Math.Ceiling(((Val(TextBox4.Text) - Val(TextBox2.Text))) / (Val(TextBox10.Text) * Val(TextBox9.Text)))
         TextBox12.Text = Math.Ceiling(((Val(TextBox3.Text) - Val(TextBox1.Text))) / (Val(TextBox10.Text) * Val(TextBox9.Text)))
-        End Sub
+    End Sub
     Private Sub TextBox4_TextChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles TextBox4.TextChanged
         TextBox5.Text = (Math.Ceiling(((Val(TextBox4.Text) - Val(TextBox2.Text))) / (Val(TextBox10.Text) * Val(TextBox9.Text))) * Val(TextBox9.Text) * Val(TextBox10.Text)) / 1000
         TextBox8.Text = Val(TextBox11.Text) * Val(TextBox9.Text)
         TextBox11.Text = Math.Ceiling(((Val(TextBox4.Text) - Val(TextBox2.Text))) / (Val(TextBox10.Text) * Val(TextBox9.Text)))
         TextBox12.Text = Math.Ceiling(((Val(TextBox3.Text) - Val(TextBox1.Text))) / (Val(TextBox10.Text) * Val(TextBox9.Text)))
-        End Sub
+    End Sub
     Private Sub TextBox1_TextChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles TextBox1.TextChanged
         TextBox6.Text = (Math.Ceiling(((Val(TextBox3.Text) - Val(TextBox1.Text))) / (Val(TextBox10.Text) * Val(TextBox9.Text))) * Val(TextBox9.Text) * Val(TextBox10.Text)) / 1000
         TextBox7.Text = Val(TextBox12.Text) * Val(TextBox9.Text)
         TextBox11.Text = Math.Ceiling(((Val(TextBox4.Text) - Val(TextBox2.Text))) / (Val(TextBox10.Text) * Val(TextBox9.Text)))
         TextBox12.Text = Math.Ceiling(((Val(TextBox3.Text) - Val(TextBox1.Text))) / (Val(TextBox10.Text) * Val(TextBox9.Text)))
-         End Sub
+    End Sub
     Private Sub TextBox3_TextChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles TextBox3.TextChanged
-         TextBox6.Text = (Math.Ceiling(((Val(TextBox3.Text) - Val(TextBox1.Text))) / (Val(TextBox10.Text) * Val(TextBox9.Text))) * Val(TextBox9.Text) * Val(TextBox10.Text)) / 1000
+        TextBox6.Text = (Math.Ceiling(((Val(TextBox3.Text) - Val(TextBox1.Text))) / (Val(TextBox10.Text) * Val(TextBox9.Text))) * Val(TextBox9.Text) * Val(TextBox10.Text)) / 1000
         TextBox7.Text = Val(TextBox12.Text) * Val(TextBox9.Text)
         TextBox11.Text = Math.Ceiling(((Val(TextBox4.Text) - Val(TextBox2.Text))) / (Val(TextBox10.Text) * Val(TextBox9.Text)))
         TextBox12.Text = Math.Ceiling(((Val(TextBox3.Text) - Val(TextBox1.Text))) / (Val(TextBox10.Text) * Val(TextBox9.Text)))
-        End Sub
+    End Sub
     Private Sub TextBox9_TextChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles TextBox9.TextChanged
         TextBox5.Text = (Math.Ceiling(((Val(TextBox4.Text) - Val(TextBox2.Text))) / (Val(TextBox10.Text) * Val(TextBox9.Text))) * Val(TextBox9.Text) * Val(TextBox10.Text)) / 1000
         TextBox6.Text = (Math.Ceiling(((Val(TextBox3.Text) - Val(TextBox1.Text))) / (Val(TextBox10.Text) * Val(TextBox9.Text))) * Val(TextBox9.Text) * Val(TextBox10.Text)) / 1000
@@ -284,7 +287,7 @@ errororhandler:
         TextBox12.Text = Math.Ceiling(((Val(TextBox3.Text) - Val(TextBox1.Text))) / (Val(TextBox10.Text) * Val(TextBox9.Text)))
         TextBox13.Text = (Val(TextBox10.Text) * Val(TextBox9.Text)) / 1000
     End Sub
-    
+
     Private Sub ZapiszToolStripMenuItem_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles ZapiszToolStripMenuItem.Click
         Module1.utworzPlikConf()
         RichTextBox1.ForeColor = System.Drawing.Color.Green
@@ -299,19 +302,19 @@ errororhandler:
     End Sub
 
     Private Sub OtwórzOknoUstawieńToolStripMenuItem_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles UstawieniaToolStripMenuItem.Click
-        Form2.Show()
+        Form2.ShowDialog()
     End Sub
 
     Private Sub AboutToolStripMenuItem_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles AboutToolStripMenuItem.Click
-        AboutBox1.Show()
+        AboutBox1.ShowDialog()
     End Sub
 
     Private Sub PomocPomorskieForumEksploracyjneToolStripMenuItem_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles PomocPomorskieForumEksploracyjneToolStripMenuItem.Click
-        pomoc_pfe.Show()
+        pomoc_pfe.ShowDialog()
     End Sub
 
     Private Sub Instrukcja_obslugi_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles InstrukcjaObsługiToolStripMenuItem.Click
-        Instrukcja_Obslugi.Show()
+        Instrukcja_Obslugi.ShowDialog()
     End Sub
 
     Public Sub wczytaj_lastsettings()
@@ -363,7 +366,7 @@ errororhandler:
         FileClose(1)
 
         'wczytywanie ostatnio zapisanej pozycji okna mapy
-      Me.GMapControl1.Zoom = Val(Label65.Text)
+        Me.GMapControl1.Zoom = Val(Label65.Text)
         Me.GMapControl1.Position = New PointLatLng(Val(Label35.Text.ToString), Val(Label63.Text.ToString))
 
 
@@ -380,7 +383,7 @@ brakpliku:
 
         If form1loaded = True Then
             'Me.FolderBrowserDialog1.RootFolder = System.Environment.SpecialFolder.MyComputer
-            Me.FolderBrowserDialog1.SelectedPath = folderSegmentow
+            Me.FolderBrowserDialog1.SelectedPath = myPath & "\download\"
             If Me.FolderBrowserDialog1.ShowDialog = Windows.Forms.DialogResult.OK Then
                 folderSegmentow = Me.FolderBrowserDialog1.SelectedPath & "\"
             End If
@@ -432,24 +435,8 @@ brakpliku:
         FileClose(1)
 
         If formatNaProbe <> Module1.format Then
-            'MsgBox("Ustawiłeś rozszerzenie pobieranych plików na " & "." & Module1.format & Chr(13) & Chr(10) & _
-            '"podczas gdy rozszerzenie z wczytanej sesji to " & "." & formatNaProbe & Chr(13) & Chr(10) & _
-            'Chr(13) & Chr(10) & _
-            '"Program zamienił rozszerzenie na ." & formatNaProbe, , "ZMIENIONO ROZSZERZENIE")
+
             Module1.format = formatNaProbe
-
-
-            'Dim combobox1index As Integer
-            'Dim last As Integer
-
-            'combobox1index = 0
-
-            'last = Form2.ComboBox1.Items.Count - 1
-            'Do Until Form2.ComboBox1.Items.Item(combobox1index) = formatNaProbe Or combobox1index < last
-            'combobox1index = combobox1index + 1
-            'Loop
-
-            'Form2.ComboBox1.SelectedIndex = combobox1index
 
         End If
 
@@ -587,10 +574,10 @@ errorhandler:
     End Sub
 
     Private Sub UsuńPusteSegmentyToolStripMenuItem_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles UsuwaniePustychSegmentówToolStripMenuItem.Click
-        usuwanie_p_seg.Show()
+        usuwanie_p_seg.ShowDialog()
     End Sub
     Private Sub SkładajWarstwyToolStripMenuItem_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles NakładanieWarstwNaSiebieToolStripMenuItem.Click
-        nakladanie_map.Show()
+        Nakladanie_Map.ShowDialog()
     End Sub
 
     Private Sub RadioButton1_CheckedChanged(sender As Object, e As EventArgs) Handles RadioButton1.CheckedChanged
@@ -689,10 +676,10 @@ errorhandler:
     End Sub
 
     Private Sub ScalanieToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles ScalanieToolStripMenuItem.Click
-        Form3.Show()
+        Form3.ShowDialog()
     End Sub
 
-    
+
     Private Sub Label11_TextChanged(sender As Object, e As EventArgs) Handles Label11.TextChanged
         If warstwy(0) <> "" Then
             Button6.Enabled = True
@@ -703,11 +690,16 @@ errorhandler:
 
 
     Private Sub Button7_Click(sender As Object, e As EventArgs) Handles Button7.Click
-        Process.Start(folderSegmentow)
+        If Directory.Exists(myPath & "\download\") = False Then
+            Directory.CreateDirectory(myPath & "\download\")
+            Process.Start(myPath & "\download")
+        Else
+            Process.Start(myPath & "\download")
+        End If
     End Sub
 
     Private Sub Button8_Click(sender As Object, e As EventArgs) Handles Button8.Click
-        Form3.Show()
+        Form3.ShowDialog()
     End Sub
 
     Private Sub Button6_Click(sender As Object, e As EventArgs) Handles Button6.Click
@@ -732,8 +724,76 @@ errorhandler:
 
 
     End Sub
+
+    'markery rzeczywistego zasięgu pobieranej mapy
+    Private Sub Button4_Click_1(sender As Object, e As EventArgs) Handles Button4.Click
+        Me.GMapControl1.Overlays.Clear()
+
+        Dim Lx As Long                           'używane w segmentach
+        Dim Ly As Long
+        Dim Px As Long
+        Dim Py As Long
+
+        
+
+        Lx = TextBox1.Text
+        Ly = TextBox2.Text
+        Px = TextBox1.Text + (Val(TextBox10.Text) * Val(TextBox9.Text) * Val(TextBox12.Text))
+        Py = TextBox2.Text + (Val(TextBox10.Text) * Val(TextBox9.Text) * Val(TextBox11.Text))
+       
+
+        Dim MMPLL1sz As Double  'lewy górny
+        Dim MMPLL1dl As Double
+        Dim MMPLL2sz As Double  'prawy górny
+        Dim MMPLL2dl As Double
+        Dim MMPLL3sz As Double  'prawy dolny
+        Dim MMPLL3dl As Double
+        Dim MMPLL4sz As Double  'lewy dolny
+        Dim MMPLL4dl As Double
+
+        MMPLL1sz = Round(SzerokoscWgs_z1992(Px, Ly), 13)
+        MMPLL1dl = Round(DlugoscWgs_z1992(Px, Ly), 13)
+        MMPLL2sz = Round(SzerokoscWgs_z1992(Px, Py), 13)
+        MMPLL2dl = Round(DlugoscWgs_z1992(Px, Py), 13)
+        MMPLL3sz = Round(SzerokoscWgs_z1992(Lx, Py), 13)
+        MMPLL3dl = Round(DlugoscWgs_z1992(Lx, Py), 13)
+        MMPLL4sz = Round(SzerokoscWgs_z1992(Lx, Ly), 13)
+        MMPLL4dl = Round(DlugoscWgs_z1992(Lx, Ly), 13)
+
+        Dim markersOverlay As GMapOverlay = New GMapOverlay("markers")
+
+        Dim marker0 As GMarkerGoogle = New GMarkerGoogle(New PointLatLng(MMPLL1sz, MMPLL1dl), GMarkerGoogleType.red_small)
+        Dim marker1 As GMarkerGoogle = New GMarkerGoogle(New PointLatLng(MMPLL2sz, MMPLL2dl), GMarkerGoogleType.red_small)
+        Dim marker2 As GMarkerGoogle = New GMarkerGoogle(New PointLatLng(MMPLL3sz, MMPLL3dl), GMarkerGoogleType.red_small)
+        Dim marker3 As GMarkerGoogle = New GMarkerGoogle(New PointLatLng(MMPLL4sz, MMPLL4dl), GMarkerGoogleType.red_small) 'lewy dolny naroznik zaznaczenia
+        'markersOverlay.Markers.Add(marker0)
+        markersOverlay.Markers.Add(marker0)
+        markersOverlay.Markers.Add(marker1)
+        markersOverlay.Markers.Add(marker2)
+        markersOverlay.Markers.Add(marker3)
+        Me.GMapControl1.Overlays.Add(markersOverlay)
+       
+
+        'centrowanie obrazu po wyświetleniu markerów
+
+        Dim Lx_cent As Double
+        Dim Ly_cent As Double
+        Dim Lx_cent84 As Double
+        Dim Ly_cent84 As Double
+        Lx_cent = TextBox1.Text
+        Ly_cent = TextBox2.Text
+
+        Lx_cent = TextBox1.Text + ((Val(TextBox10.Text) * Val(TextBox9.Text) * Val(TextBox12.Text)) * 0.5)
+        Ly_cent = TextBox2.Text + ((Val(TextBox10.Text) * Val(TextBox9.Text) * Val(TextBox11.Text)) * 0.5)
+       
+        Lx_cent84 = SzerokoscWgs_z1992(Lx_cent, Ly_cent)
+        Ly_cent84 = Round(DlugoscWgs_z1992(Lx_cent, Ly_cent), 13)
+        
+        Me.GMapControl1.Position = New PointLatLng(Lx_cent84, Ly_cent84)
+
+
+    End Sub
 End Class
 
 
 
-      

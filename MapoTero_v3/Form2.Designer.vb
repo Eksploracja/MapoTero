@@ -486,7 +486,6 @@ Partial Class Form2
         Me.RightToLeftLayout = True
         Me.Text = "Ustawienia"
         Me.ToolTip1.SetToolTip(Me, "Przywróć domyślne ustawienia programu")
-        Me.TopMost = True
         Me.GroupBox1.ResumeLayout(False)
         Me.GroupBox1.PerformLayout()
         Me.GroupBox2.ResumeLayout(False)

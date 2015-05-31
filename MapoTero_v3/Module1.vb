@@ -289,31 +289,11 @@ pobieranieJeszczeRaz:
 
 
 
-
-
-
-
                 Lx = (Val(Form1.TextBox1.Text) + ((Val(Form1.TextBox9.Text) * Val(Form1.TextBox10.Text)) * (ileSegVert - pion)))
                 Ly = (Val(Form1.TextBox2.Text) + ((Val(Form1.TextBox9.Text) * Val(Form1.TextBox10.Text)) * (poz - 1)))
                 Px = (Lx + (Val(Form1.TextBox9.Text) * Val(Form1.TextBox10.Text)))
                 Py = (Ly + (Val(Form1.TextBox9.Text) * Val(Form1.TextBox10.Text)))
 
-
-
-
-                ' Select georef_scalanie_qgis
-
-                'Case False
-                'Lx = (Val(Form1.TextBox1.Text) + ((Val(Form1.TextBox9.Text) * Val(Form1.TextBox10.Text)) * (ileSegVert - pion)))
-                'Ly = (Val(Form1.TextBox2.Text) + ((Val(Form1.TextBox9.Text) * Val(Form1.TextBox10.Text)) * (poz - 1)))
-                'Px = (Lx + (Val(Form1.TextBox9.Text) * Val(Form1.TextBox10.Text)))
-                'Py = (Ly + (Val(Form1.TextBox9.Text) * Val(Form1.TextBox10.Text)))
-                'Case True
-                ''Lx = (Val(Form1.TextBox1.Text) + ((Val(Form1.TextBox9.Text) * Val(Form1.TextBox12.Text))))
-                ''Ly = (Val(Form1.TextBox2.Text) + ((Val(Form1.TextBox9.Text) * Val(Form1.TextBox11.Text))))
-                ''Px = (Lx + (Val(Form1.TextBox9.Text) * Val(Form1.TextBox12.Text)))
-                ''Py = (Ly + (Val(Form1.TextBox9.Text) * Val(Form1.TextBox12.Text)))
-                'End Select
 
 
 
@@ -412,7 +392,7 @@ pobieranieJeszczeRaz:
 
 
         Form1.RichTextBox1.ForeColor = System.Drawing.Color.Green
-        Form1.RichTextBox1.Text = "Zakończono pobieranie"
+        Form1.RichTextBox1.Text = "Zakończono pobieranie. Mapa znajduje się w katalogu /download"
 
 errorhandler:
 
