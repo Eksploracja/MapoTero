@@ -81,6 +81,9 @@ Public Class Form1
             Me.GMapControl1.Zoom = 6
         End If
 
+        
+
+
 
         'przypisuje wartość zmiennej publicznej nrWarstwy
         nrWarstwy = 0
@@ -277,6 +280,10 @@ errororhandler:
         TextBox11.Text = Math.Ceiling(((Val(TextBox4.Text) - Val(TextBox2.Text))) / (Val(TextBox10.Text) * Val(TextBox9.Text)))
         TextBox12.Text = Math.Ceiling(((Val(TextBox3.Text) - Val(TextBox1.Text))) / (Val(TextBox10.Text) * Val(TextBox9.Text)))
         TextBox13.Text = (Val(TextBox10.Text) * Val(TextBox9.Text)) / 1000
+        If Me.GMapControl1.SelectedArea.IsEmpty = False Then
+            Me.GMapControl1.Overlays.Clear()
+            Module1.Markery()
+        End If
     End Sub
     Private Sub TextBox10_TextChanged(sender As Object, e As EventArgs) Handles TextBox10.TextChanged
         TextBox5.Text = (Math.Ceiling(((Val(TextBox4.Text) - Val(TextBox2.Text))) / (Val(TextBox10.Text) * Val(TextBox9.Text))) * Val(TextBox9.Text) * Val(TextBox10.Text)) / 1000
@@ -286,6 +293,11 @@ errororhandler:
         TextBox11.Text = Math.Ceiling(((Val(TextBox4.Text) - Val(TextBox2.Text))) / (Val(TextBox10.Text) * Val(TextBox9.Text)))
         TextBox12.Text = Math.Ceiling(((Val(TextBox3.Text) - Val(TextBox1.Text))) / (Val(TextBox10.Text) * Val(TextBox9.Text)))
         TextBox13.Text = (Val(TextBox10.Text) * Val(TextBox9.Text)) / 1000
+
+        If Me.GMapControl1.SelectedArea.IsEmpty = False Then
+            Me.GMapControl1.Overlays.Clear()
+            Module1.Markery()
+        End If
     End Sub
 
     Private Sub ZapiszToolStripMenuItem_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles ZapiszToolStripMenuItem.Click
@@ -711,178 +723,33 @@ errorhandler:
 
 
     Private Sub GMapControl1_MouseDoubleClick(ByValsender As Object, ByVal e As System.Windows.Forms.MouseEventArgs) Handles GMapControl1.MouseDoubleClick
-
-
         Dim zoom As Integer = Me.GMapControl1.Zoom
-
         If e.Button = MouseButtons.Right Then
-
             Me.GMapControl1.Zoom = zoom - 1
         Else
             Me.GMapControl1.Zoom = zoom + 1
         End If
-
-
     End Sub
 
     'markery rzeczywistego zasięgu pobieranej mapy
     Private Sub Button4_Click_1(sender As Object, e As EventArgs) Handles Button4.Click
         Me.GMapControl1.Overlays.Clear()
-
-        Dim Lx As Long                           'używane w segmentach
-        Dim Ly As Long
-        Dim Px As Long
-        Dim Py As Long
-
-        
-
-        Lx = TextBox1.Text
-        Ly = TextBox2.Text
-        Px = TextBox1.Text + (Val(TextBox10.Text) * Val(TextBox9.Text) * Val(TextBox12.Text))
-        Py = TextBox2.Text + (Val(TextBox10.Text) * Val(TextBox9.Text) * Val(TextBox11.Text))
-       
-
-        Dim MMPLL1sz As Double  'lewy górny
-        Dim MMPLL1dl As Double
-        Dim MMPLL2sz As Double  'prawy górny
-        Dim MMPLL2dl As Double
-        Dim MMPLL3sz As Double  'prawy dolny
-        Dim MMPLL3dl As Double
-        Dim MMPLL4sz As Double  'lewy dolny
-        Dim MMPLL4dl As Double
-
-        MMPLL1sz = Round(SzerokoscWgs_z1992(Px, Ly), 13)
-        MMPLL1dl = Round(DlugoscWgs_z1992(Px, Ly), 13)
-        MMPLL2sz = Round(SzerokoscWgs_z1992(Px, Py), 13)
-        MMPLL2dl = Round(DlugoscWgs_z1992(Px, Py), 13)
-        MMPLL3sz = Round(SzerokoscWgs_z1992(Lx, Py), 13)
-        MMPLL3dl = Round(DlugoscWgs_z1992(Lx, Py), 13)
-        MMPLL4sz = Round(SzerokoscWgs_z1992(Lx, Ly), 13)
-        MMPLL4dl = Round(DlugoscWgs_z1992(Lx, Ly), 13)
-
-        Dim markersOverlay As GMapOverlay = New GMapOverlay("markers")
-
-        Dim marker0 As GMarkerGoogle = New GMarkerGoogle(New PointLatLng(MMPLL1sz, MMPLL1dl), GMarkerGoogleType.red_small)
-        Dim marker1 As GMarkerGoogle = New GMarkerGoogle(New PointLatLng(MMPLL2sz, MMPLL2dl), GMarkerGoogleType.red_small)
-        Dim marker2 As GMarkerGoogle = New GMarkerGoogle(New PointLatLng(MMPLL3sz, MMPLL3dl), GMarkerGoogleType.red_small)
-        Dim marker3 As GMarkerGoogle = New GMarkerGoogle(New PointLatLng(MMPLL4sz, MMPLL4dl), GMarkerGoogleType.red_small) 'lewy dolny naroznik zaznaczenia
-        'markersOverlay.Markers.Add(marker0)
-        markersOverlay.Markers.Add(marker0)
-        markersOverlay.Markers.Add(marker1)
-        markersOverlay.Markers.Add(marker2)
-        markersOverlay.Markers.Add(marker3)
-        Me.GMapControl1.Overlays.Add(markersOverlay)
-       
-
-        'centrowanie obrazu po wyświetleniu markerów
-
-        Dim Lx_cent As Double
-        Dim Ly_cent As Double
-        Dim Lx_cent84 As Double
-        Dim Ly_cent84 As Double
-        Lx_cent = TextBox1.Text
-        Ly_cent = TextBox2.Text
-
-        Lx_cent = TextBox1.Text + ((Val(TextBox10.Text) * Val(TextBox9.Text) * Val(TextBox12.Text)) * 0.5)
-        Ly_cent = TextBox2.Text + ((Val(TextBox10.Text) * Val(TextBox9.Text) * Val(TextBox11.Text)) * 0.5)
-       
-        Lx_cent84 = SzerokoscWgs_z1992(Lx_cent, Ly_cent)
-        Ly_cent84 = Round(DlugoscWgs_z1992(Lx_cent, Ly_cent), 13)
-        
-        Me.GMapControl1.Position = New PointLatLng(Lx_cent84, Ly_cent84)
-
-
+        Module1.Markery()
     End Sub
-
-
 
     'markery wyskakujące po zaznaczeniu obszaru pobierania
-
-
-
     Private Sub GMapControl1_MouseClick(ByValsender As Object, ByVal e As System.Windows.Forms.MouseEventArgs) Handles GMapControl1.MouseClick
-
-
         If Me.GMapControl1.SelectedArea.IsEmpty = False Then
-
             If e.Button = MouseButtons.Right Then
-
-               
-
-
                 Me.GMapControl1.Overlays.Clear()
-
-                Dim Lx As Long                           'używane w segmentach
-                Dim Ly As Long
-                Dim Px As Long
-                Dim Py As Long
-
-
-
-                Lx = TextBox1.Text
-                Ly = TextBox2.Text
-                Px = TextBox1.Text + (Val(TextBox10.Text) * Val(TextBox9.Text) * Val(TextBox12.Text))
-                Py = TextBox2.Text + (Val(TextBox10.Text) * Val(TextBox9.Text) * Val(TextBox11.Text))
-
-
-                Dim MMPLL1sz As Double  'lewy górny
-                Dim MMPLL1dl As Double
-                Dim MMPLL2sz As Double  'prawy górny
-                Dim MMPLL2dl As Double
-                Dim MMPLL3sz As Double  'prawy dolny
-                Dim MMPLL3dl As Double
-                Dim MMPLL4sz As Double  'lewy dolny
-                Dim MMPLL4dl As Double
-
-                MMPLL1sz = Round(SzerokoscWgs_z1992(Px, Ly), 13)
-                MMPLL1dl = Round(DlugoscWgs_z1992(Px, Ly), 13)
-                MMPLL2sz = Round(SzerokoscWgs_z1992(Px, Py), 13)
-                MMPLL2dl = Round(DlugoscWgs_z1992(Px, Py), 13)
-                MMPLL3sz = Round(SzerokoscWgs_z1992(Lx, Py), 13)
-                MMPLL3dl = Round(DlugoscWgs_z1992(Lx, Py), 13)
-                MMPLL4sz = Round(SzerokoscWgs_z1992(Lx, Ly), 13)
-                MMPLL4dl = Round(DlugoscWgs_z1992(Lx, Ly), 13)
-
-                Dim markersOverlay As GMapOverlay = New GMapOverlay("markers")
-
-                Dim marker0 As GMarkerGoogle = New GMarkerGoogle(New PointLatLng(MMPLL1sz, MMPLL1dl), GMarkerGoogleType.red_small)
-                Dim marker1 As GMarkerGoogle = New GMarkerGoogle(New PointLatLng(MMPLL2sz, MMPLL2dl), GMarkerGoogleType.red_small)
-                Dim marker2 As GMarkerGoogle = New GMarkerGoogle(New PointLatLng(MMPLL3sz, MMPLL3dl), GMarkerGoogleType.red_small)
-                Dim marker3 As GMarkerGoogle = New GMarkerGoogle(New PointLatLng(MMPLL4sz, MMPLL4dl), GMarkerGoogleType.red_small) 'lewy dolny naroznik zaznaczenia
-                'markersOverlay.Markers.Add(marker0)
-                markersOverlay.Markers.Add(marker0)
-                markersOverlay.Markers.Add(marker1)
-                markersOverlay.Markers.Add(marker2)
-                markersOverlay.Markers.Add(marker3)
-                Me.GMapControl1.Overlays.Add(markersOverlay)
-
-
-                'centrowanie obrazu po wyświetleniu markerów
-
-                Dim Lx_cent As Double
-                Dim Ly_cent As Double
-                Dim Lx_cent84 As Double
-                Dim Ly_cent84 As Double
-                Lx_cent = TextBox1.Text
-                Ly_cent = TextBox2.Text
-
-                Lx_cent = TextBox1.Text + ((Val(TextBox10.Text) * Val(TextBox9.Text) * Val(TextBox12.Text)) * 0.5)
-                Ly_cent = TextBox2.Text + ((Val(TextBox10.Text) * Val(TextBox9.Text) * Val(TextBox11.Text)) * 0.5)
-
-                Lx_cent84 = SzerokoscWgs_z1992(Lx_cent, Ly_cent)
-                Ly_cent84 = Round(DlugoscWgs_z1992(Lx_cent, Ly_cent), 13)
-
-                Me.GMapControl1.Position = New PointLatLng(Lx_cent84, Ly_cent84)
-
-
-
-
-
-
+                Module1.Markery()
             End If
-
         End If
     End Sub
+
+   
+    
+    
 End Class
 
 

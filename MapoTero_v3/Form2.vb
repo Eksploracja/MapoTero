@@ -280,7 +280,10 @@ Public Class Form2
         End Select
     End Sub
 
+    'przywracanie domyślnych ustawień
     Private Sub Button6_Click(sender As Object, e As EventArgs) Handles Button6.Click
+        'czyszczenie markerów i zaznaczenia na mapie
+        Form1.GMapControl1.Overlays.Clear()
 
 
         'File.Delete(folderSegmentow & "conf.txt")
