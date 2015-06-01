@@ -191,9 +191,9 @@ Partial Class Form1
         Me.Label30.AutoSize = True
         Me.Label30.Location = New System.Drawing.Point(6, 58)
         Me.Label30.Name = "Label30"
-        Me.Label30.Size = New System.Drawing.Size(126, 13)
+        Me.Label30.Size = New System.Drawing.Size(129, 13)
         Me.Label30.TabIndex = 217
-        Me.Label30.Text = "Wybierz warstwę WMS-a"
+        Me.Label30.Text = " Wybierz warstwę WMS-a"
         Me.ToolTip1.SetToolTip(Me.Label30, "Wskaż wybraną warst klikając na nią lewym klawiszem myszki. ")
         '
         'Label29
@@ -201,9 +201,9 @@ Partial Class Form1
         Me.Label29.AutoSize = True
         Me.Label29.Location = New System.Drawing.Point(6, 16)
         Me.Label29.Name = "Label29"
-        Me.Label29.Size = New System.Drawing.Size(174, 13)
+        Me.Label29.Size = New System.Drawing.Size(177, 13)
         Me.Label29.TabIndex = 216
-        Me.Label29.Text = "Wybierz serwer WMS (rodzaj mapy)"
+        Me.Label29.Text = " Wybierz serwer WMS (rodzaj mapy)"
         Me.ToolTip1.SetToolTip(Me.Label29, "Spis dostępnych serwerów WMS, których definicje znajdują się w plikach tekstowych" & _
         " katalogu /warstwy/")
         '

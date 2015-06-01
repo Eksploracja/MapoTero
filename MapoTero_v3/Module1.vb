@@ -1,18 +1,18 @@
 ﻿'Copyright (C) <2015>  pajakt
 
-    'This program is free software: you can redistribute it and/or modify
-    'it under the terms of the GNU General Public License as published by
-    'the Free Software Foundation, either version 3 of the License, or
-    '(at your option) any later version.
+'This program is free software: you can redistribute it and/or modify
+'it under the terms of the GNU General Public License as published by
+'the Free Software Foundation, either version 3 of the License, or
+'(at your option) any later version.
 
-   'This program is distributed in the hope that it will be useful,
-    'but WITHOUT ANY WARRANTY; without even the implied warranty of
-    'MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    'GNU General Public License for more details.
+'This program is distributed in the hope that it will be useful,
+'but WITHOUT ANY WARRANTY; without even the implied warranty of
+'MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+'GNU General Public License for more details.
 
-    'You should have received a copy of the GNU General Public License
-    'along with this program.  If not, see <http://www.gnu.org/licenses/>.
-	
+'You should have received a copy of the GNU General Public License
+'along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 Imports System
 Imports System.Threading
 Imports System.Diagnostics
@@ -20,6 +20,10 @@ Imports System.Net
 Imports System.IO
 Imports System.Drawing
 Imports System.Windows.Forms
+Imports GMap.NET.WindowsForms.ToolTips
+Imports GMap.NET.WindowsForms.Markers
+Imports GMap.NET.WindowsForms
+Imports GMap.NET
 
 Module Module1
     'deklaracja procedury w nagłówku (sekcja General)
@@ -47,7 +51,7 @@ Module Module1
     Public iloscProbPobrania As Integer = 3   'docelowa ilość prób
     Public przerwaMiedzyProbami As Integer = 5 'odstęp między kolejnymi próbami w sekundach
     Public numeracja As String = "NrWiersza_NrKolumny"                    'sposób numerowania segmentów
- 
+
 
 
 
@@ -528,7 +532,7 @@ errorhandler:
 
         pobierz = False
 
-      
+
     End Sub
     'procedura resetowania wprowadzonych warstw
 
@@ -691,9 +695,9 @@ errorhandler:
         WriteLine(1, format)
         WriteLine(1, wspolnaNazwaKwadratu)
         WriteLine(1, pobierajPowyzejOstatniego)
-            WriteLine(1, x_start_lastset)
-            WriteLine(1, y_start_lastset)
-            WriteLine(1, zoom_start_lastset)
+        WriteLine(1, x_start_lastset)
+        WriteLine(1, y_start_lastset)
+        WriteLine(1, zoom_start_lastset)
         WriteLine(1, Module1.numeracja)
         FileClose(1)
 
@@ -972,7 +976,7 @@ errorhandler:
                   "")
 
                 FileClose(1)
-               
+
         End Select
     End Sub
 
@@ -1214,12 +1218,12 @@ errorhandler:
                 FileClose(1)
 
         End Select
-       
+
     End Sub
 
 
     Public Sub plikGeoreferencyjny_kml()
-        Select georef_scalanie_kml
+        Select Case georef_scalanie_kml
 
             Case False
 
@@ -1629,7 +1633,92 @@ errorhandler:
 
     End Sub
 
+    Public Sub Markery()
 
+        Form1.Button4.Enabled = False
+
+        Dim Lx As Long
+        Dim Ly As Long
+        Dim Px As Long
+        Dim Py As Long
+
+        Lx = Form1.TextBox1.Text
+        Ly = Form1.TextBox2.Text
+        Px = Form1.TextBox1.Text + (Val(Form1.TextBox10.Text) * Val(Form1.TextBox9.Text) * Val(Form1.TextBox12.Text))
+        Py = Form1.TextBox2.Text + (Val(Form1.TextBox10.Text) * Val(Form1.TextBox9.Text) * Val(Form1.TextBox11.Text))
+
+        Dim MMPLL1sz As Double  'lewy górny
+        Dim MMPLL1dl As Double
+        Dim MMPLL2sz As Double  'prawy górny
+        Dim MMPLL2dl As Double
+        Dim MMPLL3sz As Double  'prawy dolny
+        Dim MMPLL3dl As Double
+        Dim MMPLL4sz As Double  'lewy dolny
+        Dim MMPLL4dl As Double
+
+        MMPLL1sz = Round(SzerokoscWgs_z1992(Px, Ly), 13)
+        MMPLL1dl = Round(DlugoscWgs_z1992(Px, Ly), 13)
+        MMPLL2sz = Round(SzerokoscWgs_z1992(Px, Py), 13)
+        MMPLL2dl = Round(DlugoscWgs_z1992(Px, Py), 13)
+        MMPLL3sz = Round(SzerokoscWgs_z1992(Lx, Py), 13)
+        MMPLL3dl = Round(DlugoscWgs_z1992(Lx, Py), 13)
+        MMPLL4sz = Round(SzerokoscWgs_z1992(Lx, Ly), 13)
+        MMPLL4dl = Round(DlugoscWgs_z1992(Lx, Ly), 13)
+
+        Dim markersOverlay As GMapOverlay = New GMapOverlay("markers")
+
+        Dim marker0 As GMarkerGoogle = New GMarkerGoogle(New PointLatLng(MMPLL1sz, MMPLL1dl), GMarkerGoogleType.red_small)
+        Dim marker1 As GMarkerGoogle = New GMarkerGoogle(New PointLatLng(MMPLL2sz, MMPLL2dl), GMarkerGoogleType.red_small)
+        Dim marker2 As GMarkerGoogle = New GMarkerGoogle(New PointLatLng(MMPLL3sz, MMPLL3dl), GMarkerGoogleType.red_small)
+        Dim marker3 As GMarkerGoogle = New GMarkerGoogle(New PointLatLng(MMPLL4sz, MMPLL4dl), GMarkerGoogleType.red_small) 'lewy dolny naroznik zaznaczenia
+
+        markersOverlay.Markers.Add(marker0)
+        markersOverlay.Markers.Add(marker1)
+        markersOverlay.Markers.Add(marker2)
+        markersOverlay.Markers.Add(marker3)
+
+        'opisy markerów
+        marker0.ToolTip = New GMapRoundedToolTip(marker0)
+        marker0.ToolTipText = "Lewy górny narożnik" & Chr(13) & Chr(10) & _
+        "po uwzględnieniu" & Chr(13) & Chr(10) & _
+        "rozmiaru segmentów " & Chr(13) & Chr(10) & _
+        "X: " & Px & ", " & "Y: " & Ly
+        marker1.ToolTip = New GMapRoundedToolTip(marker1)
+        marker1.ToolTipText = "Prawy górny narożnik" & Chr(13) & Chr(10) & _
+        "po uwzględnieniu" & Chr(13) & Chr(10) & _
+        "rozmiaru segmentów " & Chr(13) & Chr(10) & _
+        "X: " & Px & ", " & "Y: " & Py
+        marker2.ToolTip = New GMapRoundedToolTip(marker2)
+        marker2.ToolTipText = "Prawy dolny narożnik" & Chr(13) & Chr(10) & _
+        "po uwzględnieniu" & Chr(13) & Chr(10) & _
+        "rozmiaru segmentów " & Chr(13) & Chr(10) & _
+        "X: " & Lx & ", " & "Y: " & Py
+        marker3.ToolTip = New GMapRoundedToolTip(marker3)
+        marker3.ToolTipText = "Lewy dolny narożnik" & Chr(13) & Chr(10) & _
+        "po uwzględnieniu" & Chr(13) & Chr(10) & _
+        "rozmiaru segmentów " & Chr(13) & Chr(10) & _
+        "X: " & Lx & ", " & "Y: " & Ly
+
+        Form1.GMapControl1.Overlays.Add(markersOverlay)
+
+
+        'centrowanie obrazu po wyświetleniu markerów
+
+        Dim Lx_cent As Double
+        Dim Ly_cent As Double
+        Dim Lx_cent84 As Double
+        Dim Ly_cent84 As Double
+        Lx_cent = Form1.TextBox1.Text
+        Ly_cent = Form1.TextBox2.Text
+
+        Lx_cent = Form1.TextBox1.Text + ((Val(Form1.TextBox10.Text) * Val(Form1.TextBox9.Text) * Val(Form1.TextBox12.Text)) * 0.5)
+        Ly_cent = Form1.TextBox2.Text + ((Val(Form1.TextBox10.Text) * Val(Form1.TextBox9.Text) * Val(Form1.TextBox11.Text)) * 0.5)
+
+        Lx_cent84 = SzerokoscWgs_z1992(Lx_cent, Ly_cent)
+        Ly_cent84 = Round(DlugoscWgs_z1992(Lx_cent, Ly_cent), 13)
+
+        Form1.GMapControl1.Position = New PointLatLng(Lx_cent84, Ly_cent84)
+    End Sub
 
 
 End Module
