@@ -253,7 +253,7 @@ Partial Class Form1
         '
         'ToolStripStatusLabel2
         '
-        Me.ToolStripStatusLabel2.BackColor = System.Drawing.SystemColors.ActiveCaptionText
+        Me.ToolStripStatusLabel2.BackColor = System.Drawing.SystemColors.Window
         Me.ToolStripStatusLabel2.Name = "ToolStripStatusLabel2"
         Me.ToolStripStatusLabel2.Size = New System.Drawing.Size(67, 17)
         Me.ToolStripStatusLabel2.Text = "rozszerzenie"
@@ -923,7 +923,7 @@ Partial Class Form1
         '
         Me.Label35.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.Label35.AutoSize = True
-        Me.Label35.BackColor = System.Drawing.SystemColors.ActiveCaptionText
+        Me.Label35.BackColor = System.Drawing.SystemColors.Window
         Me.Label35.Location = New System.Drawing.Point(528, 499)
         Me.Label35.Name = "Label35"
         Me.Label35.Size = New System.Drawing.Size(28, 13)
@@ -934,7 +934,7 @@ Partial Class Form1
         '
         Me.Label37.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.Label37.AutoSize = True
-        Me.Label37.BackColor = System.Drawing.SystemColors.ActiveCaptionText
+        Me.Label37.BackColor = System.Drawing.SystemColors.Window
         Me.Label37.Location = New System.Drawing.Point(455, 499)
         Me.Label37.Name = "Label37"
         Me.Label37.Size = New System.Drawing.Size(75, 13)
@@ -945,7 +945,7 @@ Partial Class Form1
         '
         Me.Label38.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.Label38.AutoSize = True
-        Me.Label38.BackColor = System.Drawing.SystemColors.ActiveCaptionText
+        Me.Label38.BackColor = System.Drawing.SystemColors.Window
         Me.Label38.Location = New System.Drawing.Point(455, 482)
         Me.Label38.Name = "Label38"
         Me.Label38.Size = New System.Drawing.Size(161, 13)
@@ -956,7 +956,7 @@ Partial Class Form1
         '
         Me.Label39.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
         Me.Label39.AutoSize = True
-        Me.Label39.BackColor = System.Drawing.SystemColors.ActiveCaptionText
+        Me.Label39.BackColor = System.Drawing.SystemColors.Window
         Me.Label39.Location = New System.Drawing.Point(6, 481)
         Me.Label39.Name = "Label39"
         Me.Label39.Size = New System.Drawing.Size(109, 13)
@@ -967,7 +967,7 @@ Partial Class Form1
         '
         Me.Label40.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
         Me.Label40.AutoSize = True
-        Me.Label40.BackColor = System.Drawing.SystemColors.ActiveCaptionText
+        Me.Label40.BackColor = System.Drawing.SystemColors.Window
         Me.Label40.Location = New System.Drawing.Point(7, 498)
         Me.Label40.Name = "Label40"
         Me.Label40.Size = New System.Drawing.Size(31, 13)
@@ -978,7 +978,7 @@ Partial Class Form1
         '
         Me.Label41.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
         Me.Label41.AutoSize = True
-        Me.Label41.BackColor = System.Drawing.SystemColors.ActiveCaptionText
+        Me.Label41.BackColor = System.Drawing.SystemColors.Window
         Me.Label41.Location = New System.Drawing.Point(46, 498)
         Me.Label41.Name = "Label41"
         Me.Label41.Size = New System.Drawing.Size(31, 13)
@@ -989,7 +989,7 @@ Partial Class Form1
         '
         Me.Label63.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.Label63.AutoSize = True
-        Me.Label63.BackColor = System.Drawing.SystemColors.ActiveCaptionText
+        Me.Label63.BackColor = System.Drawing.SystemColors.Window
         Me.Label63.Location = New System.Drawing.Point(609, 499)
         Me.Label63.Name = "Label63"
         Me.Label63.Size = New System.Drawing.Size(31, 13)
@@ -1009,7 +1009,7 @@ Partial Class Form1
         '
         Me.Label66.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.Label66.AutoSize = True
-        Me.Label66.BackColor = System.Drawing.SystemColors.ActiveCaptionText
+        Me.Label66.BackColor = System.Drawing.SystemColors.Window
         Me.Label66.Location = New System.Drawing.Point(576, 499)
         Me.Label66.Name = "Label66"
         Me.Label66.Size = New System.Drawing.Size(31, 13)
