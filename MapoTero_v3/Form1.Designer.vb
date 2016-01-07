@@ -204,7 +204,7 @@ Partial Class Form1
         Me.Label29.Size = New System.Drawing.Size(177, 13)
         Me.Label29.TabIndex = 216
         Me.Label29.Text = " Wybierz serwer WMS (rodzaj mapy)"
-        Me.ToolTip1.SetToolTip(Me.Label29, "Spis dostępnych serwerów WMS, których definicje znajdują się w plikach tekstowych" & _
+        Me.ToolTip1.SetToolTip(Me.Label29, "Spis dostępnych serwerów WMS, których definicje znajdują się w plikach tekstowych" &
         " katalogu /warstwy/")
         '
         'ListBox1
@@ -243,7 +243,7 @@ Partial Class Form1
         Me.StatusStrip1.Size = New System.Drawing.Size(878, 22)
         Me.StatusStrip1.TabIndex = 237
         Me.StatusStrip1.Text = "StatusStrip1"
-        Me.ToolTip1.SetToolTip(Me.StatusStrip1, "Informacje o aktualnym formacie plików rastrowych oraz lokalizacji katalogu ""down" & _
+        Me.ToolTip1.SetToolTip(Me.StatusStrip1, "Informacje o aktualnym formacie plików rastrowych oraz lokalizacji katalogu ""down" &
         "load""")
         '
         'ToolStripProgressBar1
@@ -290,7 +290,7 @@ Partial Class Form1
         Me.SesjaToolStripMenuItem.ShortcutKeys = CType((System.Windows.Forms.Keys.Alt Or System.Windows.Forms.Keys.S), System.Windows.Forms.Keys)
         Me.SesjaToolStripMenuItem.Size = New System.Drawing.Size(98, 20)
         Me.SesjaToolStripMenuItem.Text = "Sesja pobierania"
-        Me.SesjaToolStripMenuItem.ToolTipText = "Wczytaj lub zapisz plik conf.txt, który przechowuje informacje m.in. o zasięgu po" & _
+        Me.SesjaToolStripMenuItem.ToolTipText = "Wczytaj lub zapisz plik conf.txt, który przechowuje informacje m.in. o zasięgu po" &
     "bieranego obszaru"
         '
         'ZapiszToolStripMenuItem
@@ -389,7 +389,7 @@ Partial Class Form1
         Me.Label47.Size = New System.Drawing.Size(13, 13)
         Me.Label47.TabIndex = 221
         Me.Label47.Text = "="
-        Me.ToolTip1.SetToolTip(Me.Label47, "Domyślna wartość zapewnia optymalną jakość pobranego obrazu. Im większy rozmiar p" & _
+        Me.ToolTip1.SetToolTip(Me.Label47, "Domyślna wartość zapewnia optymalną jakość pobranego obrazu. Im większy rozmiar p" &
         "ojedynczego piksela, tym gorsza jakość obrazu.")
         '
         'Label46
@@ -401,7 +401,7 @@ Partial Class Form1
         Me.Label46.Size = New System.Drawing.Size(12, 13)
         Me.Label46.TabIndex = 220
         Me.Label46.Text = "x"
-        Me.ToolTip1.SetToolTip(Me.Label46, "Domyślna wartość zapewnia optymalną jakość pobranego obrazu. Im większy rozmiar p" & _
+        Me.ToolTip1.SetToolTip(Me.Label46, "Domyślna wartość zapewnia optymalną jakość pobranego obrazu. Im większy rozmiar p" &
         "ojedynczego piksela, tym gorsza jakość obrazu.")
         '
         'TextBox13
@@ -431,8 +431,8 @@ Partial Class Form1
         Me.Label1.Size = New System.Drawing.Size(116, 13)
         Me.Label1.TabIndex = 213
         Me.Label1.Text = "Rozmiar segmentu [pix]"
-        Me.ToolTip1.SetToolTip(Me.Label1, "Rozmiar pojedyńczego segmentu - najmniejszej komórki siatki kwadtatów, na które z" & _
-        "ostanie podzielony pobierany obszar mapy.  Uwaga - maksymalna rozmiar segmentu d" & _
+        Me.ToolTip1.SetToolTip(Me.Label1, "Rozmiar pojedyńczego segmentu - najmniejszej komórki siatki kwadtatów, na które z" &
+        "ostanie podzielony pobierany obszar mapy.  Uwaga - maksymalna rozmiar segmentu d" &
         "la Geoportalu2 wynosi 2048px")
         '
         'Label2
@@ -443,7 +443,7 @@ Partial Class Form1
         Me.Label2.Size = New System.Drawing.Size(116, 13)
         Me.Label2.TabIndex = 214
         Me.Label2.Text = "Rozmiar piksela [m/pix]"
-        Me.ToolTip1.SetToolTip(Me.Label2, "Domyślna wartość jest optymalna. Im większy rozmiar piksela, tym gorsza jakość ob" & _
+        Me.ToolTip1.SetToolTip(Me.Label2, "Domyślna wartość jest optymalna. Im większy rozmiar piksela, tym gorsza jakość ob" &
         "razu, ale jednocześnie tym większy jego przestrzenny zasięg.")
         '
         'TextBox10
@@ -481,8 +481,8 @@ Partial Class Form1
         Me.GroupBox3.TabIndex = 268
         Me.GroupBox3.TabStop = False
         Me.GroupBox3.Text = "Wybrane warstwy oraz ich kolejność"
-        Me.ToolTip1.SetToolTip(Me.GroupBox3, """Kanapka"" warstw. Pierwsza warstwa to bazowy podkład, który można przykryć kolejn" & _
-        "ymi warstwami o wyższym numerze, o ile mają one przeźroczyste tło, lub mają niep" & _
+        Me.ToolTip1.SetToolTip(Me.GroupBox3, """Kanapka"" warstw. Pierwsza warstwa to bazowy podkład, który można przykryć kolejn" &
+        "ymi warstwami o wyższym numerze, o ile mają one przeźroczyste tło, lub mają niep" &
         "ełne pokrycie.")
         '
         'Button6
@@ -593,7 +593,7 @@ Partial Class Form1
         Me.Label11.Size = New System.Drawing.Size(16, 13)
         Me.Label11.TabIndex = 218
         Me.Label11.Text = "1)"
-        Me.ToolTip1.SetToolTip(Me.Label11, "Główna warstwa podkładowa, którą można przykryć kolejnymi warstwami (o ile mają p" & _
+        Me.ToolTip1.SetToolTip(Me.Label11, "Główna warstwa podkładowa, którą można przykryć kolejnymi warstwami (o ile mają p" &
         "rzeźroczyste tło lub nie pokrywają całkowicie podkładu)")
         '
         'Label13
@@ -661,7 +661,7 @@ Partial Class Form1
         Me.GroupBox4.TabIndex = 300
         Me.GroupBox4.TabStop = False
         Me.GroupBox4.Text = "Wynikowy rozmiar siatki segmentów"
-        Me.ToolTip1.SetToolTip(Me.GroupBox4, "Informacje o wynikowym rozmiarze siatki kwadratów na które zostanie podzielony ca" & _
+        Me.ToolTip1.SetToolTip(Me.GroupBox4, "Informacje o wynikowym rozmiarze siatki kwadratów na które zostanie podzielony ca" &
         "ły obszar pobieranej mapy")
         '
         'Label22
@@ -802,8 +802,8 @@ Partial Class Form1
         Me.Label42.Size = New System.Drawing.Size(87, 13)
         Me.Label42.TabIndex = 215
         Me.Label42.Text = "Terenowy zasięg"
-        Me.ToolTip1.SetToolTip(Me.Label42, "Rozmiar pojedyńczego segmentu - najmniejszej komórki siatki kwadtatów, na które z" & _
-        "ostanie podzielony pobierany obszar mapy.  Uwaga - maksymalna rozmiar segmentu d" & _
+        Me.ToolTip1.SetToolTip(Me.Label42, "Rozmiar pojedyńczego segmentu - najmniejszej komórki siatki kwadtatów, na które z" &
+        "ostanie podzielony pobierany obszar mapy.  Uwaga - maksymalna rozmiar segmentu d" &
         "la Geoportalu2 wynosi 2048px")
         '
         'Label7
@@ -815,8 +815,8 @@ Partial Class Form1
         Me.Label7.Size = New System.Drawing.Size(117, 13)
         Me.Label7.TabIndex = 316
         Me.Label7.Text = "jednego segmentu [km]"
-        Me.ToolTip1.SetToolTip(Me.Label7, "Rozmiar pojedyńczego segmentu - najmniejszej komórki siatki kwadtatów, na które z" & _
-        "ostanie podzielony pobierany obszar mapy.  Uwaga - maksymalna rozmiar segmentu d" & _
+        Me.ToolTip1.SetToolTip(Me.Label7, "Rozmiar pojedyńczego segmentu - najmniejszej komórki siatki kwadtatów, na które z" &
+        "ostanie podzielony pobierany obszar mapy.  Uwaga - maksymalna rozmiar segmentu d" &
         "la Geoportalu2 wynosi 2048px")
         '
         'Button4
@@ -829,7 +829,7 @@ Partial Class Form1
         Me.Button4.Name = "Button4"
         Me.Button4.Size = New System.Drawing.Size(30, 30)
         Me.Button4.TabIndex = 306
-        Me.ToolTip1.SetToolTip(Me.Button4, "wyświetl rzeczywisty zasięg pobieranego obszaru, uwzględniający rozmiar siatki se" & _
+        Me.ToolTip1.SetToolTip(Me.Button4, "wyświetl rzeczywisty zasięg pobieranego obszaru, uwzględniający rozmiar siatki se" &
         "gmentów")
         Me.Button4.UseVisualStyleBackColor = True
         '
@@ -859,7 +859,7 @@ Partial Class Form1
         '
         'GMapControl1
         '
-        Me.GMapControl1.Bearing = 0.0!
+        Me.GMapControl1.Bearing = 0!
         Me.GMapControl1.CanDragMap = True
         Me.GMapControl1.Cursor = System.Windows.Forms.Cursors.Hand
         Me.GMapControl1.Dock = System.Windows.Forms.DockStyle.Fill
@@ -882,7 +882,7 @@ Partial Class Form1
         Me.GMapControl1.ShowTileGridLines = False
         Me.GMapControl1.Size = New System.Drawing.Size(661, 491)
         Me.GMapControl1.TabIndex = 249
-        Me.GMapControl1.Zoom = 0.0R
+        Me.GMapControl1.Zoom = 0R
         '
         'RadioButton1
         '
