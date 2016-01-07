@@ -938,17 +938,17 @@ errorhandler:
                     'tworzy plik .tab
                     FileOpen(1, folderSegmentow & nazwaKwadratu & ".tab", OpenMode.Output)
 
-                    Print(1, "!table" & Chr(13) & Chr(10) & _
-                    "!version 300" & Chr(13) & Chr(10) & _
-                    "!charset WindowsLatin2" & Chr(13) & Chr(10) & _
-                    "Definition Table" & Chr(13) & Chr(10) & _
-                     "  File" & Chr(34) & nazwaKwadratu & "." & rozszerzenie & Chr(34) & Chr(13) & Chr(10) & _
-                     "  Type " & Chr(34) & "RASTER" & Chr(34) & Chr(13) & Chr(10) & _
-                   "  (" & Ly & "," & Px & ")" & " (0,0) Label " & Chr(34) & "Punkt 1" & Chr(34) & "," & Chr(13) & Chr(10) & _
-                   "  (" & Py & "," & Px & ")" & " (" & Form1.TextBox9.Text & ",0) " & "Label " & Chr(34) & "Punkt 2" & Chr(34) & "," & Chr(13) & Chr(10) & _
-                   "  (" & Py & "," & Lx & ")" & " (" & Form1.TextBox9.Text & "," & Form1.TextBox9.Text & ") " & "Label " & Chr(34) & "Punkt 3" & Chr(34) & "," & Chr(13) & Chr(10) & _
-                   "  (" & Ly & "," & Lx & ")" & " (0," & Form1.TextBox9.Text & ") " & "Label " & Chr(34) & "Punkt 4" & Chr(34) & "," & Chr(13) & Chr(10) & _
-                   "  CoordSys Earth Projection 8, 33, 7, 19, 0, 0.9993, 500000, -5300000" & Chr(13) & Chr(10) & _
+                    Print(1, "!table" & Chr(13) & Chr(10) &
+                    "!version 300" & Chr(13) & Chr(10) &
+                    "!charset WindowsLatin2" & Chr(13) & Chr(10) &
+                    "Definition Table" & Chr(13) & Chr(10) &
+                     "  File" & Chr(34) & nazwaKwadratu & "." & rozszerzenie & Chr(34) & Chr(13) & Chr(10) &
+                     "  Type " & Chr(34) & "RASTER" & Chr(34) & Chr(13) & Chr(10) &
+                   "  (" & Ly & "," & Px & ")" & " (0,0) Label " & Chr(34) & "Punkt 1" & Chr(34) & "," & Chr(13) & Chr(10) &
+                   "  (" & Py & "," & Px & ")" & " (" & Form1.TextBox9.Text & ",0) " & "Label " & Chr(34) & "Punkt 2" & Chr(34) & "," & Chr(13) & Chr(10) &
+                   "  (" & Py & "," & Lx & ")" & " (" & Form1.TextBox9.Text & "," & Form1.TextBox9.Text & ") " & "Label " & Chr(34) & "Punkt 3" & Chr(34) & "," & Chr(13) & Chr(10) &
+                   "  (" & Ly & "," & Lx & ")" & " (0," & Form1.TextBox9.Text & ") " & "Label " & Chr(34) & "Punkt 4" & Chr(13) & Chr(10) &
+                   "  CoordSys Earth Projection 8, 33, 7, 19, 0, 0.9993, 500000, -5300000" & Chr(13) & Chr(10) &
                    "")
 
                     FileClose(1)
