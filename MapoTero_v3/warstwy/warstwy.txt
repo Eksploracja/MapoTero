@@ -20,6 +20,9 @@ Hgis_25_messtishblatt
 Hgis_100_WIG_taktyczna
 Hgis_100_Karte_des_deutschen_reiches
 Hgis_100_grossblatt
+geologiczna_50_SMGP
+geologiczna_50_litogenetyczna
+geologiczna_500
 dzialki_katastralne
 budynki_BDOT_2010
 budynki_BDOT_2009
