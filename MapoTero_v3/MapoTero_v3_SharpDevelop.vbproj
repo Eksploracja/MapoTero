@@ -366,6 +366,9 @@
     <Content Include="skrypty\SynGdiPlus\SynGdiPlus.pas">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <None Include="warstwy\geologiczna_500.txt" />
+    <None Include="warstwy\geologiczna_50_litogenetyczna.txt" />
+    <None Include="warstwy\geologiczna_50_SMGP.txt" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="MapoTero.ico" />
