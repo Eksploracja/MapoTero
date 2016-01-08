@@ -75,6 +75,7 @@ Partial Class Form2
         Me.CheckBox9 = New System.Windows.Forms.CheckBox()
         Me.GroupBox7 = New System.Windows.Forms.GroupBox()
         Me.Button6 = New System.Windows.Forms.Button()
+        Me.Label8 = New System.Windows.Forms.Label()
         Me.GroupBox1.SuspendLayout()
         Me.GroupBox2.SuspendLayout()
         Me.GroupBox3.SuspendLayout()
@@ -132,8 +133,8 @@ Partial Class Form2
         Me.GroupBox1.TabIndex = 3
         Me.GroupBox1.TabStop = False
         Me.GroupBox1.Text = "Kalibruj segmenty"
-        Me.ToolTip1.SetToolTip(Me.GroupBox1, "Opcjonalne zaopatrywanie każdego pobranego segmentu rastrowego w dodatkowy plik k" & _
-        "alibracyjny, umożliwiający wyświetlenie  segmentów w programach GIS/GPS z zachow" & _
+        Me.ToolTip1.SetToolTip(Me.GroupBox1, "Opcjonalne zaopatrywanie każdego pobranego segmentu rastrowego w dodatkowy plik k" &
+        "alibracyjny, umożliwiający wyświetlenie  segmentów w programach GIS/GPS z zachow" &
         "aniem ""georeferencji""")
         '
         'CheckBox13
@@ -199,7 +200,7 @@ Partial Class Form2
         Me.GroupBox2.TabIndex = 4
         Me.GroupBox2.TabStop = False
         Me.GroupBox2.Text = "Ponowne próby pobrania"
-        Me.ToolTip1.SetToolTip(Me.GroupBox2, "Domyślne ustawienia są optymalne. Określają one maksymalną liczbę zapytań wysyłan" & _
+        Me.ToolTip1.SetToolTip(Me.GroupBox2, "Domyślne ustawienia są optymalne. Określają one maksymalną liczbę zapytań wysyłan" &
         "ych do serwera WMS oraz odstępy czasu między nimi")
         '
         'Label3
@@ -238,13 +239,13 @@ Partial Class Form2
         Me.TextBox1.TabIndex = 0
         Me.TextBox1.Text = "3"
         Me.TextBox1.TextAlign = System.Windows.Forms.HorizontalAlignment.Center
-        Me.ToolTip1.SetToolTip(Me.TextBox1, "Ile razy wysyłać zapytanie do serwera WMS w przypadku napotkania problemu z pobra" & _
+        Me.ToolTip1.SetToolTip(Me.TextBox1, "Ile razy wysyłać zapytanie do serwera WMS w przypadku napotkania problemu z pobra" &
         "niem segmentu?")
         '
         'Button1
         '
         Me.Button1.Font = New System.Drawing.Font("Microsoft Sans Serif", 12.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
-        Me.Button1.Location = New System.Drawing.Point(477, 258)
+        Me.Button1.Location = New System.Drawing.Point(477, 265)
         Me.Button1.Name = "Button1"
         Me.Button1.Size = New System.Drawing.Size(168, 39)
         Me.Button1.TabIndex = 11
@@ -254,12 +255,12 @@ Partial Class Form2
         'CheckBox3
         '
         Me.CheckBox3.AutoSize = True
-        Me.CheckBox3.Location = New System.Drawing.Point(8, 26)
+        Me.CheckBox3.Location = New System.Drawing.Point(9, 37)
         Me.CheckBox3.Name = "CheckBox3"
         Me.CheckBox3.Size = New System.Drawing.Size(143, 17)
         Me.CheckBox3.TabIndex = 12
         Me.CheckBox3.Text = "zamień X i Y w zapytaniu"
-        Me.ToolTip1.SetToolTip(Me.CheckBox3, "Domyślny brak zaznaczenia jest optymalnym ustawieniem dla Geoportalu2. Opcja wyko" & _
+        Me.ToolTip1.SetToolTip(Me.CheckBox3, "Domyślny brak zaznaczenia jest optymalnym ustawieniem dla Geoportalu2. Opcja wyko" &
         "rzystywana jedynie w szczególnych sytuacjach nietypowych serwerów WMS.")
         Me.CheckBox3.UseVisualStyleBackColor = True
         '
@@ -279,7 +280,7 @@ Partial Class Form2
         Me.TextBox6.Size = New System.Drawing.Size(152, 20)
         Me.TextBox6.TabIndex = 14
         Me.TextBox6.Text = "segment"
-        Me.ToolTip1.SetToolTip(Me.TextBox6, "opcjonalny wspólny przedrostek którym zostaną poprzedzone numery wszystkich pobie" & _
+        Me.ToolTip1.SetToolTip(Me.TextBox6, "opcjonalny wspólny przedrostek którym zostaną poprzedzone numery wszystkich pobie" &
         "ranych segmentów map")
         '
         'GroupBox3
@@ -291,36 +292,37 @@ Partial Class Form2
         Me.GroupBox3.Controls.Add(Me.GroupBox1)
         Me.GroupBox3.Location = New System.Drawing.Point(287, 19)
         Me.GroupBox3.Name = "GroupBox3"
-        Me.GroupBox3.Size = New System.Drawing.Size(358, 233)
+        Me.GroupBox3.Size = New System.Drawing.Size(358, 240)
         Me.GroupBox3.TabIndex = 15
         Me.GroupBox3.TabStop = False
         Me.GroupBox3.Text = "Utawienia programu (zapisane w lastsettings.txt)"
         '
         'GroupBox8
         '
+        Me.GroupBox8.Controls.Add(Me.Label8)
         Me.GroupBox8.Controls.Add(Me.CheckBox3)
-        Me.GroupBox8.Location = New System.Drawing.Point(193, 158)
+        Me.GroupBox8.Location = New System.Drawing.Point(190, 158)
         Me.GroupBox8.Name = "GroupBox8"
-        Me.GroupBox8.Size = New System.Drawing.Size(159, 58)
+        Me.GroupBox8.Size = New System.Drawing.Size(162, 67)
         Me.GroupBox8.TabIndex = 16
         Me.GroupBox8.TabStop = False
-        Me.GroupBox8.Text = "Opcje niestandardowe"
+        Me.GroupBox8.Text = "Opcje zaawansowane dla"
         '
         'GroupBox6
         '
         Me.GroupBox6.Controls.Add(Me.ComboBox2)
-        Me.GroupBox6.Location = New System.Drawing.Point(11, 155)
+        Me.GroupBox6.Location = New System.Drawing.Point(11, 156)
         Me.GroupBox6.Name = "GroupBox6"
-        Me.GroupBox6.Size = New System.Drawing.Size(170, 61)
+        Me.GroupBox6.Size = New System.Drawing.Size(170, 69)
         Me.GroupBox6.TabIndex = 14
         Me.GroupBox6.TabStop = False
-        Me.GroupBox6.Text = "Zmiana domyślnej numeracji segmentów"
+        Me.GroupBox6.Text = "Zmiana domyślnej numeracji pobieranych segmentów"
         '
         'ComboBox2
         '
         Me.ComboBox2.FormattingEnabled = True
         Me.ComboBox2.Items.AddRange(New Object() {"01_02_03", "1_2_3", "NrWiersza_NrKolumny"})
-        Me.ComboBox2.Location = New System.Drawing.Point(7, 32)
+        Me.ComboBox2.Location = New System.Drawing.Point(9, 32)
         Me.ComboBox2.Name = "ComboBox2"
         Me.ComboBox2.Size = New System.Drawing.Size(144, 21)
         Me.ComboBox2.TabIndex = 8
@@ -341,9 +343,9 @@ Partial Class Form2
         Me.CheckBox6.AutoSize = True
         Me.CheckBox6.Location = New System.Drawing.Point(9, 21)
         Me.CheckBox6.Name = "CheckBox6"
-        Me.CheckBox6.Size = New System.Drawing.Size(97, 17)
+        Me.CheckBox6.Size = New System.Drawing.Size(135, 17)
         Me.CheckBox6.TabIndex = 5
-        Me.CheckBox6.Text = "twórz mapę TB"
+        Me.CheckBox6.Text = "twórz mapę TrekBuddy"
         Me.CheckBox6.UseVisualStyleBackColor = True
         '
         'GroupBox4
@@ -397,7 +399,7 @@ Partial Class Form2
         Me.CheckBox5.Name = "CheckBox5"
         Me.CheckBox5.Size = New System.Drawing.Size(15, 14)
         Me.CheckBox5.TabIndex = 17
-        Me.ToolTip1.SetToolTip(Me.CheckBox5, "Opcjonalna funkcja wykorzystywana głównie w przypadku wznawiania niedokończonych " & _
+        Me.ToolTip1.SetToolTip(Me.CheckBox5, "Opcjonalna funkcja wykorzystywana głównie w przypadku wznawiania niedokończonych " &
         "operacji pobierania map")
         Me.CheckBox5.UseVisualStyleBackColor = True
         '
@@ -451,7 +453,7 @@ Partial Class Form2
         Me.GroupBox7.Controls.Add(Me.CheckBox11)
         Me.GroupBox7.Controls.Add(Me.CheckBox10)
         Me.GroupBox7.Controls.Add(Me.CheckBox9)
-        Me.GroupBox7.Location = New System.Drawing.Point(12, 187)
+        Me.GroupBox7.Location = New System.Drawing.Point(12, 195)
         Me.GroupBox7.Name = "GroupBox7"
         Me.GroupBox7.Size = New System.Drawing.Size(269, 110)
         Me.GroupBox7.TabIndex = 19
@@ -463,7 +465,7 @@ Partial Class Form2
         Me.Button6.Font = New System.Drawing.Font("Microsoft Sans Serif", 6.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
         Me.Button6.Image = Global.MapoTero.My.Resources.Resources.kosz
         Me.Button6.ImageAlign = System.Drawing.ContentAlignment.MiddleRight
-        Me.Button6.Location = New System.Drawing.Point(287, 265)
+        Me.Button6.Location = New System.Drawing.Point(287, 271)
         Me.Button6.Name = "Button6"
         Me.Button6.Size = New System.Drawing.Size(74, 32)
         Me.Button6.TabIndex = 305
@@ -471,11 +473,20 @@ Partial Class Form2
         Me.Button6.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
         Me.Button6.UseVisualStyleBackColor = True
         '
+        'Label8
+        '
+        Me.Label8.AutoSize = True
+        Me.Label8.Location = New System.Drawing.Point(9, 16)
+        Me.Label8.Name = "Label8"
+        Me.Label8.Size = New System.Drawing.Size(144, 13)
+        Me.Label8.TabIndex = 13
+        Me.Label8.Text = "nietypowych serwerów WMS"
+        '
         'Form2
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(656, 310)
+        Me.ClientSize = New System.Drawing.Size(656, 318)
         Me.Controls.Add(Me.Button6)
         Me.Controls.Add(Me.GroupBox7)
         Me.Controls.Add(Me.GroupBox4)
@@ -539,4 +550,5 @@ Partial Class Form2
     Friend WithEvents CheckBox9 As System.Windows.Forms.CheckBox
     Friend WithEvents CheckBox13 As System.Windows.Forms.CheckBox
     Friend WithEvents Button6 As System.Windows.Forms.Button
+    Friend WithEvents Label8 As Label
 End Class

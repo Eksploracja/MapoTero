@@ -293,8 +293,7 @@ pobieranieJeszczeRaz:
 
 
 
-                Lx = (Val(Form1.TextBox1.Text) + ((Val(Form1.TextBox9.Text) * Val(Form1.TextBox10.Text)) * (ileSegVert - pion)))
-                Ly = (Val(Form1.TextBox2.Text) + ((Val(Form1.TextBox9.Text) * Val(Form1.TextBox10.Text)) * (poz - 1)))
+
                 Px = (Lx + (Val(Form1.TextBox9.Text) * Val(Form1.TextBox10.Text)))
                 Py = (Ly + (Val(Form1.TextBox9.Text) * Val(Form1.TextBox10.Text)))
 
