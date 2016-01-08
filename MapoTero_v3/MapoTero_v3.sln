@@ -23,8 +23,8 @@ Global
 		SccNumberOfProjects = 2
 		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
 		SccTeamFoundationServer = https://tfs.codeplex.com/tfs/tfs18
-		SccProjectUniqueName0 = MapoTero_v3.vbproj
 		SccLocalPath0 = .
+		SccProjectUniqueName1 = MapoTero_v3.vbproj
 		SccLocalPath1 = .
 	EndGlobalSection
 EndGlobal
