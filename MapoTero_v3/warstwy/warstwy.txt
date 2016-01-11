@@ -26,5 +26,7 @@ geologiczna_500
 dzialki_katastralne
 budynki_BDOT_2010
 budynki_BDOT_2009
+BDOT_wybrane_warstwy
+BDOT_wszystkie_warstwy
 BDO_topograficzna
 administracyjna
