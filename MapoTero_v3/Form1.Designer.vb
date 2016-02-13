@@ -112,6 +112,7 @@ Partial Class Form1
         Me.TextBox6 = New System.Windows.Forms.TextBox()
         Me.Label42 = New System.Windows.Forms.Label()
         Me.Label7 = New System.Windows.Forms.Label()
+        Me.Label8 = New System.Windows.Forms.Label()
         Me.Button4 = New System.Windows.Forms.Button()
         Me.Button8 = New System.Windows.Forms.Button()
         Me.Button7 = New System.Windows.Forms.Button()
@@ -191,9 +192,9 @@ Partial Class Form1
         Me.Label30.AutoSize = True
         Me.Label30.Location = New System.Drawing.Point(6, 58)
         Me.Label30.Name = "Label30"
-        Me.Label30.Size = New System.Drawing.Size(129, 13)
+        Me.Label30.Size = New System.Drawing.Size(152, 13)
         Me.Label30.TabIndex = 217
-        Me.Label30.Text = " Wybierz warstwę WMS-a"
+        Me.Label30.Text = " Wybież mapę (warstwa WMS)"
         Me.ToolTip1.SetToolTip(Me.Label30, "Wskaż wybraną warst klikając na nią lewym klawiszem myszki. ")
         '
         'Label29
@@ -201,9 +202,9 @@ Partial Class Form1
         Me.Label29.AutoSize = True
         Me.Label29.Location = New System.Drawing.Point(6, 16)
         Me.Label29.Name = "Label29"
-        Me.Label29.Size = New System.Drawing.Size(177, 13)
+        Me.Label29.Size = New System.Drawing.Size(166, 13)
         Me.Label29.TabIndex = 216
-        Me.Label29.Text = " Wybierz serwer WMS (rodzaj mapy)"
+        Me.Label29.Text = " Wybierz zbiór map (serwer WMS)"
         Me.ToolTip1.SetToolTip(Me.Label29, "Spis dostępnych serwerów WMS, których definicje znajdują się w plikach tekstowych" &
         " katalogu /warstwy/")
         '
@@ -384,7 +385,7 @@ Partial Class Form1
         '
         Me.Label47.AutoSize = True
         Me.Label47.Enabled = False
-        Me.Label47.Location = New System.Drawing.Point(263, 84)
+        Me.Label47.Location = New System.Drawing.Point(262, 94)
         Me.Label47.Name = "Label47"
         Me.Label47.Size = New System.Drawing.Size(13, 13)
         Me.Label47.TabIndex = 221
@@ -396,7 +397,7 @@ Partial Class Form1
         '
         Me.Label46.AutoSize = True
         Me.Label46.Enabled = False
-        Me.Label46.Location = New System.Drawing.Point(264, 45)
+        Me.Label46.Location = New System.Drawing.Point(263, 57)
         Me.Label46.Name = "Label46"
         Me.Label46.Size = New System.Drawing.Size(12, 13)
         Me.Label46.TabIndex = 220
@@ -407,7 +408,7 @@ Partial Class Form1
         'TextBox13
         '
         Me.TextBox13.Enabled = False
-        Me.TextBox13.Location = New System.Drawing.Point(247, 101)
+        Me.TextBox13.Location = New System.Drawing.Point(246, 108)
         Me.TextBox13.Name = "TextBox13"
         Me.TextBox13.Size = New System.Drawing.Size(44, 20)
         Me.TextBox13.TabIndex = 219
@@ -416,7 +417,7 @@ Partial Class Form1
         '
         'TextBox9
         '
-        Me.TextBox9.Location = New System.Drawing.Point(246, 61)
+        Me.TextBox9.Location = New System.Drawing.Point(246, 72)
         Me.TextBox9.Name = "TextBox9"
         Me.TextBox9.Size = New System.Drawing.Size(44, 20)
         Me.TextBox9.TabIndex = 211
@@ -426,7 +427,7 @@ Partial Class Form1
         'Label1
         '
         Me.Label1.AutoSize = True
-        Me.Label1.Location = New System.Drawing.Point(293, 66)
+        Me.Label1.Location = New System.Drawing.Point(293, 77)
         Me.Label1.Name = "Label1"
         Me.Label1.Size = New System.Drawing.Size(116, 13)
         Me.Label1.TabIndex = 213
@@ -438,7 +439,7 @@ Partial Class Form1
         'Label2
         '
         Me.Label2.AutoSize = True
-        Me.Label2.Location = New System.Drawing.Point(293, 26)
+        Me.Label2.Location = New System.Drawing.Point(292, 39)
         Me.Label2.Name = "Label2"
         Me.Label2.Size = New System.Drawing.Size(116, 13)
         Me.Label2.TabIndex = 214
@@ -448,7 +449,7 @@ Partial Class Form1
         '
         'TextBox10
         '
-        Me.TextBox10.Location = New System.Drawing.Point(247, 23)
+        Me.TextBox10.Location = New System.Drawing.Point(246, 36)
         Me.TextBox10.Name = "TextBox10"
         Me.TextBox10.Size = New System.Drawing.Size(44, 20)
         Me.TextBox10.TabIndex = 212
@@ -797,7 +798,7 @@ Partial Class Form1
         '
         Me.Label42.AutoSize = True
         Me.Label42.Enabled = False
-        Me.Label42.Location = New System.Drawing.Point(292, 98)
+        Me.Label42.Location = New System.Drawing.Point(292, 105)
         Me.Label42.Name = "Label42"
         Me.Label42.Size = New System.Drawing.Size(87, 13)
         Me.Label42.TabIndex = 215
@@ -810,7 +811,7 @@ Partial Class Form1
         '
         Me.Label7.AutoSize = True
         Me.Label7.Enabled = False
-        Me.Label7.Location = New System.Drawing.Point(294, 111)
+        Me.Label7.Location = New System.Drawing.Point(294, 118)
         Me.Label7.Name = "Label7"
         Me.Label7.Size = New System.Drawing.Size(117, 13)
         Me.Label7.TabIndex = 316
@@ -818,6 +819,17 @@ Partial Class Form1
         Me.ToolTip1.SetToolTip(Me.Label7, "Rozmiar pojedyńczego segmentu - najmniejszej komórki siatki kwadtatów, na które z" &
         "ostanie podzielony pobierany obszar mapy.  Uwaga - maksymalna rozmiar segmentu d" &
         "la Geoportalu2 wynosi 2048px")
+        '
+        'Label8
+        '
+        Me.Label8.AutoSize = True
+        Me.Label8.Location = New System.Drawing.Point(244, 18)
+        Me.Label8.Name = "Label8"
+        Me.Label8.Size = New System.Drawing.Size(166, 13)
+        Me.Label8.TabIndex = 317
+        Me.Label8.Text = "Rozmiar pojedynczego segmentu:"
+        Me.ToolTip1.SetToolTip(Me.Label8, "Domyślna wartość jest optymalna. Im większy rozmiar piksela, tym gorsza jakość ob" &
+        "razu, ale jednocześnie tym większy jego przestrzenny zasięg.")
         '
         'Button4
         '
@@ -854,7 +866,7 @@ Partial Class Form1
         Me.Button7.Name = "Button7"
         Me.Button7.Size = New System.Drawing.Size(30, 30)
         Me.Button7.TabIndex = 304
-        Me.ToolTip1.SetToolTip(Me.Button7, "wyświetl folder segmentów")
+        Me.ToolTip1.SetToolTip(Me.Button7, "wyświetl folder z segmentami pobranej mapy")
         Me.Button7.UseVisualStyleBackColor = True
         '
         'GMapControl1
@@ -1052,6 +1064,7 @@ Partial Class Form1
         '
         'GroupBox5
         '
+        Me.GroupBox5.Controls.Add(Me.Label8)
         Me.GroupBox5.Controls.Add(Me.Label7)
         Me.GroupBox5.Controls.Add(Me.Label42)
         Me.GroupBox5.Controls.Add(Me.Label47)
@@ -1079,14 +1092,14 @@ Partial Class Form1
         Me.GroupBox5.Size = New System.Drawing.Size(418, 141)
         Me.GroupBox5.TabIndex = 303
         Me.GroupBox5.TabStop = False
-        Me.GroupBox5.Text = "Schemat siatki segmentów i zasięgu zaznaczenia. Rozmiar pojedyńczego segmentu"
+        Me.GroupBox5.Text = "Schemat siatki segmentów pobieranej mapy i zasięgu zaznaczenia"
         '
         'Label34
         '
         Me.Label34.AutoSize = True
         Me.Label34.Font = New System.Drawing.Font("Microsoft Sans Serif", 7.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
         Me.Label34.ForeColor = System.Drawing.Color.Navy
-        Me.Label34.Location = New System.Drawing.Point(1, 85)
+        Me.Label34.Location = New System.Drawing.Point(4, 63)
         Me.Label34.Name = "Label34"
         Me.Label34.Size = New System.Drawing.Size(10, 13)
         Me.Label34.TabIndex = 315
@@ -1097,7 +1110,7 @@ Partial Class Form1
         Me.Label32.AutoSize = True
         Me.Label32.Font = New System.Drawing.Font("Microsoft Sans Serif", 7.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
         Me.Label32.ForeColor = System.Drawing.Color.Navy
-        Me.Label32.Location = New System.Drawing.Point(69, 123)
+        Me.Label32.Location = New System.Drawing.Point(72, 98)
         Me.Label32.Name = "Label32"
         Me.Label32.Size = New System.Drawing.Size(10, 13)
         Me.Label32.TabIndex = 314
@@ -1108,7 +1121,7 @@ Partial Class Form1
         Me.Label33.AutoSize = True
         Me.Label33.Font = New System.Drawing.Font("Microsoft Sans Serif", 7.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
         Me.Label33.ForeColor = System.Drawing.Color.Navy
-        Me.Label33.Location = New System.Drawing.Point(133, 86)
+        Me.Label33.Location = New System.Drawing.Point(134, 64)
         Me.Label33.Name = "Label33"
         Me.Label33.Size = New System.Drawing.Size(10, 13)
         Me.Label33.TabIndex = 313
@@ -1119,7 +1132,7 @@ Partial Class Form1
         Me.Label31.AutoSize = True
         Me.Label31.Font = New System.Drawing.Font("Microsoft Sans Serif", 7.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
         Me.Label31.ForeColor = System.Drawing.Color.Navy
-        Me.Label31.Location = New System.Drawing.Point(71, 59)
+        Me.Label31.Location = New System.Drawing.Point(73, 33)
         Me.Label31.Name = "Label31"
         Me.Label31.Size = New System.Drawing.Size(10, 13)
         Me.Label31.TabIndex = 312
@@ -1129,7 +1142,7 @@ Partial Class Form1
         '
         Me.Label5.AutoSize = True
         Me.Label5.ForeColor = System.Drawing.Color.Blue
-        Me.Label5.Location = New System.Drawing.Point(132, 70)
+        Me.Label5.Location = New System.Drawing.Point(133, 79)
         Me.Label5.Name = "Label5"
         Me.Label5.Size = New System.Drawing.Size(12, 13)
         Me.Label5.TabIndex = 310
@@ -1139,7 +1152,7 @@ Partial Class Form1
         '
         Me.Label6.AutoSize = True
         Me.Label6.ForeColor = System.Drawing.Color.Blue
-        Me.Label6.Location = New System.Drawing.Point(70, 43)
+        Me.Label6.Location = New System.Drawing.Point(72, 52)
         Me.Label6.Name = "Label6"
         Me.Label6.Size = New System.Drawing.Size(12, 13)
         Me.Label6.TabIndex = 311
@@ -1148,7 +1161,7 @@ Partial Class Form1
         'TextBox4
         '
         Me.TextBox4.ForeColor = System.Drawing.Color.Blue
-        Me.TextBox4.Location = New System.Drawing.Point(147, 67)
+        Me.TextBox4.Location = New System.Drawing.Point(148, 76)
         Me.TextBox4.Name = "TextBox4"
         Me.TextBox4.Size = New System.Drawing.Size(44, 20)
         Me.TextBox4.TabIndex = 309
@@ -1157,7 +1170,7 @@ Partial Class Form1
         'TextBox3
         '
         Me.TextBox3.ForeColor = System.Drawing.Color.Blue
-        Me.TextBox3.Location = New System.Drawing.Point(82, 40)
+        Me.TextBox3.Location = New System.Drawing.Point(84, 49)
         Me.TextBox3.Name = "TextBox3"
         Me.TextBox3.Size = New System.Drawing.Size(44, 20)
         Me.TextBox3.TabIndex = 308
@@ -1167,7 +1180,7 @@ Partial Class Form1
         '
         Me.Label4.AutoSize = True
         Me.Label4.ForeColor = System.Drawing.Color.Blue
-        Me.Label4.Location = New System.Drawing.Point(0, 69)
+        Me.Label4.Location = New System.Drawing.Point(4, 78)
         Me.Label4.Name = "Label4"
         Me.Label4.Size = New System.Drawing.Size(12, 13)
         Me.Label4.TabIndex = 307
@@ -1177,7 +1190,7 @@ Partial Class Form1
         '
         Me.Label3.AutoSize = True
         Me.Label3.ForeColor = System.Drawing.Color.Blue
-        Me.Label3.Location = New System.Drawing.Point(68, 103)
+        Me.Label3.Location = New System.Drawing.Point(71, 115)
         Me.Label3.Name = "Label3"
         Me.Label3.Size = New System.Drawing.Size(12, 13)
         Me.Label3.TabIndex = 306
@@ -1186,7 +1199,7 @@ Partial Class Form1
         'TextBox2
         '
         Me.TextBox2.ForeColor = System.Drawing.Color.Blue
-        Me.TextBox2.Location = New System.Drawing.Point(17, 66)
+        Me.TextBox2.Location = New System.Drawing.Point(21, 75)
         Me.TextBox2.Name = "TextBox2"
         Me.TextBox2.Size = New System.Drawing.Size(44, 20)
         Me.TextBox2.TabIndex = 305
@@ -1195,7 +1208,7 @@ Partial Class Form1
         'TextBox1
         '
         Me.TextBox1.ForeColor = System.Drawing.Color.Blue
-        Me.TextBox1.Location = New System.Drawing.Point(82, 99)
+        Me.TextBox1.Location = New System.Drawing.Point(85, 111)
         Me.TextBox1.Name = "TextBox1"
         Me.TextBox1.Size = New System.Drawing.Size(44, 20)
         Me.TextBox1.TabIndex = 304
@@ -1206,7 +1219,7 @@ Partial Class Form1
         Me.PictureBox2.Image = Global.MapoTero.My.Resources.Resources.siatka
         Me.PictureBox2.Location = New System.Drawing.Point(10, 16)
         Me.PictureBox2.Name = "PictureBox2"
-        Me.PictureBox2.Size = New System.Drawing.Size(235, 119)
+        Me.PictureBox2.Size = New System.Drawing.Size(231, 120)
         Me.PictureBox2.TabIndex = 303
         Me.PictureBox2.TabStop = False
         '
@@ -1394,5 +1407,5 @@ Partial Class Form1
     Friend WithEvents Button4 As System.Windows.Forms.Button
     Friend WithEvents Panel2 As System.Windows.Forms.Panel
     Friend WithEvents Panel3 As System.Windows.Forms.Panel
-
+    Friend WithEvents Label8 As Label
 End Class

@@ -143,7 +143,7 @@ Partial Class usuwanie_p_seg
         Me.TextBox4.TabIndex = 7
         Me.TextBox4.Text = "0"
         Me.TextBox4.TextAlign = System.Windows.Forms.HorizontalAlignment.Right
-        Me.ToolTip1.SetToolTip(Me.TextBox4, "Sprawdź rozmiar przykładowego ""pustego"" segmentu i wprowadź tą wartość powiększon" & _
+        Me.ToolTip1.SetToolTip(Me.TextBox4, "Sprawdź rozmiar przykładowego ""pustego"" segmentu i wprowadź tą wartość powiększon" &
         "ą o ok. 10%")
         '
         'Button1
@@ -214,7 +214,7 @@ Partial Class usuwanie_p_seg
         Me.TextBox5.TabIndex = 20
         Me.TextBox5.Text = "0"
         Me.TextBox5.TextAlign = System.Windows.Forms.HorizontalAlignment.Right
-        Me.ToolTip1.SetToolTip(Me.TextBox5, "Sprawdź rozmiar przykładowego ""pustego"" segmentu i wprowadź tą wartość powiększon" & _
+        Me.ToolTip1.SetToolTip(Me.TextBox5, "Sprawdź rozmiar przykładowego ""pustego"" segmentu i wprowadź tą wartość powiększon" &
         "ą o ok. 10%")
         '
         'Label6
