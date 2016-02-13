@@ -59,6 +59,7 @@ Partial Class Form2
         Me.TextBox6 = New System.Windows.Forms.TextBox()
         Me.GroupBox3 = New System.Windows.Forms.GroupBox()
         Me.GroupBox8 = New System.Windows.Forms.GroupBox()
+        Me.Label8 = New System.Windows.Forms.Label()
         Me.GroupBox6 = New System.Windows.Forms.GroupBox()
         Me.ComboBox2 = New System.Windows.Forms.ComboBox()
         Me.GroupBox5 = New System.Windows.Forms.GroupBox()
@@ -75,7 +76,6 @@ Partial Class Form2
         Me.CheckBox9 = New System.Windows.Forms.CheckBox()
         Me.GroupBox7 = New System.Windows.Forms.GroupBox()
         Me.Button6 = New System.Windows.Forms.Button()
-        Me.Label8 = New System.Windows.Forms.Label()
         Me.GroupBox1.SuspendLayout()
         Me.GroupBox2.SuspendLayout()
         Me.GroupBox3.SuspendLayout()
@@ -308,6 +308,15 @@ Partial Class Form2
         Me.GroupBox8.TabStop = False
         Me.GroupBox8.Text = "Opcje zaawansowane dla"
         '
+        'Label8
+        '
+        Me.Label8.AutoSize = True
+        Me.Label8.Location = New System.Drawing.Point(9, 16)
+        Me.Label8.Name = "Label8"
+        Me.Label8.Size = New System.Drawing.Size(144, 13)
+        Me.Label8.TabIndex = 13
+        Me.Label8.Text = "nietypowych serwerów WMS"
+        '
         'GroupBox6
         '
         Me.GroupBox6.Controls.Add(Me.ComboBox2)
@@ -379,9 +388,9 @@ Partial Class Form2
         Me.Label6.AutoSize = True
         Me.Label6.Location = New System.Drawing.Point(41, 125)
         Me.Label6.Name = "Label6"
-        Me.Label6.Size = New System.Drawing.Size(165, 13)
+        Me.Label6.Size = New System.Drawing.Size(164, 13)
         Me.Label6.TabIndex = 19
-        Me.Label6.Text = "segmenty o numerze wyższym jak"
+        Me.Label6.Text = "segmenty o numerze wyższym niż"
         '
         'Label5
         '
@@ -472,15 +481,6 @@ Partial Class Form2
         Me.Button6.Text = "Resetuj ustawienia"
         Me.Button6.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
         Me.Button6.UseVisualStyleBackColor = True
-        '
-        'Label8
-        '
-        Me.Label8.AutoSize = True
-        Me.Label8.Location = New System.Drawing.Point(9, 16)
-        Me.Label8.Name = "Label8"
-        Me.Label8.Size = New System.Drawing.Size(144, 13)
-        Me.Label8.TabIndex = 13
-        Me.Label8.Text = "nietypowych serwerów WMS"
         '
         'Form2
         '

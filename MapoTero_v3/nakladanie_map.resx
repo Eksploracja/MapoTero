@@ -125,9 +125,9 @@
 
 Instrukcja obsługi:
 1. W katalogu /download/ utwórz trzy podkatalogi o następujących nazwach: "dolna", "gorna", "polaczone".
-1. Pobierz mapę podkładową (np ortofotomapę) w formacie png i zapisz ją do katalogu /download/dolna/
-2. Pobierz mapę którą chcesz nałożyć na podkład, zachowując niezmienione ustawienia geometrii segmentów, i umieść ją w katalogu  /download/gorna/
-3. Kliknij button "Połącz mapy". Jeśli proces łączenia przebiegł pomyślnie, to wyświetli się stosowny komunikat, oraz wyświetli się zawartość katalogu "połączone" w którym znajdziesz wynikową mapę</value>
+2. Pobierz mapę podkładową (np ortofotomapę) w formacie png i zapisz ją w katalogu /download/dolna/
+3. Pobierz mapę, którą chcesz nałożyć na podkład, zachowując niezmienione ustawienia geometrii segmentów i umieść ją w katalogu /download/gorna/
+4. Kliknij przycisk "Połącz mapy". Jeśli proces łączenia przebiegł pomyślnie, to wyświetli się stosowny komunikat oraz wyświetli się zawartość katalogu "połączone", w którym znajdziesz wynikową mapę</value>
   </data>
   <assembly alias="System.Drawing" name="System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <data name="PictureBox1.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">

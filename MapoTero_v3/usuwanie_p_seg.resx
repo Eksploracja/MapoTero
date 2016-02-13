@@ -124,11 +124,11 @@
     <value>17, 17</value>
   </metadata>
   <data name="RichTextBox1.Text" xml:space="preserve">
-    <value>To narzędzie usuwa wybrane segmenty z katalogu /download/. Przydaje się ono jedynie w szczególnych sytuacjach, gdy podczas pobierania dużego zbioru segmentów część z nich zapisała się błędbnie, jako tzw "puste segmenty". Względem prawidłowo pobranych segmentów wyróżniają się one kilkukrotnie mniejszym rozmiarem oraz zawartością składającą się wyłącznie z białego tła. Do takich sytuacji dochodzi najczęściej z powodu niestabilnej pracy serwera WMS z którego pobieramy mapy.
+    <value>To narzędzie usuwa wybrane segmenty z katalogu /download/. Przydaje się ono jedynie w szczególnych sytuacjach, gdy podczas pobierania dużego zbioru segmentów część z nich zapisała się błędnie, jako tzw "puste segmenty". Względem prawidłowo pobranych segmentów wyróżniają się one kilkukrotnie mniejszym rozmiarem oraz zawartością składającą się wyłącznie z białego tła. Do takich sytuacji dochodzi najczęściej z powodu niestabilnej pracy serwera WMS z którego pobieramy mapy.
 
-Aby usunąć puste segmenty sprawdź jaki jest rozmiar pojedyńczego pustego segmentu. Zwykle ich rozmiar jest jednakowy i zbliżony do wartości  podanej w polu "Rozmiar najmniejszego pliku". Powiększ tą wartość o około 10% i wprowadź ją do ostantiego formularza "Usuń kafle mniejsze niż:". Wciśnięcie buttonu "OK" powoduje usunięcie wskazanych segmentów.
+Aby usunąć puste segmenty sprawdź jaki jest rozmiar pojedynczego pustego segmentu. Zwykle ich rozmiar jest jednakowy i zbliżony do wartości podanej w polu "Rozmiar najmniejszego pliku". Powiększ tę wartość o około 10% i wprowadź ją do ostatniego formularza "Usuń kafle mniejsze niż:". Wciśnięcie przycisku "OK" spowoduje usunięcie wskazanych segmentów.
 
-Po usunięciu pustych segmentów możemy automatycznie uzupełnić brakujące obszary, poprzez ponowne wznowienie sesji pobierania. MapoTero automatycznie wykryje których segmentów brakuje i podejmie ponowną próbę ich pobrania. </value>
+Po usunięciu pustych segmentów możemy automatycznie uzupełnić brakujące obszary poprzez wznowienie sesji pobierania. MapoTero automatycznie wykryje, których segmentów brakuje, i podejmie kolejną próbę ich pobrania. </value>
   </data>
   <assembly alias="System.Drawing" name="System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <data name="$this.Icon" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
