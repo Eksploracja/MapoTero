@@ -1017,14 +1017,14 @@ errorhandler:
                     Dim MMPLL4sz As String  'lewy dolny
                     Dim MMPLL4dl As String
 
-                    MMPLL1sz = Round(SzerokoscWgs_z1992(Px, Ly), 8)
-                    MMPLL1dl = Round(DlugoscWgs_z1992(Px, Ly), 8)
-                    MMPLL2sz = Round(SzerokoscWgs_z1992(Px, Py), 8)
-                    MMPLL2dl = Round(DlugoscWgs_z1992(Px, Py), 8)
-                    MMPLL3sz = Round(SzerokoscWgs_z1992(Lx, Py), 8)
-                    MMPLL3dl = Round(DlugoscWgs_z1992(Lx, Py), 8)
-                    MMPLL4sz = Round(SzerokoscWgs_z1992(Lx, Ly), 8)
-                    MMPLL4dl = Round(DlugoscWgs_z1992(Lx, Ly), 8)
+                    MMPLL1sz = Round(SzerokoscWgs_z1992(Px, Ly), 6)
+                    MMPLL1dl = Round(DlugoscWgs_z1992(Px, Ly), 6)
+                    MMPLL2sz = Round(SzerokoscWgs_z1992(Px, Py), 6)
+                    MMPLL2dl = Round(DlugoscWgs_z1992(Px, Py), 6)
+                    MMPLL3sz = Round(SzerokoscWgs_z1992(Lx, Py), 6)
+                    MMPLL3dl = Round(DlugoscWgs_z1992(Lx, Py), 6)
+                    MMPLL4sz = Round(SzerokoscWgs_z1992(Lx, Ly), 6)
+                    MMPLL4dl = Round(DlugoscWgs_z1992(Lx, Ly), 6)
 
                     'przelicza na stopnie, minuty, sekundy i ułamki sekund
                     Dim Point01N As String = StMinSek(MMPLL1sz)
@@ -1049,61 +1049,62 @@ errorhandler:
 
                     'tworzy plik .map
                     FileOpen(1, folderSegmentow & nazwaKwadratu & ".map", OpenMode.Output)
-                    Print(1, "OziExplorer Map Data File Version 2.2" & Chr(13) & Chr(10) & _
-                         nazwaKwadratu & "." & rozszerzenie & Chr(13) & Chr(10) & _
-                         folderSegmentow & nazwaKwadratu & "." & rozszerzenie & Chr(13) & Chr(10) & _
-                         "1 ,Map Code," & Chr(13) & Chr(10) & _
-                         "WGS 84,,0.0000,0.0000," & Chr(13) & Chr(10) & _
-                         "Reserved 1" & Chr(13) & Chr(10) & _
-                         "Reserved 2" & Chr(13) & Chr(10) & _
-                         "Magnetic Variation,,,E" & Chr(13) & Chr(10) & _
-                         "Map Projection,Transverse Mercator,PolyCal,No,AutoCalOnly,No,BSBUseWPX,No" & Chr(13) & Chr(10) & _
-                         "Point01,xy,    0,    0,in, deg,  " & Point01N & ",N,  " & Point01E & ",E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
-                         "Point02,xy, " & Form1.TextBox9.Text & ",    0,in, deg,  " & Point02N & ",N,  " & Point02E & ",E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
-                         "Point03,xy, " & Form1.TextBox9.Text & ", " & Form1.TextBox9.Text & ",in, deg,  " & Point03N & ",N,  " & Point03E & ",E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
-                         "Point04,xy,    0, " & Form1.TextBox9.Text & ",in, deg,  " & Point04N & ",N,  " & Point04E & ",E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
-                         "Point05,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
-                         "Point06,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
-                         "Point07,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
-                         "Point08,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
-                         "Point09,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
-                         "Point10,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
-                         "Point11,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
-                         "Point12,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
-                         "Point13,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
-                         "Point14,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
-                         "Point15,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
-                         "Point16,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
-                         "Point17,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
-                         "Point18,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
-                         "Point19,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
-                         "Point20,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
-                         "Point21,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
-                         "Point22,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
-                         "Point23,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
-                         "Point24,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
-                         "Point25,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
-                         "Point26,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
-                         "Point27,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
-                         "Point28,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
-                         "Point29,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
-                         "Point30,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
-                         "Projection Setup,     0.000000000,    19.000000000,     0.999300000,       500000.00,     -5300000.00,,,," & Chr(13) & Chr(10) & _
-                         "Map Feature = MF ; Map Comment = MC     These follow if they exist" & Chr(13) & Chr(10) & _
-                         "Track File = TF      These follow if they exist" & Chr(13) & Chr(10) & _
-                         "Moving Map Parameters = MM?    These follow if they exist" & Chr(13) & Chr(10) & _
-                         "MM0,Yes" & Chr(13) & Chr(10) & _
-                         "MMPNUM,4" & Chr(13) & Chr(10) & _
-                         "MMPXY,1,0,0" & Chr(13) & Chr(10) & _
-                         "MMPXY,2," & Form1.TextBox9.Text & ",0" & Chr(13) & Chr(10) & _
-                         "MMPXY,3," & Form1.TextBox9.Text & "," & Form1.TextBox9.Text & Chr(13) & Chr(10) & _
-                         "MMPXY,4,0," & Form1.TextBox9.Text & Chr(13) & Chr(10) & _
-                         "MMPLL,1,  " & MMPLL1dlDot & ",  " & MMPLL1szDot & Chr(13) & Chr(10) & _
-                         "MMPLL,2,  " & MMPLL2dlDot & ",  " & MMPLL2szDot & Chr(13) & Chr(10) & _
-                         "MMPLL,3,  " & MMPLL3dlDot & ",  " & MMPLL3szDot & Chr(13) & Chr(10) & _
-                         "MMPLL,4,   " & MMPLL4dlDot & ",  " & MMPLL4szDot & Chr(13) & Chr(10) & _
-                         "MM1B,     " & Form1.TextBox10.Text & Chr(13) & Chr(10) & _
-                         "MOP,Map Open Position,0,0" & Chr(13) & Chr(10) & _
+                    Print(1, "OziExplorer Map Data File Version 2.2" & Chr(13) & Chr(10) &
+                         nazwaKwadratu & "." & rozszerzenie & Chr(13) & Chr(10) &
+                         folderSegmentow & nazwaKwadratu & "." & rozszerzenie & Chr(13) & Chr(10) &
+                         "1 ,Map Code," & Chr(13) & Chr(10) &
+                         "WGS 84,,   0.0000,   0.0000,WGS 84" & Chr(13) & Chr(10) &
+                         "Reserved 1" & Chr(13) & Chr(10) &
+                         "Reserved 2" & Chr(13) & Chr(10) &
+                         "Magnetic Variation,,,E" & Chr(13) & Chr(10) &
+                         "Map Projection,Transverse Mercator,PolyCal,No,AutoCalOnly,No,BSBUseWPX,No" & Chr(13) & Chr(10) &
+                         "Point01,xy,    0,    0,in, deg,  " & Point01N & ",N,  " & Point01E & ",E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) &
+                         "Point02,xy, " & Form1.TextBox9.Text & ",    0,in, deg,  " & Point02N & ",N,  " & Point02E & ",E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) &
+                         "Point03,xy, " & Form1.TextBox9.Text & ", " & Form1.TextBox9.Text & ",in, deg,  " & Point03N & ",N,  " & Point03E & ",E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) &
+                         "Point04,xy,    0, " & Form1.TextBox9.Text & ",in, deg,  " & Point04N & ",N,  " & Point04E & ",E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) &
+                         "Point05,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) &
+                         "Point06,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) &
+                         "Point07,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) &
+                         "Point08,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) &
+                         "Point09,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) &
+                         "Point10,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) &
+                         "Point11,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) &
+                         "Point12,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) &
+                         "Point13,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) &
+                         "Point14,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) &
+                         "Point15,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) &
+                         "Point16,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) &
+                         "Point17,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) &
+                         "Point18,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) &
+                         "Point19,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) &
+                         "Point20,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) &
+                         "Point21,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) &
+                         "Point22,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) &
+                         "Point23,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) &
+                         "Point24,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) &
+                         "Point25,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) &
+                         "Point26,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) &
+                         "Point27,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) &
+                         "Point28,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) &
+                         "Point29,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) &
+                         "Point30,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) &
+                         "Projection Setup,     0.000000000,    19.000000000,     0.999300000,       500000.00,     -5300000.00,,,,," & Chr(13) & Chr(10) &
+                         "Map Feature = MF ; Map Comment = MC     These follow if they exist" & Chr(13) & Chr(10) &
+                         "Track File = TF      These follow if they exist" & Chr(13) & Chr(10) &
+                         "Moving Map Parameters = MM?    These follow if they exist" & Chr(13) & Chr(10) &
+                         "MM0,Yes" & Chr(13) & Chr(10) &
+                         "MMPNUM,4" & Chr(13) & Chr(10) &
+                         "MMPXY,1,0,0" & Chr(13) & Chr(10) &
+                         "MMPXY,2," & Form1.TextBox9.Text & ",0" & Chr(13) & Chr(10) &
+                         "MMPXY,3," & Form1.TextBox9.Text & "," & Form1.TextBox9.Text & Chr(13) & Chr(10) &
+                         "MMPXY,4,0," & Form1.TextBox9.Text & Chr(13) & Chr(10) &
+                         "MMPLL,1,  " & MMPLL1dlDot & ",  " & MMPLL1szDot & Chr(13) & Chr(10) &
+                         "MMPLL,2,  " & MMPLL2dlDot & ",  " & MMPLL2szDot & Chr(13) & Chr(10) &
+                         "MMPLL,3,  " & MMPLL3dlDot & ",  " & MMPLL3szDot & Chr(13) & Chr(10) &
+                         "MMPLL,4,   " & MMPLL4dlDot & ",  " & MMPLL4szDot & Chr(13) & Chr(10) &
+                         "MM1B,     " & Form1.TextBox10.Text & Chr(13) & Chr(10) &
+                         "MOP,Map Open Position,0,0" & Chr(13) & Chr(10) &
+                         "MOPLL,Map Open Position,0.0000000,0.0000000,100" & Chr(13) & Chr(10) &
                          "IWH,Map Image Width/Height," & Form1.TextBox9.Text & "," & Form1.TextBox9.Text)
                     FileClose(1)
 
@@ -1126,14 +1127,14 @@ errorhandler:
                 Dim MMPLL4sz As String  'lewy dolny
                 Dim MMPLL4dl As String
 
-                MMPLL1sz = Round(SzerokoscWgs_z1992(Px, Ly), 8)
-                MMPLL1dl = Round(DlugoscWgs_z1992(Px, Ly), 8)
-                MMPLL2sz = Round(SzerokoscWgs_z1992(Px, Py), 8)
-                MMPLL2dl = Round(DlugoscWgs_z1992(Px, Py), 8)
-                MMPLL3sz = Round(SzerokoscWgs_z1992(Lx, Py), 8)
-                MMPLL3dl = Round(DlugoscWgs_z1992(Lx, Py), 8)
-                MMPLL4sz = Round(SzerokoscWgs_z1992(Lx, Ly), 8)
-                MMPLL4dl = Round(DlugoscWgs_z1992(Lx, Ly), 8)
+                MMPLL1sz = Round(SzerokoscWgs_z1992(Px, Ly), 6)
+                MMPLL1dl = Round(DlugoscWgs_z1992(Px, Ly), 6)
+                MMPLL2sz = Round(SzerokoscWgs_z1992(Px, Py), 6)
+                MMPLL2dl = Round(DlugoscWgs_z1992(Px, Py), 6)
+                MMPLL3sz = Round(SzerokoscWgs_z1992(Lx, Py), 6)
+                MMPLL3dl = Round(DlugoscWgs_z1992(Lx, Py), 6)
+                MMPLL4sz = Round(SzerokoscWgs_z1992(Lx, Ly), 6)
+                MMPLL4dl = Round(DlugoscWgs_z1992(Lx, Ly), 6)
 
                 'przelicza na stopnie, minuty, sekundy i ułamki sekund
                 Dim Point01N As String = StMinSek(MMPLL1sz)
@@ -1158,61 +1159,62 @@ errorhandler:
 
                 'tworzy plik .map
                 FileOpen(1, folderSegmentow & "_scalone_segmenty_" & Form3.TextBox8.Text & "x" & Form3.TextBox9.Text & ".map", OpenMode.Output)
-                Print(1, "OziExplorer Map Data File Version 2.2" & Chr(13) & Chr(10) & _
-                     "_scalone_segmenty_" & Form3.TextBox8.Text & "x" & Form3.TextBox9.Text & "." & rozszerzenie & Chr(13) & Chr(10) & _
-                     folderSegmentow & "_scalone_segmenty_" & Form3.TextBox8.Text & "x" & Form3.TextBox9.Text & "." & rozszerzenie & Chr(13) & Chr(10) & _
-                     "1 ,Map Code," & Chr(13) & Chr(10) & _
-                     "WGS 84,,0.0000,0.0000," & Chr(13) & Chr(10) & _
-                     "Reserved 1" & Chr(13) & Chr(10) & _
-                     "Reserved 2" & Chr(13) & Chr(10) & _
-                     "Magnetic Variation,,,E" & Chr(13) & Chr(10) & _
-                     "Map Projection,Transverse Mercator,PolyCal,No,AutoCalOnly,No,BSBUseWPX,No" & Chr(13) & Chr(10) & _
-                     "Point01,xy,    0,    0,in, deg,  " & Point01N & ",N,  " & Point01E & ",E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
-                     "Point02,xy, " & (Val(Form3.TextBox6.Text) * Val(Form3.TextBox8.Text)) & ",    0,in, deg,  " & Point02N & ",N,  " & Point02E & ",E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
-                     "Point03,xy, " & (Val(Form3.TextBox6.Text) * Val(Form3.TextBox8.Text)) & ", " & (Val(Form3.TextBox6.Text) * Val(Form3.TextBox9.Text)) & ",in, deg,  " & Point03N & ",N,  " & Point03E & ",E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
-                     "Point04,xy,    0, " & (Val(Form3.TextBox6.Text) * Val(Form3.TextBox9.Text)) & ",in, deg,  " & Point04N & ",N,  " & Point04E & ",E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
-                     "Point05,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
-                     "Point06,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
-                     "Point07,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
-                     "Point08,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
-                     "Point09,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
-                     "Point10,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
-                     "Point11,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
-                     "Point12,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
-                     "Point13,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
-                     "Point14,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
-                     "Point15,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
-                     "Point16,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
-                     "Point17,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
-                     "Point18,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
-                     "Point19,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
-                     "Point20,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
-                     "Point21,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
-                     "Point22,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
-                     "Point23,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
-                     "Point24,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
-                     "Point25,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
-                     "Point26,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
-                     "Point27,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
-                     "Point28,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
-                     "Point29,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
-                     "Point30,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) & _
-                     "Projection Setup,     0.000000000,    19.000000000,     0.999300000,       500000.00,     -5300000.00,,,," & Chr(13) & Chr(10) & _
-                     "Map Feature = MF ; Map Comment = MC     These follow if they exist" & Chr(13) & Chr(10) & _
-                     "Track File = TF      These follow if they exist" & Chr(13) & Chr(10) & _
-                     "Moving Map Parameters = MM?    These follow if they exist" & Chr(13) & Chr(10) & _
-                     "MM0,Yes" & Chr(13) & Chr(10) & _
-                     "MMPNUM,4" & Chr(13) & Chr(10) & _
-                     "MMPXY,1,0,0" & Chr(13) & Chr(10) & _
-                     "MMPXY,2," & (Val(Form3.TextBox6.Text) * Val(Form3.TextBox8.Text)) & ",0" & Chr(13) & Chr(10) & _
-                     "MMPXY,3," & (Val(Form3.TextBox6.Text) * Val(Form3.TextBox8.Text)) & "," & (Val(Form3.TextBox6.Text) * Val(Form3.TextBox9.Text)) & Chr(13) & Chr(10) & _
-                     "MMPXY,4,0," & (Val(Form3.TextBox6.Text) * Val(Form3.TextBox9.Text)) & Chr(13) & Chr(10) & _
-                     "MMPLL,1,  " & MMPLL1dlDot & ",  " & MMPLL1szDot & Chr(13) & Chr(10) & _
-                     "MMPLL,2,  " & MMPLL2dlDot & ",  " & MMPLL2szDot & Chr(13) & Chr(10) & _
-                     "MMPLL,3,  " & MMPLL3dlDot & ",  " & MMPLL3szDot & Chr(13) & Chr(10) & _
-                     "MMPLL,4,   " & MMPLL4dlDot & ",  " & MMPLL4szDot & Chr(13) & Chr(10) & _
-                     "MM1B,     " & Form3.TextBox7.Text & Chr(13) & Chr(10) & _
-                     "MOP,Map Open Position,0,0" & Chr(13) & Chr(10) & _
+                Print(1, "OziExplorer Map Data File Version 2.2" & Chr(13) & Chr(10) &
+                     "_scalone_segmenty_" & Form3.TextBox8.Text & "x" & Form3.TextBox9.Text & "." & rozszerzenie & Chr(13) & Chr(10) &
+                     folderSegmentow & "_scalone_segmenty_" & Form3.TextBox8.Text & "x" & Form3.TextBox9.Text & "." & rozszerzenie & Chr(13) & Chr(10) &
+                     "1 ,Map Code," & Chr(13) & Chr(10) &
+                     "WGS 84,,   0.0000,   0.0000,WGS 84" & Chr(13) & Chr(10) &
+                     "Reserved 1" & Chr(13) & Chr(10) &
+                     "Reserved 2" & Chr(13) & Chr(10) &
+                     "Magnetic Variation,,,E" & Chr(13) & Chr(10) &
+                     "Map Projection,Transverse Mercator,PolyCal,No,AutoCalOnly,No,BSBUseWPX,No" & Chr(13) & Chr(10) &
+                     "Point01,xy,    0,    0,in, deg,  " & Point01N & ",N,  " & Point01E & ",E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) &
+                     "Point02,xy, " & (Val(Form3.TextBox6.Text) * Val(Form3.TextBox8.Text)) & ",    0,in, deg,  " & Point02N & ",N,  " & Point02E & ",E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) &
+                     "Point03,xy, " & (Val(Form3.TextBox6.Text) * Val(Form3.TextBox8.Text)) & ", " & (Val(Form3.TextBox6.Text) * Val(Form3.TextBox9.Text)) & ",in, deg,  " & Point03N & ",N,  " & Point03E & ",E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) &
+                     "Point04,xy,    0, " & (Val(Form3.TextBox6.Text) * Val(Form3.TextBox9.Text)) & ",in, deg,  " & Point04N & ",N,  " & Point04E & ",E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) &
+                     "Point05,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) &
+                     "Point06,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) &
+                     "Point07,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) &
+                     "Point08,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) &
+                     "Point09,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) &
+                     "Point10,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) &
+                     "Point11,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) &
+                     "Point12,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) &
+                     "Point13,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) &
+                     "Point14,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) &
+                     "Point15,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) &
+                     "Point16,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) &
+                     "Point17,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) &
+                     "Point18,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) &
+                     "Point19,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) &
+                     "Point20,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) &
+                     "Point21,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) &
+                     "Point22,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) &
+                     "Point23,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) &
+                     "Point24,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) &
+                     "Point25,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) &
+                     "Point26,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) &
+                     "Point27,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) &
+                     "Point28,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) &
+                     "Point29,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) &
+                     "Point30,xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N" & Chr(13) & Chr(10) &
+                     "Projection Setup,     0.000000000,    19.000000000,     0.999300000,       500000.00,     -5300000.00,,,,," & Chr(13) & Chr(10) &
+                     "Map Feature = MF ; Map Comment = MC     These follow if they exist" & Chr(13) & Chr(10) &
+                     "Track File = TF      These follow if they exist" & Chr(13) & Chr(10) &
+                     "Moving Map Parameters = MM?    These follow if they exist" & Chr(13) & Chr(10) &
+                     "MM0,Yes" & Chr(13) & Chr(10) &
+                     "MMPNUM,4" & Chr(13) & Chr(10) &
+                     "MMPXY,1,0,0" & Chr(13) & Chr(10) &
+                     "MMPXY,2," & (Val(Form3.TextBox6.Text) * Val(Form3.TextBox8.Text)) & ",0" & Chr(13) & Chr(10) &
+                     "MMPXY,3," & (Val(Form3.TextBox6.Text) * Val(Form3.TextBox8.Text)) & "," & (Val(Form3.TextBox6.Text) * Val(Form3.TextBox9.Text)) & Chr(13) & Chr(10) &
+                     "MMPXY,4,0," & (Val(Form3.TextBox6.Text) * Val(Form3.TextBox9.Text)) & Chr(13) & Chr(10) &
+                     "MMPLL,1,  " & MMPLL1dlDot & ",  " & MMPLL1szDot & Chr(13) & Chr(10) &
+                     "MMPLL,2,  " & MMPLL2dlDot & ",  " & MMPLL2szDot & Chr(13) & Chr(10) &
+                     "MMPLL,3,  " & MMPLL3dlDot & ",  " & MMPLL3szDot & Chr(13) & Chr(10) &
+                     "MMPLL,4,   " & MMPLL4dlDot & ",  " & MMPLL4szDot & Chr(13) & Chr(10) &
+                     "MM1B,     " & Form3.TextBox7.Text & Chr(13) & Chr(10) &
+                     "MOP,Map Open Position,0,0" & Chr(13) & Chr(10) &
+                      "MOPLL,Map Open Position,0.0000000,0.0000000,100" & Chr(13) & Chr(10) &
                      "IWH,Map Image Width/Height," & (Val(Form3.TextBox6.Text) * Val(Form3.TextBox8.Text)) & "," & (Val(Form3.TextBox6.Text) * Val(Form3.TextBox9.Text)))
                 FileClose(1)
 
