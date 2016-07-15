@@ -18,9 +18,8 @@
     <OptionStrict>Off</OptionStrict>
     <OptionInfer>On</OptionInfer>
     <IsWebBootstrapper>false</IsWebBootstrapper>
-    <ManifestCertificateThumbprint>B524FF3A52776D007E6C488B5A25BE969EDD35CE</ManifestCertificateThumbprint>
-    <ManifestKeyFile>
-    </ManifestKeyFile>
+    <ManifestCertificateThumbprint>EB81C49E7BCA54E4C61FFD3EB2459C152E139E11</ManifestCertificateThumbprint>
+    <ManifestKeyFile>MapoTero_v3_TemporaryKey.pfx</ManifestKeyFile>
     <GenerateManifests>true</GenerateManifests>
     <SignManifests>false</SignManifests>
     <ApplicationIcon>MapoTero.ico</ApplicationIcon>
@@ -100,7 +99,7 @@
     <SignAssembly>true</SignAssembly>
   </PropertyGroup>
   <PropertyGroup>
-    <AssemblyOriginatorKeyFile>MapoTero.snk</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>MapoTero_v3_TemporaryKey.pfx</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="GMap.NET.Core">
@@ -338,6 +337,9 @@
     <None Include="app.config" />
     <None Include="MapoTero.snk" />
     <None Include="MapoTero_v3_SharpDevelop.vbproj">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="MapoTero_v3_TemporaryKey.pfx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="My Project\app.manifest" />

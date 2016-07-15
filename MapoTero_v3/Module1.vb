@@ -1017,14 +1017,14 @@ errorhandler:
                     Dim MMPLL4sz As String  'lewy dolny
                     Dim MMPLL4dl As String
 
-                    MMPLL1sz = Round(SzerokoscWgs_z1992(Px, Ly), 6)
-                    MMPLL1dl = Round(DlugoscWgs_z1992(Px, Ly), 6)
-                    MMPLL2sz = Round(SzerokoscWgs_z1992(Px, Py), 6)
-                    MMPLL2dl = Round(DlugoscWgs_z1992(Px, Py), 6)
-                    MMPLL3sz = Round(SzerokoscWgs_z1992(Lx, Py), 6)
-                    MMPLL3dl = Round(DlugoscWgs_z1992(Lx, Py), 6)
-                    MMPLL4sz = Round(SzerokoscWgs_z1992(Lx, Ly), 6)
-                    MMPLL4dl = Round(DlugoscWgs_z1992(Lx, Ly), 6)
+                    MMPLL1sz = Round(SzerokoscWgs_z1992(Px, Ly), 8)
+                    MMPLL1dl = Round(DlugoscWgs_z1992(Px, Ly), 8)
+                    MMPLL2sz = Round(SzerokoscWgs_z1992(Px, Py), 8)
+                    MMPLL2dl = Round(DlugoscWgs_z1992(Px, Py), 8)
+                    MMPLL3sz = Round(SzerokoscWgs_z1992(Lx, Py), 8)
+                    MMPLL3dl = Round(DlugoscWgs_z1992(Lx, Py), 8)
+                    MMPLL4sz = Round(SzerokoscWgs_z1992(Lx, Ly), 8)
+                    MMPLL4dl = Round(DlugoscWgs_z1992(Lx, Ly), 8)
 
                     'przelicza na stopnie, minuty, sekundy i ułamki sekund
                     Dim Point01N As String = StMinSek(MMPLL1sz)
@@ -1127,14 +1127,14 @@ errorhandler:
                 Dim MMPLL4sz As String  'lewy dolny
                 Dim MMPLL4dl As String
 
-                MMPLL1sz = Round(SzerokoscWgs_z1992(Px, Ly), 6)
-                MMPLL1dl = Round(DlugoscWgs_z1992(Px, Ly), 6)
-                MMPLL2sz = Round(SzerokoscWgs_z1992(Px, Py), 6)
-                MMPLL2dl = Round(DlugoscWgs_z1992(Px, Py), 6)
-                MMPLL3sz = Round(SzerokoscWgs_z1992(Lx, Py), 6)
-                MMPLL3dl = Round(DlugoscWgs_z1992(Lx, Py), 6)
-                MMPLL4sz = Round(SzerokoscWgs_z1992(Lx, Ly), 6)
-                MMPLL4dl = Round(DlugoscWgs_z1992(Lx, Ly), 6)
+                MMPLL1sz = Round(SzerokoscWgs_z1992(Px, Ly), 8)
+                MMPLL1dl = Round(DlugoscWgs_z1992(Px, Ly), 8)
+                MMPLL2sz = Round(SzerokoscWgs_z1992(Px, Py), 8)
+                MMPLL2dl = Round(DlugoscWgs_z1992(Px, Py), 8)
+                MMPLL3sz = Round(SzerokoscWgs_z1992(Lx, Py), 8)
+                MMPLL3dl = Round(DlugoscWgs_z1992(Lx, Py), 8)
+                MMPLL4sz = Round(SzerokoscWgs_z1992(Lx, Ly), 8)
+                MMPLL4dl = Round(DlugoscWgs_z1992(Lx, Ly), 8)
 
                 'przelicza na stopnie, minuty, sekundy i ułamki sekund
                 Dim Point01N As String = StMinSek(MMPLL1sz)
