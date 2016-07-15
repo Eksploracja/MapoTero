@@ -1104,7 +1104,6 @@ errorhandler:
                          "MMPLL,4,   " & MMPLL4dlDot & ",  " & MMPLL4szDot & Chr(13) & Chr(10) &
                          "MM1B,     " & Form1.TextBox10.Text & Chr(13) & Chr(10) &
                          "MOP,Map Open Position,0,0" & Chr(13) & Chr(10) &
-                         "MOPLL,Map Open Position,0.0000000,0.0000000,100" & Chr(13) & Chr(10) &
                          "IWH,Map Image Width/Height," & Form1.TextBox9.Text & "," & Form1.TextBox9.Text)
                     FileClose(1)
 
@@ -1214,7 +1213,6 @@ errorhandler:
                      "MMPLL,4,   " & MMPLL4dlDot & ",  " & MMPLL4szDot & Chr(13) & Chr(10) &
                      "MM1B,     " & Form3.TextBox7.Text & Chr(13) & Chr(10) &
                      "MOP,Map Open Position,0,0" & Chr(13) & Chr(10) &
-                      "MOPLL,Map Open Position,0.0000000,0.0000000,100" & Chr(13) & Chr(10) &
                      "IWH,Map Image Width/Height," & (Val(Form3.TextBox6.Text) * Val(Form3.TextBox8.Text)) & "," & (Val(Form3.TextBox6.Text) * Val(Form3.TextBox9.Text)))
                 FileClose(1)
 
