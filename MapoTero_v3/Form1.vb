@@ -747,9 +747,13 @@ errorhandler:
         End If
     End Sub
 
-   
-    
-    
+    'zamiana przecinka na kropkę w textbox10 odpowiedzialnym za rozmiar piksela
+    Private Sub TextBox10_KeyUp(sender As Object, e As KeyEventArgs) Handles TextBox10.KeyUp
+        TextBox10.Text = TextBox10.Text.Replace(",", ".")
+        Dim pozycja As String
+        pozycja = TextBox10.SelectionStart 'pozycja kursora
+        TextBox10.SelectionStart = TextBox1.Text.Length 'ustawienie kursora na koncu
+    End Sub
 End Class
 
 
