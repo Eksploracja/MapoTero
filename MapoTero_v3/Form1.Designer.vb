@@ -79,6 +79,7 @@ Partial Class Form1
         Me.TextBox10 = New System.Windows.Forms.TextBox()
         Me.ToolTip1 = New System.Windows.Forms.ToolTip(Me.components)
         Me.GroupBox3 = New System.Windows.Forms.GroupBox()
+        Me.Button6 = New System.Windows.Forms.Button()
         Me.Label23 = New System.Windows.Forms.Label()
         Me.Label24 = New System.Windows.Forms.Label()
         Me.Label25 = New System.Windows.Forms.Label()
@@ -91,6 +92,7 @@ Partial Class Form1
         Me.Label14 = New System.Windows.Forms.Label()
         Me.Label11 = New System.Windows.Forms.Label()
         Me.Label13 = New System.Windows.Forms.Label()
+        Me.PictureBox1 = New System.Windows.Forms.PictureBox()
         Me.Button2 = New System.Windows.Forms.Button()
         Me.Button5 = New System.Windows.Forms.Button()
         Me.GroupBox4 = New System.Windows.Forms.GroupBox()
@@ -111,6 +113,9 @@ Partial Class Form1
         Me.Label42 = New System.Windows.Forms.Label()
         Me.Label7 = New System.Windows.Forms.Label()
         Me.Label8 = New System.Windows.Forms.Label()
+        Me.Button4 = New System.Windows.Forms.Button()
+        Me.Button8 = New System.Windows.Forms.Button()
+        Me.Button7 = New System.Windows.Forms.Button()
         Me.GMapControl1 = New GMap.NET.WindowsForms.GMapControl()
         Me.RadioButton1 = New System.Windows.Forms.RadioButton()
         Me.RadioButton2 = New System.Windows.Forms.RadioButton()
@@ -140,24 +145,19 @@ Partial Class Form1
         Me.Label3 = New System.Windows.Forms.Label()
         Me.TextBox2 = New System.Windows.Forms.TextBox()
         Me.TextBox1 = New System.Windows.Forms.TextBox()
+        Me.PictureBox2 = New System.Windows.Forms.PictureBox()
         Me.Panel2 = New System.Windows.Forms.Panel()
         Me.Panel3 = New System.Windows.Forms.Panel()
-        Me.PictureBox2 = New System.Windows.Forms.PictureBox()
-        Me.Button4 = New System.Windows.Forms.Button()
-        Me.Button6 = New System.Windows.Forms.Button()
-        Me.PictureBox1 = New System.Windows.Forms.PictureBox()
-        Me.Button8 = New System.Windows.Forms.Button()
-        Me.Button7 = New System.Windows.Forms.Button()
         Me.GroupBox2.SuspendLayout()
         Me.StatusStrip1.SuspendLayout()
         Me.MenuStrip1.SuspendLayout()
         Me.GroupBox3.SuspendLayout()
+        CType(Me.PictureBox1, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.GroupBox4.SuspendLayout()
         Me.GroupBox5.SuspendLayout()
+        CType(Me.PictureBox2, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.Panel2.SuspendLayout()
         Me.Panel3.SuspendLayout()
-        CType(Me.PictureBox2, System.ComponentModel.ISupportInitialize).BeginInit()
-        CType(Me.PictureBox1, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
         '
         'Button1
@@ -486,6 +486,15 @@ Partial Class Form1
         "ymi warstwami o wyższym numerze, o ile mają one przeźroczyste tło, lub mają niep" &
         "ełne pokrycie.")
         '
+        'Button6
+        '
+        Me.Button6.Image = Global.MapoTero.My.Resources.Resources.kosz
+        Me.Button6.Location = New System.Drawing.Point(4, 209)
+        Me.Button6.Name = "Button6"
+        Me.Button6.Size = New System.Drawing.Size(26, 22)
+        Me.Button6.TabIndex = 304
+        Me.Button6.UseVisualStyleBackColor = True
+        '
         'Label23
         '
         Me.Label23.AutoSize = True
@@ -596,6 +605,15 @@ Partial Class Form1
         Me.Label13.Size = New System.Drawing.Size(16, 13)
         Me.Label13.TabIndex = 220
         Me.Label13.Text = "3)"
+        '
+        'PictureBox1
+        '
+        Me.PictureBox1.Image = Global.MapoTero.My.Resources.Resources.kanapka_gis
+        Me.PictureBox1.Location = New System.Drawing.Point(92, 91)
+        Me.PictureBox1.Name = "PictureBox1"
+        Me.PictureBox1.Size = New System.Drawing.Size(113, 138)
+        Me.PictureBox1.TabIndex = 305
+        Me.PictureBox1.TabStop = False
         '
         'Button2
         '
@@ -812,6 +830,44 @@ Partial Class Form1
         Me.Label8.Text = "Rozmiar pojedynczego segmentu:"
         Me.ToolTip1.SetToolTip(Me.Label8, "Domyślna wartość jest optymalna. Im większy rozmiar piksela, tym gorsza jakość ob" &
         "razu, ale jednocześnie tym większy jego przestrzenny zasięg.")
+        '
+        'Button4
+        '
+        Me.Button4.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.Button4.Font = New System.Drawing.Font("Microsoft Sans Serif", 6.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
+        Me.Button4.Image = Global.MapoTero.My.Resources.Resources.marker_ico
+        Me.Button4.Location = New System.Drawing.Point(39, 569)
+        Me.Button4.Margin = New System.Windows.Forms.Padding(0)
+        Me.Button4.Name = "Button4"
+        Me.Button4.Size = New System.Drawing.Size(30, 30)
+        Me.Button4.TabIndex = 306
+        Me.ToolTip1.SetToolTip(Me.Button4, "wyświetl rzeczywisty zasięg pobieranego obszaru, uwzględniający rozmiar siatki se" &
+        "gmentów")
+        Me.Button4.UseVisualStyleBackColor = True
+        '
+        'Button8
+        '
+        Me.Button8.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.Button8.Image = Global.MapoTero.My.Resources.Resources.ico_merge
+        Me.Button8.Location = New System.Drawing.Point(5, 603)
+        Me.Button8.Margin = New System.Windows.Forms.Padding(0)
+        Me.Button8.Name = "Button8"
+        Me.Button8.Size = New System.Drawing.Size(30, 30)
+        Me.Button8.TabIndex = 305
+        Me.ToolTip1.SetToolTip(Me.Button8, "złącz pobrane segmenty w jeden arkusz")
+        Me.Button8.UseVisualStyleBackColor = True
+        '
+        'Button7
+        '
+        Me.Button7.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.Button7.Image = Global.MapoTero.My.Resources.Resources.ico_folder
+        Me.Button7.Location = New System.Drawing.Point(5, 569)
+        Me.Button7.Margin = New System.Windows.Forms.Padding(0)
+        Me.Button7.Name = "Button7"
+        Me.Button7.Size = New System.Drawing.Size(30, 30)
+        Me.Button7.TabIndex = 304
+        Me.ToolTip1.SetToolTip(Me.Button7, "wyświetl folder z segmentami pobranej mapy")
+        Me.Button7.UseVisualStyleBackColor = True
         '
         'GMapControl1
         '
@@ -1158,6 +1214,15 @@ Partial Class Form1
         Me.TextBox1.TabIndex = 304
         Me.TextBox1.Text = "682000"
         '
+        'PictureBox2
+        '
+        Me.PictureBox2.Image = Global.MapoTero.My.Resources.Resources.siatka
+        Me.PictureBox2.Location = New System.Drawing.Point(10, 16)
+        Me.PictureBox2.Name = "PictureBox2"
+        Me.PictureBox2.Size = New System.Drawing.Size(231, 120)
+        Me.PictureBox2.TabIndex = 303
+        Me.PictureBox2.TabStop = False
+        '
         'Panel2
         '
         Me.Panel2.Controls.Add(Me.GroupBox2)
@@ -1183,71 +1248,6 @@ Partial Class Form1
         Me.Panel3.Name = "Panel3"
         Me.Panel3.Size = New System.Drawing.Size(661, 147)
         Me.Panel3.TabIndex = 308
-        '
-        'PictureBox2
-        '
-        Me.PictureBox2.Image = Global.MapoTero.My.Resources.Resources.siatka
-        Me.PictureBox2.Location = New System.Drawing.Point(10, 16)
-        Me.PictureBox2.Name = "PictureBox2"
-        Me.PictureBox2.Size = New System.Drawing.Size(231, 120)
-        Me.PictureBox2.TabIndex = 303
-        Me.PictureBox2.TabStop = False
-        '
-        'Button4
-        '
-        Me.Button4.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.Button4.Font = New System.Drawing.Font("Microsoft Sans Serif", 6.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
-        Me.Button4.Image = Global.MapoTero.My.Resources.Resources.marker_ico
-        Me.Button4.Location = New System.Drawing.Point(39, 569)
-        Me.Button4.Margin = New System.Windows.Forms.Padding(0)
-        Me.Button4.Name = "Button4"
-        Me.Button4.Size = New System.Drawing.Size(30, 30)
-        Me.Button4.TabIndex = 306
-        Me.ToolTip1.SetToolTip(Me.Button4, "wyświetl rzeczywisty zasięg pobieranego obszaru, uwzględniający rozmiar siatki se" &
-        "gmentów")
-        Me.Button4.UseVisualStyleBackColor = True
-        '
-        'Button6
-        '
-        Me.Button6.Image = Global.MapoTero.My.Resources.Resources.kosz
-        Me.Button6.Location = New System.Drawing.Point(4, 209)
-        Me.Button6.Name = "Button6"
-        Me.Button6.Size = New System.Drawing.Size(26, 22)
-        Me.Button6.TabIndex = 304
-        Me.Button6.UseVisualStyleBackColor = True
-        '
-        'PictureBox1
-        '
-        Me.PictureBox1.Image = Global.MapoTero.My.Resources.Resources.kanapka_gis
-        Me.PictureBox1.Location = New System.Drawing.Point(92, 91)
-        Me.PictureBox1.Name = "PictureBox1"
-        Me.PictureBox1.Size = New System.Drawing.Size(113, 138)
-        Me.PictureBox1.TabIndex = 305
-        Me.PictureBox1.TabStop = False
-        '
-        'Button8
-        '
-        Me.Button8.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.Button8.Image = Global.MapoTero.My.Resources.Resources.ico_merge
-        Me.Button8.Location = New System.Drawing.Point(5, 603)
-        Me.Button8.Margin = New System.Windows.Forms.Padding(0)
-        Me.Button8.Name = "Button8"
-        Me.Button8.Size = New System.Drawing.Size(30, 30)
-        Me.Button8.TabIndex = 305
-        Me.ToolTip1.SetToolTip(Me.Button8, "złącz pobrane segmenty w jeden arkusz")
-        Me.Button8.UseVisualStyleBackColor = True
-        '
-        'Button7
-        '
-        Me.Button7.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.Button7.Image = Global.MapoTero.My.Resources.Resources.ico_folder
-        Me.Button7.Location = New System.Drawing.Point(5, 569)
-        Me.Button7.Margin = New System.Windows.Forms.Padding(0)
-        Me.Button7.Name = "Button7"
-        Me.Button7.Size = New System.Drawing.Size(30, 30)
-        Me.Button7.TabIndex = 304
-        Me.ToolTip1.SetToolTip(Me.Button7, "wyświetl folder z segmentami pobranej mapy")
-        Me.Button7.UseVisualStyleBackColor = True
         '
         'Form1
         '
@@ -1290,14 +1290,14 @@ Partial Class Form1
         Me.MenuStrip1.PerformLayout()
         Me.GroupBox3.ResumeLayout(False)
         Me.GroupBox3.PerformLayout()
+        CType(Me.PictureBox1, System.ComponentModel.ISupportInitialize).EndInit()
         Me.GroupBox4.ResumeLayout(False)
         Me.GroupBox4.PerformLayout()
         Me.GroupBox5.ResumeLayout(False)
         Me.GroupBox5.PerformLayout()
+        CType(Me.PictureBox2, System.ComponentModel.ISupportInitialize).EndInit()
         Me.Panel2.ResumeLayout(False)
         Me.Panel3.ResumeLayout(False)
-        CType(Me.PictureBox2, System.ComponentModel.ISupportInitialize).EndInit()
-        CType(Me.PictureBox1, System.ComponentModel.ISupportInitialize).EndInit()
         Me.ResumeLayout(False)
         Me.PerformLayout()
 
