@@ -594,7 +594,7 @@ errorhandler:
 
     Private Sub RadioButton1_CheckedChanged(sender As Object, e As EventArgs) Handles RadioButton1.CheckedChanged
 
-        Me.GMapControl1.MapProvider = GMapProviders.OpenStreetMap
+        Me.GMapControl1.MapProvider = GMapProviders.OpenStreet4UMap
     End Sub
 
     Private Sub RadioButton2_CheckedChanged(sender As Object, e As EventArgs) Handles RadioButton2.CheckedChanged
