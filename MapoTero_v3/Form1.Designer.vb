@@ -900,12 +900,10 @@ Partial Class Form1
         '
         Me.RadioButton1.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.RadioButton1.AutoSize = True
-        Me.RadioButton1.Checked = True
         Me.RadioButton1.Location = New System.Drawing.Point(545, 29)
         Me.RadioButton1.Name = "RadioButton1"
         Me.RadioButton1.Size = New System.Drawing.Size(109, 17)
         Me.RadioButton1.TabIndex = 258
-        Me.RadioButton1.TabStop = True
         Me.RadioButton1.Text = "OpenStreetMap   "
         Me.RadioButton1.UseVisualStyleBackColor = True
         '
@@ -913,10 +911,12 @@ Partial Class Form1
         '
         Me.RadioButton2.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.RadioButton2.AutoSize = True
+        Me.RadioButton2.Checked = True
         Me.RadioButton2.Location = New System.Drawing.Point(544, 51)
         Me.RadioButton2.Name = "RadioButton2"
         Me.RadioButton2.Size = New System.Drawing.Size(110, 17)
         Me.RadioButton2.TabIndex = 259
+        Me.RadioButton2.TabStop = True
         Me.RadioButton2.Text = "GoogleMap          "
         Me.RadioButton2.UseVisualStyleBackColor = True
         '
