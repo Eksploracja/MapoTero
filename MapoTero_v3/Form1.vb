@@ -710,6 +710,22 @@ errorhandler:
         End If
     End Sub
 
+    Private Sub Button9_Click(sender As Object, e As EventArgs) Handles Button9.Click
+
+        Dim OdpMBox As DialogResult = MessageBox.Show("Czy usunąć wszystkie pobrane mapy?", "Usuwanie zawartości katalogu download", MessageBoxButtons.YesNo, MessageBoxIcon.Question)
+        If OdpMBox = Windows.Forms.DialogResult.Yes Then
+            If Directory.Exists(myPath & "\download\") = True Then
+                System.IO.Directory.Delete(myPath & "\download\", True)
+                Directory.CreateDirectory(myPath & "\download\")
+            End If
+            RichTextBox1.ForeColor = System.Drawing.Color.Green
+            RichTextBox1.Text = "Usunięto całą zawartość katalogu download"
+
+        End If
+
+
+    End Sub
+
     Private Sub Button8_Click(sender As Object, e As EventArgs) Handles Button8.Click
         Form3.ShowDialog()
     End Sub
