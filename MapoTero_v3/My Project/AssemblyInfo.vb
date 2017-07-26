@@ -10,15 +10,15 @@ Imports System.Runtime.InteropServices
 
 ' Review the values of the assembly attributes
 
-<Assembly: AssemblyTitle("MapoTero")> 
-<Assembly: AssemblyDescription("kod: 2009-2014 pajakt, 2015 Kazik N, Paweł_gdn, AAA222; kod modułu przeliczania współrzędnych: Edward Zadorski;")> 
+<Assembly: AssemblyTitle("MapoTero")>
+<Assembly: AssemblyDescription("kod: 2009-2014 pajakt, od 2015 Kazimierz Niecikowski, Paweł_gdn, AAA222; kod modułu przeliczania współrzędnych: Edward Zadorski;")>
 <Assembly: AssemblyCompany("Pomorskie Forum Eksploracyjne")> 
 <Assembly: AssemblyProduct("Program do pobierania rastrowych map z serwerów WMS")> 
 <Assembly: AssemblyCopyright("Copyright © pajakt, 2009/2015. Powszechna Licencja Publiczna GNU-GPLv3")> 
 
-<Assembly: AssemblyTrademark("MapoTero")> 
+<Assembly: AssemblyTrademark("MapoTero")>
 
-<Assembly: ComVisible(False)> 
+<Assembly: ComVisible(True)>
 
 'The following GUID is for the ID of the typelib if this project is exposed to COM
 <Assembly: Guid("c49b1fc2-c535-4c0a-adcb-d87cb1f91e33")>
@@ -34,8 +34,8 @@ Imports System.Runtime.InteropServices
 ' by using the '*' as shown below:
 ' <Assembly: AssemblyVersion("1.0.*")> 
 
-<Assembly: AssemblyVersion("3.0.0.6")>
-<Assembly: AssemblyFileVersion("3.0.0.6")>
+<Assembly: AssemblyVersion("3.0.0.7")>
+<Assembly: AssemblyFileVersion("3.0.0.7")>
 
 <Assembly: NeutralResourcesLanguageAttribute("pl-PL")> 
 <Assembly: System.CLSCompliant(true)> 
