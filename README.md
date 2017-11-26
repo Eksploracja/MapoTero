@@ -1,41 +1,57 @@
-Opis projektu
-
-MapoTero to program służący do pobierania rastrowych map z internetu, opublikowanych za pośrednictwem serwerów WMS takich jak Geoportal2. Program pobiera mapy dzieląc je na siatkę kwadratów, których dopuszczalny rozmiar wynosi 2048px. Pobrane segmenty map można następnie:
- - scalić w jeden duży plik rastrowy przy użyciu specjalnej funkcji "złącz pobrane segmenty w jeden arkusz"
- - wgrać do urządzenia GPS przy użyciu takich programów jak TrekBuddy, OziExplorer;
- - wyświetlić jako podkład georeferencyjny w programach GIS i GPS, takich jak: QGIS, Google Earth, ArcGIS, TrekBuddy, GPS Tuner, MapInfo, OziExplorer.
-
- Obsługiwane formaty rastrowe: jpeg, tiff, png, gif.
- Obsługiwane formaty georeferencji: map, kml, tab, jpgw, wld, gmi.
-
-Skrócona instrukcja obsługi
-
-Wybierz z listy po prawej stronie okna programu zbór map, z którego chcesz pobrać dane, lub pozostaw domyślny i najczęściej używany zbiór "skany map topograficznych";
-Po wybraniu zbioru map, wybierz jego warstwę, którą chcesz pobrać, klikając na nią jeden raz lewym klawiszem myszy. Najczęściej używane warstwy to "Raster_25_1965" (czyli mapa topograficzna w skali 1:25 000 w układzie współrzędnych "1965"), oraz "Raster_10_1965" (czyli mapa topograficzna w skali 1:10 000 w układzie współrzędnych "1965"). Nazwa prawidłowo zaznaczonej warstwy wyświetli się w polu "Wybrane warstwy";
-Zaznacz na poglądowej mapie prawym klawiszem myszki zasięg pobieranej mapy;
-Kliknij button "Pobierz". Rozpocznie się wówczas zapis segmentów map do katalogu "download";
-Wyświetl pobrane segmenty map z katalogu "download", klikając na ikonkę z żółtym folderem. Opcjonalnie scal w jeden arkusz pobrane segmenty map, klikając na niżej umieszczoną ikonkę z szachownicą "scal pobrane segmenty...". Wydajność narzędzia scalania arkuszy zależy od ilości dostępnej pamięci RAM. Działa ono poprawnie dla arkuszy, których końcowa rozdzielczość nie przekracza 10 000 x 10 000 px. W przypadku potrzeby scalenia większej liczby segmentów w jeden arkusz, sięgnij po narzędzie tworzenia panoram programu IfranView.
-Uproszczona instrukcja obsługi
-
-Źródła informacji
-
-Aktualne informacje o programie znajdziesz w dziale "Programy GPS/GIS wspierające eksplorację" na Pomorskim Forum Eksploracyjnym.
-Fanpage: www.facebook.com/mapotero.opensource
-Aktualnie obsługiwane serwery WMS
-
-Geoportal2
-Państwowy Instytut Geologiczny
-Generalna Dyrekcja Ochrony Środowiska
-
-Wspomóż nas!
-
-Serdecznie zapraszamy wolontariuszy do współpracy przy rozwijaniu programu MapoTero! Pomysłów na dalszy rozwój jest tysiące, zaś programistycznych rąk do pracy zaledwie kilka :) Poszukujemy chętnych do testowania programu, porządkowania jego kodu źródłowego, tworzeniu nowych funkcji. Czym prędzej zgłoś swoją chęć pomocy przy programowaniu do koordynatora projektu (za pośrednictwem Codeplext, FB lub forum PFE).
-
-Program został napisany w języku VB.NET. Rozważamy możliwość przesiadki na popularniejsze języki c-pochodne. Pliki kodu źródłowego współpracują z programami IDE: SharpDevelop 4 (Open Source), Visual Studio Express 2015 (microsoft)
-
-Ekipa MapoTero
-
-Twórca programu: Pajakt (2009-2014);
-Rozwój od 2015: Kazimierz Niecikowski;
-Pomoc w programowaniu: Paweł_gdn, AAA222 (dodatek NoTo), Edward Zadorski (kod modułu przeliczania współrzędnych);
-
+<p style="text-align: justify;"><strong>Aktualności:<br /> </strong></p>
+<p style="text-align: justify;">26.11.2017 - Repozytorium mapotero.codeplex.com przechodzi w tryb "tylko do occzytu". Wciąż będzie można pobierać z niego obecnie najnowszą wersję MapoTero v. 3.0.0.7 Jednak ewentualne kolejne wydania aplikacji będą ukazywać się&nbsp;w nowym repozytorium&nbsp;<a href="https://github.com/Eksploracja/MapoTero/releases" target="_blank">https://github.com/Eksploracja/MapoTero/releases</a>&nbsp;kt&oacute;re niestety jest nieco mniej intuicyjne w użytkowaniu względem dotychczasowego.</p>
+<p style="text-align: justify;"><strong>Opis projektu</strong><br /> MapoTero to program służący do pobierania rastrowych map z internetu, opublikowanych za pośrednictwem serwer&oacute;w WMS takich jak Geoportal2. Program pobiera mapy dzieląc je na siatkę kwadrat&oacute;w, kt&oacute;rych dopuszczalny rozmiar wynosi 2048px. Pobrane segmenty map można następnie:</p>
+<ul style="text-align: justify;">
+<li>scalić w jeden duży plik rastrowy przy użyciu specjalnej funkcji "złącz pobrane segmenty w jeden arkusz"</li>
+<li>wgrać do urządzenia GPS przy użyciu takich program&oacute;w jak <a href="http://www.trekbuddy.net/forum/index.php"> TrekBuddy</a>, <a href="http://www.oziexplorer.com/">OziExplorer</a>;</li>
+<li>wyświetlić jako podkład georeferencyjny w programach GIS i GPS, takich jak: <a href="http://www.qgis.org/pl/site/"> QGIS</a>, <a href="http://www.google.pl/intl/pl/earth/" target="_blank">Google Earth</a>, ArcGIS, TrekBuddy, GPS Tuner, MapInfo, OziExplorer.</li>
+</ul>
+<p style="text-align: justify;">Obsługiwane formaty rastrowe: jpeg, tiff, png, gif.</p>
+<p style="text-align: justify;">Obsługiwane formaty georeferencji: map, kml, tab, jpgw, wld, gmi.</p>
+<hr />
+<p style="text-align: justify;">&nbsp;<strong>Skr&oacute;cona instrukcja obsługi</strong></p>
+<ol>
+<li>Wybierz z listy po prawej stronie okna programu zb&oacute;r map, z kt&oacute;rego chcesz pobrać dane, lub pozostaw domyślny i najczęściej używany zbi&oacute;r "skany map topograficznych";</li>
+<li>Po wybraniu zbioru map, wybierz jego warstwę, kt&oacute;rą chcesz pobrać, klikając na nią jeden raz lewym klawiszem myszy. Najczęściej używane warstwy to "Raster_25_1965" (czyli mapa topograficzna w skali 1:25 000 w układzie wsp&oacute;łrzędnych "1965"), oraz "Raster_10_1965" (czyli mapa topograficzna w skali 1:10 000 w układzie wsp&oacute;łrzędnych "1965"). Nazwa prawidłowo zaznaczonej warstwy wyświetli się w polu "Wybrane warstwy";</li>
+<li>Zaznacz na poglądowej mapie prawym klawiszem myszki zasięg pobieranej mapy;</li>
+<li>Kliknij button "Pobierz". Rozpocznie się w&oacute;wczas zapis segment&oacute;w map do katalogu "download";</li>
+<li>Wyświetl pobrane segmenty map z katalogu "download", klikając na ikonkę z ż&oacute;łtym folderem. Opcjonalnie scal w jeden arkusz pobrane segmenty map, klikając na niżej umieszczoną ikonkę z szachownicą "scal pobrane segmenty...". Wydajność narzędzia scalania arkuszy zależy od ilości dostępnej pamięci RAM. Działa ono poprawnie dla arkuszy, kt&oacute;rych końcowa rozdzielczość nie przekracza 10 000 x 10 000 px. W przypadku potrzeby scalenia większej liczby segment&oacute;w w jeden arkusz, sięgnij po narzędzie tworzenia panoram programu IfranView.</li>
+</ol>
+<p><img src="http://download-codeplex.sec.s-msft.com/Download?ProjectName=mapotero&amp;DownloadId=1547431" alt="Uproszczona instrukcja obsługi" width="640" height="486" /></p>
+<hr />
+<p style="text-align: justify;"><strong>Źr&oacute;dła informacji</strong></p>
+<ul style="text-align: justify;">
+<li>Aktualne informacje o programie znajdziesz w dziale "Programy GPS/GIS wspierające eksplorację" na <a href="http://www.forum.eksploracja.pl/viewforum.php?f=205" target="_blank">Pomorskim Forum Eksploracyjnym</a>.</li>
+<li>Fanpage: <a href="http://www.facebook.com/mapotero.opensource">www.facebook.com/mapotero.opensource</a></li>
+</ul>
+<hr />
+<p style="text-align: justify;"><strong>Aktualnie obsługiwane serwery WMS</strong></p>
+<ul>
+<li>Geoportal2</li>
+<li>Państwowy Instytut Geologiczny</li>
+<li>Generalna Dyrekcja Ochrony Środowiska</li>
+</ul>
+<p style="text-align: justify;"><strong>Wspom&oacute;ż nas!</strong></p>
+<p style="text-align: justify;">Serdecznie zapraszamy wolontariuszy do wsp&oacute;łpracy przy rozwijaniu programu MapoTero! Pomysł&oacute;w na dalszy rozw&oacute;j jest tysiące, zaś programistycznych rąk do pracy zaledwie kilka :) Poszukujemy chętnych do testowania programu, porządkowania jego kodu źr&oacute;dłowego, tworzeniu nowych funkcji. Czym prędzej zgłoś swoją chęć pomocy przy programowaniu do koordynatora projektu (za pośrednictwem <a href="https://www.codeplex.com/site/users/contact/mapotero?OriginalUrl=https%3a%2f%2fwww.codeplex.com%2fsite%2fusers%2fview%2fmapotero"> Codeplext</a>,&nbsp;<a href="http://www.facebook.com/mapotero.opensource" target="_blank">FB</a> lub forum <a href="http://www.forum.eksploracja.pl/viewforum.php?f=205" target="_blank">PFE</a>).</p>
+<p style="text-align: justify;">Program został napisany w języku VB.NET. Rozważamy możliwość przesiadki na popularniejsze języki c-pochodne. Pliki kodu źr&oacute;dłowego wsp&oacute;łpracują z programami IDE:&nbsp;<a href="http://www.icsharpcode.net/OpenSource/SD/Download/#SharpDevelop4x" target="_blank">SharpDevelop 4</a> (Open Source), Visual Studio Express 2015 (microsoft)</p>
+<p style="text-align: justify;"><strong>Ekipa MapoTero</strong></p>
+<ul>
+<li>Tw&oacute;rca programu: <a href="http://www.forum.eksploracja.pl/viewtopic.php?f=205&amp;t=15196" target="_blank"> Pajakt</a>&nbsp;(2009-2014);</li>
+<li>Rozw&oacute;j od 2015: <a href="http://labgis.pl/" target="_blank">Kazimierz Niecikowski</a>;</li>
+<li>Pomoc w programowaniu: <a href="http://www.forum.eksploracja.pl/memberlist.php?mode=viewprofile&amp;u=3289" target="_blank"> Paweł_gdn</a>, <a href="http://www.my-navia.pl/viewtopic.php?p=422691#422691" target="_blank"> AAA222</a>&nbsp;(dodatek <a href="http://www.forum.eksploracja.pl/viewtopic.php?f=205&amp;t=35039" target="_blank"> NoTo</a>), Edward Zadorski (kod modułu przeliczania wsp&oacute;łrzędnych);</li>
+</ul>
+<hr />
+<p style="text-align: justify;">&nbsp;<strong>Wygląd okien programu</strong></p>
+<p style="text-align: justify;"><strong>MapoTero, Wersja 3.0.0.4<br /> </strong></p>
+<p style="text-align: justify;">Gł&oacute;wne okno MapoTero</p>
+<p style="text-align: justify;"><img src="http://download-codeplex.sec.s-msft.com/Download?ProjectName=mapotero&amp;DownloadId=1547624" alt="Gł&oacute;wne okno programu" width="640" height="514" /></p>
+<p style="text-align: justify;">Okno ustawień programu</p>
+<p style="text-align: justify;"><img src="http://download-codeplex.sec.s-msft.com/Download?ProjectName=mapotero&amp;DownloadId=1458699" alt="okno ustawień" width="640" height="321" /></p>
+<hr />
+<p style="text-align: justify;">&nbsp;</p>
+<p style="text-align: justify;"><strong>Najlepsze alternatywne rozwiązania:</strong></p>
+<ul style="text-align: justify;">
+<li><a href="http://www.my-navia.pl/viewtopic.php?p=422691#422691" target="_blank">Kafelkarz</a>&nbsp;- program autorstwa AAA222 umożliwiający pobieranie danych zar&oacute;wno z serwer&oacute;w WMS jak i WMTS. Jest on zaawansowaną i nieco bardziej skomplikowaną w obsłudze alternatywą programu MapoTero</li>
+</ul>
+<hr />
+<p style="text-align: justify;">&nbsp;</p>
