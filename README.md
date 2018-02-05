@@ -22,7 +22,7 @@
 <li>Kliknij button "Pobierz". Rozpocznie się w&oacute;wczas zapis segment&oacute;w map do katalogu "download";</li>
 <li>Wyświetl pobrane segmenty map z katalogu "download", klikając na ikonkę z ż&oacute;łtym folderem. Opcjonalnie scal w jeden arkusz pobrane segmenty map, klikając na niżej umieszczoną ikonkę z szachownicą "scal pobrane segmenty...". Wydajność narzędzia scalania arkuszy zależy od ilości dostępnej pamięci RAM. Działa ono poprawnie dla arkuszy, kt&oacute;rych końcowa rozdzielczość nie przekracza 10 000 x 10 000 px. W przypadku potrzeby scalenia większej liczby segment&oacute;w w jeden arkusz, sięgnij po narzędzie tworzenia panoram programu IfranView.</li>
 </ol>
-<p><img src="/eksploracja/mapotero/instrukcja.jpg" alt="Uproszczona instrukcja obsługi" width="640" height="486" /></p>
+<p><img src="https://github.com/Eksploracja/MapoTero/blob/master/instrukcja.jpg" alt="Uproszczona instrukcja obsługi" width="640" height="486" /></p>
 <hr />
 <p style="text-align: justify;"><strong>Źr&oacute;dła informacji</strong></p>
 <ul style="text-align: justify;">
@@ -49,9 +49,9 @@
 <p style="text-align: justify;">&nbsp;<strong>Wygląd okien programu</strong></p>
 <p style="text-align: justify;"><strong>MapoTero, Wersja 3.0.0.4<br /> </strong></p>
 <p style="text-align: justify;">Gł&oacute;wne okno MapoTero</p>
-<p style="text-align: justify;"><img src="http://download-codeplex.sec.s-msft.com/Download?ProjectName=mapotero&amp;DownloadId=1547624" alt="Gł&oacute;wne okno programu" width="640" height="514" /></p>
+<p style="text-align: justify;"><img src="https://github.com/Eksploracja/MapoTero/blob/master/przod.jpg" alt="Gł&oacute;wne okno programu" width="640" height="514" /></p>
 <p style="text-align: justify;">Okno ustawień programu</p>
-<p style="text-align: justify;"><img src="http://download-codeplex.sec.s-msft.com/Download?ProjectName=mapotero&amp;DownloadId=1458699" alt="okno ustawień" width="640" height="321" /></p>
+<p style="text-align: justify;"><img src="https://github.com/Eksploracja/MapoTero/blob/master/tyl.jpg" alt="okno ustawień" width="640" height="321" /></p>
 <hr />
 <p style="text-align: justify;">&nbsp;</p>
 <p style="text-align: justify;"><strong>Najlepsze alternatywne rozwiązania:</strong></p>
