@@ -22,7 +22,7 @@
 <li>Kliknij button "Pobierz". Rozpocznie się w&oacute;wczas zapis segment&oacute;w map do katalogu "download";</li>
 <li>Wyświetl pobrane segmenty map z katalogu "download", klikając na ikonkę z ż&oacute;łtym folderem. Opcjonalnie scal w jeden arkusz pobrane segmenty map, klikając na niżej umieszczoną ikonkę z szachownicą "scal pobrane segmenty...". Wydajność narzędzia scalania arkuszy zależy od ilości dostępnej pamięci RAM. Działa ono poprawnie dla arkuszy, kt&oacute;rych końcowa rozdzielczość nie przekracza 10 000 x 10 000 px. W przypadku potrzeby scalenia większej liczby segment&oacute;w w jeden arkusz, sięgnij po narzędzie tworzenia panoram programu IfranView.</li>
 </ol>
-<p><img src="https://archive.codeplex.com/projects/mapotero/0ba3e5e6-cbfa-4b0d-a822-63cd780b7d22" alt="Uproszczona instrukcja obsługi" width="640" height="486" /></p>
+<p><img src="/mapotero/instrukcja.jpg" alt="Uproszczona instrukcja obsługi" width="640" height="486" /></p>
 <hr />
 <p style="text-align: justify;"><strong>Źr&oacute;dła informacji</strong></p>
 <ul style="text-align: justify;">
