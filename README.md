@@ -1,10 +1,10 @@
 
-<h2><a href="https://github.com/Eksploracja/MapoTero/releases" target="_blank">Pobierz najnowszą wersję MapoTero 3.0.0.7</a></h2>
+<h2><a href="https://github.com/Eksploracja/MapoTero/releases/tag/3.0.0.7" target="_blank">Pobierz najnowszą wersję MapoTero 3.0.0.7</a></h2>
 
 
 
 <p style="text-align: justify;"><strong>Aktualności:<br /> </strong></p>
-<p style="text-align: justify;">26.11.2017 - Repozytorium mapotero.codeplex.com przechodzi w tryb "tylko do odczytu". Wciąż będzie można pobierać z niego obecnie najnowszą wersję MapoTero v. 3.0.0.7 Jednak ewentualne kolejne wydania aplikacji będą ukazywać się&nbsp;w nowym repozytorium&nbsp;<a href="https://github.com/Eksploracja/MapoTero/releases/tag/3.0.0.7" target="_blank">https://github.com/Eksploracja/MapoTero/releases/tag/3.0.0.7</a></p>
+<p style="text-align: justify;">26.11.2017 - Repozytorium mapotero.codeplex.com przechodzi w tryb "tylko do odczytu". Wciąż będzie można pobierać z niego obecnie najnowszą wersję MapoTero v. 3.0.0.7 Jednak ewentualne kolejne wydania aplikacji będą ukazywać się&nbsp;w nowym repozytorium&nbsp;<a href="https://github.com/Eksploracja/MapoTero/releases" target="_blank">https://github.com/Eksploracja/MapoTero/releases</a></p>
 <p style="text-align: justify;"><strong>Opis projektu</strong><br /> MapoTero to program służący do pobierania rastrowych map z internetu, opublikowanych za pośrednictwem serwer&oacute;w WMS takich jak Geoportal2. Program pobiera mapy dzieląc je na siatkę kwadrat&oacute;w, kt&oacute;rych dopuszczalny rozmiar wynosi 2048px. Pobrane segmenty map można następnie:</p>
 <ul style="text-align: justify;">
 <li>scalić w jeden duży plik rastrowy przy użyciu specjalnej funkcji "złącz pobrane segmenty w jeden arkusz"</li>
