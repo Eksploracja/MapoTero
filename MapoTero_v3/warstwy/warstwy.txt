@@ -23,7 +23,8 @@ Hgis_100_grossblatt
 geologiczna_50_SMGP
 geologiczna_50_litogenetyczna
 geologiczna_500
-dzialki_katastralne
+dzialki_LPIS
+ewidencja_gruntow
 budynki_BDOT_2010
 budynki_BDOT_2009
 BDOT_wybrane_warstwy
