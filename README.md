@@ -1,5 +1,5 @@
 
-<h2><a href="https://github.com/Eksploracja/MapoTero/releases/tag/3.0.0.7" target="_blank">Pobierz najnowszą wersję MapoTero 3.0.0.7</a></h2>
+<h2><a href="https://github.com/Eksploracja/MapoTero/releases/download/3.0.0.8/MapoTero_v3.0.0.8.zip" target="_blank">Pobierz najnowszą wersję MapoTero 3.0.0.8</a></h2>
 
 
 
