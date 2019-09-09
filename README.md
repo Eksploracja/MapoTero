@@ -4,6 +4,10 @@
 
 
 <p style="text-align: justify;"><strong>Aktualności:<br /> </strong></p>
+<p style="text-align: justify;">09.09.2019 - Opublikowana została najnowsza wersja MapoTero_v3.0.0.9. Najważniejsze zmiany:
+  <ul><li>aktualizacja warstw WMS,</li> 
+  <li>zmiana platformy programistycznej .NET Framework z wersji 3.5 na 4.5,</li>
+  <li>naprawa błędu wyświetlania podkładowej warstwy OpenStreetMap.</li></ul></p>
 <p style="text-align: justify;">26.11.2017 - Repozytorium mapotero.codeplex.com przechodzi w tryb "tylko do odczytu". Wciąż będzie można pobierać z niego obecnie najnowszą wersję MapoTero v. 3.0.0.7 Jednak ewentualne kolejne wydania aplikacji będą ukazywać się&nbsp;w nowym repozytorium&nbsp;<a href="https://github.com/Eksploracja/MapoTero/releases" target="_blank">https://github.com/Eksploracja/MapoTero/releases</a></p>
 <p style="text-align: justify;"><strong>Opis projektu</strong><br /> MapoTero to program służący do pobierania rastrowych map z internetu, opublikowanych za pośrednictwem serwer&oacute;w WMS takich jak Geoportal2. Program pobiera mapy dzieląc je na siatkę kwadrat&oacute;w, kt&oacute;rych dopuszczalny rozmiar wynosi 2048px. Pobrane segmenty map można następnie:</p>
 <ul style="text-align: justify;">
