@@ -1,0 +1,2 @@
+﻿NoToCONS to skrypt obsługujący funkcję łączenia pobranych segmentów w jeden wspólny arkusz. Został on napisany przez internautę AAA222 (twórca programu "Kafelkarz"). 
+Skrypt pośredniczy pomiędzy MapoTero a biblioteką SynGdiPlus, której nie mozna było bezpośrednio połączyć z programem z powodu odmiennego środowiska programistycznego (Object Pascal). Docelowo planujemy wyeksportować SynGdiPlus do biblioteki dll dzięki czemu będzie można zrezygnować z pośredniczącej aplikacji konsolowej exe.

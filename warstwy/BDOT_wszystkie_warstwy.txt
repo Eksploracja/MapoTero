@@ -1,0 +1,5 @@
+"http://mapy.geoportal.gov.pl/wss/service/pub/guest/kompozycja_BDOT10k_WMS/MapServer/WMSServer?request=GetMap&version=1.3.0&CRS=EPSG:2180&layers=SOd2,SOd1,RZab,TPrz,GNu2,GNu1,TKa2,TKa1,TPi2,TPi1,UTrw,TLes,RKr,RTr,ku7,ku6,ku5,ku4,ku3,ku2,ku1,Mo,Szu,Pl3,Pl2,Pl1,kanOkr,rzOk,row,kan,rz,RowEt,kanEt,rzEt,WPow,LBrzN,LBrz,WPowEt,GrPol,Rez,GrPK,GrPN,GrDz,GrGm,GrPo,GrWo,GrPns,PRur,ZbTA,BudCm,TerCm,BudSp,Szkl,Kap,SwNch,SwCh,BudZr,BudGo,BudPWy,BudP2,BudP1,BudUWy,BudU,BudMWy,BudMJ,BudMW,Bzn,BHydA,BHydL,wyk,wa6,wa5,wa4,wa3,wa2,wa1,IUTA,ObOrA,ObPL,Prom,PomL,MurH,PerA,PerL,Tryb,UTrL,LTra,LKNc,LKBu,LKWs,TSt,LKNelJ,LKNelD,LKNelW,LKZelJ,LKZelD,LKZelW,Scz,Al,AlEt,Sch2,Sch1,DrDGr,DrLGr,JDrLNUt,JDLNTw,JDrZTw,JDrG,DrEk,JDrEk,AuBud,JAu,NazDr,NrDr,Umo,PPdz,Prze,TunK,TunD,Klad,MosK,MosD,UTrP,ObKom,InUTP,ZbTP,NazUl,ObOrP,WyBT,LTel,LEle,ObPP,DrzPomP,e13,e12,e11,e10,e9,e8,e7,e6,e5,e4,e3,e2,e1,s19,s18,s17,s16,s15,s14,s13,s12,s11,s10,s9,s8,s7,s6,s5,s4,s3,s2,s1"
+P
+1
+
+

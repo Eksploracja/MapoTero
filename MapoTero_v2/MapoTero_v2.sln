@@ -1,0 +1,30 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Express 2013 for Windows Desktop
+VisualStudioVersion = 12.0.31101.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "MapoTero_v2", "MapoTero_v2.vbproj", "{5EECBBEF-ED0C-4518-A4A1-3C917E98384D}"
+EndProject
+Global
+	GlobalSection(TeamFoundationVersionControl) = preSolution
+		SccNumberOfProjects = 2
+		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
+		SccTeamFoundationServer = https://tfs.codeplex.com/tfs/tfs18
+		SccLocalPath0 = .
+		SccProjectUniqueName1 = MapoTero_v2.vbproj
+		SccLocalPath1 = .
+	EndGlobalSection
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5EECBBEF-ED0C-4518-A4A1-3C917E98384D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5EECBBEF-ED0C-4518-A4A1-3C917E98384D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5EECBBEF-ED0C-4518-A4A1-3C917E98384D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5EECBBEF-ED0C-4518-A4A1-3C917E98384D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
