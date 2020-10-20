@@ -5,9 +5,10 @@
 
 <p style="text-align: justify;"><strong>Aktualności:<br /> </strong></p>
 <p style="text-align: justify;">20.10.2020 - Ukazała się najnowsza wersja MapoTero_v3.10. Najważniejsze zmiany:
-  <ul><li>aktualizacja warstw WMS,</li> 
+  <ul><li>usunięcie usterki związanej z niewyświetlaniem podkładowej warstwy OpenStreetMap w systemie Windows 10</li>
+    <li>aktualizacja warstw WMS,</li> 
   <li>zmiana platformy programistycznej .NET Framework z wersji 4.5 na 4.7.2,</li>
-  <li>naprawa błędu wyświetlania podkładowej warstwy OpenStreetMap.</li></ul></p>
+  </ul></p>
 <p style="text-align: justify;">09.09.2019 - Opublikowana została najnowsza wersja MapoTero_v3.0.0.9. Najważniejsze zmiany:
   <ul><li>aktualizacja warstw WMS,</li> 
   <li>zmiana platformy programistycznej .NET Framework z wersji 3.5 na 4.5,</li>
