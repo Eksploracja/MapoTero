@@ -1,6 +1,5 @@
 administracyjna
 dzialki_ewid_EGIB
-dzialki_ewid_LPIS
 geologiczna_50_litogenetyczna
 geologiczna_50_SMGP
 geologiczna_500
@@ -11,7 +10,7 @@ Hgis_25_messtishblatt
 Hgis_25_WIG_topograficzna
 hydrograficzna_50
 krajobrazowa
-numer_mod_terenu_ISOK
+numer_mod_terenu_ISOK_cieniowanie
 numer_mod_terenu_LPIS_cieniowanie
 numer_mod_terenu_LPIS_hipsometria
 obszary_chronione_GDOS

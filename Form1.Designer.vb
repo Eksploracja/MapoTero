@@ -909,13 +909,12 @@ Partial Class Form1
         Me.GMapControl1.Size = New System.Drawing.Size(661, 491)
         Me.GMapControl1.TabIndex = 249
         Me.GMapControl1.Zoom = 0R
-
         '
         'RadioButton1
         '
         Me.RadioButton1.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.RadioButton1.AutoSize = True
-        Me.RadioButton1.Location = New System.Drawing.Point(545, 29)
+        Me.RadioButton1.Location = New System.Drawing.Point(544, 64)
         Me.RadioButton1.Name = "RadioButton1"
         Me.RadioButton1.Size = New System.Drawing.Size(109, 17)
         Me.RadioButton1.TabIndex = 258
@@ -927,7 +926,7 @@ Partial Class Form1
         Me.RadioButton2.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.RadioButton2.AutoSize = True
         Me.RadioButton2.Checked = True
-        Me.RadioButton2.Location = New System.Drawing.Point(544, 51)
+        Me.RadioButton2.Location = New System.Drawing.Point(544, 26)
         Me.RadioButton2.Name = "RadioButton2"
         Me.RadioButton2.Size = New System.Drawing.Size(110, 17)
         Me.RadioButton2.TabIndex = 259
@@ -939,7 +938,7 @@ Partial Class Form1
         '
         Me.RadioButton3.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.RadioButton3.AutoSize = True
-        Me.RadioButton3.Location = New System.Drawing.Point(544, 73)
+        Me.RadioButton3.Location = New System.Drawing.Point(544, 44)
         Me.RadioButton3.Name = "RadioButton3"
         Me.RadioButton3.Size = New System.Drawing.Size(109, 17)
         Me.RadioButton3.TabIndex = 260

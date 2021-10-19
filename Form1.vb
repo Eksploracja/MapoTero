@@ -712,7 +712,7 @@ errorhandler:
 
     Private Sub Button9_Click(sender As Object, e As EventArgs) Handles Button9.Click
 
-        Dim OdpMBox As DialogResult = MessageBox.Show("Czy usunąć wszystkie pobrane mapy?", "Usuwanie zawartości katalogu download", MessageBoxButtons.YesNo, MessageBoxIcon.Question)
+        Dim OdpMBox As DialogResult = MessageBox.Show("Czy na pewno usunąć cały katalog 'download' z pobranymi mapami?", "Usuwanie zawartości katalogu download", MessageBoxButtons.YesNo, MessageBoxIcon.Question)
         If OdpMBox = Windows.Forms.DialogResult.Yes Then
             If Directory.Exists(myPath & "\download\") = True Then
                 System.IO.Directory.Delete(myPath & "\download\", True)

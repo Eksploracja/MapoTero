@@ -19,11 +19,3 @@ Raster_50_UTM
 4
 Raster_100_1980
 8
-Raster_250_1992
-20
-Raster_500_1992
-40
-Raster_1000_1992
-80
-Raster_4000_1992
-320
