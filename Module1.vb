@@ -13,22 +13,24 @@
 'You should have received a copy of the GNU General Public License
 'along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-Imports System
-Imports System.Threading
-Imports System.Diagnostics
-Imports System.Net
+'Imports System
+'Imports System.Threading
+'Imports System.Diagnostics
 Imports System.IO
-Imports System.Drawing
-Imports System.Windows.Forms
-Imports GMap.NET.WindowsForms.ToolTips
-Imports GMap.NET.WindowsForms.Markers
-Imports GMap.NET.WindowsForms
+Imports System.Net
 Imports GMap.NET
+Imports GMap.NET.WindowsForms
+Imports GMap.NET.WindowsForms.Markers
+'Imports System.Drawing
+'Imports System.Windows.Forms
+Imports GMap.NET.WindowsForms.ToolTips
+'Imports ICSharpCode.SharpZipLib.GZip
+Imports ICSharpCode.SharpZipLib.Tar
 
 Module Module1
     'deklaracja procedury w nagłówku (sekcja General)
     'cała deklaracja ma być w jednej linii!
-    Private Declare Sub Sleep Lib "kernel32" (ByVal dwMilliseconds As Long)
+    Public Declare Sub Sleep Lib "kernel32.dll" (ByVal dwMilliseconds As Integer)
 
     Public adresSerwera As String
     Public warstwy(11) As String                 'tablica przechowująca nazwy warstw
@@ -37,7 +39,7 @@ Module Module1
     Public strUrl As String                     'zmienna zawierająca link
     Public ileSegHoriz As Integer
     Public ileSegVert As Integer
-    Public wspolnaNazwaKwadratu As String = ""       'wspólna część nazwy kwadratów - bez kolejnych numerów
+    Public wspolnaNazwaKwadratu As String = "_"      'wspólna część nazwy kwadratów - bez kolejnych numerów
     Public nazwaKwadratu As String           'nazwa i numer kwadratu
     Public pion As Integer                      'zmienna do pętli odliczającej kwadraty (zamiast "i")
     Public poz As Integer
@@ -85,7 +87,7 @@ Module Module1
     Public TBseg As Long                        'ilość segmentów w boku mapy w jednym folderze
     Public TBbok As Integer                     'bok jednego segmentu w pikselach
     Public TBmax As Integer                     'zmienna określająca jaki maksymalnie rozmiar mapy trafi do jednego katalogu SET
-    Public folderTB As String                   'główny folder mapy
+    Public folderTB As String                 'główny folder mapy
     Public folderTBset As String                'folder SET
 
 
@@ -98,7 +100,8 @@ Module Module1
     Public x_start As String       'współrzędne x środka mapy zapisywane do conf.txt i odczytywane przy wznowieniu sesji
     Public y_start As String          'współrzędne y środka mapy zapisywane do conf.txt i odczytywane przy wznowieniu sesji"
     Public zoom_start As String       'skala mapy zapisywana do conf.txt i odczytywane przy wznowieniu sesji"
-
+    Public styl_nazwy_TB As String
+    Public styl_nazwy As String
 
 
 
@@ -410,9 +413,6 @@ errorhandler:
         Form1.ToolStripStatusLabel3.Text = ""
 
 
-
-
-
         'kasowanie zmiennych
 
         nrKwadratu = 0
@@ -428,8 +428,10 @@ errorhandler:
             'MsgBox("Nie udało się ściągnąć wszystkich segmentów." & Chr(13) & Chr(10) & _
             '"Wykaz tych segmentów w pliku:" & Chr(13) & Chr(10) & _
             'folderSegmentow & "error.txt")
-            Form1.RichTextBox1.ForeColor = System.Drawing.Color.Red
-            Form1.RichTextBox1.Text = "Nie udało się ściągnąć wszystkich segmentów. Wykaz tych segmentów w pliku error.txt"
+            If CheckTB = False Then
+                Form1.RichTextBox1.ForeColor = System.Drawing.Color.Red
+                Form1.RichTextBox1.Text = "Nie udało się ściągnąć wszystkich segmentów. Wykaz tych segmentów w pliku error.txt"
+            End If
         Else
             File.Delete(folderSegmentow & "error.txt")
         End If
@@ -437,8 +439,71 @@ errorhandler:
         If File.Exists(myPath & "\download\error.txt") = False Then Form1.Button8.Enabled = True
 
 
+        'Zapisywanie pliku TAR programu Locus Map
+        If CheckTB = True Then
+            Sleep(500 * 1) 'czas na utworzenie folderu
+            CreateTarGZ(folderSegmentow & wspolnaNazwaKwadratu & styl_nazwy_TB & ".tar", folderTB)
+        End If
+
+        'If Form2.ComboBox3.SelectedIndex = 0 Then styl_nazwy_TB = wspolnaNazwaKwadratu
+        'If Form2.ComboBox3.SelectedIndex = 1 Then styl_nazwy_TB = Form1.ComboBox3.SelectedItem & Form1.Label11.Text.Replace("1) ", "")
+        'If Form2.ComboBox3.SelectedIndex = 2 Then styl_nazwy_TB = Form1.Label11.Text.Replace("1) ", "")
     End Sub
 
+    ' kompresor plikow TAR
+
+    Public Sub CreateTarGZ(tgzFilename As String, sourceDirectory As String)
+        'System.IO.Directory.SetCurrentDirectory(folderTB)
+
+        'Dim outStream As Stream = File.Create(Path.Combine(tgzFilename))
+        Dim outStream As Stream = File.Create(tgzFilename)
+        'Dim gzoStream As Stream = New GZipOutputStream(outStream)
+        Dim tarArchive As TarArchive = TarArchive.CreateOutputTarArchive(outStream)
+
+        ' Note that the RootPath is currently case sensitive and must be forward slashes e.g. "c:/temp"
+        ' and must not end with a slash, otherwise cuts off first char of filename
+        ' This is scheduled for fix in next release  \download\TrekBuddy
+
+        tarArchive.RootPath = sourceDirectory.Replace("\", "/")
+        If tarArchive.RootPath.EndsWith("/") Then
+            tarArchive.RootPath = tarArchive.RootPath.Remove(tarArchive.RootPath.Length - 1)
+        End If
+
+        'If tarArchive.RootPath.Contains("\download\TrekBuddy\") Then
+        'tarArchive.RootPath = tarArchive.RootPath.Replace("\", "\download\TrekBuddy\")
+        'End If
+
+        AddDirectoryFilesToTar(tarArchive, sourceDirectory, String.Empty)
+
+        tarArchive.Close()
+    End Sub
+    Public Sub AddDirectoryFilesToTar(ByVal tarArchive As TarArchive, ByVal sourceDirectory As String, ByVal currentDirectory As String)
+        Dim pathToCurrentDirectory = Path.Combine(sourceDirectory, currentDirectory)
+        ' Write each file to the tgz.
+        Dim filePaths = Directory.GetFiles(pathToCurrentDirectory)
+        For Each filePath As String In filePaths
+            Dim tarEntry_ = TarEntry.CreateEntryFromFile(filePath)
+            ' Name sets where the file is written. 
+            ' Write it in the same spot it exists in the source directory
+            tarEntry_.Name = filePath.Replace(sourceDirectory, "")
+            ' If the Name starts with '\' then an extra folder (with a 
+            ' blank name) will be created, we don't want that.
+            If tarEntry_.Name.StartsWith("\\") Then
+                tarEntry_.Name = tarEntry_.Name.Substring(1)
+            End If
+
+            tarArchive.WriteEntry(tarEntry_, True)
+        Next
+        ' Write directories to tgz
+        Dim directories = Directory.GetDirectories(pathToCurrentDirectory)
+        For Each directory As String In directories
+            AddDirectoryFilesToTar(tarArchive, sourceDirectory, directory)
+        Next
+    End Sub
+
+
+
+    'koniec testu
 
 
     'procedura pobiera segmenty z internetu i zapisuje je na dysku
@@ -491,7 +556,6 @@ errorhandler:
                     'dodaje wpis do pliku o błędach
                     plikError()
                 End If
-
 
         End Select
 
@@ -1233,41 +1297,69 @@ errorhandler:
 
                     Dim LGsz As String  'lewy górny
                     Dim LGdl As String
+
                     Dim PGsz As String  'prawy górny
                     Dim PGdl As String
+
                     Dim PDsz As String  'prawy dolny
                     Dim PDdl As String
+
                     Dim LDsz As String  'lewy dolny
                     Dim LDdl As String
 
-                    LGsz = Round(SzerokoscWgs_z1992(Px, Ly), 15)
+
+                    LGsz = Round(SzerokoscWgs_z1992(Px, Ly), 15) 'lewy górny
                     LGdl = Round(DlugoscWgs_z1992(Px, Ly), 15)
-                    PGsz = Round(SzerokoscWgs_z1992(Px, Py), 15)
+
+                    PGsz = Round(SzerokoscWgs_z1992(Px, Py), 15) 'prawy górny
                     PGdl = Round(DlugoscWgs_z1992(Px, Py), 15)
-                    PDsz = Round(SzerokoscWgs_z1992(Lx, Py), 15)
+
+                    PDsz = Round(SzerokoscWgs_z1992(Lx, Py), 15) 'prawy dolny
                     PDdl = Round(DlugoscWgs_z1992(Lx, Py), 15)
-                    LDsz = Round(SzerokoscWgs_z1992(Lx, Ly), 15)
+
+                    LDsz = Round(SzerokoscWgs_z1992(Lx, Ly), 15) 'lewy dolny
                     LDdl = Round(DlugoscWgs_z1992(Lx, Ly), 15)
+
+
 
                     'usuwa przecinki i zamienia je na kropki
                     Dim LGszDot As String = Replace(LGsz, ",", ".")     'lewy górny
                     Dim LGdlDot As String = Replace(LGdl, ",", ".")
+
                     Dim PGszDot As String = Replace(PGsz, ",", ".")     'prawy górny
                     Dim PGdlDot As String = Replace(PGdl, ",", ".")
+
                     Dim PDszDot As String = Replace(PDsz, ",", ".")     'prawy dolny
                     Dim PDdlDot As String = Replace(PDdl, ",", ".")
+
                     Dim LDszDot As String = Replace(LDsz, ",", ".")     'lewy dolny
                     Dim LDdlDot As String = Replace(LDdl, ",", ".")
 
-                    'sprawdza ilość znaków w zmiennej i w razie potrzeby dodaje zera na końcu
-                    LGszDot = Dodaj_zera(LGszDot, 18)
-                    LGdlDot = Dodaj_zera(LGdlDot, 18)
-                    PGszDot = Dodaj_zera(PGszDot, 18)
-                    PGdlDot = Dodaj_zera(PGdlDot, 18)
-                    PDszDot = Dodaj_zera(PDszDot, 18)
-                    PDdlDot = Dodaj_zera(PDdlDot, 18)
-                    LDszDot = Dodaj_zera(LDszDot, 18)
-                    LDdlDot = Dodaj_zera(LDdlDot, 18)
+                    ' moje srednie
+                    Dim LGszDotD As Double = LGsz 'lewy górny
+                    Dim LGdlDotD As Double = LGdl
+
+                    Dim PGszDotD As Double = PGsz   'prawy górny
+                    Dim PGdlDotD As Double = PGdl
+
+                    Dim PDszDotD As Double = PDsz     'prawy dolny
+                    Dim PDdlDotD As Double = PDdl
+
+                    Dim LDszDotD As Double = LDsz   'lewy dolny
+                    Dim LDdlDotD As Double = LDdl
+
+                    Dim Nsred As Double = (LGszDotD + PGszDotD) / 2
+                    Dim Esred As Double = (PGdlDotD + PDdlDotD) / 2
+                    Dim Ssred As Double = (LDszDotD + PDszDotD) / 2
+                    Dim Wsred As Double = (LGdlDotD + LDdlDotD) / 2
+
+                    Dim NsredStr As String = Replace(Nsred, ",", ".")
+                    Dim EsredStr As String = Replace(Esred, ",", ".")
+                    Dim SsredStr As String = Replace(Ssred, ",", ".")
+                    Dim WsredStr As String = Replace(Wsred, ",", ".")
+
+
+
 
 
 
@@ -1285,10 +1377,10 @@ errorhandler:
                     "<viewBoundScale>" & Form1.TextBox10.Text & "</viewBoundScale>" & Chr(13) & Chr(10) &
                     "</Icon>" & Chr(13) & Chr(10) &
                     "<LatLonBox>" & Chr(13) & Chr(10) &
-                    "<north>" & PGszDot & "</north>" & Chr(13) & Chr(10) &
-                    "<south>" & PDszDot & "</south>" & Chr(13) & Chr(10) &
-                    "<east>" & PGdlDot & "</east>" & Chr(13) & Chr(10) &
-                    "<west>" & LGdlDot & "</west>" & Chr(13) & Chr(10) &
+                    "<north>" & NsredStr & "</north>" & Chr(13) & Chr(10) &
+                    "<south>" & SsredStr & "</south>" & Chr(13) & Chr(10) &
+                    "<east>" & EsredStr & "</east>" & Chr(13) & Chr(10) &
+                    "<west>" & WsredStr & "</west>" & Chr(13) & Chr(10) &
                     "</LatLonBox>" & Chr(13) & Chr(10) &
                     "</GroundOverlay>" & Chr(13) & Chr(10) &
                     "</kml>")
@@ -1306,44 +1398,75 @@ errorhandler:
                 Py = Val(Form3.TextBox5.Text) + (Val(Form3.TextBox8.Text) * Val(Form3.TextBox7.Text) * Val(Form3.TextBox6.Text))
 
                 'Dim bok As String = Form1.TextBox9.Text & ".000000000000000"
-
+                '-----------
                 Dim LGsz As String  'lewy górny
                 Dim LGdl As String
+
                 Dim PGsz As String  'prawy górny
                 Dim PGdl As String
+
                 Dim PDsz As String  'prawy dolny
                 Dim PDdl As String
+
                 Dim LDsz As String  'lewy dolny
                 Dim LDdl As String
 
-                LGsz = Round(SzerokoscWgs_z1992(Px, Ly), 15)
+
+
+                LGsz = Round(SzerokoscWgs_z1992(Px, Ly), 15) 'lewy górny
                 LGdl = Round(DlugoscWgs_z1992(Px, Ly), 15)
-                PGsz = Round(SzerokoscWgs_z1992(Px, Py), 15)
+
+                PGsz = Round(SzerokoscWgs_z1992(Px, Py), 15) 'prawy górny
                 PGdl = Round(DlugoscWgs_z1992(Px, Py), 15)
-                PDsz = Round(SzerokoscWgs_z1992(Lx, Py), 15)
+
+                PDsz = Round(SzerokoscWgs_z1992(Lx, Py), 15) 'prawy dolny
                 PDdl = Round(DlugoscWgs_z1992(Lx, Py), 15)
-                LDsz = Round(SzerokoscWgs_z1992(Lx, Ly), 15)
+
+                LDsz = Round(SzerokoscWgs_z1992(Lx, Ly), 15) 'lewy dolny
                 LDdl = Round(DlugoscWgs_z1992(Lx, Ly), 15)
+
+
 
                 'usuwa przecinki i zamienia je na kropki
                 Dim LGszDot As String = Replace(LGsz, ",", ".")     'lewy górny
                 Dim LGdlDot As String = Replace(LGdl, ",", ".")
+
                 Dim PGszDot As String = Replace(PGsz, ",", ".")     'prawy górny
                 Dim PGdlDot As String = Replace(PGdl, ",", ".")
+
                 Dim PDszDot As String = Replace(PDsz, ",", ".")     'prawy dolny
                 Dim PDdlDot As String = Replace(PDdl, ",", ".")
+
                 Dim LDszDot As String = Replace(LDsz, ",", ".")     'lewy dolny
                 Dim LDdlDot As String = Replace(LDdl, ",", ".")
 
-                'sprawdza ilość znaków w zmiennej i w razie potrzeby dodaje zera na końcu
-                LGszDot = Dodaj_zera(LGszDot, 18)
-                LGdlDot = Dodaj_zera(LGdlDot, 18)
-                PGszDot = Dodaj_zera(PGszDot, 18)
-                PGdlDot = Dodaj_zera(PGdlDot, 18)
-                PDszDot = Dodaj_zera(PDszDot, 18)
-                PDdlDot = Dodaj_zera(PDdlDot, 18)
-                LDszDot = Dodaj_zera(LDszDot, 18)
-                LDdlDot = Dodaj_zera(LDdlDot, 18)
+
+                ' moje srednie
+                Dim LGszDotD As Double = LGsz 'lewy górny
+                Dim LGdlDotD As Double = LGdl
+
+                Dim PGszDotD As Double = PGsz   'prawy górny
+                Dim PGdlDotD As Double = PGdl
+
+                Dim PDszDotD As Double = PDsz     'prawy dolny
+                Dim PDdlDotD As Double = PDdl
+
+                Dim LDszDotD As Double = LDsz   'lewy dolny
+                Dim LDdlDotD As Double = LDdl
+
+                Dim Nsred As Double = (LGszDotD + PGszDotD) / 2
+                Dim Esred As Double = (PGdlDotD + PDdlDotD) / 2
+                Dim Ssred As Double = (LDszDotD + PDszDotD) / 2
+                Dim Wsred As Double = (LGdlDotD + LDdlDotD) / 2
+
+                Dim NsredStr As String = Replace(Nsred, ",", ".")
+                Dim EsredStr As String = Replace(Esred, ",", ".")
+                Dim SsredStr As String = Replace(Ssred, ",", ".")
+                Dim WsredStr As String = Replace(Wsred, ",", ".")
+
+
+
+
 
 
                 FileOpen(1, folderSegmentow & "_scalone_segmenty_" & Form3.TextBox8.Text & "x" & Form3.TextBox9.Text & ".kml", OpenMode.Output)
@@ -1358,10 +1481,10 @@ errorhandler:
                 "<viewBoundScale>" & Form1.TextBox10.Text & "</viewBoundScale>" & Chr(13) & Chr(10) &
                 "</Icon>" & Chr(13) & Chr(10) &
                 "<LatLonBox>" & Chr(13) & Chr(10) &
-                "<north>" & PGszDot & "</north>" & Chr(13) & Chr(10) &
-                "<south>" & PDszDot & "</south>" & Chr(13) & Chr(10) &
-                "<east>" & PGdlDot & "</east>" & Chr(13) & Chr(10) &
-                "<west>" & LGdlDot & "</west>" & Chr(13) & Chr(10) &
+                "<north>" & NsredStr & "</north>" & Chr(13) & Chr(10) &
+                "<south>" & SsredStr & "</south>" & Chr(13) & Chr(10) &
+                "<east>" & EsredStr & "</east>" & Chr(13) & Chr(10) &
+                "<west>" & WsredStr & "</west>" & Chr(13) & Chr(10) &
                 "</LatLonBox>" & Chr(13) & Chr(10) &
                 "</GroundOverlay>" & Chr(13) & Chr(10) &
                 "</kml>")
@@ -1403,7 +1526,6 @@ errorhandler:
             PrintLine(1, nazwaKwadratu & "." & rozszerzenie)
 
             FileClose(1)
-
         End If
     End Sub
 
@@ -1605,6 +1727,10 @@ errorhandler:
         deltaL = System.Math.Atan((System.Math.Tan(wsw)) / System.Math.Cos(Xmer))
         DlugoscWgs_z1992 = Lo + deltaL * 180 / Pi
     End Function
+
+
+
+
     Public Sub TBfoldery()
 
 
@@ -1616,9 +1742,9 @@ errorhandler:
         folX = Math.Ceiling(dlX / TBmax)
 
 
-        If Directory.Exists(folderSegmentow & wspolnaNazwaKwadratu & "\") = False Then Directory.CreateDirectory(folderSegmentow & wspolnaNazwaKwadratu & "\")
+        If Directory.Exists(folderSegmentow & wspolnaNazwaKwadratu & styl_nazwy_TB & "\") = False Then Directory.CreateDirectory(folderSegmentow & wspolnaNazwaKwadratu & styl_nazwy_TB & "\")
         Sleep(500 * 1) 'czas na utworzenie folderu
-        folderTB = folderSegmentow & wspolnaNazwaKwadratu & "\"
+        folderTB = folderSegmentow & wspolnaNazwaKwadratu & styl_nazwy_TB & "\"
 
 
         If Directory.Exists(folderTB & "set\") = False Then Directory.CreateDirectory(folderTB & "set\")
@@ -1626,7 +1752,7 @@ errorhandler:
         folderTBset = folderTB & "set\"
 
         If File.Exists(folderTB & wspolnaNazwaKwadratu & ".set") Then File.Delete(folderTB & wspolnaNazwaKwadratu & ".set")
-        plikTB_map()
+        PlikTB_map()
 
 
 
@@ -1707,8 +1833,8 @@ errorhandler:
         Dim Ly_cent As Double
         Dim Lx_cent84 As Double
         Dim Ly_cent84 As Double
-        Lx_cent = Form1.TextBox1.Text
-        Ly_cent = Form1.TextBox2.Text
+        'Lx_cent = Form1.TextBox1.Text
+        'Ly_cent = Form1.TextBox2.Text
 
         Lx_cent = Form1.TextBox1.Text + ((Val(Form1.TextBox10.Text) * Val(Form1.TextBox9.Text) * Val(Form1.TextBox12.Text)) * 0.5)
         Ly_cent = Form1.TextBox2.Text + ((Val(Form1.TextBox10.Text) * Val(Form1.TextBox9.Text) * Val(Form1.TextBox11.Text)) * 0.5)

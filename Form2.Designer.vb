@@ -63,6 +63,8 @@ Partial Class Form2
         Me.GroupBox6 = New System.Windows.Forms.GroupBox()
         Me.ComboBox2 = New System.Windows.Forms.ComboBox()
         Me.GroupBox5 = New System.Windows.Forms.GroupBox()
+        Me.Label9 = New System.Windows.Forms.Label()
+        Me.ComboBox3 = New System.Windows.Forms.ComboBox()
         Me.CheckBox6 = New System.Windows.Forms.CheckBox()
         Me.GroupBox4 = New System.Windows.Forms.GroupBox()
         Me.Label7 = New System.Windows.Forms.Label()
@@ -76,6 +78,8 @@ Partial Class Form2
         Me.CheckBox9 = New System.Windows.Forms.CheckBox()
         Me.GroupBox7 = New System.Windows.Forms.GroupBox()
         Me.Button6 = New System.Windows.Forms.Button()
+        Me.Label10 = New System.Windows.Forms.Label()
+        Me.Label11 = New System.Windows.Forms.Label()
         Me.GroupBox1.SuspendLayout()
         Me.GroupBox2.SuspendLayout()
         Me.GroupBox3.SuspendLayout()
@@ -245,7 +249,7 @@ Partial Class Form2
         'Button1
         '
         Me.Button1.Font = New System.Drawing.Font("Microsoft Sans Serif", 12.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
-        Me.Button1.Location = New System.Drawing.Point(477, 265)
+        Me.Button1.Location = New System.Drawing.Point(477, 304)
         Me.Button1.Name = "Button1"
         Me.Button1.Size = New System.Drawing.Size(168, 39)
         Me.Button1.TabIndex = 11
@@ -255,7 +259,7 @@ Partial Class Form2
         'CheckBox3
         '
         Me.CheckBox3.AutoSize = True
-        Me.CheckBox3.Location = New System.Drawing.Point(9, 37)
+        Me.CheckBox3.Location = New System.Drawing.Point(9, 35)
         Me.CheckBox3.Name = "CheckBox3"
         Me.CheckBox3.Size = New System.Drawing.Size(143, 17)
         Me.CheckBox3.TabIndex = 12
@@ -279,7 +283,6 @@ Partial Class Form2
         Me.TextBox6.Name = "TextBox6"
         Me.TextBox6.Size = New System.Drawing.Size(152, 20)
         Me.TextBox6.TabIndex = 14
-        Me.TextBox6.Text = "segment"
         Me.ToolTip1.SetToolTip(Me.TextBox6, "opcjonalny wspólny przedrostek którym zostaną poprzedzone numery wszystkich pobie" &
         "ranych segmentów map")
         '
@@ -292,7 +295,7 @@ Partial Class Form2
         Me.GroupBox3.Controls.Add(Me.GroupBox1)
         Me.GroupBox3.Location = New System.Drawing.Point(287, 19)
         Me.GroupBox3.Name = "GroupBox3"
-        Me.GroupBox3.Size = New System.Drawing.Size(358, 240)
+        Me.GroupBox3.Size = New System.Drawing.Size(358, 286)
         Me.GroupBox3.TabIndex = 15
         Me.GroupBox3.TabStop = False
         Me.GroupBox3.Text = "Utawienia programu (zapisane w lastsettings.txt)"
@@ -301,9 +304,9 @@ Partial Class Form2
         '
         Me.GroupBox8.Controls.Add(Me.Label8)
         Me.GroupBox8.Controls.Add(Me.CheckBox3)
-        Me.GroupBox8.Location = New System.Drawing.Point(190, 158)
+        Me.GroupBox8.Location = New System.Drawing.Point(190, 214)
         Me.GroupBox8.Name = "GroupBox8"
-        Me.GroupBox8.Size = New System.Drawing.Size(162, 67)
+        Me.GroupBox8.Size = New System.Drawing.Size(162, 62)
         Me.GroupBox8.TabIndex = 16
         Me.GroupBox8.TabStop = False
         Me.GroupBox8.Text = "Opcje zaawansowane dla"
@@ -311,7 +314,7 @@ Partial Class Form2
         'Label8
         '
         Me.Label8.AutoSize = True
-        Me.Label8.Location = New System.Drawing.Point(9, 16)
+        Me.Label8.Location = New System.Drawing.Point(9, 17)
         Me.Label8.Name = "Label8"
         Me.Label8.Size = New System.Drawing.Size(144, 13)
         Me.Label8.TabIndex = 13
@@ -339,13 +342,37 @@ Partial Class Form2
         '
         'GroupBox5
         '
+        Me.GroupBox5.Controls.Add(Me.Label9)
+        Me.GroupBox5.Controls.Add(Me.ComboBox3)
         Me.GroupBox5.Controls.Add(Me.CheckBox6)
         Me.GroupBox5.Location = New System.Drawing.Point(191, 100)
         Me.GroupBox5.Name = "GroupBox5"
-        Me.GroupBox5.Size = New System.Drawing.Size(158, 48)
+        Me.GroupBox5.Size = New System.Drawing.Size(158, 114)
         Me.GroupBox5.TabIndex = 13
         Me.GroupBox5.TabStop = False
-        Me.GroupBox5.Text = "TrekBuddy"
+        Me.GroupBox5.Text = "TrekBuddy i Locus Map"
+        '
+        'Label9
+        '
+        Me.Label9.AutoSize = True
+        Me.Label9.Enabled = False
+        Me.Label9.Location = New System.Drawing.Point(8, 50)
+        Me.Label9.Name = "Label9"
+        Me.Label9.Size = New System.Drawing.Size(148, 13)
+        Me.Label9.TabIndex = 4
+        Me.Label9.Text = "nazwa finalnej paczki TB i LM"
+        '
+        'ComboBox3
+        '
+        Me.ComboBox3.Enabled = False
+        Me.ComboBox3.FormattingEnabled = True
+        Me.ComboBox3.Items.AddRange(New Object() {"przedrostek nazwy segm.", "nazwa serwera WMS", "nazwa warstwy WMS", "serwer + warstwa WMS"})
+        Me.ComboBox3.Location = New System.Drawing.Point(9, 66)
+        Me.ComboBox3.Name = "ComboBox3"
+        Me.ComboBox3.Size = New System.Drawing.Size(144, 21)
+        Me.ComboBox3.TabIndex = 9
+        Me.ComboBox3.Text = "przedrostek nazwy segm."
+        Me.ToolTip1.SetToolTip(Me.ComboBox3, "Zmień sposób numerowania pobieranych segmentów")
         '
         'CheckBox6
         '
@@ -354,7 +381,7 @@ Partial Class Form2
         Me.CheckBox6.Name = "CheckBox6"
         Me.CheckBox6.Size = New System.Drawing.Size(135, 17)
         Me.CheckBox6.TabIndex = 5
-        Me.CheckBox6.Text = "twórz mapę TrekBuddy"
+        Me.CheckBox6.Text = "twórz mapę TB i LM.tar"
         Me.CheckBox6.UseVisualStyleBackColor = True
         '
         'GroupBox4
@@ -474,7 +501,7 @@ Partial Class Form2
         Me.Button6.Font = New System.Drawing.Font("Microsoft Sans Serif", 6.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
         Me.Button6.Image = Global.MapoTero.My.Resources.Resources.kosz
         Me.Button6.ImageAlign = System.Drawing.ContentAlignment.MiddleRight
-        Me.Button6.Location = New System.Drawing.Point(287, 271)
+        Me.Button6.Location = New System.Drawing.Point(287, 308)
         Me.Button6.Name = "Button6"
         Me.Button6.Size = New System.Drawing.Size(74, 32)
         Me.Button6.TabIndex = 305
@@ -482,11 +509,36 @@ Partial Class Form2
         Me.Button6.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
         Me.Button6.UseVisualStyleBackColor = True
         '
+        'Label10
+        '
+        Me.Label10.AutoSize = True
+        Me.Label10.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
+        Me.Label10.ForeColor = System.Drawing.Color.Green
+        Me.Label10.Location = New System.Drawing.Point(17, 326)
+        Me.Label10.Name = "Label10"
+        Me.Label10.Size = New System.Drawing.Size(13, 13)
+        Me.Label10.TabIndex = 14
+        Me.Label10.Text = "_"
+        Me.Label10.Visible = False
+        '
+        'Label11
+        '
+        Me.Label11.AutoSize = True
+        Me.Label11.ForeColor = System.Drawing.Color.Green
+        Me.Label11.Location = New System.Drawing.Point(17, 310)
+        Me.Label11.Name = "Label11"
+        Me.Label11.Size = New System.Drawing.Size(189, 13)
+        Me.Label11.TabIndex = 306
+        Me.Label11.Text = "Podgląd nazwy finalnej paczki TB i LM"
+        Me.Label11.Visible = False
+        '
         'Form2
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(656, 318)
+        Me.ClientSize = New System.Drawing.Size(656, 344)
+        Me.Controls.Add(Me.Label11)
+        Me.Controls.Add(Me.Label10)
         Me.Controls.Add(Me.Button6)
         Me.Controls.Add(Me.GroupBox7)
         Me.Controls.Add(Me.GroupBox4)
@@ -512,6 +564,7 @@ Partial Class Form2
         Me.GroupBox7.ResumeLayout(False)
         Me.GroupBox7.PerformLayout()
         Me.ResumeLayout(False)
+        Me.PerformLayout()
 
     End Sub
     Friend WithEvents ComboBox1 As System.Windows.Forms.ComboBox
@@ -551,4 +604,8 @@ Partial Class Form2
     Friend WithEvents CheckBox13 As System.Windows.Forms.CheckBox
     Friend WithEvents Button6 As System.Windows.Forms.Button
     Friend WithEvents Label8 As Label
+    Friend WithEvents Label10 As Label
+    Friend WithEvents Label9 As Label
+    Friend WithEvents ComboBox3 As ComboBox
+    Friend WithEvents Label11 As Label
 End Class

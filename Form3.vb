@@ -1,6 +1,4 @@
-﻿Imports System
-Imports System.IO
-Imports System.Windows.Forms
+﻿Imports System.IO
 
 Public Class Form3
     Private Declare Sub Sleep Lib "kernel32" (ByVal dwMilliseconds As Long)

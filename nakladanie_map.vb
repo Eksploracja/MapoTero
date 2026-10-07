@@ -13,11 +13,7 @@
 'You should have received a copy of the GNU General Public License
 'along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-Imports System
-Imports System.Diagnostics
-Imports System.Drawing
 Imports System.IO
-Imports System.Windows.Forms
 
 Public Class Nakladanie_Map
 

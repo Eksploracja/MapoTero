@@ -1,7 +1,5 @@
-﻿Imports System.Resources
-
-Imports System
-Imports System.Reflection
+﻿Imports System.Reflection
+Imports System.Resources
 Imports System.Runtime.InteropServices
 
 ' General Information about an assembly is controlled through the following 
@@ -12,7 +10,7 @@ Imports System.Runtime.InteropServices
 
 <Assembly: AssemblyTitle("MapoTero")>
 <Assembly: AssemblyDescription("kod: 2009-2014 pajakt, od 2015 Kazimierz Niecikowski, Paweł_gdn, AAA222; kod modułu przeliczania współrzędnych: Edward Zadorski;")>
-<Assembly: AssemblyCompany("Pomorskie Forum Eksploracyjne")> 
+<Assembly: AssemblyCompany("Pomorskie Forum Eksploracyjne")>
 <Assembly: AssemblyProduct("Program do pobierania rastrowych map z serwerów WMS")>
 <Assembly: AssemblyCopyright("Copyright © pajakt, 2009/2020. Powszechna Licencja Publiczna GNU-GPLv3")>
 
@@ -34,8 +32,8 @@ Imports System.Runtime.InteropServices
 ' by using the '*' as shown below:
 ' <Assembly: AssemblyVersion("1.0.*")> 
 
-<Assembly: AssemblyVersion("3.11.0.0")>
-<Assembly: AssemblyFileVersion("3.11.0.0")>
+<Assembly: AssemblyVersion("3.12.0.0")>
+<Assembly: AssemblyFileVersion("3.12.0.0")>
 
-<Assembly: NeutralResourcesLanguageAttribute("pl-PL")> 
-<Assembly: System.CLSCompliant(true)> 
+<Assembly: NeutralResourcesLanguageAttribute("pl-PL")>
+<Assembly: System.CLSCompliant(true)>

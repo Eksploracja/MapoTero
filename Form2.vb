@@ -57,6 +57,7 @@ Public Class Form2
     End Sub
 
 
+
     Private Sub CheckBox1_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles CheckBox1.Click
         Select Case CheckBox1.CheckState
             Case CheckState.Checked
@@ -73,6 +74,46 @@ Public Class Form2
             Case CheckState.Unchecked
                 Module1.CheckGmi = False
         End Select
+    End Sub
+
+    Private Sub ComboBox3_SelectedIndexChanged(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles ComboBox3.SelectedIndexChanged
+
+        If ComboBox3.SelectedIndex = 0 Then
+            styl_nazwy_TB = ""
+            Label10.Text = TextBox6.Text
+        End If
+        If ComboBox3.SelectedIndex = 1 Then
+            styl_nazwy_TB = Form1.ComboBox3.Text
+            Label10.Text = TextBox6.Text & Module1.styl_nazwy_TB
+        End If
+        If ComboBox3.SelectedIndex = 2 Then
+            styl_nazwy_TB = Form1.Label11.Text.Replace("1) ", "")
+            Label10.Text = TextBox6.Text & Module1.styl_nazwy_TB
+        End If
+        If ComboBox3.SelectedIndex = 3 Then
+            styl_nazwy_TB = Form1.ComboBox3.Text & "_" & Form1.Label11.Text.Replace("1) ", "")
+            Label10.Text = TextBox6.Text & Module1.styl_nazwy_TB
+        End If
+
+    End Sub
+    Private Sub TextBox6_TextChanged(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles TextBox6.TextChanged
+
+        If ComboBox3.SelectedIndex = 0 Then
+            styl_nazwy_TB = ""
+            Label10.Text = TextBox6.Text
+        End If
+        If ComboBox3.SelectedIndex = 1 Then
+            styl_nazwy_TB = Form1.ComboBox3.Text
+            Label10.Text = TextBox6.Text & Module1.styl_nazwy_TB
+        End If
+        If ComboBox3.SelectedIndex = 2 Then
+            styl_nazwy_TB = Form1.Label11.Text.Replace("1) ", "")
+            Label10.Text = TextBox6.Text & Module1.styl_nazwy_TB
+        End If
+        If ComboBox3.SelectedIndex = 3 Then
+            styl_nazwy_TB = Form1.ComboBox3.Text & "_" & Form1.Label11.Text.Replace("1) ", "")
+            Label10.Text = TextBox6.Text & Module1.styl_nazwy_TB
+        End If
     End Sub
 
     Private Sub CheckBox4_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles CheckBox4.Click
@@ -135,18 +176,26 @@ Public Class Form2
                 Form1.TextBox9.Text = TBbok
                 ComboBox2.Enabled = False
 
-
+                ComboBox3.Enabled = True
+                Label9.Enabled = True
+                Label10.Visible = True
+                Label11.Visible = True
             Case CheckState.Unchecked
                 GroupBox1.Enabled = True
 
                 Module1.CheckTB = False
-                Form1.TextBox9.Text = bok
+                'Form1.TextBox9.Text = bok
+                Form1.TextBox9.Text = 2000
                 CheckBox5.Enabled = True
 
                 ComboBox2.Enabled = True
-
-
+                ComboBox3.Enabled = False
+                Label9.Enabled = False
+                Label10.Visible = False
+                Label11.Visible = False
         End Select
+
+
     End Sub
 
 
@@ -282,6 +331,10 @@ Public Class Form2
 
     'przywracanie domyślnych ustawień
     Private Sub Button6_Click(sender As Object, e As EventArgs) Handles Button6.Click
+
+        'Module1.Resetuj()
+        'Module1.UtworzPlikConf()
+
         'czyszczenie markerów i zaznaczenia na mapie
         Form1.GMapControl1.Overlays.Clear()
 
@@ -290,7 +343,7 @@ Public Class Form2
         File.Delete(myPath & "\lastsettings.txt")
         Form1.RichTextBox1.ForeColor = System.Drawing.Color.Green
         Form1.RichTextBox1.Text = "Usunięto plik conf.txt oraz lastsetting.txt"
-        
+
         Form1.Label35.Text = "52.3"
         Form1.Label63.Text = "19.2"
         Form1.Label65.Text = "6"
@@ -299,7 +352,7 @@ Public Class Form2
         Module1.x_start = 52.3
         Module1.y_start = 19.2
         Module1.zoom_start = 6
-        
+
 
         Form1.GMapControl1.Refresh()
         Form1.GMapControl1.ReloadMap()
@@ -311,7 +364,7 @@ Public Class Form2
 
         Form1.Refresh()
         'domyślne ustawienia
-        TextBox6.Text = "" 'wspolna nazwa kwadratu
+        TextBox6.Text = "_" 'wspolna nazwa kwadratu
         ComboBox1.Text = "jpeg"  'format
         Module1.format = "jpeg"
         CheckBox5.Checked = False 'powtorz pobieranie od ostatniego segm
@@ -343,12 +396,12 @@ Public Class Form2
         Module1.CheckTB = False
         CheckBox3.Checked = False 'zamiana XY
         Module1.XYswitched = False
-        
+
         Form1.TextBox9.Text = "2000"
         Form1.TextBox10.Text = "2"
 
         If x_start = 52.3 Then
-           
+
 
 
             FileClose(1) 'w razie gyby był otwarty
@@ -356,7 +409,7 @@ Public Class Form2
             FileOpen(1, myPath & "\lastsettings.txt", OpenMode.Output)
 
             PrintLine(1, "folder segmentow")        'zapisuje ostatni folder segmentów, z niego wczytany zostanie plik conf
-            If folderSegmentow = "" Then
+            If folderSegmentow = "_" Then
                 PrintLine(1, myPath & "\download\")
             Else
                 PrintLine(1, folderSegmentow)
@@ -418,5 +471,4 @@ Public Class Form2
         End If
     End Sub
 
-    
 End Class

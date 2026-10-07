@@ -1,6 +1,6 @@
 ﻿
 Namespace My
-    
+
     'Ta klasa umożliwia obsługę określonych zdarzeń w klasie ustawień:
     ' Zdarzenie SettingChanging jest wywoływane przed zmianą wartości ustawień.
     ' Zdarzenie PropertyChanged jest wywoływane po zmianie wartości ustawień.

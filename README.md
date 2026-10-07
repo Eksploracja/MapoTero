@@ -1,9 +1,18 @@
 
-<h2><a href="https://github.com/Eksploracja/MapoTero/releases/download/MapoTero_v3.0.0.9/MapoTero_v3.0.0.9.zip" target="_blank">Pobierz najnowszą wersję MapoTero 3.0.0.9</a></h2>
+<h2><a href="https://github.com/Eksploracja/MapoTero/releases/download/MapoTero_v3.11/MapoTero_v3.11.zip" target="_blank">Pobierz najnowszą wersję MapoTero 3.11</a></h2>
 
 
 
 <p style="text-align: justify;"><strong>Aktualności:<br /> </strong></p>
+<p style="text-align: justify;">19.10.2021 - Ukazała się najnowsza wersja MapoTero_v3.11. Najważniejsze zmiany:
+  <ul><li>naprawa niedziałającej wartsy Ortofotomapa</li>
+    <li>aktualizacja warstw WMS,</li> 
+  </ul></p>
+<p style="text-align: justify;">20.10.2020 - Ukazała się najnowsza wersja MapoTero_v3.10. Najważniejsze zmiany:
+  <ul><li>usunięcie usterki związanej z niewyświetlaniem podkładowej warstwy OpenStreetMap w systemie Windows 10</li>
+    <li>aktualizacja warstw WMS,</li> 
+  <li>zmiana platformy programistycznej .NET Framework z wersji 4.5 na 4.7.2,</li>
+  </ul></p>
 <p style="text-align: justify;">09.09.2019 - Opublikowana została najnowsza wersja MapoTero_v3.0.0.9. Najważniejsze zmiany:
   <ul><li>aktualizacja warstw WMS,</li> 
   <li>zmiana platformy programistycznej .NET Framework z wersji 3.5 na 4.5,</li>

@@ -13,15 +13,9 @@
 'You should have received a copy of the GNU General Public License
 'along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-Imports System
-Imports System.Drawing
 Imports System.IO
-Imports System.Windows.Forms
 Imports GMap.NET
 Imports GMap.NET.MapProviders
-Imports GMap.NET.WindowsForms.Markers
-Imports GMap.NET.WindowsForms.ToolTips
-Imports GMap.NET.WindowsForms
 
 Public Class Form1
 
@@ -81,7 +75,7 @@ Public Class Form1
             Me.GMapControl1.Zoom = 6
         End If
 
-        
+
 
 
 
@@ -168,6 +162,25 @@ errorhandler:
 
     'dodawanie warstw
     Private Sub ListBox1_SelectedIndexChanged(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles ListBox1.SelectedIndexChanged
+
+
+        If Form2.ComboBox3.SelectedIndex = 0 Then
+            styl_nazwy_TB = ""
+            Form2.Label10.Text = Form2.TextBox6.Text
+        End If
+        If Form2.ComboBox3.SelectedIndex = 1 Then
+            styl_nazwy_TB = ComboBox3.Text
+            Form2.Label10.Text = Form2.TextBox6.Text & Module1.styl_nazwy_TB
+        End If
+        If Form2.ComboBox3.SelectedIndex = 2 Then
+            styl_nazwy_TB = Label11.Text.Replace("1) ", "")
+            Form2.Label10.Text = Form2.TextBox6.Text & Module1.styl_nazwy_TB
+        End If
+        If Form2.ComboBox3.SelectedIndex = 3 Then
+            styl_nazwy_TB = ComboBox3.Text & "_" & Label11.Text.Replace("1) ", "")
+            Form2.Label10.Text = Form2.TextBox6.Text & Module1.styl_nazwy_TB
+        End If
+
 
 
 

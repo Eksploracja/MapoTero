@@ -1,12 +1,8 @@
-﻿Imports System
+﻿Public Class Transform
 
 
 
-Public Class Transform
 
-
-
-  
 
     ' Transformacja z ukladu BL na XY (uklad 1992)
     ' na podstawie http://ezador.w.interia.pl/gps/wzory_opis.htm
@@ -18,7 +14,7 @@ Public Class Transform
     Const U92_M_ZERO As Double = 0.9993 ' Wsp. skali
     Const U92_E As Double = 0.0818191910428
     ' pozostale stale
-   Const PI As Double = 3.14159265358979
+    Const PI As Double = 3.14159265358979
     Const RO As Double = 6367449.14577
     Const A2 As Double = 0.0008377318247344
     Const A4 As Double = 0.0000007608527788826
@@ -53,7 +49,7 @@ Public Class Transform
         Return U92_M_ZERO * ygk + U92_FE
     End Function
 
-   
+
 
 
 End Class

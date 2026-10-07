@@ -1,3 +1,0 @@
-http://mapy.geoportal.gov.pl:80/wss/service/img/guest/SOZO/MapServer/WMSServer?request=GetMap&version=1.3.0&CRS=EPSG:2180&layers=
-Raster
-4
