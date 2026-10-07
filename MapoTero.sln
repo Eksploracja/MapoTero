@@ -5,6 +5,10 @@ VisualStudioVersion = 16.0.30309.148
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "MapoTero_v3", "MapoTero_v3.vbproj", "{5EECBBEF-ED0C-4518-A4A1-3C917E98384D}"
 EndProject
+Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "MapoTero.Core", "MapoTero.Core\MapoTero.Core.vbproj", "{CA25A54F-2B2A-4041-8390-351860614585}"
+EndProject
+Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "MapoTero.Tests", "MapoTero.Tests\MapoTero.Tests.vbproj", "{229DCA60-4BE9-4967-A6C4-5042AF0C4560}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +19,14 @@ Global
 		{5EECBBEF-ED0C-4518-A4A1-3C917E98384D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5EECBBEF-ED0C-4518-A4A1-3C917E98384D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5EECBBEF-ED0C-4518-A4A1-3C917E98384D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CA25A54F-2B2A-4041-8390-351860614585}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CA25A54F-2B2A-4041-8390-351860614585}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CA25A54F-2B2A-4041-8390-351860614585}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CA25A54F-2B2A-4041-8390-351860614585}.Release|Any CPU.Build.0 = Release|Any CPU
+		{229DCA60-4BE9-4967-A6C4-5042AF0C4560}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{229DCA60-4BE9-4967-A6C4-5042AF0C4560}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{229DCA60-4BE9-4967-A6C4-5042AF0C4560}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{229DCA60-4BE9-4967-A6C4-5042AF0C4560}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

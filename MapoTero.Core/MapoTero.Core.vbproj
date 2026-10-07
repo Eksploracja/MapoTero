@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Biblioteka z logiką programu MapoTero niezależną od interfejsu użytkownika:
+       układy współrzędnych, siatka segmentów, formaty plików sesji i plików georeferencyjnych.
+       netstandard2.0 - używana zarówno przez program w .NET Framework, jak i w nowszych wersjach .NET,
+       a testy jednostkowe można uruchamiać na dowolnym systemie. -->
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <RootNamespace>MapoTero.Core</RootNamespace>
+    <AssemblyName>MapoTero.Core</AssemblyName>
+    <OptionStrict>On</OptionStrict>
+    <OptionExplicit>On</OptionExplicit>
+    <OptionInfer>On</OptionInfer>
+    <OptionCompare>Binary</OptionCompare>
+    <LangVersion>latest</LangVersion>
+    <Version>3.12.0</Version>
+    <Authors>MapoTero</Authors>
+    <Copyright>GNU GPL v3</Copyright>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Import Include="Microsoft.VisualBasic" />
+    <Import Include="System" />
+  </ItemGroup>
+
+</Project>
