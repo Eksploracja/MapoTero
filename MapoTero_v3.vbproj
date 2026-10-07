@@ -247,6 +247,13 @@
     <Compile Include="PobieranieSegmentow.vb" />
     <Compile Include="MapaTrekBuddy.vb" />
     <Compile Include="ScalanieSegmentow.vb" />
+    <Compile Include="EksportMapy.vb" />
+    <Compile Include="FormEksport.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormEksport.Designer.vb">
+      <DependentUpon>FormEksport.vb</DependentUpon>
+    </Compile>
     <Compile Include="My Project\AssemblyInfo.vb" />
     <Compile Include="My Project\Application.Designer.vb">
       <AutoGen>True</AutoGen>

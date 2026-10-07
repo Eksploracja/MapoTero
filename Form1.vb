@@ -839,6 +839,10 @@ Public Class Form1
         Form3.ShowDialog()
     End Sub
 
+    Private Sub EksportToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles EksportToolStripMenuItem.Click
+        FormEksport.ShowDialog()
+    End Sub
+
     Private Sub UstawieniaToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles UstawieniaToolStripMenuItem.Click
         Form2.ShowDialog()
     End Sub
