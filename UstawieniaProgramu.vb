@@ -52,11 +52,17 @@ Public Class UstawieniaProgramu
     Public Property ZamienXY As Boolean
     ''' <summary>Przy powtórnym pobieraniu tylko segmenty o numerze wyższym niż ostatni pobrany.</summary>
     Public Property PobierajPowyzejOstatniego As Boolean
+    ''' <summary>Limit czasu oczekiwania na odpowiedź serwera [s].</summary>
+    Public Property LimitCzasuSekundy As Integer = 60
     ''' <summary>Tworzenie mapy TrekBuddy / Locus Map.</summary>
     Public Property TrekBuddy As Boolean
-    ''' <summary>Styl nazwy paczki TrekBuddy (dopisek do przedrostka).</summary>
+    ''' <summary>Dopisek do przedrostka w nazwie paczki TrekBuddy (wg stylu StylNazwyTrekBuddy).</summary>
     Public Property NazwaTrekBuddy As String = ""
-    ''' <summary>Format obrazu WMS: jpeg, png, tiff ...</summary>
+    ''' <summary>Styl nazwy paczki TrekBuddy: 0 - sam przedrostek, 1 - zbiór map, 2 - warstwa, 3 - zbiór map i warstwa.</summary>
+    Public Property StylNazwyTrekBuddy As Integer
+    ''' <summary>Bok segmentu sprzed włączenia trybu TrekBuddy (przywracany po jego wyłączeniu); tylko w pamięci.</summary>
+    Public Property BokSegmentuPrzedTrekBuddy As String = ""
+    ''' <summary>Format obrazu WMS: jpeg, png, tiff ... (jeden z FormatySegmentow).</summary>
     Public Property Format As String = "jpeg"
     ''' <summary>Przedrostek nazw segmentów.</summary>
     Public Property Prefiks As String = "_"
@@ -64,7 +70,39 @@ Public Class UstawieniaProgramu
     Public Property Numeracja As String = "NrWiersza_NrKolumny"
     ''' <summary>Układ współrzędnych pobierania.</summary>
     Public Property Uklad As UkladWspolrzednych = UkladWspolrzednych.PL1992
+    ''' <summary>Układ współrzędnych nowej sesji (gdy w folderze pobierania nie ma pliku conf.txt).</summary>
+    Public Property UkladDomyslny As UkladWspolrzednych = UkladWspolrzednych.PL1992
 #End Region
+
+#Region "Usługi WMTS"
+    ''' <summary>Pozostawianie pobranych kafli WMTS w folderze sesji (ponowne pobieranie tego obszaru bez łączenia z serwerem).</summary>
+    Public Property ZachowajKafleWmts As Boolean
+    ''' <summary>Jakość JPEG segmentów składanych z kafli WMTS (50-100).</summary>
+    Public Property JakoscJpegWmts As Integer = 90
+#End Region
+
+    ''' <summary>
+    ''' Formaty segmentów obsługiwane przez program (parametr FORMAT zapytania WMS bez "image/").
+    ''' Format svg+xml z poprzednich wersji usunięto - obraz wektorowy nie może być skalibrowany ani scalony.
+    ''' </summary>
+    Public Shared ReadOnly Property FormatySegmentow As String()
+        Get
+            Return {"jpeg", "png", "png8", "png24", "png32", "gif", "tiff"}
+        End Get
+    End Property
+
+    ''' <summary>Format z listy obsługiwanych; nieznany (np. svg+xml z dawnego conf.txt) - jpeg.</summary>
+    Public Shared Function NormalizujFormat(format As String) As String
+        Dim f As String = If(format, "").Trim().ToLowerInvariant()
+        Return If(Array.IndexOf(FormatySegmentow, f) >= 0, f, "jpeg")
+    End Function
+
+    ''' <summary>Style numeracji segmentów (tekst zapisywany w plikach).</summary>
+    Public Shared ReadOnly Property StyleNumeracji As String()
+        Get
+            Return {"NrWiersza_NrKolumny", "01_02_03", "1_2_3"}
+        End Get
+    End Property
 
 #Region "Foldery"
     Public Property FolderSegmentow As String = ""
@@ -122,6 +160,12 @@ Public Class UstawieniaProgramu
         SkalaMapy = u.Tekst("zoom_start", SkalaMapy)
         'ustawienie dodane w wersji 3.12 (układ współrzędnych jest parametrem sesji - zapisywany w conf.txt)
         LiczbaWatkow = Math.Max(1, Math.Min(16, u.Calkowita("watki", LiczbaWatkow)))
+        LimitCzasuSekundy = Math.Max(10, Math.Min(600, u.Calkowita("limit_czasu", LimitCzasuSekundy)))
+        ZachowajKafleWmts = u.Logiczna("kafle_wmts_zachowaj", ZachowajKafleWmts)
+        JakoscJpegWmts = Math.Max(50, Math.Min(100, u.Calkowita("jakosc_jpeg_wmts", JakoscJpegWmts)))
+        StylNazwyTrekBuddy = Math.Max(0, Math.Min(3, u.Calkowita("styl_nazwy_tb", StylNazwyTrekBuddy)))
+        Dim epsg As Integer = u.Calkowita("uklad_domyslny", UkladDomyslny.Epsg)
+        UkladDomyslny = UkladWspolrzednych.ZKodu(epsg)
     End Sub
 
     ''' <summary>Zapis lastsettings.txt - kolejność i nazwy jak w poprzednich wersjach, nowe ustawienia na końcu.</summary>
@@ -145,6 +189,11 @@ Public Class UstawieniaProgramu
         u.Ustaw("y_start", SrodekMapyDlugosc.Replace(","c, "."c))
         u.Ustaw("zoom_start", SkalaMapy.Replace(","c, "."c))
         u.Ustaw("watki", LiczbaWatkow)
+        u.Ustaw("limit_czasu", LimitCzasuSekundy)
+        u.Ustaw("kafle_wmts_zachowaj", ZachowajKafleWmts)
+        u.Ustaw("jakosc_jpeg_wmts", JakoscJpegWmts)
+        u.Ustaw("styl_nazwy_tb", StylNazwyTrekBuddy)
+        u.Ustaw("uklad_domyslny", UkladDomyslny.Epsg)
         u.Zapisz(sciezka, KodowanieSystemowe())
     End Sub
 
@@ -167,9 +216,15 @@ Public Class UstawieniaProgramu
         IloscProbPobrania = 3
         PrzerwaMiedzyProbami = 5
         LiczbaWatkow = 4
+        LimitCzasuSekundy = 60
+        ZachowajKafleWmts = False
+        JakoscJpegWmts = 90
         TrekBuddy = False
+        StylNazwyTrekBuddy = 0
+        BokSegmentuPrzedTrekBuddy = ""
         ZamienXY = False
-        Uklad = UkladWspolrzednych.PL1992
+        'układ bieżącej sesji zmienia okno ustawień (Form1.PrzelaczUklad) - z przeliczeniem wpisanego zasięgu
+        UkladDomyslny = UkladWspolrzednych.PL1992
         SrodekMapySzerokosc = "52.3"
         SrodekMapyDlugosc = "19.2"
         SkalaMapy = "6"

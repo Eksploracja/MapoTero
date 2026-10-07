@@ -181,7 +181,8 @@ Public Class Form1
         _ustawianieUkladu = False
 
         'wczytywanie ustawień: najpierw conf.txt z folderu domyślnego, potem lastsettings.txt
-        If File.Exists(FolderDownload & "conf.txt") = False Then
+        Dim nowaSesja As Boolean = File.Exists(FolderDownload & "conf.txt") = False
+        If nowaSesja Then
             btnScalanie.Enabled = False
             mapa.Position = New PointLatLng(52.3, 19.2)
             mapa.Zoom = 6
@@ -189,6 +190,9 @@ Public Class Form1
 
         WczytajConf(False)
         WczytajLastsettings()
+
+        'nowa sesja (brak conf.txt) - układ współrzędnych wybrany w ustawieniach jako domyślny
+        If nowaSesja Then PrzelaczUklad(Ustawienia.UkladDomyslny, False)
 
         'lista zbiorów map
         WczytajListeZbiorowMap()
@@ -280,7 +284,8 @@ Public Class Form1
         Next
         PokazWarstwy()
 
-        If c.Format <> "" Then Ustawienia.Format = c.Format
+        'format spoza listy obsługiwanych (np. svg+xml z dawnych wersji) - jpeg
+        If c.Format <> "" Then Ustawienia.Format = UstawieniaProgramu.NormalizujFormat(c.Format)
         Ustawienia.Prefiks = c.Prefiks
         Ustawienia.PobierajPowyzejOstatniego = c.PobierajPowyzejOstatniego
         If c.Numeracja <> "" Then Ustawienia.Numeracja = c.Numeracja
@@ -529,6 +534,13 @@ Public Class Form1
     Private Sub cmbUklad_SelectedIndexChanged(sender As Object, e As EventArgs) Handles cmbUklad.SelectedIndexChanged
         If _ustawianieUkladu Then Exit Sub
         Dim nowy = TryCast(cmbUklad.SelectedItem, UkladWspolrzednych)
+        If nowy IsNot Nothing Then PrzelaczUklad(nowy, True)
+    End Sub
+
+    ''' <summary>
+    ''' Zmienia układ współrzędnych pobierania; wpisany zasięg i rozmiar piksela są przeliczane do nowego układu.
+    ''' </summary>
+    Public Sub PrzelaczUklad(nowy As UkladWspolrzednych, pokazKomunikat As Boolean)
         Dim stary = Ustawienia.Uklad
         If nowy Is Nothing OrElse nowy Is stary Then Exit Sub
 
@@ -545,7 +557,9 @@ Public Class Form1
             If piksel > 0 Then txtRozmiarPiksela.Text = Liczba(stary.PrzeliczRozmiarPiksela(nowy, piksel, srodek))
         End If
         OdswiezOpisUkladu()
-        Komunikat("Wybrano układ " & nowy.Nazwa & ". Zasięg pobierania przeliczono do nowego układu. Upewnij się, że serwer WMS obsługuje ten układ.", Color.Green)
+        If pokazKomunikat Then
+            Komunikat("Wybrano układ " & nowy.Nazwa & ". Zasięg pobierania przeliczono do nowego układu. Upewnij się, że serwer WMS obsługuje ten układ.", Color.Green)
+        End If
     End Sub
 
     ''' <summary>Rozmiar piksela z pliku zbioru map (w metrach) w bieżącym układzie.</summary>
@@ -562,12 +576,6 @@ Public Class Form1
 #Region "Pobieranie"
 
     Private Async Sub btnPobierz_Click(sender As Object, e As EventArgs) Handles btnPobierz.Click
-        If Ustawienia.Format = "svg+xml" Then
-            MsgBox("Ten format jeszcze nie działa :o(", , "Zmień format.")
-            Form2.ShowDialog()
-            Exit Sub
-        End If
-
         'kontrola parametrów
         Dim piksel As Double = Wartosc(txtRozmiarPiksela.Text)
         Dim bok As Integer = WartoscCalkowita(txtBokSegmentu.Text)
@@ -606,7 +614,9 @@ Public Class Form1
             .Siatka = siatka, .Format = Ustawienia.Format, .Prefiks = Ustawienia.Prefiks,
             .Numeracja = Siatka.StylZTekstu(Ustawienia.Numeracja), .Folder = FolderSesji, .ZamienOsie = Ustawienia.ZamienXY,
             .IloscProb = Math.Max(1, Ustawienia.IloscProbPobrania), .PrzerwaSekundy = Ustawienia.PrzerwaMiedzyProbami,
-            .LiczbaWatkow = Ustawienia.LiczbaWatkow, .PobierajPowyzejOstatniego = Ustawienia.PobierajPowyzejOstatniego,
+            .LiczbaWatkow = Ustawienia.LiczbaWatkow, .LimitCzasuSekundy = Ustawienia.LimitCzasuSekundy,
+            .ZachowajKafleWmts = Ustawienia.ZachowajKafleWmts, .JakoscJpegWmts = Ustawienia.JakoscJpegWmts,
+            .PobierajPowyzejOstatniego = Ustawienia.PobierajPowyzejOstatniego,
             .Georeferencja = Ustawienia.OpcjeGeoreferencji(), .TrekBuddy = Ustawienia.TrekBuddy, .NazwaTrekBuddy = Ustawienia.NazwaTrekBuddy}
 
         btnPobierz.Enabled = False

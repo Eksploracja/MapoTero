@@ -36,6 +36,12 @@ Public Class ZadaniePobierania
     Public Property IloscProb As Integer = 3
     Public Property PrzerwaSekundy As Integer = 5
     Public Property LiczbaWatkow As Integer = 4
+    ''' <summary>Limit czasu oczekiwania na odpowiedź serwera [s].</summary>
+    Public Property LimitCzasuSekundy As Integer = 60
+    ''' <summary>WMTS: pozostawienie pobranych kafli w folderze sesji po pobraniu wszystkich segmentów.</summary>
+    Public Property ZachowajKafleWmts As Boolean
+    ''' <summary>WMTS: jakość JPEG segmentów składanych z kafli.</summary>
+    Public Property JakoscJpegWmts As Integer = 90
     Public Property PobierajPowyzejOstatniego As Boolean
     Public Property Georeferencja As New OpcjeGeoreferencji()
     Public Property TrekBuddy As Boolean
@@ -81,9 +87,25 @@ Public NotInheritable Class PobieranieSegmentow
 
     Private Shared Function UtworzKlienta() As HttpClient
         Dim obsluga As New HttpClientHandler() With {.AutomaticDecompression = DecompressionMethods.GZip Or DecompressionMethods.Deflate}
-        Dim k As New HttpClient(obsluga) With {.Timeout = TimeSpan.FromSeconds(60)}
+        'limit czasu ustawiany osobno dla każdego zapytania (LimitCzasu) - wartość z ustawień może się zmieniać
+        Dim k As New HttpClient(obsluga) With {.Timeout = Threading.Timeout.InfiniteTimeSpan}
         k.DefaultRequestHeaders.UserAgent.ParseAdd("MapoTero/" & My.Application.Info.Version.ToString())
         Return k
+    End Function
+
+    ''' <summary>
+    ''' Token przerwania zapytania: przerwanie przez użytkownika albo przekroczenie limitu czasu.
+    ''' Przekroczenie limitu rozpoznaje się po tym, że token użytkownika nie został przerwany.
+    ''' </summary>
+    Friend Shared Function LimitCzasu(sekundy As Integer, token As CancellationToken) As CancellationTokenSource
+        Dim cts = CancellationTokenSource.CreateLinkedTokenSource(token)
+        cts.CancelAfter(TimeSpan.FromSeconds(Math.Max(1, sekundy)))
+        Return cts
+    End Function
+
+    ''' <summary>Opis błędu przekroczenia limitu czasu.</summary>
+    Friend Shared Function OpisLimituCzasu(sekundy As Integer) As String
+        Return "przekroczono czas oczekiwania na odpowiedź serwera (" & sekundy & " s)"
     End Function
 
     ''' <summary>Opis segmentu siatki.</summary>
@@ -176,7 +198,7 @@ Public NotInheritable Class PobieranieSegmentow
                                     Dim blad As String = ""
                                     If Not File.Exists(plik) Then
                                         If kafleWmts Is Nothing Then
-                                            blad = Await PobierzSegmentAsync(segment.Adres, plik, token).ConfigureAwait(False)
+                                            blad = Await PobierzSegmentAsync(segment.Adres, plik, z.LimitCzasuSekundy, token).ConfigureAwait(False)
                                         Else
                                             blad = Await kafleWmts.PobierzSegmentAsync(segment.Zasieg, s.BokSegmentuPx, z.Format, plik, token).ConfigureAwait(False)
                                         End If
@@ -219,7 +241,7 @@ Public NotInheritable Class PobieranieSegmentow
         If brakujace.Count = 0 Then
             If File.Exists(plikBledow) Then File.Delete(plikBledow)
             'komplet segmentów - pobrane kafle WMTS nie są już potrzebne
-            If kafleWmts IsNot Nothing AndAlso Not wynik.Przerwano Then kafleWmts.UsunKafle()
+            If kafleWmts IsNot Nothing AndAlso Not wynik.Przerwano AndAlso Not z.ZachowajKafleWmts Then kafleWmts.UsunKafle()
         Else
             Dim tekst As New Text.StringBuilder()
             For Each sg In brakujace
@@ -247,9 +269,11 @@ Public NotInheritable Class PobieranieSegmentow
     ''' Pobiera jeden segment i zapisuje go w pliku. Zwraca pusty tekst, gdy się udało, albo opis błędu
     ''' (np. komunikat serwera WMS), gdy segmentu nie pobrano.
     ''' </summary>
-    Public Shared Async Function PobierzSegmentAsync(adres As String, plikDocelowy As String, token As CancellationToken) As Task(Of String)
+    Public Shared Async Function PobierzSegmentAsync(adres As String, plikDocelowy As String, limitCzasuSekundy As Integer,
+                                                     token As CancellationToken) As Task(Of String)
         Try
-            Using odpowiedz = Await Klient.GetAsync(adres, HttpCompletionOption.ResponseContentRead, token).ConfigureAwait(False)
+            Using limit = LimitCzasu(limitCzasuSekundy, token),
+                  odpowiedz = Await Klient.GetAsync(adres, HttpCompletionOption.ResponseContentRead, limit.Token).ConfigureAwait(False)
                 Dim dane() As Byte = Await odpowiedz.Content.ReadAsByteArrayAsync().ConfigureAwait(False)
                 Dim typ As String = If(odpowiedz.Content.Headers.ContentType?.MediaType, "")
 
@@ -271,8 +295,8 @@ Public NotInheritable Class PobieranieSegmentow
             End Using
         Catch ex As OperationCanceledException When token.IsCancellationRequested
             Throw
-        Catch ex As TaskCanceledException
-            Return "przekroczono czas oczekiwania na odpowiedź serwera (60 s)"
+        Catch ex As OperationCanceledException
+            Return OpisLimituCzasu(limitCzasuSekundy)
         Catch ex As Exception
             Dim opis As String = ex.Message
             If ex.InnerException IsNot Nothing Then opis &= " (" & ex.InnerException.Message & ")"

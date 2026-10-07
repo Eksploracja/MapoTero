@@ -31,7 +31,7 @@ Imports MapoTero.Core
 ''' wybrane przez użytkownika). Dzięki temu segmenty WMTS mają te same pliki georeferencji co segmenty WMS i działają
 ''' z nimi scalanie, eksport i paczki TrekBuddy. Pobrane kafle przechowywane są w folderze _kafle_wmts sesji
 ''' (wspólne kafle sąsiednich segmentów pobierane są raz, ponowienie po błędzie nie pobiera ich ponownie);
-''' folder jest usuwany po pobraniu wszystkich segmentów.
+''' folder jest usuwany po pobraniu wszystkich segmentów, chyba że w ustawieniach wybrano zachowywanie kafli.
 ''' </summary>
 Public Class ZrodloWmts
 
@@ -47,8 +47,13 @@ Public Class ZrodloWmts
     'kafle pobierane w tej chwili - sąsiednie segmenty, pobierane równolegle, czekają na ten sam kafel zamiast pobierać go ponownie
     Private ReadOnly _wTrakcie As New ConcurrentDictionary(Of String, Lazy(Of Task(Of Tuple(Of Byte(), String))))
 
-    Private Sub New(folderKafli As String)
+    Private ReadOnly _limitCzasu As Integer
+    Private ReadOnly _jakoscJpeg As Integer
+
+    Private Sub New(folderKafli As String, limitCzasuSekundy As Integer, jakoscJpeg As Integer)
         Me.FolderKafli = folderKafli
+        _limitCzasu = limitCzasuSekundy
+        _jakoscJpeg = jakoscJpeg
     End Sub
 
     ''' <summary>Odczyt dokumentu GetCapabilities i wybór poziomu kafli dla każdej warstwy.</summary>
@@ -57,13 +62,17 @@ Public Class ZrodloWmts
         Dim xml As String = ""
         For proba = 1 To Math.Max(1, z.IloscProb)
             Try
-                Using odpowiedz = Await PobieranieSegmentow.Klient.GetAsync(adres, token).ConfigureAwait(False)
+                Using limit = PobieranieSegmentow.LimitCzasu(z.LimitCzasuSekundy, token),
+                      odpowiedz = Await PobieranieSegmentow.Klient.GetAsync(adres, limit.Token).ConfigureAwait(False)
                     odpowiedz.EnsureSuccessStatusCode()
                     xml = Await odpowiedz.Content.ReadAsStringAsync().ConfigureAwait(False)
                 End Using
                 Exit For
             Catch ex As OperationCanceledException When token.IsCancellationRequested
                 Throw
+            Catch ex As OperationCanceledException When proba >= z.IloscProb
+                Throw New InvalidOperationException("nie udało się pobrać opisu usługi WMTS (" & adres & "): " &
+                                                    PobieranieSegmentow.OpisLimituCzasu(z.LimitCzasuSekundy), ex)
             Catch ex As Exception When proba < z.IloscProb
             Catch ex As Exception
                 Throw New InvalidOperationException("nie udało się pobrać opisu usługi WMTS (" & adres & "): " & ex.Message, ex)
@@ -77,7 +86,7 @@ Public Class ZrodloWmts
         Catch ex As Exception
             Throw New InvalidOperationException("niepoprawny opis usługi WMTS (" & adres & "): " & ex.Message, ex)
         End Try
-        Dim zrodlo As New ZrodloWmts(z.Folder & "_kafle_wmts\")
+        Dim zrodlo As New ZrodloWmts(z.Folder & "_kafle_wmts\", z.LimitCzasuSekundy, Math.Max(1, Math.Min(100, z.JakoscJpegWmts)))
         For Each w In z.Warstwy
             zrodlo.Plany.Add(New PlanWmts(usluga, w, z.Uklad, z.Siatka.ZasiegSiatki, z.Siatka.RozmiarPiksela, z.Format))
         Next
@@ -139,7 +148,7 @@ Public Class ZrodloWmts
             Next
             token.ThrowIfCancellationRequested()
 
-            Dim dane() As Byte = Await Task.Run(Function() Koduj(Renderuj(mozaiki, bok), format), token).ConfigureAwait(False)
+            Dim dane() As Byte = Await Task.Run(Function() Koduj(Renderuj(mozaiki, bok), format, _jakoscJpeg), token).ConfigureAwait(False)
             Dim tymczasowy As String = plikDocelowy & ".tmp"
             File.WriteAllBytes(tymczasowy, dane)
             If File.Exists(plikDocelowy) Then File.Delete(plikDocelowy)
@@ -269,7 +278,7 @@ Public Class ZrodloWmts
     Private Async Function PobierzKafelAsync(adres As String, token As CancellationToken) As Task(Of Tuple(Of Byte(), String))
         Dim plik As String = FolderKafli & NazwaKafla(adres)
         If File.Exists(plik) Then Return Tuple.Create(File.ReadAllBytes(plik), "")
-        Dim zadanie = _wTrakcie.GetOrAdd(adres, Function(a) New Lazy(Of Task(Of Tuple(Of Byte(), String)))(Function() PobierzKafelZSerweraAsync(a, plik, token)))
+        Dim zadanie = _wTrakcie.GetOrAdd(adres, Function(a) New Lazy(Of Task(Of Tuple(Of Byte(), String)))(Function() PobierzKafelZSerweraAsync(a, plik, _limitCzasu, token)))
         Try
             Return Await zadanie.Value.ConfigureAwait(False)
         Finally
@@ -279,9 +288,11 @@ Public Class ZrodloWmts
         End Try
     End Function
 
-    Private Shared Async Function PobierzKafelZSerweraAsync(adres As String, plik As String, token As CancellationToken) As Task(Of Tuple(Of Byte(), String))
+    Private Shared Async Function PobierzKafelZSerweraAsync(adres As String, plik As String, limitCzasuSekundy As Integer,
+                                                           token As CancellationToken) As Task(Of Tuple(Of Byte(), String))
         Try
-            Using odpowiedz = Await PobieranieSegmentow.Klient.GetAsync(adres, HttpCompletionOption.ResponseContentRead, token).ConfigureAwait(False)
+            Using limit = PobieranieSegmentow.LimitCzasu(limitCzasuSekundy, token),
+                  odpowiedz = Await PobieranieSegmentow.Klient.GetAsync(adres, HttpCompletionOption.ResponseContentRead, limit.Token).ConfigureAwait(False)
                 Dim dane() As Byte = Await odpowiedz.Content.ReadAsByteArrayAsync().ConfigureAwait(False)
                 If odpowiedz.StatusCode = HttpStatusCode.NotFound OrElse odpowiedz.StatusCode = HttpStatusCode.NoContent Then
                     dane = New Byte() {}
@@ -303,8 +314,8 @@ Public Class ZrodloWmts
             End Using
         Catch ex As OperationCanceledException When token.IsCancellationRequested
             Throw
-        Catch ex As TaskCanceledException
-            Return Tuple.Create(CType(Nothing, Byte()), "przekroczono czas oczekiwania na odpowiedź serwera (60 s)")
+        Catch ex As OperationCanceledException
+            Return Tuple.Create(CType(Nothing, Byte()), PobieranieSegmentow.OpisLimituCzasu(limitCzasuSekundy))
         Catch ex As Exception
             Dim opis As String = ex.Message
             If ex.InnerException IsNot Nothing Then opis &= " (" & ex.InnerException.Message & ")"
@@ -394,7 +405,7 @@ Public Class ZrodloWmts
     End Sub
 
     ''' <summary>Zapis segmentu w formacie wybranym w ustawieniach (JPEG na białym tle, PNG z przezroczystością).</summary>
-    Private Shared Function Koduj(bmp As Bitmap, format As String) As Byte()
+    Private Shared Function Koduj(bmp As Bitmap, format As String, jakoscJpeg As Integer) As Byte()
         Using bmp
             Select Case Wms.RozszerzeniePliku(format)
                 Case "png"
@@ -405,7 +416,7 @@ Public Class ZrodloWmts
                         Return ms.ToArray()
                     End Using
                 Case Else
-                    Return EksportMapy.Koduj(bmp, False, 90)
+                    Return EksportMapy.Koduj(bmp, False, jakoscJpeg)
             End Select
         End Using
     End Function
