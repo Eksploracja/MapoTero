@@ -27,13 +27,13 @@ Partial Class Nakladanie_Map
         Me.ButtonPolaczone = New System.Windows.Forms.Button()
         Me.ButtonGorna = New System.Windows.Forms.Button()
         Me.ButtonDolna = New System.Windows.Forms.Button()
-        Me.TextBox5 = New System.Windows.Forms.TextBox()
-        Me.TextBox4 = New System.Windows.Forms.TextBox()
-        Me.TextBox3 = New System.Windows.Forms.TextBox()
-        Me.Button1 = New System.Windows.Forms.Button()
-        Me.FolderBrowserDialog1 = New System.Windows.Forms.FolderBrowserDialog()
+        Me.txtFolderWynik = New System.Windows.Forms.TextBox()
+        Me.txtFolderGorna = New System.Windows.Forms.TextBox()
+        Me.txtFolderDolna = New System.Windows.Forms.TextBox()
+        Me.btnSkladaj = New System.Windows.Forms.Button()
+        Me.dlgFolder = New System.Windows.Forms.FolderBrowserDialog()
         Me.Panel1 = New System.Windows.Forms.Panel()
-        Me.RichTextBox1 = New System.Windows.Forms.RichTextBox()
+        Me.txtOpis = New System.Windows.Forms.RichTextBox()
         Me.PictureBox1 = New System.Windows.Forms.PictureBox()
         Me.PictureBox2 = New System.Windows.Forms.PictureBox()
         Me.PictureBox3 = New System.Windows.Forms.PictureBox()
@@ -53,9 +53,9 @@ Partial Class Nakladanie_Map
         Me.GroupBoxWarstwy.Controls.Add(Me.ButtonPolaczone)
         Me.GroupBoxWarstwy.Controls.Add(Me.ButtonGorna)
         Me.GroupBoxWarstwy.Controls.Add(Me.ButtonDolna)
-        Me.GroupBoxWarstwy.Controls.Add(Me.TextBox5)
-        Me.GroupBoxWarstwy.Controls.Add(Me.TextBox4)
-        Me.GroupBoxWarstwy.Controls.Add(Me.TextBox3)
+        Me.GroupBoxWarstwy.Controls.Add(Me.txtFolderWynik)
+        Me.GroupBoxWarstwy.Controls.Add(Me.txtFolderGorna)
+        Me.GroupBoxWarstwy.Controls.Add(Me.txtFolderDolna)
         Me.GroupBoxWarstwy.Location = New System.Drawing.Point(8, 330)
         Me.GroupBoxWarstwy.Name = "GroupBoxWarstwy"
         Me.GroupBoxWarstwy.Size = New System.Drawing.Size(623, 107)
@@ -91,36 +91,36 @@ Partial Class Nakladanie_Map
         Me.ButtonDolna.Text = "dolna (podkładowa)"
         Me.ButtonDolna.UseVisualStyleBackColor = true
         '
-        'TextBox5
+        'txtFolderWynik
         '
-        Me.TextBox5.Location = New System.Drawing.Point(146, 74)
-        Me.TextBox5.Name = "TextBox5"
-        Me.TextBox5.Size = New System.Drawing.Size(471, 20)
-        Me.TextBox5.TabIndex = 6
+        Me.txtFolderWynik.Location = New System.Drawing.Point(146, 74)
+        Me.txtFolderWynik.Name = "txtFolderWynik"
+        Me.txtFolderWynik.Size = New System.Drawing.Size(471, 20)
+        Me.txtFolderWynik.TabIndex = 6
         '
-        'TextBox4
+        'txtFolderGorna
         '
-        Me.TextBox4.Location = New System.Drawing.Point(146, 51)
-        Me.TextBox4.Name = "TextBox4"
-        Me.TextBox4.Size = New System.Drawing.Size(471, 20)
-        Me.TextBox4.TabIndex = 5
+        Me.txtFolderGorna.Location = New System.Drawing.Point(146, 51)
+        Me.txtFolderGorna.Name = "txtFolderGorna"
+        Me.txtFolderGorna.Size = New System.Drawing.Size(471, 20)
+        Me.txtFolderGorna.TabIndex = 5
         '
-        'TextBox3
+        'txtFolderDolna
         '
-        Me.TextBox3.Location = New System.Drawing.Point(146, 28)
-        Me.TextBox3.Name = "TextBox3"
-        Me.TextBox3.Size = New System.Drawing.Size(471, 20)
-        Me.TextBox3.TabIndex = 4
+        Me.txtFolderDolna.Location = New System.Drawing.Point(146, 28)
+        Me.txtFolderDolna.Name = "txtFolderDolna"
+        Me.txtFolderDolna.Size = New System.Drawing.Size(471, 20)
+        Me.txtFolderDolna.TabIndex = 4
         '
-        'Button1
+        'btnSkladaj
         '
-        Me.Button1.Font = New System.Drawing.Font("Microsoft Sans Serif", 12!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238,Byte))
-        Me.Button1.Location = New System.Drawing.Point(252, 448)
-        Me.Button1.Name = "Button1"
-        Me.Button1.Size = New System.Drawing.Size(145, 43)
-        Me.Button1.TabIndex = 10
-        Me.Button1.Text = "Składaj warstwy"
-        Me.Button1.UseVisualStyleBackColor = true
+        Me.btnSkladaj.Font = New System.Drawing.Font("Microsoft Sans Serif", 12!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238,Byte))
+        Me.btnSkladaj.Location = New System.Drawing.Point(252, 448)
+        Me.btnSkladaj.Name = "btnSkladaj"
+        Me.btnSkladaj.Size = New System.Drawing.Size(145, 43)
+        Me.btnSkladaj.TabIndex = 10
+        Me.btnSkladaj.Text = "Składaj warstwy"
+        Me.btnSkladaj.UseVisualStyleBackColor = true
         '
         'Panel1
         '
@@ -129,14 +129,14 @@ Partial Class Nakladanie_Map
         Me.Panel1.Size = New System.Drawing.Size(32, 34)
         Me.Panel1.TabIndex = 12
         '
-        'RichTextBox1
+        'txtOpis
         '
-        Me.RichTextBox1.Location = New System.Drawing.Point(0, 0)
-        Me.RichTextBox1.Name = "RichTextBox1"
-        Me.RichTextBox1.ReadOnly = true
-        Me.RichTextBox1.Size = New System.Drawing.Size(631, 311)
-        Me.RichTextBox1.TabIndex = 13
-        Me.RichTextBox1.Text = resources.GetString("RichTextBox1.Text")
+        Me.txtOpis.Location = New System.Drawing.Point(0, 0)
+        Me.txtOpis.Name = "txtOpis"
+        Me.txtOpis.ReadOnly = true
+        Me.txtOpis.Size = New System.Drawing.Size(631, 311)
+        Me.txtOpis.TabIndex = 13
+        Me.txtOpis.Text = resources.GetString("txtOpis.Text")
         '
         'PictureBox1
         '
@@ -233,9 +233,9 @@ Partial Class Nakladanie_Map
         Me.Controls.Add(Me.PictureBox3)
         Me.Controls.Add(Me.PictureBox2)
         Me.Controls.Add(Me.PictureBox1)
-        Me.Controls.Add(Me.RichTextBox1)
+        Me.Controls.Add(Me.txtOpis)
         Me.Controls.Add(Me.Panel1)
-        Me.Controls.Add(Me.Button1)
+        Me.Controls.Add(Me.btnSkladaj)
         Me.Controls.Add(Me.GroupBoxWarstwy)
         Me.Icon = CType(resources.GetObject("$this.Icon"),System.Drawing.Icon)
         Me.Name = "Nakladanie_Map"
@@ -253,13 +253,13 @@ End Sub
     Friend WithEvents ButtonPolaczone As System.Windows.Forms.Button
     Friend WithEvents ButtonGorna As System.Windows.Forms.Button
     Friend WithEvents ButtonDolna As System.Windows.Forms.Button
-    Friend WithEvents TextBox5 As System.Windows.Forms.TextBox
-    Friend WithEvents TextBox4 As System.Windows.Forms.TextBox
-    Friend WithEvents TextBox3 As System.Windows.Forms.TextBox
-    Friend WithEvents Button1 As System.Windows.Forms.Button
-    Friend WithEvents FolderBrowserDialog1 As System.Windows.Forms.FolderBrowserDialog
+    Friend WithEvents txtFolderWynik As System.Windows.Forms.TextBox
+    Friend WithEvents txtFolderGorna As System.Windows.Forms.TextBox
+    Friend WithEvents txtFolderDolna As System.Windows.Forms.TextBox
+    Friend WithEvents btnSkladaj As System.Windows.Forms.Button
+    Friend WithEvents dlgFolder As System.Windows.Forms.FolderBrowserDialog
     Friend WithEvents Panel1 As System.Windows.Forms.Panel
-    Friend WithEvents RichTextBox1 As System.Windows.Forms.RichTextBox
+    Friend WithEvents txtOpis As System.Windows.Forms.RichTextBox
     Friend WithEvents PictureBox1 As System.Windows.Forms.PictureBox
     Friend WithEvents PictureBox2 As System.Windows.Forms.PictureBox
     Friend WithEvents PictureBox3 As System.Windows.Forms.PictureBox

@@ -23,138 +23,138 @@ Partial Class Form3
     <System.Diagnostics.DebuggerStepThrough()> _
     Private Sub InitializeComponent()
         Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(Form3))
-        Me.TextBox1 = New System.Windows.Forms.TextBox()
-        Me.Button2 = New System.Windows.Forms.Button()
-        Me.FolderBrowserDialog1 = New System.Windows.Forms.FolderBrowserDialog()
-        Me.Button4 = New System.Windows.Forms.Button()
-        Me.GroupBox1 = New System.Windows.Forms.GroupBox()
-        Me.ComboBox2 = New System.Windows.Forms.ComboBox()
-        Me.ComboBox1 = New System.Windows.Forms.ComboBox()
+        Me.txtFolder = New System.Windows.Forms.TextBox()
+        Me.btnZmienFolder = New System.Windows.Forms.Button()
+        Me.dlgFolder = New System.Windows.Forms.FolderBrowserDialog()
+        Me.btnScal = New System.Windows.Forms.Button()
+        Me.grpParametry = New System.Windows.Forms.GroupBox()
+        Me.cmbNumeracja = New System.Windows.Forms.ComboBox()
+        Me.cmbFormat = New System.Windows.Forms.ComboBox()
         Me.Label17 = New System.Windows.Forms.Label()
         Me.Label16 = New System.Windows.Forms.Label()
         Me.Label15 = New System.Windows.Forms.Label()
         Me.Label13 = New System.Windows.Forms.Label()
         Me.Label12 = New System.Windows.Forms.Label()
-        Me.TextBox11 = New System.Windows.Forms.TextBox()
+        Me.txtPrefiks = New System.Windows.Forms.TextBox()
         Me.Label11 = New System.Windows.Forms.Label()
         Me.Label10 = New System.Windows.Forms.Label()
-        Me.TextBox9 = New System.Windows.Forms.TextBox()
+        Me.txtLiczbaWierszy = New System.Windows.Forms.TextBox()
         Me.Label9 = New System.Windows.Forms.Label()
-        Me.TextBox8 = New System.Windows.Forms.TextBox()
+        Me.txtLiczbaKolumn = New System.Windows.Forms.TextBox()
         Me.Label8 = New System.Windows.Forms.Label()
-        Me.TextBox7 = New System.Windows.Forms.TextBox()
+        Me.txtRozmiarPiksela = New System.Windows.Forms.TextBox()
         Me.Label7 = New System.Windows.Forms.Label()
-        Me.TextBox6 = New System.Windows.Forms.TextBox()
+        Me.txtBokSegmentu = New System.Windows.Forms.TextBox()
         Me.Label4 = New System.Windows.Forms.Label()
         Me.Label5 = New System.Windows.Forms.Label()
         Me.Label6 = New System.Windows.Forms.Label()
-        Me.TextBox4 = New System.Windows.Forms.TextBox()
-        Me.TextBox5 = New System.Windows.Forms.TextBox()
+        Me.txtXDol = New System.Windows.Forms.TextBox()
+        Me.txtYLewy = New System.Windows.Forms.TextBox()
         Me.Label3 = New System.Windows.Forms.Label()
         Me.Label2 = New System.Windows.Forms.Label()
         Me.Label1 = New System.Windows.Forms.Label()
-        Me.TextBox3 = New System.Windows.Forms.TextBox()
-        Me.TextBox2 = New System.Windows.Forms.TextBox()
-        Me.CheckBox1 = New System.Windows.Forms.CheckBox()
+        Me.txtYPrawy = New System.Windows.Forms.TextBox()
+        Me.txtXGora = New System.Windows.Forms.TextBox()
+        Me.chkRecznie = New System.Windows.Forms.CheckBox()
         Me.Label21 = New System.Windows.Forms.Label()
-        Me.RichTextBox1 = New System.Windows.Forms.RichTextBox()
+        Me.txtKomunikaty = New System.Windows.Forms.RichTextBox()
         Me.Label22 = New System.Windows.Forms.Label()
         Me.groupBox2 = New System.Windows.Forms.GroupBox()
-        Me.Label20 = New System.Windows.Forms.Label()
+        Me.lblJakosc = New System.Windows.Forms.Label()
         Me.Label19 = New System.Windows.Forms.Label()
         Me.Label18 = New System.Windows.Forms.Label()
         Me.Label14 = New System.Windows.Forms.Label()
-        Me.TrackBar1 = New System.Windows.Forms.TrackBar()
-        Me.GroupBox3 = New System.Windows.Forms.GroupBox()
-        Me.CheckBox5 = New System.Windows.Forms.CheckBox()
-        Me.CheckBox4 = New System.Windows.Forms.CheckBox()
-        Me.CheckBox3 = New System.Windows.Forms.CheckBox()
-        Me.CheckBox2 = New System.Windows.Forms.CheckBox()
-        Me.GroupBox1.SuspendLayout()
+        Me.trkJakosc = New System.Windows.Forms.TrackBar()
+        Me.grpPlikiReferencyjne = New System.Windows.Forms.GroupBox()
+        Me.chkTab = New System.Windows.Forms.CheckBox()
+        Me.chkMap = New System.Windows.Forms.CheckBox()
+        Me.chkKml = New System.Windows.Forms.CheckBox()
+        Me.chkWorldFile = New System.Windows.Forms.CheckBox()
+        Me.grpParametry.SuspendLayout()
         Me.groupBox2.SuspendLayout()
-        CType(Me.TrackBar1, System.ComponentModel.ISupportInitialize).BeginInit()
-        Me.GroupBox3.SuspendLayout()
+        CType(Me.trkJakosc, System.ComponentModel.ISupportInitialize).BeginInit()
+        Me.grpPlikiReferencyjne.SuspendLayout()
         Me.SuspendLayout()
         '
-        'TextBox1
+        'txtFolder
         '
-        Me.TextBox1.Location = New System.Drawing.Point(90, 46)
-        Me.TextBox1.Name = "TextBox1"
-        Me.TextBox1.Size = New System.Drawing.Size(521, 20)
-        Me.TextBox1.TabIndex = 1
+        Me.txtFolder.Location = New System.Drawing.Point(90, 46)
+        Me.txtFolder.Name = "txtFolder"
+        Me.txtFolder.Size = New System.Drawing.Size(521, 20)
+        Me.txtFolder.TabIndex = 1
         '
-        'Button2
+        'btnZmienFolder
         '
-        Me.Button2.Location = New System.Drawing.Point(12, 46)
-        Me.Button2.Name = "Button2"
-        Me.Button2.Size = New System.Drawing.Size(79, 20)
-        Me.Button2.TabIndex = 2
-        Me.Button2.Text = "zmień folder"
-        Me.Button2.UseVisualStyleBackColor = True
+        Me.btnZmienFolder.Location = New System.Drawing.Point(12, 46)
+        Me.btnZmienFolder.Name = "btnZmienFolder"
+        Me.btnZmienFolder.Size = New System.Drawing.Size(79, 20)
+        Me.btnZmienFolder.TabIndex = 2
+        Me.btnZmienFolder.Text = "zmień folder"
+        Me.btnZmienFolder.UseVisualStyleBackColor = True
         '
-        'Button4
+        'btnScal
         '
-        Me.Button4.Font = New System.Drawing.Font("Microsoft Sans Serif", 12.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
-        Me.Button4.Location = New System.Drawing.Point(494, 426)
-        Me.Button4.Name = "Button4"
-        Me.Button4.Size = New System.Drawing.Size(117, 54)
-        Me.Button4.TabIndex = 26
-        Me.Button4.Text = "Złącz segmenty"
-        Me.Button4.UseVisualStyleBackColor = True
+        Me.btnScal.Font = New System.Drawing.Font("Microsoft Sans Serif", 12.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
+        Me.btnScal.Location = New System.Drawing.Point(494, 426)
+        Me.btnScal.Name = "btnScal"
+        Me.btnScal.Size = New System.Drawing.Size(117, 54)
+        Me.btnScal.TabIndex = 26
+        Me.btnScal.Text = "Złącz segmenty"
+        Me.btnScal.UseVisualStyleBackColor = True
         '
-        'GroupBox1
+        'grpParametry
         '
-        Me.GroupBox1.Controls.Add(Me.ComboBox2)
-        Me.GroupBox1.Controls.Add(Me.ComboBox1)
-        Me.GroupBox1.Controls.Add(Me.Label17)
-        Me.GroupBox1.Controls.Add(Me.Label16)
-        Me.GroupBox1.Controls.Add(Me.Label15)
-        Me.GroupBox1.Controls.Add(Me.Label13)
-        Me.GroupBox1.Controls.Add(Me.Label12)
-        Me.GroupBox1.Controls.Add(Me.TextBox11)
-        Me.GroupBox1.Controls.Add(Me.Label11)
-        Me.GroupBox1.Controls.Add(Me.Label10)
-        Me.GroupBox1.Controls.Add(Me.TextBox9)
-        Me.GroupBox1.Controls.Add(Me.Label9)
-        Me.GroupBox1.Controls.Add(Me.TextBox8)
-        Me.GroupBox1.Controls.Add(Me.Label8)
-        Me.GroupBox1.Controls.Add(Me.TextBox7)
-        Me.GroupBox1.Controls.Add(Me.Label7)
-        Me.GroupBox1.Controls.Add(Me.TextBox6)
-        Me.GroupBox1.Controls.Add(Me.Label4)
-        Me.GroupBox1.Controls.Add(Me.Label5)
-        Me.GroupBox1.Controls.Add(Me.Label6)
-        Me.GroupBox1.Controls.Add(Me.TextBox4)
-        Me.GroupBox1.Controls.Add(Me.TextBox5)
-        Me.GroupBox1.Controls.Add(Me.Label3)
-        Me.GroupBox1.Controls.Add(Me.Label2)
-        Me.GroupBox1.Controls.Add(Me.Label1)
-        Me.GroupBox1.Controls.Add(Me.TextBox3)
-        Me.GroupBox1.Controls.Add(Me.TextBox2)
-        Me.GroupBox1.Location = New System.Drawing.Point(12, 101)
-        Me.GroupBox1.Name = "GroupBox1"
-        Me.GroupBox1.Size = New System.Drawing.Size(281, 352)
-        Me.GroupBox1.TabIndex = 35
-        Me.GroupBox1.TabStop = False
-        Me.GroupBox1.Text = "Właściwości zbioru segmentów z pliku conf.txt"
+        Me.grpParametry.Controls.Add(Me.cmbNumeracja)
+        Me.grpParametry.Controls.Add(Me.cmbFormat)
+        Me.grpParametry.Controls.Add(Me.Label17)
+        Me.grpParametry.Controls.Add(Me.Label16)
+        Me.grpParametry.Controls.Add(Me.Label15)
+        Me.grpParametry.Controls.Add(Me.Label13)
+        Me.grpParametry.Controls.Add(Me.Label12)
+        Me.grpParametry.Controls.Add(Me.txtPrefiks)
+        Me.grpParametry.Controls.Add(Me.Label11)
+        Me.grpParametry.Controls.Add(Me.Label10)
+        Me.grpParametry.Controls.Add(Me.txtLiczbaWierszy)
+        Me.grpParametry.Controls.Add(Me.Label9)
+        Me.grpParametry.Controls.Add(Me.txtLiczbaKolumn)
+        Me.grpParametry.Controls.Add(Me.Label8)
+        Me.grpParametry.Controls.Add(Me.txtRozmiarPiksela)
+        Me.grpParametry.Controls.Add(Me.Label7)
+        Me.grpParametry.Controls.Add(Me.txtBokSegmentu)
+        Me.grpParametry.Controls.Add(Me.Label4)
+        Me.grpParametry.Controls.Add(Me.Label5)
+        Me.grpParametry.Controls.Add(Me.Label6)
+        Me.grpParametry.Controls.Add(Me.txtXDol)
+        Me.grpParametry.Controls.Add(Me.txtYLewy)
+        Me.grpParametry.Controls.Add(Me.Label3)
+        Me.grpParametry.Controls.Add(Me.Label2)
+        Me.grpParametry.Controls.Add(Me.Label1)
+        Me.grpParametry.Controls.Add(Me.txtYPrawy)
+        Me.grpParametry.Controls.Add(Me.txtXGora)
+        Me.grpParametry.Location = New System.Drawing.Point(12, 101)
+        Me.grpParametry.Name = "grpParametry"
+        Me.grpParametry.Size = New System.Drawing.Size(281, 352)
+        Me.grpParametry.TabIndex = 35
+        Me.grpParametry.TabStop = False
+        Me.grpParametry.Text = "Właściwości zbioru segmentów z pliku conf.txt"
         '
-        'ComboBox2
+        'cmbNumeracja
         '
-        Me.ComboBox2.FormattingEnabled = True
-        Me.ComboBox2.Items.AddRange(New Object() {"01_02_03", "1_2_3", "NrWiersza_NrKolumny"})
-        Me.ComboBox2.Location = New System.Drawing.Point(24, 302)
-        Me.ComboBox2.Name = "ComboBox2"
-        Me.ComboBox2.Size = New System.Drawing.Size(88, 21)
-        Me.ComboBox2.TabIndex = 63
+        Me.cmbNumeracja.FormattingEnabled = True
+        Me.cmbNumeracja.Items.AddRange(New Object() {"01_02_03", "1_2_3", "NrWiersza_NrKolumny"})
+        Me.cmbNumeracja.Location = New System.Drawing.Point(24, 302)
+        Me.cmbNumeracja.Name = "cmbNumeracja"
+        Me.cmbNumeracja.Size = New System.Drawing.Size(88, 21)
+        Me.cmbNumeracja.TabIndex = 63
         '
-        'ComboBox1
+        'cmbFormat
         '
-        Me.ComboBox1.FormattingEnabled = True
-        Me.ComboBox1.Items.AddRange(New Object() {"jpeg", "gif", "png", "png24", "png32", "png8", "svg+xml", "tiff"})
-        Me.ComboBox1.Location = New System.Drawing.Point(24, 262)
-        Me.ComboBox1.Name = "ComboBox1"
-        Me.ComboBox1.Size = New System.Drawing.Size(88, 21)
-        Me.ComboBox1.TabIndex = 62
+        Me.cmbFormat.FormattingEnabled = True
+        Me.cmbFormat.Items.AddRange(New Object() {"jpeg", "gif", "png", "png24", "png32", "png8", "svg+xml", "tiff"})
+        Me.cmbFormat.Location = New System.Drawing.Point(24, 262)
+        Me.cmbFormat.Name = "cmbFormat"
+        Me.cmbFormat.Size = New System.Drawing.Size(88, 21)
+        Me.cmbFormat.TabIndex = 62
         '
         'Label17
         '
@@ -201,12 +201,12 @@ Partial Class Form3
         Me.Label12.TabIndex = 56
         Me.Label12.Text = "przedrostek"
         '
-        'TextBox11
+        'txtPrefiks
         '
-        Me.TextBox11.Location = New System.Drawing.Point(136, 263)
-        Me.TextBox11.Name = "TextBox11"
-        Me.TextBox11.Size = New System.Drawing.Size(88, 20)
-        Me.TextBox11.TabIndex = 55
+        Me.txtPrefiks.Location = New System.Drawing.Point(136, 263)
+        Me.txtPrefiks.Name = "txtPrefiks"
+        Me.txtPrefiks.Size = New System.Drawing.Size(88, 20)
+        Me.txtPrefiks.TabIndex = 55
         '
         'Label11
         '
@@ -226,12 +226,12 @@ Partial Class Form3
         Me.Label10.TabIndex = 52
         Me.Label10.Text = "pionowo"
         '
-        'TextBox9
+        'txtLiczbaWierszy
         '
-        Me.TextBox9.Location = New System.Drawing.Point(136, 136)
-        Me.TextBox9.Name = "TextBox9"
-        Me.TextBox9.Size = New System.Drawing.Size(88, 20)
-        Me.TextBox9.TabIndex = 51
+        Me.txtLiczbaWierszy.Location = New System.Drawing.Point(136, 136)
+        Me.txtLiczbaWierszy.Name = "txtLiczbaWierszy"
+        Me.txtLiczbaWierszy.Size = New System.Drawing.Size(88, 20)
+        Me.txtLiczbaWierszy.TabIndex = 51
         '
         'Label9
         '
@@ -242,12 +242,12 @@ Partial Class Form3
         Me.Label9.TabIndex = 50
         Me.Label9.Text = "Liczba segmentów"
         '
-        'TextBox8
+        'txtLiczbaKolumn
         '
-        Me.TextBox8.Location = New System.Drawing.Point(24, 136)
-        Me.TextBox8.Name = "TextBox8"
-        Me.TextBox8.Size = New System.Drawing.Size(88, 20)
-        Me.TextBox8.TabIndex = 49
+        Me.txtLiczbaKolumn.Location = New System.Drawing.Point(24, 136)
+        Me.txtLiczbaKolumn.Name = "txtLiczbaKolumn"
+        Me.txtLiczbaKolumn.Size = New System.Drawing.Size(88, 20)
+        Me.txtLiczbaKolumn.TabIndex = 49
         '
         'Label8
         '
@@ -258,12 +258,12 @@ Partial Class Form3
         Me.Label8.TabIndex = 48
         Me.Label8.Text = "pixel"
         '
-        'TextBox7
+        'txtRozmiarPiksela
         '
-        Me.TextBox7.Location = New System.Drawing.Point(136, 195)
-        Me.TextBox7.Name = "TextBox7"
-        Me.TextBox7.Size = New System.Drawing.Size(88, 20)
-        Me.TextBox7.TabIndex = 47
+        Me.txtRozmiarPiksela.Location = New System.Drawing.Point(136, 195)
+        Me.txtRozmiarPiksela.Name = "txtRozmiarPiksela"
+        Me.txtRozmiarPiksela.Size = New System.Drawing.Size(88, 20)
+        Me.txtRozmiarPiksela.TabIndex = 47
         '
         'Label7
         '
@@ -274,12 +274,12 @@ Partial Class Form3
         Me.Label7.TabIndex = 46
         Me.Label7.Text = "dł boku"
         '
-        'TextBox6
+        'txtBokSegmentu
         '
-        Me.TextBox6.Location = New System.Drawing.Point(24, 195)
-        Me.TextBox6.Name = "TextBox6"
-        Me.TextBox6.Size = New System.Drawing.Size(88, 20)
-        Me.TextBox6.TabIndex = 45
+        Me.txtBokSegmentu.Location = New System.Drawing.Point(24, 195)
+        Me.txtBokSegmentu.Name = "txtBokSegmentu"
+        Me.txtBokSegmentu.Size = New System.Drawing.Size(88, 20)
+        Me.txtBokSegmentu.TabIndex = 45
         '
         'Label4
         '
@@ -308,19 +308,19 @@ Partial Class Form3
         Me.Label6.TabIndex = 42
         Me.Label6.Text = "prawy gorny narożnik"
         '
-        'TextBox4
+        'txtXDol
         '
-        Me.TextBox4.Location = New System.Drawing.Point(24, 90)
-        Me.TextBox4.Name = "TextBox4"
-        Me.TextBox4.Size = New System.Drawing.Size(88, 20)
-        Me.TextBox4.TabIndex = 41
+        Me.txtXDol.Location = New System.Drawing.Point(24, 90)
+        Me.txtXDol.Name = "txtXDol"
+        Me.txtXDol.Size = New System.Drawing.Size(88, 20)
+        Me.txtXDol.TabIndex = 41
         '
-        'TextBox5
+        'txtYLewy
         '
-        Me.TextBox5.Location = New System.Drawing.Point(136, 90)
-        Me.TextBox5.Name = "TextBox5"
-        Me.TextBox5.Size = New System.Drawing.Size(88, 20)
-        Me.TextBox5.TabIndex = 40
+        Me.txtYLewy.Location = New System.Drawing.Point(136, 90)
+        Me.txtYLewy.Name = "txtYLewy"
+        Me.txtYLewy.Size = New System.Drawing.Size(88, 20)
+        Me.txtYLewy.TabIndex = 40
         '
         'Label3
         '
@@ -349,29 +349,29 @@ Partial Class Form3
         Me.Label1.TabIndex = 37
         Me.Label1.Text = "Lewy dolny narożnik"
         '
-        'TextBox3
+        'txtYPrawy
         '
-        Me.TextBox3.Location = New System.Drawing.Point(136, 39)
-        Me.TextBox3.Name = "TextBox3"
-        Me.TextBox3.Size = New System.Drawing.Size(88, 20)
-        Me.TextBox3.TabIndex = 36
+        Me.txtYPrawy.Location = New System.Drawing.Point(136, 39)
+        Me.txtYPrawy.Name = "txtYPrawy"
+        Me.txtYPrawy.Size = New System.Drawing.Size(88, 20)
+        Me.txtYPrawy.TabIndex = 36
         '
-        'TextBox2
+        'txtXGora
         '
-        Me.TextBox2.Location = New System.Drawing.Point(24, 39)
-        Me.TextBox2.Name = "TextBox2"
-        Me.TextBox2.Size = New System.Drawing.Size(88, 20)
-        Me.TextBox2.TabIndex = 35
+        Me.txtXGora.Location = New System.Drawing.Point(24, 39)
+        Me.txtXGora.Name = "txtXGora"
+        Me.txtXGora.Size = New System.Drawing.Size(88, 20)
+        Me.txtXGora.TabIndex = 35
         '
-        'CheckBox1
+        'chkRecznie
         '
-        Me.CheckBox1.AutoSize = True
-        Me.CheckBox1.Location = New System.Drawing.Point(12, 459)
-        Me.CheckBox1.Name = "CheckBox1"
-        Me.CheckBox1.Size = New System.Drawing.Size(291, 17)
-        Me.CheckBox1.TabIndex = 63
-        Me.CheckBox1.Text = "ręczne wprowadzanie parametrów w razie braku conf.txt"
-        Me.CheckBox1.UseVisualStyleBackColor = True
+        Me.chkRecznie.AutoSize = True
+        Me.chkRecznie.Location = New System.Drawing.Point(12, 459)
+        Me.chkRecznie.Name = "chkRecznie"
+        Me.chkRecznie.Size = New System.Drawing.Size(291, 17)
+        Me.chkRecznie.TabIndex = 63
+        Me.chkRecznie.Text = "ręczne wprowadzanie parametrów w razie braku conf.txt"
+        Me.chkRecznie.UseVisualStyleBackColor = True
         '
         'Label21
         '
@@ -382,14 +382,14 @@ Partial Class Form3
         Me.Label21.TabIndex = 69
         Me.Label21.Text = "Lokalizacja katalogu z segmentami i plikiem conf.txt"
         '
-        'RichTextBox1
+        'txtKomunikaty
         '
-        Me.RichTextBox1.BackColor = System.Drawing.SystemColors.ButtonFace
-        Me.RichTextBox1.Location = New System.Drawing.Point(344, 319)
-        Me.RichTextBox1.Name = "RichTextBox1"
-        Me.RichTextBox1.Size = New System.Drawing.Size(267, 96)
-        Me.RichTextBox1.TabIndex = 70
-        Me.RichTextBox1.Text = ""
+        Me.txtKomunikaty.BackColor = System.Drawing.SystemColors.ButtonFace
+        Me.txtKomunikaty.Location = New System.Drawing.Point(344, 319)
+        Me.txtKomunikaty.Name = "txtKomunikaty"
+        Me.txtKomunikaty.Size = New System.Drawing.Size(267, 96)
+        Me.txtKomunikaty.TabIndex = 70
+        Me.txtKomunikaty.Text = ""
         '
         'Label22
         '
@@ -402,26 +402,26 @@ Partial Class Form3
         '
         'groupBox2
         '
-        Me.groupBox2.Controls.Add(Me.Label20)
+        Me.groupBox2.Controls.Add(Me.lblJakosc)
         Me.groupBox2.Controls.Add(Me.Label19)
         Me.groupBox2.Controls.Add(Me.Label18)
         Me.groupBox2.Controls.Add(Me.Label14)
-        Me.groupBox2.Controls.Add(Me.TrackBar1)
+        Me.groupBox2.Controls.Add(Me.trkJakosc)
         Me.groupBox2.Location = New System.Drawing.Point(344, 204)
         Me.groupBox2.Name = "groupBox2"
         Me.groupBox2.Size = New System.Drawing.Size(267, 84)
         Me.groupBox2.TabIndex = 72
         Me.groupBox2.TabStop = False
         '
-        'Label20
+        'lblJakosc
         '
-        Me.Label20.AutoSize = True
-        Me.Label20.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
-        Me.Label20.Location = New System.Drawing.Point(207, 14)
-        Me.Label20.Name = "Label20"
-        Me.Label20.Size = New System.Drawing.Size(30, 13)
-        Me.Label20.TabIndex = 73
-        Me.Label20.Text = "75%"
+        Me.lblJakosc.AutoSize = True
+        Me.lblJakosc.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
+        Me.lblJakosc.Location = New System.Drawing.Point(207, 14)
+        Me.lblJakosc.Name = "lblJakosc"
+        Me.lblJakosc.Size = New System.Drawing.Size(30, 13)
+        Me.lblJakosc.TabIndex = 73
+        Me.lblJakosc.Text = "75%"
         '
         'Label19
         '
@@ -450,144 +450,144 @@ Partial Class Form3
         Me.Label14.TabIndex = 70
         Me.Label14.Text = "Jakość kompresji JPG scalonego pliku:"
         '
-        'TrackBar1
+        'trkJakosc
         '
-        Me.TrackBar1.Location = New System.Drawing.Point(6, 38)
-        Me.TrackBar1.Maximum = 100
-        Me.TrackBar1.Name = "TrackBar1"
-        Me.TrackBar1.Size = New System.Drawing.Size(255, 42)
-        Me.TrackBar1.SmallChange = 5
-        Me.TrackBar1.TabIndex = 69
-        Me.TrackBar1.TickFrequency = 5
-        Me.TrackBar1.Value = 75
+        Me.trkJakosc.Location = New System.Drawing.Point(6, 38)
+        Me.trkJakosc.Maximum = 100
+        Me.trkJakosc.Name = "trkJakosc"
+        Me.trkJakosc.Size = New System.Drawing.Size(255, 42)
+        Me.trkJakosc.SmallChange = 5
+        Me.trkJakosc.TabIndex = 69
+        Me.trkJakosc.TickFrequency = 5
+        Me.trkJakosc.Value = 75
         '
-        'GroupBox3
+        'grpPlikiReferencyjne
         '
-        Me.GroupBox3.Controls.Add(Me.CheckBox5)
-        Me.GroupBox3.Controls.Add(Me.CheckBox4)
-        Me.GroupBox3.Controls.Add(Me.CheckBox3)
-        Me.GroupBox3.Controls.Add(Me.CheckBox2)
-        Me.GroupBox3.Location = New System.Drawing.Point(344, 101)
-        Me.GroupBox3.Name = "GroupBox3"
-        Me.GroupBox3.Size = New System.Drawing.Size(267, 101)
-        Me.GroupBox3.TabIndex = 75
-        Me.GroupBox3.TabStop = False
-        Me.GroupBox3.Text = "Pliki referencyjne scalonego arkusza"
+        Me.grpPlikiReferencyjne.Controls.Add(Me.chkTab)
+        Me.grpPlikiReferencyjne.Controls.Add(Me.chkMap)
+        Me.grpPlikiReferencyjne.Controls.Add(Me.chkKml)
+        Me.grpPlikiReferencyjne.Controls.Add(Me.chkWorldFile)
+        Me.grpPlikiReferencyjne.Location = New System.Drawing.Point(344, 101)
+        Me.grpPlikiReferencyjne.Name = "grpPlikiReferencyjne"
+        Me.grpPlikiReferencyjne.Size = New System.Drawing.Size(267, 101)
+        Me.grpPlikiReferencyjne.TabIndex = 75
+        Me.grpPlikiReferencyjne.TabStop = False
+        Me.grpPlikiReferencyjne.Text = "Pliki referencyjne scalonego arkusza"
         '
-        'CheckBox5
+        'chkTab
         '
-        Me.CheckBox5.AutoSize = True
-        Me.CheckBox5.Location = New System.Drawing.Point(6, 69)
-        Me.CheckBox5.Name = "CheckBox5"
-        Me.CheckBox5.Size = New System.Drawing.Size(199, 17)
-        Me.CheckBox5.TabIndex = 78
-        Me.CheckBox5.Text = "twórz plik referencyjny MapInfo (.tab)"
-        Me.CheckBox5.UseVisualStyleBackColor = True
+        Me.chkTab.AutoSize = True
+        Me.chkTab.Location = New System.Drawing.Point(6, 69)
+        Me.chkTab.Name = "chkTab"
+        Me.chkTab.Size = New System.Drawing.Size(199, 17)
+        Me.chkTab.TabIndex = 78
+        Me.chkTab.Text = "twórz plik referencyjny MapInfo (.tab)"
+        Me.chkTab.UseVisualStyleBackColor = True
         '
-        'CheckBox4
+        'chkMap
         '
-        Me.CheckBox4.AutoSize = True
-        Me.CheckBox4.Location = New System.Drawing.Point(6, 19)
-        Me.CheckBox4.Name = "CheckBox4"
-        Me.CheckBox4.Size = New System.Drawing.Size(218, 17)
-        Me.CheckBox4.TabIndex = 77
-        Me.CheckBox4.Text = "twórz plik referencyjny OziExplorer (.map)"
-        Me.CheckBox4.UseVisualStyleBackColor = True
+        Me.chkMap.AutoSize = True
+        Me.chkMap.Location = New System.Drawing.Point(6, 19)
+        Me.chkMap.Name = "chkMap"
+        Me.chkMap.Size = New System.Drawing.Size(218, 17)
+        Me.chkMap.TabIndex = 77
+        Me.chkMap.Text = "twórz plik referencyjny OziExplorer (.map)"
+        Me.chkMap.UseVisualStyleBackColor = True
         '
-        'CheckBox3
+        'chkKml
         '
-        Me.CheckBox3.AutoSize = True
-        Me.CheckBox3.Location = New System.Drawing.Point(6, 36)
-        Me.CheckBox3.Name = "CheckBox3"
-        Me.CheckBox3.Size = New System.Drawing.Size(220, 17)
-        Me.CheckBox3.TabIndex = 76
-        Me.CheckBox3.Text = "twórz plik referencyjny GoogleEarth (.kml)"
-        Me.CheckBox3.UseVisualStyleBackColor = True
+        Me.chkKml.AutoSize = True
+        Me.chkKml.Location = New System.Drawing.Point(6, 36)
+        Me.chkKml.Name = "chkKml"
+        Me.chkKml.Size = New System.Drawing.Size(220, 17)
+        Me.chkKml.TabIndex = 76
+        Me.chkKml.Text = "twórz plik referencyjny GoogleEarth (.kml)"
+        Me.chkKml.UseVisualStyleBackColor = True
         '
-        'CheckBox2
+        'chkWorldFile
         '
-        Me.CheckBox2.AutoSize = True
-        Me.CheckBox2.Location = New System.Drawing.Point(6, 52)
-        Me.CheckBox2.Name = "CheckBox2"
-        Me.CheckBox2.Size = New System.Drawing.Size(230, 17)
-        Me.CheckBox2.TabIndex = 75
-        Me.CheckBox2.Text = "twórz plik referencyjny QGIS, ArcGis (.jpgw)"
-        Me.CheckBox2.UseVisualStyleBackColor = True
+        Me.chkWorldFile.AutoSize = True
+        Me.chkWorldFile.Location = New System.Drawing.Point(6, 52)
+        Me.chkWorldFile.Name = "chkWorldFile"
+        Me.chkWorldFile.Size = New System.Drawing.Size(230, 17)
+        Me.chkWorldFile.TabIndex = 75
+        Me.chkWorldFile.Text = "twórz plik referencyjny QGIS, ArcGis (.jpgw)"
+        Me.chkWorldFile.UseVisualStyleBackColor = True
         '
         'Form3
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.ClientSize = New System.Drawing.Size(621, 491)
-        Me.Controls.Add(Me.GroupBox3)
+        Me.Controls.Add(Me.grpPlikiReferencyjne)
         Me.Controls.Add(Me.groupBox2)
         Me.Controls.Add(Me.Label22)
-        Me.Controls.Add(Me.RichTextBox1)
+        Me.Controls.Add(Me.txtKomunikaty)
         Me.Controls.Add(Me.Label21)
-        Me.Controls.Add(Me.CheckBox1)
-        Me.Controls.Add(Me.GroupBox1)
-        Me.Controls.Add(Me.Button4)
-        Me.Controls.Add(Me.Button2)
-        Me.Controls.Add(Me.TextBox1)
+        Me.Controls.Add(Me.chkRecznie)
+        Me.Controls.Add(Me.grpParametry)
+        Me.Controls.Add(Me.btnScal)
+        Me.Controls.Add(Me.btnZmienFolder)
+        Me.Controls.Add(Me.txtFolder)
         Me.Icon = CType(resources.GetObject("$this.Icon"), System.Drawing.Icon)
         Me.Name = "Form3"
         Me.Text = "Złączanie segmentów w jeden plik"
-        Me.GroupBox1.ResumeLayout(False)
-        Me.GroupBox1.PerformLayout()
+        Me.grpParametry.ResumeLayout(False)
+        Me.grpParametry.PerformLayout()
         Me.groupBox2.ResumeLayout(False)
         Me.groupBox2.PerformLayout()
-        CType(Me.TrackBar1, System.ComponentModel.ISupportInitialize).EndInit()
-        Me.GroupBox3.ResumeLayout(False)
-        Me.GroupBox3.PerformLayout()
+        CType(Me.trkJakosc, System.ComponentModel.ISupportInitialize).EndInit()
+        Me.grpPlikiReferencyjne.ResumeLayout(False)
+        Me.grpPlikiReferencyjne.PerformLayout()
         Me.ResumeLayout(False)
         Me.PerformLayout()
 
     End Sub
     Private groupBox2 As System.Windows.Forms.GroupBox
-    Friend WithEvents TextBox1 As System.Windows.Forms.TextBox
-    Friend WithEvents Button2 As System.Windows.Forms.Button
-    Friend WithEvents FolderBrowserDialog1 As System.Windows.Forms.FolderBrowserDialog
-    Friend WithEvents Button4 As System.Windows.Forms.Button
-    Friend WithEvents GroupBox1 As System.Windows.Forms.GroupBox
+    Friend WithEvents txtFolder As System.Windows.Forms.TextBox
+    Friend WithEvents btnZmienFolder As System.Windows.Forms.Button
+    Friend WithEvents dlgFolder As System.Windows.Forms.FolderBrowserDialog
+    Friend WithEvents btnScal As System.Windows.Forms.Button
+    Friend WithEvents grpParametry As System.Windows.Forms.GroupBox
     Friend WithEvents Label17 As System.Windows.Forms.Label
     Friend WithEvents Label16 As System.Windows.Forms.Label
     Friend WithEvents Label15 As System.Windows.Forms.Label
     Friend WithEvents Label13 As System.Windows.Forms.Label
     Friend WithEvents Label12 As System.Windows.Forms.Label
-    Friend WithEvents TextBox11 As System.Windows.Forms.TextBox
+    Friend WithEvents txtPrefiks As System.Windows.Forms.TextBox
     Friend WithEvents Label11 As System.Windows.Forms.Label
     Friend WithEvents Label10 As System.Windows.Forms.Label
-    Friend WithEvents TextBox9 As System.Windows.Forms.TextBox
+    Friend WithEvents txtLiczbaWierszy As System.Windows.Forms.TextBox
     Friend WithEvents Label9 As System.Windows.Forms.Label
-    Friend WithEvents TextBox8 As System.Windows.Forms.TextBox
+    Friend WithEvents txtLiczbaKolumn As System.Windows.Forms.TextBox
     Friend WithEvents Label8 As System.Windows.Forms.Label
-    Friend WithEvents TextBox7 As System.Windows.Forms.TextBox
+    Friend WithEvents txtRozmiarPiksela As System.Windows.Forms.TextBox
     Friend WithEvents Label7 As System.Windows.Forms.Label
-    Friend WithEvents TextBox6 As System.Windows.Forms.TextBox
+    Friend WithEvents txtBokSegmentu As System.Windows.Forms.TextBox
     Friend WithEvents Label4 As System.Windows.Forms.Label
     Friend WithEvents Label5 As System.Windows.Forms.Label
     Friend WithEvents Label6 As System.Windows.Forms.Label
-    Friend WithEvents TextBox4 As System.Windows.Forms.TextBox
-    Friend WithEvents TextBox5 As System.Windows.Forms.TextBox
+    Friend WithEvents txtXDol As System.Windows.Forms.TextBox
+    Friend WithEvents txtYLewy As System.Windows.Forms.TextBox
     Friend WithEvents Label3 As System.Windows.Forms.Label
     Friend WithEvents Label2 As System.Windows.Forms.Label
     Friend WithEvents Label1 As System.Windows.Forms.Label
-    Friend WithEvents TextBox3 As System.Windows.Forms.TextBox
-    Friend WithEvents TextBox2 As System.Windows.Forms.TextBox
-    Friend WithEvents CheckBox1 As System.Windows.Forms.CheckBox
-    Friend WithEvents ComboBox1 As System.Windows.Forms.ComboBox
-    Friend WithEvents ComboBox2 As System.Windows.Forms.ComboBox
-    Friend WithEvents TrackBar1 As System.Windows.Forms.TrackBar
+    Friend WithEvents txtYPrawy As System.Windows.Forms.TextBox
+    Friend WithEvents txtXGora As System.Windows.Forms.TextBox
+    Friend WithEvents chkRecznie As System.Windows.Forms.CheckBox
+    Friend WithEvents cmbFormat As System.Windows.Forms.ComboBox
+    Friend WithEvents cmbNumeracja As System.Windows.Forms.ComboBox
+    Friend WithEvents trkJakosc As System.Windows.Forms.TrackBar
     Friend WithEvents Label14 As System.Windows.Forms.Label
     Friend WithEvents Label18 As System.Windows.Forms.Label
     Friend WithEvents Label19 As System.Windows.Forms.Label
-    Friend WithEvents Label20 As System.Windows.Forms.Label
+    Friend WithEvents lblJakosc As System.Windows.Forms.Label
     Friend WithEvents Label21 As System.Windows.Forms.Label
-    Friend WithEvents RichTextBox1 As System.Windows.Forms.RichTextBox
+    Friend WithEvents txtKomunikaty As System.Windows.Forms.RichTextBox
     Friend WithEvents Label22 As System.Windows.Forms.Label
-    Friend WithEvents GroupBox3 As System.Windows.Forms.GroupBox
-    Friend WithEvents CheckBox3 As System.Windows.Forms.CheckBox
-    Friend WithEvents CheckBox2 As System.Windows.Forms.CheckBox
-    Friend WithEvents CheckBox4 As System.Windows.Forms.CheckBox
-    Friend WithEvents CheckBox5 As System.Windows.Forms.CheckBox
+    Friend WithEvents grpPlikiReferencyjne As System.Windows.Forms.GroupBox
+    Friend WithEvents chkKml As System.Windows.Forms.CheckBox
+    Friend WithEvents chkWorldFile As System.Windows.Forms.CheckBox
+    Friend WithEvents chkMap As System.Windows.Forms.CheckBox
+    Friend WithEvents chkTab As System.Windows.Forms.CheckBox
 End Class

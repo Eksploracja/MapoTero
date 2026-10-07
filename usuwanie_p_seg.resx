@@ -120,10 +120,10 @@
   <metadata name="ToolTip1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>177, 17</value>
   </metadata>
-  <metadata name="FolderBrowserDialog1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+  <metadata name="dlgFolder.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>17, 17</value>
   </metadata>
-  <data name="RichTextBox1.Text" xml:space="preserve">
+  <data name="txtOpis.Text" xml:space="preserve">
     <value>To narzędzie usuwa wybrane segmenty z katalogu /download/. Przydaje się ono jedynie w szczególnych sytuacjach, gdy podczas pobierania dużego zbioru segmentów część z nich zapisała się błędnie, jako tzw "puste segmenty". Względem prawidłowo pobranych segmentów wyróżniają się one kilkukrotnie mniejszym rozmiarem oraz zawartością składającą się wyłącznie z białego tła. Do takich sytuacji dochodzi najczęściej z powodu niestabilnej pracy serwera WMS z którego pobieramy mapy.
 
 Aby usunąć puste segmenty sprawdź jaki jest rozmiar pojedynczego pustego segmentu. Zwykle ich rozmiar jest jednakowy i zbliżony do wartości podanej w polu "Rozmiar najmniejszego pliku". Powiększ tę wartość o około 10% i wprowadź ją do ostatniego formularza "Usuń kafle mniejsze niż:". Wciśnięcie przycisku "OK" spowoduje usunięcie wskazanych segmentów.

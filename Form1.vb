@@ -1,4 +1,4 @@
-﻿'Copyright (C) <2015>  pajakt
+'Copyright (C) <2015>  pajakt
 
 'This program is free software: you can redistribute it and/or modify
 'it under the terms of the GNU General Public License as published by
@@ -14,824 +14,801 @@
 'along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 Imports System.IO
+Imports System.Threading
 Imports GMap.NET
 Imports GMap.NET.MapProviders
+Imports GMap.NET.WindowsForms
+Imports GMap.NET.WindowsForms.Markers
+Imports GMap.NET.WindowsForms.ToolTips
+Imports MapoTero.Core
 
+''' <summary>Główne okno programu.</summary>
 Public Class Form1
 
-    Private Property Form1loaded As Boolean = False   'wskazuje, że form1 została już załadowana
+    ''' <summary>Wskazuje, że okno zostało już załadowane (wczytanie sesji z menu pyta wtedy o folder).</summary>
+    Private _zaladowany As Boolean
 
+    ''' <summary>Wybrane warstwy mapy (maksymalnie 12).</summary>
+    Private ReadOnly _warstwy As New List(Of String)
+    Private Const MaksLiczbaWarstw As Integer = 12
 
+    ''' <summary>Bieżący zbiór map (adres serwera i lista warstw).</summary>
+    Private _plikWarstw As New PlikWarstw()
 
-    <System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1305:SpecifyIFormatProvider", MessageId:="System.Double.ToString")> _
-    Private Sub Form1_Load(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MyBase.Load
+    ''' <summary>Przerywanie trwającego pobierania.</summary>
+    Private _przerwanie As CancellationTokenSource
 
-        'wyświetla nazwę i wersję 
+#Region "Dostęp dla innych okien"
+
+    ''' <summary>Folder segmentów bieżącej sesji (wyświetlany na pasku stanu).</summary>
+    Public Property FolderSesji As String
+        Get
+            Return stFolder.Text
+        End Get
+        Set(value As String)
+            stFolder.Text = value
+            Ustawienia.FolderSegmentow = value
+        End Set
+    End Property
+
+    ''' <summary>Nazwa bieżącego zbioru map.</summary>
+    Public ReadOnly Property ZbiorMap As String
+        Get
+            Return cmbZbiorMap.Text
+        End Get
+    End Property
+
+    ''' <summary>Nazwa pierwszej wybranej warstwy.</summary>
+    Public ReadOnly Property PierwszaWarstwa As String
+        Get
+            Return If(_warstwy.Count > 0, _warstwy(0), "")
+        End Get
+    End Property
+
+    ''' <summary>Bok segmentu w pikselach (pole formularza).</summary>
+    Public Property BokSegmentu As String
+        Get
+            Return txtBokSegmentu.Text
+        End Get
+        Set(value As String)
+            txtBokSegmentu.Text = value
+        End Set
+    End Property
+
+    ''' <summary>Rozmiar piksela (pole formularza).</summary>
+    Public Property RozmiarPiksela As String
+        Get
+            Return txtRozmiarPiksela.Text
+        End Get
+        Set(value As String)
+            txtRozmiarPiksela.Text = value
+        End Set
+    End Property
+
+    ''' <summary>Wyświetla komunikat w polu komunikatów okna głównego.</summary>
+    Public Sub Komunikat(tekst As String, kolor As Color)
+        txtKomunikaty.ForeColor = kolor
+        txtKomunikaty.Text = tekst
+    End Sub
+
+    ''' <summary>Włącza lub wyłącza ręczną edycję współrzędnych zasięgu.</summary>
+    Public Sub UstawEdycjeXY(wlaczona As Boolean)
+        For Each c As Control In New Control() {txtXDol, txtYLewy, txtXGora, txtYPrawy, lblOpisXDol, lblOpisYLewy, lblOpisXGora, lblOpisYPrawy}
+            c.Enabled = wlaczona
+        Next
+    End Sub
+
+    ''' <summary>Pokazuje lub ukrywa współrzędne WGS84 zaznaczenia.</summary>
+    Public Sub UstawWidokZaznaczeniaWgs(widoczne As Boolean)
+        For Each c As Control In New Control() {lblZaznSzerGora, lblZaznSzerDol, lblZaznDlugPrawa, lblZaznDlugLewa}
+            c.Visible = widoczne
+        Next
+    End Sub
+
+    ''' <summary>Pokazuje lub ukrywa współrzędne kursora i środka mapy.</summary>
+    Public Sub UstawWidokWspolrzednych(widoczne As Boolean)
+        For Each c As Control In New Control() {lblKursorTytul, lblKursorUkladOpis, lblKursorUklad, lblSrodekSzer, lblSrodekOpisSzer,
+                                                lblSrodekTytul, lblSrodekDlug, lblSrodekOpisDlug}
+            c.Visible = widoczne
+        Next
+    End Sub
+
+    ''' <summary>Wybiera zbiór map z listy.</summary>
+    Public Sub UstawZbiorMap(nazwa As String)
+        cmbZbiorMap.Text = nazwa
+    End Sub
+
+    ''' <summary>Przywraca domyślny widok mapy (cała Polska).</summary>
+    Public Sub DomyslnyWidokMapy()
+        mapa.Overlays.Clear()
+        lblSrodekSzer.Text = "52.3"
+        lblSrodekDlug.Text = "19.2"
+        lblZoom.Text = "6"
+        mapa.Zoom = 6
+        mapa.Position = New PointLatLng(52.3, 19.2)
+        mapa.Refresh()
+    End Sub
+
+    ''' <summary>Zapisuje aktualne położenie mapy w ustawieniach.</summary>
+    Private Sub ZapamietajPolozenieMapy()
+        Ustawienia.SrodekMapySzerokosc = lblSrodekSzer.Text
+        Ustawienia.SrodekMapyDlugosc = lblSrodekDlug.Text
+        Ustawienia.SkalaMapy = lblZoom.Text
+    End Sub
+
+#End Region
+
+#Region "Uruchomienie i zamknięcie"
+
+    Private Sub Form1_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+
+        'wyświetla nazwę i wersję
         Me.Text = My.Application.Info.Title & " " & My.Application.Info.Version.ToString
 
-        TBseg = 22
-        TBbok = 512
+        FolderProgramu = My.Application.Info.DirectoryPath
+        FolderDanych = UstalFolderDanych(FolderProgramu)
+        Directory.CreateDirectory(FolderDownload)
+        Ustawienia.FolderSegmentow = FolderDownload
+        FolderSesji = FolderDownload
 
-        ' pozostałe parametry
-        myPath = My.Application.Info.DirectoryPath.ToString()
-        folderDanych = Module1.UstalFolderDanych(myPath)
-        Module1.folderSegmentow = folderDanych & "\download\"
-        If Directory.Exists(folderDanych & "\download\") = False Then Directory.CreateDirectory(folderDanych & "\download\")
-
-        'serwery WMS (np. Geoportal) wymagają TLS 1.2 - na starszych wersjach Windows nie jest on domyślnie włączony
-        System.Net.ServicePointManager.SecurityProtocol = System.Net.ServicePointManager.SecurityProtocol Or System.Net.SecurityProtocolType.Tls12
+        'serwery WMS (np. Geoportal) wymagają TLS 1.2 - na starszych wersjach Windows nie jest on domyślnie włączony;
+        'domyślnie .NET Framework ogranicza też liczbę jednoczesnych połączeń z serwerem do 2
+        Net.ServicePointManager.SecurityProtocol = Net.ServicePointManager.SecurityProtocol Or Net.SecurityProtocolType.Tls12
+#If Not NETCOREAPP Then
+        Net.ServicePointManager.DefaultConnectionLimit = 16
+#End If
 
         Me.SetDesktopLocation(0, 0)
 
         'ustawienia startowe okna mapy
+        mapa.Manager.Mode = AccessMode.ServerAndCache
+        mapa.DragButton = MouseButtons.Left
+        mapa.MapScaleInfoEnabled = False
+        mapa.DisableAltForSelection = True
+        mapa.Zoom = Wartosc(lblZoom.Text, 6)
 
-        'punkt startowy mapy głównej
-        Me.GMapControl1.Manager.Mode = AccessMode.ServerAndCache
-        Me.GMapControl1.DragButton = Windows.Forms.MouseButtons.Left
-        Me.GMapControl1.MapScaleInfoEnabled = False
-        Me.GMapControl1.DisableAltForSelection = True
-        Me.GMapControl1.Zoom = Val(Label65.Text)
+        UstawEdycjeXY(False)
+        UstawWidokZaznaczeniaWgs(False)
 
-        TextBox1.Enabled = False
-        TextBox2.Enabled = False
-        TextBox3.Enabled = False
-        TextBox4.Enabled = False
-        Label3.Enabled = False
-        Label4.Enabled = False
-        Label5.Enabled = False
-        Label6.Enabled = False
-
-
-        Label31.Visible = False
-        Label32.Visible = False
-        Label33.Visible = False
-        Label34.Visible = False
-
-
-        'wczytywanie ustaleń okna z lastsetting. Jeśli go nie ma, to szuka conf. Gdy go zabraknie, to sięgamy po sztywny start
-
-        If File.Exists(folderSegmentow & "\conf.txt") = False Then
-            Button8.Enabled = False
+        'wczytywanie ustawień: najpierw conf.txt z folderu domyślnego, potem lastsettings.txt
+        If File.Exists(FolderDownload & "conf.txt") = False Then
+            btnScalanie.Enabled = False
+            mapa.Position = New PointLatLng(52.3, 19.2)
+            mapa.Zoom = 6
         End If
 
-        If File.Exists(folderSegmentow & "\conf.txt") = False Then
-            Me.GMapControl1.Position = New PointLatLng(52.3, 19.2)
-            Me.GMapControl1.Zoom = 6
-        End If
+        WczytajConf(False)
+        WczytajLastsettings()
 
+        'lista zbiorów map
+        WczytajListeZbiorowMap()
+        WczytajWarstwyZbioru()
+        PokazWarstwy()
 
+        If Ustawienia.Format = "" Then Ustawienia.Format = "jpeg"
+        stFormat.Text = "." & Ustawienia.Format
+        stSegment.Text = ""
+        OdswiezOpisUkladu()
+        PrzeliczSiatke()
 
-
-
-        'przypisuje wartość zmiennej publicznej nrWarstwy
-        nrWarstwy = 0
-        wczytajConf()
-        wczytaj_lastsettings()
-
-
-        'tworzy combobox z listą dostępnych warstw
-        wczytaj_warstwyTxt()
-        wczytaj_warstwy_z_pliku()
-
-        ToolStripStatusLabel2.Text = "." & format
-        If format = "" Then
-            ToolStripStatusLabel2.Text = "jpeg"
-            Form2.ComboBox1.Text = "jpeg"
-        End If
-        ToolStripStatusLabel3.Text = ""
-
-        form1loaded = True
-
-
+        _zaladowany = True
     End Sub
 
-    Private Sub Form1_FormClosing(ByVal sender As Object, ByVal e As System.Windows.Forms.FormClosingEventArgs) Handles MyBase.FormClosing
-        Module1.plik_lastsettings()
-
-    End Sub
-
-    Private Sub Button1_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button1.Click
-        RichTextBox1.ForeColor = System.Drawing.Color.Black
-        RichTextBox1.Text = "Trwa pobieranie segmentów"
-
-        'w zależności od formatu obrazka odpowiednie rozszerzenie pliku
-        Select Case Module1.format
-            Case "jpeg"
-                Module1.rozszerzenie = "jpg" 'format wysyłania zapytań do wms
-            Case "tiff"
-                Module1.rozszerzenie = "tif"
-            Case "png"
-                Module1.rozszerzenie = "png"
-            Case "png8"
-                Module1.rozszerzenie = "png"
-            Case "png24"
-                Module1.rozszerzenie = "png"
-            Case "png32"
-                Module1.rozszerzenie = "png"
-            Case "gif"
-                Module1.rozszerzenie = "gif"
-            Case "svg+xml"
-                'Module1.rozszerzenie = "svg"
-                '==> dopóki svg nie działa będzie tak:
-                MsgBox("Ten format jeszcze nie działa :o(", , "Zmień format.")
-                Form2.ShowDialog()
-                GoTo errorhandler
-
-        End Select
-
-        pobierz = True
-
-        Button3.Enabled = True
-
-        folderSegmentow = ToolStripStatusLabel1.Text
-        Module1.utworzPlikConf() 'na wszelki wypadek - żeby nie okazało się, że zapisuje w folderze głównym programu
-
-
-        If folderSegmentow = "" Then
-            MsgBox("folder segmentów jest pusty")
-            GoTo errorhandler
-        End If
-
-        'tworzy plik koordynaty, kolejne procedury dodadzą do niego dane
-        FileOpen(1, folderSegmentow & "koordynaty.txt", OpenMode.Output)
-        WriteLine(1, folderSegmentow)           'zapisuje ścieżkę dostępu do folderu
-        WriteLine(1, Val(TextBox9.Text))        'długość boku segmentu
-        FileClose(1)
-
-        Module1.proceduraGlowna()
-
-errorhandler:
-    End Sub
-
-
-    'dodawanie warstw
-    Private Sub ListBox1_SelectedIndexChanged(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles ListBox1.SelectedIndexChanged
-
-
-        If Form2.ComboBox3.SelectedIndex = 0 Then
-            styl_nazwy_TB = ""
-            Form2.Label10.Text = Form2.TextBox6.Text
-        End If
-        If Form2.ComboBox3.SelectedIndex = 1 Then
-            styl_nazwy_TB = ComboBox3.Text
-            Form2.Label10.Text = Form2.TextBox6.Text & Module1.styl_nazwy_TB
-        End If
-        If Form2.ComboBox3.SelectedIndex = 2 Then
-            styl_nazwy_TB = Label11.Text.Replace("1) ", "")
-            Form2.Label10.Text = Form2.TextBox6.Text & Module1.styl_nazwy_TB
-        End If
-        If Form2.ComboBox3.SelectedIndex = 3 Then
-            styl_nazwy_TB = ComboBox3.Text & "_" & Label11.Text.Replace("1) ", "")
-            Form2.Label10.Text = Form2.TextBox6.Text & Module1.styl_nazwy_TB
-        End If
-
-
-
-
-        Dim linia As String = ""    'przechowuje linię pliku
-
-        If nrWarstwy > 11 Then       'jeśli zechcesz wyznaczyć więcej warstw niż miejsca w tablicy
-            MsgBox("TEJ WARSTWY NIE MOŻNA JUŻ DODAĆ.", , )
-            GoTo errororhandler
-        End If
-
-        'zapisuje w tablicy dane z zaznaczonego wiersza
-        warstwy(nrWarstwy) = ListBox1.SelectedItem
-
-        nrWarstwy += 1
-
-        Label11.Text = "1) " & warstwy(0)
-        Label12.Text = "2) " & warstwy(1)
-        Label13.Text = "3) " & warstwy(2)
-        Label14.Text = "4) " & warstwy(3)
-        Label15.Text = "5) " & warstwy(4)
-        Label16.Text = "6) " & warstwy(5)
-        Label27.Text = "7) " & warstwy(6)
-        Label24.Text = "8) " & warstwy(7)
-        Label28.Text = "9) " & warstwy(8)
-        Label26.Text = "10) " & warstwy(9)
-        Label25.Text = "11) " & warstwy(10)
-        Label23.Text = "12) " & warstwy(11)
-
-
-        'wpisuje do TextBox10 wartość m/pix przypisaną do danej warstwy
-        FileOpen(1, myPath & "\warstwy\" & ComboBox3.Text & ".txt", OpenMode.Input)
-
-        Input(1, adresSerwera)
-
-        'przetważa plik, aż znajdzie linię zgodną z zaznaczeniem listbox1
-        Do Until linia = ListBox1.SelectedItem Or EOF(1)
-            Input(1, linia)
-        Loop
-        'wtedy przechodzi linię niżej i pobiera ją jako ilość m/piksel
-        Input(1, TextBox10.Text)
-
-        FileClose(1)
-
-        If warstwy(0) <> "" Then
-            RichTextBox1.ForeColor = System.Drawing.Color.Green
-            RichTextBox1.Text = "Wskazano warstwę: " & ListBox1.SelectedItem
-        End If
-        'tymczasowe komunikaty informujące o wybraniu WMS HGIS, który posiada zabójcze ograniczenia rozdzielczości
-        Select Case ListBox1.SelectedItem
-            Case "m25k"
-                TextBox9.Text = 250
-                RichTextBox1.ForeColor = System.Drawing.Color.Blue
-                RichTextBox1.Text = "Wybrałeś warstwę niemieckiej mapy topograficznej 1:25 000 Messtischblatt. Pokrywa ona swoim zasięgiem terytorium Zaboru Pruskiego. Wskazany WMS portalu hgis.cartomatic.pl, który posiada ograniczenia maksymalnego rozmiaru segmentu 256px."
-            Case "wig25k"
-                TextBox9.Text = 250
-                RichTextBox1.ForeColor = System.Drawing.Color.Blue
-                RichTextBox1.Text = "Wybrałeś warstwę polskiej mapy topograficznej 1:25 000 Wojskowego Instytutu Geograficznego. Pokrywa ona głównie środkową i północną część terytorium II RP. Wybrany WMS historycznych map hgis.cartomatic.pl,który posiada ograniczenia maksymalnego rozmiaru segmentu 256px."
-
-            Case "wig100k"
-                TextBox9.Text = 250
-                RichTextBox1.ForeColor = System.Drawing.Color.Blue
-                RichTextBox1.Text = "Wybrałeś warstwę polskiej mapy topograficznej 1:100 000 Wojskowego Instytutu Geograficznego. Pokrywa ona terytorium II RP. Wybrany WMS historycznych map hgis.cartomatic.pl,który posiada ograniczenia maksymalnego rozmiaru segmentu 256px."
-            Case "kdr"
-                TextBox9.Text = 250
-                RichTextBox1.ForeColor = System.Drawing.Color.Blue
-                RichTextBox1.Text = "Wybrałeś warstwę niemieckiej mapy topograficznej 1:100 000  Karte des Deutschen Reiches. Obejmuje ona terytorium Zaboru Pruskiego. Wybrany WMS historycznych map hgis.cartomatic.pl posiada ograniczenia maksymalnego rozmiaru segmentu 256px."
-            Case "kdr_gb"
-                TextBox9.Text = 250
-                RichTextBox1.ForeColor = System.Drawing.Color.Blue
-                RichTextBox1.Text = "Wybrałeś warstwę niemieckiej mapy topograficznej 1:100 000  Grossblatt. Obejmuje ona większość terytorium IIIRP. Wybrany WMS historycznych map hgis.cartomatic.pl posiada ograniczenia maksymalnego rozmiaru segmentu 256px."
-        End Select
-        If ListBox1.SelectedItem = "m25k" Or ListBox1.SelectedItem = "wig100k" Then
-
-            TextBox9.Text = 250
-            RichTextBox1.ForeColor = System.Drawing.Color.Green
-            RichTextBox1.Text = "Wybrałeś WMS historycznych map hgis.cartomatic.pl,który posiada ograniczenia maksymalnego rozmiaru segmentu 256px."
-        End If
-errororhandler:
-    End Sub
-
-    Private Sub TextBox2_TextChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles TextBox2.TextChanged
-        TextBox5.Text = (Math.Ceiling(((Val(TextBox4.Text) - Val(TextBox2.Text))) / (Val(TextBox10.Text) * Val(TextBox9.Text))) * Val(TextBox9.Text) * Val(TextBox10.Text)) / 1000
-        TextBox8.Text = Val(TextBox11.Text) * Val(TextBox9.Text)
-        TextBox11.Text = Math.Ceiling(((Val(TextBox4.Text) - Val(TextBox2.Text))) / (Val(TextBox10.Text) * Val(TextBox9.Text)))
-        TextBox12.Text = Math.Ceiling(((Val(TextBox3.Text) - Val(TextBox1.Text))) / (Val(TextBox10.Text) * Val(TextBox9.Text)))
-    End Sub
-    Private Sub TextBox4_TextChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles TextBox4.TextChanged
-        TextBox5.Text = (Math.Ceiling(((Val(TextBox4.Text) - Val(TextBox2.Text))) / (Val(TextBox10.Text) * Val(TextBox9.Text))) * Val(TextBox9.Text) * Val(TextBox10.Text)) / 1000
-        TextBox8.Text = Val(TextBox11.Text) * Val(TextBox9.Text)
-        TextBox11.Text = Math.Ceiling(((Val(TextBox4.Text) - Val(TextBox2.Text))) / (Val(TextBox10.Text) * Val(TextBox9.Text)))
-        TextBox12.Text = Math.Ceiling(((Val(TextBox3.Text) - Val(TextBox1.Text))) / (Val(TextBox10.Text) * Val(TextBox9.Text)))
-    End Sub
-    Private Sub TextBox1_TextChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles TextBox1.TextChanged
-        TextBox6.Text = (Math.Ceiling(((Val(TextBox3.Text) - Val(TextBox1.Text))) / (Val(TextBox10.Text) * Val(TextBox9.Text))) * Val(TextBox9.Text) * Val(TextBox10.Text)) / 1000
-        TextBox7.Text = Val(TextBox12.Text) * Val(TextBox9.Text)
-        TextBox11.Text = Math.Ceiling(((Val(TextBox4.Text) - Val(TextBox2.Text))) / (Val(TextBox10.Text) * Val(TextBox9.Text)))
-        TextBox12.Text = Math.Ceiling(((Val(TextBox3.Text) - Val(TextBox1.Text))) / (Val(TextBox10.Text) * Val(TextBox9.Text)))
-    End Sub
-    Private Sub TextBox3_TextChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles TextBox3.TextChanged
-        TextBox6.Text = (Math.Ceiling(((Val(TextBox3.Text) - Val(TextBox1.Text))) / (Val(TextBox10.Text) * Val(TextBox9.Text))) * Val(TextBox9.Text) * Val(TextBox10.Text)) / 1000
-        TextBox7.Text = Val(TextBox12.Text) * Val(TextBox9.Text)
-        TextBox11.Text = Math.Ceiling(((Val(TextBox4.Text) - Val(TextBox2.Text))) / (Val(TextBox10.Text) * Val(TextBox9.Text)))
-        TextBox12.Text = Math.Ceiling(((Val(TextBox3.Text) - Val(TextBox1.Text))) / (Val(TextBox10.Text) * Val(TextBox9.Text)))
-    End Sub
-    Private Sub TextBox9_TextChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles TextBox9.TextChanged
-        TextBox5.Text = (Math.Ceiling(((Val(TextBox4.Text) - Val(TextBox2.Text))) / (Val(TextBox10.Text) * Val(TextBox9.Text))) * Val(TextBox9.Text) * Val(TextBox10.Text)) / 1000
-        TextBox6.Text = (Math.Ceiling(((Val(TextBox3.Text) - Val(TextBox1.Text))) / (Val(TextBox10.Text) * Val(TextBox9.Text))) * Val(TextBox9.Text) * Val(TextBox10.Text)) / 1000
-        TextBox7.Text = Math.Ceiling(((Val(TextBox3.Text) - Val(TextBox1.Text))) / (Val(TextBox10.Text) * Val(TextBox9.Text))) * Val(TextBox9.Text)
-        TextBox8.Text = Math.Ceiling(((Val(TextBox4.Text) - Val(TextBox2.Text))) / (Val(TextBox10.Text) * Val(TextBox9.Text))) * Val(TextBox9.Text)
-        TextBox11.Text = Math.Ceiling(((Val(TextBox4.Text) - Val(TextBox2.Text))) / (Val(TextBox10.Text) * Val(TextBox9.Text)))
-        TextBox12.Text = Math.Ceiling(((Val(TextBox3.Text) - Val(TextBox1.Text))) / (Val(TextBox10.Text) * Val(TextBox9.Text)))
-        TextBox13.Text = (Val(TextBox10.Text) * Val(TextBox9.Text)) / 1000
-        If Me.GMapControl1.SelectedArea.IsEmpty = False Then
-            Me.GMapControl1.Overlays.Clear()
-            Module1.Markery()
-        End If
-    End Sub
-    Private Sub TextBox10_TextChanged(sender As Object, e As EventArgs) Handles TextBox10.TextChanged
-        TextBox5.Text = (Math.Ceiling(((Val(TextBox4.Text) - Val(TextBox2.Text))) / (Val(TextBox10.Text) * Val(TextBox9.Text))) * Val(TextBox9.Text) * Val(TextBox10.Text)) / 1000
-        TextBox6.Text = (Math.Ceiling(((Val(TextBox3.Text) - Val(TextBox1.Text))) / (Val(TextBox10.Text) * Val(TextBox9.Text))) * Val(TextBox9.Text) * Val(TextBox10.Text)) / 1000
-        TextBox7.Text = Math.Ceiling(((Val(TextBox3.Text) - Val(TextBox1.Text))) / (Val(TextBox10.Text) * Val(TextBox9.Text))) * Val(TextBox9.Text)
-        TextBox8.Text = Math.Ceiling(((Val(TextBox4.Text) - Val(TextBox2.Text))) / (Val(TextBox10.Text) * Val(TextBox9.Text))) * Val(TextBox9.Text)
-        TextBox11.Text = Math.Ceiling(((Val(TextBox4.Text) - Val(TextBox2.Text))) / (Val(TextBox10.Text) * Val(TextBox9.Text)))
-        TextBox12.Text = Math.Ceiling(((Val(TextBox3.Text) - Val(TextBox1.Text))) / (Val(TextBox10.Text) * Val(TextBox9.Text)))
-        TextBox13.Text = (Val(TextBox10.Text) * Val(TextBox9.Text)) / 1000
-
-        If Me.GMapControl1.SelectedArea.IsEmpty = False Then
-            Me.GMapControl1.Overlays.Clear()
-            Module1.Markery()
-        End If
-    End Sub
-
-    Private Sub ZapiszToolStripMenuItem_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles ZapiszToolStripMenuItem.Click
-        Module1.utworzPlikConf()
-        RichTextBox1.ForeColor = System.Drawing.Color.Green
-        RichTextBox1.Text = "Zapisano ustawienia sesji do pliku conf.txt zlokalizowanym w folderze " & folderSegmentow
-    End Sub
-
-    Private Sub WczytajToolStripMenuItem1_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles WczytajToolStripMenuItem1.Click
-        FileClose(1) ' na wypadek gdyby był otwarty
-        'dawniej wczytywano conf dwukrotnie (obejście błędu opisanego w WczytajConf) - po poprawce wystarcza jeden odczyt
-        wczytajConf()
-    End Sub
-
-    Private Sub OtwórzOknoUstawieńToolStripMenuItem_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles UstawieniaToolStripMenuItem.Click
-        Form2.ShowDialog()
-    End Sub
-
-    Private Sub AboutToolStripMenuItem_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles AboutToolStripMenuItem.Click
-        AboutBox1.ShowDialog()
-    End Sub
-
-    Private Sub PomocPomorskieForumEksploracyjneToolStripMenuItem_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles PomocPomorskieForumEksploracyjneToolStripMenuItem.Click
-        pomoc_pfe.ShowDialog()
-    End Sub
-
-    Private Sub Instrukcja_obslugi_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles InstrukcjaObsługiToolStripMenuItem.Click
-        Instrukcja_Obslugi.ShowDialog()
-    End Sub
-
-    Public Sub Wczytaj_lastsettings()
-
-        Dim plik As String = folderDanych & "\lastsettings.txt"
-        If File.Exists(plik) = False Then Exit Sub
-
-        'plik zawiera pary wierszy: nazwa ustawienia, wartość. Odczyt odbywa się po nazwach, a nie po kolejności wierszy,
-        'dzięki czemu brak któregoś ustawienia (np. starszy plik bez chkkml/chktab) nie przesuwa wszystkich kolejnych wartości
-        Dim ustawienia As New Dictionary(Of String, String)(StringComparer.OrdinalIgnoreCase)
+    Private Sub Form1_FormClosing(sender As Object, e As FormClosingEventArgs) Handles MyBase.FormClosing
+        _przerwanie?.Cancel()
+        ZapamietajPolozenieMapy()
         Try
-            'kodowanie systemowe (ANSI) - takie samo, jakim plik jest zapisywany przez PrintLine
-            Dim linie() As String = File.ReadAllLines(plik, System.Text.Encoding.Default)
-            For i = 0 To linie.Length - 2 Step 2
-                ustawienia(linie(i).Trim()) = linie(i + 1).Trim()
-            Next
+            Ustawienia.Zapisz(PlikLastsettings)
+        Catch ex As Exception
+            MsgBox("Nie udało się zapisać ustawień: " & ex.Message, MsgBoxStyle.Exclamation)
+        End Try
+    End Sub
+
+#End Region
+
+#Region "Ustawienia programu i sesji"
+
+    ''' <summary>Odczyt ostatnich ustawień programu z lastsettings.txt.</summary>
+    Public Sub WczytajLastsettings()
+        If File.Exists(PlikLastsettings) = False Then Exit Sub
+        Try
+            Ustawienia.Wczytaj(PlikLastsettings)
         Catch
             Exit Sub
         End Try
+        lblSrodekSzer.Text = Ustawienia.SrodekMapySzerokosc
+        lblSrodekDlug.Text = Ustawienia.SrodekMapyDlugosc
+        lblZoom.Text = Ustawienia.SkalaMapy
 
-        Dim w As String = ""
-        If ustawienia.TryGetValue("folder segmentow", w) AndAlso w <> "" Then folderSegmentow = w   'ostatni folder segmentów, z niego wczytany zostanie plik conf
-        CheckGmi = WartoscLogiczna(ustawienia, "chkgmi", CheckGmi)                  'czy tworzyć gmi
-        CheckMap = WartoscLogiczna(ustawienia, "chkmap", CheckMap)                  'czy tworzyć map
-        CheckWldPoints = WartoscLogiczna(ustawienia, "chkwldpoints", CheckWldPoints) 'czy tworzyć wld i points
-        CheckJpgw = WartoscLogiczna(ustawienia, "chkjpgw", CheckJpgw)               'czy tworzyć jpgw
-        CheckKml = WartoscLogiczna(ustawienia, "chkkml", CheckKml)                  'czy tworzyć kml
-        CheckTab = WartoscLogiczna(ustawienia, "chktab", CheckTab)                  'czy tworzyć tab
-        If ustawienia.TryGetValue("dolna", w) AndAlso w <> "" Then folderWarstwa1 = w      'foldery łączonych warstw
-        If ustawienia.TryGetValue("gorna", w) AndAlso w <> "" Then folderWarstwa2 = w
-        If ustawienia.TryGetValue("polaczone", w) AndAlso w <> "" Then folderWynikowy = w
-        XYswitched = WartoscLogiczna(ustawienia, "XYswitched", XYswitched)
-        'zapisywane jako "numeracja_" (starsze pliki domyślne zawierały "numeracja")
-        If ustawienia.TryGetValue("numeracja_", w) AndAlso w <> "" Then
-            numeracja = w
-        ElseIf ustawienia.TryGetValue("numeracja", w) AndAlso w <> "" Then
-            numeracja = w
-        End If
-        Dim liczba As Integer
-        If ustawienia.TryGetValue("iloscProbPobrania", w) AndAlso Integer.TryParse(w, liczba) Then iloscProbPobrania = liczba
-        If ustawienia.TryGetValue("przerwaMiedzyProbami", w) AndAlso Integer.TryParse(w, liczba) Then przerwaMiedzyProbami = liczba
-        If ustawienia.TryGetValue("x_start", w) AndAlso w <> "" Then Label35.Text = w
-        If ustawienia.TryGetValue("y_start", w) AndAlso w <> "" Then Label63.Text = w
-        If ustawienia.TryGetValue("zoom_start", w) AndAlso w <> "" Then Label65.Text = w
+        'ostatnio zapisana pozycja okna mapy
+        mapa.Zoom = Wartosc(lblZoom.Text, 6)
+        mapa.Position = New PointLatLng(Wartosc(lblSrodekSzer.Text, 52.3), Wartosc(lblSrodekDlug.Text, 19.2))
 
-        'wczytywanie ostatnio zapisanej pozycji okna mapy
-        Me.GMapControl1.Zoom = Val(Label65.Text)
-        Me.GMapControl1.Position = New PointLatLng(Val(Label35.Text.ToString), Val(Label63.Text.ToString))
-
-
-        RichTextBox1.ForeColor = System.Drawing.Color.Green
-        RichTextBox1.Text = "Wczytano ostatnio zapisane ustawienia programu z lastsettings.txt. Styl numerowania segmentów to: " & numeracja
-
+        Komunikat("Wczytano ostatnio zapisane ustawienia programu z lastsettings.txt. Styl numerowania segmentów to: " & Ustawienia.Numeracja, Color.Green)
     End Sub
 
-    'odczytuje wartość True/False ustawienia; gdy jej brak lub jest nieczytelna - pozostawia dotychczasową
-    Private Function WartoscLogiczna(ByVal ustawienia As Dictionary(Of String, String), ByVal nazwa As String, ByVal domyslna As Boolean) As Boolean
-        Dim w As String = ""
-        Dim wynik As Boolean
-        If ustawienia.TryGetValue(nazwa, w) AndAlso Boolean.TryParse(w, wynik) Then Return wynik
-        Return domyslna
-    End Function
-
-    Private Sub WczytajConf()
-
-        Dim formatNaProbe As String = "" 'służy do wczytania rozszerzenia obrazka z pliku i jeśli module1.format jest inny to następuje zamiana
-
-        If Form1loaded = True Then
-            'Me.FolderBrowserDialog1.RootFolder = System.Environment.SpecialFolder.MyComputer
-            Me.FolderBrowserDialog1.SelectedPath = folderDanych & "\download\"
-            If Me.FolderBrowserDialog1.ShowDialog = Windows.Forms.DialogResult.OK Then
-                folderSegmentow = Me.FolderBrowserDialog1.SelectedPath & "\"
-            End If
-            If Dir(folderSegmentow & "\conf.txt") = "" Then
-                MsgBox("Brak pliku w podanej lokalizacji.")
+    ''' <summary>
+    ''' Odczyt parametrów sesji z conf.txt. Gdy pytajOFolder - użytkownik wskazuje folder sesji.
+    ''' Cały plik jest najpierw wczytywany, a dopiero potem przypisywany do kontrolek (dawniej zmiana rodzaju mapy
+    ''' w trakcie czytania pliku zamykała go i reszta parametrów nie była wczytywana).
+    ''' </summary>
+    Private Sub WczytajConf(pytajOFolder As Boolean)
+        Dim folder As String = FolderSesji
+        If pytajOFolder Then
+            dlgFolder.SelectedPath = FolderDownload
+            If dlgFolder.ShowDialog = DialogResult.OK Then folder = dlgFolder.SelectedPath & "\"
+            If File.Exists(folder & "conf.txt") = False Then
+                MsgBox("Brak pliku conf.txt w podanej lokalizacji.")
                 Exit Sub
             End If
         End If
 
-        'wyświetla nazwę kwadratu na pasku stanu
-        ToolStripStatusLabel1.Text = folderSegmentow
+        FolderSesji = folder
+        If File.Exists(folder & "conf.txt") = False Then Exit Sub
 
-        'przy pierwszym uruchomieniu conf.txt jeszcze nie ma
-        If File.Exists(folderSegmentow & "\conf.txt") = False Then Exit Sub
-
-        'Cały plik jest najpierw wczytywany do zmiennych, a dopiero potem przypisywany do kontrolek.
-        'Przypisanie rodzaju mapy (ComboBox3) uruchamia wczytanie listy warstw, które zamyka plik nr 1 -
-        'gdy działo się to w trakcie czytania conf.txt, reszta pliku nie była wczytywana
-        '(dawny "nierozwiązany bug", obchodzony dwukrotnym wczytywaniem conf.txt).
-        Dim folderZPliku As String = ""         'ścieżka zapisana w conf.txt - nieużywana: obowiązuje folder, w którym faktycznie znaleziono conf.txt
-        Dim rodzajMapy As String = ""
-        Dim x1 As String = "", y1 As String = "", x2 As String = "", y2 As String = ""
-        Dim bokSegmentu As String = "", rozmiarPiksela As String = ""
-        Dim warstwyZPliku(11) As String
-        Dim nrWarstwyZPliku As Integer
-        Dim nazwaKwadratuZPliku As String = ""
-        Dim powyzejOstatniegoZPliku As Boolean
-        Dim srodekX As String = "", srodekY As String = "", zoomZPliku As String = ""
-        Dim numeracjaZPliku As String = ""
-
-        Dim nrPliku As Integer = FreeFile()
+        Dim c As KonfiguracjaSesji
         Try
-            FileOpen(nrPliku, folderSegmentow & "\conf.txt", OpenMode.Input)
-            Input(nrPliku, folderZPliku)
-            Input(nrPliku, rodzajMapy)
-            Input(nrPliku, x1)
-            Input(nrPliku, y1)
-            Input(nrPliku, x2)
-            Input(nrPliku, y2)
-            Input(nrPliku, bokSegmentu)
-            Input(nrPliku, rozmiarPiksela)
-            For i = 0 To 11
-                Input(nrPliku, warstwyZPliku(i))
-            Next
-            Input(nrPliku, nrWarstwyZPliku)
-            Input(nrPliku, formatNaProbe)
-            Input(nrPliku, nazwaKwadratuZPliku)
-            Input(nrPliku, powyzejOstatniegoZPliku)
-            Input(nrPliku, srodekX)
-            Input(nrPliku, srodekY)
-            Input(nrPliku, zoomZPliku)
-            Try
-                Input(nrPliku, numeracjaZPliku)  'starsze pliki conf.txt mogą nie zawierać stylu numeracji
-            Catch
-                numeracjaZPliku = ""
-            End Try
-        Catch
-            FileClose(nrPliku)
+            c = KonfiguracjaSesji.Wczytaj(folder & "conf.txt", KodowanieSystemowe())
+        Catch ex As Exception
+            Komunikat("Nie udało się odczytać pliku conf.txt: " & ex.Message, Color.Red)
             Exit Sub
         End Try
-        FileClose(nrPliku)
 
-        ComboBox3.Text = rodzajMapy
-        TextBox1.Text = x1
-        TextBox2.Text = y1
-        TextBox3.Text = x2
-        TextBox4.Text = y2
-        TextBox9.Text = bokSegmentu
-        TextBox10.Text = rozmiarPiksela
-        For i = 0 To 11
-            If warstwyZPliku(i) = "#ERROR 448#" Then warstwyZPliku(i) = ""
-            warstwy(i) = warstwyZPliku(i)
+        'zbiór map - zmiana wywołuje wczytanie listy warstw i wyczyszczenie wybranych
+        cmbZbiorMap.Text = c.RodzajMapy
+        Ustawienia.Uklad = UkladWspolrzednych.ZKodu(c.UkladEpsg)
+        txtXDol.Text = c.XDol
+        txtYLewy.Text = c.YLewy
+        txtXGora.Text = c.XGora
+        txtYPrawy.Text = c.YPrawy
+        txtBokSegmentu.Text = c.BokSegmentuPx
+        txtRozmiarPiksela.Text = c.RozmiarPiksela
+
+        _warstwy.Clear()
+        For i = 0 To Math.Min(c.LiczbaWarstw, MaksLiczbaWarstw) - 1
+            If c.Warstwy(i) <> "" Then _warstwy.Add(c.Warstwy(i))
         Next
-        nrWarstwy = nrWarstwyZPliku
-        wspolnaNazwaKwadratu = nazwaKwadratuZPliku
-        pobierajPowyzejOstatniego = powyzejOstatniegoZPliku
-        Label35.Text = srodekX
-        Label63.Text = srodekY
-        Label65.Text = zoomZPliku
-        If numeracjaZPliku <> "" Then
-            Form2.ComboBox2.Text = numeracjaZPliku
-            Module1.numeracja = numeracjaZPliku
+        PokazWarstwy()
+
+        If c.Format <> "" Then Ustawienia.Format = c.Format
+        Ustawienia.Prefiks = c.Prefiks
+        Ustawienia.PobierajPowyzejOstatniego = c.PobierajPowyzejOstatniego
+        If c.Numeracja <> "" Then Ustawienia.Numeracja = c.Numeracja
+        lblSrodekSzer.Text = c.SrodekMapySzerokosc
+        lblSrodekDlug.Text = c.SrodekMapyDlugosc
+        lblZoom.Text = c.SkalaMapy
+
+        stFormat.Text = "." & Ustawienia.Format
+        OdswiezOpisUkladu()
+
+        'odświeżenie widoku okna mapy
+        mapa.Refresh()
+        mapa.ReloadMap()
+        mapa.Zoom = Wartosc(lblZoom.Text, 6)
+        mapa.Position = New PointLatLng(Wartosc(lblSrodekSzer.Text, 52.3), Wartosc(lblSrodekDlug.Text, 19.2))
+        ZapamietajPolozenieMapy()
+
+        Komunikat("Wczytano ustawienia sesji z pliku conf.txt. Format graficzny pobieranych segmentów to " & Ustawienia.Format &
+                  ". Styl ich numerowania to: " & Ustawienia.Numeracja, Color.Green)
+    End Sub
+
+    ''' <summary>Zapis parametrów sesji do conf.txt. Gdy pytajOFolder - użytkownik wskazuje folder.</summary>
+    Public Sub ZapiszConf(pytajOFolder As Boolean)
+        If pytajOFolder Then
+            dlgFolder.SelectedPath = FolderSesji
+            If dlgFolder.ShowDialog = DialogResult.OK Then FolderSesji = dlgFolder.SelectedPath & "\"
         End If
 
-        If formatNaProbe <> Module1.format Then
-
-            Module1.format = formatNaProbe
-
-        End If
-
-        ToolStripStatusLabel2.Text = "." & format
-        Label11.Text = "1) " & warstwy(0)
-        Label12.Text = "2) " & warstwy(1)
-        Label13.Text = "3) " & warstwy(2)
-        Label14.Text = "4) " & warstwy(3)
-        Label15.Text = "5) " & warstwy(4)
-        Label16.Text = "6) " & warstwy(5)
-        Label27.Text = "7) " & warstwy(6)
-        Label24.Text = "8) " & warstwy(7)
-        Label28.Text = "9) " & warstwy(8)
-        Label26.Text = "10) " & warstwy(9)
-        Label25.Text = "11) " & warstwy(10)
-        Label23.Text = "12) " & warstwy(11)
-
-        'wyłączyłem wyskakujące okienko folderu download (30. 03. 2015. Kazik)
-        'If folderSegmentow <> "" Then
-        'Process.Start(folderSegmentow)
-        ' End If
-
-        'odświeżenie widoku okna mapy po wprowadzeniu nowych ustawień conf.txt
-        Me.GMapControl1.Refresh()
-        Me.GMapControl1.ReloadMap()
-        Me.GMapControl1.Zoom = Val(Label65.Text)
-        Me.GMapControl1.Position = New PointLatLng(Val(Label35.Text.ToString), Val(Label63.Text.ToString))
-        x_start = Label35.Text
-        y_start = Label63.Text
-        zoom_start = Label65.Text
-        'End If
-
-        Me.Refresh()
-
-
-        RichTextBox1.ForeColor = System.Drawing.Color.Green
-        RichTextBox1.Text = "Wczytano ostatnio zapisane ustawienia sesji z pliku conf.txt. Format graficzny pobieranych segmentów to " & format & " . Styl ich numerowania to: " & numeracja
-
-    End Sub
-    'wczytanie listy plików z warstwami do combobox3
-    Private Sub Wczytaj_warstwyTxt()
-
-        Dim pozycjaListy As String = ""
-
-        FileClose(1) 'w razie gyby był otwarty
-
-        FileOpen(1, myPath & "\warstwy\warstwy.txt", OpenMode.Input)
-
-        Do Until EOF(1)
-            Input(1, pozycjaListy)
-            ComboBox3.Items.Add(pozycjaListy)
-        Loop
-
-        FileClose(1)
-
-errorhandler:
-    End Sub
-    'wcztanie danych do listbox1 w zależności od wyboru w combobox3
-    Private Sub Wczytaj_warstwy_z_pliku()
-
-        Dim pozycjaListy As String = ""
-        Dim pusta As String = ""    'zmienna na linie, które nie będą użyte
-
-        FileClose(1) 'w razie gyby był otwarty
-
-        ListBox1.Items.Clear()
-
-        'brak pliku (np. zbiór map zapisany w conf.txt, a usunięty w nowszej wersji programu) - dawniej przy
-        '"On Error Resume Next" pętla Do Until EOF nigdy się nie kończyła i program zawieszał się przy starcie
-        Dim plikWarstw As String = myPath & "\warstwy\" & ComboBox3.Text & ".txt"
-        If File.Exists(plikWarstw) = False Then Exit Sub
-
+        Dim c As New KonfiguracjaSesji With {
+            .Folder = FolderSesji, .RodzajMapy = cmbZbiorMap.Text,
+            .XDol = txtXDol.Text, .YLewy = txtYLewy.Text, .XGora = txtXGora.Text, .YPrawy = txtYPrawy.Text,
+            .BokSegmentuPx = txtBokSegmentu.Text, .RozmiarPiksela = txtRozmiarPiksela.Text,
+            .LiczbaWarstw = _warstwy.Count, .Format = Ustawienia.Format, .Prefiks = Ustawienia.Prefiks,
+            .PobierajPowyzejOstatniego = Ustawienia.PobierajPowyzejOstatniego,
+            .SrodekMapySzerokosc = lblSrodekSzer.Text.Replace(","c, "."c), .SrodekMapyDlugosc = lblSrodekDlug.Text.Replace(","c, "."c),
+            .SkalaMapy = lblZoom.Text.Replace(","c, "."c), .Numeracja = Ustawienia.Numeracja, .UkladEpsg = Ustawienia.Uklad.Epsg}
+        For i = 0 To _warstwy.Count - 1
+            c.Warstwy(i) = _warstwy(i)
+        Next
         Try
-            FileOpen(1, plikWarstw, OpenMode.Input)
-
-            Input(1, adresSerwera)
-
-            Do Until EOF(1)
-                Input(1, pozycjaListy)
-                ListBox1.Items.Add(pozycjaListy)
-                If Not EOF(1) Then Input(1, pusta)
-            Loop
-        Catch
-            'uszkodzony plik warstw - lista zawiera to, co udało się odczytać
-        Finally
-            FileClose(1)
+            Directory.CreateDirectory(FolderSesji)
+            c.Zapisz(FolderSesji & "conf.txt", KodowanieSystemowe())
+        Catch ex As Exception
+            Komunikat("Nie udało się zapisać pliku conf.txt: " & ex.Message, Color.Red)
+            Exit Sub
         End Try
 
+        If pytajOFolder Then Komunikat("Zapisano ustawienia sesji do pliku conf.txt w folderze " & FolderSesji, Color.Green)
     End Sub
 
-    Private Sub ComboBox3_SelectedIndexChanged(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles ComboBox3.SelectedIndexChanged
-        'zeruje wybrane warstwy
-        Module1.przerwij()
-        'wczytuje nowe do wyboru
-        wczytaj_warstwy_z_pliku()
+    Private Sub ZapiszToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles ZapiszToolStripMenuItem.Click
+        ZapiszConf(True)
+    End Sub
 
+    Private Sub WczytajToolStripMenuItem1_Click(sender As Object, e As EventArgs) Handles WczytajToolStripMenuItem1.Click
+        WczytajConf(True)
+    End Sub
 
-        'czyszczenie listy dotychczasowych warstw
-        nrWarstwy = 0
-        For i = 0 To 11
-            warstwy(i) = ""
+#End Region
+
+#Region "Zbiory map i warstwy"
+
+    ''' <summary>Lista zbiorów map z pliku warstwy\warstwy.txt.</summary>
+    Private Sub WczytajListeZbiorowMap()
+        Dim plik As String = FolderProgramu & "\warstwy\warstwy.txt"
+        If File.Exists(plik) = False Then
+            Komunikat("Brak pliku " & plik & " z listą zbiorów map.", Color.Red)
+            Exit Sub
+        End If
+        For Each linia In File.ReadAllLines(plik, PlikWarstw.Kodowanie())
+            Dim nazwa As String = linia.Trim().Trim(""""c)
+            If nazwa <> "" Then cmbZbiorMap.Items.Add(nazwa)
         Next
-        Label11.Text = "1) " & warstwy(0)
-        Label12.Text = "2) " & warstwy(1)
-        Label13.Text = "3) " & warstwy(2)
-        Label14.Text = "4) " & warstwy(3)
-        Label15.Text = "5) " & warstwy(4)
-        Label16.Text = "6) " & warstwy(5)
-        Label27.Text = "7) " & warstwy(6)
-        Label24.Text = "8) " & warstwy(7)
-        Label28.Text = "9) " & warstwy(8)
-        Label26.Text = "10) " & warstwy(9)
-        Label25.Text = "11) " & warstwy(10)
-        Label23.Text = "12) " & warstwy(11)
+    End Sub
 
-        strUrlparts(1) = ""
+    ''' <summary>Warstwy bieżącego zbioru map do listy wyboru.</summary>
+    Private Sub WczytajWarstwyZbioru()
+        lstWarstwy.Items.Clear()
+        _plikWarstw = New PlikWarstw()
 
+        'brak pliku (np. zbiór map zapisany w conf.txt, a usunięty w nowszej wersji programu) - lista pozostaje pusta
+        Dim plik As String = FolderProgramu & "\warstwy\" & cmbZbiorMap.Text & ".txt"
+        If File.Exists(plik) = False Then Exit Sub
+        Try
+            _plikWarstw = PlikWarstw.Wczytaj(plik)
+        Catch ex As Exception
+            Komunikat("Nie udało się odczytać pliku zbioru map: " & ex.Message, Color.Red)
+            Exit Sub
+        End Try
+        For Each w In _plikWarstw.Warstwy
+            lstWarstwy.Items.Add(w.Nazwa)
+        Next
+    End Sub
 
-        If warstwy(0) = "" Then
-            RichTextBox1.ForeColor = System.Drawing.Color.Red
-            RichTextBox1.Text = "Zmieniono rodzaj mapy. Wybierz która dokładnie jej warstwa ma zostać pobrana, klikając na nią myszką"
+    ''' <summary>Wyświetla wybrane warstwy w etykietach 1) ... 12).</summary>
+    Private Sub PokazWarstwy()
+        Dim etykiety() As Label = {lblWarstwa01, lblWarstwa02, lblWarstwa03, lblWarstwa04, lblWarstwa05, lblWarstwa06,
+                                   lblWarstwa07, lblWarstwa08, lblWarstwa09, lblWarstwa10, lblWarstwa11, lblWarstwa12}
+        For i = 0 To etykiety.Length - 1
+            etykiety(i).Text = (i + 1).ToString() & ") " & If(i < _warstwy.Count, _warstwy(i), "")
+        Next
+        btnResetujWarstwy.Enabled = _warstwy.Count > 0
+    End Sub
+
+    ''' <summary>Czyści listę wybranych warstw.</summary>
+    Private Sub WyczyscWarstwy()
+        _warstwy.Clear()
+        PokazWarstwy()
+    End Sub
+
+    Private Sub cmbZbiorMap_SelectedIndexChanged(sender As Object, e As EventArgs) Handles cmbZbiorMap.SelectedIndexChanged
+        PrzerwijPobieranie()
+        WczytajWarstwyZbioru()
+        WyczyscWarstwy()
+        Komunikat("Zmieniono rodzaj mapy. Wybierz która dokładnie jej warstwa ma zostać pobrana, klikając na nią myszką", Color.Red)
+    End Sub
+
+    'dodawanie warstw
+    Private Sub lstWarstwy_SelectedIndexChanged(sender As Object, e As EventArgs) Handles lstWarstwy.SelectedIndexChanged
+        If lstWarstwy.SelectedItem Is Nothing Then Exit Sub
+        Dim nazwa As String = lstWarstwy.SelectedItem.ToString()
+
+        If _warstwy.Count >= MaksLiczbaWarstw Then
+            MsgBox("TEJ WARSTWY NIE MOŻNA JUŻ DODAĆ.")
+            Exit Sub
         End If
 
+        _warstwy.Add(nazwa)
+        PokazWarstwy()
+        Form2.OdswiezNazweTrekBuddy()
+
+        'rozmiar piksela przypisany do warstwy w pliku zbioru map
+        Dim w = _plikWarstw.Znajdz(nazwa)
+        If w IsNot Nothing AndAlso w.RozmiarPiksela <> "" Then txtRozmiarPiksela.Text = w.RozmiarPiksela
+
+        Komunikat("Wskazano warstwę: " & nazwa, Color.Green)
+
+        'komunikaty o warstwach WMS HGIS, które ograniczają maksymalny rozmiar segmentu do 256 px
+        Dim opis As String = ""
+        Select Case nazwa
+            Case "m25k"
+                opis = "Wybrałeś warstwę niemieckiej mapy topograficznej 1:25 000 Messtischblatt. Pokrywa ona swoim zasięgiem terytorium Zaboru Pruskiego. Wskazany WMS portalu hgis.cartomatic.pl, który posiada ograniczenia maksymalnego rozmiaru segmentu 256px."
+            Case "wig25k"
+                opis = "Wybrałeś warstwę polskiej mapy topograficznej 1:25 000 Wojskowego Instytutu Geograficznego. Pokrywa ona głównie środkową i północną część terytorium II RP. Wybrany WMS historycznych map hgis.cartomatic.pl,który posiada ograniczenia maksymalnego rozmiaru segmentu 256px."
+            Case "wig100k"
+                opis = "Wybrałeś warstwę polskiej mapy topograficznej 1:100 000 Wojskowego Instytutu Geograficznego. Pokrywa ona terytorium II RP. Wybrany WMS historycznych map hgis.cartomatic.pl,który posiada ograniczenia maksymalnego rozmiaru segmentu 256px."
+            Case "kdr"
+                opis = "Wybrałeś warstwę niemieckiej mapy topograficznej 1:100 000  Karte des Deutschen Reiches. Obejmuje ona terytorium Zaboru Pruskiego. Wybrany WMS historycznych map hgis.cartomatic.pl posiada ograniczenia maksymalnego rozmiaru segmentu 256px."
+            Case "kdr_gb"
+                opis = "Wybrałeś warstwę niemieckiej mapy topograficznej 1:100 000  Grossblatt. Obejmuje ona większość terytorium IIIRP. Wybrany WMS historycznych map hgis.cartomatic.pl posiada ograniczenia maksymalnego rozmiaru segmentu 256px."
+        End Select
+        If opis <> "" Then
+            txtBokSegmentu.Text = "250"
+            Komunikat(opis, Color.Blue)
+        End If
     End Sub
 
-    Private Sub Button3_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles Button3.Click
-        Module1.przerwij()
-        Button1.Enabled = True
-        Button3.Enabled = False
-        RichTextBox1.ForeColor = System.Drawing.Color.Red
-        RichTextBox1.Text = "Przerwano pobieranie segmentów"
+    Private Sub btnResetujWarstwy_Click(sender As Object, e As EventArgs) Handles btnResetujWarstwy.Click
+        WyczyscWarstwy()
+        ZapiszConf(False)
+        btnPobierz.Enabled = True
+        btnPrzerwij.Enabled = False
+        Komunikat("Zresetowano listę wprowadzonych warstw mapy wskazanych do pobrania", Color.Green)
     End Sub
 
-    Private Sub Button4_Click(ByVal sender As System.Object, ByVal e As System.EventArgs)
-        Module1.resetuj()
-        Module1.utworzPlikConf()
-        Button1.Enabled = True
-        Button3.Enabled = False
+#End Region
 
+#Region "Siatka segmentów"
+
+    ''' <summary>Siatka segmentów wg pól formularza.</summary>
+    Private Function BiezacaSiatka() As Siatka
+        Dim obszar As New Zasieg(Wartosc(txtXDol.Text), Wartosc(txtYLewy.Text), Wartosc(txtXGora.Text), Wartosc(txtYPrawy.Text))
+        Return New Siatka(obszar, Wartosc(txtRozmiarPiksela.Text), WartoscCalkowita(txtBokSegmentu.Text))
+    End Function
+
+    ''' <summary>
+    ''' Przelicza wynikowy rozmiar siatki segmentów (dawniej te same obliczenia powtarzało sześć procedur,
+    ''' z których część korzystała z nieaktualnych jeszcze wartości).
+    ''' </summary>
+    Private Sub PrzeliczSiatke()
+        Dim s = BiezacaSiatka()
+        Dim km As Double = If(Ustawienia.Uklad.Geograficzny, Double.NaN, 1000)
+        If s.Poprawna Then
+            txtLiczbaKolumn.Text = s.LiczbaKolumn.ToString()
+            txtLiczbaWierszy.Text = s.LiczbaWierszy.ToString()
+            txtSzerokoscPx.Text = s.SzerokoscPx.ToString()
+            txtWysokoscPx.Text = s.WysokoscPx.ToString()
+            txtSzerokoscKm.Text = If(Double.IsNaN(km), "", Liczba(s.LiczbaKolumn * s.BokSegmentu / km))
+            txtWysokoscKm.Text = If(Double.IsNaN(km), "", Liczba(s.LiczbaWierszy * s.BokSegmentu / km))
+        Else
+            For Each t In New TextBox() {txtLiczbaKolumn, txtLiczbaWierszy, txtSzerokoscPx, txtWysokoscPx, txtSzerokoscKm, txtWysokoscKm}
+                t.Text = ""
+            Next
+        End If
+        Dim bok As Double = Wartosc(txtRozmiarPiksela.Text) * WartoscCalkowita(txtBokSegmentu.Text)
+        txtZasiegSegmentuKm.Text = If(Double.IsNaN(km) OrElse bok <= 0, "", Liczba(bok / km))
     End Sub
 
-    Private Sub UsuńPusteSegmentyToolStripMenuItem_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles UsuwaniePustychSegmentówToolStripMenuItem.Click
-        usuwanie_p_seg.ShowDialog()
-    End Sub
-    Private Sub SkładajWarstwyToolStripMenuItem_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles NakładanieWarstwNaSiebieToolStripMenuItem.Click
-        Nakladanie_Map.ShowDialog()
+    Private Sub PolaZasieguZmienione(sender As Object, e As EventArgs) Handles txtXDol.TextChanged, txtYLewy.TextChanged, txtXGora.TextChanged, txtYPrawy.TextChanged
+        PrzeliczSiatke()
     End Sub
 
-    'zdarzenie CheckedChanged zachodzi także przy ODZNACZANIU przycisku - dawniej odznaczany przycisk
-    'ustawiał swój podkład, przez co wybór mapy mógł zostać nadpisany; teraz reaguje tylko zaznaczony
-    Private Sub RadioButton1_CheckedChanged(sender As Object, e As EventArgs) Handles RadioButton1.CheckedChanged
-        If RadioButton1.Checked = False Then Exit Sub
-        MapProviders.GMapProvider.UserAgent = "MapoTero/" & My.Application.Info.Version.ToString
-        Me.GMapControl1.MapProvider = GMapProviders.OpenStreetMap
+    Private Sub ParametrySegmentuZmienione(sender As Object, e As EventArgs) Handles txtBokSegmentu.TextChanged, txtRozmiarPiksela.TextChanged
+        PrzeliczSiatke()
+        If mapa.SelectedArea.IsEmpty = False Then
+            mapa.Overlays.Clear()
+            PokazZnaczniki()
+        End If
     End Sub
 
-    Private Sub RadioButton2_CheckedChanged(sender As Object, e As EventArgs) Handles RadioButton2.CheckedChanged
-        If RadioButton2.Checked = False Then Exit Sub
-        Me.GMapControl1.MapProvider = GMapProviders.GoogleMap
+    'zamiana przecinka na kropkę w polu rozmiaru piksela
+    Private Sub txtRozmiarPiksela_KeyUp(sender As Object, e As KeyEventArgs) Handles txtRozmiarPiksela.KeyUp
+        If txtRozmiarPiksela.Text.Contains(",") Then
+            txtRozmiarPiksela.Text = txtRozmiarPiksela.Text.Replace(","c, "."c)
+            txtRozmiarPiksela.SelectionStart = txtRozmiarPiksela.Text.Length
+        End If
     End Sub
 
-    Private Sub RadioButton3_CheckedChanged(sender As Object, e As EventArgs) Handles RadioButton3.CheckedChanged
-        If RadioButton3.Checked = False Then Exit Sub
-        Me.GMapControl1.MapProvider = GMapProviders.BingSatelliteMap
+    ''' <summary>Opis układu współrzędnych przy współrzędnych kursora.</summary>
+    Public Sub OdswiezOpisUkladu()
+        Dim u = Ustawienia.Uklad
+        Select Case u.Epsg
+            Case 2180 : lblKursorUkladOpis.Text = "1992"
+            Case 2176 To 2179 : lblKursorUkladOpis.Text = "2000/" & (u.Epsg - 2171).ToString()
+            Case 4326 : lblKursorUkladOpis.Text = "WGS84"
+            Case Else : lblKursorUkladOpis.Text = "UTM " & (u.Epsg - 32600).ToString() & "N"
+        End Select
+        ToolTip1.SetToolTip(lblKursorUkladOpis, u.Nazwa)
+        PrzeliczSiatke()
     End Sub
 
-    Private Sub GMapControl1_MouseMove(sender As Object, e As MouseEventArgs) Handles GMapControl1.MouseMove
+#End Region
 
-        'współrzędne bbox podczas przeciągania zaznaczenia
-        If Module1.editXY = False Then
-            If Me.GMapControl1.SelectedArea.IsEmpty = False Then
-                Dim X0_92 As Integer
-                Dim Y0_92 As Integer
-                Dim X1_92 As Integer
-                Dim Y1_92 As Integer
-                Dim X0_84 = Me.GMapControl1.SelectedArea.Lng
-                Dim Y1_84 = Me.GMapControl1.SelectedArea.Lat
-                Dim X1_84 = Me.GMapControl1.SelectedArea.Lng + Me.GMapControl1.SelectedArea.WidthLng
-                Dim Y0_84 = Me.GMapControl1.SelectedArea.Lat - Me.GMapControl1.SelectedArea.HeightLat
+#Region "Pobieranie"
 
+    Private Async Sub btnPobierz_Click(sender As Object, e As EventArgs) Handles btnPobierz.Click
+        If Ustawienia.Format = "svg+xml" Then
+            MsgBox("Ten format jeszcze nie działa :o(", , "Zmień format.")
+            Form2.ShowDialog()
+            Exit Sub
+        End If
 
-                X0_92 = Transform.GetXU92(Y1_84, X1_84)   'prawy gorny x
-                TextBox3.Text = X0_92
-                Y0_92 = Transform.GetYU92(Y1_84, X1_84)  'prawy gorny y
-                TextBox4.Text = Y0_92
-                X1_92 = Transform.GetXU92(Y0_84, X0_84)   'lewy dolny x
-                TextBox1.Text = X1_92
-                Y1_92 = Transform.GetYU92(Y0_84, X0_84)  'lewy gorny y
-                TextBox2.Text = Y1_92
+        'kontrola parametrów
+        Dim piksel As Double = Wartosc(txtRozmiarPiksela.Text)
+        Dim bok As Integer = WartoscCalkowita(txtBokSegmentu.Text)
+        If txtRozmiarPiksela.Text.Trim() = "" Then
+            Komunikat("Nie podano rozmiaru pojedynczego piksela segmentu", Color.Red) : Exit Sub
+        ElseIf piksel <= 0 Then
+            Komunikat("Rozmiar pojedynczego piksela segmentu musi być większy od zera", Color.Red) : Exit Sub
+        End If
+        If txtBokSegmentu.Text.Trim() = "" Then
+            Komunikat("Nie podano długości boku segmentu.", Color.Red) : Exit Sub
+        ElseIf bok < 1 Then
+            Komunikat("Długość boku segmentu musi być większa od zera.", Color.Red) : Exit Sub
+        ElseIf bok > 2048 Then
+            Komunikat("Długość boku segmentu musi być mniejsza od 2048px.", Color.Red) : Exit Sub
+        End If
+        Dim siatka = BiezacaSiatka()
+        If Not siatka.Poprawna Then
+            Komunikat("Niepoprawne współrzędne X, Y.", Color.Red) : Exit Sub
+        End If
+        If _warstwy.Count = 0 Then
+            Komunikat("Nie wybrano żadnej warstwy. Aby wybrać warstwę kliknij w jej nazwę.", Color.Red) : Exit Sub
+        End If
+        If _plikWarstw.Adres = "" Then
+            Komunikat("Nie wybrano zbioru map (serwera WMS).", Color.Red) : Exit Sub
+        End If
 
+        'zapis parametrów sesji - na wszelki wypadek, żeby nie okazało się, że zapisuje w folderze głównym programu
+        If FolderSesji = "" Then
+            MsgBox("folder segmentów jest pusty")
+            Exit Sub
+        End If
+        ZapiszConf(False)
 
-                Label31.Text = "lat= " + Convert.ToString(Round(Y1_84, 4))
-                Label32.Text = "lat= " + Convert.ToString(Round(Y0_84, 4))
-                Label33.Text = "lng= " + Convert.ToString(Round(X1_84, 4))
-                Label34.Text = "lng= " + Convert.ToString(Round(X0_84, 4))
+        Dim zadanie As New ZadaniePobierania With {
+            .AdresSerwera = _plikWarstw.Adres, .Warstwy = New List(Of String)(_warstwy), .Uklad = Ustawienia.Uklad,
+            .Siatka = siatka, .Format = Ustawienia.Format, .Prefiks = Ustawienia.Prefiks,
+            .Numeracja = Siatka.StylZTekstu(Ustawienia.Numeracja), .Folder = FolderSesji, .ZamienOsie = Ustawienia.ZamienXY,
+            .IloscProb = Math.Max(1, Ustawienia.IloscProbPobrania), .PrzerwaSekundy = Ustawienia.PrzerwaMiedzyProbami,
+            .LiczbaWatkow = Ustawienia.LiczbaWatkow, .PobierajPowyzejOstatniego = Ustawienia.PobierajPowyzejOstatniego,
+            .Georeferencja = Ustawienia.OpcjeGeoreferencji(), .TrekBuddy = Ustawienia.TrekBuddy, .NazwaTrekBuddy = Ustawienia.NazwaTrekBuddy}
 
-                If Val(TextBox8.Text) * Val(TextBox7.Text) < 5000000000 Then
-                    RichTextBox1.ForeColor = System.Drawing.Color.Green
-                    RichTextBox1.Text = "Zaznaczyłeś obszar do pobrania o powierzchni " & ((Math.Ceiling(((Val(TextBox4.Text) - Val(TextBox2.Text))) / (Val(TextBox10.Text) * Val(TextBox9.Text))) * Val(TextBox9.Text) * Val(TextBox10.Text)) / 1000) * ((Math.Ceiling(((Val(TextBox3.Text) - Val(TextBox1.Text))) / (Val(TextBox10.Text) * Val(TextBox9.Text))) * Val(TextBox9.Text) * Val(TextBox10.Text)) / 1000) & " km2"
+        btnPobierz.Enabled = False
+        btnPrzerwij.Enabled = True
+        cmbZbiorMap.Enabled = False
+        lstWarstwy.Enabled = False
+        btnScalanie.Enabled = False
+        Komunikat("Trwa pobieranie segmentów (" & siatka.LiczbaSegmentow & ")", Color.Black)
 
+        _przerwanie = New CancellationTokenSource()
+        Dim postep As New Progress(Of PostepPobierania)(AddressOf PokazPostep)
+        Dim wynik As WynikPobierania = Nothing
+        Try
+            wynik = Await PobieranieSegmentow.PobierzAsync(zadanie, postep, _przerwanie.Token)
+        Catch ex As Exception
+            Komunikat("Błąd pobierania: " & ex.Message, Color.Red)
+        Finally
+            _przerwanie.Dispose()
+            _przerwanie = Nothing
+            btnPobierz.Enabled = True
+            btnPrzerwij.Enabled = False
+            cmbZbiorMap.Enabled = True
+            lstWarstwy.Enabled = True
+            stPostep.Value = 0
+            stSegment.Text = ""
+        End Try
+
+        If wynik Is Nothing Then Exit Sub
+        If wynik.Przerwano Then
+            Komunikat("Przerwano pobieranie segmentów", Color.Red)
+        ElseIf wynik.Nieudane > 0 Then
+            Komunikat("Nie udało się ściągnąć wszystkich segmentów (" & wynik.Nieudane & " z " & wynik.Wszystkie &
+                      "). Wykaz tych segmentów i przyczyny błędów w pliku error.txt", Color.Red)
+        Else
+            Komunikat("Zakończono pobieranie. Mapa znajduje się w katalogu " & FolderSesji, Color.Green)
+        End If
+        btnScalanie.Enabled = File.Exists(FolderSesji & "error.txt") = False
+    End Sub
+
+    Private Sub PokazPostep(p As PostepPobierania)
+        If p.Komunikat <> "" Then Komunikat(p.Komunikat, Color.Black)
+        If p.Wszystkie > 0 Then stPostep.Value = Math.Min(100, CInt(p.Pobrane * 100L \ p.Wszystkie))
+        stSegment.Text = p.Segment
+    End Sub
+
+    ''' <summary>Przerywa trwające pobieranie.</summary>
+    Public Sub PrzerwijPobieranie()
+        _przerwanie?.Cancel()
+    End Sub
+
+    Private Sub btnPrzerwij_Click(sender As Object, e As EventArgs) Handles btnPrzerwij.Click
+        'komunikat przed przerwaniem - zakończenie pobierania może nastąpić od razu, wewnątrz Cancel(),
+        'i wtedy jego komunikat końcowy nie może zostać nadpisany
+        Komunikat("Przerywanie pobierania segmentów...", Color.Red)
+        btnPrzerwij.Enabled = False
+        PrzerwijPobieranie()
+    End Sub
+
+#End Region
+
+#Region "Mapa"
+
+    'zdarzenie CheckedChanged zachodzi także przy ODZNACZANIU przycisku - reaguje tylko zaznaczony
+    Private Sub rbOsm_CheckedChanged(sender As Object, e As EventArgs) Handles rbOsm.CheckedChanged
+        If rbOsm.Checked = False Then Exit Sub
+        GMapProvider.UserAgent = "MapoTero/" & My.Application.Info.Version.ToString
+        mapa.MapProvider = GMapProviders.OpenStreetMap
+    End Sub
+
+    Private Sub rbGoogle_CheckedChanged(sender As Object, e As EventArgs) Handles rbGoogle.CheckedChanged
+        If rbGoogle.Checked = False Then Exit Sub
+        mapa.MapProvider = GMapProviders.GoogleMap
+    End Sub
+
+    Private Sub rbBing_CheckedChanged(sender As Object, e As EventArgs) Handles rbBing.CheckedChanged
+        If rbBing.Checked = False Then Exit Sub
+        mapa.MapProvider = GMapProviders.BingSatelliteMap
+    End Sub
+
+    Private Sub mapa_MouseMove(sender As Object, e As MouseEventArgs) Handles mapa.MouseMove
+        Dim u = Ustawienia.Uklad
+
+        'współrzędne zasięgu podczas przeciągania zaznaczenia
+        If Ustawienia.EdycjaXY = False AndAlso mapa.SelectedArea.IsEmpty = False Then
+            Dim a = mapa.SelectedArea
+            Dim gora As Double = a.Lat, dol As Double = a.Lat - a.HeightLat
+            Dim lewa As Double = a.Lng, prawa As Double = a.Lng + a.WidthLng
+
+            'prostokąt WGS84 w innym układzie jest lekko obróconym czworokątem - zasięg obejmuje wszystkie jego narożniki
+            Dim narozniki() As PunktXY = {u.ZWgs84(gora, lewa), u.ZWgs84(gora, prawa), u.ZWgs84(dol, lewa), u.ZWgs84(dol, prawa)}
+            Dim xMin As Double = Double.MaxValue, xMax As Double = Double.MinValue, yMin As Double = Double.MaxValue, yMax As Double = Double.MinValue
+            For Each p In narozniki
+                xMin = Math.Min(xMin, p.X) : xMax = Math.Max(xMax, p.X)
+                yMin = Math.Min(yMin, p.Y) : yMax = Math.Max(yMax, p.Y)
+            Next
+            If u.Geograficzny Then
+                txtXDol.Text = Liczba(Math.Round(xMin, 6)) : txtYLewy.Text = Liczba(Math.Round(yMin, 6))
+                txtXGora.Text = Liczba(Math.Round(xMax, 6)) : txtYPrawy.Text = Liczba(Math.Round(yMax, 6))
+            Else
+                txtXDol.Text = Liczba(Math.Floor(xMin)) : txtYLewy.Text = Liczba(Math.Floor(yMin))
+                txtXGora.Text = Liczba(Math.Ceiling(xMax)) : txtYPrawy.Text = Liczba(Math.Ceiling(yMax))
+            End If
+
+            lblZaznSzerGora.Text = "lat= " & Liczba(Math.Round(gora, 4))
+            lblZaznSzerDol.Text = "lat= " & Liczba(Math.Round(dol, 4))
+            lblZaznDlugPrawa.Text = "lng= " & Liczba(Math.Round(prawa, 4))
+            lblZaznDlugLewa.Text = "lng= " & Liczba(Math.Round(lewa, 4))
+
+            Dim s = BiezacaSiatka()
+            If s.Poprawna AndAlso Not u.Geograficzny Then
+                Dim km2 As Double = s.LiczbaKolumn * s.BokSegmentu / 1000 * s.LiczbaWierszy * s.BokSegmentu / 1000
+                If s.SzerokoscPx * s.WysokoscPx < 5000000000L Then
+                    Komunikat("Zaznaczyłeś obszar do pobrania o powierzchni " & Liczba(Math.Round(km2, 3)) & " km2", Color.Green)
                 Else
-                    RichTextBox1.ForeColor = System.Drawing.Color.Red
-                    RichTextBox1.Text = "Zaznaczyłeś obszar do pobrania o powierzchni " & ((Math.Ceiling(((Val(TextBox4.Text) - Val(TextBox2.Text))) / (Val(TextBox10.Text) * Val(TextBox9.Text))) * Val(TextBox9.Text) * Val(TextBox10.Text)) / 1000) * ((Math.Ceiling(((Val(TextBox3.Text) - Val(TextBox1.Text))) / (Val(TextBox10.Text) * Val(TextBox9.Text))) * Val(TextBox9.Text) * Val(TextBox10.Text)) / 1000) & " km2. To dużo. Poradzę sobie. Jednak uzbroj się lepiej w kubek gorącej kawy :)"
+                    Komunikat("Zaznaczyłeś obszar do pobrania o powierzchni " & Liczba(Math.Round(km2, 3)) & " km2. To dużo. Poradzę sobie. Jednak uzbroj się lepiej w kubek gorącej kawy :)", Color.Red)
                 End If
             End If
         End If
 
-        'współrzędne środka mapy w wgs84
-        Dim Lat_srodek As Double = Me.GMapControl1.Position.Lat
-        Dim Lng_srodek As Double = Me.GMapControl1.Position.Lng
-        Label35.Text = Convert.ToString(Round(Lat_srodek, 4))
-        Label63.Text = Convert.ToString(Round(Lng_srodek, 4))
-        'współrzędne podczas ruchu myszą
-        Dim lat_mysz As Double = GMapControl1.FromLocalToLatLng(e.X, e.Y).Lat
-        Dim lng_mysz As Double = GMapControl1.FromLocalToLatLng(e.X, e.Y).Lng
+        'współrzędne środka mapy w WGS84
+        lblSrodekSzer.Text = Liczba(Math.Round(mapa.Position.Lat, 4))
+        lblSrodekDlug.Text = Liczba(Math.Round(mapa.Position.Lng, 4))
 
-        Dim lng_92 As Integer = Transform.GetXU92(lat_mysz, lng_mysz)   'prawy gorny x
-        Dim lat_92 As Integer = Transform.GetYU92(lat_mysz, lng_mysz)   'prawy gorny y
-        Label41.Text = "x= " + Convert.ToString(lng_92) + "   y= " + Convert.ToString(lat_92)
-
-        Dim mouseY As Double = e.Location.Y
-        Dim mouseX As Double = e.Location.X
-        Label36.BackColor = Color.Transparent
-        Label36.Location = New Point(mouseX - 140, mouseY - 10)
-        'Label43.Text = "lat= " + Convert.ToString(Round(lat_mysz, 4)) + "   lng= " + Convert.ToString(Round(lng_mysz, 4))
-        If kursorWGS84 = True Then
-            Label36.Text = "lat= " + Convert.ToString(Round(lat_mysz, 4)) + "   lng= " + Convert.ToString(Round(lng_mysz, 4))
-            Label36.Visible = True
+        'współrzędne kursora
+        Dim kursor = mapa.FromLocalToLatLng(e.X, e.Y)
+        Dim k = u.ZWgs84(kursor.Lat, kursor.Lng)
+        If u.Geograficzny Then
+            lblKursorUklad.Text = "x= " & Liczba(Math.Round(k.X, 5)) & "   y= " & Liczba(Math.Round(k.Y, 5))
         Else
-            Label36.Visible = False
+            lblKursorUklad.Text = "x= " & Liczba(Math.Round(k.X)) & "   y= " & Liczba(Math.Round(k.Y))
+        End If
+
+        lblKursorWgs.BackColor = Color.Transparent
+        lblKursorWgs.Location = New Point(e.X - 140, e.Y - 10)
+        If Ustawienia.KursorWgs84 Then
+            lblKursorWgs.Text = "lat= " & Liczba(Math.Round(kursor.Lat, 4)) & "   lng= " & Liczba(Math.Round(kursor.Lng, 4))
+            lblKursorWgs.Visible = True
+        Else
+            lblKursorWgs.Visible = False
         End If
     End Sub
 
-
-    Private Sub Button2_Click(sender As Object, e As EventArgs) Handles Button2.Click
-        Dim zoom As Integer = Me.GMapControl1.Zoom
-        Me.GMapControl1.Zoom = zoom + 1
+    Private Sub btnPowieksz_Click(sender As Object, e As EventArgs) Handles btnPowieksz.Click
+        mapa.Zoom += 1
     End Sub
 
-    Private Sub Button5_Click(sender As Object, e As EventArgs) Handles Button5.Click
-        Dim zoom As Integer = Me.GMapControl1.Zoom
-        Me.GMapControl1.Zoom = zoom - 1
+    Private Sub btnPomniejsz_Click(sender As Object, e As EventArgs) Handles btnPomniejsz.Click
+        mapa.Zoom -= 1
     End Sub
 
-    Private Sub GMapControl1_OnMapZoomChanged() Handles GMapControl1.OnMapZoomChanged
-        Label65.Text = Me.GMapControl1.Zoom.ToString
+    Private Sub mapa_OnMapZoomChanged() Handles mapa.OnMapZoomChanged
+        lblZoom.Text = mapa.Zoom.ToString()
+    End Sub
+
+    Private Sub mapa_MouseDoubleClick(sender As Object, e As MouseEventArgs) Handles mapa.MouseDoubleClick
+        If e.Button = MouseButtons.Right Then
+            mapa.Zoom -= 1
+        Else
+            mapa.Zoom += 1
+        End If
+    End Sub
+
+    'znaczniki rzeczywistego zasięgu pobieranej mapy
+    Private Sub btnZnaczniki_Click(sender As Object, e As EventArgs) Handles btnZnaczniki.Click
+        mapa.Overlays.Clear()
+        PokazZnaczniki()
+    End Sub
+
+    'znaczniki wyświetlane po zaznaczeniu obszaru pobierania
+    Private Sub mapa_MouseClick(sender As Object, e As MouseEventArgs) Handles mapa.MouseClick
+        If mapa.SelectedArea.IsEmpty = False AndAlso e.Button = MouseButtons.Right Then
+            mapa.Overlays.Clear()
+            PokazZnaczniki()
+        End If
+    End Sub
+
+    ''' <summary>Znaczniki narożników siatki segmentów (zasięg po uwzględnieniu rozmiaru segmentów).</summary>
+    Private Sub PokazZnaczniki()
+        Dim s = BiezacaSiatka()
+        If Not s.Poprawna Then Exit Sub
+        Dim u = Ustawienia.Uklad
+        Dim z = s.ZasiegSiatki
+
+        btnZnaczniki.Enabled = False
+        Dim warstwa As New GMapOverlay("markers")
+        Dim narozniki = {Tuple.Create(z.LewyGorny, "Lewy górny narożnik"), Tuple.Create(z.PrawyGorny, "Prawy górny narożnik"),
+                         Tuple.Create(z.PrawyDolny, "Prawy dolny narożnik"), Tuple.Create(z.LewyDolny, "Lewy dolny narożnik")}
+        For Each n In narozniki
+            Dim g = u.DoWgs84(n.Item1)
+            Dim znacznik As New GMarkerGoogle(New PointLatLng(g.Szerokosc, g.Dlugosc), GMarkerGoogleType.red_small)
+            znacznik.ToolTip = New GMapRoundedToolTip(znacznik)
+            znacznik.ToolTipText = n.Item2 & vbCrLf & "po uwzględnieniu" & vbCrLf & "rozmiaru segmentów " & vbCrLf &
+                                   "X: " & Liczba(n.Item1.X) & ", Y: " & Liczba(n.Item1.Y)
+            warstwa.Markers.Add(znacznik)
+        Next
+        mapa.Overlays.Add(warstwa)
+
+        'centrowanie obrazu po wyświetleniu znaczników
+        Dim srodek = u.DoWgs84(z.Srodek)
+        mapa.Position = New PointLatLng(srodek.Szerokosc, srodek.Dlugosc)
+    End Sub
+
+#End Region
+
+#Region "Przyciski i menu"
+
+    Private Sub btnOtworzFolder_Click(sender As Object, e As EventArgs) Handles btnOtworzFolder.Click
+        Directory.CreateDirectory(FolderDownload)
+        OtworzFolder(FolderDownload)
+    End Sub
+
+    Private Sub btnUsunPobrane_Click(sender As Object, e As EventArgs) Handles btnUsunPobrane.Click
+        Dim odp As DialogResult = MessageBox.Show("Czy na pewno usunąć cały katalog 'download' z pobranymi mapami?", "Usuwanie zawartości katalogu download",
+                                                 MessageBoxButtons.YesNo, MessageBoxIcon.Question)
+        If odp = DialogResult.Yes Then
+            Try
+                If Directory.Exists(FolderDownload) Then Directory.Delete(FolderDownload, True)
+                Directory.CreateDirectory(FolderDownload)
+                Komunikat("Usunięto całą zawartość katalogu download", Color.Green)
+            Catch ex As Exception
+                Komunikat("Nie udało się usunąć zawartości katalogu download: " & ex.Message, Color.Red)
+            End Try
+        End If
+    End Sub
+
+    Private Sub btnScalanie_Click(sender As Object, e As EventArgs) Handles btnScalanie.Click
+        Form3.ShowDialog()
     End Sub
 
     Private Sub ScalanieToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles ScalanieToolStripMenuItem.Click
         Form3.ShowDialog()
     End Sub
 
-
-    Private Sub Label11_TextChanged(sender As Object, e As EventArgs) Handles Label11.TextChanged
-        If warstwy(0) <> "" Then
-            Button6.Enabled = True
-        Else
-            Button6.Enabled = False
-        End If
+    Private Sub UstawieniaToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles UstawieniaToolStripMenuItem.Click
+        Form2.ShowDialog()
     End Sub
 
-
-    Private Sub Button7_Click(sender As Object, e As EventArgs) Handles Button7.Click
-        If Directory.Exists(folderDanych & "\download\") = False Then
-            Directory.CreateDirectory(folderDanych & "\download\")
-            Process.Start(folderDanych & "\download")
-        Else
-            Process.Start(folderDanych & "\download")
-        End If
+    Private Sub AboutToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles AboutToolStripMenuItem.Click
+        AboutBox1.ShowDialog()
     End Sub
 
-    Private Sub Button9_Click(sender As Object, e As EventArgs) Handles Button9.Click
-
-        Dim OdpMBox As DialogResult = MessageBox.Show("Czy na pewno usunąć cały katalog 'download' z pobranymi mapami?", "Usuwanie zawartości katalogu download", MessageBoxButtons.YesNo, MessageBoxIcon.Question)
-        If OdpMBox = Windows.Forms.DialogResult.Yes Then
-            If Directory.Exists(folderDanych & "\download\") = True Then
-                System.IO.Directory.Delete(folderDanych & "\download\", True)
-                Directory.CreateDirectory(folderDanych & "\download\")
-            End If
-            RichTextBox1.ForeColor = System.Drawing.Color.Green
-            RichTextBox1.Text = "Usunięto całą zawartość katalogu download"
-
-        End If
-
-
+    Private Sub PomocPomorskieForumEksploracyjneToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles PomocPomorskieForumEksploracyjneToolStripMenuItem.Click
+        pomoc_pfe.ShowDialog()
     End Sub
 
-    Private Sub Button8_Click(sender As Object, e As EventArgs) Handles Button8.Click
-        Form3.ShowDialog()
+    Private Sub InstrukcjaObslugiToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles InstrukcjaObsługiToolStripMenuItem.Click
+        Instrukcja_Obslugi.ShowDialog()
     End Sub
 
-    Private Sub Button6_Click(sender As Object, e As EventArgs) Handles Button6.Click
-        Module1.resetuj()
-        Module1.utworzPlikConf()
-        Button1.Enabled = True
-        Button3.Enabled = False
+    Private Sub UsuwaniePustychSegmentowToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles UsuwaniePustychSegmentówToolStripMenuItem.Click
+        Usuwanie_p_seg.ShowDialog()
     End Sub
 
-
-    Private Sub GMapControl1_MouseDoubleClick(ByValsender As Object, ByVal e As System.Windows.Forms.MouseEventArgs) Handles GMapControl1.MouseDoubleClick
-        Dim zoom As Integer = Me.GMapControl1.Zoom
-        If e.Button = MouseButtons.Right Then
-            Me.GMapControl1.Zoom = zoom - 1
-        Else
-            Me.GMapControl1.Zoom = zoom + 1
-        End If
+    Private Sub NakladanieWarstwToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles NakładanieWarstwNaSiebieToolStripMenuItem.Click
+        Nakladanie_Map.ShowDialog()
     End Sub
 
-    'markery rzeczywistego zasięgu pobieranej mapy
-    Private Sub Button4_Click_1(sender As Object, e As EventArgs) Handles Button4.Click
-        Me.GMapControl1.Overlays.Clear()
-        Module1.Markery()
-    End Sub
+#End Region
 
-    'markery wyskakujące po zaznaczeniu obszaru pobierania
-    Private Sub GMapControl1_MouseClick(ByValsender As Object, ByVal e As System.Windows.Forms.MouseEventArgs) Handles GMapControl1.MouseClick
-        If Me.GMapControl1.SelectedArea.IsEmpty = False Then
-            If e.Button = MouseButtons.Right Then
-                Me.GMapControl1.Overlays.Clear()
-                Module1.Markery()
-            End If
-        End If
-    End Sub
-
-    'zamiana przecinka na kropkę w textbox10 odpowiedzialnym za rozmiar piksela
-    Private Sub TextBox10_KeyUp(sender As Object, e As KeyEventArgs) Handles TextBox10.KeyUp
-        TextBox10.Text = TextBox10.Text.Replace(",", ".")
-        Dim pozycja As String
-        pozycja = TextBox10.SelectionStart 'pozycja kursora
-        TextBox10.SelectionStart = TextBox10.Text.Length 'ustawienie kursora na koncu
-    End Sub
 End Class
-
-
-

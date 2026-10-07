@@ -43,24 +43,24 @@ Partial Class Form1
     Private Sub InitializeComponent()
         Me.components = New System.ComponentModel.Container()
         Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(Form1))
-        Me.Button1 = New System.Windows.Forms.Button()
-        Me.GroupBox2 = New System.Windows.Forms.GroupBox()
+        Me.btnPobierz = New System.Windows.Forms.Button()
+        Me.grpDaneZrodlowe = New System.Windows.Forms.GroupBox()
         Me.Label30 = New System.Windows.Forms.Label()
         Me.Label29 = New System.Windows.Forms.Label()
-        Me.ListBox1 = New System.Windows.Forms.ListBox()
-        Me.ComboBox3 = New System.Windows.Forms.ComboBox()
+        Me.lstWarstwy = New System.Windows.Forms.ListBox()
+        Me.cmbZbiorMap = New System.Windows.Forms.ComboBox()
         Me.Panel1 = New System.Windows.Forms.Panel()
-        Me.FolderBrowserDialog1 = New System.Windows.Forms.FolderBrowserDialog()
+        Me.dlgFolder = New System.Windows.Forms.FolderBrowserDialog()
         Me.StatusStrip1 = New System.Windows.Forms.StatusStrip()
-        Me.ToolStripProgressBar1 = New System.Windows.Forms.ToolStripProgressBar()
-        Me.ToolStripStatusLabel2 = New System.Windows.Forms.ToolStripStatusLabel()
-        Me.ToolStripStatusLabel1 = New System.Windows.Forms.ToolStripStatusLabel()
-        Me.ToolStripStatusLabel3 = New System.Windows.Forms.ToolStripStatusLabel()
-        Me.Button3 = New System.Windows.Forms.Button()
+        Me.stPostep = New System.Windows.Forms.ToolStripProgressBar()
+        Me.stFormat = New System.Windows.Forms.ToolStripStatusLabel()
+        Me.stFolder = New System.Windows.Forms.ToolStripStatusLabel()
+        Me.stSegment = New System.Windows.Forms.ToolStripStatusLabel()
+        Me.btnPrzerwij = New System.Windows.Forms.Button()
         Me.SesjaToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.ZapiszToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.WczytajToolStripMenuItem1 = New System.Windows.Forms.ToolStripMenuItem()
-        Me.WarstwyToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.NarzedziaToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.ScalanieToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.NakładanieWarstwNaSiebieToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.UsuwaniePustychSegmentówToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
@@ -72,121 +72,121 @@ Partial Class Form1
         Me.MenuStrip1 = New System.Windows.Forms.MenuStrip()
         Me.Label47 = New System.Windows.Forms.Label()
         Me.Label46 = New System.Windows.Forms.Label()
-        Me.TextBox13 = New System.Windows.Forms.TextBox()
-        Me.TextBox9 = New System.Windows.Forms.TextBox()
+        Me.txtZasiegSegmentuKm = New System.Windows.Forms.TextBox()
+        Me.txtBokSegmentu = New System.Windows.Forms.TextBox()
         Me.Label1 = New System.Windows.Forms.Label()
         Me.Label2 = New System.Windows.Forms.Label()
-        Me.TextBox10 = New System.Windows.Forms.TextBox()
+        Me.txtRozmiarPiksela = New System.Windows.Forms.TextBox()
         Me.ToolTip1 = New System.Windows.Forms.ToolTip(Me.components)
-        Me.GroupBox3 = New System.Windows.Forms.GroupBox()
-        Me.Button6 = New System.Windows.Forms.Button()
-        Me.Label23 = New System.Windows.Forms.Label()
-        Me.Label24 = New System.Windows.Forms.Label()
-        Me.Label25 = New System.Windows.Forms.Label()
-        Me.Label26 = New System.Windows.Forms.Label()
-        Me.Label27 = New System.Windows.Forms.Label()
-        Me.Label28 = New System.Windows.Forms.Label()
-        Me.Label16 = New System.Windows.Forms.Label()
-        Me.Label12 = New System.Windows.Forms.Label()
-        Me.Label15 = New System.Windows.Forms.Label()
-        Me.Label14 = New System.Windows.Forms.Label()
-        Me.Label11 = New System.Windows.Forms.Label()
-        Me.Label13 = New System.Windows.Forms.Label()
+        Me.grpWybraneWarstwy = New System.Windows.Forms.GroupBox()
+        Me.btnResetujWarstwy = New System.Windows.Forms.Button()
+        Me.lblWarstwa12 = New System.Windows.Forms.Label()
+        Me.lblWarstwa08 = New System.Windows.Forms.Label()
+        Me.lblWarstwa11 = New System.Windows.Forms.Label()
+        Me.lblWarstwa10 = New System.Windows.Forms.Label()
+        Me.lblWarstwa07 = New System.Windows.Forms.Label()
+        Me.lblWarstwa09 = New System.Windows.Forms.Label()
+        Me.lblWarstwa06 = New System.Windows.Forms.Label()
+        Me.lblWarstwa02 = New System.Windows.Forms.Label()
+        Me.lblWarstwa05 = New System.Windows.Forms.Label()
+        Me.lblWarstwa04 = New System.Windows.Forms.Label()
+        Me.lblWarstwa01 = New System.Windows.Forms.Label()
+        Me.lblWarstwa03 = New System.Windows.Forms.Label()
         Me.PictureBox1 = New System.Windows.Forms.PictureBox()
-        Me.Button2 = New System.Windows.Forms.Button()
-        Me.Button5 = New System.Windows.Forms.Button()
-        Me.GroupBox4 = New System.Windows.Forms.GroupBox()
+        Me.btnPowieksz = New System.Windows.Forms.Button()
+        Me.btnPomniejsz = New System.Windows.Forms.Button()
+        Me.grpRozmiarSiatki = New System.Windows.Forms.GroupBox()
         Me.Label22 = New System.Windows.Forms.Label()
         Me.Label19 = New System.Windows.Forms.Label()
         Me.Label18 = New System.Windows.Forms.Label()
-        Me.TextBox12 = New System.Windows.Forms.TextBox()
+        Me.txtLiczbaWierszy = New System.Windows.Forms.TextBox()
         Me.Label21 = New System.Windows.Forms.Label()
-        Me.TextBox11 = New System.Windows.Forms.TextBox()
+        Me.txtLiczbaKolumn = New System.Windows.Forms.TextBox()
         Me.Label20 = New System.Windows.Forms.Label()
-        Me.TextBox7 = New System.Windows.Forms.TextBox()
-        Me.TextBox8 = New System.Windows.Forms.TextBox()
+        Me.txtWysokoscPx = New System.Windows.Forms.TextBox()
+        Me.txtSzerokoscPx = New System.Windows.Forms.TextBox()
         Me.Label9 = New System.Windows.Forms.Label()
         Me.Label17 = New System.Windows.Forms.Label()
         Me.Label10 = New System.Windows.Forms.Label()
-        Me.TextBox5 = New System.Windows.Forms.TextBox()
-        Me.TextBox6 = New System.Windows.Forms.TextBox()
+        Me.txtSzerokoscKm = New System.Windows.Forms.TextBox()
+        Me.txtWysokoscKm = New System.Windows.Forms.TextBox()
         Me.Label42 = New System.Windows.Forms.Label()
         Me.Label7 = New System.Windows.Forms.Label()
         Me.Label8 = New System.Windows.Forms.Label()
-        Me.Button9 = New System.Windows.Forms.Button()
-        Me.Button4 = New System.Windows.Forms.Button()
-        Me.Button8 = New System.Windows.Forms.Button()
-        Me.Button7 = New System.Windows.Forms.Button()
-        Me.GMapControl1 = New GMap.NET.WindowsForms.GMapControl()
-        Me.RadioButton1 = New System.Windows.Forms.RadioButton()
-        Me.RadioButton2 = New System.Windows.Forms.RadioButton()
-        Me.RadioButton3 = New System.Windows.Forms.RadioButton()
-        Me.Label35 = New System.Windows.Forms.Label()
-        Me.Label37 = New System.Windows.Forms.Label()
-        Me.Label38 = New System.Windows.Forms.Label()
-        Me.Label39 = New System.Windows.Forms.Label()
-        Me.Label40 = New System.Windows.Forms.Label()
-        Me.Label41 = New System.Windows.Forms.Label()
-        Me.Label63 = New System.Windows.Forms.Label()
-        Me.Label65 = New System.Windows.Forms.Label()
-        Me.Label66 = New System.Windows.Forms.Label()
+        Me.btnUsunPobrane = New System.Windows.Forms.Button()
+        Me.btnZnaczniki = New System.Windows.Forms.Button()
+        Me.btnScalanie = New System.Windows.Forms.Button()
+        Me.btnOtworzFolder = New System.Windows.Forms.Button()
+        Me.mapa = New GMap.NET.WindowsForms.GMapControl()
+        Me.rbOsm = New System.Windows.Forms.RadioButton()
+        Me.rbGoogle = New System.Windows.Forms.RadioButton()
+        Me.rbBing = New System.Windows.Forms.RadioButton()
+        Me.lblSrodekSzer = New System.Windows.Forms.Label()
+        Me.lblSrodekOpisSzer = New System.Windows.Forms.Label()
+        Me.lblSrodekTytul = New System.Windows.Forms.Label()
+        Me.lblKursorTytul = New System.Windows.Forms.Label()
+        Me.lblKursorUkladOpis = New System.Windows.Forms.Label()
+        Me.lblKursorUklad = New System.Windows.Forms.Label()
+        Me.lblSrodekDlug = New System.Windows.Forms.Label()
+        Me.lblZoom = New System.Windows.Forms.Label()
+        Me.lblSrodekOpisDlug = New System.Windows.Forms.Label()
         Me.Label67 = New System.Windows.Forms.Label()
-        Me.RichTextBox1 = New System.Windows.Forms.RichTextBox()
-        Me.Label36 = New System.Windows.Forms.Label()
-        Me.GroupBox5 = New System.Windows.Forms.GroupBox()
-        Me.Label34 = New System.Windows.Forms.Label()
-        Me.Label32 = New System.Windows.Forms.Label()
-        Me.Label33 = New System.Windows.Forms.Label()
-        Me.Label31 = New System.Windows.Forms.Label()
-        Me.Label5 = New System.Windows.Forms.Label()
-        Me.Label6 = New System.Windows.Forms.Label()
-        Me.TextBox4 = New System.Windows.Forms.TextBox()
-        Me.TextBox3 = New System.Windows.Forms.TextBox()
-        Me.Label4 = New System.Windows.Forms.Label()
-        Me.Label3 = New System.Windows.Forms.Label()
-        Me.TextBox2 = New System.Windows.Forms.TextBox()
-        Me.TextBox1 = New System.Windows.Forms.TextBox()
+        Me.txtKomunikaty = New System.Windows.Forms.RichTextBox()
+        Me.lblKursorWgs = New System.Windows.Forms.Label()
+        Me.grpSchemat = New System.Windows.Forms.GroupBox()
+        Me.lblZaznDlugLewa = New System.Windows.Forms.Label()
+        Me.lblZaznSzerDol = New System.Windows.Forms.Label()
+        Me.lblZaznDlugPrawa = New System.Windows.Forms.Label()
+        Me.lblZaznSzerGora = New System.Windows.Forms.Label()
+        Me.lblOpisYPrawy = New System.Windows.Forms.Label()
+        Me.lblOpisXGora = New System.Windows.Forms.Label()
+        Me.txtYPrawy = New System.Windows.Forms.TextBox()
+        Me.txtXGora = New System.Windows.Forms.TextBox()
+        Me.lblOpisYLewy = New System.Windows.Forms.Label()
+        Me.lblOpisXDol = New System.Windows.Forms.Label()
+        Me.txtYLewy = New System.Windows.Forms.TextBox()
+        Me.txtXDol = New System.Windows.Forms.TextBox()
         Me.PictureBox2 = New System.Windows.Forms.PictureBox()
         Me.Panel2 = New System.Windows.Forms.Panel()
         Me.Panel3 = New System.Windows.Forms.Panel()
-        Me.GroupBox2.SuspendLayout()
+        Me.grpDaneZrodlowe.SuspendLayout()
         Me.StatusStrip1.SuspendLayout()
         Me.MenuStrip1.SuspendLayout()
-        Me.GroupBox3.SuspendLayout()
+        Me.grpWybraneWarstwy.SuspendLayout()
         CType(Me.PictureBox1, System.ComponentModel.ISupportInitialize).BeginInit()
-        Me.GroupBox4.SuspendLayout()
-        Me.GroupBox5.SuspendLayout()
+        Me.grpRozmiarSiatki.SuspendLayout()
+        Me.grpSchemat.SuspendLayout()
         CType(Me.PictureBox2, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.Panel2.SuspendLayout()
         Me.Panel3.SuspendLayout()
         Me.SuspendLayout()
         '
-        'Button1
+        'btnPobierz
         '
-        Me.Button1.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.Button1.BackColor = System.Drawing.SystemColors.ActiveBorder
-        Me.Button1.Font = New System.Drawing.Font("Microsoft Sans Serif", 12.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
-        Me.Button1.Location = New System.Drawing.Point(110, 569)
-        Me.Button1.Name = "Button1"
-        Me.Button1.Size = New System.Drawing.Size(105, 36)
-        Me.Button1.TabIndex = 6
-        Me.Button1.Tag = ""
-        Me.Button1.Text = "Pobierz"
-        Me.ToolTip1.SetToolTip(Me.Button1, "Rozpocznij proces pobierania mapy.")
-        Me.Button1.UseVisualStyleBackColor = False
+        Me.btnPobierz.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.btnPobierz.BackColor = System.Drawing.SystemColors.ActiveBorder
+        Me.btnPobierz.Font = New System.Drawing.Font("Microsoft Sans Serif", 12.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
+        Me.btnPobierz.Location = New System.Drawing.Point(110, 569)
+        Me.btnPobierz.Name = "btnPobierz"
+        Me.btnPobierz.Size = New System.Drawing.Size(105, 36)
+        Me.btnPobierz.TabIndex = 6
+        Me.btnPobierz.Tag = ""
+        Me.btnPobierz.Text = "Pobierz"
+        Me.ToolTip1.SetToolTip(Me.btnPobierz, "Rozpocznij proces pobierania mapy.")
+        Me.btnPobierz.UseVisualStyleBackColor = False
         '
-        'GroupBox2
+        'grpDaneZrodlowe
         '
-        Me.GroupBox2.Controls.Add(Me.Label30)
-        Me.GroupBox2.Controls.Add(Me.Label29)
-        Me.GroupBox2.Controls.Add(Me.ListBox1)
-        Me.GroupBox2.Controls.Add(Me.ComboBox3)
-        Me.GroupBox2.Location = New System.Drawing.Point(5, 3)
-        Me.GroupBox2.Name = "GroupBox2"
-        Me.GroupBox2.Size = New System.Drawing.Size(212, 254)
-        Me.GroupBox2.TabIndex = 210
-        Me.GroupBox2.TabStop = False
-        Me.GroupBox2.Text = "Dane źródłowe"
+        Me.grpDaneZrodlowe.Controls.Add(Me.Label30)
+        Me.grpDaneZrodlowe.Controls.Add(Me.Label29)
+        Me.grpDaneZrodlowe.Controls.Add(Me.lstWarstwy)
+        Me.grpDaneZrodlowe.Controls.Add(Me.cmbZbiorMap)
+        Me.grpDaneZrodlowe.Location = New System.Drawing.Point(5, 3)
+        Me.grpDaneZrodlowe.Name = "grpDaneZrodlowe"
+        Me.grpDaneZrodlowe.Size = New System.Drawing.Size(212, 254)
+        Me.grpDaneZrodlowe.TabIndex = 210
+        Me.grpDaneZrodlowe.TabStop = False
+        Me.grpDaneZrodlowe.Text = "Dane źródłowe"
         '
         'Label30
         '
@@ -209,23 +209,23 @@ Partial Class Form1
         Me.ToolTip1.SetToolTip(Me.Label29, "Spis dostępnych serwerów WMS, których definicje znajdują się w plikach tekstowych" &
         " katalogu /warstwy/")
         '
-        'ListBox1
+        'lstWarstwy
         '
-        Me.ListBox1.FormattingEnabled = True
-        Me.ListBox1.Location = New System.Drawing.Point(6, 72)
-        Me.ListBox1.Name = "ListBox1"
-        Me.ListBox1.Size = New System.Drawing.Size(198, 173)
-        Me.ListBox1.TabIndex = 216
+        Me.lstWarstwy.FormattingEnabled = True
+        Me.lstWarstwy.Location = New System.Drawing.Point(6, 72)
+        Me.lstWarstwy.Name = "lstWarstwy"
+        Me.lstWarstwy.Size = New System.Drawing.Size(198, 173)
+        Me.lstWarstwy.TabIndex = 216
         '
-        'ComboBox3
+        'cmbZbiorMap
         '
-        Me.ComboBox3.FormattingEnabled = True
-        Me.ComboBox3.Location = New System.Drawing.Point(6, 29)
-        Me.ComboBox3.MaxDropDownItems = 18
-        Me.ComboBox3.Name = "ComboBox3"
-        Me.ComboBox3.Size = New System.Drawing.Size(198, 21)
-        Me.ComboBox3.TabIndex = 216
-        Me.ComboBox3.Text = "skany_map_topograficznych"
+        Me.cmbZbiorMap.FormattingEnabled = True
+        Me.cmbZbiorMap.Location = New System.Drawing.Point(6, 29)
+        Me.cmbZbiorMap.MaxDropDownItems = 18
+        Me.cmbZbiorMap.Name = "cmbZbiorMap"
+        Me.cmbZbiorMap.Size = New System.Drawing.Size(198, 21)
+        Me.cmbZbiorMap.TabIndex = 216
+        Me.cmbZbiorMap.Text = "skany_map_topograficznych"
         '
         'Panel1
         '
@@ -239,7 +239,7 @@ Partial Class Form1
         '
         'StatusStrip1
         '
-        Me.StatusStrip1.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.ToolStripProgressBar1, Me.ToolStripStatusLabel2, Me.ToolStripStatusLabel1, Me.ToolStripStatusLabel3})
+        Me.StatusStrip1.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.stPostep, Me.stFormat, Me.stFolder, Me.stSegment})
         Me.StatusStrip1.Location = New System.Drawing.Point(0, 662)
         Me.StatusStrip1.Name = "StatusStrip1"
         Me.StatusStrip1.Size = New System.Drawing.Size(878, 22)
@@ -248,42 +248,42 @@ Partial Class Form1
         Me.ToolTip1.SetToolTip(Me.StatusStrip1, "Informacje o aktualnym formacie plików rastrowych oraz lokalizacji katalogu ""down" &
         "load""")
         '
-        'ToolStripProgressBar1
+        'stPostep
         '
-        Me.ToolStripProgressBar1.Name = "ToolStripProgressBar1"
-        Me.ToolStripProgressBar1.Size = New System.Drawing.Size(100, 16)
+        Me.stPostep.Name = "stPostep"
+        Me.stPostep.Size = New System.Drawing.Size(100, 16)
         '
-        'ToolStripStatusLabel2
+        'stFormat
         '
-        Me.ToolStripStatusLabel2.BackColor = System.Drawing.SystemColors.Window
-        Me.ToolStripStatusLabel2.Name = "ToolStripStatusLabel2"
-        Me.ToolStripStatusLabel2.Size = New System.Drawing.Size(70, 17)
-        Me.ToolStripStatusLabel2.Text = "rozszerzenie"
+        Me.stFormat.BackColor = System.Drawing.SystemColors.Window
+        Me.stFormat.Name = "stFormat"
+        Me.stFormat.Size = New System.Drawing.Size(70, 17)
+        Me.stFormat.Text = "rozszerzenie"
         '
-        'ToolStripStatusLabel1
+        'stFolder
         '
-        Me.ToolStripStatusLabel1.Name = "ToolStripStatusLabel1"
-        Me.ToolStripStatusLabel1.Size = New System.Drawing.Size(81, 17)
-        Me.ToolStripStatusLabel1.Text = "wybierz folder"
+        Me.stFolder.Name = "stFolder"
+        Me.stFolder.Size = New System.Drawing.Size(81, 17)
+        Me.stFolder.Text = "wybierz folder"
         '
-        'ToolStripStatusLabel3
+        'stSegment
         '
-        Me.ToolStripStatusLabel3.Name = "ToolStripStatusLabel3"
-        Me.ToolStripStatusLabel3.Size = New System.Drawing.Size(49, 17)
-        Me.ToolStripStatusLabel3.Text = "kwadrat"
+        Me.stSegment.Name = "stSegment"
+        Me.stSegment.Size = New System.Drawing.Size(49, 17)
+        Me.stSegment.Text = "kwadrat"
         '
-        'Button3
+        'btnPrzerwij
         '
-        Me.Button3.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.Button3.Enabled = False
-        Me.Button3.Location = New System.Drawing.Point(110, 613)
-        Me.Button3.Name = "Button3"
-        Me.Button3.Size = New System.Drawing.Size(105, 21)
-        Me.Button3.TabIndex = 245
-        Me.Button3.Tag = ""
-        Me.Button3.Text = "Przerwij pobieranie"
-        Me.ToolTip1.SetToolTip(Me.Button3, "Anuluj rozpoczęty proces pobierania mapy")
-        Me.Button3.UseVisualStyleBackColor = True
+        Me.btnPrzerwij.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.btnPrzerwij.Enabled = False
+        Me.btnPrzerwij.Location = New System.Drawing.Point(110, 613)
+        Me.btnPrzerwij.Name = "btnPrzerwij"
+        Me.btnPrzerwij.Size = New System.Drawing.Size(105, 21)
+        Me.btnPrzerwij.TabIndex = 245
+        Me.btnPrzerwij.Tag = ""
+        Me.btnPrzerwij.Text = "Przerwij pobieranie"
+        Me.ToolTip1.SetToolTip(Me.btnPrzerwij, "Anuluj rozpoczęty proces pobierania mapy")
+        Me.btnPrzerwij.UseVisualStyleBackColor = True
         '
         'SesjaToolStripMenuItem
         '
@@ -309,13 +309,13 @@ Partial Class Form1
         Me.WczytajToolStripMenuItem1.Size = New System.Drawing.Size(290, 22)
         Me.WczytajToolStripMenuItem1.Text = "wczytaj ustawienia sesji (conf.txt)"
         '
-        'WarstwyToolStripMenuItem
+        'NarzedziaToolStripMenuItem
         '
-        Me.WarstwyToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.ScalanieToolStripMenuItem, Me.NakładanieWarstwNaSiebieToolStripMenuItem, Me.UsuwaniePustychSegmentówToolStripMenuItem})
-        Me.WarstwyToolStripMenuItem.Name = "WarstwyToolStripMenuItem"
-        Me.WarstwyToolStripMenuItem.Size = New System.Drawing.Size(70, 20)
-        Me.WarstwyToolStripMenuItem.Text = "Narzędzia"
-        Me.WarstwyToolStripMenuItem.ToolTipText = "Opcjonalne narzędzia wykorzystywane jedynie w szczególnych przypadkach"
+        Me.NarzedziaToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.ScalanieToolStripMenuItem, Me.NakładanieWarstwNaSiebieToolStripMenuItem, Me.UsuwaniePustychSegmentówToolStripMenuItem})
+        Me.NarzedziaToolStripMenuItem.Name = "NarzedziaToolStripMenuItem"
+        Me.NarzedziaToolStripMenuItem.Size = New System.Drawing.Size(70, 20)
+        Me.NarzedziaToolStripMenuItem.Text = "Narzędzia"
+        Me.NarzedziaToolStripMenuItem.ToolTipText = "Opcjonalne narzędzia wykorzystywane jedynie w szczególnych przypadkach"
         '
         'ScalanieToolStripMenuItem
         '
@@ -375,7 +375,7 @@ Partial Class Form1
         '
         'MenuStrip1
         '
-        Me.MenuStrip1.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.SesjaToolStripMenuItem, Me.WarstwyToolStripMenuItem, Me.UstawieniaToolStripMenuItem, Me.HelpToolStripMenuItem})
+        Me.MenuStrip1.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.SesjaToolStripMenuItem, Me.NarzedziaToolStripMenuItem, Me.UstawieniaToolStripMenuItem, Me.HelpToolStripMenuItem})
         Me.MenuStrip1.Location = New System.Drawing.Point(0, 0)
         Me.MenuStrip1.Name = "MenuStrip1"
         Me.MenuStrip1.Size = New System.Drawing.Size(878, 24)
@@ -406,24 +406,24 @@ Partial Class Form1
         Me.ToolTip1.SetToolTip(Me.Label46, "Domyślna wartość zapewnia optymalną jakość pobranego obrazu. Im większy rozmiar p" &
         "ojedynczego piksela, tym gorsza jakość obrazu.")
         '
-        'TextBox13
+        'txtZasiegSegmentuKm
         '
-        Me.TextBox13.Enabled = False
-        Me.TextBox13.Location = New System.Drawing.Point(246, 108)
-        Me.TextBox13.Name = "TextBox13"
-        Me.TextBox13.Size = New System.Drawing.Size(44, 20)
-        Me.TextBox13.TabIndex = 219
-        Me.TextBox13.Text = "2000"
-        Me.TextBox13.TextAlign = System.Windows.Forms.HorizontalAlignment.Center
+        Me.txtZasiegSegmentuKm.Enabled = False
+        Me.txtZasiegSegmentuKm.Location = New System.Drawing.Point(246, 108)
+        Me.txtZasiegSegmentuKm.Name = "txtZasiegSegmentuKm"
+        Me.txtZasiegSegmentuKm.Size = New System.Drawing.Size(44, 20)
+        Me.txtZasiegSegmentuKm.TabIndex = 219
+        Me.txtZasiegSegmentuKm.Text = "2000"
+        Me.txtZasiegSegmentuKm.TextAlign = System.Windows.Forms.HorizontalAlignment.Center
         '
-        'TextBox9
+        'txtBokSegmentu
         '
-        Me.TextBox9.Location = New System.Drawing.Point(246, 72)
-        Me.TextBox9.Name = "TextBox9"
-        Me.TextBox9.Size = New System.Drawing.Size(44, 20)
-        Me.TextBox9.TabIndex = 211
-        Me.TextBox9.Text = "2000"
-        Me.TextBox9.TextAlign = System.Windows.Forms.HorizontalAlignment.Center
+        Me.txtBokSegmentu.Location = New System.Drawing.Point(246, 72)
+        Me.txtBokSegmentu.Name = "txtBokSegmentu"
+        Me.txtBokSegmentu.Size = New System.Drawing.Size(44, 20)
+        Me.txtBokSegmentu.TabIndex = 211
+        Me.txtBokSegmentu.Text = "2000"
+        Me.txtBokSegmentu.TextAlign = System.Windows.Forms.HorizontalAlignment.Center
         '
         'Label1
         '
@@ -448,164 +448,164 @@ Partial Class Form1
         Me.ToolTip1.SetToolTip(Me.Label2, "Domyślna wartość jest optymalna. Im większy rozmiar piksela, tym gorsza jakość ob" &
         "razu, ale jednocześnie tym większy jego przestrzenny zasięg.")
         '
-        'TextBox10
+        'txtRozmiarPiksela
         '
-        Me.TextBox10.Location = New System.Drawing.Point(246, 36)
-        Me.TextBox10.Name = "TextBox10"
-        Me.TextBox10.Size = New System.Drawing.Size(44, 20)
-        Me.TextBox10.TabIndex = 212
-        Me.TextBox10.Text = "1"
-        Me.TextBox10.TextAlign = System.Windows.Forms.HorizontalAlignment.Center
+        Me.txtRozmiarPiksela.Location = New System.Drawing.Point(246, 36)
+        Me.txtRozmiarPiksela.Name = "txtRozmiarPiksela"
+        Me.txtRozmiarPiksela.Size = New System.Drawing.Size(44, 20)
+        Me.txtRozmiarPiksela.TabIndex = 212
+        Me.txtRozmiarPiksela.Text = "1"
+        Me.txtRozmiarPiksela.TextAlign = System.Windows.Forms.HorizontalAlignment.Center
         '
         'ToolTip1
         '
         Me.ToolTip1.IsBalloon = True
         '
-        'GroupBox3
+        'grpWybraneWarstwy
         '
-        Me.GroupBox3.Controls.Add(Me.Button6)
-        Me.GroupBox3.Controls.Add(Me.Label23)
-        Me.GroupBox3.Controls.Add(Me.Label24)
-        Me.GroupBox3.Controls.Add(Me.Label25)
-        Me.GroupBox3.Controls.Add(Me.Label26)
-        Me.GroupBox3.Controls.Add(Me.Label27)
-        Me.GroupBox3.Controls.Add(Me.Label28)
-        Me.GroupBox3.Controls.Add(Me.Label16)
-        Me.GroupBox3.Controls.Add(Me.Label12)
-        Me.GroupBox3.Controls.Add(Me.Label15)
-        Me.GroupBox3.Controls.Add(Me.Label14)
-        Me.GroupBox3.Controls.Add(Me.Label11)
-        Me.GroupBox3.Controls.Add(Me.Label13)
-        Me.GroupBox3.Controls.Add(Me.PictureBox1)
-        Me.GroupBox3.Location = New System.Drawing.Point(5, 258)
-        Me.GroupBox3.Name = "GroupBox3"
-        Me.GroupBox3.Size = New System.Drawing.Size(210, 234)
-        Me.GroupBox3.TabIndex = 268
-        Me.GroupBox3.TabStop = False
-        Me.GroupBox3.Text = "Wybrane warstwy oraz ich kolejność"
-        Me.ToolTip1.SetToolTip(Me.GroupBox3, """Kanapka"" warstw. Pierwsza warstwa to bazowy podkład, który można przykryć kolejn" &
+        Me.grpWybraneWarstwy.Controls.Add(Me.btnResetujWarstwy)
+        Me.grpWybraneWarstwy.Controls.Add(Me.lblWarstwa12)
+        Me.grpWybraneWarstwy.Controls.Add(Me.lblWarstwa08)
+        Me.grpWybraneWarstwy.Controls.Add(Me.lblWarstwa11)
+        Me.grpWybraneWarstwy.Controls.Add(Me.lblWarstwa10)
+        Me.grpWybraneWarstwy.Controls.Add(Me.lblWarstwa07)
+        Me.grpWybraneWarstwy.Controls.Add(Me.lblWarstwa09)
+        Me.grpWybraneWarstwy.Controls.Add(Me.lblWarstwa06)
+        Me.grpWybraneWarstwy.Controls.Add(Me.lblWarstwa02)
+        Me.grpWybraneWarstwy.Controls.Add(Me.lblWarstwa05)
+        Me.grpWybraneWarstwy.Controls.Add(Me.lblWarstwa04)
+        Me.grpWybraneWarstwy.Controls.Add(Me.lblWarstwa01)
+        Me.grpWybraneWarstwy.Controls.Add(Me.lblWarstwa03)
+        Me.grpWybraneWarstwy.Controls.Add(Me.PictureBox1)
+        Me.grpWybraneWarstwy.Location = New System.Drawing.Point(5, 258)
+        Me.grpWybraneWarstwy.Name = "grpWybraneWarstwy"
+        Me.grpWybraneWarstwy.Size = New System.Drawing.Size(210, 234)
+        Me.grpWybraneWarstwy.TabIndex = 268
+        Me.grpWybraneWarstwy.TabStop = False
+        Me.grpWybraneWarstwy.Text = "Wybrane warstwy oraz ich kolejność"
+        Me.ToolTip1.SetToolTip(Me.grpWybraneWarstwy, """Kanapka"" warstw. Pierwsza warstwa to bazowy podkład, który można przykryć kolejn" &
         "ymi warstwami o wyższym numerze, o ile mają one przeźroczyste tło, lub mają niep" &
         "ełne pokrycie.")
         '
-        'Button6
+        'btnResetujWarstwy
         '
-        Me.Button6.Image = Global.MapoTero.My.Resources.Resources.kosz
-        Me.Button6.Location = New System.Drawing.Point(4, 209)
-        Me.Button6.Name = "Button6"
-        Me.Button6.Size = New System.Drawing.Size(26, 22)
-        Me.Button6.TabIndex = 304
-        Me.Button6.UseVisualStyleBackColor = True
+        Me.btnResetujWarstwy.Image = Global.MapoTero.My.Resources.Resources.kosz
+        Me.btnResetujWarstwy.Location = New System.Drawing.Point(4, 209)
+        Me.btnResetujWarstwy.Name = "btnResetujWarstwy"
+        Me.btnResetujWarstwy.Size = New System.Drawing.Size(26, 22)
+        Me.btnResetujWarstwy.TabIndex = 304
+        Me.btnResetujWarstwy.UseVisualStyleBackColor = True
         '
-        'Label23
+        'lblWarstwa12
         '
-        Me.Label23.AutoSize = True
-        Me.Label23.Location = New System.Drawing.Point(1, 16)
-        Me.Label23.Name = "Label23"
-        Me.Label23.Size = New System.Drawing.Size(22, 13)
-        Me.Label23.TabIndex = 229
-        Me.Label23.Text = "12)"
+        Me.lblWarstwa12.AutoSize = True
+        Me.lblWarstwa12.Location = New System.Drawing.Point(1, 16)
+        Me.lblWarstwa12.Name = "lblWarstwa12"
+        Me.lblWarstwa12.Size = New System.Drawing.Size(22, 13)
+        Me.lblWarstwa12.TabIndex = 229
+        Me.lblWarstwa12.Text = "12)"
         '
-        'Label24
+        'lblWarstwa08
         '
-        Me.Label24.AutoSize = True
-        Me.Label24.Location = New System.Drawing.Point(6, 78)
-        Me.Label24.Name = "Label24"
-        Me.Label24.Size = New System.Drawing.Size(16, 13)
-        Me.Label24.TabIndex = 225
-        Me.Label24.Text = "8)"
+        Me.lblWarstwa08.AutoSize = True
+        Me.lblWarstwa08.Location = New System.Drawing.Point(6, 78)
+        Me.lblWarstwa08.Name = "lblWarstwa08"
+        Me.lblWarstwa08.Size = New System.Drawing.Size(16, 13)
+        Me.lblWarstwa08.TabIndex = 225
+        Me.lblWarstwa08.Text = "8)"
         '
-        'Label25
+        'lblWarstwa11
         '
-        Me.Label25.AutoSize = True
-        Me.Label25.Location = New System.Drawing.Point(1, 31)
-        Me.Label25.Name = "Label25"
-        Me.Label25.Size = New System.Drawing.Size(22, 13)
-        Me.Label25.TabIndex = 228
-        Me.Label25.Text = "11)"
+        Me.lblWarstwa11.AutoSize = True
+        Me.lblWarstwa11.Location = New System.Drawing.Point(1, 31)
+        Me.lblWarstwa11.Name = "lblWarstwa11"
+        Me.lblWarstwa11.Size = New System.Drawing.Size(22, 13)
+        Me.lblWarstwa11.TabIndex = 228
+        Me.lblWarstwa11.Text = "11)"
         '
-        'Label26
+        'lblWarstwa10
         '
-        Me.Label26.AutoSize = True
-        Me.Label26.Location = New System.Drawing.Point(1, 47)
-        Me.Label26.Name = "Label26"
-        Me.Label26.Size = New System.Drawing.Size(22, 13)
-        Me.Label26.TabIndex = 227
-        Me.Label26.Text = "10)"
+        Me.lblWarstwa10.AutoSize = True
+        Me.lblWarstwa10.Location = New System.Drawing.Point(1, 47)
+        Me.lblWarstwa10.Name = "lblWarstwa10"
+        Me.lblWarstwa10.Size = New System.Drawing.Size(22, 13)
+        Me.lblWarstwa10.TabIndex = 227
+        Me.lblWarstwa10.Text = "10)"
         '
-        'Label27
+        'lblWarstwa07
         '
-        Me.Label27.AutoSize = True
-        Me.Label27.Location = New System.Drawing.Point(6, 93)
-        Me.Label27.Name = "Label27"
-        Me.Label27.Size = New System.Drawing.Size(16, 13)
-        Me.Label27.TabIndex = 224
-        Me.Label27.Text = "7)"
+        Me.lblWarstwa07.AutoSize = True
+        Me.lblWarstwa07.Location = New System.Drawing.Point(6, 93)
+        Me.lblWarstwa07.Name = "lblWarstwa07"
+        Me.lblWarstwa07.Size = New System.Drawing.Size(16, 13)
+        Me.lblWarstwa07.TabIndex = 224
+        Me.lblWarstwa07.Text = "7)"
         '
-        'Label28
+        'lblWarstwa09
         '
-        Me.Label28.AutoSize = True
-        Me.Label28.Location = New System.Drawing.Point(6, 63)
-        Me.Label28.Name = "Label28"
-        Me.Label28.Size = New System.Drawing.Size(16, 13)
-        Me.Label28.TabIndex = 226
-        Me.Label28.Text = "9)"
+        Me.lblWarstwa09.AutoSize = True
+        Me.lblWarstwa09.Location = New System.Drawing.Point(6, 63)
+        Me.lblWarstwa09.Name = "lblWarstwa09"
+        Me.lblWarstwa09.Size = New System.Drawing.Size(16, 13)
+        Me.lblWarstwa09.TabIndex = 226
+        Me.lblWarstwa09.Text = "9)"
         '
-        'Label16
+        'lblWarstwa06
         '
-        Me.Label16.AutoSize = True
-        Me.Label16.Location = New System.Drawing.Point(6, 109)
-        Me.Label16.Name = "Label16"
-        Me.Label16.Size = New System.Drawing.Size(16, 13)
-        Me.Label16.TabIndex = 223
-        Me.Label16.Text = "6)"
+        Me.lblWarstwa06.AutoSize = True
+        Me.lblWarstwa06.Location = New System.Drawing.Point(6, 109)
+        Me.lblWarstwa06.Name = "lblWarstwa06"
+        Me.lblWarstwa06.Size = New System.Drawing.Size(16, 13)
+        Me.lblWarstwa06.TabIndex = 223
+        Me.lblWarstwa06.Text = "6)"
         '
-        'Label12
+        'lblWarstwa02
         '
-        Me.Label12.AutoSize = True
-        Me.Label12.Location = New System.Drawing.Point(6, 178)
-        Me.Label12.Name = "Label12"
-        Me.Label12.Size = New System.Drawing.Size(16, 13)
-        Me.Label12.TabIndex = 219
-        Me.Label12.Text = "2)"
-        Me.ToolTip1.SetToolTip(Me.Label12, "Kolejna nakładana warstwa, która przykryje podkład")
+        Me.lblWarstwa02.AutoSize = True
+        Me.lblWarstwa02.Location = New System.Drawing.Point(6, 178)
+        Me.lblWarstwa02.Name = "lblWarstwa02"
+        Me.lblWarstwa02.Size = New System.Drawing.Size(16, 13)
+        Me.lblWarstwa02.TabIndex = 219
+        Me.lblWarstwa02.Text = "2)"
+        Me.ToolTip1.SetToolTip(Me.lblWarstwa02, "Kolejna nakładana warstwa, która przykryje podkład")
         '
-        'Label15
+        'lblWarstwa05
         '
-        Me.Label15.AutoSize = True
-        Me.Label15.Location = New System.Drawing.Point(6, 126)
-        Me.Label15.Name = "Label15"
-        Me.Label15.Size = New System.Drawing.Size(16, 13)
-        Me.Label15.TabIndex = 222
-        Me.Label15.Text = "5)"
+        Me.lblWarstwa05.AutoSize = True
+        Me.lblWarstwa05.Location = New System.Drawing.Point(6, 126)
+        Me.lblWarstwa05.Name = "lblWarstwa05"
+        Me.lblWarstwa05.Size = New System.Drawing.Size(16, 13)
+        Me.lblWarstwa05.TabIndex = 222
+        Me.lblWarstwa05.Text = "5)"
         '
-        'Label14
+        'lblWarstwa04
         '
-        Me.Label14.AutoSize = True
-        Me.Label14.Location = New System.Drawing.Point(6, 143)
-        Me.Label14.Name = "Label14"
-        Me.Label14.Size = New System.Drawing.Size(16, 13)
-        Me.Label14.TabIndex = 221
-        Me.Label14.Text = "4)"
+        Me.lblWarstwa04.AutoSize = True
+        Me.lblWarstwa04.Location = New System.Drawing.Point(6, 143)
+        Me.lblWarstwa04.Name = "lblWarstwa04"
+        Me.lblWarstwa04.Size = New System.Drawing.Size(16, 13)
+        Me.lblWarstwa04.TabIndex = 221
+        Me.lblWarstwa04.Text = "4)"
         '
-        'Label11
+        'lblWarstwa01
         '
-        Me.Label11.AutoSize = True
-        Me.Label11.Location = New System.Drawing.Point(6, 194)
-        Me.Label11.Name = "Label11"
-        Me.Label11.Size = New System.Drawing.Size(16, 13)
-        Me.Label11.TabIndex = 218
-        Me.Label11.Text = "1)"
-        Me.ToolTip1.SetToolTip(Me.Label11, "Główna warstwa podkładowa, którą można przykryć kolejnymi warstwami (o ile mają p" &
+        Me.lblWarstwa01.AutoSize = True
+        Me.lblWarstwa01.Location = New System.Drawing.Point(6, 194)
+        Me.lblWarstwa01.Name = "lblWarstwa01"
+        Me.lblWarstwa01.Size = New System.Drawing.Size(16, 13)
+        Me.lblWarstwa01.TabIndex = 218
+        Me.lblWarstwa01.Text = "1)"
+        Me.ToolTip1.SetToolTip(Me.lblWarstwa01, "Główna warstwa podkładowa, którą można przykryć kolejnymi warstwami (o ile mają p" &
         "rzeźroczyste tło lub nie pokrywają całkowicie podkładu)")
         '
-        'Label13
+        'lblWarstwa03
         '
-        Me.Label13.AutoSize = True
-        Me.Label13.Location = New System.Drawing.Point(6, 161)
-        Me.Label13.Name = "Label13"
-        Me.Label13.Size = New System.Drawing.Size(16, 13)
-        Me.Label13.TabIndex = 220
-        Me.Label13.Text = "3)"
+        Me.lblWarstwa03.AutoSize = True
+        Me.lblWarstwa03.Location = New System.Drawing.Point(6, 161)
+        Me.lblWarstwa03.Name = "lblWarstwa03"
+        Me.lblWarstwa03.Size = New System.Drawing.Size(16, 13)
+        Me.lblWarstwa03.TabIndex = 220
+        Me.lblWarstwa03.Text = "3)"
         '
         'PictureBox1
         '
@@ -616,54 +616,54 @@ Partial Class Form1
         Me.PictureBox1.TabIndex = 305
         Me.PictureBox1.TabStop = False
         '
-        'Button2
+        'btnPowieksz
         '
-        Me.Button2.Font = New System.Drawing.Font("Microsoft Sans Serif", 14.25!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
-        Me.Button2.Location = New System.Drawing.Point(6, 28)
-        Me.Button2.Margin = New System.Windows.Forms.Padding(0)
-        Me.Button2.Name = "Button2"
-        Me.Button2.Size = New System.Drawing.Size(23, 31)
-        Me.Button2.TabIndex = 295
-        Me.Button2.Text = "+"
-        Me.ToolTip1.SetToolTip(Me.Button2, "Powiększ")
-        Me.Button2.UseVisualStyleBackColor = True
+        Me.btnPowieksz.Font = New System.Drawing.Font("Microsoft Sans Serif", 14.25!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
+        Me.btnPowieksz.Location = New System.Drawing.Point(6, 28)
+        Me.btnPowieksz.Margin = New System.Windows.Forms.Padding(0)
+        Me.btnPowieksz.Name = "btnPowieksz"
+        Me.btnPowieksz.Size = New System.Drawing.Size(23, 31)
+        Me.btnPowieksz.TabIndex = 295
+        Me.btnPowieksz.Text = "+"
+        Me.ToolTip1.SetToolTip(Me.btnPowieksz, "Powiększ")
+        Me.btnPowieksz.UseVisualStyleBackColor = True
         '
-        'Button5
+        'btnPomniejsz
         '
-        Me.Button5.Font = New System.Drawing.Font("Microsoft Sans Serif", 14.25!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
-        Me.Button5.Location = New System.Drawing.Point(6, 74)
-        Me.Button5.Margin = New System.Windows.Forms.Padding(0)
-        Me.Button5.Name = "Button5"
-        Me.Button5.Size = New System.Drawing.Size(23, 30)
-        Me.Button5.TabIndex = 296
-        Me.Button5.Text = "-"
-        Me.ToolTip1.SetToolTip(Me.Button5, "Powiększ")
-        Me.Button5.UseVisualStyleBackColor = True
+        Me.btnPomniejsz.Font = New System.Drawing.Font("Microsoft Sans Serif", 14.25!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
+        Me.btnPomniejsz.Location = New System.Drawing.Point(6, 74)
+        Me.btnPomniejsz.Margin = New System.Windows.Forms.Padding(0)
+        Me.btnPomniejsz.Name = "btnPomniejsz"
+        Me.btnPomniejsz.Size = New System.Drawing.Size(23, 30)
+        Me.btnPomniejsz.TabIndex = 296
+        Me.btnPomniejsz.Text = "-"
+        Me.ToolTip1.SetToolTip(Me.btnPomniejsz, "Powiększ")
+        Me.btnPomniejsz.UseVisualStyleBackColor = True
         '
-        'GroupBox4
+        'grpRozmiarSiatki
         '
-        Me.GroupBox4.Controls.Add(Me.Label22)
-        Me.GroupBox4.Controls.Add(Me.Label19)
-        Me.GroupBox4.Controls.Add(Me.Label18)
-        Me.GroupBox4.Controls.Add(Me.TextBox12)
-        Me.GroupBox4.Controls.Add(Me.Label21)
-        Me.GroupBox4.Controls.Add(Me.TextBox11)
-        Me.GroupBox4.Controls.Add(Me.Label20)
-        Me.GroupBox4.Controls.Add(Me.TextBox7)
-        Me.GroupBox4.Controls.Add(Me.TextBox8)
-        Me.GroupBox4.Controls.Add(Me.Label9)
-        Me.GroupBox4.Controls.Add(Me.Label17)
-        Me.GroupBox4.Controls.Add(Me.Label10)
-        Me.GroupBox4.Controls.Add(Me.TextBox5)
-        Me.GroupBox4.Controls.Add(Me.TextBox6)
-        Me.GroupBox4.Enabled = False
-        Me.GroupBox4.Location = New System.Drawing.Point(434, 3)
-        Me.GroupBox4.Name = "GroupBox4"
-        Me.GroupBox4.Size = New System.Drawing.Size(221, 141)
-        Me.GroupBox4.TabIndex = 300
-        Me.GroupBox4.TabStop = False
-        Me.GroupBox4.Text = "Wynikowy rozmiar siatki segmentów"
-        Me.ToolTip1.SetToolTip(Me.GroupBox4, "Informacje o wynikowym rozmiarze siatki kwadratów na które zostanie podzielony ca" &
+        Me.grpRozmiarSiatki.Controls.Add(Me.Label22)
+        Me.grpRozmiarSiatki.Controls.Add(Me.Label19)
+        Me.grpRozmiarSiatki.Controls.Add(Me.Label18)
+        Me.grpRozmiarSiatki.Controls.Add(Me.txtLiczbaWierszy)
+        Me.grpRozmiarSiatki.Controls.Add(Me.Label21)
+        Me.grpRozmiarSiatki.Controls.Add(Me.txtLiczbaKolumn)
+        Me.grpRozmiarSiatki.Controls.Add(Me.Label20)
+        Me.grpRozmiarSiatki.Controls.Add(Me.txtWysokoscPx)
+        Me.grpRozmiarSiatki.Controls.Add(Me.txtSzerokoscPx)
+        Me.grpRozmiarSiatki.Controls.Add(Me.Label9)
+        Me.grpRozmiarSiatki.Controls.Add(Me.Label17)
+        Me.grpRozmiarSiatki.Controls.Add(Me.Label10)
+        Me.grpRozmiarSiatki.Controls.Add(Me.txtSzerokoscKm)
+        Me.grpRozmiarSiatki.Controls.Add(Me.txtWysokoscKm)
+        Me.grpRozmiarSiatki.Enabled = False
+        Me.grpRozmiarSiatki.Location = New System.Drawing.Point(434, 3)
+        Me.grpRozmiarSiatki.Name = "grpRozmiarSiatki"
+        Me.grpRozmiarSiatki.Size = New System.Drawing.Size(221, 141)
+        Me.grpRozmiarSiatki.TabIndex = 300
+        Me.grpRozmiarSiatki.TabStop = False
+        Me.grpRozmiarSiatki.Text = "Wynikowy rozmiar siatki segmentów"
+        Me.ToolTip1.SetToolTip(Me.grpRozmiarSiatki, "Informacje o wynikowym rozmiarze siatki kwadratów na które zostanie podzielony ca" &
         "ły obszar pobieranej mapy")
         '
         'Label22
@@ -696,14 +696,14 @@ Partial Class Form1
         Me.Label18.TabIndex = 240
         Me.Label18.Text = "x"
         '
-        'TextBox12
+        'txtLiczbaWierszy
         '
-        Me.TextBox12.Enabled = False
-        Me.TextBox12.Location = New System.Drawing.Point(118, 108)
-        Me.TextBox12.Name = "TextBox12"
-        Me.TextBox12.Size = New System.Drawing.Size(55, 20)
-        Me.TextBox12.TabIndex = 239
-        Me.TextBox12.TextAlign = System.Windows.Forms.HorizontalAlignment.Center
+        Me.txtLiczbaWierszy.Enabled = False
+        Me.txtLiczbaWierszy.Location = New System.Drawing.Point(118, 108)
+        Me.txtLiczbaWierszy.Name = "txtLiczbaWierszy"
+        Me.txtLiczbaWierszy.Size = New System.Drawing.Size(55, 20)
+        Me.txtLiczbaWierszy.TabIndex = 239
+        Me.txtLiczbaWierszy.TextAlign = System.Windows.Forms.HorizontalAlignment.Center
         '
         'Label21
         '
@@ -714,14 +714,14 @@ Partial Class Form1
         Me.Label21.TabIndex = 238
         Me.Label21.Text = "[segm]"
         '
-        'TextBox11
+        'txtLiczbaKolumn
         '
-        Me.TextBox11.Enabled = False
-        Me.TextBox11.Location = New System.Drawing.Point(49, 108)
-        Me.TextBox11.Name = "TextBox11"
-        Me.TextBox11.Size = New System.Drawing.Size(55, 20)
-        Me.TextBox11.TabIndex = 237
-        Me.TextBox11.TextAlign = System.Windows.Forms.HorizontalAlignment.Center
+        Me.txtLiczbaKolumn.Enabled = False
+        Me.txtLiczbaKolumn.Location = New System.Drawing.Point(49, 108)
+        Me.txtLiczbaKolumn.Name = "txtLiczbaKolumn"
+        Me.txtLiczbaKolumn.Size = New System.Drawing.Size(55, 20)
+        Me.txtLiczbaKolumn.TabIndex = 237
+        Me.txtLiczbaKolumn.TextAlign = System.Windows.Forms.HorizontalAlignment.Center
         '
         'Label20
         '
@@ -732,23 +732,23 @@ Partial Class Form1
         Me.Label20.TabIndex = 235
         Me.Label20.Text = "[pix]"
         '
-        'TextBox7
+        'txtWysokoscPx
         '
-        Me.TextBox7.Enabled = False
-        Me.TextBox7.Location = New System.Drawing.Point(119, 71)
-        Me.TextBox7.Name = "TextBox7"
-        Me.TextBox7.Size = New System.Drawing.Size(55, 20)
-        Me.TextBox7.TabIndex = 234
-        Me.TextBox7.TextAlign = System.Windows.Forms.HorizontalAlignment.Center
+        Me.txtWysokoscPx.Enabled = False
+        Me.txtWysokoscPx.Location = New System.Drawing.Point(119, 71)
+        Me.txtWysokoscPx.Name = "txtWysokoscPx"
+        Me.txtWysokoscPx.Size = New System.Drawing.Size(55, 20)
+        Me.txtWysokoscPx.TabIndex = 234
+        Me.txtWysokoscPx.TextAlign = System.Windows.Forms.HorizontalAlignment.Center
         '
-        'TextBox8
+        'txtSzerokoscPx
         '
-        Me.TextBox8.Enabled = False
-        Me.TextBox8.Location = New System.Drawing.Point(49, 71)
-        Me.TextBox8.Name = "TextBox8"
-        Me.TextBox8.Size = New System.Drawing.Size(55, 20)
-        Me.TextBox8.TabIndex = 233
-        Me.TextBox8.TextAlign = System.Windows.Forms.HorizontalAlignment.Center
+        Me.txtSzerokoscPx.Enabled = False
+        Me.txtSzerokoscPx.Location = New System.Drawing.Point(49, 71)
+        Me.txtSzerokoscPx.Name = "txtSzerokoscPx"
+        Me.txtSzerokoscPx.Size = New System.Drawing.Size(55, 20)
+        Me.txtSzerokoscPx.TabIndex = 233
+        Me.txtSzerokoscPx.TextAlign = System.Windows.Forms.HorizontalAlignment.Center
         '
         'Label9
         '
@@ -777,23 +777,23 @@ Partial Class Form1
         Me.Label10.TabIndex = 215
         Me.Label10.Text = "Wysokość siatki"
         '
-        'TextBox5
+        'txtSzerokoscKm
         '
-        Me.TextBox5.Enabled = False
-        Me.TextBox5.Location = New System.Drawing.Point(49, 36)
-        Me.TextBox5.Name = "TextBox5"
-        Me.TextBox5.Size = New System.Drawing.Size(55, 20)
-        Me.TextBox5.TabIndex = 216
-        Me.TextBox5.TextAlign = System.Windows.Forms.HorizontalAlignment.Center
+        Me.txtSzerokoscKm.Enabled = False
+        Me.txtSzerokoscKm.Location = New System.Drawing.Point(49, 36)
+        Me.txtSzerokoscKm.Name = "txtSzerokoscKm"
+        Me.txtSzerokoscKm.Size = New System.Drawing.Size(55, 20)
+        Me.txtSzerokoscKm.TabIndex = 216
+        Me.txtSzerokoscKm.TextAlign = System.Windows.Forms.HorizontalAlignment.Center
         '
-        'TextBox6
+        'txtWysokoscKm
         '
-        Me.TextBox6.Enabled = False
-        Me.TextBox6.Location = New System.Drawing.Point(119, 36)
-        Me.TextBox6.Name = "TextBox6"
-        Me.TextBox6.Size = New System.Drawing.Size(55, 20)
-        Me.TextBox6.TabIndex = 217
-        Me.TextBox6.TextAlign = System.Windows.Forms.HorizontalAlignment.Center
+        Me.txtWysokoscKm.Enabled = False
+        Me.txtWysokoscKm.Location = New System.Drawing.Point(119, 36)
+        Me.txtWysokoscKm.Name = "txtWysokoscKm"
+        Me.txtWysokoscKm.Size = New System.Drawing.Size(55, 20)
+        Me.txtWysokoscKm.TabIndex = 217
+        Me.txtWysokoscKm.TextAlign = System.Windows.Forms.HorizontalAlignment.Center
         '
         'Label42
         '
@@ -832,215 +832,215 @@ Partial Class Form1
         Me.ToolTip1.SetToolTip(Me.Label8, "Domyślna wartość jest optymalna. Im większy rozmiar piksela, tym gorsza jakość ob" &
         "razu, ale jednocześnie tym większy jego przestrzenny zasięg.")
         '
-        'Button9
+        'btnUsunPobrane
         '
-        Me.Button9.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.Button9.Image = Global.MapoTero.My.Resources.Resources.ico_folde_delete
-        Me.Button9.Location = New System.Drawing.Point(39, 603)
-        Me.Button9.Margin = New System.Windows.Forms.Padding(0)
-        Me.Button9.Name = "Button9"
-        Me.Button9.Size = New System.Drawing.Size(30, 30)
-        Me.Button9.TabIndex = 307
-        Me.ToolTip1.SetToolTip(Me.Button9, "usuń wszystkie pobrane mapy")
-        Me.Button9.UseVisualStyleBackColor = True
+        Me.btnUsunPobrane.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.btnUsunPobrane.Image = Global.MapoTero.My.Resources.Resources.ico_folde_delete
+        Me.btnUsunPobrane.Location = New System.Drawing.Point(39, 603)
+        Me.btnUsunPobrane.Margin = New System.Windows.Forms.Padding(0)
+        Me.btnUsunPobrane.Name = "btnUsunPobrane"
+        Me.btnUsunPobrane.Size = New System.Drawing.Size(30, 30)
+        Me.btnUsunPobrane.TabIndex = 307
+        Me.ToolTip1.SetToolTip(Me.btnUsunPobrane, "usuń wszystkie pobrane mapy")
+        Me.btnUsunPobrane.UseVisualStyleBackColor = True
         '
-        'Button4
+        'btnZnaczniki
         '
-        Me.Button4.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.Button4.Font = New System.Drawing.Font("Microsoft Sans Serif", 6.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
-        Me.Button4.Image = Global.MapoTero.My.Resources.Resources.marker_ico
-        Me.Button4.Location = New System.Drawing.Point(39, 569)
-        Me.Button4.Margin = New System.Windows.Forms.Padding(0)
-        Me.Button4.Name = "Button4"
-        Me.Button4.Size = New System.Drawing.Size(30, 30)
-        Me.Button4.TabIndex = 306
-        Me.ToolTip1.SetToolTip(Me.Button4, "wyświetl rzeczywisty zasięg pobieranego obszaru, uwzględniający rozmiar siatki se" &
+        Me.btnZnaczniki.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.btnZnaczniki.Font = New System.Drawing.Font("Microsoft Sans Serif", 6.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
+        Me.btnZnaczniki.Image = Global.MapoTero.My.Resources.Resources.marker_ico
+        Me.btnZnaczniki.Location = New System.Drawing.Point(39, 569)
+        Me.btnZnaczniki.Margin = New System.Windows.Forms.Padding(0)
+        Me.btnZnaczniki.Name = "btnZnaczniki"
+        Me.btnZnaczniki.Size = New System.Drawing.Size(30, 30)
+        Me.btnZnaczniki.TabIndex = 306
+        Me.ToolTip1.SetToolTip(Me.btnZnaczniki, "wyświetl rzeczywisty zasięg pobieranego obszaru, uwzględniający rozmiar siatki se" &
         "gmentów")
-        Me.Button4.UseVisualStyleBackColor = True
+        Me.btnZnaczniki.UseVisualStyleBackColor = True
         '
-        'Button8
+        'btnScalanie
         '
-        Me.Button8.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.Button8.Image = Global.MapoTero.My.Resources.Resources.ico_merge
-        Me.Button8.Location = New System.Drawing.Point(5, 603)
-        Me.Button8.Margin = New System.Windows.Forms.Padding(0)
-        Me.Button8.Name = "Button8"
-        Me.Button8.Size = New System.Drawing.Size(30, 30)
-        Me.Button8.TabIndex = 305
-        Me.ToolTip1.SetToolTip(Me.Button8, "złącz pobrane segmenty w jeden arkusz")
-        Me.Button8.UseVisualStyleBackColor = True
+        Me.btnScalanie.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.btnScalanie.Image = Global.MapoTero.My.Resources.Resources.ico_merge
+        Me.btnScalanie.Location = New System.Drawing.Point(5, 603)
+        Me.btnScalanie.Margin = New System.Windows.Forms.Padding(0)
+        Me.btnScalanie.Name = "btnScalanie"
+        Me.btnScalanie.Size = New System.Drawing.Size(30, 30)
+        Me.btnScalanie.TabIndex = 305
+        Me.ToolTip1.SetToolTip(Me.btnScalanie, "złącz pobrane segmenty w jeden arkusz")
+        Me.btnScalanie.UseVisualStyleBackColor = True
         '
-        'Button7
+        'btnOtworzFolder
         '
-        Me.Button7.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.Button7.Image = Global.MapoTero.My.Resources.Resources.ico_folder
-        Me.Button7.Location = New System.Drawing.Point(5, 569)
-        Me.Button7.Margin = New System.Windows.Forms.Padding(0)
-        Me.Button7.Name = "Button7"
-        Me.Button7.Size = New System.Drawing.Size(30, 30)
-        Me.Button7.TabIndex = 304
-        Me.ToolTip1.SetToolTip(Me.Button7, "wyświetl folder z segmentami pobranej mapy")
-        Me.Button7.UseVisualStyleBackColor = True
+        Me.btnOtworzFolder.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.btnOtworzFolder.Image = Global.MapoTero.My.Resources.Resources.ico_folder
+        Me.btnOtworzFolder.Location = New System.Drawing.Point(5, 569)
+        Me.btnOtworzFolder.Margin = New System.Windows.Forms.Padding(0)
+        Me.btnOtworzFolder.Name = "btnOtworzFolder"
+        Me.btnOtworzFolder.Size = New System.Drawing.Size(30, 30)
+        Me.btnOtworzFolder.TabIndex = 304
+        Me.ToolTip1.SetToolTip(Me.btnOtworzFolder, "wyświetl folder z segmentami pobranej mapy")
+        Me.btnOtworzFolder.UseVisualStyleBackColor = True
         '
-        'GMapControl1
+        'mapa
         '
-        Me.GMapControl1.Bearing = 0!
-        Me.GMapControl1.CanDragMap = True
-        Me.GMapControl1.Cursor = System.Windows.Forms.Cursors.Hand
-        Me.GMapControl1.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.GMapControl1.EmptyTileColor = System.Drawing.Color.Navy
-        Me.GMapControl1.GrayScaleMode = False
-        Me.GMapControl1.HelperLineOption = GMap.NET.WindowsForms.HelperLineOptions.DontShow
-        Me.GMapControl1.LevelsKeepInMemory = 5
-        Me.GMapControl1.Location = New System.Drawing.Point(0, 24)
-        Me.GMapControl1.MarkersEnabled = True
-        Me.GMapControl1.MaxZoom = 17
-        Me.GMapControl1.MinZoom = 3
-        Me.GMapControl1.MouseWheelZoomEnabled = True
-        Me.GMapControl1.MouseWheelZoomType = GMap.NET.MouseWheelZoomType.MousePositionAndCenter
-        Me.GMapControl1.Name = "GMapControl1"
-        Me.GMapControl1.NegativeMode = False
-        Me.GMapControl1.PolygonsEnabled = True
-        Me.GMapControl1.RetryLoadTile = 0
-        Me.GMapControl1.RoutesEnabled = True
-        Me.GMapControl1.ScaleMode = GMap.NET.WindowsForms.ScaleModes.Fractional
-        Me.GMapControl1.SelectedAreaFillColor = System.Drawing.Color.FromArgb(CType(CType(33, Byte), Integer), CType(CType(65, Byte), Integer), CType(CType(105, Byte), Integer), CType(CType(225, Byte), Integer))
-        Me.GMapControl1.ShowTileGridLines = False
-        Me.GMapControl1.Size = New System.Drawing.Size(661, 491)
-        Me.GMapControl1.TabIndex = 249
-        Me.GMapControl1.Zoom = 0R
+        Me.mapa.Bearing = 0!
+        Me.mapa.CanDragMap = True
+        Me.mapa.Cursor = System.Windows.Forms.Cursors.Hand
+        Me.mapa.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.mapa.EmptyTileColor = System.Drawing.Color.Navy
+        Me.mapa.GrayScaleMode = False
+        Me.mapa.HelperLineOption = GMap.NET.WindowsForms.HelperLineOptions.DontShow
+        Me.mapa.LevelsKeepInMemory = 5
+        Me.mapa.Location = New System.Drawing.Point(0, 24)
+        Me.mapa.MarkersEnabled = True
+        Me.mapa.MaxZoom = 17
+        Me.mapa.MinZoom = 3
+        Me.mapa.MouseWheelZoomEnabled = True
+        Me.mapa.MouseWheelZoomType = GMap.NET.MouseWheelZoomType.MousePositionAndCenter
+        Me.mapa.Name = "mapa"
+        Me.mapa.NegativeMode = False
+        Me.mapa.PolygonsEnabled = True
+        Me.mapa.RetryLoadTile = 0
+        Me.mapa.RoutesEnabled = True
+        Me.mapa.ScaleMode = GMap.NET.WindowsForms.ScaleModes.Fractional
+        Me.mapa.SelectedAreaFillColor = System.Drawing.Color.FromArgb(CType(CType(33, Byte), Integer), CType(CType(65, Byte), Integer), CType(CType(105, Byte), Integer), CType(CType(225, Byte), Integer))
+        Me.mapa.ShowTileGridLines = False
+        Me.mapa.Size = New System.Drawing.Size(661, 491)
+        Me.mapa.TabIndex = 249
+        Me.mapa.Zoom = 0R
         '
-        'RadioButton1
+        'rbOsm
         '
-        Me.RadioButton1.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.RadioButton1.AutoSize = True
-        Me.RadioButton1.Location = New System.Drawing.Point(544, 64)
-        Me.RadioButton1.Name = "RadioButton1"
-        Me.RadioButton1.Size = New System.Drawing.Size(109, 17)
-        Me.RadioButton1.TabIndex = 258
-        Me.RadioButton1.Checked = True
-        Me.RadioButton1.Text = "OpenStreetMap   "
-        Me.RadioButton1.UseVisualStyleBackColor = True
+        Me.rbOsm.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.rbOsm.AutoSize = True
+        Me.rbOsm.Location = New System.Drawing.Point(544, 64)
+        Me.rbOsm.Name = "rbOsm"
+        Me.rbOsm.Size = New System.Drawing.Size(109, 17)
+        Me.rbOsm.TabIndex = 258
+        Me.rbOsm.Checked = True
+        Me.rbOsm.Text = "OpenStreetMap   "
+        Me.rbOsm.UseVisualStyleBackColor = True
         '
-        'RadioButton2
+        'rbGoogle
         '
-        Me.RadioButton2.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.RadioButton2.AutoSize = True
-        Me.RadioButton2.Location = New System.Drawing.Point(544, 26)
-        Me.RadioButton2.Name = "RadioButton2"
-        Me.RadioButton2.Size = New System.Drawing.Size(110, 17)
-        Me.RadioButton2.TabIndex = 259
-        Me.RadioButton2.TabStop = True
-        Me.RadioButton2.Text = "GoogleMap          "
-        Me.RadioButton2.UseVisualStyleBackColor = True
+        Me.rbGoogle.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.rbGoogle.AutoSize = True
+        Me.rbGoogle.Location = New System.Drawing.Point(544, 26)
+        Me.rbGoogle.Name = "rbGoogle"
+        Me.rbGoogle.Size = New System.Drawing.Size(110, 17)
+        Me.rbGoogle.TabIndex = 259
+        Me.rbGoogle.TabStop = True
+        Me.rbGoogle.Text = "GoogleMap          "
+        Me.rbGoogle.UseVisualStyleBackColor = True
         '
-        'RadioButton3
+        'rbBing
         '
-        Me.RadioButton3.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.RadioButton3.AutoSize = True
-        Me.RadioButton3.Location = New System.Drawing.Point(544, 44)
-        Me.RadioButton3.Name = "RadioButton3"
-        Me.RadioButton3.Size = New System.Drawing.Size(109, 17)
-        Me.RadioButton3.TabIndex = 260
-        Me.RadioButton3.Text = "SatelliteBingsMap"
-        Me.RadioButton3.UseVisualStyleBackColor = True
+        Me.rbBing.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.rbBing.AutoSize = True
+        Me.rbBing.Location = New System.Drawing.Point(544, 44)
+        Me.rbBing.Name = "rbBing"
+        Me.rbBing.Size = New System.Drawing.Size(109, 17)
+        Me.rbBing.TabIndex = 260
+        Me.rbBing.Text = "SatelliteBingsMap"
+        Me.rbBing.UseVisualStyleBackColor = True
         '
-        'Label35
+        'lblSrodekSzer
         '
-        Me.Label35.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.Label35.AutoSize = True
-        Me.Label35.BackColor = System.Drawing.SystemColors.Window
-        Me.Label35.Location = New System.Drawing.Point(528, 499)
-        Me.Label35.Name = "Label35"
-        Me.Label35.Size = New System.Drawing.Size(28, 13)
-        Me.Label35.TabIndex = 261
-        Me.Label35.Text = "52.3"
+        Me.lblSrodekSzer.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.lblSrodekSzer.AutoSize = True
+        Me.lblSrodekSzer.BackColor = System.Drawing.SystemColors.Window
+        Me.lblSrodekSzer.Location = New System.Drawing.Point(528, 499)
+        Me.lblSrodekSzer.Name = "lblSrodekSzer"
+        Me.lblSrodekSzer.Size = New System.Drawing.Size(28, 13)
+        Me.lblSrodekSzer.TabIndex = 261
+        Me.lblSrodekSzer.Text = "52.3"
         '
-        'Label37
+        'lblSrodekOpisSzer
         '
-        Me.Label37.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.Label37.AutoSize = True
-        Me.Label37.BackColor = System.Drawing.SystemColors.Window
-        Me.Label37.Location = New System.Drawing.Point(455, 499)
-        Me.Label37.Name = "Label37"
-        Me.Label37.Size = New System.Drawing.Size(75, 13)
-        Me.Label37.TabIndex = 263
-        Me.Label37.Text = "WGS84  Lat ="
+        Me.lblSrodekOpisSzer.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.lblSrodekOpisSzer.AutoSize = True
+        Me.lblSrodekOpisSzer.BackColor = System.Drawing.SystemColors.Window
+        Me.lblSrodekOpisSzer.Location = New System.Drawing.Point(455, 499)
+        Me.lblSrodekOpisSzer.Name = "lblSrodekOpisSzer"
+        Me.lblSrodekOpisSzer.Size = New System.Drawing.Size(75, 13)
+        Me.lblSrodekOpisSzer.TabIndex = 263
+        Me.lblSrodekOpisSzer.Text = "WGS84  Lat ="
         '
-        'Label38
+        'lblSrodekTytul
         '
-        Me.Label38.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.Label38.AutoSize = True
-        Me.Label38.BackColor = System.Drawing.SystemColors.Window
-        Me.Label38.Location = New System.Drawing.Point(455, 482)
-        Me.Label38.Name = "Label38"
-        Me.Label38.Size = New System.Drawing.Size(161, 13)
-        Me.Label38.TabIndex = 264
-        Me.Label38.Text = "Współrzędne środka okna mapy"
+        Me.lblSrodekTytul.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.lblSrodekTytul.AutoSize = True
+        Me.lblSrodekTytul.BackColor = System.Drawing.SystemColors.Window
+        Me.lblSrodekTytul.Location = New System.Drawing.Point(455, 482)
+        Me.lblSrodekTytul.Name = "lblSrodekTytul"
+        Me.lblSrodekTytul.Size = New System.Drawing.Size(161, 13)
+        Me.lblSrodekTytul.TabIndex = 264
+        Me.lblSrodekTytul.Text = "Współrzędne środka okna mapy"
         '
-        'Label39
+        'lblKursorTytul
         '
-        Me.Label39.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
-        Me.Label39.AutoSize = True
-        Me.Label39.BackColor = System.Drawing.SystemColors.Window
-        Me.Label39.Location = New System.Drawing.Point(6, 481)
-        Me.Label39.Name = "Label39"
-        Me.Label39.Size = New System.Drawing.Size(109, 13)
-        Me.Label39.TabIndex = 265
-        Me.Label39.Text = "Współrzędne kursora"
+        Me.lblKursorTytul.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
+        Me.lblKursorTytul.AutoSize = True
+        Me.lblKursorTytul.BackColor = System.Drawing.SystemColors.Window
+        Me.lblKursorTytul.Location = New System.Drawing.Point(6, 481)
+        Me.lblKursorTytul.Name = "lblKursorTytul"
+        Me.lblKursorTytul.Size = New System.Drawing.Size(109, 13)
+        Me.lblKursorTytul.TabIndex = 265
+        Me.lblKursorTytul.Text = "Współrzędne kursora"
         '
-        'Label40
+        'lblKursorUkladOpis
         '
-        Me.Label40.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
-        Me.Label40.AutoSize = True
-        Me.Label40.BackColor = System.Drawing.SystemColors.Window
-        Me.Label40.Location = New System.Drawing.Point(7, 498)
-        Me.Label40.Name = "Label40"
-        Me.Label40.Size = New System.Drawing.Size(31, 13)
-        Me.Label40.TabIndex = 266
-        Me.Label40.Text = "1992"
+        Me.lblKursorUkladOpis.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
+        Me.lblKursorUkladOpis.AutoSize = True
+        Me.lblKursorUkladOpis.BackColor = System.Drawing.SystemColors.Window
+        Me.lblKursorUkladOpis.Location = New System.Drawing.Point(7, 498)
+        Me.lblKursorUkladOpis.Name = "lblKursorUkladOpis"
+        Me.lblKursorUkladOpis.Size = New System.Drawing.Size(31, 13)
+        Me.lblKursorUkladOpis.TabIndex = 266
+        Me.lblKursorUkladOpis.Text = "1992"
         '
-        'Label41
+        'lblKursorUklad
         '
-        Me.Label41.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
-        Me.Label41.AutoSize = True
-        Me.Label41.BackColor = System.Drawing.SystemColors.Window
-        Me.Label41.Location = New System.Drawing.Point(46, 498)
-        Me.Label41.Name = "Label41"
-        Me.Label41.Size = New System.Drawing.Size(31, 13)
-        Me.Label41.TabIndex = 267
-        Me.Label41.Text = "1992"
+        Me.lblKursorUklad.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
+        Me.lblKursorUklad.AutoSize = True
+        Me.lblKursorUklad.BackColor = System.Drawing.SystemColors.Window
+        Me.lblKursorUklad.Location = New System.Drawing.Point(46, 498)
+        Me.lblKursorUklad.Name = "lblKursorUklad"
+        Me.lblKursorUklad.Size = New System.Drawing.Size(31, 13)
+        Me.lblKursorUklad.TabIndex = 267
+        Me.lblKursorUklad.Text = "1992"
         '
-        'Label63
+        'lblSrodekDlug
         '
-        Me.Label63.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.Label63.AutoSize = True
-        Me.Label63.BackColor = System.Drawing.SystemColors.Window
-        Me.Label63.Location = New System.Drawing.Point(609, 499)
-        Me.Label63.Name = "Label63"
-        Me.Label63.Size = New System.Drawing.Size(31, 13)
-        Me.Label63.TabIndex = 290
-        Me.Label63.Text = "19.2 "
+        Me.lblSrodekDlug.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.lblSrodekDlug.AutoSize = True
+        Me.lblSrodekDlug.BackColor = System.Drawing.SystemColors.Window
+        Me.lblSrodekDlug.Location = New System.Drawing.Point(609, 499)
+        Me.lblSrodekDlug.Name = "lblSrodekDlug"
+        Me.lblSrodekDlug.Size = New System.Drawing.Size(31, 13)
+        Me.lblSrodekDlug.TabIndex = 290
+        Me.lblSrodekDlug.Text = "19.2 "
         '
-        'Label65
+        'lblZoom
         '
-        Me.Label65.AutoSize = True
-        Me.Label65.Location = New System.Drawing.Point(9, 60)
-        Me.Label65.Name = "Label65"
-        Me.Label65.Size = New System.Drawing.Size(13, 13)
-        Me.Label65.TabIndex = 292
-        Me.Label65.Text = "6"
+        Me.lblZoom.AutoSize = True
+        Me.lblZoom.Location = New System.Drawing.Point(9, 60)
+        Me.lblZoom.Name = "lblZoom"
+        Me.lblZoom.Size = New System.Drawing.Size(13, 13)
+        Me.lblZoom.TabIndex = 292
+        Me.lblZoom.Text = "6"
         '
-        'Label66
+        'lblSrodekOpisDlug
         '
-        Me.Label66.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.Label66.AutoSize = True
-        Me.Label66.BackColor = System.Drawing.SystemColors.Window
-        Me.Label66.Location = New System.Drawing.Point(576, 499)
-        Me.Label66.Name = "Label66"
-        Me.Label66.Size = New System.Drawing.Size(31, 13)
-        Me.Label66.TabIndex = 293
-        Me.Label66.Text = "Lng="
+        Me.lblSrodekOpisDlug.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.lblSrodekOpisDlug.AutoSize = True
+        Me.lblSrodekOpisDlug.BackColor = System.Drawing.SystemColors.Window
+        Me.lblSrodekOpisDlug.Location = New System.Drawing.Point(576, 499)
+        Me.lblSrodekOpisDlug.Name = "lblSrodekOpisDlug"
+        Me.lblSrodekOpisDlug.Size = New System.Drawing.Size(31, 13)
+        Me.lblSrodekOpisDlug.TabIndex = 293
+        Me.lblSrodekOpisDlug.Text = "Lng="
         '
         'Label67
         '
@@ -1054,179 +1054,179 @@ Partial Class Form1
         Me.Label67.TabIndex = 297
         Me.Label67.Text = "Zaznacz na mapie  prawym  przyciskiem myszy obszar do pobrania"
         '
-        'RichTextBox1
+        'txtKomunikaty
         '
-        Me.RichTextBox1.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.RichTextBox1.BackColor = System.Drawing.SystemColors.ButtonFace
-        Me.RichTextBox1.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
-        Me.RichTextBox1.ForeColor = System.Drawing.SystemColors.WindowText
-        Me.RichTextBox1.Location = New System.Drawing.Point(5, 500)
-        Me.RichTextBox1.Name = "RichTextBox1"
-        Me.RichTextBox1.Size = New System.Drawing.Size(210, 65)
-        Me.RichTextBox1.TabIndex = 301
-        Me.RichTextBox1.Text = "Komunikaty:"
+        Me.txtKomunikaty.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.txtKomunikaty.BackColor = System.Drawing.SystemColors.ButtonFace
+        Me.txtKomunikaty.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
+        Me.txtKomunikaty.ForeColor = System.Drawing.SystemColors.WindowText
+        Me.txtKomunikaty.Location = New System.Drawing.Point(5, 500)
+        Me.txtKomunikaty.Name = "txtKomunikaty"
+        Me.txtKomunikaty.Size = New System.Drawing.Size(210, 65)
+        Me.txtKomunikaty.TabIndex = 301
+        Me.txtKomunikaty.Text = "Komunikaty:"
         '
-        'Label36
+        'lblKursorWgs
         '
-        Me.Label36.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
-        Me.Label36.AutoSize = True
-        Me.Label36.Location = New System.Drawing.Point(83, 499)
-        Me.Label36.Name = "Label36"
-        Me.Label36.Size = New System.Drawing.Size(36, 13)
-        Me.Label36.TabIndex = 260
-        Me.Label36.Text = "kursor"
+        Me.lblKursorWgs.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
+        Me.lblKursorWgs.AutoSize = True
+        Me.lblKursorWgs.Location = New System.Drawing.Point(83, 499)
+        Me.lblKursorWgs.Name = "lblKursorWgs"
+        Me.lblKursorWgs.Size = New System.Drawing.Size(36, 13)
+        Me.lblKursorWgs.TabIndex = 260
+        Me.lblKursorWgs.Text = "kursor"
         '
-        'GroupBox5
+        'grpSchemat
         '
-        Me.GroupBox5.Controls.Add(Me.Label8)
-        Me.GroupBox5.Controls.Add(Me.Label7)
-        Me.GroupBox5.Controls.Add(Me.Label42)
-        Me.GroupBox5.Controls.Add(Me.Label47)
-        Me.GroupBox5.Controls.Add(Me.Label34)
-        Me.GroupBox5.Controls.Add(Me.TextBox13)
-        Me.GroupBox5.Controls.Add(Me.Label46)
-        Me.GroupBox5.Controls.Add(Me.Label32)
-        Me.GroupBox5.Controls.Add(Me.Label33)
-        Me.GroupBox5.Controls.Add(Me.Label31)
-        Me.GroupBox5.Controls.Add(Me.Label2)
-        Me.GroupBox5.Controls.Add(Me.TextBox9)
-        Me.GroupBox5.Controls.Add(Me.TextBox10)
-        Me.GroupBox5.Controls.Add(Me.Label1)
-        Me.GroupBox5.Controls.Add(Me.Label5)
-        Me.GroupBox5.Controls.Add(Me.Label6)
-        Me.GroupBox5.Controls.Add(Me.TextBox4)
-        Me.GroupBox5.Controls.Add(Me.TextBox3)
-        Me.GroupBox5.Controls.Add(Me.Label4)
-        Me.GroupBox5.Controls.Add(Me.Label3)
-        Me.GroupBox5.Controls.Add(Me.TextBox2)
-        Me.GroupBox5.Controls.Add(Me.TextBox1)
-        Me.GroupBox5.Controls.Add(Me.PictureBox2)
-        Me.GroupBox5.Location = New System.Drawing.Point(5, 3)
-        Me.GroupBox5.Name = "GroupBox5"
-        Me.GroupBox5.Size = New System.Drawing.Size(418, 141)
-        Me.GroupBox5.TabIndex = 303
-        Me.GroupBox5.TabStop = False
-        Me.GroupBox5.Text = "Schemat siatki segmentów pobieranej mapy i zasięgu zaznaczenia"
+        Me.grpSchemat.Controls.Add(Me.Label8)
+        Me.grpSchemat.Controls.Add(Me.Label7)
+        Me.grpSchemat.Controls.Add(Me.Label42)
+        Me.grpSchemat.Controls.Add(Me.Label47)
+        Me.grpSchemat.Controls.Add(Me.lblZaznDlugLewa)
+        Me.grpSchemat.Controls.Add(Me.txtZasiegSegmentuKm)
+        Me.grpSchemat.Controls.Add(Me.Label46)
+        Me.grpSchemat.Controls.Add(Me.lblZaznSzerDol)
+        Me.grpSchemat.Controls.Add(Me.lblZaznDlugPrawa)
+        Me.grpSchemat.Controls.Add(Me.lblZaznSzerGora)
+        Me.grpSchemat.Controls.Add(Me.Label2)
+        Me.grpSchemat.Controls.Add(Me.txtBokSegmentu)
+        Me.grpSchemat.Controls.Add(Me.txtRozmiarPiksela)
+        Me.grpSchemat.Controls.Add(Me.Label1)
+        Me.grpSchemat.Controls.Add(Me.lblOpisYPrawy)
+        Me.grpSchemat.Controls.Add(Me.lblOpisXGora)
+        Me.grpSchemat.Controls.Add(Me.txtYPrawy)
+        Me.grpSchemat.Controls.Add(Me.txtXGora)
+        Me.grpSchemat.Controls.Add(Me.lblOpisYLewy)
+        Me.grpSchemat.Controls.Add(Me.lblOpisXDol)
+        Me.grpSchemat.Controls.Add(Me.txtYLewy)
+        Me.grpSchemat.Controls.Add(Me.txtXDol)
+        Me.grpSchemat.Controls.Add(Me.PictureBox2)
+        Me.grpSchemat.Location = New System.Drawing.Point(5, 3)
+        Me.grpSchemat.Name = "grpSchemat"
+        Me.grpSchemat.Size = New System.Drawing.Size(418, 141)
+        Me.grpSchemat.TabIndex = 303
+        Me.grpSchemat.TabStop = False
+        Me.grpSchemat.Text = "Schemat siatki segmentów pobieranej mapy i zasięgu zaznaczenia"
         '
-        'Label34
+        'lblZaznDlugLewa
         '
-        Me.Label34.AutoSize = True
-        Me.Label34.Font = New System.Drawing.Font("Microsoft Sans Serif", 7.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
-        Me.Label34.ForeColor = System.Drawing.Color.Navy
-        Me.Label34.Location = New System.Drawing.Point(4, 63)
-        Me.Label34.Name = "Label34"
-        Me.Label34.Size = New System.Drawing.Size(10, 13)
-        Me.Label34.TabIndex = 315
-        Me.Label34.Text = "."
+        Me.lblZaznDlugLewa.AutoSize = True
+        Me.lblZaznDlugLewa.Font = New System.Drawing.Font("Microsoft Sans Serif", 7.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
+        Me.lblZaznDlugLewa.ForeColor = System.Drawing.Color.Navy
+        Me.lblZaznDlugLewa.Location = New System.Drawing.Point(4, 63)
+        Me.lblZaznDlugLewa.Name = "lblZaznDlugLewa"
+        Me.lblZaznDlugLewa.Size = New System.Drawing.Size(10, 13)
+        Me.lblZaznDlugLewa.TabIndex = 315
+        Me.lblZaznDlugLewa.Text = "."
         '
-        'Label32
+        'lblZaznSzerDol
         '
-        Me.Label32.AutoSize = True
-        Me.Label32.Font = New System.Drawing.Font("Microsoft Sans Serif", 7.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
-        Me.Label32.ForeColor = System.Drawing.Color.Navy
-        Me.Label32.Location = New System.Drawing.Point(72, 98)
-        Me.Label32.Name = "Label32"
-        Me.Label32.Size = New System.Drawing.Size(10, 13)
-        Me.Label32.TabIndex = 314
-        Me.Label32.Text = "."
+        Me.lblZaznSzerDol.AutoSize = True
+        Me.lblZaznSzerDol.Font = New System.Drawing.Font("Microsoft Sans Serif", 7.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
+        Me.lblZaznSzerDol.ForeColor = System.Drawing.Color.Navy
+        Me.lblZaznSzerDol.Location = New System.Drawing.Point(72, 98)
+        Me.lblZaznSzerDol.Name = "lblZaznSzerDol"
+        Me.lblZaznSzerDol.Size = New System.Drawing.Size(10, 13)
+        Me.lblZaznSzerDol.TabIndex = 314
+        Me.lblZaznSzerDol.Text = "."
         '
-        'Label33
+        'lblZaznDlugPrawa
         '
-        Me.Label33.AutoSize = True
-        Me.Label33.Font = New System.Drawing.Font("Microsoft Sans Serif", 7.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
-        Me.Label33.ForeColor = System.Drawing.Color.Navy
-        Me.Label33.Location = New System.Drawing.Point(134, 64)
-        Me.Label33.Name = "Label33"
-        Me.Label33.Size = New System.Drawing.Size(10, 13)
-        Me.Label33.TabIndex = 313
-        Me.Label33.Text = "."
+        Me.lblZaznDlugPrawa.AutoSize = True
+        Me.lblZaznDlugPrawa.Font = New System.Drawing.Font("Microsoft Sans Serif", 7.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
+        Me.lblZaznDlugPrawa.ForeColor = System.Drawing.Color.Navy
+        Me.lblZaznDlugPrawa.Location = New System.Drawing.Point(134, 64)
+        Me.lblZaznDlugPrawa.Name = "lblZaznDlugPrawa"
+        Me.lblZaznDlugPrawa.Size = New System.Drawing.Size(10, 13)
+        Me.lblZaznDlugPrawa.TabIndex = 313
+        Me.lblZaznDlugPrawa.Text = "."
         '
-        'Label31
+        'lblZaznSzerGora
         '
-        Me.Label31.AutoSize = True
-        Me.Label31.Font = New System.Drawing.Font("Microsoft Sans Serif", 7.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
-        Me.Label31.ForeColor = System.Drawing.Color.Navy
-        Me.Label31.Location = New System.Drawing.Point(73, 33)
-        Me.Label31.Name = "Label31"
-        Me.Label31.Size = New System.Drawing.Size(10, 13)
-        Me.Label31.TabIndex = 312
-        Me.Label31.Text = "."
+        Me.lblZaznSzerGora.AutoSize = True
+        Me.lblZaznSzerGora.Font = New System.Drawing.Font("Microsoft Sans Serif", 7.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
+        Me.lblZaznSzerGora.ForeColor = System.Drawing.Color.Navy
+        Me.lblZaznSzerGora.Location = New System.Drawing.Point(73, 33)
+        Me.lblZaznSzerGora.Name = "lblZaznSzerGora"
+        Me.lblZaznSzerGora.Size = New System.Drawing.Size(10, 13)
+        Me.lblZaznSzerGora.TabIndex = 312
+        Me.lblZaznSzerGora.Text = "."
         '
-        'Label5
+        'lblOpisYPrawy
         '
-        Me.Label5.AutoSize = True
-        Me.Label5.ForeColor = System.Drawing.Color.Blue
-        Me.Label5.Location = New System.Drawing.Point(133, 79)
-        Me.Label5.Name = "Label5"
-        Me.Label5.Size = New System.Drawing.Size(12, 13)
-        Me.Label5.TabIndex = 310
-        Me.Label5.Text = "y"
+        Me.lblOpisYPrawy.AutoSize = True
+        Me.lblOpisYPrawy.ForeColor = System.Drawing.Color.Blue
+        Me.lblOpisYPrawy.Location = New System.Drawing.Point(133, 79)
+        Me.lblOpisYPrawy.Name = "lblOpisYPrawy"
+        Me.lblOpisYPrawy.Size = New System.Drawing.Size(12, 13)
+        Me.lblOpisYPrawy.TabIndex = 310
+        Me.lblOpisYPrawy.Text = "y"
         '
-        'Label6
+        'lblOpisXGora
         '
-        Me.Label6.AutoSize = True
-        Me.Label6.ForeColor = System.Drawing.Color.Blue
-        Me.Label6.Location = New System.Drawing.Point(72, 52)
-        Me.Label6.Name = "Label6"
-        Me.Label6.Size = New System.Drawing.Size(12, 13)
-        Me.Label6.TabIndex = 311
-        Me.Label6.Text = "x"
+        Me.lblOpisXGora.AutoSize = True
+        Me.lblOpisXGora.ForeColor = System.Drawing.Color.Blue
+        Me.lblOpisXGora.Location = New System.Drawing.Point(72, 52)
+        Me.lblOpisXGora.Name = "lblOpisXGora"
+        Me.lblOpisXGora.Size = New System.Drawing.Size(12, 13)
+        Me.lblOpisXGora.TabIndex = 311
+        Me.lblOpisXGora.Text = "x"
         '
-        'TextBox4
+        'txtYPrawy
         '
-        Me.TextBox4.ForeColor = System.Drawing.Color.Blue
-        Me.TextBox4.Location = New System.Drawing.Point(148, 76)
-        Me.TextBox4.Name = "TextBox4"
-        Me.TextBox4.Size = New System.Drawing.Size(44, 20)
-        Me.TextBox4.TabIndex = 309
-        Me.TextBox4.Text = "571000"
+        Me.txtYPrawy.ForeColor = System.Drawing.Color.Blue
+        Me.txtYPrawy.Location = New System.Drawing.Point(148, 76)
+        Me.txtYPrawy.Name = "txtYPrawy"
+        Me.txtYPrawy.Size = New System.Drawing.Size(44, 20)
+        Me.txtYPrawy.TabIndex = 309
+        Me.txtYPrawy.Text = "571000"
         '
-        'TextBox3
+        'txtXGora
         '
-        Me.TextBox3.ForeColor = System.Drawing.Color.Blue
-        Me.TextBox3.Location = New System.Drawing.Point(84, 49)
-        Me.TextBox3.Name = "TextBox3"
-        Me.TextBox3.Size = New System.Drawing.Size(44, 20)
-        Me.TextBox3.TabIndex = 308
-        Me.TextBox3.Text = "684000"
+        Me.txtXGora.ForeColor = System.Drawing.Color.Blue
+        Me.txtXGora.Location = New System.Drawing.Point(84, 49)
+        Me.txtXGora.Name = "txtXGora"
+        Me.txtXGora.Size = New System.Drawing.Size(44, 20)
+        Me.txtXGora.TabIndex = 308
+        Me.txtXGora.Text = "684000"
         '
-        'Label4
+        'lblOpisYLewy
         '
-        Me.Label4.AutoSize = True
-        Me.Label4.ForeColor = System.Drawing.Color.Blue
-        Me.Label4.Location = New System.Drawing.Point(4, 78)
-        Me.Label4.Name = "Label4"
-        Me.Label4.Size = New System.Drawing.Size(12, 13)
-        Me.Label4.TabIndex = 307
-        Me.Label4.Text = "y"
+        Me.lblOpisYLewy.AutoSize = True
+        Me.lblOpisYLewy.ForeColor = System.Drawing.Color.Blue
+        Me.lblOpisYLewy.Location = New System.Drawing.Point(4, 78)
+        Me.lblOpisYLewy.Name = "lblOpisYLewy"
+        Me.lblOpisYLewy.Size = New System.Drawing.Size(12, 13)
+        Me.lblOpisYLewy.TabIndex = 307
+        Me.lblOpisYLewy.Text = "y"
         '
-        'Label3
+        'lblOpisXDol
         '
-        Me.Label3.AutoSize = True
-        Me.Label3.ForeColor = System.Drawing.Color.Blue
-        Me.Label3.Location = New System.Drawing.Point(71, 115)
-        Me.Label3.Name = "Label3"
-        Me.Label3.Size = New System.Drawing.Size(12, 13)
-        Me.Label3.TabIndex = 306
-        Me.Label3.Text = "x"
+        Me.lblOpisXDol.AutoSize = True
+        Me.lblOpisXDol.ForeColor = System.Drawing.Color.Blue
+        Me.lblOpisXDol.Location = New System.Drawing.Point(71, 115)
+        Me.lblOpisXDol.Name = "lblOpisXDol"
+        Me.lblOpisXDol.Size = New System.Drawing.Size(12, 13)
+        Me.lblOpisXDol.TabIndex = 306
+        Me.lblOpisXDol.Text = "x"
         '
-        'TextBox2
+        'txtYLewy
         '
-        Me.TextBox2.ForeColor = System.Drawing.Color.Blue
-        Me.TextBox2.Location = New System.Drawing.Point(21, 75)
-        Me.TextBox2.Name = "TextBox2"
-        Me.TextBox2.Size = New System.Drawing.Size(44, 20)
-        Me.TextBox2.TabIndex = 305
-        Me.TextBox2.Text = "569000"
+        Me.txtYLewy.ForeColor = System.Drawing.Color.Blue
+        Me.txtYLewy.Location = New System.Drawing.Point(21, 75)
+        Me.txtYLewy.Name = "txtYLewy"
+        Me.txtYLewy.Size = New System.Drawing.Size(44, 20)
+        Me.txtYLewy.TabIndex = 305
+        Me.txtYLewy.Text = "569000"
         '
-        'TextBox1
+        'txtXDol
         '
-        Me.TextBox1.ForeColor = System.Drawing.Color.Blue
-        Me.TextBox1.Location = New System.Drawing.Point(85, 111)
-        Me.TextBox1.Name = "TextBox1"
-        Me.TextBox1.Size = New System.Drawing.Size(44, 20)
-        Me.TextBox1.TabIndex = 304
-        Me.TextBox1.Text = "682000"
+        Me.txtXDol.ForeColor = System.Drawing.Color.Blue
+        Me.txtXDol.Location = New System.Drawing.Point(85, 111)
+        Me.txtXDol.Name = "txtXDol"
+        Me.txtXDol.Size = New System.Drawing.Size(44, 20)
+        Me.txtXDol.TabIndex = 304
+        Me.txtXDol.Text = "682000"
         '
         'PictureBox2
         '
@@ -1239,15 +1239,15 @@ Partial Class Form1
         '
         'Panel2
         '
-        Me.Panel2.Controls.Add(Me.Button9)
-        Me.Panel2.Controls.Add(Me.GroupBox2)
-        Me.Panel2.Controls.Add(Me.Button4)
-        Me.Panel2.Controls.Add(Me.GroupBox3)
-        Me.Panel2.Controls.Add(Me.Button8)
-        Me.Panel2.Controls.Add(Me.RichTextBox1)
-        Me.Panel2.Controls.Add(Me.Button7)
-        Me.Panel2.Controls.Add(Me.Button1)
-        Me.Panel2.Controls.Add(Me.Button3)
+        Me.Panel2.Controls.Add(Me.btnUsunPobrane)
+        Me.Panel2.Controls.Add(Me.grpDaneZrodlowe)
+        Me.Panel2.Controls.Add(Me.btnZnaczniki)
+        Me.Panel2.Controls.Add(Me.grpWybraneWarstwy)
+        Me.Panel2.Controls.Add(Me.btnScalanie)
+        Me.Panel2.Controls.Add(Me.txtKomunikaty)
+        Me.Panel2.Controls.Add(Me.btnOtworzFolder)
+        Me.Panel2.Controls.Add(Me.btnPobierz)
+        Me.Panel2.Controls.Add(Me.btnPrzerwij)
         Me.Panel2.Dock = System.Windows.Forms.DockStyle.Right
         Me.Panel2.Location = New System.Drawing.Point(661, 24)
         Me.Panel2.Name = "Panel2"
@@ -1256,8 +1256,8 @@ Partial Class Form1
         '
         'Panel3
         '
-        Me.Panel3.Controls.Add(Me.GroupBox5)
-        Me.Panel3.Controls.Add(Me.GroupBox4)
+        Me.Panel3.Controls.Add(Me.grpSchemat)
+        Me.Panel3.Controls.Add(Me.grpRozmiarSiatki)
         Me.Panel3.Dock = System.Windows.Forms.DockStyle.Bottom
         Me.Panel3.Location = New System.Drawing.Point(0, 515)
         Me.Panel3.Name = "Panel3"
@@ -1270,22 +1270,22 @@ Partial Class Form1
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.AutoScroll = True
         Me.ClientSize = New System.Drawing.Size(878, 684)
-        Me.Controls.Add(Me.Label36)
-        Me.Controls.Add(Me.Label41)
-        Me.Controls.Add(Me.Label40)
-        Me.Controls.Add(Me.Label39)
-        Me.Controls.Add(Me.Button5)
-        Me.Controls.Add(Me.Button2)
-        Me.Controls.Add(Me.Label66)
-        Me.Controls.Add(Me.Label65)
-        Me.Controls.Add(Me.Label63)
-        Me.Controls.Add(Me.Label38)
-        Me.Controls.Add(Me.Label37)
-        Me.Controls.Add(Me.Label35)
-        Me.Controls.Add(Me.RadioButton3)
-        Me.Controls.Add(Me.RadioButton2)
-        Me.Controls.Add(Me.RadioButton1)
-        Me.Controls.Add(Me.GMapControl1)
+        Me.Controls.Add(Me.lblKursorWgs)
+        Me.Controls.Add(Me.lblKursorUklad)
+        Me.Controls.Add(Me.lblKursorUkladOpis)
+        Me.Controls.Add(Me.lblKursorTytul)
+        Me.Controls.Add(Me.btnPomniejsz)
+        Me.Controls.Add(Me.btnPowieksz)
+        Me.Controls.Add(Me.lblSrodekOpisDlug)
+        Me.Controls.Add(Me.lblZoom)
+        Me.Controls.Add(Me.lblSrodekDlug)
+        Me.Controls.Add(Me.lblSrodekTytul)
+        Me.Controls.Add(Me.lblSrodekOpisSzer)
+        Me.Controls.Add(Me.lblSrodekSzer)
+        Me.Controls.Add(Me.rbBing)
+        Me.Controls.Add(Me.rbGoogle)
+        Me.Controls.Add(Me.rbOsm)
+        Me.Controls.Add(Me.mapa)
         Me.Controls.Add(Me.Panel3)
         Me.Controls.Add(Me.Panel2)
         Me.Controls.Add(Me.Label67)
@@ -1297,19 +1297,19 @@ Partial Class Form1
         Me.Icon = CType(resources.GetObject("$this.Icon"), System.Drawing.Icon)
         Me.MainMenuStrip = Me.MenuStrip1
         Me.Name = "Form1"
-        Me.GroupBox2.ResumeLayout(False)
-        Me.GroupBox2.PerformLayout()
+        Me.grpDaneZrodlowe.ResumeLayout(False)
+        Me.grpDaneZrodlowe.PerformLayout()
         Me.StatusStrip1.ResumeLayout(False)
         Me.StatusStrip1.PerformLayout()
         Me.MenuStrip1.ResumeLayout(False)
         Me.MenuStrip1.PerformLayout()
-        Me.GroupBox3.ResumeLayout(False)
-        Me.GroupBox3.PerformLayout()
+        Me.grpWybraneWarstwy.ResumeLayout(False)
+        Me.grpWybraneWarstwy.PerformLayout()
         CType(Me.PictureBox1, System.ComponentModel.ISupportInitialize).EndInit()
-        Me.GroupBox4.ResumeLayout(False)
-        Me.GroupBox4.PerformLayout()
-        Me.GroupBox5.ResumeLayout(False)
-        Me.GroupBox5.PerformLayout()
+        Me.grpRozmiarSiatki.ResumeLayout(False)
+        Me.grpRozmiarSiatki.PerformLayout()
+        Me.grpSchemat.ResumeLayout(False)
+        Me.grpSchemat.PerformLayout()
         CType(Me.PictureBox2, System.ComponentModel.ISupportInitialize).EndInit()
         Me.Panel2.ResumeLayout(False)
         Me.Panel3.ResumeLayout(False)
@@ -1317,111 +1317,111 @@ Partial Class Form1
         Me.PerformLayout()
 
     End Sub
-    Friend WithEvents Button1 As System.Windows.Forms.Button
-    Friend WithEvents GroupBox2 As System.Windows.Forms.GroupBox
-    Friend WithEvents FolderBrowserDialog1 As System.Windows.Forms.FolderBrowserDialog
+    Friend WithEvents btnPobierz As System.Windows.Forms.Button
+    Friend WithEvents grpDaneZrodlowe As System.Windows.Forms.GroupBox
+    Friend WithEvents dlgFolder As System.Windows.Forms.FolderBrowserDialog
     Friend WithEvents StatusStrip1 As System.Windows.Forms.StatusStrip
-    Friend WithEvents ToolStripProgressBar1 As System.Windows.Forms.ToolStripProgressBar
-    Friend WithEvents ToolStripStatusLabel1 As System.Windows.Forms.ToolStripStatusLabel
-    Friend WithEvents ToolStripStatusLabel2 As System.Windows.Forms.ToolStripStatusLabel
-    Friend WithEvents Button3 As System.Windows.Forms.Button
-    Friend WithEvents ToolStripStatusLabel3 As System.Windows.Forms.ToolStripStatusLabel
+    Friend WithEvents stPostep As System.Windows.Forms.ToolStripProgressBar
+    Friend WithEvents stFolder As System.Windows.Forms.ToolStripStatusLabel
+    Friend WithEvents stFormat As System.Windows.Forms.ToolStripStatusLabel
+    Friend WithEvents btnPrzerwij As System.Windows.Forms.Button
+    Friend WithEvents stSegment As System.Windows.Forms.ToolStripStatusLabel
     Friend WithEvents SesjaToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents ZapiszToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents WczytajToolStripMenuItem1 As System.Windows.Forms.ToolStripMenuItem
-    Friend WithEvents WarstwyToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
+    Friend WithEvents NarzedziaToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents NakładanieWarstwNaSiebieToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents UstawieniaToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents HelpToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents AboutToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents PomocPomorskieForumEksploracyjneToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents MenuStrip1 As System.Windows.Forms.MenuStrip
-    Friend WithEvents ComboBox3 As System.Windows.Forms.ComboBox
-    Friend WithEvents ListBox1 As System.Windows.Forms.ListBox
+    Friend WithEvents cmbZbiorMap As System.Windows.Forms.ComboBox
+    Friend WithEvents lstWarstwy As System.Windows.Forms.ListBox
     Friend WithEvents InstrukcjaObsługiToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents Label30 As System.Windows.Forms.Label
     Friend WithEvents Label29 As System.Windows.Forms.Label
     Friend WithEvents UsuwaniePustychSegmentówToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
-    Friend WithEvents TextBox9 As System.Windows.Forms.TextBox
+    Friend WithEvents txtBokSegmentu As System.Windows.Forms.TextBox
     Friend WithEvents Label1 As System.Windows.Forms.Label
     Friend WithEvents Label2 As System.Windows.Forms.Label
-    Friend WithEvents TextBox10 As System.Windows.Forms.TextBox
+    Friend WithEvents txtRozmiarPiksela As System.Windows.Forms.TextBox
     Friend WithEvents ToolTip1 As System.Windows.Forms.ToolTip
     Friend WithEvents Panel1 As System.Windows.Forms.Panel
-    Friend WithEvents GMapControl1 As GMap.NET.WindowsForms.GMapControl
-    Friend WithEvents RadioButton1 As System.Windows.Forms.RadioButton
-    Friend WithEvents RadioButton2 As System.Windows.Forms.RadioButton
-    Friend WithEvents RadioButton3 As System.Windows.Forms.RadioButton
-    Friend WithEvents Label35 As System.Windows.Forms.Label
-    Friend WithEvents Label37 As System.Windows.Forms.Label
-    'Friend WithEvents Label36 As System.Windows.Forms.Label
-    Friend WithEvents Label38 As System.Windows.Forms.Label
-    Friend WithEvents Label39 As System.Windows.Forms.Label
-    Friend WithEvents Label40 As System.Windows.Forms.Label
-    Friend WithEvents Label41 As System.Windows.Forms.Label
-    Friend WithEvents GroupBox3 As System.Windows.Forms.GroupBox
-    Friend WithEvents Label23 As System.Windows.Forms.Label
-    Friend WithEvents Label24 As System.Windows.Forms.Label
-    Friend WithEvents Label25 As System.Windows.Forms.Label
-    Friend WithEvents Label26 As System.Windows.Forms.Label
-    Friend WithEvents Label27 As System.Windows.Forms.Label
-    Friend WithEvents Label28 As System.Windows.Forms.Label
-    Friend WithEvents Label16 As System.Windows.Forms.Label
-    Friend WithEvents Label12 As System.Windows.Forms.Label
-    Friend WithEvents Label15 As System.Windows.Forms.Label
-    Friend WithEvents Label14 As System.Windows.Forms.Label
-    Friend WithEvents Label11 As System.Windows.Forms.Label
-    Friend WithEvents Label13 As System.Windows.Forms.Label
-    Friend WithEvents Label63 As System.Windows.Forms.Label
-    Friend WithEvents Label65 As System.Windows.Forms.Label
-    Friend WithEvents Label66 As System.Windows.Forms.Label
-    Friend WithEvents Button2 As System.Windows.Forms.Button
-    Friend WithEvents Button5 As System.Windows.Forms.Button
+    Friend WithEvents mapa As GMap.NET.WindowsForms.GMapControl
+    Friend WithEvents rbOsm As System.Windows.Forms.RadioButton
+    Friend WithEvents rbGoogle As System.Windows.Forms.RadioButton
+    Friend WithEvents rbBing As System.Windows.Forms.RadioButton
+    Friend WithEvents lblSrodekSzer As System.Windows.Forms.Label
+    Friend WithEvents lblSrodekOpisSzer As System.Windows.Forms.Label
+    'Friend WithEvents lblKursorWgs As System.Windows.Forms.Label
+    Friend WithEvents lblSrodekTytul As System.Windows.Forms.Label
+    Friend WithEvents lblKursorTytul As System.Windows.Forms.Label
+    Friend WithEvents lblKursorUkladOpis As System.Windows.Forms.Label
+    Friend WithEvents lblKursorUklad As System.Windows.Forms.Label
+    Friend WithEvents grpWybraneWarstwy As System.Windows.Forms.GroupBox
+    Friend WithEvents lblWarstwa12 As System.Windows.Forms.Label
+    Friend WithEvents lblWarstwa08 As System.Windows.Forms.Label
+    Friend WithEvents lblWarstwa11 As System.Windows.Forms.Label
+    Friend WithEvents lblWarstwa10 As System.Windows.Forms.Label
+    Friend WithEvents lblWarstwa07 As System.Windows.Forms.Label
+    Friend WithEvents lblWarstwa09 As System.Windows.Forms.Label
+    Friend WithEvents lblWarstwa06 As System.Windows.Forms.Label
+    Friend WithEvents lblWarstwa02 As System.Windows.Forms.Label
+    Friend WithEvents lblWarstwa05 As System.Windows.Forms.Label
+    Friend WithEvents lblWarstwa04 As System.Windows.Forms.Label
+    Friend WithEvents lblWarstwa01 As System.Windows.Forms.Label
+    Friend WithEvents lblWarstwa03 As System.Windows.Forms.Label
+    Friend WithEvents lblSrodekDlug As System.Windows.Forms.Label
+    Friend WithEvents lblZoom As System.Windows.Forms.Label
+    Friend WithEvents lblSrodekOpisDlug As System.Windows.Forms.Label
+    Friend WithEvents btnPowieksz As System.Windows.Forms.Button
+    Friend WithEvents btnPomniejsz As System.Windows.Forms.Button
     Friend WithEvents Label67 As System.Windows.Forms.Label
     Friend WithEvents ScalanieToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
-    Friend WithEvents GroupBox4 As System.Windows.Forms.GroupBox
-    Friend WithEvents TextBox12 As System.Windows.Forms.TextBox
+    Friend WithEvents grpRozmiarSiatki As System.Windows.Forms.GroupBox
+    Friend WithEvents txtLiczbaWierszy As System.Windows.Forms.TextBox
     Friend WithEvents Label21 As System.Windows.Forms.Label
-    Friend WithEvents TextBox11 As System.Windows.Forms.TextBox
+    Friend WithEvents txtLiczbaKolumn As System.Windows.Forms.TextBox
     Friend WithEvents Label20 As System.Windows.Forms.Label
-    Friend WithEvents TextBox7 As System.Windows.Forms.TextBox
-    Friend WithEvents TextBox8 As System.Windows.Forms.TextBox
+    Friend WithEvents txtWysokoscPx As System.Windows.Forms.TextBox
+    Friend WithEvents txtSzerokoscPx As System.Windows.Forms.TextBox
     Friend WithEvents Label9 As System.Windows.Forms.Label
     Friend WithEvents Label17 As System.Windows.Forms.Label
     Friend WithEvents Label10 As System.Windows.Forms.Label
-    Friend WithEvents TextBox5 As System.Windows.Forms.TextBox
-    Friend WithEvents TextBox6 As System.Windows.Forms.TextBox
-    Friend WithEvents RichTextBox1 As System.Windows.Forms.RichTextBox
-    Friend WithEvents Label36 As System.Windows.Forms.Label
-    Friend WithEvents TextBox13 As System.Windows.Forms.TextBox
+    Friend WithEvents txtSzerokoscKm As System.Windows.Forms.TextBox
+    Friend WithEvents txtWysokoscKm As System.Windows.Forms.TextBox
+    Friend WithEvents txtKomunikaty As System.Windows.Forms.RichTextBox
+    Friend WithEvents lblKursorWgs As System.Windows.Forms.Label
+    Friend WithEvents txtZasiegSegmentuKm As System.Windows.Forms.TextBox
     Friend WithEvents Label47 As System.Windows.Forms.Label
     Friend WithEvents Label46 As System.Windows.Forms.Label
     Friend WithEvents Label22 As System.Windows.Forms.Label
     Friend WithEvents Label19 As System.Windows.Forms.Label
     Friend WithEvents Label18 As System.Windows.Forms.Label
-    Friend WithEvents GroupBox5 As System.Windows.Forms.GroupBox
-    Friend WithEvents Label34 As System.Windows.Forms.Label
-    Friend WithEvents Label32 As System.Windows.Forms.Label
-    Friend WithEvents Label33 As System.Windows.Forms.Label
-    Friend WithEvents Label31 As System.Windows.Forms.Label
-    Friend WithEvents Label5 As System.Windows.Forms.Label
-    Friend WithEvents Label6 As System.Windows.Forms.Label
-    Friend WithEvents TextBox4 As System.Windows.Forms.TextBox
-    Friend WithEvents TextBox3 As System.Windows.Forms.TextBox
-    Friend WithEvents Label4 As System.Windows.Forms.Label
-    Friend WithEvents Label3 As System.Windows.Forms.Label
-    Friend WithEvents TextBox2 As System.Windows.Forms.TextBox
-    Friend WithEvents TextBox1 As System.Windows.Forms.TextBox
+    Friend WithEvents grpSchemat As System.Windows.Forms.GroupBox
+    Friend WithEvents lblZaznDlugLewa As System.Windows.Forms.Label
+    Friend WithEvents lblZaznSzerDol As System.Windows.Forms.Label
+    Friend WithEvents lblZaznDlugPrawa As System.Windows.Forms.Label
+    Friend WithEvents lblZaznSzerGora As System.Windows.Forms.Label
+    Friend WithEvents lblOpisYPrawy As System.Windows.Forms.Label
+    Friend WithEvents lblOpisXGora As System.Windows.Forms.Label
+    Friend WithEvents txtYPrawy As System.Windows.Forms.TextBox
+    Friend WithEvents txtXGora As System.Windows.Forms.TextBox
+    Friend WithEvents lblOpisYLewy As System.Windows.Forms.Label
+    Friend WithEvents lblOpisXDol As System.Windows.Forms.Label
+    Friend WithEvents txtYLewy As System.Windows.Forms.TextBox
+    Friend WithEvents txtXDol As System.Windows.Forms.TextBox
     Friend WithEvents PictureBox2 As System.Windows.Forms.PictureBox
-    Friend WithEvents Button7 As System.Windows.Forms.Button
-    Friend WithEvents Button8 As System.Windows.Forms.Button
-    Friend WithEvents Button6 As System.Windows.Forms.Button
+    Friend WithEvents btnOtworzFolder As System.Windows.Forms.Button
+    Friend WithEvents btnScalanie As System.Windows.Forms.Button
+    Friend WithEvents btnResetujWarstwy As System.Windows.Forms.Button
     Friend WithEvents Label42 As System.Windows.Forms.Label
     Friend WithEvents Label7 As System.Windows.Forms.Label
     Friend WithEvents PictureBox1 As System.Windows.Forms.PictureBox
-    Friend WithEvents Button4 As System.Windows.Forms.Button
+    Friend WithEvents btnZnaczniki As System.Windows.Forms.Button
     Friend WithEvents Panel2 As System.Windows.Forms.Panel
     Friend WithEvents Panel3 As System.Windows.Forms.Panel
     Friend WithEvents Label8 As Label
-    Friend WithEvents Button9 As Button
+    Friend WithEvents btnUsunPobrane As Button
 End Class

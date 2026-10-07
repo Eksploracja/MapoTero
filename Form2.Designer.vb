@@ -39,69 +39,74 @@ Partial Class Form2
     Private Sub InitializeComponent()
         Me.components = New System.ComponentModel.Container()
         Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(Form2))
-        Me.ComboBox1 = New System.Windows.Forms.ComboBox()
+        Me.cmbFormat = New System.Windows.Forms.ComboBox()
         Me.Label1 = New System.Windows.Forms.Label()
-        Me.CheckBox1 = New System.Windows.Forms.CheckBox()
-        Me.GroupBox1 = New System.Windows.Forms.GroupBox()
-        Me.CheckBox13 = New System.Windows.Forms.CheckBox()
-        Me.CheckBox8 = New System.Windows.Forms.CheckBox()
-        Me.CheckBox7 = New System.Windows.Forms.CheckBox()
-        Me.CheckBox4 = New System.Windows.Forms.CheckBox()
-        Me.CheckBox2 = New System.Windows.Forms.CheckBox()
+        Me.chkMap = New System.Windows.Forms.CheckBox()
+        Me.grpKalibracja = New System.Windows.Forms.GroupBox()
+        Me.chkTab = New System.Windows.Forms.CheckBox()
+        Me.chkKml = New System.Windows.Forms.CheckBox()
+        Me.chkWorldFile = New System.Windows.Forms.CheckBox()
+        Me.chkWldPoints = New System.Windows.Forms.CheckBox()
+        Me.chkGmi = New System.Windows.Forms.CheckBox()
         Me.GroupBox2 = New System.Windows.Forms.GroupBox()
         Me.Label3 = New System.Windows.Forms.Label()
         Me.Label2 = New System.Windows.Forms.Label()
-        Me.TextBox2 = New System.Windows.Forms.TextBox()
-        Me.TextBox1 = New System.Windows.Forms.TextBox()
-        Me.Button1 = New System.Windows.Forms.Button()
-        Me.CheckBox3 = New System.Windows.Forms.CheckBox()
+        Me.txtPrzerwa = New System.Windows.Forms.TextBox()
+        Me.txtIloscProb = New System.Windows.Forms.TextBox()
+        Me.btnZapisz = New System.Windows.Forms.Button()
+        Me.chkZamienXY = New System.Windows.Forms.CheckBox()
         Me.Label4 = New System.Windows.Forms.Label()
-        Me.TextBox6 = New System.Windows.Forms.TextBox()
+        Me.txtPrefiks = New System.Windows.Forms.TextBox()
         Me.GroupBox3 = New System.Windows.Forms.GroupBox()
         Me.GroupBox8 = New System.Windows.Forms.GroupBox()
         Me.Label8 = New System.Windows.Forms.Label()
         Me.GroupBox6 = New System.Windows.Forms.GroupBox()
-        Me.ComboBox2 = New System.Windows.Forms.ComboBox()
+        Me.cmbNumeracja = New System.Windows.Forms.ComboBox()
         Me.GroupBox5 = New System.Windows.Forms.GroupBox()
-        Me.Label9 = New System.Windows.Forms.Label()
-        Me.ComboBox3 = New System.Windows.Forms.ComboBox()
-        Me.CheckBox6 = New System.Windows.Forms.CheckBox()
+        Me.lblNazwaTB = New System.Windows.Forms.Label()
+        Me.cmbNazwaTB = New System.Windows.Forms.ComboBox()
+        Me.chkTrekBuddy = New System.Windows.Forms.CheckBox()
         Me.GroupBox4 = New System.Windows.Forms.GroupBox()
         Me.Label7 = New System.Windows.Forms.Label()
         Me.Label6 = New System.Windows.Forms.Label()
         Me.Label5 = New System.Windows.Forms.Label()
-        Me.CheckBox5 = New System.Windows.Forms.CheckBox()
+        Me.chkPowyzejOstatniego = New System.Windows.Forms.CheckBox()
         Me.ToolTip1 = New System.Windows.Forms.ToolTip(Me.components)
-        Me.CheckBox12 = New System.Windows.Forms.CheckBox()
-        Me.CheckBox11 = New System.Windows.Forms.CheckBox()
-        Me.CheckBox10 = New System.Windows.Forms.CheckBox()
-        Me.CheckBox9 = New System.Windows.Forms.CheckBox()
+        Me.chkKursorISrodek = New System.Windows.Forms.CheckBox()
+        Me.chkZaznaczenieWgs = New System.Windows.Forms.CheckBox()
+        Me.chkKursorWgs = New System.Windows.Forms.CheckBox()
+        Me.chkEdycjaXY = New System.Windows.Forms.CheckBox()
         Me.GroupBox7 = New System.Windows.Forms.GroupBox()
-        Me.Button6 = New System.Windows.Forms.Button()
-        Me.Label10 = New System.Windows.Forms.Label()
-        Me.Label11 = New System.Windows.Forms.Label()
-        Me.GroupBox1.SuspendLayout()
+        Me.btnResetuj = New System.Windows.Forms.Button()
+        Me.lblPodgladNazwyTB = New System.Windows.Forms.Label()
+        Me.lblPodgladTB = New System.Windows.Forms.Label()
+        Me.grpKalibracja.SuspendLayout()
         Me.GroupBox2.SuspendLayout()
         Me.GroupBox3.SuspendLayout()
         Me.GroupBox8.SuspendLayout()
         Me.GroupBox6.SuspendLayout()
+        Me.grpPobieranie = New System.Windows.Forms.GroupBox()
+        Me.lblWatki = New System.Windows.Forms.Label()
+        Me.nudWatki = New System.Windows.Forms.NumericUpDown()
+        Me.grpPobieranie.SuspendLayout()
+        CType(Me.nudWatki, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.GroupBox5.SuspendLayout()
         Me.GroupBox4.SuspendLayout()
         Me.GroupBox7.SuspendLayout()
         Me.SuspendLayout()
         '
-        'ComboBox1
+        'cmbFormat
         '
-        Me.ComboBox1.AccessibleRole = System.Windows.Forms.AccessibleRole.TitleBar
-        Me.ComboBox1.FormattingEnabled = True
-        Me.ComboBox1.Items.AddRange(New Object() {"jpeg", "gif", "png", "png24", "png32", "png8", "svg+xml", "tiff"})
-        Me.ComboBox1.Location = New System.Drawing.Point(15, 81)
-        Me.ComboBox1.Name = "ComboBox1"
-        Me.ComboBox1.Size = New System.Drawing.Size(152, 21)
-        Me.ComboBox1.TabIndex = 0
-        Me.ComboBox1.TabStop = False
-        Me.ComboBox1.Tag = ""
-        Me.ToolTip1.SetToolTip(Me.ComboBox1, "format pobieranych segmentów map")
+        Me.cmbFormat.AccessibleRole = System.Windows.Forms.AccessibleRole.TitleBar
+        Me.cmbFormat.FormattingEnabled = True
+        Me.cmbFormat.Items.AddRange(New Object() {"jpeg", "gif", "png", "png24", "png32", "png8", "svg+xml", "tiff"})
+        Me.cmbFormat.Location = New System.Drawing.Point(15, 81)
+        Me.cmbFormat.Name = "cmbFormat"
+        Me.cmbFormat.Size = New System.Drawing.Size(152, 21)
+        Me.cmbFormat.TabIndex = 0
+        Me.cmbFormat.TabStop = False
+        Me.cmbFormat.Tag = ""
+        Me.ToolTip1.SetToolTip(Me.cmbFormat, "format pobieranych segmentów map")
         '
         'Label1
         '
@@ -112,92 +117,92 @@ Partial Class Form2
         Me.Label1.TabIndex = 1
         Me.Label1.Text = "rozszerzenie segmentu"
         '
-        'CheckBox1
+        'chkMap
         '
-        Me.CheckBox1.AccessibleDescription = ""
-        Me.CheckBox1.AutoSize = True
-        Me.CheckBox1.Location = New System.Drawing.Point(8, 20)
-        Me.CheckBox1.Name = "CheckBox1"
-        Me.CheckBox1.Size = New System.Drawing.Size(132, 17)
-        Me.CheckBox1.TabIndex = 2
-        Me.CheckBox1.Text = "plik .map / OziExplorer"
-        Me.CheckBox1.UseVisualStyleBackColor = True
+        Me.chkMap.AccessibleDescription = ""
+        Me.chkMap.AutoSize = True
+        Me.chkMap.Location = New System.Drawing.Point(8, 20)
+        Me.chkMap.Name = "chkMap"
+        Me.chkMap.Size = New System.Drawing.Size(132, 17)
+        Me.chkMap.TabIndex = 2
+        Me.chkMap.Text = "plik .map / OziExplorer"
+        Me.chkMap.UseVisualStyleBackColor = True
         '
-        'GroupBox1
+        'grpKalibracja
         '
-        Me.GroupBox1.Controls.Add(Me.CheckBox13)
-        Me.GroupBox1.Controls.Add(Me.CheckBox8)
-        Me.GroupBox1.Controls.Add(Me.CheckBox7)
-        Me.GroupBox1.Controls.Add(Me.CheckBox4)
-        Me.GroupBox1.Controls.Add(Me.CheckBox2)
-        Me.GroupBox1.Controls.Add(Me.CheckBox1)
-        Me.GroupBox1.Location = New System.Drawing.Point(11, 29)
-        Me.GroupBox1.Name = "GroupBox1"
-        Me.GroupBox1.Size = New System.Drawing.Size(170, 120)
-        Me.GroupBox1.TabIndex = 3
-        Me.GroupBox1.TabStop = False
-        Me.GroupBox1.Text = "Kalibruj segmenty"
-        Me.ToolTip1.SetToolTip(Me.GroupBox1, "Opcjonalne zaopatrywanie każdego pobranego segmentu rastrowego w dodatkowy plik k" &
+        Me.grpKalibracja.Controls.Add(Me.chkTab)
+        Me.grpKalibracja.Controls.Add(Me.chkKml)
+        Me.grpKalibracja.Controls.Add(Me.chkWorldFile)
+        Me.grpKalibracja.Controls.Add(Me.chkWldPoints)
+        Me.grpKalibracja.Controls.Add(Me.chkGmi)
+        Me.grpKalibracja.Controls.Add(Me.chkMap)
+        Me.grpKalibracja.Location = New System.Drawing.Point(11, 29)
+        Me.grpKalibracja.Name = "grpKalibracja"
+        Me.grpKalibracja.Size = New System.Drawing.Size(170, 120)
+        Me.grpKalibracja.TabIndex = 3
+        Me.grpKalibracja.TabStop = False
+        Me.grpKalibracja.Text = "Kalibruj segmenty"
+        Me.ToolTip1.SetToolTip(Me.grpKalibracja, "Opcjonalne zaopatrywanie każdego pobranego segmentu rastrowego w dodatkowy plik k" &
         "alibracyjny, umożliwiający wyświetlenie  segmentów w programach GIS/GPS z zachow" &
         "aniem ""georeferencji""")
         '
-        'CheckBox13
+        'chkTab
         '
-        Me.CheckBox13.AutoSize = True
-        Me.CheckBox13.Location = New System.Drawing.Point(8, 67)
-        Me.CheckBox13.Name = "CheckBox13"
-        Me.CheckBox13.Size = New System.Drawing.Size(113, 17)
-        Me.CheckBox13.TabIndex = 7
-        Me.CheckBox13.Text = "plik .tab / MapInfo"
-        Me.CheckBox13.UseVisualStyleBackColor = True
+        Me.chkTab.AutoSize = True
+        Me.chkTab.Location = New System.Drawing.Point(8, 67)
+        Me.chkTab.Name = "chkTab"
+        Me.chkTab.Size = New System.Drawing.Size(113, 17)
+        Me.chkTab.TabIndex = 7
+        Me.chkTab.Text = "plik .tab / MapInfo"
+        Me.chkTab.UseVisualStyleBackColor = True
         '
-        'CheckBox8
+        'chkKml
         '
-        Me.CheckBox8.AutoSize = True
-        Me.CheckBox8.Location = New System.Drawing.Point(8, 36)
-        Me.CheckBox8.Name = "CheckBox8"
-        Me.CheckBox8.Size = New System.Drawing.Size(134, 17)
-        Me.CheckBox8.TabIndex = 6
-        Me.CheckBox8.Text = "plik .kml / GoogleEarth"
-        Me.CheckBox8.UseVisualStyleBackColor = True
+        Me.chkKml.AutoSize = True
+        Me.chkKml.Location = New System.Drawing.Point(8, 36)
+        Me.chkKml.Name = "chkKml"
+        Me.chkKml.Size = New System.Drawing.Size(134, 17)
+        Me.chkKml.TabIndex = 6
+        Me.chkKml.Text = "plik .kml / GoogleEarth"
+        Me.chkKml.UseVisualStyleBackColor = True
         '
-        'CheckBox7
+        'chkWorldFile
         '
-        Me.CheckBox7.AutoSize = True
-        Me.CheckBox7.Location = New System.Drawing.Point(8, 51)
-        Me.CheckBox7.Name = "CheckBox7"
-        Me.CheckBox7.Size = New System.Drawing.Size(144, 17)
-        Me.CheckBox7.TabIndex = 5
-        Me.CheckBox7.Text = "plik .jpgw / QGIS, ArcGis"
-        Me.ToolTip1.SetToolTip(Me.CheckBox7, "plik .jpgw obsługuje jedynie segmenty pobierane w formacie jpeg")
-        Me.CheckBox7.UseVisualStyleBackColor = True
+        Me.chkWorldFile.AutoSize = True
+        Me.chkWorldFile.Location = New System.Drawing.Point(8, 51)
+        Me.chkWorldFile.Name = "chkWorldFile"
+        Me.chkWorldFile.Size = New System.Drawing.Size(144, 17)
+        Me.chkWorldFile.TabIndex = 5
+        Me.chkWorldFile.Text = "plik .jpgw / QGIS, ArcGis"
+        Me.ToolTip1.SetToolTip(Me.chkWorldFile, "plik .jpgw obsługuje jedynie segmenty pobierane w formacie jpeg")
+        Me.chkWorldFile.UseVisualStyleBackColor = True
         '
-        'CheckBox4
+        'chkWldPoints
         '
-        Me.CheckBox4.AutoSize = True
-        Me.CheckBox4.Location = New System.Drawing.Point(8, 82)
-        Me.CheckBox4.Name = "CheckBox4"
-        Me.CheckBox4.Size = New System.Drawing.Size(100, 17)
-        Me.CheckBox4.TabIndex = 4
-        Me.CheckBox4.Text = "pliki .wld .points"
-        Me.CheckBox4.UseVisualStyleBackColor = True
+        Me.chkWldPoints.AutoSize = True
+        Me.chkWldPoints.Location = New System.Drawing.Point(8, 82)
+        Me.chkWldPoints.Name = "chkWldPoints"
+        Me.chkWldPoints.Size = New System.Drawing.Size(100, 17)
+        Me.chkWldPoints.TabIndex = 4
+        Me.chkWldPoints.Text = "pliki .wld .points"
+        Me.chkWldPoints.UseVisualStyleBackColor = True
         '
-        'CheckBox2
+        'chkGmi
         '
-        Me.CheckBox2.AutoSize = True
-        Me.CheckBox2.Location = New System.Drawing.Point(8, 97)
-        Me.CheckBox2.Name = "CheckBox2"
-        Me.CheckBox2.Size = New System.Drawing.Size(142, 17)
-        Me.CheckBox2.TabIndex = 3
-        Me.CheckBox2.Text = "plik .gmi / GPSTuner 5.x"
-        Me.CheckBox2.UseVisualStyleBackColor = True
+        Me.chkGmi.AutoSize = True
+        Me.chkGmi.Location = New System.Drawing.Point(8, 97)
+        Me.chkGmi.Name = "chkGmi"
+        Me.chkGmi.Size = New System.Drawing.Size(142, 17)
+        Me.chkGmi.TabIndex = 3
+        Me.chkGmi.Text = "plik .gmi / GPSTuner 5.x"
+        Me.chkGmi.UseVisualStyleBackColor = True
         '
         'GroupBox2
         '
         Me.GroupBox2.Controls.Add(Me.Label3)
         Me.GroupBox2.Controls.Add(Me.Label2)
-        Me.GroupBox2.Controls.Add(Me.TextBox2)
-        Me.GroupBox2.Controls.Add(Me.TextBox1)
+        Me.GroupBox2.Controls.Add(Me.txtPrzerwa)
+        Me.GroupBox2.Controls.Add(Me.txtIloscProb)
         Me.GroupBox2.Location = New System.Drawing.Point(190, 29)
         Me.GroupBox2.Name = "GroupBox2"
         Me.GroupBox2.Size = New System.Drawing.Size(159, 68)
@@ -225,48 +230,48 @@ Partial Class Form2
         Me.Label2.TabIndex = 2
         Me.Label2.Text = "Ilość prób"
         '
-        'TextBox2
+        'txtPrzerwa
         '
-        Me.TextBox2.Location = New System.Drawing.Point(98, 45)
-        Me.TextBox2.Name = "TextBox2"
-        Me.TextBox2.Size = New System.Drawing.Size(38, 20)
-        Me.TextBox2.TabIndex = 1
-        Me.TextBox2.Text = "5"
-        Me.TextBox2.TextAlign = System.Windows.Forms.HorizontalAlignment.Center
-        Me.ToolTip1.SetToolTip(Me.TextBox2, "W jakich odstępach czasowych wysyłać kolejne zapytania do serwera WMS?")
+        Me.txtPrzerwa.Location = New System.Drawing.Point(98, 45)
+        Me.txtPrzerwa.Name = "txtPrzerwa"
+        Me.txtPrzerwa.Size = New System.Drawing.Size(38, 20)
+        Me.txtPrzerwa.TabIndex = 1
+        Me.txtPrzerwa.Text = "5"
+        Me.txtPrzerwa.TextAlign = System.Windows.Forms.HorizontalAlignment.Center
+        Me.ToolTip1.SetToolTip(Me.txtPrzerwa, "W jakich odstępach czasowych wysyłać kolejne zapytania do serwera WMS?")
         '
-        'TextBox1
+        'txtIloscProb
         '
-        Me.TextBox1.Location = New System.Drawing.Point(98, 18)
-        Me.TextBox1.Name = "TextBox1"
-        Me.TextBox1.Size = New System.Drawing.Size(38, 20)
-        Me.TextBox1.TabIndex = 0
-        Me.TextBox1.Text = "3"
-        Me.TextBox1.TextAlign = System.Windows.Forms.HorizontalAlignment.Center
-        Me.ToolTip1.SetToolTip(Me.TextBox1, "Ile razy wysyłać zapytanie do serwera WMS w przypadku napotkania problemu z pobra" &
+        Me.txtIloscProb.Location = New System.Drawing.Point(98, 18)
+        Me.txtIloscProb.Name = "txtIloscProb"
+        Me.txtIloscProb.Size = New System.Drawing.Size(38, 20)
+        Me.txtIloscProb.TabIndex = 0
+        Me.txtIloscProb.Text = "3"
+        Me.txtIloscProb.TextAlign = System.Windows.Forms.HorizontalAlignment.Center
+        Me.ToolTip1.SetToolTip(Me.txtIloscProb, "Ile razy wysyłać zapytanie do serwera WMS w przypadku napotkania problemu z pobra" &
         "niem segmentu?")
         '
-        'Button1
+        'btnZapisz
         '
-        Me.Button1.Font = New System.Drawing.Font("Microsoft Sans Serif", 12.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
-        Me.Button1.Location = New System.Drawing.Point(477, 304)
-        Me.Button1.Name = "Button1"
-        Me.Button1.Size = New System.Drawing.Size(168, 39)
-        Me.Button1.TabIndex = 11
-        Me.Button1.Text = "Zapisz ustawienia"
-        Me.Button1.UseVisualStyleBackColor = True
+        Me.btnZapisz.Font = New System.Drawing.Font("Microsoft Sans Serif", 12.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
+        Me.btnZapisz.Location = New System.Drawing.Point(477, 304)
+        Me.btnZapisz.Name = "btnZapisz"
+        Me.btnZapisz.Size = New System.Drawing.Size(168, 39)
+        Me.btnZapisz.TabIndex = 11
+        Me.btnZapisz.Text = "Zapisz ustawienia"
+        Me.btnZapisz.UseVisualStyleBackColor = True
         '
-        'CheckBox3
+        'chkZamienXY
         '
-        Me.CheckBox3.AutoSize = True
-        Me.CheckBox3.Location = New System.Drawing.Point(9, 35)
-        Me.CheckBox3.Name = "CheckBox3"
-        Me.CheckBox3.Size = New System.Drawing.Size(143, 17)
-        Me.CheckBox3.TabIndex = 12
-        Me.CheckBox3.Text = "zamień X i Y w zapytaniu"
-        Me.ToolTip1.SetToolTip(Me.CheckBox3, "Domyślny brak zaznaczenia jest optymalnym ustawieniem dla Geoportalu2. Opcja wyko" &
+        Me.chkZamienXY.AutoSize = True
+        Me.chkZamienXY.Location = New System.Drawing.Point(9, 35)
+        Me.chkZamienXY.Name = "chkZamienXY"
+        Me.chkZamienXY.Size = New System.Drawing.Size(143, 17)
+        Me.chkZamienXY.TabIndex = 12
+        Me.chkZamienXY.Text = "zamień X i Y w zapytaniu"
+        Me.ToolTip1.SetToolTip(Me.chkZamienXY, "Domyślny brak zaznaczenia jest optymalnym ustawieniem dla Geoportalu2. Opcja wyko" &
         "rzystywana jedynie w szczególnych sytuacjach nietypowych serwerów WMS.")
-        Me.CheckBox3.UseVisualStyleBackColor = True
+        Me.chkZamienXY.UseVisualStyleBackColor = True
         '
         'Label4
         '
@@ -277,22 +282,23 @@ Partial Class Form2
         Me.Label4.TabIndex = 13
         Me.Label4.Text = "przedrostek nazwy segmentów"
         '
-        'TextBox6
+        'txtPrefiks
         '
-        Me.TextBox6.Location = New System.Drawing.Point(15, 36)
-        Me.TextBox6.Name = "TextBox6"
-        Me.TextBox6.Size = New System.Drawing.Size(152, 20)
-        Me.TextBox6.TabIndex = 14
-        Me.ToolTip1.SetToolTip(Me.TextBox6, "opcjonalny wspólny przedrostek którym zostaną poprzedzone numery wszystkich pobie" &
+        Me.txtPrefiks.Location = New System.Drawing.Point(15, 36)
+        Me.txtPrefiks.Name = "txtPrefiks"
+        Me.txtPrefiks.Size = New System.Drawing.Size(152, 20)
+        Me.txtPrefiks.TabIndex = 14
+        Me.ToolTip1.SetToolTip(Me.txtPrefiks, "opcjonalny wspólny przedrostek którym zostaną poprzedzone numery wszystkich pobie" &
         "ranych segmentów map")
         '
         'GroupBox3
         '
         Me.GroupBox3.Controls.Add(Me.GroupBox8)
+        Me.GroupBox3.Controls.Add(Me.grpPobieranie)
         Me.GroupBox3.Controls.Add(Me.GroupBox6)
         Me.GroupBox3.Controls.Add(Me.GroupBox5)
         Me.GroupBox3.Controls.Add(Me.GroupBox2)
-        Me.GroupBox3.Controls.Add(Me.GroupBox1)
+        Me.GroupBox3.Controls.Add(Me.grpKalibracja)
         Me.GroupBox3.Location = New System.Drawing.Point(287, 19)
         Me.GroupBox3.Name = "GroupBox3"
         Me.GroupBox3.Size = New System.Drawing.Size(358, 286)
@@ -303,7 +309,7 @@ Partial Class Form2
         'GroupBox8
         '
         Me.GroupBox8.Controls.Add(Me.Label8)
-        Me.GroupBox8.Controls.Add(Me.CheckBox3)
+        Me.GroupBox8.Controls.Add(Me.chkZamienXY)
         Me.GroupBox8.Location = New System.Drawing.Point(190, 214)
         Me.GroupBox8.Name = "GroupBox8"
         Me.GroupBox8.Size = New System.Drawing.Size(162, 62)
@@ -320,9 +326,42 @@ Partial Class Form2
         Me.Label8.TabIndex = 13
         Me.Label8.Text = "nietypowych serwerów WMS"
         '
+        'grpPobieranie
+        '
+        Me.grpPobieranie.Controls.Add(Me.nudWatki)
+        Me.grpPobieranie.Controls.Add(Me.lblWatki)
+        Me.grpPobieranie.Location = New System.Drawing.Point(11, 231)
+        Me.grpPobieranie.Name = "grpPobieranie"
+        Me.grpPobieranie.Size = New System.Drawing.Size(170, 48)
+        Me.grpPobieranie.TabIndex = 20
+        Me.grpPobieranie.TabStop = False
+        Me.grpPobieranie.Text = "Pobieranie"
+        Me.ToolTip1.SetToolTip(Me.grpPobieranie, "Liczba segmentów pobieranych z serwera jednocześnie. Większa wartość przyspiesza pobieranie, ale bardziej obciąża serwer.")
+        '
+        'lblWatki
+        '
+        Me.lblWatki.AutoSize = True
+        Me.lblWatki.Location = New System.Drawing.Point(6, 21)
+        Me.lblWatki.Name = "lblWatki"
+        Me.lblWatki.Size = New System.Drawing.Size(105, 13)
+        Me.lblWatki.TabIndex = 0
+        Me.lblWatki.Text = "równoczesne pobrania"
+        '
+        'nudWatki
+        '
+        Me.nudWatki.Location = New System.Drawing.Point(120, 18)
+        Me.nudWatki.Maximum = New Decimal(New Integer() {16, 0, 0, 0})
+        Me.nudWatki.Minimum = New Decimal(New Integer() {1, 0, 0, 0})
+        Me.nudWatki.Name = "nudWatki"
+        Me.nudWatki.Size = New System.Drawing.Size(40, 20)
+        Me.nudWatki.TabIndex = 1
+        Me.nudWatki.TextAlign = System.Windows.Forms.HorizontalAlignment.Center
+        Me.nudWatki.Value = New Decimal(New Integer() {4, 0, 0, 0})
+        Me.ToolTip1.SetToolTip(Me.nudWatki, "Liczba segmentów pobieranych z serwera jednocześnie (1-16).")
+        '
         'GroupBox6
         '
-        Me.GroupBox6.Controls.Add(Me.ComboBox2)
+        Me.GroupBox6.Controls.Add(Me.cmbNumeracja)
         Me.GroupBox6.Location = New System.Drawing.Point(11, 156)
         Me.GroupBox6.Name = "GroupBox6"
         Me.GroupBox6.Size = New System.Drawing.Size(170, 69)
@@ -330,21 +369,21 @@ Partial Class Form2
         Me.GroupBox6.TabStop = False
         Me.GroupBox6.Text = "Zmiana domyślnej numeracji pobieranych segmentów"
         '
-        'ComboBox2
+        'cmbNumeracja
         '
-        Me.ComboBox2.FormattingEnabled = True
-        Me.ComboBox2.Items.AddRange(New Object() {"01_02_03", "1_2_3", "NrWiersza_NrKolumny"})
-        Me.ComboBox2.Location = New System.Drawing.Point(9, 32)
-        Me.ComboBox2.Name = "ComboBox2"
-        Me.ComboBox2.Size = New System.Drawing.Size(144, 21)
-        Me.ComboBox2.TabIndex = 8
-        Me.ToolTip1.SetToolTip(Me.ComboBox2, "Zmień sposób numerowania pobieranych segmentów")
+        Me.cmbNumeracja.FormattingEnabled = True
+        Me.cmbNumeracja.Items.AddRange(New Object() {"01_02_03", "1_2_3", "NrWiersza_NrKolumny"})
+        Me.cmbNumeracja.Location = New System.Drawing.Point(9, 32)
+        Me.cmbNumeracja.Name = "cmbNumeracja"
+        Me.cmbNumeracja.Size = New System.Drawing.Size(144, 21)
+        Me.cmbNumeracja.TabIndex = 8
+        Me.ToolTip1.SetToolTip(Me.cmbNumeracja, "Zmień sposób numerowania pobieranych segmentów")
         '
         'GroupBox5
         '
-        Me.GroupBox5.Controls.Add(Me.Label9)
-        Me.GroupBox5.Controls.Add(Me.ComboBox3)
-        Me.GroupBox5.Controls.Add(Me.CheckBox6)
+        Me.GroupBox5.Controls.Add(Me.lblNazwaTB)
+        Me.GroupBox5.Controls.Add(Me.cmbNazwaTB)
+        Me.GroupBox5.Controls.Add(Me.chkTrekBuddy)
         Me.GroupBox5.Location = New System.Drawing.Point(191, 100)
         Me.GroupBox5.Name = "GroupBox5"
         Me.GroupBox5.Size = New System.Drawing.Size(158, 114)
@@ -352,48 +391,48 @@ Partial Class Form2
         Me.GroupBox5.TabStop = False
         Me.GroupBox5.Text = "TrekBuddy i Locus Map"
         '
-        'Label9
+        'lblNazwaTB
         '
-        Me.Label9.AutoSize = True
-        Me.Label9.Enabled = False
-        Me.Label9.Location = New System.Drawing.Point(8, 50)
-        Me.Label9.Name = "Label9"
-        Me.Label9.Size = New System.Drawing.Size(148, 13)
-        Me.Label9.TabIndex = 4
-        Me.Label9.Text = "nazwa finalnej paczki TB i LM"
+        Me.lblNazwaTB.AutoSize = True
+        Me.lblNazwaTB.Enabled = False
+        Me.lblNazwaTB.Location = New System.Drawing.Point(8, 50)
+        Me.lblNazwaTB.Name = "lblNazwaTB"
+        Me.lblNazwaTB.Size = New System.Drawing.Size(148, 13)
+        Me.lblNazwaTB.TabIndex = 4
+        Me.lblNazwaTB.Text = "nazwa finalnej paczki TB i LM"
         '
-        'ComboBox3
+        'cmbNazwaTB
         '
-        Me.ComboBox3.Enabled = False
-        Me.ComboBox3.FormattingEnabled = True
-        Me.ComboBox3.Items.AddRange(New Object() {"przedrostek nazwy segm.", "nazwa serwera WMS", "nazwa warstwy WMS", "serwer + warstwa WMS"})
-        Me.ComboBox3.Location = New System.Drawing.Point(9, 66)
-        Me.ComboBox3.Name = "ComboBox3"
-        Me.ComboBox3.Size = New System.Drawing.Size(144, 21)
-        Me.ComboBox3.TabIndex = 9
-        Me.ComboBox3.Text = "przedrostek nazwy segm."
-        Me.ToolTip1.SetToolTip(Me.ComboBox3, "Zmień sposób numerowania pobieranych segmentów")
+        Me.cmbNazwaTB.Enabled = False
+        Me.cmbNazwaTB.FormattingEnabled = True
+        Me.cmbNazwaTB.Items.AddRange(New Object() {"przedrostek nazwy segm.", "nazwa serwera WMS", "nazwa warstwy WMS", "serwer + warstwa WMS"})
+        Me.cmbNazwaTB.Location = New System.Drawing.Point(9, 66)
+        Me.cmbNazwaTB.Name = "cmbNazwaTB"
+        Me.cmbNazwaTB.Size = New System.Drawing.Size(144, 21)
+        Me.cmbNazwaTB.TabIndex = 9
+        Me.cmbNazwaTB.Text = "przedrostek nazwy segm."
+        Me.ToolTip1.SetToolTip(Me.cmbNazwaTB, "Zmień sposób numerowania pobieranych segmentów")
         '
-        'CheckBox6
+        'chkTrekBuddy
         '
-        Me.CheckBox6.AutoSize = True
-        Me.CheckBox6.Location = New System.Drawing.Point(9, 21)
-        Me.CheckBox6.Name = "CheckBox6"
-        Me.CheckBox6.Size = New System.Drawing.Size(135, 17)
-        Me.CheckBox6.TabIndex = 5
-        Me.CheckBox6.Text = "twórz mapę TB i LM.tar"
-        Me.CheckBox6.UseVisualStyleBackColor = True
+        Me.chkTrekBuddy.AutoSize = True
+        Me.chkTrekBuddy.Location = New System.Drawing.Point(9, 21)
+        Me.chkTrekBuddy.Name = "chkTrekBuddy"
+        Me.chkTrekBuddy.Size = New System.Drawing.Size(135, 17)
+        Me.chkTrekBuddy.TabIndex = 5
+        Me.chkTrekBuddy.Text = "twórz mapę TB i LM.tar"
+        Me.chkTrekBuddy.UseVisualStyleBackColor = True
         '
         'GroupBox4
         '
         Me.GroupBox4.Controls.Add(Me.Label7)
         Me.GroupBox4.Controls.Add(Me.Label6)
         Me.GroupBox4.Controls.Add(Me.Label5)
-        Me.GroupBox4.Controls.Add(Me.CheckBox5)
-        Me.GroupBox4.Controls.Add(Me.TextBox6)
+        Me.GroupBox4.Controls.Add(Me.chkPowyzejOstatniego)
+        Me.GroupBox4.Controls.Add(Me.txtPrefiks)
         Me.GroupBox4.Controls.Add(Me.Label4)
         Me.GroupBox4.Controls.Add(Me.Label1)
-        Me.GroupBox4.Controls.Add(Me.ComboBox1)
+        Me.GroupBox4.Controls.Add(Me.cmbFormat)
         Me.GroupBox4.Location = New System.Drawing.Point(12, 19)
         Me.GroupBox4.Name = "GroupBox4"
         Me.GroupBox4.Size = New System.Drawing.Size(269, 163)
@@ -428,67 +467,67 @@ Partial Class Form2
         Me.Label5.TabIndex = 18
         Me.Label5.Text = "Przy powtórnym pobieraniu ściągaj tylko"
         '
-        'CheckBox5
+        'chkPowyzejOstatniego
         '
-        Me.CheckBox5.AutoSize = True
-        Me.CheckBox5.Location = New System.Drawing.Point(17, 125)
-        Me.CheckBox5.Name = "CheckBox5"
-        Me.CheckBox5.Size = New System.Drawing.Size(15, 14)
-        Me.CheckBox5.TabIndex = 17
-        Me.ToolTip1.SetToolTip(Me.CheckBox5, "Opcjonalna funkcja wykorzystywana głównie w przypadku wznawiania niedokończonych " &
+        Me.chkPowyzejOstatniego.AutoSize = True
+        Me.chkPowyzejOstatniego.Location = New System.Drawing.Point(17, 125)
+        Me.chkPowyzejOstatniego.Name = "chkPowyzejOstatniego"
+        Me.chkPowyzejOstatniego.Size = New System.Drawing.Size(15, 14)
+        Me.chkPowyzejOstatniego.TabIndex = 17
+        Me.ToolTip1.SetToolTip(Me.chkPowyzejOstatniego, "Opcjonalna funkcja wykorzystywana głównie w przypadku wznawiania niedokończonych " &
         "operacji pobierania map")
-        Me.CheckBox5.UseVisualStyleBackColor = True
+        Me.chkPowyzejOstatniego.UseVisualStyleBackColor = True
         '
-        'CheckBox12
+        'chkKursorISrodek
         '
-        Me.CheckBox12.AutoSize = True
-        Me.CheckBox12.Location = New System.Drawing.Point(8, 21)
-        Me.CheckBox12.Name = "CheckBox12"
-        Me.CheckBox12.Size = New System.Drawing.Size(235, 17)
-        Me.CheckBox12.TabIndex = 25
-        Me.CheckBox12.Text = "wyświetl współrzędne kursora i srodka mapy"
-        Me.ToolTip1.SetToolTip(Me.CheckBox12, "umożliwia wprowadzanie z klawiatury współrzędnych XY zasięgu pobieranej mapy ")
-        Me.CheckBox12.UseVisualStyleBackColor = True
+        Me.chkKursorISrodek.AutoSize = True
+        Me.chkKursorISrodek.Location = New System.Drawing.Point(8, 21)
+        Me.chkKursorISrodek.Name = "chkKursorISrodek"
+        Me.chkKursorISrodek.Size = New System.Drawing.Size(235, 17)
+        Me.chkKursorISrodek.TabIndex = 25
+        Me.chkKursorISrodek.Text = "wyświetl współrzędne kursora i srodka mapy"
+        Me.ToolTip1.SetToolTip(Me.chkKursorISrodek, "umożliwia wprowadzanie z klawiatury współrzędnych XY zasięgu pobieranej mapy ")
+        Me.chkKursorISrodek.UseVisualStyleBackColor = True
         '
-        'CheckBox11
+        'chkZaznaczenieWgs
         '
-        Me.CheckBox11.AutoSize = True
-        Me.CheckBox11.Location = New System.Drawing.Point(8, 61)
-        Me.CheckBox11.Name = "CheckBox11"
-        Me.CheckBox11.Size = New System.Drawing.Size(246, 17)
-        Me.CheckBox11.TabIndex = 23
-        Me.CheckBox11.Text = "wyświetl współrzędne  zaznaczenia w WGS84"
-        Me.ToolTip1.SetToolTip(Me.CheckBox11, "umożliwia wprowadzanie z klawiatury współrzędnych XY zasięgu pobieranej mapy ")
-        Me.CheckBox11.UseVisualStyleBackColor = True
+        Me.chkZaznaczenieWgs.AutoSize = True
+        Me.chkZaznaczenieWgs.Location = New System.Drawing.Point(8, 61)
+        Me.chkZaznaczenieWgs.Name = "chkZaznaczenieWgs"
+        Me.chkZaznaczenieWgs.Size = New System.Drawing.Size(246, 17)
+        Me.chkZaznaczenieWgs.TabIndex = 23
+        Me.chkZaznaczenieWgs.Text = "wyświetl współrzędne  zaznaczenia w WGS84"
+        Me.ToolTip1.SetToolTip(Me.chkZaznaczenieWgs, "umożliwia wprowadzanie z klawiatury współrzędnych XY zasięgu pobieranej mapy ")
+        Me.chkZaznaczenieWgs.UseVisualStyleBackColor = True
         '
-        'CheckBox10
+        'chkKursorWgs
         '
-        Me.CheckBox10.AutoSize = True
-        Me.CheckBox10.Location = New System.Drawing.Point(8, 41)
-        Me.CheckBox10.Name = "CheckBox10"
-        Me.CheckBox10.Size = New System.Drawing.Size(241, 17)
-        Me.CheckBox10.TabIndex = 20
-        Me.CheckBox10.Text = "wyświetl współrzędne kursora w ukł. WGS84"
-        Me.ToolTip1.SetToolTip(Me.CheckBox10, "umożliwia wprowadzanie z klawiatury współrzędnych XY zasięgu pobieranej mapy ")
-        Me.CheckBox10.UseVisualStyleBackColor = True
+        Me.chkKursorWgs.AutoSize = True
+        Me.chkKursorWgs.Location = New System.Drawing.Point(8, 41)
+        Me.chkKursorWgs.Name = "chkKursorWgs"
+        Me.chkKursorWgs.Size = New System.Drawing.Size(241, 17)
+        Me.chkKursorWgs.TabIndex = 20
+        Me.chkKursorWgs.Text = "wyświetl współrzędne kursora w ukł. WGS84"
+        Me.ToolTip1.SetToolTip(Me.chkKursorWgs, "umożliwia wprowadzanie z klawiatury współrzędnych XY zasięgu pobieranej mapy ")
+        Me.chkKursorWgs.UseVisualStyleBackColor = True
         '
-        'CheckBox9
+        'chkEdycjaXY
         '
-        Me.CheckBox9.AutoSize = True
-        Me.CheckBox9.Location = New System.Drawing.Point(8, 83)
-        Me.CheckBox9.Name = "CheckBox9"
-        Me.CheckBox9.Size = New System.Drawing.Size(195, 17)
-        Me.CheckBox9.TabIndex = 18
-        Me.CheckBox9.Text = "edytuj pola XY zasięgu zaznaczenia"
-        Me.ToolTip1.SetToolTip(Me.CheckBox9, "umożliwia wprowadzanie z klawiatury współrzędnych XY zasięgu pobieranej mapy ")
-        Me.CheckBox9.UseVisualStyleBackColor = True
+        Me.chkEdycjaXY.AutoSize = True
+        Me.chkEdycjaXY.Location = New System.Drawing.Point(8, 83)
+        Me.chkEdycjaXY.Name = "chkEdycjaXY"
+        Me.chkEdycjaXY.Size = New System.Drawing.Size(195, 17)
+        Me.chkEdycjaXY.TabIndex = 18
+        Me.chkEdycjaXY.Text = "edytuj pola XY zasięgu zaznaczenia"
+        Me.ToolTip1.SetToolTip(Me.chkEdycjaXY, "umożliwia wprowadzanie z klawiatury współrzędnych XY zasięgu pobieranej mapy ")
+        Me.chkEdycjaXY.UseVisualStyleBackColor = True
         '
         'GroupBox7
         '
-        Me.GroupBox7.Controls.Add(Me.CheckBox12)
-        Me.GroupBox7.Controls.Add(Me.CheckBox11)
-        Me.GroupBox7.Controls.Add(Me.CheckBox10)
-        Me.GroupBox7.Controls.Add(Me.CheckBox9)
+        Me.GroupBox7.Controls.Add(Me.chkKursorISrodek)
+        Me.GroupBox7.Controls.Add(Me.chkZaznaczenieWgs)
+        Me.GroupBox7.Controls.Add(Me.chkKursorWgs)
+        Me.GroupBox7.Controls.Add(Me.chkEdycjaXY)
         Me.GroupBox7.Location = New System.Drawing.Point(12, 195)
         Me.GroupBox7.Name = "GroupBox7"
         Me.GroupBox7.Size = New System.Drawing.Size(269, 110)
@@ -496,67 +535,70 @@ Partial Class Form2
         Me.GroupBox7.TabStop = False
         Me.GroupBox7.Text = "Opcje widoku okna głównego"
         '
-        'Button6
+        'btnResetuj
         '
-        Me.Button6.Font = New System.Drawing.Font("Microsoft Sans Serif", 6.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
-        Me.Button6.Image = Global.MapoTero.My.Resources.Resources.kosz
-        Me.Button6.ImageAlign = System.Drawing.ContentAlignment.MiddleRight
-        Me.Button6.Location = New System.Drawing.Point(287, 308)
-        Me.Button6.Name = "Button6"
-        Me.Button6.Size = New System.Drawing.Size(74, 32)
-        Me.Button6.TabIndex = 305
-        Me.Button6.Text = "Resetuj ustawienia"
-        Me.Button6.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
-        Me.Button6.UseVisualStyleBackColor = True
+        Me.btnResetuj.Font = New System.Drawing.Font("Microsoft Sans Serif", 6.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
+        Me.btnResetuj.Image = Global.MapoTero.My.Resources.Resources.kosz
+        Me.btnResetuj.ImageAlign = System.Drawing.ContentAlignment.MiddleRight
+        Me.btnResetuj.Location = New System.Drawing.Point(287, 308)
+        Me.btnResetuj.Name = "btnResetuj"
+        Me.btnResetuj.Size = New System.Drawing.Size(74, 32)
+        Me.btnResetuj.TabIndex = 305
+        Me.btnResetuj.Text = "Resetuj ustawienia"
+        Me.btnResetuj.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
+        Me.btnResetuj.UseVisualStyleBackColor = True
         '
-        'Label10
+        'lblPodgladNazwyTB
         '
-        Me.Label10.AutoSize = True
-        Me.Label10.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
-        Me.Label10.ForeColor = System.Drawing.Color.Green
-        Me.Label10.Location = New System.Drawing.Point(17, 326)
-        Me.Label10.Name = "Label10"
-        Me.Label10.Size = New System.Drawing.Size(13, 13)
-        Me.Label10.TabIndex = 14
-        Me.Label10.Text = "_"
-        Me.Label10.Visible = False
+        Me.lblPodgladNazwyTB.AutoSize = True
+        Me.lblPodgladNazwyTB.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
+        Me.lblPodgladNazwyTB.ForeColor = System.Drawing.Color.Green
+        Me.lblPodgladNazwyTB.Location = New System.Drawing.Point(17, 326)
+        Me.lblPodgladNazwyTB.Name = "lblPodgladNazwyTB"
+        Me.lblPodgladNazwyTB.Size = New System.Drawing.Size(13, 13)
+        Me.lblPodgladNazwyTB.TabIndex = 14
+        Me.lblPodgladNazwyTB.Text = "_"
+        Me.lblPodgladNazwyTB.Visible = False
         '
-        'Label11
+        'lblPodgladTB
         '
-        Me.Label11.AutoSize = True
-        Me.Label11.ForeColor = System.Drawing.Color.Green
-        Me.Label11.Location = New System.Drawing.Point(17, 310)
-        Me.Label11.Name = "Label11"
-        Me.Label11.Size = New System.Drawing.Size(189, 13)
-        Me.Label11.TabIndex = 306
-        Me.Label11.Text = "Podgląd nazwy finalnej paczki TB i LM"
-        Me.Label11.Visible = False
+        Me.lblPodgladTB.AutoSize = True
+        Me.lblPodgladTB.ForeColor = System.Drawing.Color.Green
+        Me.lblPodgladTB.Location = New System.Drawing.Point(17, 310)
+        Me.lblPodgladTB.Name = "lblPodgladTB"
+        Me.lblPodgladTB.Size = New System.Drawing.Size(189, 13)
+        Me.lblPodgladTB.TabIndex = 306
+        Me.lblPodgladTB.Text = "Podgląd nazwy finalnej paczki TB i LM"
+        Me.lblPodgladTB.Visible = False
         '
         'Form2
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.ClientSize = New System.Drawing.Size(656, 344)
-        Me.Controls.Add(Me.Label11)
-        Me.Controls.Add(Me.Label10)
-        Me.Controls.Add(Me.Button6)
+        Me.Controls.Add(Me.lblPodgladTB)
+        Me.Controls.Add(Me.lblPodgladNazwyTB)
+        Me.Controls.Add(Me.btnResetuj)
         Me.Controls.Add(Me.GroupBox7)
         Me.Controls.Add(Me.GroupBox4)
         Me.Controls.Add(Me.GroupBox3)
-        Me.Controls.Add(Me.Button1)
+        Me.Controls.Add(Me.btnZapisz)
         Me.Icon = CType(resources.GetObject("$this.Icon"), System.Drawing.Icon)
         Me.Name = "Form2"
         Me.RightToLeftLayout = True
         Me.Text = "Ustawienia"
         Me.ToolTip1.SetToolTip(Me, "Przywróć domyślne ustawienia programu")
-        Me.GroupBox1.ResumeLayout(False)
-        Me.GroupBox1.PerformLayout()
+        Me.grpKalibracja.ResumeLayout(False)
+        Me.grpKalibracja.PerformLayout()
         Me.GroupBox2.ResumeLayout(False)
         Me.GroupBox2.PerformLayout()
         Me.GroupBox3.ResumeLayout(False)
         Me.GroupBox8.ResumeLayout(False)
         Me.GroupBox8.PerformLayout()
         Me.GroupBox6.ResumeLayout(False)
+        Me.grpPobieranie.ResumeLayout(False)
+        Me.grpPobieranie.PerformLayout()
+        CType(Me.nudWatki, System.ComponentModel.ISupportInitialize).EndInit()
         Me.GroupBox5.ResumeLayout(False)
         Me.GroupBox5.PerformLayout()
         Me.GroupBox4.ResumeLayout(False)
@@ -567,45 +609,48 @@ Partial Class Form2
         Me.PerformLayout()
 
     End Sub
-    Friend WithEvents ComboBox1 As System.Windows.Forms.ComboBox
+    Friend WithEvents cmbFormat As System.Windows.Forms.ComboBox
     Friend WithEvents Label1 As System.Windows.Forms.Label
-    Friend WithEvents CheckBox1 As System.Windows.Forms.CheckBox
-    Friend WithEvents GroupBox1 As System.Windows.Forms.GroupBox
+    Friend WithEvents chkMap As System.Windows.Forms.CheckBox
+    Friend WithEvents grpKalibracja As System.Windows.Forms.GroupBox
     Friend WithEvents GroupBox2 As System.Windows.Forms.GroupBox
     Friend WithEvents Label3 As System.Windows.Forms.Label
     Friend WithEvents Label2 As System.Windows.Forms.Label
-    Friend WithEvents TextBox2 As System.Windows.Forms.TextBox
-    Friend WithEvents TextBox1 As System.Windows.Forms.TextBox
-    Friend WithEvents CheckBox2 As System.Windows.Forms.CheckBox
-    Friend WithEvents Button1 As System.Windows.Forms.Button
-    Friend WithEvents CheckBox3 As System.Windows.Forms.CheckBox
-    Friend WithEvents CheckBox4 As System.Windows.Forms.CheckBox
+    Friend WithEvents txtPrzerwa As System.Windows.Forms.TextBox
+    Friend WithEvents txtIloscProb As System.Windows.Forms.TextBox
+    Friend WithEvents chkGmi As System.Windows.Forms.CheckBox
+    Friend WithEvents btnZapisz As System.Windows.Forms.Button
+    Friend WithEvents chkZamienXY As System.Windows.Forms.CheckBox
+    Friend WithEvents chkWldPoints As System.Windows.Forms.CheckBox
     Friend WithEvents Label4 As System.Windows.Forms.Label
-    Friend WithEvents TextBox6 As System.Windows.Forms.TextBox
+    Friend WithEvents txtPrefiks As System.Windows.Forms.TextBox
     Friend WithEvents GroupBox3 As System.Windows.Forms.GroupBox
     Friend WithEvents GroupBox4 As System.Windows.Forms.GroupBox
-    Friend WithEvents CheckBox5 As System.Windows.Forms.CheckBox
+    Friend WithEvents chkPowyzejOstatniego As System.Windows.Forms.CheckBox
     Friend WithEvents Label7 As System.Windows.Forms.Label
     Friend WithEvents Label6 As System.Windows.Forms.Label
     Friend WithEvents Label5 As System.Windows.Forms.Label
-    Friend WithEvents CheckBox6 As System.Windows.Forms.CheckBox
+    Friend WithEvents chkTrekBuddy As System.Windows.Forms.CheckBox
     Friend WithEvents GroupBox5 As System.Windows.Forms.GroupBox
     Friend WithEvents GroupBox6 As System.Windows.Forms.GroupBox
-    Friend WithEvents CheckBox7 As System.Windows.Forms.CheckBox
+    Friend WithEvents grpPobieranie As System.Windows.Forms.GroupBox
+    Friend WithEvents lblWatki As System.Windows.Forms.Label
+    Friend WithEvents nudWatki As System.Windows.Forms.NumericUpDown
+    Friend WithEvents chkWorldFile As System.Windows.Forms.CheckBox
     Friend WithEvents ToolTip1 As System.Windows.Forms.ToolTip
-    Friend WithEvents ComboBox2 As System.Windows.Forms.ComboBox
+    Friend WithEvents cmbNumeracja As System.Windows.Forms.ComboBox
     Friend WithEvents GroupBox8 As System.Windows.Forms.GroupBox
-    Friend WithEvents CheckBox8 As System.Windows.Forms.CheckBox
+    Friend WithEvents chkKml As System.Windows.Forms.CheckBox
     Friend WithEvents GroupBox7 As System.Windows.Forms.GroupBox
-    Friend WithEvents CheckBox12 As System.Windows.Forms.CheckBox
-    Friend WithEvents CheckBox11 As System.Windows.Forms.CheckBox
-    Friend WithEvents CheckBox10 As System.Windows.Forms.CheckBox
-    Friend WithEvents CheckBox9 As System.Windows.Forms.CheckBox
-    Friend WithEvents CheckBox13 As System.Windows.Forms.CheckBox
-    Friend WithEvents Button6 As System.Windows.Forms.Button
+    Friend WithEvents chkKursorISrodek As System.Windows.Forms.CheckBox
+    Friend WithEvents chkZaznaczenieWgs As System.Windows.Forms.CheckBox
+    Friend WithEvents chkKursorWgs As System.Windows.Forms.CheckBox
+    Friend WithEvents chkEdycjaXY As System.Windows.Forms.CheckBox
+    Friend WithEvents chkTab As System.Windows.Forms.CheckBox
+    Friend WithEvents btnResetuj As System.Windows.Forms.Button
     Friend WithEvents Label8 As Label
-    Friend WithEvents Label10 As Label
-    Friend WithEvents Label9 As Label
-    Friend WithEvents ComboBox3 As ComboBox
-    Friend WithEvents Label11 As Label
+    Friend WithEvents lblPodgladNazwyTB As Label
+    Friend WithEvents lblNazwaTB As Label
+    Friend WithEvents cmbNazwaTB As ComboBox
+    Friend WithEvents lblPodgladTB As Label
 End Class

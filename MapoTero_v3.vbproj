@@ -16,7 +16,7 @@
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <OptionExplicit>On</OptionExplicit>
     <OptionCompare>Binary</OptionCompare>
-    <OptionStrict>Off</OptionStrict>
+    <OptionStrict>On</OptionStrict>
     <OptionInfer>On</OptionInfer>
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <ManifestCertificateThumbprint>A0AD231A70B2A9B1710586C47D50C29EDD8BCBA1</ManifestCertificateThumbprint>
@@ -148,6 +148,7 @@
       <HintPath>packages\System.Data.SQLite.Linq.1.0.118.0\lib\net46\System.Data.SQLite.Linq.dll</HintPath>
     </Reference>
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Net.Http" />
     <Reference Include="System.Memory, Version=4.0.1.2, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>packages\System.Memory.4.5.5\lib\net461\System.Memory.dll</HintPath>
     </Reference>
@@ -173,6 +174,12 @@
     <Reference Include="System.Xml.Linq">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="MapoTero.Core\MapoTero.Core.vbproj">
+      <Project>{CA25A54F-2B2A-4041-8390-351860614585}</Project>
+      <Name>MapoTero.Core</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AboutBox1.Designer.vb">
@@ -228,7 +235,11 @@
       <DependentUpon>Instrukcja_obslugi.vb</DependentUpon>
     </Compile>
     <Compile Include="Instrukcja_obslugi.vb" />
-    <Compile Include="Module1.vb" />
+    <Compile Include="Program.vb" />
+    <Compile Include="UstawieniaProgramu.vb" />
+    <Compile Include="ZapisGeoreferencji.vb" />
+    <Compile Include="PobieranieSegmentow.vb" />
+    <Compile Include="MapaTrekBuddy.vb" />
     <Compile Include="My Project\AssemblyInfo.vb" />
     <Compile Include="My Project\Application.Designer.vb">
       <AutoGen>True</AutoGen>
@@ -240,7 +251,6 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <Compile Include="Transform.vb" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="AboutBox1.resx">

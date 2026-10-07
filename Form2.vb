@@ -1,5 +1,3 @@
-﻿Imports System.IO
-
 'Copyright (C) <2015>  pajakt
 
 'This program is free software: you can redistribute it and/or modify
@@ -15,394 +13,223 @@
 'You should have received a copy of the GNU General Public License
 'along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+Imports System.IO
+
+''' <summary>Okno ustawień programu i sesji pobierania.</summary>
 Public Class Form2
 
+    ''' <summary>Blokuje reakcję na zdarzenia kontrolek podczas ich wypełniania.</summary>
+    Private _wypelnianie As Boolean
 
-    Private Sub Form2_Load(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MyBase.Load
-
+    Private Sub Form2_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         Me.Location = New Point(200, 150)
-
-
-        TextBox1.Text = Module1.iloscProbPobrania
-        TextBox2.Text = Module1.przerwaMiedzyProbami
-        CheckBox1.Checked = Module1.CheckMap 'wyprowadza stan checkboxów do zmiennych
-        CheckBox2.Checked = Module1.CheckGmi
-        CheckBox4.Checked = Module1.CheckWldPoints
-        CheckBox3.Checked = Module1.XYswitched
-        CheckBox5.Checked = Module1.pobierajPowyzejOstatniego
-        CheckBox6.Checked = Module1.CheckTB
-        CheckBox7.Checked = Module1.CheckJpgw
-        CheckBox8.Checked = Module1.CheckKml
-        CheckBox9.Checked = Module1.editXY
-        CheckBox10.Checked = Module1.kursorWGS84
-        CheckBox11.Checked = Module1.zaznaczenieWGS84
-        CheckBox12.Checked = Module1.kursor_i_srodekmapy
-        CheckBox13.Checked = Module1.CheckTab
-
-        'ustawienie odpowiedniej warosci Combobox1 odbywa sie przy jego inicjalizacji
-
-        TextBox6.Text = Module1.wspolnaNazwaKwadratu
-        ComboBox2.Text = Module1.numeracja
-
-        ComboBox1.Text = Module1.format
-
-
+        WypelnijKontrolki()
     End Sub
 
-    Private Sub ComboBox1_SelectedIndexChanged(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles ComboBox1.SelectedIndexChanged
-        Module1.format = ComboBox1.Text
-        Form1.ToolStripStatusLabel2.Text = Module1.format
-
-
+    ''' <summary>Przenosi ustawienia do kontrolek okna.</summary>
+    Private Sub WypelnijKontrolki()
+        _wypelnianie = True
+        Try
+            Dim u = Ustawienia
+            txtIloscProb.Text = u.IloscProbPobrania.ToString()
+            txtPrzerwa.Text = u.PrzerwaMiedzyProbami.ToString()
+            nudWatki.Value = Math.Max(nudWatki.Minimum, Math.Min(nudWatki.Maximum, CDec(u.LiczbaWatkow)))
+            chkMap.Checked = u.PlikMap
+            chkGmi.Checked = u.PlikGmi
+            chkWldPoints.Checked = u.PlikWldPoints
+            chkZamienXY.Checked = u.ZamienXY
+            chkPowyzejOstatniego.Checked = u.PobierajPowyzejOstatniego
+            chkTrekBuddy.Checked = u.TrekBuddy
+            chkWorldFile.Checked = u.PlikWorldFile
+            chkKml.Checked = u.PlikKml
+            chkEdycjaXY.Checked = u.EdycjaXY
+            chkKursorWgs.Checked = u.KursorWgs84
+            chkZaznaczenieWgs.Checked = u.ZaznaczenieWgs84
+            chkKursorISrodek.Checked = u.KursorISrodekMapy
+            chkTab.Checked = u.PlikTab
+            txtPrefiks.Text = u.Prefiks
+            cmbNumeracja.Text = u.Numeracja
+            cmbFormat.Text = u.Format
+            UstawTrybTrekBuddy(u.TrekBuddy, False)
+        Finally
+            _wypelnianie = False
+        End Try
+        OdswiezNazweTrekBuddy()
     End Sub
 
+    Private Sub cmbFormat_SelectedIndexChanged(sender As Object, e As EventArgs) Handles cmbFormat.SelectedIndexChanged
+        If _wypelnianie Then Exit Sub
+        Ustawienia.Format = cmbFormat.Text
+        Form1.stFormat.Text = "." & Ustawienia.Format
+    End Sub
 
+    Private Sub cmbNumeracja_SelectedIndexChanged(sender As Object, e As EventArgs) Handles cmbNumeracja.SelectedIndexChanged
+        If _wypelnianie Then Exit Sub
+        Ustawienia.Numeracja = cmbNumeracja.Text
+    End Sub
 
-    Private Sub CheckBox1_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles CheckBox1.Click
-        Select Case CheckBox1.CheckState
-            Case CheckState.Checked
-                Module1.CheckMap = True
-            Case CheckState.Unchecked
-                Module1.CheckMap = False
+#Region "Pliki georeferencyjne i opcje pobierania"
+
+    Private Sub chkMap_Click(sender As Object, e As EventArgs) Handles chkMap.Click
+        Ustawienia.PlikMap = chkMap.Checked
+    End Sub
+
+    Private Sub chkGmi_Click(sender As Object, e As EventArgs) Handles chkGmi.Click
+        Ustawienia.PlikGmi = chkGmi.Checked
+    End Sub
+
+    Private Sub chkWldPoints_Click(sender As Object, e As EventArgs) Handles chkWldPoints.Click
+        Ustawienia.PlikWldPoints = chkWldPoints.Checked
+    End Sub
+
+    Private Sub chkWorldFile_Click(sender As Object, e As EventArgs) Handles chkWorldFile.Click
+        Ustawienia.PlikWorldFile = chkWorldFile.Checked
+    End Sub
+
+    Private Sub chkKml_Click(sender As Object, e As EventArgs) Handles chkKml.Click
+        Ustawienia.PlikKml = chkKml.Checked
+    End Sub
+
+    Private Sub chkTab_Click(sender As Object, e As EventArgs) Handles chkTab.Click
+        Ustawienia.PlikTab = chkTab.Checked
+    End Sub
+
+    Private Sub chkZamienXY_Click(sender As Object, e As EventArgs) Handles chkZamienXY.Click
+        Ustawienia.ZamienXY = chkZamienXY.Checked
+    End Sub
+
+    Private Sub chkPowyzejOstatniego_Click(sender As Object, e As EventArgs) Handles chkPowyzejOstatniego.Click
+        Ustawienia.PobierajPowyzejOstatniego = chkPowyzejOstatniego.Checked
+    End Sub
+
+#End Region
+
+#Region "TrekBuddy i Locus Map"
+
+    Private Sub chkTrekBuddy_CheckedChanged(sender As Object, e As EventArgs) Handles chkTrekBuddy.CheckedChanged
+        If _wypelnianie Then Exit Sub
+        UstawTrybTrekBuddy(chkTrekBuddy.Checked, True)
+    End Sub
+
+    ''' <summary>
+    ''' Tryb mapy TrekBuddy / Locus Map: wyłącza pliki kalibracyjne segmentów i numerację (segmenty nazywane
+    ''' wg położenia w pikselach), ustawia segment 512 px.
+    ''' </summary>
+    Private Sub UstawTrybTrekBuddy(wlaczony As Boolean, zmienBokSegmentu As Boolean)
+        Ustawienia.TrekBuddy = wlaczony
+        If wlaczony Then
+            chkMap.Checked = False : Ustawienia.PlikMap = False
+            chkGmi.Checked = False : Ustawienia.PlikGmi = False
+            chkZamienXY.Checked = False : Ustawienia.ZamienXY = False
+            chkEdycjaXY.Checked = False
+            chkPowyzejOstatniego.Checked = False : Ustawienia.PobierajPowyzejOstatniego = False
+            Ustawienia.PlikWldPoints = False
+            Ustawienia.PlikWorldFile = False
+            If zmienBokSegmentu Then Form1.BokSegmentu = MapaTrekBuddy.BokSegmentu.ToString()
+        ElseIf zmienBokSegmentu Then
+            Form1.BokSegmentu = "2000"
+        End If
+        chkPowyzejOstatniego.Enabled = Not wlaczony
+        grpKalibracja.Enabled = Not wlaczony
+        cmbNumeracja.Enabled = Not wlaczony
+        cmbNazwaTB.Enabled = wlaczony
+        lblNazwaTB.Enabled = wlaczony
+        lblPodgladNazwyTB.Visible = wlaczony
+        lblPodgladTB.Visible = wlaczony
+    End Sub
+
+    Private Sub cmbNazwaTB_SelectedIndexChanged(sender As Object, e As EventArgs) Handles cmbNazwaTB.SelectedIndexChanged
+        OdswiezNazweTrekBuddy()
+    End Sub
+
+    Private Sub txtPrefiks_TextChanged(sender As Object, e As EventArgs) Handles txtPrefiks.TextChanged
+        OdswiezNazweTrekBuddy()
+    End Sub
+
+    ''' <summary>Nazwa paczki TrekBuddy / Locus Map wg wybranego stylu (przedrostek + zbiór map i/lub warstwa).</summary>
+    Public Sub OdswiezNazweTrekBuddy()
+        Dim warstwa As String = Form1.PierwszaWarstwa
+        Select Case cmbNazwaTB.SelectedIndex
+            Case 1 : Ustawienia.NazwaTrekBuddy = Form1.ZbiorMap
+            Case 2 : Ustawienia.NazwaTrekBuddy = warstwa
+            Case 3 : Ustawienia.NazwaTrekBuddy = Form1.ZbiorMap & "_" & warstwa
+            Case Else : Ustawienia.NazwaTrekBuddy = ""
         End Select
+        lblPodgladNazwyTB.Text = txtPrefiks.Text & Ustawienia.NazwaTrekBuddy
     End Sub
 
-    Private Sub CheckBox2_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles CheckBox2.Click
-        Select Case CheckBox2.CheckState
-            Case CheckState.Checked
-                Module1.CheckGmi = True
-            Case CheckState.Unchecked
-                Module1.CheckGmi = False
-        End Select
-    End Sub
+#End Region
 
-    Private Sub ComboBox3_SelectedIndexChanged(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles ComboBox3.SelectedIndexChanged
+#Region "Widok okna głównego"
 
-        If ComboBox3.SelectedIndex = 0 Then
-            styl_nazwy_TB = ""
-            Label10.Text = TextBox6.Text
-        End If
-        If ComboBox3.SelectedIndex = 1 Then
-            styl_nazwy_TB = Form1.ComboBox3.Text
-            Label10.Text = TextBox6.Text & Module1.styl_nazwy_TB
-        End If
-        If ComboBox3.SelectedIndex = 2 Then
-            styl_nazwy_TB = Form1.Label11.Text.Replace("1) ", "")
-            Label10.Text = TextBox6.Text & Module1.styl_nazwy_TB
-        End If
-        If ComboBox3.SelectedIndex = 3 Then
-            styl_nazwy_TB = Form1.ComboBox3.Text & "_" & Form1.Label11.Text.Replace("1) ", "")
-            Label10.Text = TextBox6.Text & Module1.styl_nazwy_TB
-        End If
-
-    End Sub
-    Private Sub TextBox6_TextChanged(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles TextBox6.TextChanged
-
-        If ComboBox3.SelectedIndex = 0 Then
-            styl_nazwy_TB = ""
-            Label10.Text = TextBox6.Text
-        End If
-        If ComboBox3.SelectedIndex = 1 Then
-            styl_nazwy_TB = Form1.ComboBox3.Text
-            Label10.Text = TextBox6.Text & Module1.styl_nazwy_TB
-        End If
-        If ComboBox3.SelectedIndex = 2 Then
-            styl_nazwy_TB = Form1.Label11.Text.Replace("1) ", "")
-            Label10.Text = TextBox6.Text & Module1.styl_nazwy_TB
-        End If
-        If ComboBox3.SelectedIndex = 3 Then
-            styl_nazwy_TB = Form1.ComboBox3.Text & "_" & Form1.Label11.Text.Replace("1) ", "")
-            Label10.Text = TextBox6.Text & Module1.styl_nazwy_TB
+    Private Sub chkEdycjaXY_CheckedChanged(sender As Object, e As EventArgs) Handles chkEdycjaXY.CheckedChanged
+        Ustawienia.EdycjaXY = chkEdycjaXY.Checked
+        Form1.UstawEdycjeXY(Ustawienia.EdycjaXY)
+        If _wypelnianie Then Exit Sub
+        If Ustawienia.EdycjaXY Then
+            Form1.Komunikat("Wyłączono zaznaczanie na mapie zasięgu pobierania prawym przyciskiem myszy. Określ samodzielnie współrzędne XY zasięgu mapy i wpisz je w odpowiednie pola", Color.Green)
+        Else
+            Form1.Komunikat("", Color.Black)
         End If
     End Sub
 
-    Private Sub CheckBox4_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles CheckBox4.Click
-        Select Case CheckBox4.CheckState
-            Case CheckState.Checked
-                Module1.CheckWldPoints = True
-            Case CheckState.Unchecked
-                Module1.CheckWldPoints = False
-        End Select
+    Private Sub chkKursorWgs_CheckedChanged(sender As Object, e As EventArgs) Handles chkKursorWgs.CheckedChanged
+        Ustawienia.KursorWgs84 = chkKursorWgs.Checked
     End Sub
 
-
-
-    Private Sub CheckBox3_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles CheckBox3.Click
-        Select Case CheckBox3.CheckState
-            Case CheckState.Checked
-                Module1.XYswitched = True
-            Case CheckState.Unchecked
-                Module1.XYswitched = False
-        End Select
-    End Sub
-    Private Sub CheckBox5_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles CheckBox5.Click
-        Select Case CheckBox5.CheckState
-            Case CheckState.Checked
-                Module1.pobierajPowyzejOstatniego = True
-            Case CheckState.Unchecked
-                Module1.pobierajPowyzejOstatniego = False
-        End Select
-    End Sub
-    Private Sub CheckBox7_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles CheckBox7.Click
-        Select Case CheckBox7.CheckState
-            Case CheckState.Checked
-                Module1.CheckJpgw = True
-            Case CheckState.Unchecked
-                Module1.CheckJpgw = False
-        End Select
+    Private Sub chkZaznaczenieWgs_CheckedChanged(sender As Object, e As EventArgs) Handles chkZaznaczenieWgs.CheckedChanged
+        Ustawienia.ZaznaczenieWgs84 = chkZaznaczenieWgs.Checked
+        Form1.UstawWidokZaznaczeniaWgs(Ustawienia.ZaznaczenieWgs84)
     End Sub
 
-    Private Sub CheckBox6_CheckedChanged(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles CheckBox6.CheckedChanged
-        Dim bok As Integer = Val(Form1.TextBox9.Text)
-        Select Case CheckBox6.CheckState
-            Case CheckState.Checked
-                CheckBox1.Checked = False
-                Module1.CheckMap = False
-                CheckBox2.Checked = False
-                Module1.CheckGmi = False
-                CheckBox3.Checked = False
-                Module1.XYswitched = False
-                CheckBox9.Checked = False
-                'Module1.editXY = False
-                CheckBox5.Checked = False
-                CheckBox5.Enabled = False
-                Module1.pobierajPowyzejOstatniego = False
-                Module1.CheckWldPoints = False
-                GroupBox1.Enabled = False
-                Module1.CheckJpgw = False
-
-                'Module1.CheckNrSeg = False
-                Module1.CheckTB = True
-                Form1.TextBox9.Text = TBbok
-                ComboBox2.Enabled = False
-
-                ComboBox3.Enabled = True
-                Label9.Enabled = True
-                Label10.Visible = True
-                Label11.Visible = True
-            Case CheckState.Unchecked
-                GroupBox1.Enabled = True
-
-                Module1.CheckTB = False
-                'Form1.TextBox9.Text = bok
-                Form1.TextBox9.Text = 2000
-                CheckBox5.Enabled = True
-
-                ComboBox2.Enabled = True
-                ComboBox3.Enabled = False
-                Label9.Enabled = False
-                Label10.Visible = False
-                Label11.Visible = False
-        End Select
-
-
+    Private Sub chkKursorISrodek_CheckedChanged(sender As Object, e As EventArgs) Handles chkKursorISrodek.CheckedChanged
+        Ustawienia.KursorISrodekMapy = chkKursorISrodek.Checked
+        Form1.UstawWidokWspolrzednych(Ustawienia.KursorISrodekMapy)
     End Sub
 
+#End Region
 
-    Private Sub Button1_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles Button1.Click
-        wspolnaNazwaKwadratu = TextBox6.Text
-        iloscProbPobrania = Val(TextBox1.Text)
-        przerwaMiedzyProbami = Val(TextBox2.Text)
-        'editXY = CheckBox9.CheckState
-        Module1.plik_lastsettings()
+#Region "Zapis i reset"
+
+    Private Sub btnZapisz_Click(sender As Object, e As EventArgs) Handles btnZapisz.Click
+        Ustawienia.Prefiks = txtPrefiks.Text
+        Ustawienia.IloscProbPobrania = Math.Max(1, WartoscCalkowita(txtIloscProb.Text, 3))
+        Ustawienia.PrzerwaMiedzyProbami = Math.Max(0, WartoscCalkowita(txtPrzerwa.Text, 5))
+        Ustawienia.LiczbaWatkow = CInt(nudWatki.Value)
+        Try
+            Ustawienia.Zapisz(PlikLastsettings)
+        Catch ex As Exception
+            MsgBox("Nie udało się zapisać ustawień: " & ex.Message, MsgBoxStyle.Exclamation)
+        End Try
         Me.Close()
     End Sub
 
-    Private Sub ComboBox2_SelectedIndexChanged(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles ComboBox2.SelectedIndexChanged
-        Module1.numeracja = ComboBox2.Text
-    End Sub
-
-
-
-
-
-    Private Sub CheckBox8_Click(sender As Object, e As EventArgs) Handles CheckBox8.Click
-
-        Select Case CheckBox8.CheckState
-            Case CheckState.Checked
-                Module1.CheckKml = True
-            Case CheckState.Unchecked
-                Module1.CheckKml = False
-        End Select
-
-
-
-    End Sub
-
-
-
-
-    Private Sub CheckBox9_CheckedChanged(sender As Object, e As EventArgs) Handles CheckBox9.CheckedChanged
-        Module1.editXY = CheckBox9.CheckState
-
-
-        If Module1.editXY = True Then
-            Form1.TextBox1.Enabled = True
-            Form1.TextBox2.Enabled = True
-            Form1.TextBox3.Enabled = True
-            Form1.TextBox4.Enabled = True
-            Form1.Label3.Enabled = True
-            Form1.Label4.Enabled = True
-            Form1.Label5.Enabled = True
-            Form1.Label6.Enabled = True
-
-
-            Form1.RichTextBox1.ForeColor = System.Drawing.Color.Green
-            Form1.RichTextBox1.Text = "Wyłączono zaznaczanie na mapie zasięgu pobierania prawym przyciskiem myszy. Określ samodzielnie współrzędne XY zasięgu mapy i wpisz je w odpowiednie pola"
-
-            'Form1.GMapControl1.Enabled = False
-        Else
-            Form1.TextBox1.Enabled = False
-            Form1.TextBox2.Enabled = False
-            Form1.TextBox3.Enabled = False
-            Form1.TextBox4.Enabled = False
-            Form1.Label3.Enabled = False
-            Form1.Label4.Enabled = False
-            Form1.Label5.Enabled = False
-            Form1.Label6.Enabled = False
-            'Form1.GMapControl1.Enabled = True
-            Form1.RichTextBox1.Text = ""
-
-        End If
-
-    End Sub
-
-    Private Sub CheckBox10_CheckedChanged(sender As Object, e As EventArgs) Handles CheckBox10.CheckedChanged
-        Module1.kursorWGS84 = CheckBox10.CheckState
-
-
-
-    End Sub
-
-    Private Sub CheckBox11_CheckedChanged(sender As Object, e As EventArgs) Handles CheckBox11.CheckedChanged
-        Module1.zaznaczenieWGS84 = CheckBox11.CheckState
-
-
-        If Module1.zaznaczenieWGS84 = True Then
-            Form1.Label31.Visible = True
-            Form1.Label32.Visible = True
-            Form1.Label33.Visible = True
-            Form1.Label34.Visible = True
-        Else
-            Form1.Label31.Visible = False
-            Form1.Label32.Visible = False
-            Form1.Label33.Visible = False
-            Form1.Label34.Visible = False
-        End If
-
-
-    End Sub
-
-    Private Sub CheckBox12_CheckedChanged(sender As Object, e As EventArgs) Handles CheckBox12.CheckedChanged
-        Module1.kursor_i_srodekmapy = CheckBox12.CheckState
-
-        If Module1.kursor_i_srodekmapy = False Then
-            Form1.Label39.Visible = False
-            Form1.Label40.Visible = False
-            Form1.Label41.Visible = False
-            Form1.Label35.Visible = False
-            Form1.Label37.Visible = False
-            Form1.Label38.Visible = False
-            Form1.Label63.Visible = False
-            Form1.Label66.Visible = False
-        Else
-            Form1.Label39.Visible = True
-            Form1.Label40.Visible = True
-            Form1.Label41.Visible = True
-            Form1.Label35.Visible = True
-            Form1.Label37.Visible = True
-            Form1.Label38.Visible = True
-            Form1.Label63.Visible = True
-            Form1.Label66.Visible = True
-        End If
-
-
-    End Sub
-
-
-    Private Sub CheckBox13_Click(sender As Object, e As EventArgs) Handles CheckBox13.Click
-        Select Case CheckBox13.CheckState
-            Case CheckState.Checked
-                Module1.CheckTab = True
-            Case CheckState.Unchecked
-                Module1.CheckTab = False
-        End Select
-    End Sub
-
     'przywracanie domyślnych ustawień
-    Private Sub Button6_Click(sender As Object, e As EventArgs) Handles Button6.Click
+    Private Sub btnResetuj_Click(sender As Object, e As EventArgs) Handles btnResetuj.Click
+        Ustawienia.PrzywrocDomyslne()
 
-        'Module1.Resetuj()
-        'Module1.UtworzPlikConf()
+        'czyszczenie znaczników i domyślny widok mapy
+        Form1.DomyslnyWidokMapy()
+        Form1.UstawEdycjeXY(False)
+        Form1.UstawWidokZaznaczeniaWgs(False)
+        Form1.UstawWidokWspolrzednych(True)
+        Form1.UstawZbiorMap("skany_map_topograficznych")
+        Form1.BokSegmentu = "2000"
+        Form1.RozmiarPiksela = "2"
+        Form1.stFormat.Text = "." & Ustawienia.Format
+        Form1.OdswiezOpisUkladu()
 
-        'czyszczenie markerów i zaznaczenia na mapie
-        Form1.GMapControl1.Overlays.Clear()
+        WypelnijKontrolki()
 
-
-        'File.Delete(folderSegmentow & "conf.txt")
-        File.Delete(folderDanych & "\lastsettings.txt")
-        Form1.RichTextBox1.ForeColor = System.Drawing.Color.Green
-        Form1.RichTextBox1.Text = "Usunięto plik conf.txt oraz lastsetting.txt"
-
-        Form1.Label35.Text = "52.3"
-        Form1.Label63.Text = "19.2"
-        Form1.Label65.Text = "6"
-
-        'odświeżenie widoku okna mapy po wprowadzeniu nowych ustawień conf.txt
-        Module1.x_start = 52.3
-        Module1.y_start = 19.2
-        Module1.zoom_start = 6
-
-
-        Form1.GMapControl1.Refresh()
-        Form1.GMapControl1.ReloadMap()
-        Form1.GMapControl1.Zoom = 6
-        Form1.GMapControl1.Position = New GMap.NET.PointLatLng(52.3, 19.2)
-
-
-        Form1.ComboBox3.Text = "skany_map_topograficznych"
-
-        Form1.Refresh()
-        'domyślne ustawienia
-        TextBox6.Text = "_" 'wspolna nazwa kwadratu
-        ComboBox1.Text = "jpeg"  'format
-        Module1.format = "jpeg"
-        CheckBox5.Checked = False 'powtorz pobieranie od ostatniego segm
-        Module1.pobierajPowyzejOstatniego = False
-        CheckBox9.Checked = False 'edytuj pola XY zaznaczenia
-        Module1.editXY = False
-        CheckBox10.Checked = False 'wyswietl wspolrz kursora WGS
-        CheckBox11.Checked = False 'wyswietl wspolrz zaznaczenia WGS
-        CheckBox12.Checked = True 'wyswietl wspolrzedne kursora mapy
-        CheckBox1.Checked = False 'map
-        Module1.CheckMap = False
-        CheckBox8.Checked = False 'kml
-        Module1.CheckKml = False
-        CheckBox7.Checked = False 'jpgw
-        Module1.CheckJpgw = False
-        CheckBox13.Checked = False 'tab
-        Module1.CheckTab = False
-        CheckBox4.Checked = False 'wld
-        Module1.CheckWldPoints = False
-        CheckBox2.Checked = False 'gmi
-        Module1.CheckGmi = False
-        ComboBox2.Text = "NrWiersza_NrKolumny" 'numeracja
-        Module1.numeracja = "NrWiersza_NrKolumny"
-        TextBox1.Text = "3" 'ilosc prob
-        Module1.iloscProbPobrania = 3
-        TextBox2.Text = "5" 'sekund
-        Module1.przerwaMiedzyProbami = 5
-        CheckBox6.Checked = False 'tb
-        Module1.CheckTB = False
-        CheckBox3.Checked = False 'zamiana XY
-        Module1.XYswitched = False
-
-        Form1.TextBox9.Text = "2000"
-        Form1.TextBox10.Text = "2"
-
-        'zapis domyślnych ustawień do lastsettings.txt (ta sama procedura co przy zamykaniu programu;
-        'pozycja i skala mapy zostały ustawione powyżej na wartości domyślne 52.3 / 19.2 / 6)
-        Module1.Plik_lastsettings()
+        Try
+            If File.Exists(PlikLastsettings) Then File.Delete(PlikLastsettings)
+            Ustawienia.Zapisz(PlikLastsettings)
+        Catch ex As Exception
+            MsgBox("Nie udało się zapisać ustawień: " & ex.Message, MsgBoxStyle.Exclamation)
+        End Try
+        Form1.Komunikat("Przywrócono ustawienia domyślne programu (lastsettings.txt)", Color.Green)
     End Sub
+
+#End Region
 
 End Class

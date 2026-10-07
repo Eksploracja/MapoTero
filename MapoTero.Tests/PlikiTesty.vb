@@ -222,3 +222,36 @@ Public Class GeoreferencjaTesty
     End Sub
 
 End Class
+
+Public Class PlikWarstwTesty
+
+    <Fact>
+    Public Sub OdczytPlikuWarstw()
+        'format plików z katalogu "warstwy": adres (czasem w cudzysłowie), potem pary: nazwa warstwy, rozmiar piksela
+        Dim p = PlikWarstw.ZTekstu("""http://s/wms?request=GetMap&version=1.3.0&CRS=EPSG:2180&layers=""" & vbCrLf &
+                                   "Raster_10_1942" & vbCrLf & "1" & vbCrLf & "Wydajność potencjalna >70" & vbCrLf & "2" & vbCrLf & "Bez piksela")
+        Assert.Equal("http://s/wms?request=GetMap&version=1.3.0&CRS=EPSG:2180&layers=", p.Adres)
+        Assert.Equal(3, p.Warstwy.Count)
+        Assert.Equal("1", p.Warstwy(0).RozmiarPiksela)
+        Assert.Equal("Wydajność potencjalna >70", p.Warstwy(1).Nazwa)
+        Assert.Equal("", p.Warstwy(2).RozmiarPiksela)
+        Assert.Same(p.Warstwy(1), p.Znajdz("Wydajność potencjalna >70"))
+        Assert.Null(p.Znajdz("brak"))
+    End Sub
+
+    <Fact>
+    Public Sub WszystkiePlikiWarstwProgramuSaCzytelne()
+        'pliki z repozytorium: każdy ma adres http(s) i co najmniej jedną warstwę
+        Text.Encoding.RegisterProvider(Text.CodePagesEncodingProvider.Instance)
+        Dim folder = Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "warstwy")
+        Dim lista = File.ReadAllLines(Path.Combine(folder, "warstwy.txt"))
+        Assert.NotEmpty(lista)
+        For Each nazwa In lista
+            If nazwa.Trim() = "" Then Continue For
+            Dim p = PlikWarstw.Wczytaj(Path.Combine(folder, nazwa.Trim() & ".txt"))
+            Assert.StartsWith("http", p.Adres)
+            Assert.NotEmpty(p.Warstwy)
+        Next
+    End Sub
+
+End Class

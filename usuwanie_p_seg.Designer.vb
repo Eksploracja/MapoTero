@@ -39,36 +39,36 @@ Partial Class usuwanie_p_seg
     Private Sub InitializeComponent()
         Me.components = New System.ComponentModel.Container()
         Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(usuwanie_p_seg))
-        Me.TextBox1 = New System.Windows.Forms.TextBox()
+        Me.txtRozmiarMin = New System.Windows.Forms.TextBox()
         Me.Label1 = New System.Windows.Forms.Label()
         Me.Label2 = New System.Windows.Forms.Label()
-        Me.TextBox2 = New System.Windows.Forms.TextBox()
+        Me.txtRozmiarMax = New System.Windows.Forms.TextBox()
         Me.Label3 = New System.Windows.Forms.Label()
-        Me.TextBox3 = New System.Windows.Forms.TextBox()
+        Me.txtRozmiarSredni = New System.Windows.Forms.TextBox()
         Me.Label4 = New System.Windows.Forms.Label()
         Me.Label5 = New System.Windows.Forms.Label()
-        Me.TextBox4 = New System.Windows.Forms.TextBox()
-        Me.Button1 = New System.Windows.Forms.Button()
-        Me.FolderBrowserDialog1 = New System.Windows.Forms.FolderBrowserDialog()
-        Me.ComboBox1 = New System.Windows.Forms.ComboBox()
+        Me.txtProgKB = New System.Windows.Forms.TextBox()
+        Me.btnUsun = New System.Windows.Forms.Button()
+        Me.dlgFolder = New System.Windows.Forms.FolderBrowserDialog()
+        Me.cmbRozszerzenie = New System.Windows.Forms.ComboBox()
         Me.Label8 = New System.Windows.Forms.Label()
-        Me.Label9 = New System.Windows.Forms.Label()
-        Me.TextBox6 = New System.Windows.Forms.TextBox()
-        Me.RichTextBox1 = New System.Windows.Forms.RichTextBox()
+        Me.lblLiczbaPlikow = New System.Windows.Forms.Label()
+        Me.txtLiczbaPlikow = New System.Windows.Forms.TextBox()
+        Me.txtOpis = New System.Windows.Forms.RichTextBox()
         Me.ToolTip1 = New System.Windows.Forms.ToolTip(Me.components)
-        Me.TextBox5 = New System.Windows.Forms.TextBox()
+        Me.txtDoUsuniecia = New System.Windows.Forms.TextBox()
         Me.Label6 = New System.Windows.Forms.Label()
         Me.Label7 = New System.Windows.Forms.Label()
         Me.SuspendLayout()
         '
-        'TextBox1
+        'txtRozmiarMin
         '
-        Me.TextBox1.Enabled = False
-        Me.TextBox1.Location = New System.Drawing.Point(227, 156)
-        Me.TextBox1.Name = "TextBox1"
-        Me.TextBox1.Size = New System.Drawing.Size(84, 20)
-        Me.TextBox1.TabIndex = 0
-        Me.TextBox1.TextAlign = System.Windows.Forms.HorizontalAlignment.Right
+        Me.txtRozmiarMin.Enabled = False
+        Me.txtRozmiarMin.Location = New System.Drawing.Point(227, 156)
+        Me.txtRozmiarMin.Name = "txtRozmiarMin"
+        Me.txtRozmiarMin.Size = New System.Drawing.Size(84, 20)
+        Me.txtRozmiarMin.TabIndex = 0
+        Me.txtRozmiarMin.TextAlign = System.Windows.Forms.HorizontalAlignment.Right
         '
         'Label1
         '
@@ -88,14 +88,14 @@ Partial Class usuwanie_p_seg
         Me.Label2.TabIndex = 3
         Me.Label2.Text = "Rozmiar największego pliku:"
         '
-        'TextBox2
+        'txtRozmiarMax
         '
-        Me.TextBox2.Enabled = False
-        Me.TextBox2.Location = New System.Drawing.Point(227, 182)
-        Me.TextBox2.Name = "TextBox2"
-        Me.TextBox2.Size = New System.Drawing.Size(84, 20)
-        Me.TextBox2.TabIndex = 2
-        Me.TextBox2.TextAlign = System.Windows.Forms.HorizontalAlignment.Right
+        Me.txtRozmiarMax.Enabled = False
+        Me.txtRozmiarMax.Location = New System.Drawing.Point(227, 182)
+        Me.txtRozmiarMax.Name = "txtRozmiarMax"
+        Me.txtRozmiarMax.Size = New System.Drawing.Size(84, 20)
+        Me.txtRozmiarMax.TabIndex = 2
+        Me.txtRozmiarMax.TextAlign = System.Windows.Forms.HorizontalAlignment.Right
         '
         'Label3
         '
@@ -106,14 +106,14 @@ Partial Class usuwanie_p_seg
         Me.Label3.TabIndex = 5
         Me.Label3.Text = "Średni rozmiar pliku:"
         '
-        'TextBox3
+        'txtRozmiarSredni
         '
-        Me.TextBox3.Enabled = False
-        Me.TextBox3.Location = New System.Drawing.Point(227, 208)
-        Me.TextBox3.Name = "TextBox3"
-        Me.TextBox3.Size = New System.Drawing.Size(84, 20)
-        Me.TextBox3.TabIndex = 4
-        Me.TextBox3.TextAlign = System.Windows.Forms.HorizontalAlignment.Right
+        Me.txtRozmiarSredni.Enabled = False
+        Me.txtRozmiarSredni.Location = New System.Drawing.Point(227, 208)
+        Me.txtRozmiarSredni.Name = "txtRozmiarSredni"
+        Me.txtRozmiarSredni.Size = New System.Drawing.Size(84, 20)
+        Me.txtRozmiarSredni.TabIndex = 4
+        Me.txtRozmiarSredni.TextAlign = System.Windows.Forms.HorizontalAlignment.Right
         '
         'Label4
         '
@@ -135,37 +135,37 @@ Partial Class usuwanie_p_seg
         Me.Label5.TabIndex = 8
         Me.Label5.Text = "kB"
         '
-        'TextBox4
+        'txtProgKB
         '
-        Me.TextBox4.Location = New System.Drawing.Point(21, 292)
-        Me.TextBox4.Name = "TextBox4"
-        Me.TextBox4.Size = New System.Drawing.Size(84, 20)
-        Me.TextBox4.TabIndex = 7
-        Me.TextBox4.Text = "0"
-        Me.TextBox4.TextAlign = System.Windows.Forms.HorizontalAlignment.Right
-        Me.ToolTip1.SetToolTip(Me.TextBox4, "Sprawdź rozmiar przykładowego ""pustego"" segmentu i wprowadź tą wartość powiększon" &
+        Me.txtProgKB.Location = New System.Drawing.Point(21, 292)
+        Me.txtProgKB.Name = "txtProgKB"
+        Me.txtProgKB.Size = New System.Drawing.Size(84, 20)
+        Me.txtProgKB.TabIndex = 7
+        Me.txtProgKB.Text = "0"
+        Me.txtProgKB.TextAlign = System.Windows.Forms.HorizontalAlignment.Right
+        Me.ToolTip1.SetToolTip(Me.txtProgKB, "Sprawdź rozmiar przykładowego ""pustego"" segmentu i wprowadź tą wartość powiększon" &
         "ą o ok. 10%")
         '
-        'Button1
+        'btnUsun
         '
-        Me.Button1.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
-        Me.Button1.Location = New System.Drawing.Point(229, 284)
-        Me.Button1.Name = "Button1"
-        Me.Button1.Size = New System.Drawing.Size(84, 33)
-        Me.Button1.TabIndex = 11
-        Me.Button1.Text = "Usuń"
-        Me.ToolTip1.SetToolTip(Me.Button1, "Usuń wskazane segmenty")
-        Me.Button1.UseVisualStyleBackColor = True
+        Me.btnUsun.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
+        Me.btnUsun.Location = New System.Drawing.Point(229, 284)
+        Me.btnUsun.Name = "btnUsun"
+        Me.btnUsun.Size = New System.Drawing.Size(84, 33)
+        Me.btnUsun.TabIndex = 11
+        Me.btnUsun.Text = "Usuń"
+        Me.ToolTip1.SetToolTip(Me.btnUsun, "Usuń wskazane segmenty")
+        Me.btnUsun.UseVisualStyleBackColor = True
         '
-        'ComboBox1
+        'cmbRozszerzenie
         '
-        Me.ComboBox1.FormattingEnabled = True
-        Me.ComboBox1.Items.AddRange(New Object() {"jpg", "tif", "png", "png8", "png24", "png32", "gif", "svg+xml", "map", "gmi", "wld", "jpgw", "kml", "tab"})
-        Me.ComboBox1.Location = New System.Drawing.Point(21, 42)
-        Me.ComboBox1.Name = "ComboBox1"
-        Me.ComboBox1.Size = New System.Drawing.Size(199, 21)
-        Me.ComboBox1.TabIndex = 14
-        Me.ComboBox1.Text = "jpg"
+        Me.cmbRozszerzenie.FormattingEnabled = True
+        Me.cmbRozszerzenie.Items.AddRange(New Object() {"jpg", "tif", "png", "png8", "png24", "png32", "gif", "svg+xml", "map", "gmi", "wld", "jpgw", "kml", "tab"})
+        Me.cmbRozszerzenie.Location = New System.Drawing.Point(21, 42)
+        Me.cmbRozszerzenie.Name = "cmbRozszerzenie"
+        Me.cmbRozszerzenie.Size = New System.Drawing.Size(199, 21)
+        Me.cmbRozszerzenie.TabIndex = 14
+        Me.cmbRozszerzenie.Text = "jpg"
         '
         'Label8
         '
@@ -177,44 +177,44 @@ Partial Class usuwanie_p_seg
         Me.Label8.TabIndex = 15
         Me.Label8.Text = "Określ rozszerzenie plików:"
         '
-        'Label9
+        'lblLiczbaPlikow
         '
-        Me.Label9.AutoSize = True
-        Me.Label9.Location = New System.Drawing.Point(17, 107)
-        Me.Label9.Name = "Label9"
-        Me.Label9.Size = New System.Drawing.Size(142, 13)
-        Me.Label9.TabIndex = 17
-        Me.Label9.Text = "Liczba wszystkich plików jpg"
+        Me.lblLiczbaPlikow.AutoSize = True
+        Me.lblLiczbaPlikow.Location = New System.Drawing.Point(17, 107)
+        Me.lblLiczbaPlikow.Name = "lblLiczbaPlikow"
+        Me.lblLiczbaPlikow.Size = New System.Drawing.Size(142, 13)
+        Me.lblLiczbaPlikow.TabIndex = 17
+        Me.lblLiczbaPlikow.Text = "Liczba wszystkich plików jpg"
         '
-        'TextBox6
+        'txtLiczbaPlikow
         '
-        Me.TextBox6.Enabled = False
-        Me.TextBox6.Location = New System.Drawing.Point(227, 103)
-        Me.TextBox6.Name = "TextBox6"
-        Me.TextBox6.Size = New System.Drawing.Size(84, 20)
-        Me.TextBox6.TabIndex = 16
-        Me.TextBox6.TextAlign = System.Windows.Forms.HorizontalAlignment.Right
-        Me.ToolTip1.SetToolTip(Me.TextBox6, "Liczba plików jedynie o wskazanym rozszerzeniu")
+        Me.txtLiczbaPlikow.Enabled = False
+        Me.txtLiczbaPlikow.Location = New System.Drawing.Point(227, 103)
+        Me.txtLiczbaPlikow.Name = "txtLiczbaPlikow"
+        Me.txtLiczbaPlikow.Size = New System.Drawing.Size(84, 20)
+        Me.txtLiczbaPlikow.TabIndex = 16
+        Me.txtLiczbaPlikow.TextAlign = System.Windows.Forms.HorizontalAlignment.Right
+        Me.ToolTip1.SetToolTip(Me.txtLiczbaPlikow, "Liczba plików jedynie o wskazanym rozszerzeniu")
         '
-        'RichTextBox1
+        'txtOpis
         '
-        Me.RichTextBox1.Location = New System.Drawing.Point(327, 9)
-        Me.RichTextBox1.Name = "RichTextBox1"
-        Me.RichTextBox1.ReadOnly = True
-        Me.RichTextBox1.Size = New System.Drawing.Size(314, 307)
-        Me.RichTextBox1.TabIndex = 18
-        Me.RichTextBox1.Text = resources.GetString("RichTextBox1.Text")
+        Me.txtOpis.Location = New System.Drawing.Point(327, 9)
+        Me.txtOpis.Name = "txtOpis"
+        Me.txtOpis.ReadOnly = True
+        Me.txtOpis.Size = New System.Drawing.Size(314, 307)
+        Me.txtOpis.TabIndex = 18
+        Me.txtOpis.Text = resources.GetString("txtOpis.Text")
         '
-        'TextBox5
+        'txtDoUsuniecia
         '
-        Me.TextBox5.Enabled = False
-        Me.TextBox5.Location = New System.Drawing.Point(227, 130)
-        Me.TextBox5.Name = "TextBox5"
-        Me.TextBox5.Size = New System.Drawing.Size(84, 20)
-        Me.TextBox5.TabIndex = 20
-        Me.TextBox5.Text = "0"
-        Me.TextBox5.TextAlign = System.Windows.Forms.HorizontalAlignment.Right
-        Me.ToolTip1.SetToolTip(Me.TextBox5, "Sprawdź rozmiar przykładowego ""pustego"" segmentu i wprowadź tą wartość powiększon" &
+        Me.txtDoUsuniecia.Enabled = False
+        Me.txtDoUsuniecia.Location = New System.Drawing.Point(227, 130)
+        Me.txtDoUsuniecia.Name = "txtDoUsuniecia"
+        Me.txtDoUsuniecia.Size = New System.Drawing.Size(84, 20)
+        Me.txtDoUsuniecia.TabIndex = 20
+        Me.txtDoUsuniecia.Text = "0"
+        Me.txtDoUsuniecia.TextAlign = System.Windows.Forms.HorizontalAlignment.Right
+        Me.ToolTip1.SetToolTip(Me.txtDoUsuniecia, "Sprawdź rozmiar przykładowego ""pustego"" segmentu i wprowadź tą wartość powiększon" &
         "ą o ok. 10%")
         '
         'Label6
@@ -241,23 +241,23 @@ Partial Class usuwanie_p_seg
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.ClientSize = New System.Drawing.Size(652, 328)
         Me.Controls.Add(Me.Label7)
-        Me.Controls.Add(Me.TextBox5)
+        Me.Controls.Add(Me.txtDoUsuniecia)
         Me.Controls.Add(Me.Label6)
-        Me.Controls.Add(Me.RichTextBox1)
-        Me.Controls.Add(Me.Label9)
-        Me.Controls.Add(Me.TextBox6)
+        Me.Controls.Add(Me.txtOpis)
+        Me.Controls.Add(Me.lblLiczbaPlikow)
+        Me.Controls.Add(Me.txtLiczbaPlikow)
         Me.Controls.Add(Me.Label8)
-        Me.Controls.Add(Me.ComboBox1)
-        Me.Controls.Add(Me.Button1)
+        Me.Controls.Add(Me.cmbRozszerzenie)
+        Me.Controls.Add(Me.btnUsun)
         Me.Controls.Add(Me.Label5)
-        Me.Controls.Add(Me.TextBox4)
+        Me.Controls.Add(Me.txtProgKB)
         Me.Controls.Add(Me.Label4)
         Me.Controls.Add(Me.Label3)
-        Me.Controls.Add(Me.TextBox3)
+        Me.Controls.Add(Me.txtRozmiarSredni)
         Me.Controls.Add(Me.Label2)
-        Me.Controls.Add(Me.TextBox2)
+        Me.Controls.Add(Me.txtRozmiarMax)
         Me.Controls.Add(Me.Label1)
-        Me.Controls.Add(Me.TextBox1)
+        Me.Controls.Add(Me.txtRozmiarMin)
         Me.Icon = CType(resources.GetObject("$this.Icon"), System.Drawing.Icon)
         Me.Name = "usuwanie_p_seg"
         Me.Text = "Usuwanie pustych segmentów"
@@ -265,29 +265,29 @@ Partial Class usuwanie_p_seg
         Me.PerformLayout()
 
     End Sub
-    Friend WithEvents TextBox1 As System.Windows.Forms.TextBox
+    Friend WithEvents txtRozmiarMin As System.Windows.Forms.TextBox
     Friend WithEvents Label1 As System.Windows.Forms.Label
     Friend WithEvents Label2 As System.Windows.Forms.Label
-    Friend WithEvents TextBox2 As System.Windows.Forms.TextBox
+    Friend WithEvents txtRozmiarMax As System.Windows.Forms.TextBox
     Friend WithEvents Label3 As System.Windows.Forms.Label
-    Friend WithEvents TextBox3 As System.Windows.Forms.TextBox
+    Friend WithEvents txtRozmiarSredni As System.Windows.Forms.TextBox
     Friend WithEvents Label4 As System.Windows.Forms.Label
     Friend WithEvents Label5 As System.Windows.Forms.Label
-    Friend WithEvents TextBox4 As System.Windows.Forms.TextBox
+    Friend WithEvents txtProgKB As System.Windows.Forms.TextBox
 
     Private Sub Label5_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles Label5.Click
 
     End Sub
-    Friend WithEvents Button1 As System.Windows.Forms.Button
-    Friend WithEvents FolderBrowserDialog1 As System.Windows.Forms.FolderBrowserDialog
-    Friend WithEvents ComboBox1 As System.Windows.Forms.ComboBox
+    Friend WithEvents btnUsun As System.Windows.Forms.Button
+    Friend WithEvents dlgFolder As System.Windows.Forms.FolderBrowserDialog
+    Friend WithEvents cmbRozszerzenie As System.Windows.Forms.ComboBox
     Friend WithEvents Label8 As System.Windows.Forms.Label
-    Friend WithEvents Label9 As System.Windows.Forms.Label
-    Friend WithEvents TextBox6 As System.Windows.Forms.TextBox
-    Friend WithEvents RichTextBox1 As System.Windows.Forms.RichTextBox
+    Friend WithEvents lblLiczbaPlikow As System.Windows.Forms.Label
+    Friend WithEvents txtLiczbaPlikow As System.Windows.Forms.TextBox
+    Friend WithEvents txtOpis As System.Windows.Forms.RichTextBox
     Friend WithEvents ToolTip1 As System.Windows.Forms.ToolTip
     Friend WithEvents Label6 As System.Windows.Forms.Label
-    Friend WithEvents TextBox5 As System.Windows.Forms.TextBox
+    Friend WithEvents txtDoUsuniecia As System.Windows.Forms.TextBox
     Friend WithEvents Label7 As System.Windows.Forms.Label
 
 
