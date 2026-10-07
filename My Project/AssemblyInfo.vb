@@ -37,3 +37,8 @@ Imports System.Runtime.InteropServices
 
 <Assembly: NeutralResourcesLanguageAttribute("pl-PL")>
 <Assembly: System.CLSCompliant(true)>
+
+'program dla Windows (w .NET 8 atrybut generowany automatycznie tylko przy GenerateAssemblyInfo)
+#If NETCOREAPP Then
+<Assembly: System.Runtime.Versioning.SupportedOSPlatform("windows7.0")>
+#End If
