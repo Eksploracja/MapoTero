@@ -83,10 +83,13 @@ Module Module1
     Public georef_scalanie_map As Boolean = False        'opcja referencji map dla scalanych plików
     Public georef_scalanie_tab As Boolean = False        'opcja referencji map dla scalanych plików
 
-    Public Lx As Long                           'używane w segmentach
-    Public Ly As Long
-    Public Px As Long
-    Public Py As Long
+    'narożniki segmentu w układzie 1992 (X - północ, Y - wschód): Lx/Ly - lewy dolny, Px/Py - prawy górny.
+    'Double, a nie Long - przy niecałkowitym zasięgu segmentu (np. 0,1 m/pix x 2048 pix = 204,8 m) zaokrąglanie
+    'zmieniało zasięg pobieranego obrazu względem rozmiaru piksela zapisanego w plikach georeferencyjnych
+    Public Lx As Double
+    Public Ly As Double
+    Public Px As Double
+    Public Py As Double
 
     Public TBseg As Long                        'ilość segmentów w boku mapy w jednym folderze
     Public TBbok As Integer                     'bok jednego segmentu w pikselach
@@ -303,11 +306,11 @@ pobieranieJeszczeRaz:
 
 
 
-                strUrlparts(2) = Lx & ","               'lewy X
-                strUrlparts(3) = Ly & ","               'lewy Y
-                strUrlparts(4) = Px & ","
+                strUrlparts(2) = Liczba(Lx) & ","               'lewy X
+                strUrlparts(3) = Liczba(Ly) & ","               'lewy Y
+                strUrlparts(4) = Liczba(Px) & ","
 
-                strUrlparts(5) = Py & "&format=image/" & format & "&styles=&width="
+                strUrlparts(5) = Liczba(Py) & "&format=image/" & format & "&styles=&width="
                 'Edit 1.04.2015 by Kazik - likwiduję wpis "-1" dla zachowania  rozdzielczości pobieranego segmentu zgodnie z zadaną w formularzu
                 'strUrlparts(6) = Form1.TextBox9.Text - 1 & "&height="
 
@@ -666,6 +669,93 @@ errorhandler:
         Form1.RichTextBox1.ForeColor = System.Drawing.Color.Green
         Form1.RichTextBox1.Text = "Zresetowano listę wprowadzonych warstw mapy wskazanych do pobrania"
     End Sub
+    'liczba zapisana z kropką dziesiętną, niezależnie od ustawień regionalnych systemu (w zapytaniach WMS i plikach georeferencyjnych)
+    Public Function Liczba(ByVal wartosc As Double) As String
+        Return wartosc.ToString("0.##########", System.Globalization.CultureInfo.InvariantCulture)
+    End Function
+
+    'tworzy plik KML (GroundOverlay) dla obrazu, który w układzie 1992 jest prostokątem:
+    'X (północ) od xDol do xGora, Y (wschód) od yLewy do yPrawy.
+    'Prostokąt z układu 1992 jest w WGS84 obrócony o zbieżność południków (do ok. 4° na krańcach Polski).
+    'Dawny zapis - LatLonBox bez obrotu z uśrednionymi bokami - obracał i przeskalowywał obraz względem
+    'rzeczywistego położenia (na wschodzie i zachodzie kraju narożniki kafla 1 km przesunięte o ok. 40 m).
+    'Teraz zapisywane są:
+    ' - gx:LatLonQuad - dokładne położenie czterech narożników obrazu (Google Earth, programy zgodne z KML 2.2/2.3),
+    ' - LatLonBox z obrotem (rotation) - przybliżenie dla programów, które nie obsługują gx:LatLonQuad.
+    Public Sub ZapiszKml(ByVal plik As String, ByVal nazwa As String, ByVal href As String,
+                         ByVal xDol As Double, ByVal yLewy As Double, ByVal xGora As Double, ByVal yPrawy As Double)
+
+        'narożniki obrazu w WGS84 (sz - szerokość, dl - długość geograficzna)
+        Dim ldSz As Double = SzerokoscWgs_z1992(xDol, yLewy), ldDl As Double = DlugoscWgs_z1992(xDol, yLewy)     'lewy dolny
+        Dim pdSz As Double = SzerokoscWgs_z1992(xDol, yPrawy), pdDl As Double = DlugoscWgs_z1992(xDol, yPrawy)   'prawy dolny
+        Dim pgSz As Double = SzerokoscWgs_z1992(xGora, yPrawy), pgDl As Double = DlugoscWgs_z1992(xGora, yPrawy) 'prawy górny
+        Dim lgSz As Double = SzerokoscWgs_z1992(xGora, yLewy), lgDl As Double = DlugoscWgs_z1992(xGora, yLewy)   'lewy górny
+
+        'środek obrazu
+        Dim srSz As Double = SzerokoscWgs_z1992((xDol + xGora) / 2, (yLewy + yPrawy) / 2)
+        Dim srDl As Double = DlugoscWgs_z1992((xDol + xGora) / 2, (yLewy + yPrawy) / 2)
+
+        'długość w metrach jednego stopnia szerokości i długości geograficznej w środku obrazu (elipsoida GRS80)
+        Const a As Double = 6378137.0
+        Const e2 As Double = 0.0066943800229
+        Dim fi As Double = srSz * System.Math.PI / 180
+        Dim w As Double = 1 - e2 * System.Math.Sin(fi) ^ 2
+        Dim mSz As Double = a * (1 - e2) / (w ^ 1.5) * System.Math.PI / 180
+        Dim mDl As Double = a / System.Math.Sqrt(w) * System.Math.Cos(fi) * System.Math.PI / 180
+
+        'azymut "północy" obrazu (lewego i prawego boku) względem północy geograficznej
+        Dim azLewy As Double = System.Math.Atan2((lgDl - ldDl) * mDl, (lgSz - ldSz) * mSz)
+        Dim azPrawy As Double = System.Math.Atan2((pgDl - pdDl) * mDl, (pgSz - pdSz) * mSz)
+        'KML: obrót w stopniach przeciwnie do ruchu wskazówek zegara
+        Dim obrot As Double = -(azLewy + azPrawy) / 2 * 180 / System.Math.PI
+
+        'rzeczywiste wymiary obrazu w terenie (średnie z przeciwległych boków)
+        Dim szerokosc As Double = (Odleglosc(ldSz, ldDl, pdSz, pdDl, mSz, mDl) + Odleglosc(lgSz, lgDl, pgSz, pgDl, mSz, mDl)) / 2
+        Dim wysokosc As Double = (Odleglosc(ldSz, ldDl, lgSz, lgDl, mSz, mDl) + Odleglosc(pdSz, pdDl, pgSz, pgDl, mSz, mDl)) / 2
+        Dim polowaSz As Double = wysokosc / 2 / mSz
+        Dim polowaDl As Double = szerokosc / 2 / mDl
+
+        Dim ci As System.Globalization.CultureInfo = System.Globalization.CultureInfo.InvariantCulture
+        Dim st As String = "0.0000000000"   '10 miejsc po przecinku - ok. 0,01 mm
+
+        Dim kml As New System.Text.StringBuilder()
+        kml.AppendLine("<?xml version=""1.0"" encoding=""UTF-8""?>")
+        kml.AppendLine("<kml xmlns=""http://www.opengis.net/kml/2.2"" xmlns:gx=""http://www.google.com/kml/ext/2.2"">")
+        kml.AppendLine("<GroundOverlay>")
+        kml.AppendLine("<name>" & System.Security.SecurityElement.Escape(nazwa) & "</name>")
+        kml.AppendLine("<Icon>")
+        kml.AppendLine("<href>" & System.Security.SecurityElement.Escape(href) & "</href>")
+        kml.AppendLine("</Icon>")
+        kml.AppendLine("<LatLonBox>")
+        kml.AppendLine("<north>" & (srSz + polowaSz).ToString(st, ci) & "</north>")
+        kml.AppendLine("<south>" & (srSz - polowaSz).ToString(st, ci) & "</south>")
+        kml.AppendLine("<east>" & (srDl + polowaDl).ToString(st, ci) & "</east>")
+        kml.AppendLine("<west>" & (srDl - polowaDl).ToString(st, ci) & "</west>")
+        kml.AppendLine("<rotation>" & obrot.ToString(st, ci) & "</rotation>")
+        kml.AppendLine("</LatLonBox>")
+        kml.AppendLine("<gx:LatLonQuad>")
+        'kolejność narożników wg KML: lewy dolny, prawy dolny, prawy górny, lewy górny (długość,szerokość)
+        kml.AppendLine("<coordinates>" &
+                       ldDl.ToString(st, ci) & "," & ldSz.ToString(st, ci) & " " &
+                       pdDl.ToString(st, ci) & "," & pdSz.ToString(st, ci) & " " &
+                       pgDl.ToString(st, ci) & "," & pgSz.ToString(st, ci) & " " &
+                       lgDl.ToString(st, ci) & "," & lgSz.ToString(st, ci) & "</coordinates>")
+        kml.AppendLine("</gx:LatLonQuad>")
+        kml.AppendLine("</GroundOverlay>")
+        kml.AppendLine("</kml>")
+
+        'zapis w UTF-8 (zgodnie z deklaracją w nagłówku) - dawniej plik zapisywany był w kodowaniu systemowym,
+        'co przy polskich znakach w nazwie segmentów dawało niepoprawny plik XML
+        File.WriteAllText(plik, kml.ToString(), New System.Text.UTF8Encoding(False))
+
+    End Sub
+
+    'odległość w metrach między dwoma bliskimi punktami (sz, dl w stopniach) przy lokalnych współczynnikach mSz, mDl
+    Private Function Odleglosc(ByVal sz1 As Double, ByVal dl1 As Double, ByVal sz2 As Double, ByVal dl2 As Double,
+                               ByVal mSz As Double, ByVal mDl As Double) As Double
+        Return System.Math.Sqrt(((sz2 - sz1) * mSz) ^ 2 + ((dl2 - dl1) * mDl) ^ 2)
+    End Function
+
     'ustala folder zapisu danych programu: katalog programu, jeśli można w nim zapisywać (wersja przenośna),
     'w przeciwnym razie (np. instalacja w Program Files) %LocalAppData%\MapoTero
     Public Function UstalFolderDanych(ByVal folderProgramu As String) As String
@@ -1001,12 +1091,14 @@ errorhandler:
                         Case "gif"
                             FileOpen(4, folderSegmentow & nazwaKwadratu & ".gifw", OpenMode.Output)
                     End Select
-                    Print(4, Form1.TextBox10.Text & Chr(13) & Chr(10) &
+                    'world file podaje współrzędne ŚRODKA lewego górnego piksela (dawniej zapisywany był narożnik - przesunięcie o pół piksela)
+                    Dim piksel As Double = Val(Form1.TextBox10.Text)
+                    Print(4, Liczba(piksel) & Chr(13) & Chr(10) &
                     "0" & Chr(13) & Chr(10) &
                     "0" & Chr(13) & Chr(10) &
-                    "-" & Form1.TextBox10.Text & Chr(13) & Chr(10) &
-                   Ly & Chr(13) & Chr(10) &
-                    Px)
+                    "-" & Liczba(piksel) & Chr(13) & Chr(10) &
+                   Liczba(Ly + piksel / 2) & Chr(13) & Chr(10) &
+                    Liczba(Px - piksel / 2))
                     FileClose(4)
 
                 End If
@@ -1026,12 +1118,14 @@ errorhandler:
                         FileOpen(4, folderScalonych & "_scalone_segmenty_" & Form3.TextBox8.Text & "x" & Form3.TextBox9.Text & ".gifw", OpenMode.Output)
                 End Select
                 'rozmiar piksela z parametrów scalanych segmentów (Form3), a nie z bieżącej sesji w oknie głównym
-                Print(4, Form3.TextBox7.Text & Chr(13) & Chr(10) &
+                'world file podaje współrzędne ŚRODKA lewego górnego piksela
+                Dim pikselArkusza As Double = Val(Form3.TextBox7.Text)
+                Print(4, Liczba(pikselArkusza) & Chr(13) & Chr(10) &
                 "0" & Chr(13) & Chr(10) &
                 "0" & Chr(13) & Chr(10) &
-                "-" & Form3.TextBox7.Text & Chr(13) & Chr(10) &
-               Ly & Chr(13) & Chr(10) &
-                Px)
+                "-" & Liczba(pikselArkusza) & Chr(13) & Chr(10) &
+               Liczba(Ly + pikselArkusza / 2) & Chr(13) & Chr(10) &
+                Liczba(Px - pikselArkusza / 2))
                 FileClose(4)
 
 
@@ -1057,10 +1151,10 @@ errorhandler:
                     "Definition Table" & Chr(13) & Chr(10) &
                      "  File " & Chr(34) & nazwaKwadratu & "." & rozszerzenie & Chr(34) & Chr(13) & Chr(10) &
                      "  Type " & Chr(34) & "RASTER" & Chr(34) & Chr(13) & Chr(10) &
-                   "  (" & Ly & "," & Px & ")" & " (0,0) Label " & Chr(34) & "Punkt 1" & Chr(34) & "," & Chr(13) & Chr(10) &
-                   "  (" & Py & "," & Px & ")" & " (" & Form1.TextBox9.Text & ",0) " & "Label " & Chr(34) & "Punkt 2" & Chr(34) & "," & Chr(13) & Chr(10) &
-                   "  (" & Py & "," & Lx & ")" & " (" & Form1.TextBox9.Text & "," & Form1.TextBox9.Text & ") " & "Label " & Chr(34) & "Punkt 3" & Chr(34) & "," & Chr(13) & Chr(10) &
-                   "  (" & Ly & "," & Lx & ")" & " (0," & Form1.TextBox9.Text & ") " & "Label " & Chr(34) & "Punkt 4" & Chr(34) & Chr(13) & Chr(10) &
+                   "  (" & Liczba(Ly) & "," & Liczba(Px) & ")" & " (0,0) Label " & Chr(34) & "Punkt 1" & Chr(34) & "," & Chr(13) & Chr(10) &
+                   "  (" & Liczba(Py) & "," & Liczba(Px) & ")" & " (" & Form1.TextBox9.Text & ",0) " & "Label " & Chr(34) & "Punkt 2" & Chr(34) & "," & Chr(13) & Chr(10) &
+                   "  (" & Liczba(Py) & "," & Liczba(Lx) & ")" & " (" & Form1.TextBox9.Text & "," & Form1.TextBox9.Text & ") " & "Label " & Chr(34) & "Punkt 3" & Chr(34) & "," & Chr(13) & Chr(10) &
+                   "  (" & Liczba(Ly) & "," & Liczba(Lx) & ")" & " (0," & Form1.TextBox9.Text & ") " & "Label " & Chr(34) & "Punkt 4" & Chr(34) & Chr(13) & Chr(10) &
                    "  CoordSys Earth Projection 8, 33, 7, 19, 0, 0.9993, 500000, -5300000" & Chr(13) & Chr(10) &
                    "")
 
@@ -1081,10 +1175,10 @@ errorhandler:
                    "Definition Table" & Chr(13) & Chr(10) &
                     "  File " & Chr(34) & "_scalone_segmenty_" & Form3.TextBox8.Text & "x" & Form3.TextBox9.Text & "." & rozszerzenieScalonych & Chr(34) & Chr(13) & Chr(10) &
                     "  Type " & Chr(34) & "RASTER" & Chr(34) & Chr(13) & Chr(10) &
-                  "  (" & Ly & "," & Px & ")" & " (0,0) Label " & Chr(34) & "Punkt 1" & Chr(34) & "," & Chr(13) & Chr(10) &
-                  "  (" & Py & "," & Px & ")" & " (" & Val(Form3.TextBox6.Text) * Val(Form3.TextBox8.Text) & ",0) " & "Label " & Chr(34) & "Punkt 2" & Chr(34) & "," & Chr(13) & Chr(10) &
-                  "  (" & Py & "," & Lx & ")" & " (" & Val(Form3.TextBox6.Text) * Val(Form3.TextBox8.Text) & "," & Val(Form3.TextBox6.Text) * Val(Form3.TextBox9.Text) & ") " & "Label " & Chr(34) & "Punkt 3" & Chr(34) & "," & Chr(13) & Chr(10) &
-                  "  (" & Ly & "," & Lx & ")" & " (0," & Val(Form3.TextBox6.Text) * Val(Form3.TextBox9.Text) & ") " & "Label " & Chr(34) & "Punkt 4" & Chr(34) & Chr(13) & Chr(10) &
+                  "  (" & Liczba(Ly) & "," & Liczba(Px) & ")" & " (0,0) Label " & Chr(34) & "Punkt 1" & Chr(34) & "," & Chr(13) & Chr(10) &
+                  "  (" & Liczba(Py) & "," & Liczba(Px) & ")" & " (" & Val(Form3.TextBox6.Text) * Val(Form3.TextBox8.Text) & ",0) " & "Label " & Chr(34) & "Punkt 2" & Chr(34) & "," & Chr(13) & Chr(10) &
+                  "  (" & Liczba(Py) & "," & Liczba(Lx) & ")" & " (" & Val(Form3.TextBox6.Text) * Val(Form3.TextBox8.Text) & "," & Val(Form3.TextBox6.Text) * Val(Form3.TextBox9.Text) & ") " & "Label " & Chr(34) & "Punkt 3" & Chr(34) & "," & Chr(13) & Chr(10) &
+                  "  (" & Liczba(Ly) & "," & Liczba(Lx) & ")" & " (0," & Val(Form3.TextBox6.Text) * Val(Form3.TextBox9.Text) & ") " & "Label " & Chr(34) & "Punkt 4" & Chr(34) & Chr(13) & Chr(10) &
                   "  CoordSys Earth Projection 8, 33, 7, 19, 0, 0.9993, 500000, -5300000" & Chr(13) & Chr(10) &
                   "")
 
@@ -1340,206 +1434,20 @@ errorhandler:
 
             Case False
 
-
                 If CheckKml = True Then
-
-                    'Dim bok As String = Form1.TextBox9.Text & ".000000000000000"
-
-                    Dim LGsz As String  'lewy górny
-                    Dim LGdl As String
-
-                    Dim PGsz As String  'prawy górny
-                    Dim PGdl As String
-
-                    Dim PDsz As String  'prawy dolny
-                    Dim PDdl As String
-
-                    Dim LDsz As String  'lewy dolny
-                    Dim LDdl As String
-
-
-                    LGsz = Round(SzerokoscWgs_z1992(Px, Ly), 15) 'lewy górny
-                    LGdl = Round(DlugoscWgs_z1992(Px, Ly), 15)
-
-                    PGsz = Round(SzerokoscWgs_z1992(Px, Py), 15) 'prawy górny
-                    PGdl = Round(DlugoscWgs_z1992(Px, Py), 15)
-
-                    PDsz = Round(SzerokoscWgs_z1992(Lx, Py), 15) 'prawy dolny
-                    PDdl = Round(DlugoscWgs_z1992(Lx, Py), 15)
-
-                    LDsz = Round(SzerokoscWgs_z1992(Lx, Ly), 15) 'lewy dolny
-                    LDdl = Round(DlugoscWgs_z1992(Lx, Ly), 15)
-
-
-
-                    'usuwa przecinki i zamienia je na kropki
-                    Dim LGszDot As String = Replace(LGsz, ",", ".")     'lewy górny
-                    Dim LGdlDot As String = Replace(LGdl, ",", ".")
-
-                    Dim PGszDot As String = Replace(PGsz, ",", ".")     'prawy górny
-                    Dim PGdlDot As String = Replace(PGdl, ",", ".")
-
-                    Dim PDszDot As String = Replace(PDsz, ",", ".")     'prawy dolny
-                    Dim PDdlDot As String = Replace(PDdl, ",", ".")
-
-                    Dim LDszDot As String = Replace(LDsz, ",", ".")     'lewy dolny
-                    Dim LDdlDot As String = Replace(LDdl, ",", ".")
-
-                    ' moje srednie
-                    Dim LGszDotD As Double = LGsz 'lewy górny
-                    Dim LGdlDotD As Double = LGdl
-
-                    Dim PGszDotD As Double = PGsz   'prawy górny
-                    Dim PGdlDotD As Double = PGdl
-
-                    Dim PDszDotD As Double = PDsz     'prawy dolny
-                    Dim PDdlDotD As Double = PDdl
-
-                    Dim LDszDotD As Double = LDsz   'lewy dolny
-                    Dim LDdlDotD As Double = LDdl
-
-                    Dim Nsred As Double = (LGszDotD + PGszDotD) / 2
-                    Dim Esred As Double = (PGdlDotD + PDdlDotD) / 2
-                    Dim Ssred As Double = (LDszDotD + PDszDotD) / 2
-                    Dim Wsred As Double = (LGdlDotD + LDdlDotD) / 2
-
-                    Dim NsredStr As String = Replace(Nsred, ",", ".")
-                    Dim EsredStr As String = Replace(Esred, ",", ".")
-                    Dim SsredStr As String = Replace(Ssred, ",", ".")
-                    Dim WsredStr As String = Replace(Wsred, ",", ".")
-
-
-
-
-
-
-
-                    FileOpen(1, folderSegmentow & nazwaKwadratu & ".kml", OpenMode.Output)
-
-
-
-                    Print(1, "<?xml version=" & Chr(34) & "1.0" & Chr(34) & " encoding=" & Chr(34) & "UTF-8" & Chr(34) & "?>" & Chr(13) & Chr(10) &
-                    "<kml xmlns=" & Chr(34) & "http://www.opengis.net/kml/2.2" & Chr(34) & " xmlns:gx=" & Chr(34) & "http://www.google.com/kml/ext/2.2" & Chr(34) & " xmlns:kml=" & Chr(34) & "http://www.opengis.net/kml/2.2" & Chr(34) & " xmlns:atom=" & Chr(34) & "http://www.w3.org/2005/Atom" & Chr(34) & ">" & Chr(13) & Chr(10) &
-        "<GroundOverlay>" & Chr(13) & Chr(10) &
-                    "<name>" & nazwaKwadratu & "</name>" & Chr(13) & Chr(10) &
-                    "<Icon>" & Chr(13) & Chr(10) &
-                    "<href>" & nazwaKwadratu & "." & rozszerzenie & "</href>" & Chr(13) & Chr(10) &
-                    "<viewBoundScale>" & Form1.TextBox10.Text & "</viewBoundScale>" & Chr(13) & Chr(10) &
-                    "</Icon>" & Chr(13) & Chr(10) &
-                    "<LatLonBox>" & Chr(13) & Chr(10) &
-                    "<north>" & NsredStr & "</north>" & Chr(13) & Chr(10) &
-                    "<south>" & SsredStr & "</south>" & Chr(13) & Chr(10) &
-                    "<east>" & EsredStr & "</east>" & Chr(13) & Chr(10) &
-                    "<west>" & WsredStr & "</west>" & Chr(13) & Chr(10) &
-                    "</LatLonBox>" & Chr(13) & Chr(10) &
-                    "</GroundOverlay>" & Chr(13) & Chr(10) &
-                    "</kml>")
-
-                    FileClose(1)
-
+                    'segment: lewy dolny narożnik (Lx, Ly), prawy górny (Px, Py)
+                    ZapiszKml(folderSegmentow & nazwaKwadratu & ".kml", nazwaKwadratu, nazwaKwadratu & "." & rozszerzenie, Lx, Ly, Px, Py)
                 End If
 
             Case True
-
 
                 Lx = (Val(Form3.TextBox4.Text))
                 Ly = (Val(Form3.TextBox5.Text))
                 Px = Val(Form3.TextBox4.Text) + (Val(Form3.TextBox9.Text) * Val(Form3.TextBox7.Text) * Val(Form3.TextBox6.Text))
                 Py = Val(Form3.TextBox5.Text) + (Val(Form3.TextBox8.Text) * Val(Form3.TextBox7.Text) * Val(Form3.TextBox6.Text))
 
-                'Dim bok As String = Form1.TextBox9.Text & ".000000000000000"
-                '-----------
-                Dim LGsz As String  'lewy górny
-                Dim LGdl As String
-
-                Dim PGsz As String  'prawy górny
-                Dim PGdl As String
-
-                Dim PDsz As String  'prawy dolny
-                Dim PDdl As String
-
-                Dim LDsz As String  'lewy dolny
-                Dim LDdl As String
-
-
-
-                LGsz = Round(SzerokoscWgs_z1992(Px, Ly), 15) 'lewy górny
-                LGdl = Round(DlugoscWgs_z1992(Px, Ly), 15)
-
-                PGsz = Round(SzerokoscWgs_z1992(Px, Py), 15) 'prawy górny
-                PGdl = Round(DlugoscWgs_z1992(Px, Py), 15)
-
-                PDsz = Round(SzerokoscWgs_z1992(Lx, Py), 15) 'prawy dolny
-                PDdl = Round(DlugoscWgs_z1992(Lx, Py), 15)
-
-                LDsz = Round(SzerokoscWgs_z1992(Lx, Ly), 15) 'lewy dolny
-                LDdl = Round(DlugoscWgs_z1992(Lx, Ly), 15)
-
-
-
-                'usuwa przecinki i zamienia je na kropki
-                Dim LGszDot As String = Replace(LGsz, ",", ".")     'lewy górny
-                Dim LGdlDot As String = Replace(LGdl, ",", ".")
-
-                Dim PGszDot As String = Replace(PGsz, ",", ".")     'prawy górny
-                Dim PGdlDot As String = Replace(PGdl, ",", ".")
-
-                Dim PDszDot As String = Replace(PDsz, ",", ".")     'prawy dolny
-                Dim PDdlDot As String = Replace(PDdl, ",", ".")
-
-                Dim LDszDot As String = Replace(LDsz, ",", ".")     'lewy dolny
-                Dim LDdlDot As String = Replace(LDdl, ",", ".")
-
-
-                ' moje srednie
-                Dim LGszDotD As Double = LGsz 'lewy górny
-                Dim LGdlDotD As Double = LGdl
-
-                Dim PGszDotD As Double = PGsz   'prawy górny
-                Dim PGdlDotD As Double = PGdl
-
-                Dim PDszDotD As Double = PDsz     'prawy dolny
-                Dim PDdlDotD As Double = PDdl
-
-                Dim LDszDotD As Double = LDsz   'lewy dolny
-                Dim LDdlDotD As Double = LDdl
-
-                Dim Nsred As Double = (LGszDotD + PGszDotD) / 2
-                Dim Esred As Double = (PGdlDotD + PDdlDotD) / 2
-                Dim Ssred As Double = (LDszDotD + PDszDotD) / 2
-                Dim Wsred As Double = (LGdlDotD + LDdlDotD) / 2
-
-                Dim NsredStr As String = Replace(Nsred, ",", ".")
-                Dim EsredStr As String = Replace(Esred, ",", ".")
-                Dim SsredStr As String = Replace(Ssred, ",", ".")
-                Dim WsredStr As String = Replace(Wsred, ",", ".")
-
-
-
-
-
-
-                FileOpen(1, folderScalonych & "_scalone_segmenty_" & Form3.TextBox8.Text & "x" & Form3.TextBox9.Text & ".kml", OpenMode.Output)
-
-
-                Print(1, "<?xml version=" & Chr(34) & "1.0" & Chr(34) & " encoding=" & Chr(34) & "UTF-8" & Chr(34) & "?>" & Chr(13) & Chr(10) &
-                "<kml xmlns=" & Chr(34) & "http://www.opengis.net/kml/2.2" & Chr(34) & " xmlns:gx=" & Chr(34) & "http://www.google.com/kml/ext/2.2" & Chr(34) & " xmlns:kml=" & Chr(34) & "http://www.opengis.net/kml/2.2" & Chr(34) & " xmlns:atom=" & Chr(34) & "http://www.w3.org/2005/Atom" & Chr(34) & ">" & Chr(13) & Chr(10) &
-    "<GroundOverlay>" & Chr(13) & Chr(10) &
-                "<name>" & "_scalone_segmenty_" & Form3.TextBox8.Text & "x" & Form3.TextBox9.Text & "</name>" & Chr(13) & Chr(10) &
-                "<Icon>" & Chr(13) & Chr(10) &
-                "<href>" & "_scalone_segmenty_" & Form3.TextBox8.Text & "x" & Form3.TextBox9.Text & "." & rozszerzenieScalonych & "</href>" & Chr(13) & Chr(10) &
-                "<viewBoundScale>" & Form1.TextBox10.Text & "</viewBoundScale>" & Chr(13) & Chr(10) &
-                "</Icon>" & Chr(13) & Chr(10) &
-                "<LatLonBox>" & Chr(13) & Chr(10) &
-                "<north>" & NsredStr & "</north>" & Chr(13) & Chr(10) &
-                "<south>" & SsredStr & "</south>" & Chr(13) & Chr(10) &
-                "<east>" & EsredStr & "</east>" & Chr(13) & Chr(10) &
-                "<west>" & WsredStr & "</west>" & Chr(13) & Chr(10) &
-                "</LatLonBox>" & Chr(13) & Chr(10) &
-                "</GroundOverlay>" & Chr(13) & Chr(10) &
-                "</kml>")
-
-                FileClose(1)
+                Dim nazwaArkusza As String = "_scalone_segmenty_" & Form3.TextBox8.Text & "x" & Form3.TextBox9.Text
+                ZapiszKml(folderScalonych & nazwaArkusza & ".kml", nazwaArkusza, nazwaArkusza & "." & rozszerzenieScalonych, Lx, Ly, Px, Py)
 
         End Select
     End Sub
@@ -1561,10 +1469,10 @@ errorhandler:
         FileOpen(1, folderSegmentow & "koordynaty.txt", OpenMode.Append)
         PrintLine(1, nazwaKwadratu)             'nazwa obrazka
         PrintLine(1, strUrl)                    'link do obrazka
-        PrintLine(1, Ly)        'Ly
-        PrintLine(1, Lx)        'Lx
-        PrintLine(1, Py)        'Py
-        PrintLine(1, Px)        'Px
+        PrintLine(1, Liczba(Ly))        'Ly
+        PrintLine(1, Liczba(Lx))        'Lx
+        PrintLine(1, Liczba(Py))        'Py
+        PrintLine(1, Liczba(Px))        'Px
 
         FileClose(1)
 
