@@ -1,11 +1,17 @@
-# Publikacja wydania programu: po wysłaniu tagu z numerem wersji (np. v3.12) program jest testowany, kompilowany,
-# pakowany do archiwum ZIP i publikowany w zakładce Releases z opisem z pliku .github/opis_wydania.md.
+# Publikacja wydania programu: po wysłaniu tagu z numerem wersji (np. v3.12) albo po ręcznym uruchomieniu
+# (zakładka Actions > Wydanie > Run workflow, z numerem wersji) program jest testowany, kompilowany, pakowany
+# do archiwum ZIP i publikowany w zakładce Releases z opisem z pliku .github/opis_wydania.md.
 name: Wydanie
 
 on:
   push:
     tags:
       - 'v*'
+  workflow_dispatch:
+    inputs:
+      wersja:
+        description: 'Numer wersji (tag), np. v3.12'
+        required: true
 
 permissions:
   contents: write
@@ -13,6 +19,8 @@ permissions:
 jobs:
   wydanie:
     runs-on: windows-latest
+    env:
+      WERSJA: ${{ inputs.wersja || github.ref_name }}
     steps:
       - uses: actions/checkout@v4
 
@@ -28,11 +36,13 @@ jobs:
 
       - name: Archiwum ZIP
         shell: pwsh
-        run: Compress-Archive -Path MapoTero -DestinationPath "MapoTero_${{ github.ref_name }}.zip"
+        run: Compress-Archive -Path MapoTero -DestinationPath "MapoTero_${{ env.WERSJA }}.zip"
 
       - name: Publikacja wydania
         uses: softprops/action-gh-release@v2
         with:
-          name: MapoTero ${{ github.ref_name }}
+          tag_name: ${{ env.WERSJA }}
+          target_commitish: ${{ github.sha }}
+          name: MapoTero ${{ env.WERSJA }}
           body_path: .github/opis_wydania.md
-          files: MapoTero_${{ github.ref_name }}.zip
+          files: MapoTero_${{ env.WERSJA }}.zip
