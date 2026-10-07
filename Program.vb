@@ -54,12 +54,22 @@ Public Module Program
     ''' </summary>
     Public Function KodowanieSystemowe() As Encoding
 #If NETCOREAPP Then
-        Encoding.RegisterProvider(CodePagesEncodingProvider.Instance)
+        RejestrujKodowania()
         Return Encoding.GetEncoding(CultureInfo.CurrentCulture.TextInfo.ANSICodePage)
 #Else
         Return Encoding.Default
 #End If
     End Function
+
+    ''' <summary>
+    ''' W .NET 8 strony kodowe Windows (np. 1250 plików warstw) są dostępne dopiero po rejestracji dostawcy kodowań -
+    ''' wywoływane na starcie programu, przed odczytem jakiegokolwiek pliku. W .NET Framework nic nie robi.
+    ''' </summary>
+    Public Sub RejestrujKodowania()
+#If NETCOREAPP Then
+        Encoding.RegisterProvider(CodePagesEncodingProvider.Instance)
+#End If
+    End Sub
 
     ''' <summary>Ustala folder zapisu danych programu (sprawdza możliwość zapisu w katalogu programu).</summary>
     Public Function UstalFolderDanych(folderProgramu As String) As String

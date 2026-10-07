@@ -15,6 +15,7 @@
 
 Imports System.IO
 Imports System.Threading
+Imports System.Threading.Tasks
 Imports MapoTero.Core
 
 ''' <summary>

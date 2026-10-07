@@ -144,6 +144,7 @@ Public Class Form1
 #Region "Uruchomienie i zamknięcie"
 
     Private Sub Form1_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+        RejestrujKodowania()
 
         'wyświetla nazwę i wersję
         Me.Text = My.Application.Info.Title & " " & My.Application.Info.Version.ToString

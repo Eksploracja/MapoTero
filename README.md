@@ -1,17 +1,20 @@
 # MapoTero
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
-[![Platform](https://img.shields.io/badge/.NET%20Framework-4.7.2-purple.svg)](https://dotnet.microsoft.com/)
+[![Platform](https://img.shields.io/badge/.NET-8-purple.svg)](https://dotnet.microsoft.com/)
+[![Kompilacja i testy](https://github.com/Eksploracja/MapoTero/actions/workflows/kompilacja.yml/badge.svg)](https://github.com/Eksploracja/MapoTero/actions/workflows/kompilacja.yml)
 
-**MapoTero** to darmowy program służący do pobierania rastrowych map z internetu, opublikowanych za pośrednictwem serwerów WMS (takich jak Geoportal2, PIG, GDOŚ). 
+**MapoTero** to darmowy program służący do pobierania rastrowych map z internetu, opublikowanych za pośrednictwem serwerów WMS (takich jak Geoportal2, PIG, GDOŚ) oraz usług kafelkowych WMTS. 
 
 Program pobiera mapy, dzieląc wybrany obszar na siatkę kwadratowych segmentów (do 2048×2048 px). Pobrane segmenty map można następnie:
-* **scalić w jeden duży plik rastrowy** przy użyciu wbudowanej funkcji *"złącz pobrane segmenty w jeden arkusz"*,
+* **scalić w jeden duży plik rastrowy** (GeoTIFF, JPEG, PNG) przy użyciu wbudowanej funkcji *"złącz pobrane segmenty w jeden arkusz"*,
+* **wyeksportować do map dla odbiorników GPS i aplikacji mobilnych:** KMZ (Garmin Custom Maps, Locus Map, OruxMaps) i MBTiles (Locus Map, OsmAnd, OruxMaps),
 * **wgrać do urządzeń GPS** i aplikacji turystycznych (np. [TrekBuddy](http://www.trekbuddy.net/forum/index.php), [OziExplorer](http://www.oziexplorer.com/)),
 * **wyświetlić jako podkład georeferencyjny** w programach GIS i GPS: [QGIS](https://www.qgis.org/), [Google Earth](https://www.google.pl/intl/pl/earth/), ArcGIS, GPS Tuner, MapInfo.
 
-* **Obsługiwane formaty rastrowe:** JPEG, TIFF, PNG, GIF.
-* **Obsługiwane formaty georeferencji:** MAP, KML, TAB, JPGW, WLD, GMI.
+* **Obsługiwane formaty rastrowe:** JPEG, TIFF, PNG, GIF; arkusze scalone: GeoTIFF, JPEG, PNG.
+* **Obsługiwane formaty georeferencji:** MAP, KML, TAB, JPGW, WLD, GMI, PRJ.
+* **Układy współrzędnych:** PL-1992, PL-2000 (strefy 5-8), UTM (strefy 33N-35N), WGS84.
 
 ---
 
@@ -25,7 +28,15 @@ Najnowsze wydania programu można pobrać z zakładki **[Releases](https://githu
 ## Aktualności
 
 * **Wersja 3.12:**
-  * Aktualizacja bibliotek zależnych (.NET Framework 4.7.2, GMap.NET, SQLite, Newtonsoft.Json),
+  * Przejście na platformę .NET 8 (program 64-bitowy) i aktualizacja bibliotek zależnych (GMap.NET, SQLite); automatyczna kompilacja i testy w GitHub Actions,
+  * Pobieranie z usług WMTS: wystarczy podać w pliku zbioru map adres usługi WMTS (przykład: zbiór *ortofotomapa_WMTS*); program sam wybiera poziom kafli odpowiadający rozmiarowi piksela, a segmenty składa z kafli i w razie potrzeby przelicza do wybranego układu - mają te same pliki georeferencji co segmenty WMS,
+  * Wybór układu współrzędnych segmentów: PL-1992, PL-2000 (strefy 5-8), UTM 33N-35N, WGS84 - współrzędne obszaru i rozmiar piksela przeliczane są przy zmianie układu, a pliki georeferencji zapisywane w wybranym układzie,
+  * Wbudowane scalanie segmentów do GeoTIFF (także BigTIFF, kompresja Deflate lub JPEG), JPEG i PNG - zamiast zewnętrznego programu NoToCONS; arkusz zapisywany jest strumieniowo, więc jego wielkość nie jest ograniczona pamięcią RAM,
+  * Eksport mapy (menu Narzędzia > Eksport mapy, Ctrl+E) do KMZ dla odbiorników Garmin (kafle do 1024 px, limit liczby kafli), KMZ dla Locus Map / OruxMaps i MBTiles z piramidą poziomów powiększenia,
+  * Kilka segmentów pobieranych jednocześnie (liczba wątków w ustawieniach), przerywanie pobierania w dowolnej chwili, okno programu nie zamraża się podczas pobierania i scalania,
+  * Parametr SERVICE=WMS dodawany do zapytań (wymagany przez serwery MapServer i GeoServer), kolejność osi w zapytaniach WMS 1.3.0 zgodna z definicją układu, a opcja zamiany X i Y dotyczy tylko zapytania - nie zamienia współrzędnych zapisywanych w plikach georeferencji,
+  * Domyślny podkład mapy OpenStreetMap, ostre wyświetlanie okien na ekranach o dużej rozdzielczości (skalowanie DPI),
+  * Przeliczenia współrzędnych w jednej, dokładnej implementacji (szereg Krügera, zgodność z biblioteką PROJ do 1 mm) i testy jednostkowe biblioteki MapoTero.Core,
   * Uporządkowanie struktury projektu i usunięcie przestarzałego kodu v2,
   * Poprawki konfiguracji kompilacji i wsparcia dla nowoczesnych środowisk Visual Studio,
   * Naprawa ponawiania pobierania nieudanych segmentów (ustawienia "ilość prób" i "przerwa między próbami" nie były uwzględniane); okno programu nie zamraża się podczas oczekiwania na kolejną próbę,
@@ -63,7 +74,8 @@ Najnowsze wydania programu można pobrać z zakładki **[Releases](https://githu
 4. **Pobieranie:** Kliknij przycisk **"Pobierz"**. Rozpocznie się pobieranie segmentów do katalogu `download`.
 5. **Przeglądanie i scalanie:**
    * Kliknij żółty folder, aby otworzyć katalog z pobranymi plikami.
-   * Opcjonalnie scal pobrane segmenty w jeden arkusz ikoną szachownicy (*"scal pobrane segmenty..."*). Wydajność zależy od ilości pamięci RAM (narzędzie zalecane do arkuszy do 10 000 × 10 000 px; dla większych panoram można użyć np. IrfanView).
+   * Opcjonalnie scal pobrane segmenty w jeden arkusz ikoną szachownicy (*"scal pobrane segmenty..."*), wybierając format arkusza (GeoTIFF, JPEG lub PNG). Arkusz zapisywany jest strumieniowo, więc może mieć dowolną wielkość (JPEG - do 65 500 px na bok).
+   * Opcjonalnie wyeksportuj mapę do KMZ lub MBTiles (*Narzędzia > Eksport mapy*), aby wgrać ją do odbiornika GPS lub aplikacji mobilnej.
 
 ![Uproszczona instrukcja obsługi](instrukcja.jpg)
 
@@ -79,11 +91,22 @@ Najnowsze wydania programu można pobrać z zakładki **[Releases](https://githu
 
 ---
 
-## Obsługiwane serwery WMS
+## Obsługiwane serwery WMS i WMTS
 
 * **Geoportal2** (Główny Urząd Geodezji i Kartografii)
 * **Państwowy Instytut Geologiczny (PIG)**
 * **Generalna Dyrekcja Ochrony Środowiska (GDOŚ)**
+
+Zbiory map to pliki tekstowe w katalogu `warstwy`: w pierwszym wierszu adres serwera, dalej pary wierszy - nazwa warstwy i zalecany rozmiar piksela. Adres usługi WMTS (np. zawierający `SERVICE=WMTS` lub `/WMTS`) oznacza pobieranie kafli WMTS; nazwą warstwy jest wtedy identyfikator warstwy z dokumentu GetCapabilities usługi.
+
+---
+
+## Kompilacja
+
+* Wymagany Visual Studio 2022 (wersja 17.8 lub nowsza) z obsługą .NET 8 albo samo .NET 8 SDK.
+* Kompilacja programu: `dotnet build MapoTero_v3.vbproj -c Release`, testy jednostkowe: `dotnet test MapoTero.Tests/MapoTero.Tests.vbproj`.
+* Każda zmiana w repozytorium jest kompilowana i testowana w GitHub Actions; gotowy program można pobrać jako artefakt *MapoTero* z zakładki **Actions**.
+* Do uruchomienia programu potrzebne jest środowisko [.NET Desktop Runtime 8](https://dotnet.microsoft.com/download/dotnet/8.0) (x64).
 
 ---
 
@@ -100,7 +123,7 @@ Najnowsze wydania programu można pobrać z zakładki **[Releases](https://githu
 * **Rozwój projektu:** [Kazimierz Niecikowski](http://labgis.pl/) (od 2015)
 * **Współpraca programistyczna:**
   * Paweł_gdn
-  * AAA222 (moduł NoTo)
+  * AAA222 (moduł NoTo - scalanie segmentów do wersji 3.11)
   * Edward Zadorski (kod modułu przeliczania współrzędnych)
 
 ---

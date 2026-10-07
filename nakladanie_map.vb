@@ -15,6 +15,7 @@
 
 Imports System.Drawing.Imaging
 Imports System.IO
+Imports System.Threading.Tasks
 
 ''' <summary>
 ''' Nakładanie dwóch zbiorów segmentów PNG (np. kontury działek na ortofotomapę): białe piksele warstwy górnej
