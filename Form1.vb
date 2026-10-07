@@ -648,16 +648,21 @@ errorhandler:
         Nakladanie_Map.ShowDialog()
     End Sub
 
+    'zdarzenie CheckedChanged zachodzi także przy ODZNACZANIU przycisku - dawniej odznaczany przycisk
+    'ustawiał swój podkład, przez co wybór mapy mógł zostać nadpisany; teraz reaguje tylko zaznaczony
     Private Sub RadioButton1_CheckedChanged(sender As Object, e As EventArgs) Handles RadioButton1.CheckedChanged
-        MapProviders.GMapProvider.UserAgent = "MapoTero 3"
+        If RadioButton1.Checked = False Then Exit Sub
+        MapProviders.GMapProvider.UserAgent = "MapoTero/" & My.Application.Info.Version.ToString
         Me.GMapControl1.MapProvider = GMapProviders.OpenStreetMap
     End Sub
 
     Private Sub RadioButton2_CheckedChanged(sender As Object, e As EventArgs) Handles RadioButton2.CheckedChanged
+        If RadioButton2.Checked = False Then Exit Sub
         Me.GMapControl1.MapProvider = GMapProviders.GoogleMap
     End Sub
 
     Private Sub RadioButton3_CheckedChanged(sender As Object, e As EventArgs) Handles RadioButton3.CheckedChanged
+        If RadioButton3.Checked = False Then Exit Sub
         Me.GMapControl1.MapProvider = GMapProviders.BingSatelliteMap
     End Sub
 

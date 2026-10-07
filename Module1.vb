@@ -190,7 +190,7 @@ Module Module1
         End If
 
 
-        strUrlparts(0) = adresSerwera
+        strUrlparts(0) = UzupelnijAdresWms(adresSerwera)
 
         For i = 0 To nrWarstwy - 1
 
@@ -285,32 +285,26 @@ pobieranieJeszczeRaz:
 
                 Form1.ToolStripStatusLabel3.Text = nazwaKwadratu
 
-                Select Case XYswitched
-                    'po staremu
-                    Case False
-                        Lx = (Val(Form1.TextBox1.Text) + ((Val(Form1.TextBox9.Text) * Val(Form1.TextBox10.Text)) * (ileSegVert - pion)))
-                        Ly = (Val(Form1.TextBox2.Text) + ((Val(Form1.TextBox9.Text) * Val(Form1.TextBox10.Text)) * (poz - 1)))
-                        'geoportal zwariował i zamienił "x" z "y"
-                    Case True
-                        Lx = (Val(Form1.TextBox2.Text) + ((Val(Form1.TextBox9.Text) * Val(Form1.TextBox10.Text)) * (ileSegVert - pion)))
-                        Ly = (Val(Form1.TextBox1.Text) + ((Val(Form1.TextBox9.Text) * Val(Form1.TextBox10.Text)) * (poz - 1)))
-
-                End Select
-
-
-
-
+                'narożniki segmentu (lewy dolny Lx, Ly; prawy górny Px, Py) - zawsze w prawidłowym układzie X (północ), Y (wschód);
+                'używane przez wszystkie pliki georeferencyjne
+                Lx = (Val(Form1.TextBox1.Text) + ((Val(Form1.TextBox9.Text) * Val(Form1.TextBox10.Text)) * (ileSegVert - pion)))
+                Ly = (Val(Form1.TextBox2.Text) + ((Val(Form1.TextBox9.Text) * Val(Form1.TextBox10.Text)) * (poz - 1)))
                 Px = (Lx + (Val(Form1.TextBox9.Text) * Val(Form1.TextBox10.Text)))
                 Py = (Ly + (Val(Form1.TextBox9.Text) * Val(Form1.TextBox10.Text)))
 
-
-
-
-                strUrlparts(2) = Liczba(Lx) & ","               'lewy X
-                strUrlparts(3) = Liczba(Ly) & ","               'lewy Y
-                strUrlparts(4) = Liczba(Px) & ","
-
-                strUrlparts(5) = Liczba(Py) & "&format=image/" & format & "&styles=&width="
+                'opcja "zamiana X i Y" (serwer oczekujący odwrotnej kolejności osi) zmienia wyłącznie kolejność liczb w zapytaniu -
+                'dawniej zamieniała też współrzędne zapisywane w plikach georeferencyjnych, przez co segmenty trafiały w złe miejsce
+                If XYswitched = False Then
+                    strUrlparts(2) = Liczba(Lx) & ","               'lewy X
+                    strUrlparts(3) = Liczba(Ly) & ","               'lewy Y
+                    strUrlparts(4) = Liczba(Px) & ","
+                    strUrlparts(5) = Liczba(Py) & "&format=image/" & format & "&styles=&width="
+                Else
+                    strUrlparts(2) = Liczba(Ly) & ","
+                    strUrlparts(3) = Liczba(Lx) & ","
+                    strUrlparts(4) = Liczba(Py) & ","
+                    strUrlparts(5) = Liczba(Px) & "&format=image/" & format & "&styles=&width="
+                End If
                 'Edit 1.04.2015 by Kazik - likwiduję wpis "-1" dla zachowania  rozdzielczości pobieranego segmentu zgodnie z zadaną w formularzu
                 'strUrlparts(6) = Form1.TextBox9.Text - 1 & "&height="
 
@@ -669,6 +663,16 @@ errorhandler:
         Form1.RichTextBox1.ForeColor = System.Drawing.Color.Green
         Form1.RichTextBox1.Text = "Zresetowano listę wprowadzonych warstw mapy wskazanych do pobrania"
     End Sub
+    'standard WMS wymaga parametru SERVICE=WMS - większość adresów w plikach warstw go nie zawiera;
+    'serwery ArcGIS go nie wymagają, ale MapServer czy GeoServer mogą odrzucić takie zapytanie
+    Public Function UzupelnijAdresWms(ByVal adres As String) As String
+        If adres Is Nothing Then Return adres
+        If adres.IndexOf("service=", StringComparison.OrdinalIgnoreCase) >= 0 Then Return adres
+        Dim znak As Integer = adres.IndexOf("?"c)
+        If znak < 0 Then Return adres & "?SERVICE=WMS&"
+        Return adres.Substring(0, znak + 1) & "SERVICE=WMS&" & adres.Substring(znak + 1)
+    End Function
+
     'liczba zapisana z kropką dziesiętną, niezależnie od ustawień regionalnych systemu (w zapytaniach WMS i plikach georeferencyjnych)
     Public Function Liczba(ByVal wartosc As Double) As String
         Return wartosc.ToString("0.##########", System.Globalization.CultureInfo.InvariantCulture)
