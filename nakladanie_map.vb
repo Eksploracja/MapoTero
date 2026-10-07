@@ -18,26 +18,30 @@ Imports System.IO
 Public Class Nakladanie_Map
 
 
-    Dim folderWarstwa1 As String = myPath & "\download\dolna\"           'folder warstwy dolnej
-    Dim folderWarstwa2 As String = myPath & "\download\gorna\"          'folder warstwy górnej
-    Dim folderWynikowy As String = myPath & "\download\polaczone\"
+    'foldery zapamiętane w lastsettings.txt (Module1), a gdy ich brak - domyślne podkatalogi folderu download
+    Dim folderWarstwa1 As String = If(Module1.folderWarstwa1 <> "", Module1.folderWarstwa1, folderDanych & "\download\dolna\")           'folder warstwy dolnej
+    Dim folderWarstwa2 As String = If(Module1.folderWarstwa2 <> "", Module1.folderWarstwa2, folderDanych & "\download\gorna\")          'folder warstwy górnej
+    Dim folderWynikowy As String = If(Module1.folderWynikowy <> "", Module1.folderWynikowy, folderDanych & "\download\polaczone\")
 
 
     Private Sub TextBox3_TextChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles TextBox3.TextChanged
 
         folderWarstwa1 = TextBox3.Text
+        Module1.folderWarstwa1 = folderWarstwa1   'zapisywany przy zamykaniu programu w lastsettings.txt
 
     End Sub
 
     Private Sub TextBox4_TextChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles TextBox4.TextChanged
 
         folderWarstwa2 = TextBox4.Text
+        Module1.folderWarstwa2 = folderWarstwa2
 
     End Sub
 
     Private Sub TextBox5_TextChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles TextBox5.TextChanged
 
         folderWynikowy = TextBox5.Text
+        Module1.folderWynikowy = folderWynikowy
 
     End Sub
 
@@ -104,8 +108,6 @@ Public Class Nakladanie_Map
             GoTo errorhandler
         Else
 
-            Dim PB As New PictureBox
-
             rozszerzenie = "png"
 
             'tworzy tablice z plików w folderach dolnej i górnej warstwy
@@ -161,41 +163,24 @@ Public Class Nakladanie_Map
 
 
                         'jeśli tak to nakłada obrazki na siebie
-
-                        PB.BorderStyle = BorderStyle.FixedSingle
-                        PB.Size = New Size(Form1.GroupBox3.Width, Form1.GroupBox3.Width)
-                        PB.Location = New Point(Panel1.Location.X, Panel1.Location.Y)
-                        PB.SizeMode = PictureBoxSizeMode.StretchImage
-                        PB.Visible = False
-                        Me.Panel1.Controls.Add(PB)
-
-
-
-                        Dim g As Object
-                        Dim t As New Rectangle(0, 0, Val(Form1.TextBox9.Text), Val(Form1.TextBox9.Text))
-                        Dim warstwa1 As New Bitmap(folderWarstwa1 & nazwaPliku)  'dolna warstwa
-                        Dim warstwa2 As New Bitmap(folderWarstwa2 & nazwaPliku)  'górna warstwa
-                        Dim warstwa1copy As Object
-
-
-                        '   Dim warstwa1Tmp As New Bitmap(warstwa1.Width, warstwa1.Height, System.Drawing.Imaging.PixelFormat.Format24bppRgb)
-                        '   warstwa1Tmp = Image.FromFile(folderWarstwa1 & nazwaPliku)
-                        '   warstwa1 = warstwa1Tmp
-                        '   Dim warstwa2Tmp As New Bitmap(warstwa2.Width, warstwa1.Height, System.Drawing.Imaging.PixelFormat.Format24bppRgb)
-                        '   warstwa2Tmp = Image.FromFile(folderWarstwa2 & nazwaPliku)
-                        '   warstwa2 = warstwa2Tmp
-                        '   MsgBox("1: " & warstwa1.PixelFormat & " 1tmp: " & warstwa1Tmp.PixelFormat)
-                        '   MsgBox("2: " & warstwa2.PixelFormat & " 2tmp: " & warstwa2Tmp.PixelFormat)
-
-
-                        'warstwa1copy = warstwa1.Clone()
-                        warstwa2.MakeTransparent(Color.White)
-                        g = Graphics.FromImage(warstwa1)
-                        On Error Resume Next
-                        g.DrawImageUnscaled(warstwa2, t)
-                        PB.Image = warstwa1
-                        PB.SizeMode = PictureBoxSizeMode.StretchImage
-                        PB.Image.Save(folderWynikowy & nazwaPliku)
+                        'Using zwalnia pamięć i blokady plików po każdym segmencie (dawniej obrazy nie były zwalniane,
+                        'co przy większej liczbie segmentów kończyło się brakiem pamięci). Dawny, niewidoczny PictureBox
+                        'służył jedynie do zapisu obrazu - zapis odbywa się teraz bezpośrednio.
+                        Try
+                            Using warstwa1Plik As New Bitmap(folderWarstwa1 & nazwaPliku), warstwa2 As New Bitmap(folderWarstwa2 & nazwaPliku)  'dolna i górna warstwa
+                                'kopia dolnej warstwy w formacie 32-bitowym - na obrazach z paletą barw (np. png8) nie da się rysować
+                                Using warstwa1 As New Bitmap(warstwa1Plik.Width, warstwa1Plik.Height, System.Drawing.Imaging.PixelFormat.Format32bppArgb)
+                                    warstwa2.MakeTransparent(Color.White)
+                                    Using g As Graphics = Graphics.FromImage(warstwa1)
+                                        g.DrawImage(warstwa1Plik, 0, 0, warstwa1Plik.Width, warstwa1Plik.Height)
+                                        g.DrawImage(warstwa2, 0, 0, warstwa2.Width, warstwa2.Height)
+                                    End Using
+                                    warstwa1.Save(folderWynikowy & nazwaPliku, System.Drawing.Imaging.ImageFormat.Png)
+                                End Using
+                            End Using
+                        Catch
+                            'segment, którego nie da się odczytać, jest pomijany (jak dawniej przy On Error Resume Next)
+                        End Try
 
 
 

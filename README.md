@@ -27,7 +27,17 @@ Najnowsze wydania programu można pobrać z zakładki **[Releases](https://githu
 * **Wersja 3.12:**
   * Aktualizacja bibliotek zależnych (.NET Framework 4.7.2, GMap.NET, SQLite, Newtonsoft.Json),
   * Uporządkowanie struktury projektu i usunięcie przestarzałego kodu v2,
-  * Poprawki konfiguracji kompilacji i wsparcia dla nowoczesnych środowisk Visual Studio.
+  * Poprawki konfiguracji kompilacji i wsparcia dla nowoczesnych środowisk Visual Studio,
+  * Naprawa ponawiania pobierania nieudanych segmentów (ustawienia "ilość prób" i "przerwa między próbami" nie były uwzględniane); okno programu nie zamraża się podczas oczekiwania na kolejną próbę,
+  * Odporniejsze pobieranie segmentów: limit czasu połączenia, zapis obrazu bez ponownej kompresji JPEG, przyczyna błędu (np. komunikat serwera WMS) zapisywana w pliku error.txt,
+  * Naprawa wznawiania pobierania przy numeracji segmentów NrWiersza_NrKolumny,
+  * Naprawa wczytywania sesji z pliku conf.txt za jednym razem oraz zawieszania się programu przy starcie, gdy zapisany zbiór map nie istnieje,
+  * Scalanie segmentów zgłasza sukces dopiero po faktycznym utworzeniu arkusza; pliki georeferencyjne scalonego arkusza zapisywane są obok niego, z poprawną nazwą i rozszerzeniem pliku,
+  * Naprawa awarii przy tworzeniu plików .points dla formatu PNG oraz błędnych współrzędnych pikselowych w pliku .tab scalonego arkusza,
+  * Nakładanie map: zwalnianie pamięci po każdym segmencie i obsługa plików PNG z paletą barw (png8),
+  * Usuwanie pustych segmentów: brak limitu 10 000 plików, usuwanie także plików .kml, .pngw i .png.points,
+  * Gdy w katalogu programu nie można zapisywać (np. Program Files), ustawienia i pobrane mapy trafiają do %LocalAppData%\MapoTero,
+  * Usunięcie nieużywanych bibliotek (GMap.NET.WindowsPresentation, System.Text.Encoding.CodePages) i wersji testowych (preview) bibliotek.
 * **19.10.2021 – Wersja 3.11:**
   * Naprawa niedziałającej warstwy Ortofotomapa,
   * Aktualizacja adresów warstw WMS.

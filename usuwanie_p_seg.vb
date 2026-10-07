@@ -89,98 +89,34 @@ errorhandler:
 
     Private Sub Button1_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles Button1.Click
 
-        Dim Rozmiar As Single
-        Dim Plik As String
-        Dim toDelete(10000) As String          'pliki do usunięcie
-        Dim ileDelete As Long                       'ile plików do usunięcia
+        Dim toDelete As New List(Of String)          'pliki do usunięcia (lista - dawniej tablica ograniczona do 10 001 plików)
 
         Button1.Enabled = False
 
         'przegląda wszystkie pliki w wybranym folderze i poddaje je odpowiednim czynnościom
-        Dim files() As String = Directory.GetFiles(folderSegmentow)
-        For Each Plik In files
+        For Each Plik As String In PlikiPonizejRozmiaru()
 
-            Application.DoEvents()
+            toDelete.Add(Plik)
 
-            'sprawdza czy rozszerzenie pliku jest zgodne z zadanym
-            TestRozszerzenia = Microsoft.VisualBasic.Right(Plik, Len(ComboBox1.Text))
-
-            Rozmiar = Int(FileLen(Plik) / 1024)                                'sprawdza rozmiar pliku
-
-            If TestRozszerzenia = ComboBox1.Text And Rozmiar < TextBox4.Text Then
-
-                ileDelete += 1           'jeśli warunek spełniony to zwiększa się ileDelete
-                '  ReDim toDelete(ileDelete)           'i zwiększa się rozmiar tablicy na pliki do usunięcia
-                toDelete(ileDelete - 1) = Plik      'po czym plik jest umieszczany w tablicy
-
-
-
-                'to samo co powyżej, ale dla pliku .map jeśli istnieje
-                Plik = (Replace(Plik, "." & TestRozszerzenia, ".map"))
-                If Dir(Plik) <> "" Then
-                    ileDelete += 1
-                    '         ReDim toDelete(ileDelete)
-                    toDelete(ileDelete - 1) = Plik
-                End If
-
-
-                'to samo co powyżej, ale dla pliku .gmi jeśli istnieje
-                Plik = (Replace(Plik, ".map", ".gmi"))
-                If Dir(Plik) <> "" Then
-                    ileDelete += 1
-                    '         ReDim toDelete(ileDelete)
-                    toDelete(ileDelete - 1) = Plik
-                End If
-
-
-                'to samo co powyżej, ale dla pliku .wld jeśli istnieje
-                Plik = (Replace(Plik, ".gmi", ".wld"))
-                If Dir(Plik) <> "" Then
-                    ileDelete += 1
-                    '         ReDim toDelete(ileDelete)
-                    toDelete(ileDelete - 1) = Plik
-                End If
-
-
-                'to samo co powyżej, ale dla pliku .jpg.points jeśli istnieje
-                Plik = (Replace(Plik, ".wld", ".jpg.points"))
-                If Dir(Plik) <> "" Then
-                    ileDelete += 1
-                    '          ReDim toDelete(ileDelete)
-                    toDelete(ileDelete - 1) = Plik
-                End If
-
-
-                'to samo co powyżej, ale dla pliku .jpgw jeśli istnieje
-                Plik = (Replace(Plik, ".jpg.points", ".jpgw"))
-                If Dir(Plik) <> "" Then
-                    ileDelete += 1
-                    '          ReDim toDelete(ileDelete)
-                    toDelete(ileDelete - 1) = Plik
-                End If
-
-                'to samo co powyżej, ale dla pliku .tab jeśli istnieje
-                Plik = (Replace(Plik, ".jpgw", ".tab"))
-                If Dir(Plik) <> "" Then
-                    ileDelete += 1
-                    '          ReDim toDelete(ileDelete)
-                    toDelete(ileDelete - 1) = Plik
-                End If
-
-            End If
+            'pliki georeferencyjne towarzyszące segmentowi (jeśli istnieją)
+            Dim bezRozszerzenia As String = Plik.Substring(0, Plik.Length - Len(ComboBox1.Text) - 1)
+            For Each towarzyszacy As String In {".map", ".gmi", ".wld", ".tab", ".kml",
+                                                "." & ComboBox1.Text & ".points", ".jpgw", ".pngw", ".tifw", ".gifw"}
+                If File.Exists(bezRozszerzenia & towarzyszacy) Then toDelete.Add(bezRozszerzenia & towarzyszacy)
+            Next
 
         Next
 
 
-        For i = 0 To ileDelete - 1
+        For Each plikDoUsuniecia As String In toDelete
 
-            File.Delete(toDelete(i))
+            File.Delete(plikDoUsuniecia)
 
         Next
 
 
         TextBox4.Text = 0
-        TextBox5.Text = ileDelete
+        TextBox5.Text = toDelete.Count
         Button1.Enabled = True
 
 
@@ -190,16 +126,27 @@ errorhandler:
 
 
     Private Sub TextBox4_TextChanged(sender As Object, e As EventArgs) Handles TextBox4.TextChanged
-        Dim Rozmiar As Single
-        Dim Plik As String
-        Dim toDelete(10000) As String          'pliki do usunięcie
-        Dim ileDelete As Long                       'ile plików do usunięcia
         Label9.Text = "Liczba wszystkich plików " & ComboBox1.Text
         Button1.Enabled = False
 
+        TextBox5.Text = PlikiPonizejRozmiaru().Count
+        Button1.Enabled = True
+
+
+    End Sub
+
+    'segmenty o wybranym rozszerzeniu, mniejsze niż rozmiar podany w TextBox4 (w kB)
+    Private Function PlikiPonizejRozmiaru() As List(Of String)
+
+        Dim wynik As New List(Of String)
+        Dim Rozmiar As Single
+        Dim progKB As Double = Val(TextBox4.Text)   'Val - puste lub błędne pole nie powoduje już błędu programu
+
+        If ComboBox1.Text = "" Or Directory.Exists(folderSegmentow) = False Then Return wynik
+
         'przegląda wszystkie pliki w wybranym folderze i poddaje je odpowiednim czynnościom
         Dim files() As String = Directory.GetFiles(folderSegmentow)
-        For Each Plik In files
+        For Each Plik As String In files
 
             Application.DoEvents()
 
@@ -208,29 +155,12 @@ errorhandler:
 
             Rozmiar = Int(FileLen(Plik) / 1024)                                'sprawdza rozmiar pliku
 
-            If TestRozszerzenia = ComboBox1.Text And Rozmiar < TextBox4.Text Then
-
-                ileDelete += 1           'jeśli warunek spełniony to zwiększa się ileDelete
-                '  ReDim toDelete(ileDelete)           'i zwiększa się rozmiar tablicy na pliki do usunięcia
-                toDelete(ileDelete - 1) = Plik      'po czym plik jest umieszczany w tablicy
-
-
-
-
+            If TestRozszerzenia = ComboBox1.Text And Rozmiar < progKB Then
+                wynik.Add(Plik)
             End If
 
         Next
 
-
-
-
-
-
-        TextBox5.Text = ileDelete
-        Button1.Enabled = True
-
-
-    End Sub
-
-
+        Return wynik
+    End Function
 End Class

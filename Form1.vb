@@ -34,8 +34,12 @@ Public Class Form1
 
         ' pozostałe parametry
         myPath = My.Application.Info.DirectoryPath.ToString()
-        Module1.folderSegmentow = myPath & "\download\"
-        If Directory.Exists(myPath & "\download\") = False Then Directory.CreateDirectory(myPath & "\download\")
+        folderDanych = Module1.UstalFolderDanych(myPath)
+        Module1.folderSegmentow = folderDanych & "\download\"
+        If Directory.Exists(folderDanych & "\download\") = False Then Directory.CreateDirectory(folderDanych & "\download\")
+
+        'serwery WMS (np. Geoportal) wymagają TLS 1.2 - na starszych wersjach Windows nie jest on domyślnie włączony
+        System.Net.ServicePointManager.SecurityProtocol = System.Net.ServicePointManager.SecurityProtocol Or System.Net.SecurityProtocolType.Tls12
 
         Me.SetDesktopLocation(0, 0)
 
@@ -216,7 +220,7 @@ errorhandler:
         Input(1, adresSerwera)
 
         'przetważa plik, aż znajdzie linię zgodną z zaznaczeniem listbox1
-        Do Until linia = ListBox1.SelectedItem
+        Do Until linia = ListBox1.SelectedItem Or EOF(1)
             Input(1, linia)
         Loop
         'wtedy przechodzi linię niżej i pobiera ją jako ilość m/piksel
@@ -321,9 +325,8 @@ errororhandler:
 
     Private Sub WczytajToolStripMenuItem1_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles WczytajToolStripMenuItem1.Click
         FileClose(1) ' na wypadek gdyby był otwarty
-        For i = 1 To 2 'nierozwiązany bug - dopiero po dwukrotnym wczytaniu conf, aktualizują się parametry sesji
-            wczytajConf()
-        Next
+        'dawniej wczytywano conf dwukrotnie (obejście błędu opisanego w WczytajConf) - po poprawce wystarcza jeden odczyt
+        wczytajConf()
     End Sub
 
     Private Sub OtwórzOknoUstawieńToolStripMenuItem_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles UstawieniaToolStripMenuItem.Click
@@ -343,52 +346,47 @@ errororhandler:
     End Sub
 
     Public Sub Wczytaj_lastsettings()
-        On Error GoTo brakpliku
 
-        FileClose(1) 'w razie gyby był otwarty
+        Dim plik As String = folderDanych & "\lastsettings.txt"
+        If File.Exists(plik) = False Then Exit Sub
 
-        'wpisuje ostatnie ustawienia z pliku lastsettings.txt i conf.txt
-        FileOpen(1, myPath & "\lastsettings.txt", OpenMode.Input)
+        'plik zawiera pary wierszy: nazwa ustawienia, wartość. Odczyt odbywa się po nazwach, a nie po kolejności wierszy,
+        'dzięki czemu brak któregoś ustawienia (np. starszy plik bez chkkml/chktab) nie przesuwa wszystkich kolejnych wartości
+        Dim ustawienia As New Dictionary(Of String, String)(StringComparer.OrdinalIgnoreCase)
+        Try
+            'kodowanie systemowe (ANSI) - takie samo, jakim plik jest zapisywany przez PrintLine
+            Dim linie() As String = File.ReadAllLines(plik, System.Text.Encoding.Default)
+            For i = 0 To linie.Length - 2 Step 2
+                ustawienia(linie(i).Trim()) = linie(i + 1).Trim()
+            Next
+        Catch
+            Exit Sub
+        End Try
 
-        Dim zmiennaNaSztuke As String = ""      'do przechowania opisu zmiennej znajdującej sią poniżej opisu
-        Input(1, zmiennaNaSztuke)
-        Input(1, folderSegmentow)   'wczytuje ostatni folder segmentów, z niego wczytany zostanie plik conf
-
-        Input(1, zmiennaNaSztuke)
-        Input(1, CheckGmi)          'wczytuje czy tworzyć gmi
-        Input(1, zmiennaNaSztuke)
-        Input(1, CheckMap)          'wczytuje czy tworzyć map
-        Input(1, zmiennaNaSztuke)
-        Input(1, CheckWldPoints)    'wczytuje czy tworzyć wld i points
-        Input(1, zmiennaNaSztuke)
-        Input(1, CheckJpgw)          'wczytuje czy tworzyć jpgw
-        Input(1, zmiennaNaSztuke)
-        Input(1, CheckKml)          'wczytuje czy tworzyć kml
-        Input(1, zmiennaNaSztuke)
-        Input(1, CheckTab)          'wczytuje czy tworzyć tab
-        Input(1, zmiennaNaSztuke)
-        Input(1, folderWarstwa1)    'wczytuje foldery łączonych warstw
-        Input(1, zmiennaNaSztuke)
-        Input(1, folderWarstwa2)
-        Input(1, zmiennaNaSztuke)
-        Input(1, folderWynikowy)
-        Input(1, zmiennaNaSztuke)
-        Input(1, XYswitched)
-        'Input(1, zmiennaNaSztuke)
-        'Input(1, CheckTB)
-        Input(1, zmiennaNaSztuke)
-        Input(1, numeracja)
-        Input(1, zmiennaNaSztuke)
-        Input(1, iloscProbPobrania)
-        Input(1, zmiennaNaSztuke)
-        Input(1, przerwaMiedzyProbami)
-        Input(1, zmiennaNaSztuke)
-        Input(1, Label35.Text)
-        Input(1, zmiennaNaSztuke)
-        Input(1, Label63.Text)
-        Input(1, zmiennaNaSztuke)
-        Input(1, Label65.Text)
-        FileClose(1)
+        Dim w As String = ""
+        If ustawienia.TryGetValue("folder segmentow", w) AndAlso w <> "" Then folderSegmentow = w   'ostatni folder segmentów, z niego wczytany zostanie plik conf
+        CheckGmi = WartoscLogiczna(ustawienia, "chkgmi", CheckGmi)                  'czy tworzyć gmi
+        CheckMap = WartoscLogiczna(ustawienia, "chkmap", CheckMap)                  'czy tworzyć map
+        CheckWldPoints = WartoscLogiczna(ustawienia, "chkwldpoints", CheckWldPoints) 'czy tworzyć wld i points
+        CheckJpgw = WartoscLogiczna(ustawienia, "chkjpgw", CheckJpgw)               'czy tworzyć jpgw
+        CheckKml = WartoscLogiczna(ustawienia, "chkkml", CheckKml)                  'czy tworzyć kml
+        CheckTab = WartoscLogiczna(ustawienia, "chktab", CheckTab)                  'czy tworzyć tab
+        If ustawienia.TryGetValue("dolna", w) AndAlso w <> "" Then folderWarstwa1 = w      'foldery łączonych warstw
+        If ustawienia.TryGetValue("gorna", w) AndAlso w <> "" Then folderWarstwa2 = w
+        If ustawienia.TryGetValue("polaczone", w) AndAlso w <> "" Then folderWynikowy = w
+        XYswitched = WartoscLogiczna(ustawienia, "XYswitched", XYswitched)
+        'zapisywane jako "numeracja_" (starsze pliki domyślne zawierały "numeracja")
+        If ustawienia.TryGetValue("numeracja_", w) AndAlso w <> "" Then
+            numeracja = w
+        ElseIf ustawienia.TryGetValue("numeracja", w) AndAlso w <> "" Then
+            numeracja = w
+        End If
+        Dim liczba As Integer
+        If ustawienia.TryGetValue("iloscProbPobrania", w) AndAlso Integer.TryParse(w, liczba) Then iloscProbPobrania = liczba
+        If ustawienia.TryGetValue("przerwaMiedzyProbami", w) AndAlso Integer.TryParse(w, liczba) Then przerwaMiedzyProbami = liczba
+        If ustawienia.TryGetValue("x_start", w) AndAlso w <> "" Then Label35.Text = w
+        If ustawienia.TryGetValue("y_start", w) AndAlso w <> "" Then Label63.Text = w
+        If ustawienia.TryGetValue("zoom_start", w) AndAlso w <> "" Then Label65.Text = w
 
         'wczytywanie ostatnio zapisanej pozycji okna mapy
         Me.GMapControl1.Zoom = Val(Label65.Text)
@@ -398,66 +396,106 @@ errororhandler:
         RichTextBox1.ForeColor = System.Drawing.Color.Green
         RichTextBox1.Text = "Wczytano ostatnio zapisane ustawienia programu z lastsettings.txt. Styl numerowania segmentów to: " & numeracja
 
-brakpliku:
     End Sub
+
+    'odczytuje wartość True/False ustawienia; gdy jej brak lub jest nieczytelna - pozostawia dotychczasową
+    Private Function WartoscLogiczna(ByVal ustawienia As Dictionary(Of String, String), ByVal nazwa As String, ByVal domyslna As Boolean) As Boolean
+        Dim w As String = ""
+        Dim wynik As Boolean
+        If ustawienia.TryGetValue(nazwa, w) AndAlso Boolean.TryParse(w, wynik) Then Return wynik
+        Return domyslna
+    End Function
 
     Private Sub WczytajConf()
 
-        Dim formatNaProbe As String 'służy do wczytania rozszerzenia obrazka z pliku i jeśli module1.format jest inny to następuje zamiana
-        formatNaProbe = ""
+        Dim formatNaProbe As String = "" 'służy do wczytania rozszerzenia obrazka z pliku i jeśli module1.format jest inny to następuje zamiana
 
         If Form1loaded = True Then
             'Me.FolderBrowserDialog1.RootFolder = System.Environment.SpecialFolder.MyComputer
-            Me.FolderBrowserDialog1.SelectedPath = myPath & "\download\"
+            Me.FolderBrowserDialog1.SelectedPath = folderDanych & "\download\"
             If Me.FolderBrowserDialog1.ShowDialog = Windows.Forms.DialogResult.OK Then
                 folderSegmentow = Me.FolderBrowserDialog1.SelectedPath & "\"
             End If
             If Dir(folderSegmentow & "\conf.txt") = "" Then
                 MsgBox("Brak pliku w podanej lokalizacji.")
-                GoTo errorhandler
+                Exit Sub
             End If
         End If
 
         'wyświetla nazwę kwadratu na pasku stanu
         ToolStripStatusLabel1.Text = folderSegmentow
 
-        'zazwyczaj brak conf.txt zostanie wychwycony kilka linijek wyżej, ale przypierwszym uruchomieniu conf.txt jeszcze nie ma
-        On Error GoTo errorhandler
+        'przy pierwszym uruchomieniu conf.txt jeszcze nie ma
+        If File.Exists(folderSegmentow & "\conf.txt") = False Then Exit Sub
 
-        FileOpen(1, folderSegmentow & "\conf.txt", OpenMode.Input)
-        Input(1, folderSegmentow)
-        Input(1, ComboBox3.Text)
-        Input(1, TextBox1.Text)
-        Input(1, TextBox2.Text)
-        Input(1, TextBox3.Text)
-        Input(1, TextBox4.Text)
-        Input(1, TextBox9.Text)
-        Input(1, TextBox10.Text)
-        Input(1, warstwy(0))
-        Input(1, warstwy(1))
-        Input(1, warstwy(2))
-        Input(1, warstwy(3))
-        Input(1, warstwy(4))
-        Input(1, warstwy(5))
-        Input(1, warstwy(6))
-        Input(1, warstwy(7))
-        Input(1, warstwy(8))
-        Input(1, warstwy(9))
-        Input(1, warstwy(10))
-        Input(1, warstwy(11))
-        Input(1, nrWarstwy)
-        Input(1, formatNaProbe)
+        'Cały plik jest najpierw wczytywany do zmiennych, a dopiero potem przypisywany do kontrolek.
+        'Przypisanie rodzaju mapy (ComboBox3) uruchamia wczytanie listy warstw, które zamyka plik nr 1 -
+        'gdy działo się to w trakcie czytania conf.txt, reszta pliku nie była wczytywana
+        '(dawny "nierozwiązany bug", obchodzony dwukrotnym wczytywaniem conf.txt).
+        Dim folderZPliku As String = ""         'ścieżka zapisana w conf.txt - nieużywana: obowiązuje folder, w którym faktycznie znaleziono conf.txt
+        Dim rodzajMapy As String = ""
+        Dim x1 As String = "", y1 As String = "", x2 As String = "", y2 As String = ""
+        Dim bokSegmentu As String = "", rozmiarPiksela As String = ""
+        Dim warstwyZPliku(11) As String
+        Dim nrWarstwyZPliku As Integer
+        Dim nazwaKwadratuZPliku As String = ""
+        Dim powyzejOstatniegoZPliku As Boolean
+        Dim srodekX As String = "", srodekY As String = "", zoomZPliku As String = ""
+        Dim numeracjaZPliku As String = ""
 
+        Dim nrPliku As Integer = FreeFile()
+        Try
+            FileOpen(nrPliku, folderSegmentow & "\conf.txt", OpenMode.Input)
+            Input(nrPliku, folderZPliku)
+            Input(nrPliku, rodzajMapy)
+            Input(nrPliku, x1)
+            Input(nrPliku, y1)
+            Input(nrPliku, x2)
+            Input(nrPliku, y2)
+            Input(nrPliku, bokSegmentu)
+            Input(nrPliku, rozmiarPiksela)
+            For i = 0 To 11
+                Input(nrPliku, warstwyZPliku(i))
+            Next
+            Input(nrPliku, nrWarstwyZPliku)
+            Input(nrPliku, formatNaProbe)
+            Input(nrPliku, nazwaKwadratuZPliku)
+            Input(nrPliku, powyzejOstatniegoZPliku)
+            Input(nrPliku, srodekX)
+            Input(nrPliku, srodekY)
+            Input(nrPliku, zoomZPliku)
+            Try
+                Input(nrPliku, numeracjaZPliku)  'starsze pliki conf.txt mogą nie zawierać stylu numeracji
+            Catch
+                numeracjaZPliku = ""
+            End Try
+        Catch
+            FileClose(nrPliku)
+            Exit Sub
+        End Try
+        FileClose(nrPliku)
+
+        ComboBox3.Text = rodzajMapy
+        TextBox1.Text = x1
+        TextBox2.Text = y1
+        TextBox3.Text = x2
+        TextBox4.Text = y2
+        TextBox9.Text = bokSegmentu
+        TextBox10.Text = rozmiarPiksela
         For i = 0 To 11
-            If warstwy(i) = "#ERROR 448#" Then warstwy(i) = ""
+            If warstwyZPliku(i) = "#ERROR 448#" Then warstwyZPliku(i) = ""
+            warstwy(i) = warstwyZPliku(i)
         Next
-        Input(1, wspolnaNazwaKwadratu)
-        Input(1, pobierajPowyzejOstatniego)
-        Input(1, Label35.Text)
-        Input(1, Label63.Text)
-        Input(1, Label65.Text)
-        Input(1, Form2.ComboBox2.Text)
-        FileClose(1)
+        nrWarstwy = nrWarstwyZPliku
+        wspolnaNazwaKwadratu = nazwaKwadratuZPliku
+        pobierajPowyzejOstatniego = powyzejOstatniegoZPliku
+        Label35.Text = srodekX
+        Label63.Text = srodekY
+        Label65.Text = zoomZPliku
+        If numeracjaZPliku <> "" Then
+            Form2.ComboBox2.Text = numeracjaZPliku
+            Module1.numeracja = numeracjaZPliku
+        End If
 
         If formatNaProbe <> Module1.format Then
 
@@ -500,7 +538,6 @@ brakpliku:
         RichTextBox1.ForeColor = System.Drawing.Color.Green
         RichTextBox1.Text = "Wczytano ostatnio zapisane ustawienia sesji z pliku conf.txt. Format graficzny pobieranych segmentów to " & format & " . Styl ich numerowania to: " & numeracja
 
-errorhandler:
     End Sub
     'wczytanie listy plików z warstwami do combobox3
     Private Sub Wczytaj_warstwyTxt()
@@ -530,20 +567,26 @@ errorhandler:
 
         ListBox1.Items.Clear()
 
-        On Error Resume Next
-        FileOpen(1, myPath & "\warstwy\" & ComboBox3.Text & ".txt", OpenMode.Input)
+        'brak pliku (np. zbiór map zapisany w conf.txt, a usunięty w nowszej wersji programu) - dawniej przy
+        '"On Error Resume Next" pętla Do Until EOF nigdy się nie kończyła i program zawieszał się przy starcie
+        Dim plikWarstw As String = myPath & "\warstwy\" & ComboBox3.Text & ".txt"
+        If File.Exists(plikWarstw) = False Then Exit Sub
 
-        Input(1, adresSerwera)
+        Try
+            FileOpen(1, plikWarstw, OpenMode.Input)
 
-        Do Until EOF(1)
-            Input(1, pozycjaListy)
-            ListBox1.Items.Add(pozycjaListy)
-            Input(1, pusta)
-        Loop
+            Input(1, adresSerwera)
 
-        FileClose(1)
-
-errorhandler:
+            Do Until EOF(1)
+                Input(1, pozycjaListy)
+                ListBox1.Items.Add(pozycjaListy)
+                If Not EOF(1) Then Input(1, pusta)
+            Loop
+        Catch
+            'uszkodzony plik warstw - lista zawiera to, co udało się odczytać
+        Finally
+            FileClose(1)
+        End Try
 
     End Sub
 
@@ -715,11 +758,11 @@ errorhandler:
 
 
     Private Sub Button7_Click(sender As Object, e As EventArgs) Handles Button7.Click
-        If Directory.Exists(myPath & "\download\") = False Then
-            Directory.CreateDirectory(myPath & "\download\")
-            Process.Start(myPath & "\download")
+        If Directory.Exists(folderDanych & "\download\") = False Then
+            Directory.CreateDirectory(folderDanych & "\download\")
+            Process.Start(folderDanych & "\download")
         Else
-            Process.Start(myPath & "\download")
+            Process.Start(folderDanych & "\download")
         End If
     End Sub
 
@@ -727,9 +770,9 @@ errorhandler:
 
         Dim OdpMBox As DialogResult = MessageBox.Show("Czy na pewno usunąć cały katalog 'download' z pobranymi mapami?", "Usuwanie zawartości katalogu download", MessageBoxButtons.YesNo, MessageBoxIcon.Question)
         If OdpMBox = Windows.Forms.DialogResult.Yes Then
-            If Directory.Exists(myPath & "\download\") = True Then
-                System.IO.Directory.Delete(myPath & "\download\", True)
-                Directory.CreateDirectory(myPath & "\download\")
+            If Directory.Exists(folderDanych & "\download\") = True Then
+                System.IO.Directory.Delete(folderDanych & "\download\", True)
+                Directory.CreateDirectory(folderDanych & "\download\")
             End If
             RichTextBox1.ForeColor = System.Drawing.Color.Green
             RichTextBox1.Text = "Usunięto całą zawartość katalogu download"
@@ -781,7 +824,7 @@ errorhandler:
         TextBox10.Text = TextBox10.Text.Replace(",", ".")
         Dim pozycja As String
         pozycja = TextBox10.SelectionStart 'pozycja kursora
-        TextBox10.SelectionStart = TextBox1.Text.Length 'ustawienie kursora na koncu
+        TextBox10.SelectionStart = TextBox10.Text.Length 'ustawienie kursora na koncu
     End Sub
 End Class
 

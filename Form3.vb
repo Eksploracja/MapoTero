@@ -1,7 +1,6 @@
 ﻿Imports System.IO
 
 Public Class Form3
-    Private Declare Sub Sleep Lib "kernel32" (ByVal dwMilliseconds As Long)
     Dim folderScalania As String = ""
 
     Dim styl_numeracji As String
@@ -12,7 +11,7 @@ Public Class Form3
 
 
 
-        folderScalania = myPath & "\download\"
+        folderScalania = folderDanych & "\download\"
         TextBox1.Text = folderScalania
         TextBox1.Enabled = False
         GroupBox1.Enabled = False
@@ -112,7 +111,7 @@ errorhandler:
 
 
     Private Sub Button2_Click(sender As Object, e As EventArgs) Handles Button2.Click
-        Me.FolderBrowserDialog1.SelectedPath = myPath & "\download\"
+        Me.FolderBrowserDialog1.SelectedPath = folderDanych & "\download\"
         If FolderBrowserDialog1.ShowDialog = Windows.Forms.DialogResult.OK Then
             folderScalania = FolderBrowserDialog1.SelectedPath & "\"
             If File.Exists(folderScalania & "\conf.txt") = False Then
@@ -127,12 +126,11 @@ errorhandler:
 
     End Sub
 
-    Private Sub Button4_Click(sender As Object, e As EventArgs) Handles Button4.Click
+    Private Async Sub Button4_Click(sender As Object, e As EventArgs) Handles Button4.Click
 
         'Procedura skleja kafle w mapę
         'Wywolanie: ..\NoToCONS.exe [Npoziom] [Npion] [Px] [TypNazwy] [Qjpg] [Path] [Prefix] [NazwaMapy] [Rozszerzenie]
 
-        'Dim sklejka As String
         Dim nazwa_sklejka As String = ""
 
 
@@ -143,16 +141,49 @@ errorhandler:
         Else
             nazwa_sklejka = "_scalone_segmenty_" & TextBox8.Text & "x" & TextBox9.Text
 
-            Dim procID As Integer
-            procID = Shell(myPath & "\skrypty\NoToCONS.exe" & " " & TextBox8.Text & " " & TextBox9.Text & " " & TextBox6.Text & " " & styl_numeracji & " " & TrackBar1.Value & " " & Chr(34) & folderScalania & Chr(34) & " " & TextBox11.Text & " " & nazwa_sklejka & " " & ComboBox1.Text, AppWinStyle.NormalFocus)
+            'rozszerzenie plików segmentów i scalonego arkusza - formaty png8/png24/png32 zapisywane są jako .png, jpeg jako .jpg, tiff jako .tif
+            Dim rozszerzenieArkusza As String = NormalizujRozszerzenie(ComboBox1.Text)
 
+            'NoToCONS (Delphi) oczekuje ścieżki zakończonej "\"; prefiks i nazwa w cudzysłowach, aby pusty prefiks lub spacje nie przesuwały parametrów
+            Dim folderArg As String = folderScalania.TrimEnd("\"c)
+            Dim argumenty As String = TextBox8.Text & " " & TextBox9.Text & " " & TextBox6.Text & " " & styl_numeracji & " " & TrackBar1.Value & " " &
+                Chr(34) & folderArg & "\" & Chr(34) & " " & Chr(34) & TextBox11.Text & Chr(34) & " " & Chr(34) & nazwa_sklejka & Chr(34) & " " & rozszerzenieArkusza
 
-            'sklejka = Shell(myPath & "\skrypty\NoToCONS.exe" & " " & TextBox8.Text & " " & TextBox9.Text & " " & TextBox6.Text & " " & styl_numeracji & " " & TrackBar1.Value & " " & Chr(34) & folderScalania & Chr(34) & " " & TextBox11.Text & " " & nazwa_sklejka & " " & ComboBox1.Text, AppWinStyle.NormalFocus)
-            'Sleep(1000 * 1)
-            'If File.Exists(folderScalania & nazwa_sklejka & "." & ComboBox1.Text) = True Then
-            If procID <> 0 Then
+            Dim plikArkusza As String = folderArg & "\" & nazwa_sklejka & "." & rozszerzenieArkusza
+            Dim kodWyjscia As Integer = -1
+            Dim poczatekScalania As Date = Now.AddSeconds(-2)   'plik starszy niż ta chwila to pozostałość po wcześniejszym scalaniu
+
+            Button4.Enabled = False
+            Me.UseWaitCursor = True
+            RichTextBox1.ForeColor = System.Drawing.Color.Black
+            RichTextBox1.Text = "Trwa scalanie segmentów. Przy dużych arkuszach może to potrwać kilka minut..."
+
+            Try
+                Dim startInfo As New ProcessStartInfo(myPath & "\skrypty\NoToCONS.exe", argumenty)
+                startInfo.UseShellExecute = False
+                Using proces As Process = Process.Start(startInfo)
+                    'czeka na zakończenie scalania bez blokowania okna programu
+                    Await System.Threading.Tasks.Task.Run(Sub() proces.WaitForExit())
+                    kodWyjscia = proces.ExitCode
+                End Using
+            Catch ex As Exception
+                RichTextBox1.ForeColor = System.Drawing.Color.Red
+                RichTextBox1.Text = "Nie udało się uruchomić modułu scalania NoToCONS.exe: " & ex.Message
+                Button4.Enabled = True
+                Me.UseWaitCursor = False
+                Exit Sub
+            End Try
+
+            Button4.Enabled = True
+            Me.UseWaitCursor = False
+
+            'o powodzeniu świadczy dopiero istnienie pliku scalonego arkusza (dawniej sukces zgłaszano zaraz po uruchomieniu NoToCONS)
+            If File.Exists(plikArkusza) AndAlso File.GetLastWriteTime(plikArkusza) >= poczatekScalania Then
                 Form1.RichTextBox1.ForeColor = System.Drawing.Color.Green
-                Form1.RichTextBox1.Text = "Segmenty zostały prawidłowo stalone i zapisane do pliku o nazwie" & " " & nazwa_sklejka
+                Form1.RichTextBox1.Text = "Segmenty zostały prawidłowo scalone i zapisane do pliku o nazwie" & " " & nazwa_sklejka & "." & rozszerzenieArkusza
+                'pliki georeferencyjne scalonego arkusza powstają obok niego
+                Module1.folderScalonych = folderArg & "\"
+                Module1.rozszerzenieScalonych = rozszerzenieArkusza
                 If Module1.georef_scalanie_qgis = True Then Module1.plikGeoreferencyjny_jpgw()
                 If Module1.georef_scalanie_kml = True Then Module1.plikGeoreferencyjny_kml()
                 If Module1.georef_scalanie_map = True Then Module1.plikGeoreferencyjny_map()
@@ -160,7 +191,7 @@ errorhandler:
                 Me.Close()
             Else
                 RichTextBox1.ForeColor = System.Drawing.Color.Red
-                RichTextBox1.Text = "Błąd. Segmenty nie zostały poprawnie scalone. Prawdopodobnie przygotowane wcześniej segmenty obszaru nie są kompletne, bądź po ich skompletowaniu nie został usunięty plik errot.txt"
+                RichTextBox1.Text = "Błąd. Segmenty nie zostały poprawnie scalone (kod zakończenia NoToCONS: " & kodWyjscia & "). Prawdopodobnie przygotowane wcześniej segmenty obszaru nie są kompletne, bądź po ich skompletowaniu nie został usunięty plik error.txt"
             End If
         End If
 
@@ -168,6 +199,20 @@ errorhandler:
 
 
     End Sub
+
+    'zamienia nazwę formatu WMS (jpeg, png24, tiff...) na rozszerzenie pliku
+    Private Function NormalizujRozszerzenie(ByVal formatPliku As String) As String
+        Select Case formatPliku.ToLower()
+            Case "jpeg", "jpg"
+                Return "jpg"
+            Case "tiff", "tif"
+                Return "tif"
+            Case "png", "png8", "png24", "png32"
+                Return "png"
+            Case Else
+                Return formatPliku
+        End Select
+    End Function
 
     Private Sub CheckBox1_CheckedChanged(sender As Object, e As EventArgs) Handles CheckBox1.CheckedChanged
         If CheckBox1.Checked = True Then

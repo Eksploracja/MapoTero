@@ -8,6 +8,10 @@ chkwldpoints
 False
 chkjpgw
 False
+chkkml
+False
+chktab
+False
 dolna
 \download\dolna\
 gorna
@@ -18,7 +22,7 @@ XYswitched
 False
 chkTB
 False
-numeracja
+numeracja_
 NrWiersza_NrKolumny
 iloscProbPobrania
 3

@@ -28,9 +28,10 @@ Imports GMap.NET.WindowsForms.ToolTips
 Imports ICSharpCode.SharpZipLib.Tar
 
 Module Module1
-    'deklaracja procedury w nagłówku (sekcja General)
-    'cała deklaracja ma być w jednej linii!
-    Public Declare Sub Sleep Lib "kernel32.dll" (ByVal dwMilliseconds As Integer)
+    'wstrzymanie wykonywania na podaną liczbę milisekund (dawniej deklaracja funkcji Sleep z kernel32.dll)
+    Public Sub Sleep(ByVal dwMilliseconds As Integer)
+        System.Threading.Thread.Sleep(dwMilliseconds)
+    End Sub
 
     Public adresSerwera As String
     Public warstwy(11) As String                 'tablica przechowująca nazwy warstw
@@ -47,6 +48,9 @@ Module Module1
     Public folderSegmentow As String
     Public pobierz As Boolean
     Public myPath As String                     'ścieżka tej aplikacji
+    Public folderDanych As String               'folder zapisu danych (download, lastsettings.txt) - katalog programu, a gdy nie można w nim zapisywać (np. Program Files) %LocalAppData%\MapoTero
+    Public folderScalonych As String = ""       'folder, w którym zapisano scalony arkusz (ustawiany przez Form3 przed tworzeniem plików georeferencyjnych scalonego arkusza)
+    Public rozszerzenieScalonych As String = "" 'rozszerzenie pliku scalonego arkusza (jpg / png / tif / gif)
     Public folderWarstwa1 As String           'folder warstwy dolnej
     Public folderWarstwa2 As String          'folder warstwy górnej
     Public folderWynikowy As String            'folder złączonych warstw
@@ -112,8 +116,8 @@ Module Module1
         Dim width As Long             'rozmiary mapy w pixelach
         Dim height As Long
         Dim proba As Integer                'aktualna próba pobrania
-        Dim iloscProbPobrania As Integer    'docelowa ilość prób
-        Dim przerwaMiedzyProbami As Integer 'odstęp między kolejnymi próbami w sekundach
+        'uwaga: ilość prób i przerwa między nimi pochodzą ze zmiennych publicznych modułu (iloscProbPobrania, przerwaMiedzyProbami)
+        'ustawianych w oknie ustawień - nie wolno ich tu ponownie deklarować lokalnie, bo przesłonią ustawienia (zawsze 0 prób)
         Dim Error1Linia As String = ""      'zmienna przechowująca pierwszy wiersz pliku error.txt
         Dim ostatniSegment As Integer      'przechowuje numer najwyższego segmentu w katalogu
 
@@ -159,7 +163,6 @@ Module Module1
 
         width = (Val(Form1.TextBox4.Text) - Val(Form1.TextBox2.Text)) / Val(Form1.TextBox10.Text)
         ileSegHoriz = Math.Ceiling(width / Val(Form1.TextBox9.Text)) 'Math.Ceiling() - zaokrąglenie w górę
-        ileSegVert = Math.Ceiling(height / Val(Form1.TextBox9.Text))
         width = ileSegHoriz * Val(Form1.TextBox9.Text)
         height = (Val(Form1.TextBox3.Text) - Val(Form1.TextBox1.Text)) / Val(Form1.TextBox10.Text)
         ileSegVert = Math.Ceiling(height / Val(Form1.TextBox9.Text))
@@ -224,17 +227,15 @@ Module Module1
             ElseIf numeracja = "NrWiersza_NrKolumny" Then
 
 
+                'ostatniSegment musi być kolejnym numerem segmentu (tak jak nrKwadratu w pętli pobierania),
+                'a nie numerem wiersza lub kolumny - inaczej porównanie "nrKwadratu > ostatniSegment" pomija niewłaściwe segmenty
                 For Module1.pion = 1 To ileSegVert
 
                     For Module1.poz = 1 To ileSegHoriz
                         If Dir(folderSegmentow & wspolnaNazwaKwadratu & pion.ToString("D2") & "_" & poz.ToString("D2") & "." & rozszerzenie) <> "" Then
-                            ostatniSegment = poz
+                            ostatniSegment = (pion - 1) * ileSegHoriz + poz
                         End If
                     Next
-                    If Dir(folderSegmentow & wspolnaNazwaKwadratu & pion.ToString("D2") & "_" & poz.ToString("D2") & "." & rozszerzenie) <> "" Then
-                        ostatniSegment = pion
-                    End If
-
 
                 Next
             End If
@@ -245,8 +246,7 @@ Module Module1
 pobieranieJeszczeRaz:
 
         'przy każdym przebiegu tworzy na nowo pusty plik error.txt
-        FileOpen(1, folderSegmentow & "error.txt", OpenMode.Output)
-        FileClose(1)
+        File.WriteAllText(folderSegmentow & "error.txt", "")
 
         proba += 1
 
@@ -376,21 +376,23 @@ pobieranieJeszczeRaz:
 
 
         'jeśli plik error.txt istnieje i nie jest pusty, to znaczy, że są błędy - nie pobrano wszystkich segmentów
-        If Dir(folderSegmentow & "error.txt") <> "" Then
-            FileOpen(1, folderSegmentow & "error.txt", OpenMode.Input)
-            Do While Not EOF(1)
-                Input(1, Error1Linia)
-            Loop
-            FileClose(1)
+        If File.Exists(folderSegmentow & "error.txt") Then
+            Error1Linia = File.ReadAllText(folderSegmentow & "error.txt").Trim()
         End If
 
-        If Len(Error1Linia) > 0 And proba < iloscProbPobrania Then
+        If Len(Error1Linia) > 0 And proba < iloscProbPobrania And pobierz = True Then
             nrKwadratu = 0
 
-            Sleep(przerwaMiedzyProbami * 1000)
+            Form1.RichTextBox1.ForeColor = System.Drawing.Color.Black
+            Form1.RichTextBox1.Text = "Nie pobrano wszystkich segmentów. Kolejna próba (" & proba + 1 & " z " & iloscProbPobrania & ") za " & przerwaMiedzyProbami & " s"
 
-            GoTo pobieranieJeszczeRaz
+            Czekaj(przerwaMiedzyProbami)
+
+            If pobierz = True Then GoTo pobieranieJeszczeRaz
         End If
+
+        'przerwano pobieranie w trakcie oczekiwania na kolejną próbę
+        If pobierz = False Then GoTo errorhandler
 
 
         Form1.ComboBox3.Enabled = True
@@ -436,7 +438,7 @@ errorhandler:
             File.Delete(folderSegmentow & "error.txt")
         End If
 
-        If File.Exists(myPath & "\download\error.txt") = False Then Form1.Button8.Enabled = True
+        If File.Exists(folderSegmentow & "error.txt") = False Then Form1.Button8.Enabled = True
 
 
         'Zapisywanie pliku TAR programu Locus Map
@@ -513,54 +515,86 @@ errorhandler:
 
         Application.DoEvents()  'dzięki temu form1 nie "zamraża" się podczas pracy programu
 
+        Dim folderDocelowy As String
         Select Case CheckTB
             Case True
-                If Dir(folderTBset & nazwaKwadratu & "." & rozszerzenie) = "" Then
-
-                    'zmienne niezbędne do image.fromstream
-                    Dim requestPic As WebRequest = WebRequest.Create(strUrl)
-                    On Error Resume Next
-                    Dim responsePic As WebResponse = requestPic.GetResponse
-
-                    On Error Resume Next
-                    Image.FromStream(responsePic.GetResponseStream).Save(folderTBset & nazwaKwadratu & "." & rozszerzenie)
-                    responsePic.Close()
-
-                End If
-                'po instrukcji pobrania jeszcze raz sprawdza, czy plik istnieje, jeśl nie powstał (nie został ściągnięty)
-                'to dodaje wpis do pliku error.txt
-                If Dir(folderTBset & nazwaKwadratu & "." & rozszerzenie) = "" Then
-                    'dodaje wpis do pliku o błędach
-                    plikError()
-                End If
-
-            Case False
-
-
-                If Dir(folderSegmentow & nazwaKwadratu & "." & rozszerzenie) = "" Then
-
-                    'zmienne niezbędne do image.fromstream
-                    Dim requestPic As WebRequest = WebRequest.Create(strUrl)
-                    On Error Resume Next
-                    Dim responsePic As WebResponse = requestPic.GetResponse
-
-                    On Error Resume Next
-
-                    Image.FromStream(responsePic.GetResponseStream).Save(folderSegmentow & nazwaKwadratu & "." & rozszerzenie)
-                    responsePic.Close()
-
-                End If
-                'po instrukcji pobrania jeszcze raz sprawdza, czy plik istnieje, jeśl nie powstał (nie został ściągnięty)
-                'to dodaje wpis do pliku error.txt
-                If Dir(folderSegmentow & nazwaKwadratu & "." & rozszerzenie) = "" Then
-                    'dodaje wpis do pliku o błędach
-                    plikError()
-                End If
-
+                folderDocelowy = folderTBset
+            Case Else
+                folderDocelowy = folderSegmentow
         End Select
 
+        Dim plikSegmentu As String = folderDocelowy & nazwaKwadratu & "." & rozszerzenie
+        Dim przyczynaBledu As String = ""
 
+        If File.Exists(plikSegmentu) = False Then
+            przyczynaBledu = PobierzSegment(strUrl, plikSegmentu)
+        End If
 
+        'po instrukcji pobrania jeszcze raz sprawdza, czy plik istnieje, jeśl nie powstał (nie został ściągnięty)
+        'to dodaje wpis do pliku error.txt
+        If File.Exists(plikSegmentu) = False Then
+            'dodaje wpis do pliku o błędach
+            PlikError(przyczynaBledu)
+        End If
+
+    End Sub
+
+    'pobiera jeden segment spod adresu url i zapisuje go w pliku docelowym
+    'zwraca pusty tekst, gdy się udało, albo opis błędu (np. komunikat serwera WMS), gdy segmentu nie pobrano
+    Public Function PobierzSegment(ByVal url As String, ByVal plikDocelowy As String) As String
+
+        Try
+            Dim requestPic As HttpWebRequest = CType(WebRequest.Create(url), HttpWebRequest)
+            requestPic.Timeout = 60000              'ms - zawieszony serwer nie zatrzyma programu na zawsze
+            requestPic.ReadWriteTimeout = 60000
+            requestPic.UserAgent = "MapoTero/" & My.Application.Info.Version.ToString
+
+            Dim dane() As Byte
+            Dim typZawartosci As String
+            Using responsePic As WebResponse = requestPic.GetResponse()
+                typZawartosci = responsePic.ContentType
+                Using strumien As Stream = responsePic.GetResponseStream()
+                    Using bufor As New MemoryStream()
+                        strumien.CopyTo(bufor)
+                        dane = bufor.ToArray()
+                    End Using
+                End Using
+            End Using
+
+            'serwer WMS w razie błędu zwraca zwykle dokument XML (ServiceException) zamiast obrazka
+            Try
+                Using ms As New MemoryStream(dane)
+                    Using obraz As Image = Image.FromStream(ms)
+                    End Using
+                End Using
+            Catch
+                Dim tekst As String = System.Text.Encoding.UTF8.GetString(dane, 0, Math.Min(dane.Length, 500))
+                tekst = tekst.Replace(Chr(13), " ").Replace(Chr(10), " ")
+                Return "serwer nie zwrócił obrazka (" & typZawartosci & "): " & tekst
+            End Try
+
+            'zapisuje dokładnie to, co przysłał serwer - bez ponownej kompresji obrazka (brak strat jakości JPEG)
+            File.WriteAllBytes(plikDocelowy, dane)
+            Return ""
+
+        Catch ex As Exception
+            'częściowo zapisany plik nie może pozostać na dysku, bo zostałby uznany za pobrany segment
+            Try
+                If File.Exists(plikDocelowy) Then File.Delete(plikDocelowy)
+            Catch
+            End Try
+            Return ex.Message.Replace(Chr(13), " ").Replace(Chr(10), " ")
+        End Try
+
+    End Function
+
+    'czeka podaną liczbę sekund nie blokując okna programu; kończy wcześniej, gdy przerwano pobieranie
+    Public Sub Czekaj(ByVal sekundy As Integer)
+        Dim koniec As Date = Now.AddSeconds(sekundy)
+        Do While Now < koniec And pobierz = True
+            Application.DoEvents()
+            System.Threading.Thread.Sleep(50)
+        Loop
     End Sub
 
     'procedura przerywa pobieranie
@@ -632,6 +666,21 @@ errorhandler:
         Form1.RichTextBox1.ForeColor = System.Drawing.Color.Green
         Form1.RichTextBox1.Text = "Zresetowano listę wprowadzonych warstw mapy wskazanych do pobrania"
     End Sub
+    'ustala folder zapisu danych programu: katalog programu, jeśli można w nim zapisywać (wersja przenośna),
+    'w przeciwnym razie (np. instalacja w Program Files) %LocalAppData%\MapoTero
+    Public Function UstalFolderDanych(ByVal folderProgramu As String) As String
+        Try
+            Dim plikTestowy As String = Path.Combine(folderProgramu, "zapis_test.tmp")
+            File.WriteAllText(plikTestowy, "")
+            File.Delete(plikTestowy)
+            Return folderProgramu
+        Catch
+            Dim folderUzytkownika As String = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "MapoTero")
+            Directory.CreateDirectory(folderUzytkownika)
+            Return folderUzytkownika
+        End Try
+    End Function
+
 #Region "lastsetting.txt - tworzenie pliku z ustawieniami "
 
     Public Sub Plik_lastsettings()
@@ -643,11 +692,11 @@ errorhandler:
 
         FileClose(1) 'w razie gyby był otwarty
 
-        FileOpen(1, myPath & "\lastsettings.txt", OpenMode.Output)
+        FileOpen(1, folderDanych & "\lastsettings.txt", OpenMode.Output)
 
         PrintLine(1, "folder segmentow")        'zapisuje ostatni folder segmentów, z niego wczytany zostanie plik conf
         If folderSegmentow = "" Then
-            PrintLine(1, myPath & "\download\")
+            PrintLine(1, folderDanych & "\download\")
         Else
             PrintLine(1, folderSegmentow)
         End If
@@ -666,21 +715,21 @@ errorhandler:
         PrintLine(1, CheckTab)          'zapisuje czy tworzyć kml
         PrintLine(1, "dolna")           'zapisuje foldery łączonych warstw
         If folderWarstwa1 = "" Then
-            PrintLine(1, myPath & "\download\dolna\")
+            PrintLine(1, folderDanych & "\download\dolna\")
         Else
             PrintLine(1, folderWarstwa1)
         End If
 
         PrintLine(1, "gorna")
         If folderWarstwa2 = "" Then
-            PrintLine(1, myPath & "\download\gorna\")
+            PrintLine(1, folderDanych & "\download\gorna\")
         Else
             PrintLine(1, folderWarstwa2)
         End If
 
         PrintLine(1, "polaczone")
         If folderWynikowy = "" Then
-            PrintLine(1, myPath & "\download\polaczone\")
+            PrintLine(1, folderDanych & "\download\polaczone\")
         Else
             PrintLine(1, folderWynikowy)
         End If
@@ -914,7 +963,7 @@ errorhandler:
             Select Case rozszerzenie
                 Case "jpg"
                     FileOpen(1, folderSegmentow & nazwaKwadratu & ".jpg.points", OpenMode.Output)
-                Case "png" & "png8" & "png24" & "png32"
+                Case "png"
                     FileOpen(1, folderSegmentow & nazwaKwadratu & ".png.points", OpenMode.Output)
                 Case "tif"
                     FileOpen(1, folderSegmentow & nazwaKwadratu & ".tif.points", OpenMode.Output)
@@ -966,20 +1015,21 @@ errorhandler:
                 Px = Val(Form3.TextBox4.Text) + (Val(Form3.TextBox9.Text) * Val(Form3.TextBox7.Text) * Val(Form3.TextBox6.Text))
                 'tworzy plik .jpgw
                 'FileOpen(4, folderSegmentow & nazwaKwadratu & ".jpgw", OpenMode.Output)
-                Select Case rozszerzenie
+                Select Case rozszerzenieScalonych
                     Case "jpg"
-                        FileOpen(4, folderSegmentow & "_scalone_segmenty_" & Form3.TextBox8.Text & "x" & Form3.TextBox9.Text & ".jpgw", OpenMode.Output)
+                        FileOpen(4, folderScalonych & "_scalone_segmenty_" & Form3.TextBox8.Text & "x" & Form3.TextBox9.Text & ".jpgw", OpenMode.Output)
                     Case "png" ' & "png8" & "png24" & "png32"
-                        FileOpen(4, folderSegmentow & "_scalone_segmenty_" & Form3.TextBox8.Text & "x" & Form3.TextBox9.Text & ".pngw", OpenMode.Output)
+                        FileOpen(4, folderScalonych & "_scalone_segmenty_" & Form3.TextBox8.Text & "x" & Form3.TextBox9.Text & ".pngw", OpenMode.Output)
                     Case "tif"
-                        FileOpen(4, folderSegmentow & "_scalone_segmenty_" & Form3.TextBox8.Text & "x" & Form3.TextBox9.Text & ".tifw", OpenMode.Output)
+                        FileOpen(4, folderScalonych & "_scalone_segmenty_" & Form3.TextBox8.Text & "x" & Form3.TextBox9.Text & ".tifw", OpenMode.Output)
                     Case "gif"
-                        FileOpen(4, folderSegmentow & "_scalone_segmenty_" & Form3.TextBox8.Text & "x" & Form3.TextBox9.Text & ".gifw", OpenMode.Output)
+                        FileOpen(4, folderScalonych & "_scalone_segmenty_" & Form3.TextBox8.Text & "x" & Form3.TextBox9.Text & ".gifw", OpenMode.Output)
                 End Select
-                Print(4, Form1.TextBox10.Text & Chr(13) & Chr(10) &
+                'rozmiar piksela z parametrów scalanych segmentów (Form3), a nie z bieżącej sesji w oknie głównym
+                Print(4, Form3.TextBox7.Text & Chr(13) & Chr(10) &
                 "0" & Chr(13) & Chr(10) &
                 "0" & Chr(13) & Chr(10) &
-                "-" & Form1.TextBox10.Text & Chr(13) & Chr(10) &
+                "-" & Form3.TextBox7.Text & Chr(13) & Chr(10) &
                Ly & Chr(13) & Chr(10) &
                 Px)
                 FileClose(4)
@@ -1024,17 +1074,17 @@ errorhandler:
                 Px = Val(Form3.TextBox4.Text) + (Val(Form3.TextBox9.Text) * Val(Form3.TextBox7.Text) * Val(Form3.TextBox6.Text))
                 Py = Val(Form3.TextBox5.Text) + (Val(Form3.TextBox8.Text) * Val(Form3.TextBox7.Text) * Val(Form3.TextBox6.Text))
 
-                FileOpen(1, folderSegmentow & "_scalone_segmenty_" & Form3.TextBox8.Text & "x" & Form3.TextBox9.Text & ".tab", OpenMode.Output)
+                FileOpen(1, folderScalonych & "_scalone_segmenty_" & Form3.TextBox8.Text & "x" & Form3.TextBox9.Text & ".tab", OpenMode.Output)
                 Print(1, "!table" & Chr(13) & Chr(10) &
                    "!version 300" & Chr(13) & Chr(10) &
                    "!charset WindowsLatin2" & Chr(13) & Chr(10) &
                    "Definition Table" & Chr(13) & Chr(10) &
-                    "  File " & Chr(34) & nazwaKwadratu & "." & format & Chr(34) & Chr(13) & Chr(10) &
+                    "  File " & Chr(34) & "_scalone_segmenty_" & Form3.TextBox8.Text & "x" & Form3.TextBox9.Text & "." & rozszerzenieScalonych & Chr(34) & Chr(13) & Chr(10) &
                     "  Type " & Chr(34) & "RASTER" & Chr(34) & Chr(13) & Chr(10) &
                   "  (" & Ly & "," & Px & ")" & " (0,0) Label " & Chr(34) & "Punkt 1" & Chr(34) & "," & Chr(13) & Chr(10) &
                   "  (" & Py & "," & Px & ")" & " (" & Val(Form3.TextBox6.Text) * Val(Form3.TextBox8.Text) & ",0) " & "Label " & Chr(34) & "Punkt 2" & Chr(34) & "," & Chr(13) & Chr(10) &
-                  "  (" & Py & "," & Lx & ")" & " (" & Val(Form3.TextBox6.Text) * Val(Form3.TextBox8.Text) & "," & Val(Form3.TextBox7.Text) * Val(Form3.TextBox9.Text) & ") " & "Label " & Chr(34) & "Punkt 3" & Chr(34) & "," & Chr(13) & Chr(10) &
-                  "  (" & Ly & "," & Lx & ")" & " (0," & Val(Form3.TextBox7.Text) * Val(Form3.TextBox9.Text) & ") " & "Label " & Chr(34) & "Punkt 4" & Chr(34) & Chr(13) & Chr(10) &
+                  "  (" & Py & "," & Lx & ")" & " (" & Val(Form3.TextBox6.Text) * Val(Form3.TextBox8.Text) & "," & Val(Form3.TextBox6.Text) * Val(Form3.TextBox9.Text) & ") " & "Label " & Chr(34) & "Punkt 3" & Chr(34) & "," & Chr(13) & Chr(10) &
+                  "  (" & Ly & "," & Lx & ")" & " (0," & Val(Form3.TextBox6.Text) * Val(Form3.TextBox9.Text) & ") " & "Label " & Chr(34) & "Punkt 4" & Chr(34) & Chr(13) & Chr(10) &
                   "  CoordSys Earth Projection 8, 33, 7, 19, 0, 0.9993, 500000, -5300000" & Chr(13) & Chr(10) &
                   "")
 
@@ -1221,10 +1271,10 @@ errorhandler:
 
 
                 'tworzy plik .map
-                FileOpen(1, folderSegmentow & "_scalone_segmenty_" & Form3.TextBox8.Text & "x" & Form3.TextBox9.Text & ".map", OpenMode.Output)
+                FileOpen(1, folderScalonych & "_scalone_segmenty_" & Form3.TextBox8.Text & "x" & Form3.TextBox9.Text & ".map", OpenMode.Output)
                 Print(1, "OziExplorer Map Data File Version 2.2" & Chr(13) & Chr(10) &
-                     "_scalone_segmenty_" & Form3.TextBox8.Text & "x" & Form3.TextBox9.Text & "." & rozszerzenie & Chr(13) & Chr(10) &
-                     folderSegmentow & "_scalone_segmenty_" & Form3.TextBox8.Text & "x" & Form3.TextBox9.Text & "." & rozszerzenie & Chr(13) & Chr(10) &
+                     "_scalone_segmenty_" & Form3.TextBox8.Text & "x" & Form3.TextBox9.Text & "." & rozszerzenieScalonych & Chr(13) & Chr(10) &
+                     folderScalonych & "_scalone_segmenty_" & Form3.TextBox8.Text & "x" & Form3.TextBox9.Text & "." & rozszerzenieScalonych & Chr(13) & Chr(10) &
                      "1 ,Map Code," & Chr(13) & Chr(10) &
                      "WGS 84,,   0.0000,   0.0000,WGS 84" & Chr(13) & Chr(10) &
                      "Reserved 1" & Chr(13) & Chr(10) &
@@ -1469,7 +1519,7 @@ errorhandler:
 
 
 
-                FileOpen(1, folderSegmentow & "_scalone_segmenty_" & Form3.TextBox8.Text & "x" & Form3.TextBox9.Text & ".kml", OpenMode.Output)
+                FileOpen(1, folderScalonych & "_scalone_segmenty_" & Form3.TextBox8.Text & "x" & Form3.TextBox9.Text & ".kml", OpenMode.Output)
 
 
                 Print(1, "<?xml version=" & Chr(34) & "1.0" & Chr(34) & " encoding=" & Chr(34) & "UTF-8" & Chr(34) & "?>" & Chr(13) & Chr(10) &
@@ -1477,7 +1527,7 @@ errorhandler:
     "<GroundOverlay>" & Chr(13) & Chr(10) &
                 "<name>" & "_scalone_segmenty_" & Form3.TextBox8.Text & "x" & Form3.TextBox9.Text & "</name>" & Chr(13) & Chr(10) &
                 "<Icon>" & Chr(13) & Chr(10) &
-                "<href>" & "_scalone_segmenty_" & Form3.TextBox8.Text & "x" & Form3.TextBox9.Text & "." & rozszerzenie & "</href>" & Chr(13) & Chr(10) &
+                "<href>" & "_scalone_segmenty_" & Form3.TextBox8.Text & "x" & Form3.TextBox9.Text & "." & rozszerzenieScalonych & "</href>" & Chr(13) & Chr(10) &
                 "<viewBoundScale>" & Form1.TextBox10.Text & "</viewBoundScale>" & Chr(13) & Chr(10) &
                 "</Icon>" & Chr(13) & Chr(10) &
                 "<LatLonBox>" & Chr(13) & Chr(10) &
@@ -1493,12 +1543,13 @@ errorhandler:
 
         End Select
     End Sub
-    Public Sub PlikError()
+    Public Sub PlikError(Optional ByVal przyczyna As String = "")
 
         'zapisuje w folderze z segmentami plik error.txt
         FileOpen(1, folderSegmentow & "error.txt", OpenMode.Append)
         PrintLine(1, nazwaKwadratu)             'nazwa obrazka
         PrintLine(1, strUrl)                    'link do obrazka
+        If przyczyna <> "" Then PrintLine(1, "przyczyna: " & przyczyna.Replace(Chr(34), "'"))   'opis błędu - pomaga ustalić, czy zmienił się adres lub warstwa serwera WMS
 
 
         FileClose(1)

@@ -340,7 +340,7 @@ Public Class Form2
 
 
         'File.Delete(folderSegmentow & "conf.txt")
-        File.Delete(myPath & "\lastsettings.txt")
+        File.Delete(folderDanych & "\lastsettings.txt")
         Form1.RichTextBox1.ForeColor = System.Drawing.Color.Green
         Form1.RichTextBox1.Text = "Usunięto plik conf.txt oraz lastsetting.txt"
 
@@ -400,75 +400,9 @@ Public Class Form2
         Form1.TextBox9.Text = "2000"
         Form1.TextBox10.Text = "2"
 
-        If x_start = 52.3 Then
-
-
-
-            FileClose(1) 'w razie gyby był otwarty
-
-            FileOpen(1, myPath & "\lastsettings.txt", OpenMode.Output)
-
-            PrintLine(1, "folder segmentow")        'zapisuje ostatni folder segmentów, z niego wczytany zostanie plik conf
-            If folderSegmentow = "_" Then
-                PrintLine(1, myPath & "\download\")
-            Else
-                PrintLine(1, folderSegmentow)
-            End If
-
-            PrintLine(1, "chkgmi")
-            PrintLine(1, CheckGmi)          'zapisuje czy tworzyć gmi
-            PrintLine(1, "chkmap")
-            PrintLine(1, CheckMap)          'zapisuje czy tworzyć map
-            PrintLine(1, "chkwldpoints")
-            PrintLine(1, CheckWldPoints)    'zapisuje czy tworzyć wld i points
-            PrintLine(1, "chkjpgw")
-            PrintLine(1, CheckJpgw)          'zapisuje czy tworzyć jpgw
-            PrintLine(1, "chkkml")
-            PrintLine(1, CheckKml)          'zapisuje czy tworzyć kml
-            PrintLine(1, "chktab")
-            PrintLine(1, CheckTab)          'zapisuje czy tworzyć kml
-            PrintLine(1, "dolna")           'zapisuje foldery łączonych warstw
-            If folderWarstwa1 = "" Then
-                PrintLine(1, myPath & "\download\dolna\")
-            Else
-                PrintLine(1, folderWarstwa1)
-            End If
-
-            PrintLine(1, "gorna")
-            If folderWarstwa2 = "" Then
-                PrintLine(1, myPath & "\download\gorna\")
-            Else
-                PrintLine(1, folderWarstwa2)
-            End If
-
-            PrintLine(1, "polaczone")
-            If folderWynikowy = "" Then
-                PrintLine(1, myPath & "\download\polaczone\")
-            Else
-                PrintLine(1, folderWynikowy)
-            End If
-
-            PrintLine(1, "XYswitched")
-            PrintLine(1, XYswitched)
-
-            PrintLine(1, "numeracja_")
-            PrintLine(1, numeracja)
-            PrintLine(1, "iloscProbPobrania")
-            PrintLine(1, iloscProbPobrania)
-            PrintLine(1, "przerwaMiedzyProbami")
-            PrintLine(1, przerwaMiedzyProbami)
-
-            PrintLine(1, "x_start")
-            PrintLine(1, "52.3")
-            PrintLine(1, "y_start")
-            PrintLine(1, "19.2")
-            PrintLine(1, "zoom_start")
-            PrintLine(1, "6")
-            FileClose(1)
-
-
-
-        End If
+        'zapis domyślnych ustawień do lastsettings.txt (ta sama procedura co przy zamykaniu programu;
+        'pozycja i skala mapy zostały ustawione powyżej na wartości domyślne 52.3 / 19.2 / 6)
+        Module1.Plik_lastsettings()
     End Sub
 
 End Class
