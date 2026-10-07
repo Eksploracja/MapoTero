@@ -27,6 +27,9 @@ Partial Class Form3
         Me.btnZmienFolder = New System.Windows.Forms.Button()
         Me.dlgFolder = New System.Windows.Forms.FolderBrowserDialog()
         Me.btnScal = New System.Windows.Forms.Button()
+        Me.lblFormatArkusza = New System.Windows.Forms.Label()
+        Me.cmbFormatArkusza = New System.Windows.Forms.ComboBox()
+        Me.prgScalanie = New System.Windows.Forms.ProgressBar()
         Me.grpParametry = New System.Windows.Forms.GroupBox()
         Me.cmbNumeracja = New System.Windows.Forms.ComboBox()
         Me.cmbFormat = New System.Windows.Forms.ComboBox()
@@ -91,6 +94,32 @@ Partial Class Form3
         Me.btnZmienFolder.TabIndex = 2
         Me.btnZmienFolder.Text = "zmień folder"
         Me.btnZmienFolder.UseVisualStyleBackColor = True
+        '
+        'lblFormatArkusza
+        '
+        Me.lblFormatArkusza.AutoSize = True
+        Me.lblFormatArkusza.Location = New System.Drawing.Point(341, 75)
+        Me.lblFormatArkusza.Name = "lblFormatArkusza"
+        Me.lblFormatArkusza.Size = New System.Drawing.Size(132, 13)
+        Me.lblFormatArkusza.TabIndex = 70
+        Me.lblFormatArkusza.Text = "Format scalonego arkusza:"
+        '
+        'cmbFormatArkusza
+        '
+        Me.cmbFormatArkusza.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
+        Me.cmbFormatArkusza.FormattingEnabled = True
+        Me.cmbFormatArkusza.Items.AddRange(New Object() {"GeoTIFF (bezstratny)", "GeoTIFF (kompresja JPEG)", "JPEG", "PNG"})
+        Me.cmbFormatArkusza.Location = New System.Drawing.Point(478, 71)
+        Me.cmbFormatArkusza.Name = "cmbFormatArkusza"
+        Me.cmbFormatArkusza.Size = New System.Drawing.Size(133, 21)
+        Me.cmbFormatArkusza.TabIndex = 71
+        '
+        'prgScalanie
+        '
+        Me.prgScalanie.Location = New System.Drawing.Point(344, 430)
+        Me.prgScalanie.Name = "prgScalanie"
+        Me.prgScalanie.Size = New System.Drawing.Size(144, 18)
+        Me.prgScalanie.TabIndex = 72
         '
         'btnScal
         '
@@ -448,7 +477,7 @@ Partial Class Form3
         Me.Label14.Name = "Label14"
         Me.Label14.Size = New System.Drawing.Size(191, 13)
         Me.Label14.TabIndex = 70
-        Me.Label14.Text = "Jakość kompresji JPG scalonego pliku:"
+        Me.Label14.Text = "Jakość kompresji JPEG scalonego pliku:"
         '
         'trkJakosc
         '
@@ -527,6 +556,9 @@ Partial Class Form3
         Me.Controls.Add(Me.chkRecznie)
         Me.Controls.Add(Me.grpParametry)
         Me.Controls.Add(Me.btnScal)
+        Me.Controls.Add(Me.lblFormatArkusza)
+        Me.Controls.Add(Me.cmbFormatArkusza)
+        Me.Controls.Add(Me.prgScalanie)
         Me.Controls.Add(Me.btnZmienFolder)
         Me.Controls.Add(Me.txtFolder)
         Me.Icon = CType(resources.GetObject("$this.Icon"), System.Drawing.Icon)
@@ -548,6 +580,9 @@ Partial Class Form3
     Friend WithEvents btnZmienFolder As System.Windows.Forms.Button
     Friend WithEvents dlgFolder As System.Windows.Forms.FolderBrowserDialog
     Friend WithEvents btnScal As System.Windows.Forms.Button
+    Friend WithEvents lblFormatArkusza As System.Windows.Forms.Label
+    Friend WithEvents cmbFormatArkusza As System.Windows.Forms.ComboBox
+    Friend WithEvents prgScalanie As System.Windows.Forms.ProgressBar
     Friend WithEvents grpParametry As System.Windows.Forms.GroupBox
     Friend WithEvents Label17 As System.Windows.Forms.Label
     Friend WithEvents Label16 As System.Windows.Forms.Label

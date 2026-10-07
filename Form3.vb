@@ -14,6 +14,7 @@
 'along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 Imports System.IO
+Imports System.Threading
 Imports MapoTero.Core
 
 ''' <summary>Okno scalania pobranych segmentów w jeden arkusz.</summary>
@@ -32,6 +33,8 @@ Public Class Form3
         chkKml.Checked = Ustawienia.ScalanieKml
         chkMap.Checked = Ustawienia.ScalanieMap
         chkTab.Checked = Ustawienia.ScalanieTab
+        cmbFormatArkusza.SelectedIndex = CInt(Ustawienia.FormatArkusza)
+        trkJakosc.Enabled = Ustawienia.FormatArkusza = FormatArkusza.Jpeg OrElse Ustawienia.FormatArkusza = FormatArkusza.GeoTiffJpeg
         WczytajParametry()
     End Sub
 
@@ -103,66 +106,63 @@ Public Class Form3
         End If
     End Sub
 
+    ''' <summary>Format arkusza wybrany na liście (kolejność pozycji jak w wyliczeniu FormatArkusza).</summary>
+    Private ReadOnly Property WybranyFormat As FormatArkusza
+        Get
+            Return CType(Math.Max(0, cmbFormatArkusza.SelectedIndex), FormatArkusza)
+        End Get
+    End Property
+
+    Private Sub cmbFormatArkusza_SelectedIndexChanged(sender As Object, e As EventArgs) Handles cmbFormatArkusza.SelectedIndexChanged
+        'jakość kompresji dotyczy formatów z kompresją JPEG
+        trkJakosc.Enabled = WybranyFormat = FormatArkusza.Jpeg OrElse WybranyFormat = FormatArkusza.GeoTiffJpeg
+        Ustawienia.FormatArkusza = WybranyFormat
+    End Sub
+
     Private Async Sub btnScal_Click(sender As Object, e As EventArgs) Handles btnScal.Click
-
-        'Procedura skleja kafle w mapę
-        'Wywolanie: ..\NoToCONS.exe [Npoziom] [Npion] [Px] [TypNazwy] [Qjpg] [Path] [Prefix] [NazwaMapy] [Rozszerzenie]
-
         If File.Exists(_folderScalania & "error.txt") Then
             Komunikat("W katalogu segmentów wykryto obecność pliku error.txt co świadczy o niekompletnym zestawie segmentów. Uzupełnij je i usuń plik error.txt", Color.Red)
             Exit Sub
         End If
 
         Dim s = BiezacaSiatka()
-        Dim nazwaArkusza As String = "_scalone_segmenty_" & txtLiczbaKolumn.Text & "x" & txtLiczbaWierszy.Text
-        Dim rozszerzenieArkusza As String = Wms.RozszerzeniePliku(cmbFormat.Text)
-        Dim kodNumeracji As String
-        Select Case Siatka.StylZTekstu(cmbNumeracja.Text)
-            Case StylNumeracji.KolejnyDwucyfrowy : kodNumeracji = "0"
-            Case StylNumeracji.Kolejny : kodNumeracji = "1"
-            Case Else : kodNumeracji = "2"
-        End Select
+        If Not s.Poprawna Then
+            Komunikat("Niepoprawne parametry segmentów - uzupełnij je ręcznie (opcja 'ręczne wprowadzanie parametrów').", Color.Red)
+            Exit Sub
+        End If
 
-        'NoToCONS (Delphi) oczekuje ścieżki zakończonej "\"; prefiks i nazwa w cudzysłowach, aby pusty prefiks lub spacje nie przesuwały parametrów
-        Dim folderArg As String = _folderScalania.TrimEnd("\"c)
-        Dim argumenty As String = txtLiczbaKolumn.Text & " " & txtLiczbaWierszy.Text & " " & txtBokSegmentu.Text & " " & kodNumeracji & " " & trkJakosc.Value & " " &
-            """" & folderArg & "\"" """ & txtPrefiks.Text & """ """ & nazwaArkusza & """ " & rozszerzenieArkusza
-
-        Dim plikArkusza As String = folderArg & "\" & nazwaArkusza & "." & rozszerzenieArkusza
-        Dim kodWyjscia As Integer = -1
-        Dim poczatekScalania As Date = Now.AddSeconds(-2)   'plik starszy niż ta chwila to pozostałość po wcześniejszym scalaniu
+        Dim zadanie As New ZadanieScalania With {
+            .Folder = _folderScalania, .Prefiks = If(txtPrefiks.Text = "\", "", txtPrefiks.Text),
+            .Numeracja = Siatka.StylZTekstu(cmbNumeracja.Text), .RozszerzenieSegmentow = Wms.RozszerzeniePliku(cmbFormat.Text),
+            .Siatka = s, .Uklad = _uklad, .Format = WybranyFormat, .JakoscJpeg = trkJakosc.Value,
+            .NazwaArkusza = "_scalone_segmenty_" & s.LiczbaKolumn & "x" & s.LiczbaWierszy,
+            .Georeferencja = New OpcjeGeoreferencji With {.WorldFile = chkWorldFile.Checked, .Kml = chkKml.Checked, .Map = chkMap.Checked, .Tab = chkTab.Checked}}
 
         btnScal.Enabled = False
         Me.UseWaitCursor = True
-        Komunikat("Trwa scalanie segmentów. Przy dużych arkuszach może to potrwać kilka minut...", Color.Black)
+        prgScalanie.Value = 0
+        Komunikat("Trwa scalanie segmentów (" & s.SzerokoscPx & " x " & s.WysokoscPx & " pikseli)...", Color.Black)
 
+        Dim postep As New Progress(Of Integer)(Sub(p) prgScalanie.Value = Math.Max(0, Math.Min(100, p)))
+        Dim wynik As WynikScalania
         Try
-            Dim startInfo As New ProcessStartInfo(FolderProgramu & "\skrypty\NoToCONS.exe", argumenty) With {.UseShellExecute = False}
-            Using proces As Process = Process.Start(startInfo)
-                'czeka na zakończenie scalania bez blokowania okna programu
-                Await Task.Run(Sub() proces.WaitForExit())
-                kodWyjscia = proces.ExitCode
-            End Using
+            wynik = Await Task.Run(Function() ScalanieSegmentow.Scal(zadanie, postep, CancellationToken.None))
         Catch ex As Exception
-            Komunikat("Nie udało się uruchomić modułu scalania NoToCONS.exe: " & ex.Message, Color.Red)
+            Komunikat("Błąd. Segmenty nie zostały scalone: " & ex.Message, Color.Red)
             Exit Sub
         Finally
             btnScal.Enabled = True
             Me.UseWaitCursor = False
         End Try
 
-        'o powodzeniu świadczy dopiero istnienie nowego pliku scalonego arkusza
-        If File.Exists(plikArkusza) AndAlso File.GetLastWriteTime(plikArkusza) >= poczatekScalania Then
-            Form1.Komunikat("Segmenty zostały prawidłowo scalone i zapisane do pliku o nazwie " & nazwaArkusza & "." & rozszerzenieArkusza, Color.Green)
-            'pliki georeferencyjne scalonego arkusza powstają obok niego
-            Dim opcje As New OpcjeGeoreferencji With {.WorldFile = chkWorldFile.Checked, .Kml = chkKml.Checked, .Map = chkMap.Checked, .Tab = chkTab.Checked}
-            If opcje.Dowolna AndAlso s.Poprawna Then
-                Dim obraz = ZapisGeoreferencji.Obraz(_uklad, s.ZasiegSiatki, s.SzerokoscPx, s.WysokoscPx, _folderScalania, nazwaArkusza & "." & rozszerzenieArkusza)
-                ZapisGeoreferencji.ZapiszPliki(obraz, _folderScalania, nazwaArkusza, rozszerzenieArkusza, opcje)
-            End If
-            Me.Close()
+        Dim nazwa As String = Path.GetFileName(wynik.Plik)
+        If wynik.Brakujace.Count > 0 Then
+            Komunikat("Arkusz " & nazwa & " zapisano, ale brakowało " & wynik.Brakujace.Count & " segmentów (białe pola), m.in.: " &
+                      String.Join(", ", wynik.Brakujace.Take(5)), Color.Red)
+            Form1.Komunikat("Scalono segmenty do pliku " & nazwa & " - brakowało " & wynik.Brakujace.Count & " segmentów", Color.Red)
         Else
-            Komunikat("Błąd. Segmenty nie zostały poprawnie scalone (kod zakończenia NoToCONS: " & kodWyjscia & "). Prawdopodobnie przygotowane wcześniej segmenty obszaru nie są kompletne, bądź po ich skompletowaniu nie został usunięty plik error.txt", Color.Red)
+            Form1.Komunikat("Segmenty zostały prawidłowo scalone i zapisane do pliku " & nazwa, Color.Green)
+            Me.Close()
         End If
     End Sub
 

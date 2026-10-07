@@ -19,6 +19,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <!-- zapis GeoTIFF i strumieniowy zapis JPEG dużych arkuszy (licencje BSD) -->
+    <PackageReference Include="BitMiracle.LibTiff.NET" Version="2.4.660" />
+    <PackageReference Include="BitMiracle.LibJpeg.NET" Version="1.5.324" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Import Include="Microsoft.VisualBasic" />
     <Import Include="System" />
   </ItemGroup>

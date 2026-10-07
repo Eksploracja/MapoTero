@@ -88,6 +88,8 @@ Public Class UstawieniaProgramu
     Public Property ScalanieKml As Boolean
     Public Property ScalanieMap As Boolean
     Public Property ScalanieTab As Boolean
+    ''' <summary>Format scalonego arkusza.</summary>
+    Public Property FormatArkusza As FormatArkusza = FormatArkusza.GeoTiff
 #End Region
 
     ''' <summary>Rozszerzenie plików segmentów dla bieżącego formatu.</summary>
