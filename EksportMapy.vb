@@ -291,7 +291,7 @@ Public NotInheritable Class EksportMapy
     End Function
 
     ''' <summary>Koduje bitmapę: JPEG (na białym tle) albo PNG (z przezroczystością).</summary>
-    Private Shared Function Koduj(bmp As Bitmap, png As Boolean, jakosc As Integer) As Byte()
+    Friend Shared Function Koduj(bmp As Bitmap, png As Boolean, jakosc As Integer) As Byte()
         Using ms As New MemoryStream()
             If png Then
                 bmp.Save(ms, ImageFormat.Png)

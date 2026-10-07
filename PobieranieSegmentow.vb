@@ -68,7 +68,7 @@ Public Class WynikPobierania
 End Class
 
 ''' <summary>
-''' Pobieranie segmentów mapy. Dawniej odbywało się w wątku okna (Application.DoEvents, Sleep z kernel32),
+''' Pobieranie segmentów mapy z serwera WMS (lub usługi WMTS - zob. ZrodloWmts). Dawniej odbywało się w wątku okna (Application.DoEvents, Sleep z kernel32),
 ''' po jednym segmencie i bez limitu czasu. Teraz: HttpClient, kilka segmentów jednocześnie, przerywanie
 ''' w dowolnej chwili, okno programu pozostaje w pełni responsywne.
 ''' </summary>
@@ -77,7 +77,7 @@ Public NotInheritable Class PobieranieSegmentow
     Private Sub New()
     End Sub
 
-    Private Shared ReadOnly Klient As HttpClient = UtworzKlienta()
+    Friend Shared ReadOnly Klient As HttpClient = UtworzKlienta()
 
     Private Shared Function UtworzKlienta() As HttpClient
         Dim obsluga As New HttpClientHandler() With {.AutomaticDecompression = DecompressionMethods.GZip Or DecompressionMethods.Deflate}
@@ -103,6 +103,18 @@ Public NotInheritable Class PobieranieSegmentow
         Dim ext As String = z.Rozszerzenie
         Dim wynik As New WynikPobierania()
 
+        'usługa WMTS (adres w pliku warstw wskazuje WMTS) - segmenty składane z kafli usługi
+        Dim kafleWmts As ZrodloWmts = Nothing
+        If Wmts.CzyAdresWmts(z.AdresSerwera) Then
+            Try
+                kafleWmts = Await ZrodloWmts.PrzygotujAsync(z, token)
+            Catch ex As OperationCanceledException
+                wynik.Przerwano = True
+                Return wynik
+            End Try
+            postep?.Report(New PostepPobierania With {.Komunikat = "Trwa pobieranie segmentów (" & s.LiczbaSegmentow & ") z usługi " & kafleWmts.Opis})
+        End If
+
         'lista segmentów w kolejności wierszami od góry
         Dim segmenty As New List(Of OpisSegmentu)
         For w = 1 To s.LiczbaWierszy
@@ -110,7 +122,11 @@ Public NotInheritable Class PobieranieSegmentow
                 Dim sg As New OpisSegmentu With {.Indeks = segmenty.Count, .Wiersz = w, .Kolumna = k, .Numer = s.NumerKolejny(w, k),
                                                  .Zasieg = s.Segment(w, k)}
                 sg.Nazwa = If(z.TrekBuddy, s.NazwaSegmentuTrekBuddy(z.Prefiks, w, k), s.NazwaSegmentu(z.Prefiks, z.Numeracja, w, k))
-                sg.Adres = Wms.ZapytanieGetMap(z.AdresSerwera, z.Warstwy, z.Uklad, sg.Zasieg, z.Format, s.BokSegmentuPx, s.BokSegmentuPx, z.ZamienOsie)
+                If kafleWmts Is Nothing Then
+                    sg.Adres = Wms.ZapytanieGetMap(z.AdresSerwera, z.Warstwy, z.Uklad, sg.Zasieg, z.Format, s.BokSegmentuPx, s.BokSegmentuPx, z.ZamienOsie)
+                Else
+                    sg.Adres = kafleWmts.AdresSegmentu(sg.Zasieg)
+                End If
                 segmenty.Add(sg)
             Next
         Next
@@ -158,7 +174,13 @@ Public NotInheritable Class PobieranieSegmentow
                                 Try
                                     Dim plik As String = folderDocelowy & segment.Nazwa & "." & ext
                                     Dim blad As String = ""
-                                    If Not File.Exists(plik) Then blad = Await PobierzSegmentAsync(segment.Adres, plik, token).ConfigureAwait(False)
+                                    If Not File.Exists(plik) Then
+                                        If kafleWmts Is Nothing Then
+                                            blad = Await PobierzSegmentAsync(segment.Adres, plik, token).ConfigureAwait(False)
+                                        Else
+                                            blad = Await kafleWmts.PobierzSegmentAsync(segment.Zasieg, s.BokSegmentuPx, z.Format, plik, token).ConfigureAwait(False)
+                                        End If
+                                    End If
                                     If File.Exists(plik) Then
                                         If Not z.TrekBuddy AndAlso z.Georeferencja.Dowolna Then
                                             ZapisGeoreferencji.ZapiszPliki(ZapisGeoreferencji.Obraz(z.Uklad, segment.Zasieg, s.BokSegmentuPx, s.BokSegmentuPx,
@@ -196,6 +218,8 @@ Public NotInheritable Class PobieranieSegmentow
         wynik.Nieudane = brakujace.Count
         If brakujace.Count = 0 Then
             If File.Exists(plikBledow) Then File.Delete(plikBledow)
+            'komplet segmentów - pobrane kafle WMTS nie są już potrzebne
+            If kafleWmts IsNot Nothing AndAlso Not wynik.Przerwano Then kafleWmts.UsunKafle()
         Else
             Dim tekst As New Text.StringBuilder()
             For Each sg In brakujace
@@ -257,7 +281,7 @@ Public NotInheritable Class PobieranieSegmentow
     End Function
 
     ''' <summary>Czy dane są poprawnym obrazem (dekodowanie przez GDI+).</summary>
-    Private Shared Function CzyObraz(dane() As Byte) As Boolean
+    Friend Shared Function CzyObraz(dane() As Byte) As Boolean
         If dane Is Nothing OrElse dane.Length = 0 Then Return False
         Try
             Using ms As New MemoryStream(dane)

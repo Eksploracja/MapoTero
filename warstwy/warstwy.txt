@@ -15,6 +15,7 @@ numer_mod_terenu_LPIS_cieniowanie
 numer_mod_terenu_LPIS_hipsometria
 obszary_chronione_GDOS
 ortofotomapa
+ortofotomapa_WMTS
 rejestr_granic_jednostki_teryt
 rejestr_granic_punkty_adresowe
 rejestr_nazw_geograficznych

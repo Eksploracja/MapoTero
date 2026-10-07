@@ -245,6 +245,7 @@
     <Compile Include="UstawieniaProgramu.vb" />
     <Compile Include="ZapisGeoreferencji.vb" />
     <Compile Include="PobieranieSegmentow.vb" />
+    <Compile Include="PobieranieWmts.vb" />
     <Compile Include="MapaTrekBuddy.vb" />
     <Compile Include="ScalanieSegmentow.vb" />
     <Compile Include="EksportMapy.vb" />
@@ -378,6 +379,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="warstwy\ortofotomapa.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="warstwy\ortofotomapa_WMTS.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="warstwy\osnowy_geodezyjne.txt">
