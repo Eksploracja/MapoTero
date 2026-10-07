@@ -463,3 +463,33 @@ Public Class UkladyTesty
     End Sub
 
 End Class
+
+Public Class PrzeliczanieZasieguTesty
+
+    <Fact>
+    Public Sub ZasiegObejmujeWszystkieNarozniki()
+        Dim z As New Zasieg(500000, 600000, 501000, 601500)
+        Dim w = UkladWspolrzednych.PL1992.PrzeliczZasieg(UkladWspolrzednych.PL2000Strefa7, z)
+        'każdy narożnik oryginału leży wewnątrz przeliczonego zasięgu
+        For Each p In New PunktXY() {z.LewyDolny, z.PrawyDolny, z.PrawyGorny, z.LewyGorny}
+            Dim q = UkladWspolrzednych.PL1992.PrzeliczDo(UkladWspolrzednych.PL2000Strefa7, p)
+            Assert.InRange(q.X, w.XDol, w.XGora)
+            Assert.InRange(q.Y, w.YLewy, w.YPrawy)
+        Next
+        Assert.Equal(Math.Floor(w.XDol), w.XDol)
+        Dim g = UkladWspolrzednych.PL1992.PrzeliczZasieg(UkladWspolrzednych.Wgs84, z)
+        Assert.InRange(g.XDol, 52.0, 53.0)
+        Assert.InRange(g.YLewy, 20.0, 22.0)
+    End Sub
+
+    <Fact>
+    Public Sub RozmiarPikselaMetryStopnie()
+        Dim miejsce As New PunktGeo(52, 19)
+        Dim st = UkladWspolrzednych.PL1992.PrzeliczRozmiarPiksela(UkladWspolrzednych.Wgs84, 1.0, miejsce)
+        Assert.InRange(st, 0.0000089, 0.0000091)  '1 m to ok. 9e-6 stopnia szerokości
+        Dim m = UkladWspolrzednych.Wgs84.PrzeliczRozmiarPiksela(UkladWspolrzednych.PL1992, st, miejsce)
+        Assert.InRange(m, 0.999, 1.001)
+        Assert.Equal(2.0, UkladWspolrzednych.PL1992.PrzeliczRozmiarPiksela(UkladWspolrzednych.Utm34N, 2.0, miejsce))
+    End Sub
+
+End Class

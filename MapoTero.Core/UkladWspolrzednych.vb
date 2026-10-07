@@ -246,6 +246,37 @@ Public NotInheritable Class UkladWspolrzednych
         Return cel.ZWgs84(DoWgs84(punkt))
     End Function
 
+    ''' <summary>
+    ''' Zasięg w innym układzie: prostokąt obejmujący wszystkie narożniki (prostokąt z jednego układu jest w innym
+    ''' lekko obróconym czworokątem). W układach metrycznych zaokrąglany na zewnątrz do pełnych metrów.
+    ''' </summary>
+    Public Function PrzeliczZasieg(cel As UkladWspolrzednych, z As Zasieg) As Zasieg
+        If cel Is Me Then Return z
+        Dim xMin As Double = Double.MaxValue, xMax As Double = Double.MinValue
+        Dim yMin As Double = Double.MaxValue, yMax As Double = Double.MinValue
+        For Each p In New PunktXY() {z.LewyDolny, z.PrawyDolny, z.PrawyGorny, z.LewyGorny}
+            Dim q = PrzeliczDo(cel, p)
+            xMin = Math.Min(xMin, q.X) : xMax = Math.Max(xMax, q.X)
+            yMin = Math.Min(yMin, q.Y) : yMax = Math.Max(yMax, q.Y)
+        Next
+        If cel.Geograficzny Then
+            Return New Zasieg(Math.Round(xMin, 7), Math.Round(yMin, 7), Math.Round(xMax, 7), Math.Round(yMax, 7))
+        End If
+        Return New Zasieg(Math.Floor(xMin), Math.Floor(yMin), Math.Ceiling(xMax), Math.Ceiling(yMax))
+    End Function
+
+    ''' <summary>
+    ''' Rozmiar piksela w innym układzie (metry - stopnie) w pobliżu podanego punktu WGS84. Dla WGS84 przyjmowana jest
+    ''' rozdzielczość odpowiadająca kierunkowi północ-południe. Między układami metrycznymi - bez zmian.
+    ''' </summary>
+    Public Function PrzeliczRozmiarPiksela(cel As UkladWspolrzednych, piksel As Double, miejsce As PunktGeo) As Double
+        If cel.Geograficzny = Geograficzny Then Return piksel
+        Dim mSz As Double, mDl As Double
+        Georeferencja.MetrowNaStopien(miejsce.Szerokosc, mSz, mDl)
+        If cel.Geograficzny Then Return Double.Parse((piksel / mSz).ToString("G6", CultureInfo.InvariantCulture), CultureInfo.InvariantCulture)
+        Return Math.Round(piksel * mSz, 3)
+    End Function
+
 #End Region
 
 #Region "Opisy układu dla plików georeferencyjnych"

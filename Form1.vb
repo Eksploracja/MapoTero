@@ -38,6 +38,9 @@ Public Class Form1
     ''' <summary>Przerywanie trwającego pobierania.</summary>
     Private _przerwanie As CancellationTokenSource
 
+    ''' <summary>Programowe ustawianie listy układów (bez przeliczania zasięgu).</summary>
+    Private _ustawianieUkladu As Boolean
+
 #Region "Dostęp dla innych okien"
 
     ''' <summary>Folder segmentów bieżącej sesji (wyświetlany na pasku stanu).</summary>
@@ -169,6 +172,12 @@ Public Class Form1
 
         UstawEdycjeXY(False)
         UstawWidokZaznaczeniaWgs(False)
+
+        _ustawianieUkladu = True
+        For Each u In UkladWspolrzednych.Wszystkie
+            cmbUklad.Items.Add(u)
+        Next
+        _ustawianieUkladu = False
 
         'wczytywanie ustawień: najpierw conf.txt z folderu domyślnego, potem lastsettings.txt
         If File.Exists(FolderDownload & "conf.txt") = False Then
@@ -404,7 +413,7 @@ Public Class Form1
 
         'rozmiar piksela przypisany do warstwy w pliku zbioru map
         Dim w = _plikWarstw.Znajdz(nazwa)
-        If w IsNot Nothing AndAlso w.RozmiarPiksela <> "" Then txtRozmiarPiksela.Text = w.RozmiarPiksela
+        If w IsNot Nothing AndAlso w.RozmiarPiksela <> "" Then txtRozmiarPiksela.Text = RozmiarPikselaWarstwy(w.RozmiarPiksela)
 
         Komunikat("Wskazano warstwę: " & nazwa, Color.Green)
 
@@ -452,21 +461,27 @@ Public Class Form1
     ''' </summary>
     Private Sub PrzeliczSiatke()
         Dim s = BiezacaSiatka()
-        Dim km As Double = If(Ustawienia.Uklad.Geograficzny, Double.NaN, 1000)
+        Dim km As Double = 1000
+        If Ustawienia.Uklad.Geograficzny Then
+            'w WGS84 rozmiary w km są przybliżone - liczone dla kierunku północ-południe w środku obszaru
+            Dim mSz As Double, mDl As Double
+            Georeferencja.MetrowNaStopien((s.Obszar.XDol + s.Obszar.XGora) / 2, mSz, mDl)
+            km = If(mSz > 0, 1000 / mSz, Double.NaN)
+        End If
         If s.Poprawna Then
             txtLiczbaKolumn.Text = s.LiczbaKolumn.ToString()
             txtLiczbaWierszy.Text = s.LiczbaWierszy.ToString()
             txtSzerokoscPx.Text = s.SzerokoscPx.ToString()
             txtWysokoscPx.Text = s.WysokoscPx.ToString()
-            txtSzerokoscKm.Text = If(Double.IsNaN(km), "", Liczba(s.LiczbaKolumn * s.BokSegmentu / km))
-            txtWysokoscKm.Text = If(Double.IsNaN(km), "", Liczba(s.LiczbaWierszy * s.BokSegmentu / km))
+            txtSzerokoscKm.Text = If(Double.IsNaN(km), "", Liczba(Math.Round(s.LiczbaKolumn * s.BokSegmentu / km, 3)))
+            txtWysokoscKm.Text = If(Double.IsNaN(km), "", Liczba(Math.Round(s.LiczbaWierszy * s.BokSegmentu / km, 3)))
         Else
             For Each t In New TextBox() {txtLiczbaKolumn, txtLiczbaWierszy, txtSzerokoscPx, txtWysokoscPx, txtSzerokoscKm, txtWysokoscKm}
                 t.Text = ""
             Next
         End If
         Dim bok As Double = Wartosc(txtRozmiarPiksela.Text) * WartoscCalkowita(txtBokSegmentu.Text)
-        txtZasiegSegmentuKm.Text = If(Double.IsNaN(km) OrElse bok <= 0, "", Liczba(bok / km))
+        txtZasiegSegmentuKm.Text = If(Double.IsNaN(km) OrElse bok <= 0, "", Liczba(Math.Round(bok / km, 3)))
     End Sub
 
     Private Sub PolaZasieguZmienione(sender As Object, e As EventArgs) Handles txtXDol.TextChanged, txtYLewy.TextChanged, txtXGora.TextChanged, txtYPrawy.TextChanged
@@ -499,8 +514,47 @@ Public Class Form1
             Case Else : lblKursorUkladOpis.Text = "UTM " & (u.Epsg - 32600).ToString() & "N"
         End Select
         ToolTip1.SetToolTip(lblKursorUkladOpis, u.Nazwa)
+        lblRozmiarPikselaOpis.Text = If(u.Geograficzny, "Rozmiar piksela [°/pix]", "Rozmiar piksela [m/pix]")
+
+        _ustawianieUkladu = True
+        cmbUklad.SelectedItem = u
+        _ustawianieUkladu = False
         PrzeliczSiatke()
     End Sub
+
+    ''' <summary>
+    ''' Zmiana układu współrzędnych pobierania: wpisany zasięg i rozmiar piksela są przeliczane do nowego układu.
+    ''' </summary>
+    Private Sub cmbUklad_SelectedIndexChanged(sender As Object, e As EventArgs) Handles cmbUklad.SelectedIndexChanged
+        If _ustawianieUkladu Then Exit Sub
+        Dim nowy = TryCast(cmbUklad.SelectedItem, UkladWspolrzednych)
+        Dim stary = Ustawienia.Uklad
+        If nowy Is Nothing OrElse nowy Is stary Then Exit Sub
+
+        Dim obszar As New Zasieg(Wartosc(txtXDol.Text), Wartosc(txtYLewy.Text), Wartosc(txtXGora.Text), Wartosc(txtYPrawy.Text))
+        Ustawienia.Uklad = nowy
+        If obszar.Szerokosc > 0 AndAlso obszar.Wysokosc > 0 Then
+            Dim srodek = stary.DoWgs84(obszar.Srodek)
+            Dim piksel As Double = Wartosc(txtRozmiarPiksela.Text)
+            Dim z = stary.PrzeliczZasieg(nowy, obszar)
+            txtXDol.Text = Liczba(z.XDol)
+            txtYLewy.Text = Liczba(z.YLewy)
+            txtXGora.Text = Liczba(z.XGora)
+            txtYPrawy.Text = Liczba(z.YPrawy)
+            If piksel > 0 Then txtRozmiarPiksela.Text = Liczba(stary.PrzeliczRozmiarPiksela(nowy, piksel, srodek))
+        End If
+        OdswiezOpisUkladu()
+        Komunikat("Wybrano układ " & nowy.Nazwa & ". Zasięg pobierania przeliczono do nowego układu. Upewnij się, że serwer WMS obsługuje ten układ.", Color.Green)
+    End Sub
+
+    ''' <summary>Rozmiar piksela z pliku zbioru map (w metrach) w bieżącym układzie.</summary>
+    Private Function RozmiarPikselaWarstwy(tekst As String) As String
+        Dim u = Ustawienia.Uklad
+        If Not u.Geograficzny Then Return tekst
+        Dim metry As Double = Wartosc(tekst)
+        If metry <= 0 Then Return tekst
+        Return Liczba(UkladWspolrzednych.PL1992.PrzeliczRozmiarPiksela(u, metry, New PunktGeo(mapa.Position.Lat, mapa.Position.Lng)))
+    End Function
 
 #End Region
 

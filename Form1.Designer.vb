@@ -49,6 +49,8 @@ Partial Class Form1
         Me.Label29 = New System.Windows.Forms.Label()
         Me.lstWarstwy = New System.Windows.Forms.ListBox()
         Me.cmbZbiorMap = New System.Windows.Forms.ComboBox()
+        Me.lblUklad = New System.Windows.Forms.Label()
+        Me.cmbUklad = New System.Windows.Forms.ComboBox()
         Me.Panel1 = New System.Windows.Forms.Panel()
         Me.dlgFolder = New System.Windows.Forms.FolderBrowserDialog()
         Me.StatusStrip1 = New System.Windows.Forms.StatusStrip()
@@ -75,7 +77,7 @@ Partial Class Form1
         Me.txtZasiegSegmentuKm = New System.Windows.Forms.TextBox()
         Me.txtBokSegmentu = New System.Windows.Forms.TextBox()
         Me.Label1 = New System.Windows.Forms.Label()
-        Me.Label2 = New System.Windows.Forms.Label()
+        Me.lblRozmiarPikselaOpis = New System.Windows.Forms.Label()
         Me.txtRozmiarPiksela = New System.Windows.Forms.TextBox()
         Me.ToolTip1 = New System.Windows.Forms.ToolTip(Me.components)
         Me.grpWybraneWarstwy = New System.Windows.Forms.GroupBox()
@@ -181,6 +183,8 @@ Partial Class Form1
         Me.grpDaneZrodlowe.Controls.Add(Me.Label29)
         Me.grpDaneZrodlowe.Controls.Add(Me.lstWarstwy)
         Me.grpDaneZrodlowe.Controls.Add(Me.cmbZbiorMap)
+        Me.grpDaneZrodlowe.Controls.Add(Me.lblUklad)
+        Me.grpDaneZrodlowe.Controls.Add(Me.cmbUklad)
         Me.grpDaneZrodlowe.Location = New System.Drawing.Point(5, 3)
         Me.grpDaneZrodlowe.Name = "grpDaneZrodlowe"
         Me.grpDaneZrodlowe.Size = New System.Drawing.Size(212, 254)
@@ -214,7 +218,7 @@ Partial Class Form1
         Me.lstWarstwy.FormattingEnabled = True
         Me.lstWarstwy.Location = New System.Drawing.Point(6, 72)
         Me.lstWarstwy.Name = "lstWarstwy"
-        Me.lstWarstwy.Size = New System.Drawing.Size(198, 173)
+        Me.lstWarstwy.Size = New System.Drawing.Size(198, 134)
         Me.lstWarstwy.TabIndex = 216
         '
         'cmbZbiorMap
@@ -226,6 +230,26 @@ Partial Class Form1
         Me.cmbZbiorMap.Size = New System.Drawing.Size(198, 21)
         Me.cmbZbiorMap.TabIndex = 216
         Me.cmbZbiorMap.Text = "skany_map_topograficznych"
+        '
+        'lblUklad
+        '
+        Me.lblUklad.AutoSize = True
+        Me.lblUklad.Location = New System.Drawing.Point(6, 208)
+        Me.lblUklad.Name = "lblUklad"
+        Me.lblUklad.Size = New System.Drawing.Size(160, 13)
+        Me.lblUklad.TabIndex = 217
+        Me.lblUklad.Text = " Układ współrzędnych pobierania"
+        Me.ToolTip1.SetToolTip(Me.lblUklad, "Układ, w którym pobierane są segmenty i zapisywane ich pliki georeferencyjne. Serwer WMS musi go obsługiwać.")
+        '
+        'cmbUklad
+        '
+        Me.cmbUklad.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
+        Me.cmbUklad.FormattingEnabled = True
+        Me.cmbUklad.Location = New System.Drawing.Point(6, 223)
+        Me.cmbUklad.Name = "cmbUklad"
+        Me.cmbUklad.Size = New System.Drawing.Size(198, 21)
+        Me.cmbUklad.TabIndex = 218
+        Me.ToolTip1.SetToolTip(Me.cmbUklad, "Układ, w którym pobierane są segmenty i zapisywane ich pliki georeferencyjne. Serwer WMS musi go obsługiwać.")
         '
         'Panel1
         '
@@ -437,15 +461,15 @@ Partial Class Form1
         "ostanie podzielony pobierany obszar mapy.  Uwaga - maksymalna rozmiar segmentu d" &
         "la Geoportalu2 wynosi 2048px")
         '
-        'Label2
+        'lblRozmiarPikselaOpis
         '
-        Me.Label2.AutoSize = True
-        Me.Label2.Location = New System.Drawing.Point(292, 39)
-        Me.Label2.Name = "Label2"
-        Me.Label2.Size = New System.Drawing.Size(116, 13)
-        Me.Label2.TabIndex = 214
-        Me.Label2.Text = "Rozmiar piksela [m/pix]"
-        Me.ToolTip1.SetToolTip(Me.Label2, "Domyślna wartość jest optymalna. Im większy rozmiar piksela, tym gorsza jakość ob" &
+        Me.lblRozmiarPikselaOpis.AutoSize = True
+        Me.lblRozmiarPikselaOpis.Location = New System.Drawing.Point(292, 39)
+        Me.lblRozmiarPikselaOpis.Name = "lblRozmiarPikselaOpis"
+        Me.lblRozmiarPikselaOpis.Size = New System.Drawing.Size(116, 13)
+        Me.lblRozmiarPikselaOpis.TabIndex = 214
+        Me.lblRozmiarPikselaOpis.Text = "Rozmiar piksela [m/pix]"
+        Me.ToolTip1.SetToolTip(Me.lblRozmiarPikselaOpis, "Domyślna wartość jest optymalna. Im większy rozmiar piksela, tym gorsza jakość ob" &
         "razu, ale jednocześnie tym większy jego przestrzenny zasięg.")
         '
         'txtRozmiarPiksela
@@ -1088,7 +1112,7 @@ Partial Class Form1
         Me.grpSchemat.Controls.Add(Me.lblZaznSzerDol)
         Me.grpSchemat.Controls.Add(Me.lblZaznDlugPrawa)
         Me.grpSchemat.Controls.Add(Me.lblZaznSzerGora)
-        Me.grpSchemat.Controls.Add(Me.Label2)
+        Me.grpSchemat.Controls.Add(Me.lblRozmiarPikselaOpis)
         Me.grpSchemat.Controls.Add(Me.txtBokSegmentu)
         Me.grpSchemat.Controls.Add(Me.txtRozmiarPiksela)
         Me.grpSchemat.Controls.Add(Me.Label1)
@@ -1337,6 +1361,8 @@ Partial Class Form1
     Friend WithEvents PomocPomorskieForumEksploracyjneToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents MenuStrip1 As System.Windows.Forms.MenuStrip
     Friend WithEvents cmbZbiorMap As System.Windows.Forms.ComboBox
+    Friend WithEvents lblUklad As System.Windows.Forms.Label
+    Friend WithEvents cmbUklad As System.Windows.Forms.ComboBox
     Friend WithEvents lstWarstwy As System.Windows.Forms.ListBox
     Friend WithEvents InstrukcjaObsługiToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents Label30 As System.Windows.Forms.Label
@@ -1344,7 +1370,7 @@ Partial Class Form1
     Friend WithEvents UsuwaniePustychSegmentówToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents txtBokSegmentu As System.Windows.Forms.TextBox
     Friend WithEvents Label1 As System.Windows.Forms.Label
-    Friend WithEvents Label2 As System.Windows.Forms.Label
+    Friend WithEvents lblRozmiarPikselaOpis As System.Windows.Forms.Label
     Friend WithEvents txtRozmiarPiksela As System.Windows.Forms.TextBox
     Friend WithEvents ToolTip1 As System.Windows.Forms.ToolTip
     Friend WithEvents Panel1 As System.Windows.Forms.Panel
