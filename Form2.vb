@@ -133,12 +133,14 @@ Public Class Form2
 
     ''' <summary>Dopisek do przedrostka w nazwie paczki TrekBuddy / Locus Map wg stylu.</summary>
     Private Shared Function DopisekTrekBuddy(styl As Integer) As String
+        Dim s As String = ""
         Select Case styl
-            Case 1 : Return Form1.ZbiorMap
-            Case 2 : Return Form1.PierwszaWarstwa
-            Case 3 : Return Form1.ZbiorMap & "_" & Form1.PierwszaWarstwa
-            Case Else : Return ""
+            Case 1 : s = Form1.ZbiorMap
+            Case 2 : s = Form1.PierwszaWarstwa
+            Case 3 : s = Form1.ZbiorMap & "_" & Form1.PierwszaWarstwa
+            Case Else : s = ""
         End Select
+        Return MapaTrekBuddy.BezpiecznaNazwa(s)
     End Function
 
     ''' <summary>

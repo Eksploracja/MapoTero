@@ -1,0 +1,3 @@
+https://mapy.geoportal.gov.pl/wss/service/PZGIK/ORTO/WMTS/HighResolution?SERVICE=WMTS&REQUEST=GetCapabilities
+ORTOFOTOMAPA
+0.1

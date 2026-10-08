@@ -273,7 +273,8 @@ Public NotInheritable Class UkladWspolrzednych
         If cel.Geograficzny = Geograficzny Then Return piksel
         Dim mSz As Double, mDl As Double
         Georeferencja.MetrowNaStopien(miejsce.Szerokosc, mSz, mDl)
-        If cel.Geograficzny Then Return Double.Parse((piksel / mSz).ToString("G6", CultureInfo.InvariantCulture), CultureInfo.InvariantCulture)
+        If mSz <= 0 Then Return piksel
+        If cel.Geograficzny Then Return Math.Round(piksel / mSz, 9)
         Return Math.Round(piksel * mSz, 3)
     End Function
 

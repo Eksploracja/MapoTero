@@ -448,7 +448,7 @@ Public Class PlanWmts
             Format = Wmts.WybierzFormat(Warstwa.Formaty, formatSegmentow)
         Else
             Format = Wmts.WybierzFormat(Warstwa.Szablony.Select(Function(s) s.Format).ToList(), formatSegmentow)
-            _szablon = Warstwa.Szablony.First(Function(s) s.Format = Format).Szablon
+            _szablon = Warstwa.Szablony.First(Function(s) String.Equals(s.Format, Format, StringComparison.OrdinalIgnoreCase)).Szablon
         End If
     End Sub
 

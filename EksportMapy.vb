@@ -290,6 +290,8 @@ Public NotInheritable Class EksportMapy
         Return bmp
     End Function
 
+    Private Shared ReadOnly KoderJpeg As ImageCodecInfo = ImageCodecInfo.GetImageEncoders().FirstOrDefault(Function(c) c.FormatID = ImageFormat.Jpeg.Guid)
+
     ''' <summary>Koduje bitmapę: JPEG (na białym tle) albo PNG (z przezroczystością).</summary>
     Friend Shared Function Koduj(bmp As Bitmap, png As Boolean, jakosc As Integer) As Byte()
         Using ms As New MemoryStream()
@@ -301,11 +303,14 @@ Public NotInheritable Class EksportMapy
                         g.Clear(Color.White)
                         g.DrawImage(bmp, 0, 0, bmp.Width, bmp.Height)
                     End Using
-                    Dim koder = ImageCodecInfo.GetImageEncoders().First(Function(c) c.FormatID = ImageFormat.Jpeg.Guid)
-                    Using parametry As New EncoderParameters(1)
-                        parametry.Param(0) = New EncoderParameter(Imaging.Encoder.Quality, CLng(Math.Max(1, Math.Min(100, jakosc))))
-                        tlo.Save(ms, koder, parametry)
-                    End Using
+                    If KoderJpeg IsNot Nothing Then
+                        Using parametry As New EncoderParameters(1)
+                            parametry.Param(0) = New EncoderParameter(Imaging.Encoder.Quality, CLng(Math.Max(1, Math.Min(100, jakosc))))
+                            tlo.Save(ms, KoderJpeg, parametry)
+                        End Using
+                    Else
+                        tlo.Save(ms, ImageFormat.Jpeg)
+                    End If
                 End Using
             End If
             Return ms.ToArray()
@@ -354,8 +359,10 @@ Public NotInheritable Class EksportMapy
         Dim pikselZrodla As Double = PikselWMetrach(z)
         Dim srodekSz As Double = (obszar.Polnoc + obszar.Poludnie) / 2
 
-        Using pol As New SQLiteConnection("Data Source=" & z.Plik & ";Version=3;")
+        Using pol As New SQLiteConnection("Data Source=" & z.Plik & ";Version=3;Journal Mode=WAL;Synchronous=Off;")
             pol.Open()
+            Wykonaj(pol, "PRAGMA synchronous = OFF;")
+            Wykonaj(pol, "PRAGMA journal_mode = WAL;")
             Wykonaj(pol, "CREATE TABLE metadata (name text, value text);")
             Wykonaj(pol, "CREATE TABLE tiles (zoom_level integer, tile_column integer, tile_row integer, tile_data blob);")
             Wykonaj(pol, "CREATE UNIQUE INDEX tile_index ON tiles (zoom_level, tile_column, tile_row);")
@@ -365,50 +372,82 @@ Public NotInheritable Class EksportMapy
                 {"format", If(z.KaflePng, "png", "jpg")}, {"minzoom", z.PoziomMin.ToString(ci)}, {"maxzoom", z.PoziomMax.ToString(ci)},
                 {"bounds", String.Format(ci, "{0},{1},{2},{3}", obszar.Zachod, obszar.Poludnie, obszar.Wschod, obszar.Polnoc)},
                 {"center", String.Format(ci, "{0},{1},{2}", (obszar.Zachod + obszar.Wschod) / 2, srodekSz, z.PoziomMax)}}
-            For Each m In meta
-                Using cmd As New SQLiteCommand("INSERT INTO metadata (name, value) VALUES (@n, @v);", pol)
-                    cmd.Parameters.AddWithValue("@n", m.Key)
-                    cmd.Parameters.AddWithValue("@v", m.Value)
-                    cmd.ExecuteNonQuery()
-                End Using
-            Next
+            Using cmdMeta As New SQLiteCommand("INSERT INTO metadata (name, value) VALUES (@n, @v);", pol)
+                Dim pN = cmdMeta.Parameters.Add("@n", DbType.String)
+                Dim pV = cmdMeta.Parameters.Add("@v", DbType.String)
+                For Each m In meta
+                    pN.Value = m.Key
+                    pV.Value = m.Value
+                    cmdMeta.ExecuteNonQuery()
+                Next
+            End Using
 
             'najwyższy poziom - kafle renderowane bezpośrednio z segmentów
             Dim zmax As Integer = z.PoziomMax
             Dim nadprobkowanie As Integer = CInt(Math.Ceiling(WebMercator.RozmiarPiksela(srodekSz, zmax) / pikselZrodla - 0.01))
             Dim r = WebMercator.ZakresKafli(obszar, zmax)
-            Using tr = pol.BeginTransaction()
-                For ty = r.Item2 To r.Item4
-                    For tx = r.Item1 To r.Item3
-                        token.ThrowIfCancellationRequested()
-                        Dim kx As Double = tx * 256.0, ky As Double = ty * 256.0
-                        Dim f = Function(x As Double, y As Double) z.Uklad.ZWgs84(WebMercator.Szerokosc(ky + y, zmax), WebMercator.Dlugosc(kx + x, zmax))
-                        Using bmp = RenderujKafel(z.Zrodlo, 256, 256, nadprobkowanie, f)
-                            If bmp IsNot Nothing Then ZapiszKafel(pol, New KafelXYZ(tx, ty, zmax), Koduj(bmp, z.KaflePng, z.JakoscJpeg))
-                        End Using
-                        gotowe += 1
-                        postep?.Report(CInt(gotowe * 100 \ wszystkie))
-                    Next
-                Next
-                tr.Commit()
-            End Using
 
-            'niższe poziomy - z czterech kafli poziomu wyższego (piramida)
-            For poziom = zmax - 1 To z.PoziomMin Step -1
-                Dim rp = WebMercator.ZakresKafli(obszar, poziom)
+            Using cmdZapisz As New SQLiteCommand("INSERT OR REPLACE INTO tiles (zoom_level, tile_column, tile_row, tile_data) VALUES (@z, @x, @y, @d);", pol)
+                Dim pZ = cmdZapisz.Parameters.Add("@z", DbType.Int32)
+                Dim pX = cmdZapisz.Parameters.Add("@x", DbType.Int32)
+                Dim pY = cmdZapisz.Parameters.Add("@y", DbType.Int32)
+                Dim pD = cmdZapisz.Parameters.Add("@d", DbType.Binary)
+
                 Using tr = pol.BeginTransaction()
-                    For ty = rp.Item2 To rp.Item4
-                        For tx = rp.Item1 To rp.Item3
+                    cmdZapisz.Transaction = tr
+                    For ty = r.Item2 To r.Item4
+                        For tx = r.Item1 To r.Item3
                             token.ThrowIfCancellationRequested()
-                            Dim dane = KafelZDzieci(pol, New KafelXYZ(tx, ty, poziom), z)
-                            If dane IsNot Nothing Then ZapiszKafel(pol, New KafelXYZ(tx, ty, poziom), dane)
+                            Dim kx As Double = tx * 256.0, ky As Double = ty * 256.0
+                            Dim f = Function(x As Double, y As Double) z.Uklad.ZWgs84(WebMercator.Szerokosc(ky + y, zmax), WebMercator.Dlugosc(kx + x, zmax))
+                            Using bmp = RenderujKafel(z.Zrodlo, 256, 256, nadprobkowanie, f)
+                                If bmp IsNot Nothing Then
+                                    Dim dane = Koduj(bmp, z.KaflePng, z.JakoscJpeg)
+                                    pZ.Value = zmax
+                                    pX.Value = tx
+                                    pY.Value = (1 << zmax) - 1 - ty
+                                    pD.Value = dane
+                                    cmdZapisz.ExecuteNonQuery()
+                                End If
+                            End Using
                             gotowe += 1
-                            postep?.Report(CInt(Math.Min(100, gotowe * 100 \ wszystkie)))
+                            postep?.Report(CInt(gotowe * 100 \ wszystkie))
                         Next
                     Next
                     tr.Commit()
                 End Using
-            Next
+
+                'niższe poziomy - z czterech kafli poziomu wyższego (piramida)
+                Using cmdOdczytaj As New SQLiteCommand("SELECT tile_data FROM tiles WHERE zoom_level = @z AND tile_column = @x AND tile_row = @y;", pol)
+                    Dim oZ = cmdOdczytaj.Parameters.Add("@z", DbType.Int32)
+                    Dim oX = cmdOdczytaj.Parameters.Add("@x", DbType.Int32)
+                    Dim oY = cmdOdczytaj.Parameters.Add("@y", DbType.Int32)
+
+                    For poziom = zmax - 1 To z.PoziomMin Step -1
+                        Dim rp = WebMercator.ZakresKafli(obszar, poziom)
+                        Using tr = pol.BeginTransaction()
+                            cmdZapisz.Transaction = tr
+                            cmdOdczytaj.Transaction = tr
+                            For ty = rp.Item2 To rp.Item4
+                                For tx = rp.Item1 To rp.Item3
+                                    token.ThrowIfCancellationRequested()
+                                    Dim dane = KafelZDzieci(cmdOdczytaj, oZ, oX, oY, New KafelXYZ(tx, ty, poziom), z)
+                                    If dane IsNot Nothing Then
+                                        pZ.Value = poziom
+                                        pX.Value = tx
+                                        pY.Value = (1 << poziom) - 1 - ty
+                                        pD.Value = dane
+                                        cmdZapisz.ExecuteNonQuery()
+                                    End If
+                                    gotowe += 1
+                                    postep?.Report(CInt(Math.Min(100, gotowe * 100 \ wszystkie)))
+                                Next
+                            Next
+                            tr.Commit()
+                        End Using
+                    Next
+                End Using
+            End Using
         End Using
         SQLiteConnection.ClearAllPools()
     End Sub
@@ -419,34 +458,22 @@ Public NotInheritable Class EksportMapy
         End Using
     End Sub
 
-    Private Shared Sub ZapiszKafel(pol As SQLiteConnection, k As KafelXYZ, dane() As Byte)
-        Using cmd As New SQLiteCommand("INSERT OR REPLACE INTO tiles (zoom_level, tile_column, tile_row, tile_data) VALUES (@z, @x, @y, @d);", pol)
-            cmd.Parameters.AddWithValue("@z", k.Z)
-            cmd.Parameters.AddWithValue("@x", k.X)
-            cmd.Parameters.AddWithValue("@y", k.WierszTms)
-            cmd.Parameters.Add("@d", DbType.Binary).Value = dane
-            cmd.ExecuteNonQuery()
-        End Using
-    End Sub
-
-    Private Shared Function OdczytajKafel(pol As SQLiteConnection, k As KafelXYZ) As Byte()
-        Using cmd As New SQLiteCommand("SELECT tile_data FROM tiles WHERE zoom_level = @z AND tile_column = @x AND tile_row = @y;", pol)
-            cmd.Parameters.AddWithValue("@z", k.Z)
-            cmd.Parameters.AddWithValue("@x", k.X)
-            cmd.Parameters.AddWithValue("@y", k.WierszTms)
-            Return TryCast(cmd.ExecuteScalar(), Byte())
-        End Using
+    Private Shared Function OdczytajKafel(cmd As SQLiteCommand, pZ As SQLiteParameter, pX As SQLiteParameter, pY As SQLiteParameter, k As KafelXYZ) As Byte()
+        pZ.Value = k.Z
+        pX.Value = k.X
+        pY.Value = k.WierszTms
+        Return TryCast(cmd.ExecuteScalar(), Byte())
     End Function
 
     ''' <summary>Kafel poziomu niższego złożony z czterech kafli poziomu wyższego (pomniejszenie 2x).</summary>
-    Private Shared Function KafelZDzieci(pol As SQLiteConnection, k As KafelXYZ, z As ZadanieEksportu) As Byte()
+    Private Shared Function KafelZDzieci(cmdOdczytaj As SQLiteCommand, pZ As SQLiteParameter, pX As SQLiteParameter, pY As SQLiteParameter, k As KafelXYZ, z As ZadanieEksportu) As Byte()
         Using duzy As New Bitmap(512, 512, PixelFormat.Format32bppArgb)
             Dim jest As Boolean = False
             Using g = Graphics.FromImage(duzy)
                 g.Clear(Color.Transparent)
                 For dy = 0 To 1
                     For dx = 0 To 1
-                        Dim dane = OdczytajKafel(pol, New KafelXYZ(k.X * 2 + dx, k.Y * 2 + dy, k.Z + 1))
+                        Dim dane = OdczytajKafel(cmdOdczytaj, pZ, pX, pY, New KafelXYZ(k.X * 2 + dx, k.Y * 2 + dy, k.Z + 1))
                         If dane Is Nothing Then Continue For
                         Using ms As New MemoryStream(dane), obraz = Image.FromStream(ms)
                             g.DrawImage(obraz, New Rectangle(dx * 256, dy * 256, 256, 256))

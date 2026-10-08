@@ -1,0 +1,3 @@
+https://mapy.geoportal.gov.pl/wss/service/WMTS/guest/wmts/BDOT10k?SERVICE=WMTS&REQUEST=GetCapabilities
+BDOT10k
+1

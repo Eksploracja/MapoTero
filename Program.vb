@@ -55,7 +55,12 @@ Public Module Program
     Public Function KodowanieSystemowe() As Encoding
 #If NETCOREAPP Then
         RejestrujKodowania()
-        Return Encoding.GetEncoding(CultureInfo.CurrentCulture.TextInfo.ANSICodePage)
+        Try
+            Dim cp As Integer = CultureInfo.CurrentCulture.TextInfo.ANSICodePage
+            If cp > 0 Then Return Encoding.GetEncoding(cp)
+        Catch
+        End Try
+        Return Encoding.GetEncoding(1250)
 #Else
         Return Encoding.Default
 #End If

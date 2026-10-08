@@ -17,6 +17,7 @@
     <OptionStrict>On</OptionStrict>
     <OptionInfer>On</OptionInfer>
     <ApplicationIcon>MapoTero.ico</ApplicationIcon>
+    <ApplicationHighDpiMode>SystemAware</ApplicationHighDpiMode>
     <ApplicationManifest>My Project\app.manifest</ApplicationManifest>
     <!-- wersja i opis programu w My Project\AssemblyInfo.vb -->
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
@@ -55,17 +56,20 @@
   </ItemGroup>
 
   <ItemGroup>
-    <!-- okno mapy (podkład OpenStreetMap / Google / Bing) -->
+    <!-- okno mapy (podkład OpenStreetMap / Google / Bing) oraz silnik SQLite kafelków i MBTiles -->
     <PackageReference Include="GMap.NET.WinForms" Version="2.1.7" />
-    <!-- archiwum TAR map TrekBuddy -->
-    <PackageReference Include="SharpZipLib" Version="1.4.2" />
-    <!-- eksport MBTiles (także pamięć podręczna map GMap.NET) -->
-    <PackageReference Include="System.Data.SQLite" Version="1.0.118" />
-    <!-- My.Settings -->
-    <PackageReference Include="System.Configuration.ConfigurationManager" Version="8.0.1" />
-    <!-- odczyt zasobów-obrazów formularzy -->
-    <PackageReference Include="System.Resources.Extensions" Version="8.0.0" />
+    <!-- wykluczenie zbędnego Entity Framework 6 ciągniętego przez zależność SQLite z GMap.NET -->
+    <PackageReference Include="EntityFramework" Version="6.4.4" ExcludeAssets="all" />
+    <PackageReference Include="System.Data.SQLite.EF6" Version="1.0.115.5" ExcludeAssets="all" />
   </ItemGroup>
+
+  <!-- Usunięcie nieużywanych bibliotek MSSQL i JSON ciągniętych rykoszetem przez pakiet GMap.NET -->
+  <Target Name="UsunZbedneDll" AfterTargets="ComputeFilesToPublish">
+    <ItemGroup>
+      <ResolvedFileToPublish Remove="@(ResolvedFileToPublish)"
+        Condition="'%(Filename)' == 'System.Data.SqlClient' or '%(Filename)' == 'sni' or '%(Filename)' == 'Newtonsoft.Json'" />
+    </ItemGroup>
+  </Target>
 
   <ItemGroup>
     <None Update="My Project\Application.myapp">

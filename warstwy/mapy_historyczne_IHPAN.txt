@@ -1,3 +1,17 @@
 https://pastmaps.cenagis.edu.pl/geoserver/ihpan/wms/?request=GetMap&version=1.3.0&CRS=EPSG:2180&layers=
 m25k_2180
 2
+wig25k_2180
+2
+wig100k_2180
+8
+kdr_2180
+8
+kdr_gb_2180
+8
+wig300k_2180
+25
+wig500k_2180
+40
+kdwr_2180
+8

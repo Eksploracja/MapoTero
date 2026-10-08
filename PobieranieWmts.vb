@@ -276,11 +276,11 @@ Public Class ZrodloWmts
     ''' (serwery WMTS zgłaszają w ten sposób kafle poza obszarem danych: HTTP 404 lub 204).
     ''' </summary>
     Private Async Function PobierzKafelAsync(adres As String, token As CancellationToken) As Task(Of Tuple(Of Byte(), String))
-        Dim plik As String = FolderKafli & NazwaKafla(adres)
+        Dim plik As String = Path.Combine(FolderKafli, NazwaKafla(adres))
         If File.Exists(plik) Then Return Tuple.Create(File.ReadAllBytes(plik), "")
-        Dim zadanie = _wTrakcie.GetOrAdd(adres, Function(a) New Lazy(Of Task(Of Tuple(Of Byte(), String)))(Function() PobierzKafelZSerweraAsync(a, plik, _limitCzasu, token)))
+        Dim zadanie = _wTrakcie.GetOrAdd(adres, Function(a) New Lazy(Of Task(Of Tuple(Of Byte(), String)))(Function() PobierzKafelZSerweraAsync(a, plik, _limitCzasu)))
         Try
-            Return Await zadanie.Value.ConfigureAwait(False)
+            Return Await zadanie.Value.WaitAsync(token).ConfigureAwait(False)
         Finally
             'kafel pobrany jest już w folderze kafli; nieudany - przy kolejnej próbie pobierany od nowa
             Dim usuniete As Lazy(Of Task(Of Tuple(Of Byte(), String))) = Nothing
@@ -288,12 +288,11 @@ Public Class ZrodloWmts
         End Try
     End Function
 
-    Private Shared Async Function PobierzKafelZSerweraAsync(adres As String, plik As String, limitCzasuSekundy As Integer,
-                                                           token As CancellationToken) As Task(Of Tuple(Of Byte(), String))
+    Private Shared Async Function PobierzKafelZSerweraAsync(adres As String, plik As String, limitCzasuSekundy As Integer) As Task(Of Tuple(Of Byte(), String))
         Try
-            Using limit = PobieranieSegmentow.LimitCzasu(limitCzasuSekundy, token),
+            Using limit = PobieranieSegmentow.LimitCzasu(limitCzasuSekundy, CancellationToken.None),
                   odpowiedz = Await PobieranieSegmentow.Klient.GetAsync(adres, HttpCompletionOption.ResponseContentRead, limit.Token).ConfigureAwait(False)
-                Dim dane() As Byte = Await odpowiedz.Content.ReadAsByteArrayAsync().ConfigureAwait(False)
+                Dim dane() As Byte = Await odpowiedz.Content.ReadAsByteArrayAsync(limit.Token).ConfigureAwait(False)
                 If odpowiedz.StatusCode = HttpStatusCode.NotFound OrElse odpowiedz.StatusCode = HttpStatusCode.NoContent Then
                     dane = New Byte() {}
                 ElseIf Not PobieranieSegmentow.CzyObraz(dane) Then
@@ -312,8 +311,6 @@ Public Class ZrodloWmts
                 If File.Exists(tymczasowy) Then File.Delete(tymczasowy)
                 Return Tuple.Create(dane, "")
             End Using
-        Catch ex As OperationCanceledException When token.IsCancellationRequested
-            Throw
         Catch ex As OperationCanceledException
             Return Tuple.Create(CType(Nothing, Byte()), PobieranieSegmentow.OpisLimituCzasu(limitCzasuSekundy))
         Catch ex As Exception

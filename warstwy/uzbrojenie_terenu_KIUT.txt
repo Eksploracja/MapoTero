@@ -1,0 +1,15 @@
+https://integracja.gugik.gov.pl/cgi-bin/KrajowaIntegracjaUzbrojeniaTerenu?request=GetMap&version=1.3.0&CRS=EPSG:2180&layers=
+przewod_wodociagowy
+0.25
+przewod_kanalizacyjny
+0.25
+przewod_elektroenergetyczny
+0.25
+przewod_gazowy
+0.25
+przewod_cieplowniczy
+0.25
+przewod_telekomunikacyjny
+0.25
+przewod_urzadzenia
+0.25

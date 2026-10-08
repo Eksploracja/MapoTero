@@ -3,7 +3,8 @@
   <!-- Testy jednostkowe biblioteki MapoTero.Core (uruchamiane poleceniem: dotnet test).
        Wartości wzorcowe przeliczeń współrzędnych pochodzą z biblioteki PROJ 9 (pyproj). -->
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
     <RootNamespace>MapoTero.Tests</RootNamespace>
     <IsPackable>false</IsPackable>
     <OptionStrict>On</OptionStrict>
@@ -18,6 +19,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\MapoTero.Core\MapoTero.Core.vbproj" />
+    <ProjectReference Include="..\MapoTero_v3.vbproj" />
   </ItemGroup>
 
 </Project>

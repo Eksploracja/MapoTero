@@ -416,17 +416,22 @@ Public Class ZapisGeoTiff
             klucze = {1, 1, 0, 3,
                       1024, 0, 1, 2,              'GTModelTypeGeoKey = geograficzny
                       1025, 0, 1, 1,              'GTRasterTypeGeoKey = PixelIsArea
-                      2048, 0, 1, CShort(uklad.Epsg)}  'GeographicTypeGeoKey
+                      2048, 0, 1, JakoShort(uklad.Epsg)}  'GeographicTypeGeoKey
         Else
             klucze = {1, 1, 0, 3,
                       1024, 0, 1, 1,              'GTModelTypeGeoKey = odwzorowanie
                       1025, 0, 1, 1,              'GTRasterTypeGeoKey = PixelIsArea
-                      3072, 0, 1, CShort(uklad.Epsg)}  'ProjectedCSTypeGeoKey
+                      3072, 0, 1, JakoShort(uklad.Epsg)}  'ProjectedCSTypeGeoKey
         End If
         _tiff.SetField(CType(TagGeoKeyDirectory, TiffTag), klucze.Length, klucze)
 
         _wiersz = New Byte(szerokosc * 3 - 1) {}
     End Sub
+
+    Private Shared Function JakoShort(kod As Integer) As Short
+        Dim u As Integer = kod And &HFFFF
+        Return CShort(If(u > 32767, u - 65536, u))
+    End Function
 
     ''' <summary>Rejestruje w LibTiff.NET znaczniki GeoTIFF (raz na cały program).</summary>
     Private Shared Sub ZarejestrujZnaczniki()
@@ -466,9 +471,15 @@ Public Class ZapisGeoTiff
     Public Overrides Sub Dispose()
         'po Zakoncz() plik jest już zamknięty (Close zwalnia zasoby)
         If Not _zakonczony Then
+            _zakonczony = True
             Try
-                _tiff.Dispose()
+                _tiff?.Close()
             Catch
+            Finally
+                Try
+                    _tiff?.Dispose()
+                Catch
+                End Try
             End Try
         End If
     End Sub

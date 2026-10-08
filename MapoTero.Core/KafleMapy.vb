@@ -281,15 +281,17 @@ Public Class ZapisKmz
             Dim b() As Byte = New UTF8Encoding(False).GetBytes(doc.ToString())
             s.Write(b, 0, b.Length)
         End Using
-        _zip.Dispose()
-        _plik.Dispose()
-        _zakonczony = True
+        Dispose()
     End Sub
 
     Public Sub Dispose() Implements IDisposable.Dispose
         If Not _zakonczony Then
-            _zip.Dispose()
-            _plik.Dispose()
+            _zakonczony = True
+            Try
+                _zip?.Dispose()
+            Finally
+                _plik?.Dispose()
+            End Try
         End If
     End Sub
 

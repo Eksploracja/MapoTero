@@ -91,8 +91,15 @@ Public NotInheritable Class Wms
             If Not String.IsNullOrEmpty(w) Then lista.Add(w)
         Next
         Dim nowe As String = String.Join(",", lista)
-        If nowe <> "" AndAlso Not baza.EndsWith("=", StringComparison.Ordinal) AndAlso Not baza.EndsWith(",", StringComparison.Ordinal) Then
-            nowe = "," & nowe
+        If nowe <> "" Then
+            If Regex.IsMatch(baza, "[?&]layers=", RegexOptions.IgnoreCase) Then
+                If Not baza.EndsWith("=", StringComparison.Ordinal) AndAlso Not baza.EndsWith(",", StringComparison.Ordinal) Then
+                    nowe = "," & nowe
+                End If
+            Else
+                Dim lacznik As String = If(baza.EndsWith("&", StringComparison.Ordinal) OrElse baza.EndsWith("?", StringComparison.Ordinal), "", If(baza.IndexOf("?"c) < 0, "?", "&"))
+                nowe = lacznik & "layers=" & nowe
+            End If
         End If
 
         Dim bbox As String
@@ -102,13 +109,16 @@ Public NotInheritable Class Wms
             bbox = Liczba(zasieg.YLewy) & "," & Liczba(zasieg.XDol) & "," & Liczba(zasieg.YPrawy) & "," & Liczba(zasieg.XGora)
         End If
 
-        Return baza & nowe & "&bbox=" & bbox & "&format=image/" & format & "&styles=&width=" &
+        Dim fmt As String = If(format.StartsWith("image/", StringComparison.OrdinalIgnoreCase), format, "image/" & format)
+        Return baza & nowe & "&bbox=" & bbox & "&format=" & fmt & "&styles=&width=" &
                szerokoscPx.ToString(CultureInfo.InvariantCulture) & "&height=" & wysokoscPx.ToString(CultureInfo.InvariantCulture)
     End Function
 
     ''' <summary>Rozszerzenie pliku dla formatu obrazu WMS (jpeg - jpg, tiff - tif, png8/png24/png32 - png).</summary>
     Public Shared Function RozszerzeniePliku(format As String) As String
-        Select Case If(format, "").ToLowerInvariant()
+        Dim f As String = If(format, "").Trim().ToLowerInvariant()
+        If f.StartsWith("image/", StringComparison.Ordinal) Then f = f.Substring(6)
+        Select Case f
             Case "jpeg", "jpg" : Return "jpg"
             Case "tiff", "tif" : Return "tif"
             Case "png", "png8", "png24", "png32" : Return "png"

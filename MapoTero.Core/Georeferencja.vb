@@ -122,6 +122,10 @@ Public NotInheritable Class Georeferencja
         Dim w As Double = Math.Round(wartosc, 8)
         Dim st As Double = Math.Floor(w)
         Dim min As Double = Math.Round((w - st) * 60, 6)
+        If min >= 60.0 Then
+            st += 1
+            min = 0
+        End If
         Return st.ToString("0", Ci) & ", " & min.ToString("0.######", Ci)
     End Function
 

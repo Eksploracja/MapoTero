@@ -40,6 +40,12 @@ Public Class PlikWarstw
     ''' <summary>Pliki warstw są zapisane w kodowaniu Windows-1250 (polskie znaki w nazwach warstw).</summary>
     Public Shared Function Kodowanie() As Encoding
         Try
+            Dim providerType = Type.GetType("System.Text.CodePagesEncodingProvider, System.Text.Encoding.CodePages")
+            If providerType IsNot Nothing Then
+                Dim prop = providerType.GetProperty("Instance")
+                Dim instance = TryCast(prop?.GetValue(Nothing), EncodingProvider)
+                If instance IsNot Nothing Then Encoding.RegisterProvider(instance)
+            End If
             Return Encoding.GetEncoding(1250)
         Catch ex As Exception
             'platforma bez stron kodowych Windows - teksty ASCII odczytane zostaną poprawnie
@@ -67,7 +73,7 @@ Public Class PlikWarstw
     ''' <summary>Warstwa o podanej nazwie albo Nothing.</summary>
     Public Function Znajdz(nazwa As String) As WarstwaMapy
         For Each w In Warstwy
-            If w.Nazwa = nazwa Then Return w
+            If String.Equals(w.Nazwa, nazwa, StringComparison.OrdinalIgnoreCase) Then Return w
         Next
         Return Nothing
     End Function

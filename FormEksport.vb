@@ -145,23 +145,37 @@ Public Class FormEksport
         prgEksport.Value = 0
         Komunikat("Trwa eksport do pliku " & Path.GetFileName(z.Plik) & "...", Color.Black)
 
-        Dim postep As New Progress(Of Integer)(Sub(p) prgEksport.Value = Math.Max(0, Math.Min(100, p)))
+        Dim postep As New Progress(Of Integer)(Sub(p)
+                                                   If Not Me.IsDisposed AndAlso Not Me.Disposing Then
+                                                       prgEksport.Value = Math.Max(0, Math.Min(100, p))
+                                                   End If
+                                               End Sub)
         Dim token = _przerwanie.Token
         Try
             Await Task.Run(Sub() EksportMapy.Eksportuj(z, postep, token))
-            prgEksport.Value = 100
-            Komunikat("Zapisano plik " & z.Plik, Color.Green)
+            If Not Me.IsDisposed AndAlso Not Me.Disposing Then
+                prgEksport.Value = 100
+                Komunikat("Zapisano plik " & z.Plik, Color.Green)
+            End If
             Form1.Komunikat("Wyeksportowano mapę do pliku " & Path.GetFileName(z.Plik), Color.Green)
         Catch ex As OperationCanceledException
-            Komunikat("Przerwano eksport", Color.Red)
+            If Not Me.IsDisposed AndAlso Not Me.Disposing Then
+                Komunikat("Przerwano eksport", Color.Red)
+            End If
         Catch ex As Exception
-            Komunikat("Błąd eksportu: " & ex.Message, Color.Red)
+            If Not Me.IsDisposed AndAlso Not Me.Disposing Then
+                Komunikat("Błąd eksportu: " & ex.Message, Color.Red)
+            End If
         Finally
-            _przerwanie.Dispose()
-            _przerwanie = Nothing
-            btnPrzerwij.Enabled = False
-            grpFormat.Enabled = True
-            UstawWidok()
+            If _przerwanie IsNot Nothing Then
+                _przerwanie.Dispose()
+                _przerwanie = Nothing
+            End If
+            If Not Me.IsDisposed AndAlso Not Me.Disposing Then
+                btnPrzerwij.Enabled = False
+                grpFormat.Enabled = True
+                UstawWidok()
+            End If
         End Try
     End Sub
 

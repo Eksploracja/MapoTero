@@ -23,6 +23,7 @@ Public Class Form3
 
     Private _folderScalania As String = ""
     Private _uklad As UkladWspolrzednych = UkladWspolrzednych.PL1992
+    Private _ctsScalanie As CancellationTokenSource
 
     Private Sub Form3_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         _folderScalania = Form1.FolderSesji
@@ -121,6 +122,13 @@ Public Class Form3
     End Sub
 
     Private Async Sub btnScal_Click(sender As Object, e As EventArgs) Handles btnScal.Click
+        If _ctsScalanie IsNot Nothing Then
+            btnScal.Enabled = False
+            Komunikat("Trwa przerywanie scalania...", Color.OrangeRed)
+            _ctsScalanie.Cancel()
+            Exit Sub
+        End If
+
         If File.Exists(_folderScalania & "error.txt") Then
             Komunikat("W katalogu segmentów wykryto obecność pliku error.txt co świadczy o niekompletnym zestawie segmentów. Uzupełnij je i usuń plik error.txt", Color.Red)
             Exit Sub
@@ -139,22 +147,45 @@ Public Class Form3
             .NazwaArkusza = "_scalone_segmenty_" & s.LiczbaKolumn & "x" & s.LiczbaWierszy,
             .Georeferencja = New OpcjeGeoreferencji With {.WorldFile = chkWorldFile.Checked, .Kml = chkKml.Checked, .Map = chkMap.Checked, .Tab = chkTab.Checked}}
 
-        btnScal.Enabled = False
+        _ctsScalanie = New CancellationTokenSource()
+        btnScal.Text = "Przerwij"
         Me.UseWaitCursor = True
         prgScalanie.Value = 0
         Komunikat("Trwa scalanie segmentów (" & s.SzerokoscPx & " x " & s.WysokoscPx & " pikseli)...", Color.Black)
 
-        Dim postep As New Progress(Of Integer)(Sub(p) prgScalanie.Value = Math.Max(0, Math.Min(100, p)))
-        Dim wynik As WynikScalania
+        Dim postep As New Progress(Of Integer)(Sub(p)
+                                                   If Not Me.IsDisposed AndAlso Not Me.Disposing Then
+                                                       prgScalanie.Value = Math.Max(0, Math.Min(100, p))
+                                                   End If
+                                               End Sub)
+        Dim wynik As WynikScalania = Nothing
+        Dim przerwane As Boolean = False
         Try
-            wynik = Await Task.Run(Function() ScalanieSegmentow.Scal(zadanie, postep, CancellationToken.None))
+            wynik = Await Task.Run(Function() ScalanieSegmentow.Scal(zadanie, postep, _ctsScalanie.Token))
+        Catch ex As OperationCanceledException
+            przerwane = True
+            If Not Me.IsDisposed AndAlso Not Me.Disposing Then
+                Komunikat("Scalanie segmentów zostało przerwane.", Color.OrangeRed)
+            End If
+            Form1.Komunikat("Scalanie segmentów zostało przerwane.", Color.OrangeRed)
         Catch ex As Exception
-            Komunikat("Błąd. Segmenty nie zostały scalone: " & ex.Message, Color.Red)
+            If Not Me.IsDisposed AndAlso Not Me.Disposing Then
+                Komunikat("Błąd. Segmenty nie zostały scalone: " & ex.Message, Color.Red)
+            End If
             Exit Sub
         Finally
-            btnScal.Enabled = True
-            Me.UseWaitCursor = False
+            If _ctsScalanie IsNot Nothing Then
+                _ctsScalanie.Dispose()
+                _ctsScalanie = Nothing
+            End If
+            If Not Me.IsDisposed AndAlso Not Me.Disposing Then
+                btnScal.Text = "Złącz segmenty"
+                btnScal.Enabled = True
+                Me.UseWaitCursor = False
+            End If
         End Try
+
+        If przerwane OrElse wynik Is Nothing OrElse Me.IsDisposed OrElse Me.Disposing Then Exit Sub
 
         Dim nazwa As String = Path.GetFileName(wynik.Plik)
         If wynik.Brakujace.Count > 0 Then
@@ -173,6 +204,16 @@ Public Class Form3
 
     Private Sub trkJakosc_Scroll(sender As Object, e As EventArgs) Handles trkJakosc.Scroll
         lblJakosc.Text = trkJakosc.Value & "%"
+    End Sub
+
+    Private Sub Form3_FormClosing(sender As Object, e As FormClosingEventArgs) Handles MyBase.FormClosing
+        If _ctsScalanie IsNot Nothing Then
+            If MessageBox.Show("Trwa scalanie segmentów. Czy chcesz przerwać operację i zamknąć okno?", "Zamykanie okna", MessageBoxButtons.YesNo, MessageBoxIcon.Question) = DialogResult.Yes Then
+                _ctsScalanie.Cancel()
+            Else
+                e.Cancel = True
+            End If
+        End If
     End Sub
 
     Private Sub Form3_FormClosed(sender As Object, e As FormClosedEventArgs) Handles MyBase.FormClosed

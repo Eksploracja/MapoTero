@@ -120,25 +120,53 @@ Public Class Nakladanie_Map
     ''' <summary>Nakłada segmenty o tych samych nazwach; zwraca liczbę zapisanych plików.</summary>
     Private Shared Function NalozWarstwy(dolna As String, gorna As String, wynik As String) As Integer
         Dim liczba As Integer = 0
+
+        ' Kopiowanie conf.txt jeśli istnieje w warstwie dolnej
+        Dim confDolna As String = Path.Combine(dolna, "conf.txt")
+        If File.Exists(confDolna) Then
+            Try
+                File.Copy(confDolna, Path.Combine(wynik, "conf.txt"), True)
+            Catch
+            End Try
+        End If
+
         For Each plikDolny In Directory.GetFiles(dolna, "*.png")
             Dim nazwaPliku As String = Path.GetFileName(plikDolny)
-            If File.Exists(gorna & nazwaPliku) = False Then Continue For
+            Dim plikGorny As String = Path.Combine(gorna, nazwaPliku)
+            If File.Exists(plikGorny) = False Then Continue For
             'Using zwalnia pamięć i blokady plików po każdym segmencie; kopia dolnej warstwy w formacie 32-bitowym,
             'bo na obrazach z paletą barw (np. png8) nie da się rysować
             Try
-                Using warstwa1Plik As New Bitmap(plikDolny), warstwa2 As New Bitmap(gorna & nazwaPliku)
-                    Using warstwa1 As New Bitmap(warstwa1Plik.Width, warstwa1Plik.Height, PixelFormat.Format32bppArgb)
+                Using warstwa1Plik As New Bitmap(plikDolny), warstwa2Plik As New Bitmap(plikGorny)
+                    Using warstwa1 As New Bitmap(warstwa1Plik.Width, warstwa1Plik.Height, PixelFormat.Format32bppArgb),
+                          warstwa2 As New Bitmap(warstwa2Plik.Width, warstwa2Plik.Height, PixelFormat.Format32bppArgb)
+                        Using g2 As Graphics = Graphics.FromImage(warstwa2)
+                            g2.DrawImage(warstwa2Plik, 0, 0, warstwa2Plik.Width, warstwa2Plik.Height)
+                        End Using
                         warstwa2.MakeTransparent(Color.White)
                         Using g As Graphics = Graphics.FromImage(warstwa1)
                             g.DrawImage(warstwa1Plik, 0, 0, warstwa1Plik.Width, warstwa1Plik.Height)
                             g.DrawImage(warstwa2, 0, 0, warstwa2.Width, warstwa2.Height)
                         End Using
-                        warstwa1.Save(wynik & nazwaPliku, ImageFormat.Png)
+                        Dim plikDocelowy As String = Path.Combine(wynik, nazwaPliku)
+                        warstwa1.Save(plikDocelowy, ImageFormat.Png)
                         liczba += 1
+
+                        ' Kopiowanie georeferencji z warstwy dolnej
+                        Dim bezRozszerzenia As String = Path.ChangeExtension(plikDolny, Nothing)
+                        For Each ext In {".pngw", ".wld", ".prj", ".map", ".gmi", ".tab", ".kml", ".png.points", ".pgw"}
+                            Dim plikGeoDolny As String = bezRozszerzenia & ext
+                            If File.Exists(plikGeoDolny) Then
+                                Try
+                                    File.Copy(plikGeoDolny, Path.Combine(wynik, Path.GetFileName(plikGeoDolny)), True)
+                                Catch
+                                End Try
+                            End If
+                        Next
                     End Using
                 End Using
-            Catch
-                'segment, którego nie da się odczytać, jest pomijany
+            Catch ex As Exception
+                Debug.WriteLine("Błąd nakładania segmentu " & nazwaPliku & ": " & ex.Message)
             End Try
         Next
         Return liczba

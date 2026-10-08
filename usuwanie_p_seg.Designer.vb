@@ -1,4 +1,4 @@
-﻿'Copyright (C) <2015>  pajakt
+'Copyright (C) <2015>  pajakt
 
 'This program is free software: you can redistribute it and/or modify
 'it under the terms of the GNU General Public License as published by
@@ -160,7 +160,7 @@ Partial Class usuwanie_p_seg
         'cmbRozszerzenie
         '
         Me.cmbRozszerzenie.FormattingEnabled = True
-        Me.cmbRozszerzenie.Items.AddRange(New Object() {"jpg", "tif", "png", "png8", "png24", "png32", "gif", "svg+xml", "map", "gmi", "wld", "jpgw", "kml", "tab"})
+        Me.cmbRozszerzenie.Items.AddRange(New Object() {"jpg", "png", "tif", "gif"})
         Me.cmbRozszerzenie.Location = New System.Drawing.Point(21, 42)
         Me.cmbRozszerzenie.Name = "cmbRozszerzenie"
         Me.cmbRozszerzenie.Size = New System.Drawing.Size(199, 21)

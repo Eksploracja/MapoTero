@@ -123,7 +123,8 @@ Public Class Form1
 
     ''' <summary>Przywraca domyślny widok mapy (cała Polska).</summary>
     Public Sub DomyslnyWidokMapy()
-        mapa.Overlays.Clear()
+        WyczyscZnaczniki()
+        btnZnaczniki.Enabled = True
         lblSrodekSzer.Text = "52.3"
         lblSrodekDlug.Text = "19.2"
         lblZoom.Text = "6"
@@ -210,6 +211,7 @@ Public Class Form1
 
     Private Sub Form1_FormClosing(sender As Object, e As FormClosingEventArgs) Handles MyBase.FormClosing
         _przerwanie?.Cancel()
+        WyczyscZnaczniki()
         ZapamietajPolozenieMapy()
         Try
             Ustawienia.Zapisz(PlikLastsettings)
@@ -491,13 +493,15 @@ Public Class Form1
     End Sub
 
     Private Sub PolaZasieguZmienione(sender As Object, e As EventArgs) Handles txtXDol.TextChanged, txtYLewy.TextChanged, txtXGora.TextChanged, txtYPrawy.TextChanged
+        btnZnaczniki.Enabled = True
         PrzeliczSiatke()
     End Sub
 
     Private Sub ParametrySegmentuZmienione(sender As Object, e As EventArgs) Handles txtBokSegmentu.TextChanged, txtRozmiarPiksela.TextChanged
+        btnZnaczniki.Enabled = True
         PrzeliczSiatke()
         If mapa.SelectedArea.IsEmpty = False Then
-            mapa.Overlays.Clear()
+            WyczyscZnaczniki()
             PokazZnaczniki()
         End If
     End Sub
@@ -779,16 +783,27 @@ Public Class Form1
         End If
     End Sub
 
+    ''' <summary>Czyści i poprawnie zwalnia zasoby GDI+ wszystkich znaczników na mapie.</summary>
+    Private Sub WyczyscZnaczniki()
+        For Each overlay In mapa.Overlays
+            For Each marker In overlay.Markers
+                marker.Dispose()
+            Next
+            overlay.Markers.Clear()
+        Next
+        mapa.Overlays.Clear()
+    End Sub
+
     'znaczniki rzeczywistego zasięgu pobieranej mapy
     Private Sub btnZnaczniki_Click(sender As Object, e As EventArgs) Handles btnZnaczniki.Click
-        mapa.Overlays.Clear()
+        WyczyscZnaczniki()
         PokazZnaczniki()
     End Sub
 
     'znaczniki wyświetlane po zaznaczeniu obszaru pobierania
     Private Sub mapa_MouseClick(sender As Object, e As MouseEventArgs) Handles mapa.MouseClick
         If mapa.SelectedArea.IsEmpty = False AndAlso e.Button = MouseButtons.Right Then
-            mapa.Overlays.Clear()
+            WyczyscZnaczniki()
             PokazZnaczniki()
         End If
     End Sub
@@ -863,7 +878,7 @@ Public Class Form1
     End Sub
 
     Private Sub PomocPomorskieForumEksploracyjneToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles PomocPomorskieForumEksploracyjneToolStripMenuItem.Click
-        pomoc_pfe.ShowDialog()
+        pomoc_pfe.OtworzWPrzegladarce()
     End Sub
 
     Private Sub InstrukcjaObslugiToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles InstrukcjaObsługiToolStripMenuItem.Click

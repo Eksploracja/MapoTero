@@ -59,10 +59,12 @@ Public NotInheritable Class ScalanieSegmentow
 
     Public Shared Function Scal(z As ZadanieScalania, postep As IProgress(Of Integer), token As CancellationToken) As WynikScalania
         Dim s As Siatka = z.Siatka
+        If s Is Nothing OrElse Not s.Poprawna OrElse s.LiczbaKolumn = 0 OrElse s.LiczbaWierszy = 0 Then
+            Throw New ArgumentException("Niepoprawne parametry siatki segmentów")
+        End If
         Dim bok As Integer = s.BokSegmentuPx
         Dim kolumny As Integer = s.LiczbaKolumn
         Dim wiersze As Integer = s.LiczbaWierszy
-        If Not s.Poprawna OrElse kolumny = 0 OrElse wiersze = 0 Then Throw New ArgumentException("Niepoprawne parametry siatki segmentów")
         If s.SzerokoscPx > Integer.MaxValue \ 3 OrElse s.WysokoscPx > Integer.MaxValue Then Throw New ArgumentException("Arkusz jest zbyt duży")
 
         Dim szer As Integer = CInt(s.SzerokoscPx)
@@ -72,9 +74,10 @@ Public NotInheritable Class ScalanieSegmentow
             Throw New ArgumentException("Arkusz " & szer & " x " & wys & " pikseli przekracza możliwości formatu (maks. " & maks & " pikseli) - wybierz GeoTIFF lub PNG")
         End If
 
+        Dim folder As String = If(String.IsNullOrEmpty(z.Folder), "", If(z.Folder.EndsWith("\") OrElse z.Folder.EndsWith("/"), z.Folder, z.Folder & Path.DirectorySeparatorChar))
         Dim rozszerzenie As String = ZapisRastra.Rozszerzenie(z.Format)
         Dim nazwaPliku As String = z.NazwaArkusza & "." & rozszerzenie
-        Dim plik As String = z.Folder & nazwaPliku
+        Dim plik As String = folder & nazwaPliku
         Dim wynik As New WynikScalania With {.Plik = plik}
 
         'wysokość pasa wierszy mieszczącego się w budżecie pamięci
@@ -85,25 +88,71 @@ Public NotInheritable Class ScalanieSegmentow
         Try
             Using zapis = ZapisRastra.Utworz(z.Format, plik, szer, wys, z.JakoscJpeg, z.Uklad, s.ZasiegSiatki)
                 For w = 1 To wiersze
-                    For y0 = 0 To bok - 1 Step pas
-                        token.ThrowIfCancellationRequested()
-                        Dim n As Integer = Math.Min(pas, bok - y0)
-                        'tło białe - widoczne w miejscu brakujących segmentów
-                        For i = 0 To n * szer * 3 - 1
-                            bufor(i) = 255
-                        Next
+                    ' Wczytanie segmentów bieżącego wiersza raz dla wszystkich pasów wiersza
+                    Dim segmentyWiersza As New Dictionary(Of Integer, Bitmap)()
+                    Try
                         For k = 1 To kolumny
                             Dim nazwa As String = s.NazwaSegmentu(z.Prefiks, z.Numeracja, w, k) & "." & z.RozszerzenieSegmentow
-                            Dim sciezka As String = z.Folder & nazwa
+                            Dim sciezka As String = folder & nazwa
                             If Not File.Exists(sciezka) Then
-                                If y0 = 0 Then wynik.Brakujace.Add(nazwa)
+                                wynik.Brakujace.Add(nazwa)
                                 Continue For
                             End If
-                            KopiujSegment(sciezka, bok, y0, n, bufor, szer, (k - 1) * bok, liniaSegmentu)
+                            Try
+                                Using zrodlo As Image = Image.FromFile(sciezka)
+                                    Dim rgb As New Bitmap(bok, bok, PixelFormat.Format24bppRgb)
+                                    Using g As Graphics = Graphics.FromImage(rgb)
+                                        g.Clear(Color.White)
+                                        If zrodlo.Width = bok AndAlso zrodlo.Height = bok Then
+                                            g.InterpolationMode = InterpolationMode.NearestNeighbor
+                                        Else
+                                            g.InterpolationMode = InterpolationMode.HighQualityBicubic
+                                        End If
+                                        g.PixelOffsetMode = PixelOffsetMode.Half
+                                        g.DrawImage(zrodlo, New Rectangle(0, 0, bok, bok), 0, 0, zrodlo.Width, zrodlo.Height, GraphicsUnit.Pixel)
+                                    End Using
+                                    segmentyWiersza(k) = rgb
+                                End Using
+                            Catch
+                                wynik.Brakujace.Add(nazwa)
+                            End Try
                         Next
-                        zapis.ZapiszWiersze(bufor, n)
-                        postep?.Report(CInt(CLng(zapis.Zapisane) * 100 \ wys))
-                    Next
+
+                        For y0 = 0 To bok - 1 Step pas
+                            token.ThrowIfCancellationRequested()
+                            Dim n As Integer = Math.Min(pas, bok - y0)
+                            'tło białe - widoczne w miejscu brakujących segmentów
+                            Array.Fill(bufor, CByte(255), 0, n * szer * 3)
+
+                            For k = 1 To kolumny
+                                Dim rgb As Bitmap = Nothing
+                                If Not segmentyWiersza.TryGetValue(k, rgb) Then Continue For
+                                Dim dane As BitmapData = rgb.LockBits(New Rectangle(0, y0, bok, n), ImageLockMode.ReadOnly, PixelFormat.Format24bppRgb)
+                                Try
+                                    Dim x0 As Integer = (k - 1) * bok
+                                    For r = 0 To n - 1
+                                        Marshal.Copy(IntPtr.Add(dane.Scan0, r * dane.Stride), liniaSegmentu, 0, bok * 3)
+                                        Dim cel As Integer = (r * szer + x0) * 3
+                                        'GDI+ przechowuje piksele w kolejności BGR
+                                        For i = 0 To bok - 1
+                                            bufor(cel + i * 3) = liniaSegmentu(i * 3 + 2)
+                                            bufor(cel + i * 3 + 1) = liniaSegmentu(i * 3 + 1)
+                                            bufor(cel + i * 3 + 2) = liniaSegmentu(i * 3)
+                                        Next
+                                    Next
+                                Finally
+                                    rgb.UnlockBits(dane)
+                                End Try
+                            Next
+                            zapis.ZapiszWiersze(bufor, n)
+                            postep?.Report(CInt(CLng(zapis.Zapisane) * 100 \ wys))
+                        Next
+                    Finally
+                        For Each b In segmentyWiersza.Values
+                            b.Dispose()
+                        Next
+                        segmentyWiersza.Clear()
+                    End Try
                 Next
                 zapis.Zakoncz()
             End Using
@@ -118,48 +167,10 @@ Public NotInheritable Class ScalanieSegmentow
 
         'pliki georeferencyjne arkusza (GeoTIFF ma georeferencję także w samym pliku)
         If z.Georeferencja.Dowolna Then
-            Dim obraz = ZapisGeoreferencji.Obraz(z.Uklad, s.ZasiegSiatki, szer, wys, z.Folder, nazwaPliku)
-            ZapisGeoreferencji.ZapiszPliki(obraz, z.Folder, z.NazwaArkusza, rozszerzenie, z.Georeferencja)
+            Dim obraz = ZapisGeoreferencji.Obraz(z.Uklad, s.ZasiegSiatki, szer, wys, folder, nazwaPliku)
+            ZapisGeoreferencji.ZapiszPliki(obraz, folder, z.NazwaArkusza, rozszerzenie, z.Georeferencja)
         End If
         Return wynik
     End Function
-
-    ''' <summary>
-    ''' Kopiuje wiersze y0..y0+n-1 segmentu do pasa arkusza (od kolumny pikseli x0). Segment jest sprowadzany do formatu
-    ''' RGB 24 bity na białym tle (obrazy z paletą lub przezroczystością) i - gdy ma inny rozmiar - skalowany do boku segmentu.
-    ''' </summary>
-    Private Shared Sub KopiujSegment(sciezka As String, bok As Integer, y0 As Integer, n As Integer,
-                                     bufor() As Byte, szerokoscArkusza As Integer, x0 As Integer, linia() As Byte)
-        Using zrodlo As Image = Image.FromFile(sciezka)
-            Using rgb As New Bitmap(bok, bok, PixelFormat.Format24bppRgb)
-                Using g As Graphics = Graphics.FromImage(rgb)
-                    g.Clear(Color.White)
-                    'segment o właściwym rozmiarze kopiowany jest piksel w piksel, inny - skalowany
-                    If zrodlo.Width = bok AndAlso zrodlo.Height = bok Then
-                        g.InterpolationMode = InterpolationMode.NearestNeighbor
-                    Else
-                        g.InterpolationMode = InterpolationMode.HighQualityBicubic
-                    End If
-                    g.PixelOffsetMode = PixelOffsetMode.Half
-                    g.DrawImage(zrodlo, New Rectangle(0, 0, bok, bok), 0, 0, zrodlo.Width, zrodlo.Height, GraphicsUnit.Pixel)
-                End Using
-                Dim dane As BitmapData = rgb.LockBits(New Rectangle(0, y0, bok, n), ImageLockMode.ReadOnly, PixelFormat.Format24bppRgb)
-                Try
-                    For r = 0 To n - 1
-                        Marshal.Copy(IntPtr.Add(dane.Scan0, r * dane.Stride), linia, 0, bok * 3)
-                        Dim cel As Integer = (r * szerokoscArkusza + x0) * 3
-                        'GDI+ przechowuje piksele w kolejności BGR
-                        For i = 0 To bok - 1
-                            bufor(cel + i * 3) = linia(i * 3 + 2)
-                            bufor(cel + i * 3 + 1) = linia(i * 3 + 1)
-                            bufor(cel + i * 3 + 2) = linia(i * 3)
-                        Next
-                    Next
-                Finally
-                    rgb.UnlockBits(dane)
-                End Try
-            End Using
-        End Using
-    End Sub
 
 End Class

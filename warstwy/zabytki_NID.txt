@@ -1,0 +1,3 @@
+http://usluga.zabytek.gov.pl/INSPIRE_IMD/service.svc/get?request=GetMap&version=1.3.0&CRS=EPSG:2180&layers=
+Immovable_Monuments
+1

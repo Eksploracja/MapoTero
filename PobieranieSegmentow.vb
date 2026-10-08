@@ -155,7 +155,7 @@ Public NotInheritable Class PobieranieSegmentow
         wynik.Wszystkie = segmenty.Count
 
         'foldery mapy TrekBuddy / Locus Map
-        Dim folderDocelowy As String = z.Folder
+        Dim folderDocelowy As String = If(z.Folder.EndsWith("\") OrElse z.Folder.EndsWith("/"), z.Folder, z.Folder & Path.DirectorySeparatorChar)
         Dim tb As MapaTrekBuddy = Nothing
         If z.TrekBuddy Then
             tb = New MapaTrekBuddy(z)
@@ -165,17 +165,13 @@ Public NotInheritable Class PobieranieSegmentow
 
         ZapiszKoordynaty(z, segmenty)
 
-        'przy powtórnym pobieraniu - tylko segmenty o numerze wyższym niż ostatni istniejący
+        'przy powtórnym pobieraniu - tylko brakujące segmenty
         Dim doPobrania As List(Of OpisSegmentu) = segmenty
         If z.PobierajPowyzejOstatniego AndAlso Not z.TrekBuddy Then
-            Dim ostatni As Integer = 0
-            For Each sg In segmenty
-                If File.Exists(folderDocelowy & sg.Nazwa & "." & ext) Then ostatni = Math.Max(ostatni, sg.Numer)
-            Next
-            doPobrania = segmenty.FindAll(Function(sg) sg.Numer > ostatni)
+            doPobrania = segmenty.FindAll(Function(sg) Not File.Exists(Path.Combine(folderDocelowy, sg.Nazwa & "." & ext)))
         End If
 
-        Dim plikBledow As String = z.Folder & "error.txt"
+        Dim plikBledow As String = Path.Combine(z.Folder, "error.txt")
         Dim przyczyny As New ConcurrentDictionary(Of Integer, String)
 
         Try
@@ -194,7 +190,7 @@ Public NotInheritable Class PobieranieSegmentow
                             Async Function()
                                 Await semafor.WaitAsync(token).ConfigureAwait(False)
                                 Try
-                                    Dim plik As String = folderDocelowy & segment.Nazwa & "." & ext
+                                    Dim plik As String = Path.Combine(folderDocelowy, segment.Nazwa & "." & ext)
                                     Dim blad As String = ""
                                     If Not File.Exists(plik) Then
                                         If kafleWmts Is Nothing Then
@@ -219,14 +215,14 @@ Public NotInheritable Class PobieranieSegmentow
                                 End Try
                             End Function, token))
                     Next
-                    Await Task.WhenAll(zadania)
+                    Await Task.WhenAll(zadania).ConfigureAwait(False)
                 End Using
 
                 If przyczyny.IsEmpty OrElse proba >= z.IloscProb Then Exit For
 
                 postep?.Report(New PostepPobierania With {.Pobrane = 0, .Wszystkie = doPobrania.Count, .Proba = proba,
                     .Komunikat = "Nie pobrano " & przyczyny.Count & " segmentów. Kolejna próba (" & (proba + 1) & " z " & z.IloscProb & ") za " & z.PrzerwaSekundy & " s"})
-                Await Task.Delay(TimeSpan.FromSeconds(Math.Max(0, z.PrzerwaSekundy)), token)
+                Await Task.Delay(TimeSpan.FromSeconds(Math.Max(0, z.PrzerwaSekundy)), token).ConfigureAwait(False)
             Next
         Catch ex As OperationCanceledException
             wynik.Przerwano = True
@@ -235,7 +231,7 @@ Public NotInheritable Class PobieranieSegmentow
         'wykaz brakujących segmentów (także po przerwaniu - scalanie ostrzeże o niekompletnym zestawie)
         Dim brakujace As New List(Of OpisSegmentu)
         For Each sg In doPobrania
-            If Not File.Exists(folderDocelowy & sg.Nazwa & "." & ext) Then brakujace.Add(sg)
+            If Not File.Exists(Path.Combine(folderDocelowy, sg.Nazwa & "." & ext)) Then brakujace.Add(sg)
         Next
         wynik.Nieudane = brakujace.Count
         If brakujace.Count = 0 Then
@@ -259,7 +255,13 @@ Public NotInheritable Class PobieranieSegmentow
 
         If tb IsNot Nothing Then
             tb.ZapiszListeSegmentow(segmenty.ConvertAll(Function(sg) sg.Nazwa & "." & ext))
-            If Not wynik.Przerwano Then tb.UtworzArchiwumTar()
+            If Not wynik.Przerwano Then
+                Try
+                    tb.UtworzArchiwumTar()
+                Catch ex As Exception
+                    Debug.WriteLine("Nie udało się utworzyć archiwum TAR: " & ex.Message)
+                End Try
+            End If
         End If
 
         Return wynik
@@ -274,7 +276,7 @@ Public NotInheritable Class PobieranieSegmentow
         Try
             Using limit = LimitCzasu(limitCzasuSekundy, token),
                   odpowiedz = Await Klient.GetAsync(adres, HttpCompletionOption.ResponseContentRead, limit.Token).ConfigureAwait(False)
-                Dim dane() As Byte = Await odpowiedz.Content.ReadAsByteArrayAsync().ConfigureAwait(False)
+                Dim dane() As Byte = Await odpowiedz.Content.ReadAsByteArrayAsync(limit.Token).ConfigureAwait(False)
                 Dim typ As String = If(odpowiedz.Content.Headers.ContentType?.MediaType, "")
 
                 If Not CzyObraz(dane) Then
@@ -287,10 +289,9 @@ Public NotInheritable Class PobieranieSegmentow
                 End If
 
                 'zapisuje dokładnie to, co przysłał serwer - bez ponownej kompresji obrazka
-                Dim tymczasowy As String = plikDocelowy & ".tmp"
+                Dim tymczasowy As String = plikDocelowy & "." & Guid.NewGuid().ToString("N") & ".tmp"
                 File.WriteAllBytes(tymczasowy, dane)
-                If File.Exists(plikDocelowy) Then File.Delete(plikDocelowy)
-                File.Move(tymczasowy, plikDocelowy)
+                File.Move(tymczasowy, plikDocelowy, overwrite:=True)
                 Return ""
             End Using
         Catch ex As OperationCanceledException When token.IsCancellationRequested

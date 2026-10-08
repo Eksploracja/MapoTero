@@ -1,4 +1,4 @@
-﻿'Copyright (C) <2015>  pajakt
+'Copyright (C) <2015>  pajakt
 
     'This program is free software: you can redistribute it and/or modify
     'it under the terms of the GNU General Public License as published by
@@ -48,8 +48,8 @@ Partial Class pomoc_pfe
         Me.WebBrowser1.MinimumSize = New System.Drawing.Size(20, 20)
         Me.WebBrowser1.Name = "WebBrowser1"
         Me.WebBrowser1.Size = New System.Drawing.Size(952, 576)
-        Me.WebBrowser1.TabIndex = 0
-        Me.WebBrowser1.Url = New System.Uri("http://www.forum.eksploracja.pl/viewforum.php?f=205", System.UriKind.Absolute)
+        Me.WebBrowser1.ScriptErrorsSuppressed = True
+        Me.WebBrowser1.Url = New System.Uri("https://forum.eksploracja.pl/viewforum.php?f=205", System.UriKind.Absolute)
         '
         'Form3
         '
