@@ -2,7 +2,7 @@ MapoTero 3.13 - optymalizacja scalania segmentów, naprawa eksportu MBTiles, pop
 
 ## Instalacja
 
-1. Pobierz plik **MapoTero_v3.13.zip** (poniżej, w sekcji *Assets*).
+1. Pobierz plik **[MapoTero_v3.13.zip](https://github.com/Eksploracja/MapoTero/releases/download/v3.13/MapoTero_v3.13.zip)** (bezpośrednie pobranie lub poniżej w sekcji *Assets*).
 2. Przed rozpakowaniem kliknij plik prawym przyciskiem myszy, wybierz *Właściwości*, zaznacz **Odblokuj** i kliknij *OK* - wtedy Windows nie będzie blokował uruchomienia programu (program nie ma podpisu cyfrowego, więc filtr SmartScreen traktuje go jako nierozpoznaną aplikację; można też w oknie SmartScreen kliknąć *Więcej informacji* > *Uruchom mimo to*).
 3. Rozpakuj archiwum do dowolnego folderu i uruchom **MapoTero.exe**.
 4. Program wymaga środowiska [.NET Desktop Runtime 8 (x64)](https://dotnet.microsoft.com/download/dotnet/8.0) - jeśli nie jest zainstalowane, Windows zaproponuje jego pobranie przy pierwszym uruchomieniu.

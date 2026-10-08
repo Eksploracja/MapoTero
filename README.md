@@ -20,8 +20,9 @@ Program pobiera mapy, dzieląc wybrany obszar na siatkę kwadratowych segmentów
 
 ## Pobieranie
 
-Najnowsze wydania programu można pobrać z zakładki **[Releases](https://github.com/Eksploracja/MapoTero/releases)**:
-* 📥 [Pobierz najnowszą wersję MapoTero z GitHub Releases](https://github.com/Eksploracja/MapoTero/releases)
+Najnowsze wydania programu można pobrać bezpośrednio w paczce ZIP:
+* 📥 **[Pobierz najnowszą wersję MapoTero z GitHub Releases (MapoTero_v3.13.zip)](https://github.com/Eksploracja/MapoTero/releases/download/v3.13/MapoTero_v3.13.zip)** – bezpośrednie pobranie programu (gotowy do uruchomienia po rozpakowaniu, wersja 64-bitowa dla systemu Windows).
+* 📦 Wszystkie wydania, kody źródłowe i historia wersji: **[GitHub Releases](https://github.com/Eksploracja/MapoTero/releases/latest)**.
 
 ---
 
