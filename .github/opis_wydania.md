@@ -1,13 +1,32 @@
-MapoTero 3.12 - pobieranie map z serwerów WMS i usług WMTS, scalanie do GeoTIFF, eksport do KMZ i MBTiles.
+MapoTero 3.13 - optymalizacja scalania segmentów, naprawa eksportu MBTiles, poprawki pobierania WMTS/WMS oraz wycieków pamięci GDI+.
 
 ## Instalacja
 
-1. Pobierz plik **MapoTero_v3.12.zip** (poniżej, w sekcji *Assets*).
+1. Pobierz plik **MapoTero_v3.13.zip** (poniżej, w sekcji *Assets*).
 2. Przed rozpakowaniem kliknij plik prawym przyciskiem myszy, wybierz *Właściwości*, zaznacz **Odblokuj** i kliknij *OK* - wtedy Windows nie będzie blokował uruchomienia programu (program nie ma podpisu cyfrowego, więc filtr SmartScreen traktuje go jako nierozpoznaną aplikację; można też w oknie SmartScreen kliknąć *Więcej informacji* > *Uruchom mimo to*).
 3. Rozpakuj archiwum do dowolnego folderu i uruchom **MapoTero.exe**.
 4. Program wymaga środowiska [.NET Desktop Runtime 8 (x64)](https://dotnet.microsoft.com/download/dotnet/8.0) - jeśli nie jest zainstalowane, Windows zaproponuje jego pobranie przy pierwszym uruchomieniu.
 
-Ustawienia i zbiory map z poprzednich wersji (plik `lastsettings.txt`, folder `warstwy`) są zgodne z wersją 3.12.
+Ustawienia i zbiory map z poprzednich wersji (plik `lastsettings.txt`, folder `warstwy`) są w pełni zgodne z wersją 3.13.
+
+## Zmiany w wersji 3.13
+
+* **Wydajność scalania segmentów:** eliminacja wielokrotnego odczytu i dekodowania plików kafli z dysku poprzez buforowanie wiersza segmentów w pamięci RAM; wielokrotne przyspieszenie łączenia arkuszy.
+* **Eksport MBTiles:** naprawa powiązania transakcji SQLite z zapytaniami (rozwiązanie wyjątku `InvalidOperationException`), jednorazowa alokacja parametrów SQL, włączenie trybów `PRAGMA synchronous = OFF` oraz `WAL` dla szybkiego zapisu, buforowanie kodeka JPEG.
+* **Odporność pobierania:** naprawa wznawiania sesji – brakujące segmenty są identyfikowane na podstawie fizycznego istnienia plików na dysku (brak pomijania kafli w przypadku restartu lub błędów sieci); atomowe przenoszenie plików tymczasowych.
+* **Izolacja współbieżności WMTS:** token anulowania nie wpływa na współdzielone pobierania kafli w pamięci podręcznej.
+* **Zarządzanie pamięcią i zasobami natywnymi:**
+  * Eliminacja wycieków uchwytów plików KMZ (`FileStream`) w bloku `Try...Finally`.
+  * Bezpieczne zamykanie i zwalnianie biblioteki LibTiff w eksporcie GeoTIFF.
+  * Obsługa paletowych obrazów PNG (8-bit) przed nałożeniem przezroczystości `MakeTransparent`.
+  * Poprawne zwalnianie zasobów GDI+ dla znaczników `GMarkerGoogle` przy odświeżaniu mapy i zamykaniu okna.
+* **Stabilność interfejsu (WinForms):** zabezpieczenie asynchronicznych operacji w oknach scalania i eksportu przed `ObjectDisposedException` przy zamknięciu okna w trakcie pracy w tle.
+* **Narzędzia i UI:**
+  * Dokładne porównywanie rozmiaru plików w bajtach w oknie usuwania pustych segmentów (rozwiązanie problemu zaokrąglania przy ułamkowych progach kB) oraz eliminacja obciążenia UI przez buforowanie listy plików w RAM.
+  * Nowe okno ustawień programu: bezpieczne stosowanie zmian przyciskiem OK, walidowane pola liczbowe, listy wyboru, ochrona przed utratą boku segmentu w trybie TrekBuddy.
+  * Otwieranie forum pomocy w domyślnej przeglądarce internetowej systemu z protokołem HTTPS (zamiast przestarzałego silnika IE Trident).
+* **Aktualizacja zbiorów map:** dodanie nowych warstw WMTS (m.in. BDOT10k, ortofotomapa wysokiej rozdzielczości, TrueOrtho) oraz uporządkowanie nieaktywnych źródeł w katalogu `_archiwalne`.
+* **Testy jednostkowe:** rozszerzenie zestawu testów jednostkowych o testy scalania segmentów (482 testy zakończone sukcesem).
 
 ## Zmiany w wersji 3.12
 

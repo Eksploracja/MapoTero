@@ -27,12 +27,14 @@ Najnowsze wydania programu można pobrać z zakładki **[Releases](https://githu
 
 ## Aktualności
 
-* **Wersja 3.13 (w przygotowaniu):**
-  * Nowe okno ustawień: zmiany stosowane dopiero po kliknięciu OK (Anuluj - bez zmian), okno zawsze pokazuje aktualne ustawienia, pola liczbowe z zakresem wartości, listy tylko do wyboru (wpisanie błędnego formatu lub stylu numeracji nie jest już możliwe), poprawione opisy i podpowiedzi,
-  * Przywracanie ustawień domyślnych wymaga potwierdzenia i przelicza wpisany zasięg do układu PL-1992 (dawniej współrzędne w innym układzie pozostawały bez przeliczenia),
-  * Tryb TrekBuddy / Locus Map nie kasuje już wybranych plików kalibracji i po wyłączeniu przywraca poprzedni bok segmentu; zapamiętywany jest styl nazwy paczki,
-  * Nowe ustawienia: limit czasu odpowiedzi serwera (10-600 s, dawniej stałe 60 s), zachowywanie pobranych kafli WMTS, jakość JPEG segmentów WMTS, domyślny układ współrzędnych nowej sesji,
-  * Usunięcie formatu svg+xml (obraz wektorowy był zapisywany jako plik .jpg, którego nie dało się skalibrować ani scalić); format ten w dawnym pliku conf.txt zamieniany jest na jpeg.
+* **08.10.2026 – Wersja 3.13:**
+  * **Wydajność scalania segmentów:** jednokrotne buforowanie wiersza segmentów w pamięci RAM zamiast wielokrotnego dekodowania kafli z dysku (wielokrotne przyspieszenie tworzenia dużych arkuszy),
+  * **Eksport MBTiles:** naprawa transakcji SQLite i zapytań (rozwiązanie błędu `InvalidOperationException`), optymalizacja parametrów SQL, włączenie trybów `PRAGMA synchronous = OFF` oraz `WAL`, buforowanie kodeka JPEG,
+  * **Odporność pobierania:** naprawa wznawiania sesji – brakujące segmenty są identyfikowane na podstawie fizycznego istnienia plików na dysku; atomowe przenoszenie plików tymczasowych; izolacja anulowania zadań WMTS,
+  * **Zarządzanie pamięcią i zasobami natywnymi:** gwarantowane zwalnianie uchwytów plików KMZ (`FileStream`) w blokach `Finally`, bezpieczne zamykanie LibTiff w GeoTIFF, obsługa paletowych obrazów PNG w `MakeTransparent`, zwalnianie zasobów GDI+ dla znaczników `GMarkerGoogle`,
+  * **Stabilność UI (WinForms):** ochrona przed `ObjectDisposedException` przy zamknięciu formularzy w trakcie pracy w tle; precyzyjne porównywanie rozmiaru plików w bajtach w oknie usuwania pustych segmentów i buforowanie listy plików w RAM; bezpieczne otwieranie forum pomocy przez HTTPS w przeglądarce,
+  * **Nowe okno ustawień:** zmiany stosowane po kliknięciu OK (Anuluj - bez zmian), okno zawsze pokazuje aktualne ustawienia, pola liczbowe z zakresem wartości, listy tylko do wyboru, poprawione opisy i podpowiedzi, przywracanie domyślnych z potwierdzeniem i przeliczeniem do PL-1992, tryb TrekBuddy bez kasowania plików kalibracji, usunięcie formatu svg+xml,
+  * **Baza warstw i testy:** dodanie nowych warstw WMTS (m.in. BDOT10k, ortofotomapa wysokiej rozdzielczości, TrueOrtho), uporządkowanie nieaktywnych źródeł w `_archiwalne/` oraz nowy zestaw testów scalania (482 testy jednostkowe).
 * **07.10.2026 – Wersja 3.12:**
   * Przejście na platformę .NET 8 (program 64-bitowy) i aktualizacja bibliotek zależnych (GMap.NET, SQLite); automatyczna kompilacja i testy w GitHub Actions,
   * Pobieranie z usług WMTS: wystarczy podać w pliku zbioru map adres usługi WMTS (przykład: zbiór *ortofotomapa_WMTS*); program sam wybiera poziom kafli odpowiadający rozmiarowi piksela, a segmenty składa z kafli i w razie potrzeby przelicza do wybranego układu - mają te same pliki georeferencji co segmenty WMS,
