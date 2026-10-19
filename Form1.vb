@@ -41,6 +41,13 @@ Public Class Form1
     ''' <summary>Programowe ustawianie listy układów (bez przeliczania zasięgu).</summary>
     Private _ustawianieUkladu As Boolean
 
+    ''' <summary>Szerokość prawego panelu (bez paska przewijania) i jego najmniejsza wysokość, przy której nie jest przewijany.</summary>
+    Private _szerokoscPanelu As Integer
+    Private _minWysokoscPanelu As Integer
+
+    ''' <summary>Liczba wierszy listy warstw WMS widocznych w najmniejszym oknie.</summary>
+    Private Const MinWierszyListyWarstw As Integer = 5
+
 #Region "Dostęp dla innych okien"
 
     ''' <summary>Folder segmentów bieżącej sesji (wyświetlany na pasku stanu).</summary>
@@ -164,6 +171,7 @@ Public Class Form1
 #End If
 
         Me.SetDesktopLocation(0, 0)
+        UstawRozmiarOkna()
 
         'ustawienia startowe okna mapy
         mapa.Manager.Mode = AccessMode.ServerAndCache
@@ -218,6 +226,34 @@ Public Class Form1
         Catch ex As Exception
             MsgBox("Nie udało się zapisać ustawień: " & ex.Message, MsgBoxStyle.Exclamation)
         End Try
+    End Sub
+
+#End Region
+
+#Region "Rozmiar okna"
+
+    ''' <summary>
+    ''' Najmniejszy rozmiar okna i rozmiar startowy dopasowany do ekranu. Lista warstw WMS rozciąga się razem z oknem
+    ''' (kotwice w projekcie formularza), więc okno można zmniejszyć o tyle, o ile da się skrócić tę listę; na ekranie
+    ''' niższym nawet od tego prawy panel jest przewijany.
+    ''' </summary>
+    Private Sub UstawRozmiarOkna()
+        Dim minWysokoscListy As Integer = lstWarstwy.ItemHeight * MinWierszyListyWarstw + (lstWarstwy.Height - lstWarstwy.ClientSize.Height)
+        Dim zapasListy As Integer = Math.Max(0, lstWarstwy.Height - minWysokoscListy)
+        _szerokoscPanelu = Panel2.Width
+        _minWysokoscPanelu = Panel2.ClientSize.Height - zapasListy
+        Panel2.AutoScrollMinSize = New Size(0, _minWysokoscPanelu)
+
+        Dim ekran As Rectangle = Screen.FromControl(Me).WorkingArea
+        Me.MinimumSize = New Size(Math.Min(Me.Width, ekran.Width), Math.Min(Me.Height - zapasListy, ekran.Height))
+        Me.Size = New Size(Math.Min(Me.Width, ekran.Width), Math.Min(Me.Height, ekran.Height))
+    End Sub
+
+    ''' <summary>Przewijany prawy panel (ekran niższy niż najmniejsze okno) poszerza się o pasek przewijania.</summary>
+    Private Sub Panel2_SizeChanged(sender As Object, e As EventArgs) Handles Panel2.SizeChanged
+        If _szerokoscPanelu = 0 Then Exit Sub
+        Dim szerokosc As Integer = _szerokoscPanelu + If(Panel2.Height < _minWysokoscPanelu, SystemInformation.VerticalScrollBarWidth, 0)
+        If Panel2.Width <> szerokosc Then Panel2.Width = szerokosc
     End Sub
 
 #End Region

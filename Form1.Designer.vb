@@ -186,6 +186,7 @@ Partial Class Form1
         Me.grpDaneZrodlowe.Controls.Add(Me.cmbZbiorMap)
         Me.grpDaneZrodlowe.Controls.Add(Me.lblUklad)
         Me.grpDaneZrodlowe.Controls.Add(Me.cmbUklad)
+        Me.grpDaneZrodlowe.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
         Me.grpDaneZrodlowe.Location = New System.Drawing.Point(5, 3)
         Me.grpDaneZrodlowe.Name = "grpDaneZrodlowe"
         Me.grpDaneZrodlowe.Size = New System.Drawing.Size(212, 254)
@@ -216,7 +217,9 @@ Partial Class Form1
         '
         'lstWarstwy
         '
+        Me.lstWarstwy.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
         Me.lstWarstwy.FormattingEnabled = True
+        Me.lstWarstwy.IntegralHeight = False
         Me.lstWarstwy.Location = New System.Drawing.Point(6, 72)
         Me.lstWarstwy.Name = "lstWarstwy"
         Me.lstWarstwy.Size = New System.Drawing.Size(198, 134)
@@ -234,6 +237,7 @@ Partial Class Form1
         '
         'lblUklad
         '
+        Me.lblUklad.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
         Me.lblUklad.AutoSize = True
         Me.lblUklad.Location = New System.Drawing.Point(6, 208)
         Me.lblUklad.Name = "lblUklad"
@@ -244,6 +248,7 @@ Partial Class Form1
         '
         'cmbUklad
         '
+        Me.cmbUklad.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
         Me.cmbUklad.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
         Me.cmbUklad.FormattingEnabled = True
         Me.cmbUklad.Location = New System.Drawing.Point(6, 223)
@@ -509,6 +514,7 @@ Partial Class Form1
         Me.grpWybraneWarstwy.Controls.Add(Me.lblWarstwa01)
         Me.grpWybraneWarstwy.Controls.Add(Me.lblWarstwa03)
         Me.grpWybraneWarstwy.Controls.Add(Me.PictureBox1)
+        Me.grpWybraneWarstwy.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
         Me.grpWybraneWarstwy.Location = New System.Drawing.Point(5, 258)
         Me.grpWybraneWarstwy.Name = "grpWybraneWarstwy"
         Me.grpWybraneWarstwy.Size = New System.Drawing.Size(210, 234)
@@ -1280,6 +1286,7 @@ Partial Class Form1
         Me.Panel2.Controls.Add(Me.btnOtworzFolder)
         Me.Panel2.Controls.Add(Me.btnPobierz)
         Me.Panel2.Controls.Add(Me.btnPrzerwij)
+        Me.Panel2.AutoScroll = True
         Me.Panel2.Dock = System.Windows.Forms.DockStyle.Right
         Me.Panel2.Location = New System.Drawing.Point(661, 24)
         Me.Panel2.Name = "Panel2"
@@ -1325,7 +1332,6 @@ Partial Class Form1
         Me.Controls.Add(Me.Panel1)
         Me.Controls.Add(Me.MenuStrip1)
         Me.DoubleBuffered = True
-        Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle
         Me.Icon = CType(resources.GetObject("$this.Icon"), System.Drawing.Icon)
         Me.MainMenuStrip = Me.MenuStrip1
         Me.Name = "Form1"
