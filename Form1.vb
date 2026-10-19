@@ -932,7 +932,33 @@ Public Class Form1
         'centrowanie obrazu po wyświetleniu znaczników
         Dim srodek = u.DoWgs84(z.Srodek)
         mapa.Position = New PointLatLng(srodek.Szerokosc, srodek.Dlugosc)
+
+        'siatka rośnie od lewego dolnego narożnika zaznaczenia w górę i w prawo - przy bardzo małym zaznaczeniu
+        'pojedynczy segment jest znacznie większy od niego i znaczniki wypadają poza okno mapy; wtedy mapa jest
+        'oddalana tak, by objąć cały zasięg siatki
+        If Not ZnacznikiWidoczne(warstwa) Then
+            Dim gora As Double = Double.MinValue, dol As Double = Double.MaxValue
+            Dim lewa As Double = Double.MaxValue, prawa As Double = Double.MinValue
+            For Each m In warstwa.Markers
+                gora = Math.Max(gora, m.Position.Lat) : dol = Math.Min(dol, m.Position.Lat)
+                lewa = Math.Min(lewa, m.Position.Lng) : prawa = Math.Max(prawa, m.Position.Lng)
+            Next
+            'margines wokół znaczników; u góry większy, bo ikona pinezki leży nad wskazywanym punktem
+            Dim dSz As Double = gora - dol, dDl As Double = prawa - lewa
+            mapa.SetZoomToFitRect(RectLatLng.FromLTRB(lewa - 0.15 * dDl, gora + 0.25 * dSz, prawa + 0.15 * dDl, dol - 0.15 * dSz))
+        End If
     End Sub
+
+    ''' <summary>Czy wszystkie znaczniki warstwy (wraz z ikoną pinezki) mieszczą się w oknie mapy.</summary>
+    Private Function ZnacznikiWidoczne(warstwa As GMapOverlay) As Boolean
+        Const margines As Integer = 10
+        For Each m In warstwa.Markers
+            Dim p = mapa.FromLatLngToLocal(m.Position)
+            If p.X < margines OrElse p.X > mapa.Width - margines OrElse
+               p.Y < m.Size.Height + margines OrElse p.Y > mapa.Height - margines Then Return False
+        Next
+        Return True
+    End Function
 
 #End Region
 
