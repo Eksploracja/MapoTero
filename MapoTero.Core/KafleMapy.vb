@@ -154,6 +154,139 @@ Public NotInheritable Class WebMercator
 
 End Class
 
+''' <summary>Zakres kafli jednego poziomu powiększenia (numery kafli XYZ, wiersze od północy).</summary>
+Public Structure ZakresKafliPoziomu
+    Public Z As Integer
+    Public XMin As Integer
+    Public YMin As Integer
+    Public XMax As Integer
+    Public YMax As Integer
+
+    Public Sub New(z As Integer, xMin As Integer, yMin As Integer, xMax As Integer, yMax As Integer)
+        Me.Z = z
+        Me.XMin = xMin
+        Me.YMin = yMin
+        Me.XMax = xMax
+        Me.YMax = yMax
+    End Sub
+
+    ''' <summary>Zakres kafli prostokąta na danym poziomie.</summary>
+    Public Shared Function Dla(p As ProstokatGeo, z As Integer) As ZakresKafliPoziomu
+        Dim r = WebMercator.ZakresKafli(p, z)
+        Return New ZakresKafliPoziomu(z, r.Item1, r.Item2, r.Item3, r.Item4)
+    End Function
+
+    Public ReadOnly Property Kolumny As Integer
+        Get
+            Return XMax - XMin + 1
+        End Get
+    End Property
+
+    Public ReadOnly Property Wiersze As Integer
+        Get
+            Return YMax - YMin + 1
+        End Get
+    End Property
+End Structure
+
+''' <summary>
+''' Mapy offline programu OruxMaps: folder z bazą kafli OruxMapsImages.db i plikiem kalibracji &lt;nazwa&gt;.otrk2.xml.
+''' Kafle każdego poziomu numerowane są od lewego górnego kafla poziomu (x, y od 0), a położenie poziomu opisuje kalibracja.
+''' </summary>
+Public NotInheritable Class MapaOruxMaps
+
+    Private Sub New()
+    End Sub
+
+    ''' <summary>Nazwa bazy kafli wymagana przez OruxMaps.</summary>
+    Public Const NazwaBazy As String = "OruxMapsImages.db"
+
+    ''' <summary>Rozszerzenie pliku kalibracji.</summary>
+    Public Const RozszerzenieKalibracji As String = ".otrk2.xml"
+
+    ''' <summary>Plik kalibracji: mapa wielopoziomowa (poziomy w siatce Web Mercator, kafle 256 px).</summary>
+    Public Shared Function Kalibracja(nazwa As String, poziomy As IEnumerable(Of ZakresKafliPoziomu)) As String
+        Dim ci = CultureInfo.InvariantCulture
+        Const f As String = "0.00000000"
+        Dim nl As String = ChrW(10)
+        Dim bok As Double = WebMercator.RozmiarKafla
+        Dim sb As New StringBuilder()
+        sb.Append("<?xml version=""1.0"" encoding=""UTF-8""?>").Append(nl)
+        sb.Append("<OruxTracker xmlns=""http://oruxtracker.com/app/res/calibration"" versionCode=""3.0"">").Append(nl)
+        sb.Append("<MapCalibration layers=""true"" layerLevel=""0"">").Append(nl)
+        sb.Append("<MapName><![CDATA[").Append(Cdata(nazwa)).Append("]]></MapName>").Append(nl)
+        For Each p In poziomy
+            Dim polnoc As Double = WebMercator.Szerokosc(p.YMin * bok, p.Z)
+            Dim poludnie As Double = WebMercator.Szerokosc((p.YMax + 1) * bok, p.Z)
+            Dim zachod As Double = WebMercator.Dlugosc(p.XMin * bok, p.Z)
+            Dim wschod As Double = WebMercator.Dlugosc((p.XMax + 1) * bok, p.Z)
+            Dim nazwaPoziomu As String = nazwa & " " & p.Z.ToString(ci)
+            sb.Append("<MapCalibration layers=""false"" layerLevel=""").Append(p.Z.ToString(ci)).Append(""">").Append(nl)
+            sb.Append("<MapName><![CDATA[").Append(Cdata(nazwaPoziomu)).Append("]]></MapName>").Append(nl)
+            sb.Append("<MapChunks xMax=""").Append(p.Kolumny.ToString(ci)).Append(""" yMax=""").Append(p.Wiersze.ToString(ci)).
+               Append(""" datum=""WGS84"" projection=""Mercator"" img_height=""256"" img_width=""256"" file_name=""").
+               Append(Security.SecurityElement.Escape(nazwaPoziomu)).Append(""" />").Append(nl)
+            sb.Append("<MapDimensions height=""").Append((CLng(p.Wiersze) * WebMercator.RozmiarKafla).ToString(ci)).Append(""" width=""").
+               Append((CLng(p.Kolumny) * WebMercator.RozmiarKafla).ToString(ci)).Append(""" />").Append(nl)
+            sb.Append("<MapBounds minLat=""").Append(poludnie.ToString(f, ci)).Append(""" maxLat=""").Append(polnoc.ToString(f, ci)).
+               Append(""" minLon=""").Append(zachod.ToString(f, ci)).Append(""" maxLon=""").Append(wschod.ToString(f, ci)).Append(""" />").Append(nl)
+            sb.Append("<CalibrationPoints>").Append(nl)
+            Punkt(sb, "TL", zachod, polnoc)
+            Punkt(sb, "BR", wschod, poludnie)
+            Punkt(sb, "TR", wschod, polnoc)
+            Punkt(sb, "BL", zachod, poludnie)
+            sb.Append("</CalibrationPoints>").Append(nl)
+            sb.Append("</MapCalibration>").Append(nl)
+        Next
+        sb.Append("</MapCalibration>").Append(nl)
+        sb.Append("</OruxTracker>").Append(nl)
+        Return sb.ToString()
+    End Function
+
+    Private Shared Sub Punkt(sb As StringBuilder, naroznik As String, dlugosc As Double, szerokosc As Double)
+        Dim ci = CultureInfo.InvariantCulture
+        sb.Append("<CalibrationPoint corner=""").Append(naroznik).Append(""" lon=""").Append(dlugosc.ToString("0.00000000", ci)).
+           Append(""" lat=""").Append(szerokosc.ToString("0.00000000", ci)).Append(""" />").Append(ChrW(10))
+    End Sub
+
+    ''' <summary>Tekst bezpieczny w sekcji CDATA.</summary>
+    Private Shared Function Cdata(tekst As String) As String
+        Return If(tekst, "").Replace("]]>", "]] >")
+    End Function
+
+    ''' <summary>Nazwa folderu i plików mapy bez znaków niedozwolonych w nazwach plików Windows i Androida.</summary>
+    Public Shared Function NazwaPliku(tekst As String) As String
+        Dim sb As New StringBuilder()
+        For Each c In If(tekst, "")
+            If "<>:""/\|?*".IndexOf(c) >= 0 OrElse Char.IsControl(c) Then
+                sb.Append("_"c)
+            Else
+                sb.Append(c)
+            End If
+        Next
+        Dim wynik As String = sb.ToString().Trim().TrimEnd("."c).Trim()
+        Return If(wynik = "", "mapa", wynik)
+    End Function
+
+End Class
+
+''' <summary>
+''' Baza kafli SQLiteDB (format RMaps / BigPlanet) - mapy offline OsmAnd i Locus Map. Numer poziomu zapisywany jest
+''' odwrotnie (z = 17 - poziom), tak jak w plikach tworzonych przez RMaps i MOBAC; OsmAnd rozpoznaje to po polu
+''' tilenumbering = BigPlanet w tabeli info.
+''' </summary>
+Public NotInheritable Class MapaSQLiteDB
+
+    Private Sub New()
+    End Sub
+
+    ''' <summary>Numer poziomu w kolumnie z bazy dla poziomu powiększenia (i odwrotnie - przeliczenie jest symetryczne).</summary>
+    Public Shared Function ZapisanyPoziom(poziom As Integer) As Integer
+        Return 17 - poziom
+    End Function
+
+End Class
+
 ''' <summary>Podział mapy na kafle KMZ w WGS84 (bez obrotu - wymagane przez odbiorniki Garmin).</summary>
 Public Class PlanKmz
 
@@ -240,6 +373,9 @@ Public Class ZapisKmz
     Private ReadOnly _kolejnosc As Integer
     Private _zakonczony As Boolean
 
+    ''' <summary>Opis mapy w dokumencie KML (np. źródło danych i data pobrania); pusty - bez opisu.</summary>
+    Public Property Opis As String = ""
+
     ''' <param name="kolejnoscRysowania">drawOrder nakładek (Garmin: mapy o wyższej wartości rysowane są na wierzchu).</param>
     Public Sub New(sciezka As String, nazwa As String, kolejnoscRysowania As Integer)
         _plik = New FileStream(sciezka, FileMode.Create, FileAccess.ReadWrite)
@@ -273,6 +409,9 @@ Public Class ZapisKmz
         doc.Append("<kml xmlns=""http://www.opengis.net/kml/2.2"">").Append(ChrW(10))
         doc.Append("<Folder>").Append(ChrW(10))
         doc.Append("<name>").Append(Security.SecurityElement.Escape(_nazwa)).Append("</name>").Append(ChrW(10))
+        If Not String.IsNullOrEmpty(Opis) Then
+            doc.Append("<description>").Append(Security.SecurityElement.Escape(Opis)).Append("</description>").Append(ChrW(10))
+        End If
         doc.Append(_kml)
         doc.Append("</Folder>").Append(ChrW(10))
         doc.Append("</kml>").Append(ChrW(10))
@@ -321,14 +460,21 @@ Public Class SiatkaPrzeliczen
         Dim ny As Integer = wysokosc \ krok + 2
         ReDim _x(nx - 1, ny - 1)
         ReDim _y(nx - 1, ny - 1)
+        Dim xMin As Double = Double.MaxValue, xMax As Double = Double.MinValue, yMin As Double = Double.MaxValue, yMax As Double = Double.MinValue
         For j = 0 To ny - 1
             For i = 0 To nx - 1
                 Dim p = przelicz(i * krok, j * krok)
                 _x(i, j) = p.X
                 _y(i, j) = p.Y
+                xMin = Math.Min(xMin, p.X) : xMax = Math.Max(xMax, p.X)
+                yMin = Math.Min(yMin, p.Y) : yMax = Math.Max(yMax, p.Y)
             Next
         Next
+        _Obszar = New Zasieg(xMin, yMin, xMax, yMax)
     End Sub
+
+    ''' <summary>Prostokąt w układzie źródła obejmujący wszystkie węzły siatki (zasięg obszaru po przeliczeniu).</summary>
+    Public ReadOnly Property Obszar As Zasieg
 
     ''' <summary>Przeliczony punkt dla piksela (px, py).</summary>
     Public Function Punkt(px As Double, py As Double) As PunktXY

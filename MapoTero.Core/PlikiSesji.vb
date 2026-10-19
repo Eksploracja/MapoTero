@@ -161,6 +161,12 @@ Public Class KonfiguracjaSesji
     Public Property Numeracja As String = ""
     ''' <summary>Kod EPSG układu współrzędnych sesji (nowe pole; brak w starszych plikach = 2180).</summary>
     Public Property UkladEpsg As Integer = 2180
+    ''' <summary>Pobieranie z przezroczystym tłem (parametr TRANSPARENT=TRUE zapytań WMS) - warstwy nakładane na inne mapy.</summary>
+    Public Property Przezroczystosc As Boolean
+    ''' <summary>Data rozpoczęcia ostatniego pobierania (rrrr-mm-dd); pusta w plikach ze starszych wersji.</summary>
+    Public Property DataPobrania As String = ""
+    ''' <summary>Adres serwera WMS / WMTS, z którego pobrano segmenty (źródło danych w opisie eksportowanej mapy).</summary>
+    Public Property AdresSerwera As String = ""
 
     Public Sub New()
         For i = 0 To 11
@@ -195,6 +201,9 @@ Public Class KonfiguracjaSesji
             Dim epsg As Integer = r.NastepnaLiczbaCalkowita()
             If epsg > 0 Then c.UkladEpsg = epsg
         End If
+        If Not r.KoniecPliku Then c.Przezroczystosc = r.NastepnyLogiczny()
+        If Not r.KoniecPliku Then c.DataPobrania = r.Nastepne()
+        If Not r.KoniecPliku Then c.AdresSerwera = r.Nastepne()
         Return c
     End Function
 
@@ -220,6 +229,9 @@ Public Class KonfiguracjaSesji
         w.Tekst(SkalaMapy)
         w.Tekst(Numeracja)
         w.LiczbaCalkowita(UkladEpsg)
+        w.Logiczny(Przezroczystosc)
+        w.Tekst(DataPobrania)
+        w.Tekst(AdresSerwera)
         Return w.ToString()
     End Function
 

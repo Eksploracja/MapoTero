@@ -41,6 +41,15 @@ Public Class Form1
     ''' <summary>Programowe ustawianie listy układów (bez przeliczania zasięgu).</summary>
     Private _ustawianieUkladu As Boolean
 
+    ''' <summary>Obszar pobierania wzdłuż trasy (zapisywany w folderze sesji w korytarz.txt); Nothing - cały prostokąt.</summary>
+    Private _korytarz As Korytarz
+
+    ''' <summary>Data ostatniego pobierania sesji (rrrr-mm-dd) - z conf.txt, ustawiana na nowo przy rozpoczęciu pobierania.</summary>
+    Private _dataPobrania As String = ""
+
+    ''' <summary>Najwięcej segmentów korytarza rysowanych na mapie (przy większej liczbie - tylko linia trasy).</summary>
+    Private Const MaksSegmentowNaMapie As Integer = 3000
+
 #Region "Dostęp dla innych okien"
 
     ''' <summary>Folder segmentów bieżącej sesji (wyświetlany na pasku stanu).</summary>
@@ -289,6 +298,8 @@ Public Class Form1
         'format spoza listy obsługiwanych (np. svg+xml z dawnych wersji) - jpeg
         If c.Format <> "" Then Ustawienia.Format = UstawieniaProgramu.NormalizujFormat(c.Format)
         Ustawienia.Prefiks = c.Prefiks
+        Ustawienia.Przezroczystosc = c.Przezroczystosc
+        _dataPobrania = c.DataPobrania
         Ustawienia.PobierajPowyzejOstatniego = c.PobierajPowyzejOstatniego
         If c.Numeracja <> "" Then Ustawienia.Numeracja = c.Numeracja
         lblSrodekSzer.Text = c.SrodekMapySzerokosc
@@ -305,8 +316,14 @@ Public Class Form1
         mapa.Position = New PointLatLng(Wartosc(lblSrodekSzer.Text, 52.3), Wartosc(lblSrodekDlug.Text, 19.2))
         ZapamietajPolozenieMapy()
 
+        'obszar wzdłuż trasy zapisany w folderze sesji
+        _korytarz = Korytarz.ZFolderu(folder)
+        UsunKorytarzToolStripMenuItem.Enabled = _korytarz IsNot Nothing
+        WyczyscZnaczniki()
+        PokazKorytarz()
+
         Komunikat("Wczytano ustawienia sesji z pliku conf.txt. Format graficzny pobieranych segmentów to " & Ustawienia.Format &
-                  ". Styl ich numerowania to: " & Ustawienia.Numeracja, Color.Green)
+                  ". Styl ich numerowania to: " & Ustawienia.Numeracja & If(_korytarz IsNot Nothing, ". " & OpisKorytarza(), ""), Color.Green)
     End Sub
 
     ''' <summary>Zapis parametrów sesji do conf.txt. Gdy pytajOFolder - użytkownik wskazuje folder.</summary>
@@ -323,13 +340,21 @@ Public Class Form1
             .LiczbaWarstw = _warstwy.Count, .Format = Ustawienia.Format, .Prefiks = Ustawienia.Prefiks,
             .PobierajPowyzejOstatniego = Ustawienia.PobierajPowyzejOstatniego,
             .SrodekMapySzerokosc = lblSrodekSzer.Text.Replace(","c, "."c), .SrodekMapyDlugosc = lblSrodekDlug.Text.Replace(","c, "."c),
-            .SkalaMapy = lblZoom.Text.Replace(","c, "."c), .Numeracja = Ustawienia.Numeracja, .UkladEpsg = Ustawienia.Uklad.Epsg}
+            .SkalaMapy = lblZoom.Text.Replace(","c, "."c), .Numeracja = Ustawienia.Numeracja, .UkladEpsg = Ustawienia.Uklad.Epsg,
+            .Przezroczystosc = Ustawienia.Przezroczystosc, .DataPobrania = _dataPobrania, .AdresSerwera = _plikWarstw.Adres}
         For i = 0 To _warstwy.Count - 1
             c.Warstwy(i) = _warstwy(i)
         Next
         Try
             Directory.CreateDirectory(FolderSesji)
             c.Zapisz(FolderSesji & "conf.txt", KodowanieSystemowe())
+            'obszar wzdłuż trasy - plik korytarz.txt obok conf.txt (bez korytarza - usunięcie nieaktualnego pliku)
+            Dim plikKorytarza As String = FolderSesji & Korytarz.NazwaPliku
+            If _korytarz IsNot Nothing Then
+                _korytarz.Zapisz(plikKorytarza)
+            ElseIf File.Exists(plikKorytarza) Then
+                File.Delete(plikKorytarza)
+            End If
         Catch ex As Exception
             Komunikat("Nie udało się zapisać pliku conf.txt: " & ex.Message, Color.Red)
             Exit Sub
@@ -500,7 +525,7 @@ Public Class Form1
     Private Sub ParametrySegmentuZmienione(sender As Object, e As EventArgs) Handles txtBokSegmentu.TextChanged, txtRozmiarPiksela.TextChanged
         btnZnaczniki.Enabled = True
         PrzeliczSiatke()
-        If mapa.SelectedArea.IsEmpty = False Then
+        If mapa.SelectedArea.IsEmpty = False OrElse _korytarz IsNot Nothing Then
             WyczyscZnaczniki()
             PokazZnaczniki()
         End If
@@ -579,7 +604,21 @@ Public Class Form1
 
 #Region "Pobieranie"
 
-    Private Async Sub btnPobierz_Click(sender As Object, e As EventArgs) Handles btnPobierz.Click
+    Private Sub btnPobierz_Click(sender As Object, e As EventArgs) Handles btnPobierz.Click
+        RozpocznijPobieranie(False)
+    End Sub
+
+    ''' <summary>Ponowne pobranie wszystkich segmentów bieżącej sesji (np. po aktualizacji ortofotomapy).</summary>
+    Private Sub OdswiezToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles OdswiezToolStripMenuItem.Click
+        If _przerwanie IsNot Nothing Then Exit Sub
+        If MessageBox.Show("Pobrać ponownie wszystkie segmenty mapy do folderu " & FolderSesji & "?" & vbCrLf & vbCrLf &
+                           "Istniejące pliki segmentów zostaną zastąpione nowymi - każdy dopiero po udanym pobraniu nowego segmentu.",
+                           "Odświeżenie mapy", MessageBoxButtons.YesNo, MessageBoxIcon.Question) <> DialogResult.Yes Then Exit Sub
+        RozpocznijPobieranie(True)
+    End Sub
+
+    ''' <summary>Pobieranie segmentów; odswiez - ponownie także tych, które już są w folderze sesji.</summary>
+    Private Async Sub RozpocznijPobieranie(odswiez As Boolean)
         'kontrola parametrów
         Dim piksel As Double = Wartosc(txtRozmiarPiksela.Text)
         Dim bok As Integer = WartoscCalkowita(txtBokSegmentu.Text)
@@ -606,11 +645,20 @@ Public Class Form1
             Komunikat("Nie wybrano zbioru map (serwera WMS).", Color.Red) : Exit Sub
         End If
 
+        Dim liczbaSegmentow As Integer = siatka.LiczbaSegmentow
+        If _korytarz IsNot Nothing Then
+            liczbaSegmentow = _korytarz.Segmenty(siatka, Ustawienia.Uklad).Count
+            If liczbaSegmentow = 0 Then
+                Komunikat("Trasa nie przecina obszaru pobierania - wybierz trasę ponownie albo usuń obszar wzdłuż trasy (menu Sesja pobierania).", Color.Red) : Exit Sub
+            End If
+        End If
+
         'zapis parametrów sesji - na wszelki wypadek, żeby nie okazało się, że zapisuje w folderze głównym programu
         If FolderSesji = "" Then
             MsgBox("folder segmentów jest pusty")
             Exit Sub
         End If
+        _dataPobrania = MetadaneMapy.TekstDaty(Date.Today)
         ZapiszConf(False)
 
         Dim zadanie As New ZadaniePobierania With {
@@ -621,14 +669,17 @@ Public Class Form1
             .LiczbaWatkow = Ustawienia.LiczbaWatkow, .LimitCzasuSekundy = Ustawienia.LimitCzasuSekundy,
             .ZachowajKafleWmts = Ustawienia.ZachowajKafleWmts, .JakoscJpegWmts = Ustawienia.JakoscJpegWmts,
             .PobierajPowyzejOstatniego = Ustawienia.PobierajPowyzejOstatniego,
-            .Georeferencja = Ustawienia.OpcjeGeoreferencji(), .TrekBuddy = Ustawienia.TrekBuddy, .NazwaTrekBuddy = Ustawienia.NazwaTrekBuddy}
+            .Georeferencja = Ustawienia.OpcjeGeoreferencji(), .TrekBuddy = Ustawienia.TrekBuddy, .NazwaTrekBuddy = Ustawienia.NazwaTrekBuddy,
+            .Przezroczystosc = Ustawienia.Przezroczystosc, .Korytarz = _korytarz, .Odswiez = odswiez}
 
         btnPobierz.Enabled = False
         btnPrzerwij.Enabled = True
         cmbZbiorMap.Enabled = False
         lstWarstwy.Enabled = False
         btnScalanie.Enabled = False
-        Komunikat("Trwa pobieranie segmentów (" & siatka.LiczbaSegmentow & ")", Color.Black)
+        OdswiezToolStripMenuItem.Enabled = False
+        KorytarzToolStripMenuItem.Enabled = False
+        Komunikat(If(odswiez, "Trwa odświeżanie segmentów (", "Trwa pobieranie segmentów (") & liczbaSegmentow & ")", Color.Black)
 
         _przerwanie = New CancellationTokenSource()
         Dim postep As New Progress(Of PostepPobierania)(AddressOf PokazPostep)
@@ -644,6 +695,8 @@ Public Class Form1
             btnPrzerwij.Enabled = False
             cmbZbiorMap.Enabled = True
             lstWarstwy.Enabled = True
+            OdswiezToolStripMenuItem.Enabled = True
+            KorytarzToolStripMenuItem.Enabled = True
             stPostep.Value = 0
             stSegment.Text = ""
         End Try
@@ -705,6 +758,8 @@ Public Class Form1
 
         'współrzędne zasięgu podczas przeciągania zaznaczenia
         If Ustawienia.EdycjaXY = False AndAlso mapa.SelectedArea.IsEmpty = False Then
+            'nowe zaznaczenie prostokąta zastępuje obszar wzdłuż trasy
+            If _korytarz IsNot Nothing Then UsunKorytarz(False)
             Dim a = mapa.SelectedArea
             Dim gora As Double = a.Lat, dol As Double = a.Lat - a.HeightLat
             Dim lewa As Double = a.Lng, prawa As Double = a.Lng + a.WidthLng
@@ -790,6 +845,14 @@ Public Class Form1
                 marker.Dispose()
             Next
             overlay.Markers.Clear()
+            For Each trasa In overlay.Routes
+                trasa.Dispose()
+            Next
+            overlay.Routes.Clear()
+            For Each wielokat In overlay.Polygons
+                wielokat.Dispose()
+            Next
+            overlay.Polygons.Clear()
         Next
         mapa.Overlays.Clear()
     End Sub
@@ -828,10 +891,116 @@ Public Class Form1
             warstwa.Markers.Add(znacznik)
         Next
         mapa.Overlays.Add(warstwa)
+        PokazKorytarz()
 
         'centrowanie obrazu po wyświetleniu znaczników
         Dim srodek = u.DoWgs84(z.Srodek)
         mapa.Position = New PointLatLng(srodek.Szerokosc, srodek.Dlugosc)
+    End Sub
+
+#End Region
+
+#Region "Obszar wzdłuż trasy"
+
+    ''' <summary>Siatka segmentów dla zasięgu przy bieżącym rozmiarze piksela i boku segmentu (okno wyboru trasy).</summary>
+    Public Function SiatkaDlaZasiegu(z As Zasieg) As Siatka
+        Return New Siatka(ZaokraglonyZasieg(z), Wartosc(txtRozmiarPiksela.Text), WartoscCalkowita(txtBokSegmentu.Text))
+    End Function
+
+    ''' <summary>Zasięg zaokrąglony jak przy zaznaczaniu na mapie: metry do pełnych wartości na zewnątrz, stopnie do 6 miejsc.</summary>
+    Private Shared Function ZaokraglonyZasieg(z As Zasieg) As Zasieg
+        If Ustawienia.Uklad.Geograficzny Then
+            Return New Zasieg(Math.Round(z.XDol, 6), Math.Round(z.YLewy, 6), Math.Round(z.XGora, 6), Math.Round(z.YPrawy, 6))
+        End If
+        Return New Zasieg(Math.Floor(z.XDol), Math.Floor(z.YLewy), Math.Ceiling(z.XGora), Math.Ceiling(z.YPrawy))
+    End Function
+
+    Private Sub KorytarzToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles KorytarzToolStripMenuItem.Click
+        If _przerwanie IsNot Nothing Then Exit Sub
+        Using okno As New FormKorytarz(_korytarz)
+            If okno.ShowDialog(Me) = DialogResult.OK AndAlso okno.Wynik IsNot Nothing Then UstawKorytarz(okno.Wynik)
+        End Using
+    End Sub
+
+    Private Sub UsunKorytarzToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles UsunKorytarzToolStripMenuItem.Click
+        UsunKorytarz(True)
+    End Sub
+
+    ''' <summary>
+    ''' Ustawia obszar pobierania wzdłuż trasy: zasięg pobierania obejmuje cały korytarz, a pobierane są tylko segmenty,
+    ''' które go przecinają.
+    ''' </summary>
+    Public Sub UstawKorytarz(k As Korytarz)
+        _korytarz = k
+        UsunKorytarzToolStripMenuItem.Enabled = True
+        mapa.SelectedArea = RectLatLng.Empty
+        Dim z = ZaokraglonyZasieg(k.Zasieg(Ustawienia.Uklad))
+        txtXDol.Text = Liczba(z.XDol)
+        txtYLewy.Text = Liczba(z.YLewy)
+        txtXGora.Text = Liczba(z.XGora)
+        txtYPrawy.Text = Liczba(z.YPrawy)
+        WyczyscZnaczniki()
+        PokazZnaczniki()
+        'widok mapy obejmujący całą trasę
+        Dim s = BiezacaSiatka()
+        If s.Poprawna Then
+            Dim g = ProstokatGeo.Opisany(Ustawienia.Uklad, s.ZasiegSiatki)
+            mapa.SetZoomToFitRect(New RectLatLng(g.Polnoc, g.Zachod, g.Wschod - g.Zachod, g.Polnoc - g.Poludnie))
+        End If
+        Komunikat(OpisKorytarza(), Color.Green)
+    End Sub
+
+    ''' <summary>Usuwa obszar wzdłuż trasy - pobierany będzie cały prostokąt.</summary>
+    Private Sub UsunKorytarz(komunikatOUsunieciu As Boolean)
+        If _korytarz Is Nothing Then Exit Sub
+        _korytarz = Nothing
+        UsunKorytarzToolStripMenuItem.Enabled = False
+        WyczyscZnaczniki()
+        If komunikatOUsunieciu Then
+            PokazZnaczniki()
+            Komunikat("Usunięto obszar wzdłuż trasy - pobierany będzie cały prostokąt.", Color.Green)
+        End If
+    End Sub
+
+    ''' <summary>Opis korytarza: trasa, szerokość pasa i liczba pobieranych segmentów.</summary>
+    Private Function OpisKorytarza() As String
+        If _korytarz Is Nothing Then Return ""
+        Dim s = BiezacaSiatka()
+        Dim opis As String = "Obszar wzdłuż trasy " & If(_korytarz.Nazwa <> "", "'" & _korytarz.Nazwa & "' ", "") &
+                             "(" & _korytarz.DlugoscKm.ToString("0.0") & " km, pas " & Liczba(_korytarz.SzerokoscMetry) & " m po obu stronach trasy)"
+        If Not s.Poprawna Then Return opis
+        Dim n As Integer = _korytarz.Segmenty(s, Ustawienia.Uklad).Count
+        Dim wszystkie As Integer = s.LiczbaSegmentow
+        Return opis & ": pobranych zostanie " & n & " z " & wszystkie & " segmentów prostokąta" &
+               If(wszystkie > 0, " (" & Math.Round(100.0 * (wszystkie - n) / wszystkie) & "% mniej danych)", "")
+    End Function
+
+    ''' <summary>Rysuje na mapie trasę i segmenty korytarza.</summary>
+    Private Sub PokazKorytarz()
+        If _korytarz Is Nothing Then Exit Sub
+        Dim warstwa As New GMapOverlay("korytarz")
+        Dim s = BiezacaSiatka()
+        If s.Poprawna Then
+            Dim u = Ustawienia.Uklad
+            Dim zbior = _korytarz.Segmenty(s, u)
+            If zbior.Count <= MaksSegmentowNaMapie Then
+                For Each klucz In zbior
+                    Dim z = s.Segment(klucz \ s.LiczbaKolumn + 1, klucz Mod s.LiczbaKolumn + 1)
+                    Dim punkty As New List(Of PointLatLng)
+                    For Each n In {z.LewyGorny, z.PrawyGorny, z.PrawyDolny, z.LewyDolny}
+                        Dim g = u.DoWgs84(n)
+                        punkty.Add(New PointLatLng(g.Szerokosc, g.Dlugosc))
+                    Next
+                    warstwa.Polygons.Add(New GMapPolygon(punkty, "segment") With {
+                        .Fill = New SolidBrush(Color.FromArgb(40, Color.RoyalBlue)), .Stroke = New Pen(Color.FromArgb(140, Color.RoyalBlue), 1)})
+                Next
+            End If
+        End If
+        For Each l In _korytarz.Linie
+            Dim punkty = l.ConvertAll(Function(p) New PointLatLng(p.Szerokosc, p.Dlugosc))
+            warstwa.Routes.Add(New GMapRoute(punkty, "trasa") With {.Stroke = New Pen(Color.Red, 2)})
+        Next
+        mapa.Overlays.Add(warstwa)
     End Sub
 
 #End Region
