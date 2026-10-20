@@ -1,13 +1,41 @@
-MapoTero 3.13 - optymalizacja scalania segmentów, naprawa eksportu MBTiles, poprawki pobierania WMTS/WMS oraz wycieków pamięci GDI+.
+MapoTero 3.14 - obszar pobierania wzdłuż trasy (korytarz GPX), przezroczyste nakładki, łączenie warstw, eksport do SQLiteDB i OruxMaps, rozciągane okno główne.
 
 ## Instalacja
 
-1. Pobierz plik **[MapoTero_v3.13.zip](https://github.com/Eksploracja/MapoTero/releases/download/v3.13/MapoTero_v3.13.zip)** (bezpośrednie pobranie lub poniżej w sekcji *Assets*).
+1. Pobierz plik **[MapoTero_v3.14.zip](https://github.com/Eksploracja/MapoTero/releases/download/v3.14/MapoTero_v3.14.zip)** (bezpośrednie pobranie lub poniżej w sekcji *Assets*).
 2. Przed rozpakowaniem kliknij plik prawym przyciskiem myszy, wybierz *Właściwości*, zaznacz **Odblokuj** i kliknij *OK* - wtedy Windows nie będzie blokował uruchomienia programu (program nie ma podpisu cyfrowego, więc filtr SmartScreen traktuje go jako nierozpoznaną aplikację; można też w oknie SmartScreen kliknąć *Więcej informacji* > *Uruchom mimo to*).
 3. Rozpakuj archiwum do dowolnego folderu i uruchom **MapoTero.exe**.
 4. Program wymaga środowiska [.NET Desktop Runtime 8 (x64)](https://dotnet.microsoft.com/download/dotnet/8.0) - jeśli nie jest zainstalowane, Windows zaproponuje jego pobranie przy pierwszym uruchomieniu.
 
-Ustawienia i zbiory map z poprzednich wersji (plik `lastsettings.txt`, folder `warstwy`) są w pełni zgodne z wersją 3.13.
+Ustawienia i zbiory map z poprzednich wersji (plik `lastsettings.txt`, folder `warstwy`) są w pełni zgodne z wersją 3.14.
+
+## Zmiany w wersji 3.14
+
+* **Obszar pobierania wzdłuż trasy (korytarz GPX/KML/KMZ):**
+  * Nowa funkcja w menu *Sesja pobierania*: po wczytaniu pliku śladu (GPX, KML lub KMZ z Mapy.com, Komoot, Locus Map itp.) i zdefiniowaniu szerokości bufora, program pobiera wyłącznie segmenty przecinające korytarz trasy zamiast całego prostokąta otaczającego.
+  * Wielokrotna oszczędność transferu i czasu przy trasach krętych lub ukośnych.
+  * Wizualizacja trasy i wybranych segmentów korytarza bezpośrednio na mapie.
+  * Zapis definicji korytarza w pliku sesji `korytarz.txt` i jego automatyczne wznawianie.
+* **Przezroczyste nakładki i przezroczystość tła:**
+  * Nowa opcja *przezroczyste tło* w ustawieniach (parametr `TRANSPARENT=TRUE` zapytań WMS dla formatów PNG/GIF).
+  * Opcja *nakładka* w oknie eksportu (kafle PNG, typ `overlay` w MBTiles).
+  * Opcja automatycznej zamiany jednolitego białego tła na przezroczyste dla serwerów WMS nieobsługujących kanału alfa.
+* **Łączenie warstw podczas eksportu:**
+  * Możliwość nakładania na eksportowaną mapę dodatkowych warstw z innych folderów sesji (np. cieniowanie rzeźby terenu lub granice działek nałożone na ortofotomapę) z płynną regulacją przezroczystości/krycia – także dla sesji pobranych w różnych układach współrzędnych.
+* **Nowe formaty eksportu map mobilnych:**
+  * **SQLiteDB:** format bazodanowy kafli RMaps (kompatybilny z aplikacjami Locus Map oraz OsmAnd).
+  * **OruxMaps:** eksport do natywnego formatu offline OruxMaps (folder z bazą `OruxMapsImages.db` i plikiem kalibracji `.otrk2.xml`).
+  * Automatyczne ustawianie flagi tylko do odczytu dla bezpiecznego otwierania baz kafli.
+* **Rozmiar i opis mapy:**
+  * Szacowanie wielkości wynikowego pliku mapy przed rozpoczęciem eksportu (próbne pobranie kafli) i dobór maksymalnego poziomu powiększenia mieszczącego się w zadanym limicie MB.
+  * Zapis daty pobrania sesji i źródła danych w `conf.txt` oraz metadanych eksportu (nazwa, opis, atrybucja w MBTiles/KMZ).
+  * Opcja *odśwież mapę*: ponowne pobranie wszystkich segmentów sesji z bezpiecznym zastąpieniem plików dopiero po pomyślnym pobraniu nowych.
+* **Usprawnienia interfejsu (WinForms):**
+  * Okno główne o zmiennym rozmiarze z automatycznym dopasowaniem do wysokości ekranu (rozciągana lista warstw WMS z przewijanym panelem).
+  * Przywrócenie klasycznej czcionki Microsoft Sans Serif 8,25 pt (.NET Framework) dla maksymalnej czytelności na każdym ekranie.
+  * Automatyczne oddalanie podglądu mapy do zasięgu siatki, gdy znaczniki narożników wykraczają poza okno.
+* **Testy jednostkowe:**
+  * Rozbudowa zestawu testów o weryfikację algorytmów korytarza GPX i nowych eksporterów (507 testów jednostkowych zakończonych sukcesem).
 
 ## Zmiany w wersji 3.13
 

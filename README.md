@@ -21,14 +21,14 @@ Program pobiera mapy, dzieląc wybrany obszar na siatkę kwadratowych segmentów
 ## Pobieranie
 
 Najnowsze wydania programu można pobrać bezpośrednio w paczce ZIP:
-* 📥 **[Pobierz najnowszą wersję MapoTero z GitHub Releases (MapoTero_v3.13.zip)](https://github.com/Eksploracja/MapoTero/releases/download/v3.13/MapoTero_v3.13.zip)** – bezpośrednie pobranie programu (gotowy do uruchomienia po rozpakowaniu, wersja 64-bitowa dla systemu Windows).
+* 📥 **[Pobierz najnowszą wersję MapoTero z GitHub Releases (MapoTero_v3.14.zip)](https://github.com/Eksploracja/MapoTero/releases/download/v3.14/MapoTero_v3.14.zip)** – bezpośrednie pobranie programu (gotowy do uruchomienia po rozpakowaniu, wersja 64-bitowa dla systemu Windows).
 * 📦 Wszystkie wydania, kody źródłowe i historia wersji: **[GitHub Releases](https://github.com/Eksploracja/MapoTero/releases/latest)**.
 
 ---
 
 ## Aktualności
 
-* **19.10.2026 – Zmiany przygotowywane do kolejnej wersji:**
+* **20.10.2026 – Wersja 3.14:**
   * **Obszar pobierania wzdłuż trasy** (menu *Sesja pobierania*): po wskazaniu pliku GPX, KML lub KMZ (np. trasy zaplanowanej w Mapy.com, Komoot czy Locus Map) i szerokości pasa pobierane są tylko segmenty leżące wzdłuż trasy, a nie cały prostokąt - przy trasie ukośnej lub krętej wielokrotnie mniej danych; trasa i wybrane segmenty widoczne są na mapie, a korytarz zapisywany jest w folderze sesji (`korytarz.txt`),
   * **Przezroczyste nakładki:** opcja *przezroczyste tło* w ustawieniach (parametr `TRANSPARENT=TRUE` zapytań WMS dla segmentów PNG / GIF), w eksporcie opcja *nakładka* (kafle PNG, w MBTiles typ `overlay`) oraz zamiana białego tła na przezroczyste dla serwerów, które przezroczystości nie obsługują,
   * **Łączenie warstw podczas eksportu:** na mapę można nałożyć warstwy z innych folderów sesji (np. granice działek lub cieniowanie rzeźby na ortofotomapie) z regulacją krycia - także pobrane w innym układzie współrzędnych,
