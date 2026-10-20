@@ -78,4 +78,107 @@ Public Class PlikWarstw
         Return Nothing
     End Function
 
+    ''' <summary>Zapisuje zbiór map do pliku tekstowego z zachowaniem kodowania programu.</summary>
+    Public Sub Zapisz(sciezka As String)
+        Dim sb As New ZapisPlikuVb()
+        sb.Tekst(Adres)
+        For Each w In Warstwy
+            sb.Tekst(w.Nazwa)
+            sb.Tekst(If(Not String.IsNullOrEmpty(w.RozmiarPiksela), w.RozmiarPiksela, "1"))
+        Next
+        sb.Zapisz(sciezka, Kodowanie())
+    End Sub
+
+    ''' <summary>Sprawdza, czy nazwa zbioru map jest poprawna dla systemu plików i nie koliduje z nazwami zarezerwowanymi.</summary>
+    Public Shared Function CzyNazwaZbioruPoprawna(nazwa As String, ByRef komunikatBledu As String) As Boolean
+        komunikatBledu = ""
+        If String.IsNullOrWhiteSpace(nazwa) Then
+            komunikatBledu = "Nazwa zbioru map nie może być pusta."
+            Return False
+        End If
+        Dim czysta = nazwa.Trim()
+        For Each c In Path.GetInvalidFileNameChars()
+            If czysta.Contains(c) Then
+                komunikatBledu = "Nazwa zawiera niedozwolony znak: '" & c & "'."
+                Return False
+            End If
+        Next
+        Dim male = czysta.ToLowerInvariant()
+        If male = "warstwy" OrElse male = "_archiwalne" OrElse male = "download" OrElse male = "conf" Then
+            komunikatBledu = "Nazwa '" & czysta & "' jest zarezerwowana dla plików programu."
+            Return False
+        End If
+        Dim zarezerwowaneDos As String() = {"con", "prn", "aux", "nul", "com1", "com2", "com3", "com4", "com5", "com6",
+                                            "com7", "com8", "com9", "lpt1", "lpt2", "lpt3", "lpt4", "lpt5", "lpt6", "lpt7", "lpt8", "lpt9"}
+        If Array.IndexOf(zarezerwowaneDos, male) >= 0 Then
+            komunikatBledu = "Nazwa '" & czysta & "' jest nazwą zarezerwowaną systemu Windows."
+            Return False
+        End If
+        Return True
+    End Function
+
+    ''' <summary>Tworzy bezpieczną nazwę pliku z tytułu usługi lub warstwy (usuwa znaki specjalne, zamienia polskie litery i spacje na podkreślenia).</summary>
+    Public Shared Function OczyscNazweZbioru(sugerowana As String) As String
+        If String.IsNullOrWhiteSpace(sugerowana) Then Return "nowy_zbior_map"
+        Dim s As String = sugerowana.Trim()
+        'zamiana polskich znaków
+        Dim plZrodlo As String = "ąćęłńóśźżĄĆĘŁŃÓŚŹŻ"
+        Dim plCel As String = "acelnoszzACELNOSZZ"
+        For i = 0 To plZrodlo.Length - 1
+            s = s.Replace(plZrodlo(i), plCel(i))
+        Next
+        Dim sb As New StringBuilder()
+        For Each c In s
+            If (c >= "a"c AndAlso c <= "z"c) OrElse (c >= "A"c AndAlso c <= "Z"c) OrElse (c >= "0"c AndAlso c <= "9"c) OrElse c = "_"c Then
+                sb.Append(c)
+            Else
+                sb.Append("_"c)
+            End If
+        Next
+        s = System.Text.RegularExpressions.Regex.Replace(sb.ToString(), "_+", "_").Trim("_"c)
+        If s.Length > 60 Then s = s.Substring(0, 60).TrimEnd("_"c)
+        If s = "" Then s = "nowy_zbior_map"
+        Return s
+    End Function
+
+    ''' <summary>Tworzy poprawny adres zapytania GetMap dla WMS z parametrami CRS/SRS i layers=.</summary>
+    Public Shared Function ZbudujAdresWmsDlaPliku(adresGetMap As String, wersja As String) As String
+        Dim a As String = Wms.UzupelnijAdres(adresGetMap.Trim())
+        Dim czyWersja11 As Boolean = wersja.StartsWith("1.1", StringComparison.Ordinal)
+        Dim ukladParam As String = If(czyWersja11, "SRS=EPSG:2180", "CRS=EPSG:2180")
+        Dim verParam As String = If(czyWersja11, "version=1.1.1", "version=1.3.0")
+
+        If a.IndexOf("request=getmap", StringComparison.OrdinalIgnoreCase) < 0 Then
+            Dim sep As String = If(a.Contains("?"), "&", "?")
+            If a.EndsWith("?", StringComparison.Ordinal) OrElse a.EndsWith("&", StringComparison.Ordinal) Then sep = ""
+            a &= sep & "request=GetMap"
+        End If
+
+        If a.IndexOf("version=", StringComparison.OrdinalIgnoreCase) < 0 Then
+            a &= "&" & verParam
+        End If
+
+        If a.IndexOf("crs=", StringComparison.OrdinalIgnoreCase) < 0 AndAlso a.IndexOf("srs=", StringComparison.OrdinalIgnoreCase) < 0 Then
+            a &= "&" & ukladParam
+        End If
+
+        If a.IndexOf("layers=", StringComparison.OrdinalIgnoreCase) < 0 Then
+            a &= "&layers="
+        End If
+
+        Return a
+    End Function
+
+    ''' <summary>Dopisuje nazwę zbioru do pliku indeksu warstwy.txt, jeśli jeszcze w nim nie istnieje.</summary>
+    Public Shared Sub DodajDoIndeksu(plikIndeksu As String, nazwaZbioru As String)
+        Dim linie As New List(Of String)
+        If File.Exists(plikIndeksu) Then
+            linie.AddRange(File.ReadAllLines(plikIndeksu, Kodowanie()).Select(Function(l) l.Trim()).Where(Function(l) l <> ""))
+        End If
+        If Not linie.Any(Function(l) String.Equals(l, nazwaZbioru, StringComparison.OrdinalIgnoreCase)) Then
+            linie.Add(nazwaZbioru)
+            File.WriteAllLines(plikIndeksu, linie, Kodowanie())
+        End If
+    End Sub
+
 End Class

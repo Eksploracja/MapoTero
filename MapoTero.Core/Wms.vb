@@ -81,10 +81,23 @@ Public NotInheritable Class Wms
     ''' Pełne zapytanie GetMap dla zasięgu segmentu. Adres z pliku warstw kończy się parametrem "layers=",
     ''' do którego dopisywane są wybrane warstwy (jeśli adres zawiera już stałą listę warstw, nowe dopisywane są po przecinku).
     ''' </summary>
+    Private Shared Function DopisParametrPrzedLayers(adres As String, nazwa As String, wartosc As String) As String
+        If Regex.IsMatch(adres, "[?&]" & Regex.Escape(nazwa) & "=", RegexOptions.IgnoreCase) Then Return adres
+        Dim m = Regex.Match(adres, "[?&]layers=", RegexOptions.IgnoreCase)
+        If m.Success Then
+            Return adres.Substring(0, m.Index + 1) & nazwa & "=" & wartosc & "&" & adres.Substring(m.Index + 1)
+        Else
+            Dim sep = If(adres.EndsWith("&", StringComparison.Ordinal) OrElse adres.EndsWith("?", StringComparison.Ordinal), "", If(adres.IndexOf("?"c) < 0, "?", "&"))
+            Return adres & sep & nazwa & "=" & wartosc
+        End If
+    End Function
+
     Public Shared Function ZapytanieGetMap(adres As String, warstwy As IEnumerable(Of String), uklad As UkladWspolrzednych,
                                            zasieg As Zasieg, format As String, szerokoscPx As Integer, wysokoscPx As Integer,
                                            zamienOsie As Boolean, Optional przezroczystosc As Boolean = False) As String
         Dim baza As String = UstawUklad(UzupelnijAdres(adres), uklad)
+        baza = DopisParametrPrzedLayers(baza, "REQUEST", "GetMap")
+        baza = DopisParametrPrzedLayers(baza, "VERSION", Wersja(adres))
 
         Dim lista As New List(Of String)
         For Each w In warstwy

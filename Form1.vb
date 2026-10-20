@@ -412,15 +412,38 @@ Public Class Form1
 #Region "Zbiory map i warstwy"
 
     ''' <summary>Lista zbiorów map z pliku warstwy\warstwy.txt.</summary>
-    Private Sub WczytajListeZbiorowMap()
-        Dim plik As String = FolderProgramu & "\warstwy\warstwy.txt"
-        If File.Exists(plik) = False Then
-            Komunikat("Brak pliku " & plik & " z listą zbiorów map.", Color.Red)
-            Exit Sub
+    Public Sub WczytajListeZbiorowMap(Optional wybranyZbior As String = "")
+        cmbZbiorMap.Items.Clear()
+        Dim znalezione As New List(Of String)()
+        Dim dodane As New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
+
+        '1. zbiory w folderze programu
+        DodajZbioryZIndeksu(Path.Combine(FolderWarstwProgramu, "warstwy.txt"), znalezione, dodane)
+        '2. zbiory w folderze danych użytkownika (jeśli inny niż programu)
+        If Not String.Equals(FolderWarstwProgramu, FolderWarstwDanych, StringComparison.OrdinalIgnoreCase) Then
+            DodajZbioryZIndeksu(Path.Combine(FolderWarstwDanych, "warstwy.txt"), znalezione, dodane)
         End If
+
+        For Each nazwa In znalezione
+            cmbZbiorMap.Items.Add(nazwa)
+        Next
+
+        If cmbZbiorMap.Items.Count = 0 Then
+            Komunikat("Brak plików z listą zbiorów map.", Color.Red)
+        ElseIf Not String.IsNullOrEmpty(wybranyZbior) AndAlso cmbZbiorMap.Items.Contains(wybranyZbior) Then
+            cmbZbiorMap.SelectedItem = wybranyZbior
+        ElseIf cmbZbiorMap.Items.Contains("skany_map_topograficznych") Then
+            cmbZbiorMap.SelectedItem = "skany_map_topograficznych"
+        ElseIf cmbZbiorMap.Items.Count > 0 Then
+            cmbZbiorMap.SelectedIndex = 0
+        End If
+    End Sub
+
+    Private Sub DodajZbioryZIndeksu(plik As String, lista As List(Of String), dodane As HashSet(Of String))
+        If Not File.Exists(plik) Then Exit Sub
         For Each linia In File.ReadAllLines(plik, PlikWarstw.Kodowanie())
             Dim nazwa As String = linia.Trim().Trim(""""c)
-            If nazwa <> "" Then cmbZbiorMap.Items.Add(nazwa)
+            If nazwa <> "" AndAlso dodane.Add(nazwa) Then lista.Add(nazwa)
         Next
     End Sub
 
@@ -429,8 +452,11 @@ Public Class Form1
         lstWarstwy.Items.Clear()
         _plikWarstw = New PlikWarstw()
 
-        'brak pliku (np. zbiór map zapisany w conf.txt, a usunięty w nowszej wersji programu) - lista pozostaje pusta
-        Dim plik As String = FolderProgramu & "\warstwy\" & cmbZbiorMap.Text & ".txt"
+        Dim nazwaPliku As String = cmbZbiorMap.Text & ".txt"
+        Dim plik As String = Path.Combine(FolderWarstwProgramu, nazwaPliku)
+        If Not File.Exists(plik) Then
+            plik = Path.Combine(FolderWarstwDanych, nazwaPliku)
+        End If
         If File.Exists(plik) = False Then Exit Sub
         Try
             _plikWarstw = PlikWarstw.Wczytaj(plik)
@@ -1090,6 +1116,15 @@ Public Class Form1
 
     Private Sub btnScalanie_Click(sender As Object, e As EventArgs) Handles btnScalanie.Click
         Form3.ShowDialog()
+    End Sub
+
+    Private Sub DodajSerwerToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles DodajSerwerToolStripMenuItem.Click, btnDodajSerwer.Click
+        Using okno As New FormDodajSerwer()
+            If okno.ShowDialog(Me) = DialogResult.OK AndAlso Not String.IsNullOrEmpty(okno.WynikNazwaZbioru) Then
+                WczytajListeZbiorowMap(okno.WynikNazwaZbioru)
+                Komunikat("Dodano zbiór map: " & okno.WynikNazwaZbioru, Color.Green)
+            End If
+        End Using
     End Sub
 
     Private Sub ScalanieToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles ScalanieToolStripMenuItem.Click

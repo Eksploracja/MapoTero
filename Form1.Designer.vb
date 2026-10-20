@@ -68,6 +68,9 @@ Partial Class Form1
         Me.SesjaSeparator2 = New System.Windows.Forms.ToolStripSeparator()
         Me.OdswiezToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.NarzedziaToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.DodajSerwerToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.NarzedziaSeparator1 = New System.Windows.Forms.ToolStripSeparator()
+        Me.btnDodajSerwer = New System.Windows.Forms.Button()
         Me.ScalanieToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.EksportToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.NakładanieWarstwNaSiebieToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
@@ -189,6 +192,7 @@ Partial Class Form1
         Me.grpDaneZrodlowe.Controls.Add(Me.Label29)
         Me.grpDaneZrodlowe.Controls.Add(Me.lstWarstwy)
         Me.grpDaneZrodlowe.Controls.Add(Me.cmbZbiorMap)
+        Me.grpDaneZrodlowe.Controls.Add(Me.btnDodajSerwer)
         Me.grpDaneZrodlowe.Controls.Add(Me.lblUklad)
         Me.grpDaneZrodlowe.Controls.Add(Me.cmbUklad)
         Me.grpDaneZrodlowe.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
@@ -236,9 +240,20 @@ Partial Class Form1
         Me.cmbZbiorMap.Location = New System.Drawing.Point(6, 29)
         Me.cmbZbiorMap.MaxDropDownItems = 18
         Me.cmbZbiorMap.Name = "cmbZbiorMap"
-        Me.cmbZbiorMap.Size = New System.Drawing.Size(198, 21)
+        Me.cmbZbiorMap.Size = New System.Drawing.Size(170, 21)
         Me.cmbZbiorMap.TabIndex = 216
         Me.cmbZbiorMap.Text = "skany_map_topograficznych"
+        '
+        'btnDodajSerwer
+        '
+        Me.btnDodajSerwer.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
+        Me.btnDodajSerwer.Location = New System.Drawing.Point(179, 28)
+        Me.btnDodajSerwer.Name = "btnDodajSerwer"
+        Me.btnDodajSerwer.Size = New System.Drawing.Size(25, 23)
+        Me.btnDodajSerwer.TabIndex = 217
+        Me.btnDodajSerwer.Text = "+"
+        Me.ToolTip1.SetToolTip(Me.btnDodajSerwer, "Dodaj nowy serwer WMS / WMTS (kreator pobierania warstw)...")
+        Me.btnDodajSerwer.UseVisualStyleBackColor = True
         '
         'lblUklad
         '
@@ -377,12 +392,24 @@ Partial Class Form1
         '
         'NarzedziaToolStripMenuItem
         '
-        Me.NarzedziaToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.ScalanieToolStripMenuItem, Me.EksportToolStripMenuItem, Me.NakładanieWarstwNaSiebieToolStripMenuItem, Me.UsuwaniePustychSegmentówToolStripMenuItem})
+        Me.NarzedziaToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.DodajSerwerToolStripMenuItem, Me.NarzedziaSeparator1, Me.ScalanieToolStripMenuItem, Me.EksportToolStripMenuItem, Me.NakładanieWarstwNaSiebieToolStripMenuItem, Me.UsuwaniePustychSegmentówToolStripMenuItem})
         Me.NarzedziaToolStripMenuItem.Name = "NarzedziaToolStripMenuItem"
         Me.NarzedziaToolStripMenuItem.Size = New System.Drawing.Size(70, 20)
         Me.NarzedziaToolStripMenuItem.Text = "Narzędzia"
         Me.NarzedziaToolStripMenuItem.ToolTipText = "Opcjonalne narzędzia wykorzystywane jedynie w szczególnych przypadkach"
         '
+        '
+        'DodajSerwerToolStripMenuItem
+        '
+        Me.DodajSerwerToolStripMenuItem.Name = "DodajSerwerToolStripMenuItem"
+        Me.DodajSerwerToolStripMenuItem.Size = New System.Drawing.Size(315, 22)
+        Me.DodajSerwerToolStripMenuItem.Text = "Dodaj nowy serwer WMS / WMTS..."
+        Me.DodajSerwerToolStripMenuItem.ToolTipText = "Kreator dodawania serwera WMS lub WMTS (analiza GetCapabilities i wybór warstw)"
+        '
+        'NarzedziaSeparator1
+        '
+        Me.NarzedziaSeparator1.Name = "NarzedziaSeparator1"
+        Me.NarzedziaSeparator1.Size = New System.Drawing.Size(312, 6)
         'ScalanieToolStripMenuItem
         '
         Me.ScalanieToolStripMenuItem.Name = "ScalanieToolStripMenuItem"
@@ -1409,6 +1436,9 @@ Partial Class Form1
     Friend WithEvents SesjaSeparator2 As System.Windows.Forms.ToolStripSeparator
     Friend WithEvents OdswiezToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents NarzedziaToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
+    Friend WithEvents DodajSerwerToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
+    Friend WithEvents NarzedziaSeparator1 As System.Windows.Forms.ToolStripSeparator
+    Friend WithEvents btnDodajSerwer As System.Windows.Forms.Button
     Friend WithEvents NakładanieWarstwNaSiebieToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents UstawieniaToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents HelpToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem

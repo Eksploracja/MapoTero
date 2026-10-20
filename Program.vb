@@ -48,6 +48,36 @@ Public Module Program
         End Get
     End Property
 
+    ''' <summary>Katalog ze zbiorami map w folderze programu.</summary>
+    Public ReadOnly Property FolderWarstwProgramu As String
+        Get
+            Return Path.Combine(FolderProgramu, "warstwy")
+        End Get
+    End Property
+
+    ''' <summary>Katalog ze zbiorami map w folderze danych użytkownika (%LocalAppData%\MapoTero\warstwy).</summary>
+    Public ReadOnly Property FolderWarstwDanych As String
+        Get
+            Return Path.Combine(FolderDanych, "warstwy")
+        End Get
+    End Property
+
+    ''' <summary>Katalog zapisu nowych zbiorów map (katalog programu, a przy braku uprawnień - katalog użytkownika).</summary>
+    Public Function FolderZapisuWarstw() As String
+        Try
+            Dim katProg = FolderWarstwProgramu
+            Directory.CreateDirectory(katProg)
+            Dim test = Path.Combine(katProg, "zapis_test.tmp")
+            File.WriteAllText(test, "")
+            File.Delete(test)
+            Return katProg
+        Catch
+            Dim katDanych = FolderWarstwDanych
+            Directory.CreateDirectory(katDanych)
+            Return katDanych
+        End Try
+    End Function
+
     ''' <summary>
     ''' Kodowanie plików tekstowych programu (conf.txt, lastsettings.txt, pliki georeferencyjne): systemowa strona
     ''' kodowa ANSI - takie samo, jakiego używały instrukcje FileOpen/Print poprzednich wersji.
