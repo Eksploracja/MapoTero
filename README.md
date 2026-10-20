@@ -26,6 +26,12 @@ Najnowsze wydania programu można pobrać bezpośrednio w paczce ZIP:
 * 📥 **[Pobierz najnowszą wersję MapoTero z GitHub Releases (MapoTero_v3.14.zip)](https://github.com/Eksploracja/MapoTero/releases/download/v3.14/MapoTero_v3.14.zip)** – bezpośrednie pobranie programu (gotowy do uruchomienia po rozpakowaniu, wersja 64-bitowa dla systemu Windows).
 * 📦 Wszystkie wydania, kody źródłowe i historia wersji: **[GitHub Releases](https://github.com/Eksploracja/MapoTero/releases/latest)**.
 
+> [!NOTE]
+> **Pierwsze uruchomienie w systemie Windows (komunikat SmartScreen):**  
+> Program jest w pełni bezpieczny i otwartoźródłowy (GPLv3), lecz nie posiada kosztownego komercyjnego certyfikatu podpisu cyfrowego. System Windows może przy pierwszym uruchomieniu wyświetlić niebieski monit *"System Windows ochronił ten komputer"*.  
+> * **Jak uruchomić:** Kliknij odnośnik **„Więcej informacji”**, a następnie przycisk **„Uruchom mimo to”**.  
+> * **Wskazówka:** Możesz także przed rozpakowaniem kliknąć prawym przyciskiem myszy na pobranym pliku ZIP → **Właściwości** → zaznaczyć pole **„Odblokuj”** na dole i kliknąć **OK**.
+
 ---
 
 ## Aktualności
