@@ -47,6 +47,15 @@ Public Class ZadaniePobierania
     Public Property TrekBuddy As Boolean
     ''' <summary>Dopisek do nazwy paczki TrekBuddy / Locus Map.</summary>
     Public Property NazwaTrekBuddy As String = ""
+    ''' <summary>Przezroczyste tło segmentów PNG / GIF (parametr TRANSPARENT=TRUE zapytań WMS).</summary>
+    Public Property Przezroczystosc As Boolean
+    ''' <summary>Obszar wzdłuż trasy: pobierane są tylko segmenty przecinające korytarz; Nothing - cały prostokąt.</summary>
+    Public Property Korytarz As Korytarz
+    ''' <summary>
+    ''' Odświeżenie mapy: wszystkie segmenty pobierane są ponownie (istniejący plik zastępowany jest dopiero po
+    ''' udanym pobraniu nowego), a kafle WMTS zachowane w folderze sesji - usuwane przed pobieraniem.
+    ''' </summary>
+    Public Property Odswiez As Boolean
 
     Public ReadOnly Property Rozszerzenie As String
         Get
@@ -134,18 +143,29 @@ Public NotInheritable Class PobieranieSegmentow
                 wynik.Przerwano = True
                 Return wynik
             End Try
+            'odświeżenie - kafle zachowane z poprzedniego pobierania są nieaktualne
+            If z.Odswiez Then
+                kafleWmts.UsunKafle()
+                Directory.CreateDirectory(kafleWmts.FolderKafli)
+            End If
             postep?.Report(New PostepPobierania With {.Komunikat = "Trwa pobieranie segmentów (" & s.LiczbaSegmentow & ") z usługi " & kafleWmts.Opis})
         End If
+
+        'segmenty przecinające korytarz trasy (Nothing - wszystkie segmenty prostokąta)
+        Dim wKorytarzu As HashSet(Of Integer) = Nothing
+        If z.Korytarz IsNot Nothing AndAlso z.Korytarz.Poprawny Then wKorytarzu = z.Korytarz.Segmenty(s, z.Uklad)
 
         'lista segmentów w kolejności wierszami od góry
         Dim segmenty As New List(Of OpisSegmentu)
         For w = 1 To s.LiczbaWierszy
             For k = 1 To s.LiczbaKolumn
+                If wKorytarzu IsNot Nothing AndAlso Not wKorytarzu.Contains(s.NumerKolejny(w, k) - 1) Then Continue For
                 Dim sg As New OpisSegmentu With {.Indeks = segmenty.Count, .Wiersz = w, .Kolumna = k, .Numer = s.NumerKolejny(w, k),
                                                  .Zasieg = s.Segment(w, k)}
                 sg.Nazwa = If(z.TrekBuddy, s.NazwaSegmentuTrekBuddy(z.Prefiks, w, k), s.NazwaSegmentu(z.Prefiks, z.Numeracja, w, k))
                 If kafleWmts Is Nothing Then
-                    sg.Adres = Wms.ZapytanieGetMap(z.AdresSerwera, z.Warstwy, z.Uklad, sg.Zasieg, z.Format, s.BokSegmentuPx, s.BokSegmentuPx, z.ZamienOsie)
+                    sg.Adres = Wms.ZapytanieGetMap(z.AdresSerwera, z.Warstwy, z.Uklad, sg.Zasieg, z.Format, s.BokSegmentuPx, s.BokSegmentuPx, z.ZamienOsie,
+                                                     z.Przezroczystosc)
                 Else
                     sg.Adres = kafleWmts.AdresSegmentu(sg.Zasieg)
                 End If
@@ -167,12 +187,14 @@ Public NotInheritable Class PobieranieSegmentow
 
         'przy powtórnym pobieraniu - tylko brakujące segmenty
         Dim doPobrania As List(Of OpisSegmentu) = segmenty
-        If z.PobierajPowyzejOstatniego AndAlso Not z.TrekBuddy Then
+        If z.PobierajPowyzejOstatniego AndAlso Not z.TrekBuddy AndAlso Not z.Odswiez Then
             doPobrania = segmenty.FindAll(Function(sg) Not File.Exists(Path.Combine(folderDocelowy, sg.Nazwa & "." & ext)))
         End If
 
         Dim plikBledow As String = Path.Combine(z.Folder, "error.txt")
         Dim przyczyny As New ConcurrentDictionary(Of Integer, String)
+        'odświeżanie: segmenty już pobrane ponownie (kolejne próby pomijają je)
+        Dim odswiezone As New ConcurrentDictionary(Of Integer, Boolean)
 
         Try
             For proba = 1 To Math.Max(1, z.IloscProb)
@@ -192,14 +214,16 @@ Public NotInheritable Class PobieranieSegmentow
                                 Try
                                     Dim plik As String = Path.Combine(folderDocelowy, segment.Nazwa & "." & ext)
                                     Dim blad As String = ""
-                                    If Not File.Exists(plik) Then
+                                    Dim pobierz As Boolean = Not File.Exists(plik) OrElse (z.Odswiez AndAlso Not odswiezone.ContainsKey(segment.Indeks))
+                                    If pobierz Then
                                         If kafleWmts Is Nothing Then
                                             blad = Await PobierzSegmentAsync(segment.Adres, plik, z.LimitCzasuSekundy, token).ConfigureAwait(False)
                                         Else
                                             blad = Await kafleWmts.PobierzSegmentAsync(segment.Zasieg, s.BokSegmentuPx, z.Format, plik, token).ConfigureAwait(False)
                                         End If
                                     End If
-                                    If File.Exists(plik) Then
+                                    If pobierz AndAlso blad = "" Then odswiezone(segment.Indeks) = True
+                                    If File.Exists(plik) AndAlso blad = "" Then
                                         If Not z.TrekBuddy AndAlso z.Georeferencja.Dowolna Then
                                             ZapisGeoreferencji.ZapiszPliki(ZapisGeoreferencji.Obraz(z.Uklad, segment.Zasieg, s.BokSegmentuPx, s.BokSegmentuPx,
                                                                                                    folderDocelowy, segment.Nazwa & "." & ext),
@@ -231,7 +255,10 @@ Public NotInheritable Class PobieranieSegmentow
         'wykaz brakujących segmentów (także po przerwaniu - scalanie ostrzeże o niekompletnym zestawie)
         Dim brakujace As New List(Of OpisSegmentu)
         For Each sg In doPobrania
-            If Not File.Exists(Path.Combine(folderDocelowy, sg.Nazwa & "." & ext)) Then brakujace.Add(sg)
+            'przy odświeżaniu brakujący jest także segment, którego nie udało się pobrać ponownie (pozostał stary plik)
+            If Not File.Exists(Path.Combine(folderDocelowy, sg.Nazwa & "." & ext)) OrElse (z.Odswiez AndAlso Not odswiezone.ContainsKey(sg.Indeks)) Then
+                brakujace.Add(sg)
+            End If
         Next
         wynik.Nieudane = brakujace.Count
         If brakujace.Count = 0 Then

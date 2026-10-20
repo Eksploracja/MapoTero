@@ -42,6 +42,7 @@ Partial Class Form2
         Me.grpSesja = New System.Windows.Forms.GroupBox()
         Me.lblFormat = New System.Windows.Forms.Label()
         Me.cmbFormat = New System.Windows.Forms.ComboBox()
+        Me.chkPrzezroczystosc = New System.Windows.Forms.CheckBox()
         Me.lblPrefiks = New System.Windows.Forms.Label()
         Me.txtPrefiks = New System.Windows.Forms.TextBox()
         Me.lblNumeracja = New System.Windows.Forms.Label()
@@ -106,6 +107,7 @@ Partial Class Form2
         '
         Me.grpSesja.Controls.Add(Me.lblFormat)
         Me.grpSesja.Controls.Add(Me.cmbFormat)
+        Me.grpSesja.Controls.Add(Me.chkPrzezroczystosc)
         Me.grpSesja.Controls.Add(Me.lblPrefiks)
         Me.grpSesja.Controls.Add(Me.txtPrefiks)
         Me.grpSesja.Controls.Add(Me.lblNumeracja)
@@ -169,6 +171,17 @@ Partial Class Form2
         Me.cmbNumeracja.Size = New System.Drawing.Size(214, 21)
         Me.cmbNumeracja.TabIndex = 5
         Me.ToolTip1.SetToolTip(Me.cmbNumeracja, "Sposób numerowania segmentów w nazwach plików: NrWiersza_NrKolumny - numer wiersza i kolumny (np. _03_12), 01_02_03 - kolejne numery z zerem wiodącym (_01, _02 ...), 1_2_3 - kolejne numery bez zer (_1, _2 ...). W trybie TrekBuddy segmenty nazywane są wg położenia w pikselach.")
+        '
+        'chkPrzezroczystosc
+        '
+        Me.chkPrzezroczystosc.AutoSize = True
+        Me.chkPrzezroczystosc.Location = New System.Drawing.Point(116, 20)
+        Me.chkPrzezroczystosc.Name = "chkPrzezroczystosc"
+        Me.chkPrzezroczystosc.Size = New System.Drawing.Size(108, 17)
+        Me.chkPrzezroczystosc.TabIndex = 7
+        Me.chkPrzezroczystosc.Text = "przezroczyste tło"
+        Me.ToolTip1.SetToolTip(Me.chkPrzezroczystosc, "Segmenty PNG / GIF z przezroczystym tłem (parametr TRANSPARENT=TRUE zapytania WMS) - do warstw nakładanych na inne mapy, np. granic działek, obszarów chronionych czy map historycznych. W eksporcie wybierz opcję 'nakładka' albo dodaj tę mapę jako warstwę nakładaną.")
+        Me.chkPrzezroczystosc.UseVisualStyleBackColor = True
         '
         'chkPowyzejOstatniego
         '
@@ -663,6 +676,7 @@ Partial Class Form2
     Friend WithEvents lblNumeracja As System.Windows.Forms.Label
     Friend WithEvents cmbNumeracja As System.Windows.Forms.ComboBox
     Friend WithEvents chkPowyzejOstatniego As System.Windows.Forms.CheckBox
+    Friend WithEvents chkPrzezroczystosc As System.Windows.Forms.CheckBox
     Friend WithEvents grpNowaSesja As System.Windows.Forms.GroupBox
     Friend WithEvents lblUkladDomyslny As System.Windows.Forms.Label
     Friend WithEvents cmbUkladDomyslny As System.Windows.Forms.ComboBox

@@ -64,6 +64,8 @@ Public Class UstawieniaProgramu
     Public Property BokSegmentuPrzedTrekBuddy As String = ""
     ''' <summary>Format obrazu WMS: jpeg, png, tiff ... (jeden z FormatySegmentow).</summary>
     Public Property Format As String = "jpeg"
+    ''' <summary>Przezroczyste tło segmentów PNG / GIF (TRANSPARENT=TRUE) - warstwy nakładane na inne mapy.</summary>
+    Public Property Przezroczystosc As Boolean
     ''' <summary>Przedrostek nazw segmentów.</summary>
     Public Property Prefiks As String = "_"
     ''' <summary>Styl numeracji segmentów (tekst jak w plikach: NrWiersza_NrKolumny, 01_02_03, 1_2_3).</summary>
@@ -201,6 +203,7 @@ Public Class UstawieniaProgramu
     Public Sub PrzywrocDomyslne()
         Prefiks = "_"
         Format = "jpeg"
+        Przezroczystosc = False
         PobierajPowyzejOstatniego = False
         EdycjaXY = False
         KursorWgs84 = False

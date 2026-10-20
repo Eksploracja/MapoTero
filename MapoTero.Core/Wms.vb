@@ -83,7 +83,7 @@ Public NotInheritable Class Wms
     ''' </summary>
     Public Shared Function ZapytanieGetMap(adres As String, warstwy As IEnumerable(Of String), uklad As UkladWspolrzednych,
                                            zasieg As Zasieg, format As String, szerokoscPx As Integer, wysokoscPx As Integer,
-                                           zamienOsie As Boolean) As String
+                                           zamienOsie As Boolean, Optional przezroczystosc As Boolean = False) As String
         Dim baza As String = UstawUklad(UzupelnijAdres(adres), uklad)
 
         Dim lista As New List(Of String)
@@ -110,8 +110,20 @@ Public NotInheritable Class Wms
         End If
 
         Dim fmt As String = If(format.StartsWith("image/", StringComparison.OrdinalIgnoreCase), format, "image/" & format)
-        Return baza & nowe & "&bbox=" & bbox & "&format=" & fmt & "&styles=&width=" &
-               szerokoscPx.ToString(CultureInfo.InvariantCulture) & "&height=" & wysokoscPx.ToString(CultureInfo.InvariantCulture)
+        Dim wynik As String = baza & nowe & "&bbox=" & bbox & "&format=" & fmt & "&styles=&width=" &
+                              szerokoscPx.ToString(CultureInfo.InvariantCulture) & "&height=" & wysokoscPx.ToString(CultureInfo.InvariantCulture)
+        If przezroczystosc AndAlso CzyFormatZPrzezroczystoscia(format) AndAlso
+           Not Regex.IsMatch(baza, "[?&]transparent=", RegexOptions.IgnoreCase) Then wynik &= "&transparent=TRUE"
+        Return wynik
+    End Function
+
+    ''' <summary>
+    ''' Czy format obrazu może mieć przezroczyste tło (PNG, GIF). Parametr TRANSPARENT=TRUE dodawany jest tylko dla nich -
+    ''' JPEG nie ma przezroczystości, a niektóre serwery odrzucają ten parametr przy formacie bez kanału alfa.
+    ''' </summary>
+    Public Shared Function CzyFormatZPrzezroczystoscia(format As String) As Boolean
+        Dim r As String = RozszerzeniePliku(format)
+        Return r = "png" OrElse r = "gif"
     End Function
 
     ''' <summary>Rozszerzenie pliku dla formatu obrazu WMS (jpeg - jpg, tiff - tif, png8/png24/png32 - png).</summary>

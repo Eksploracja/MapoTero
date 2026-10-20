@@ -8,7 +8,7 @@
 
 Program pobiera mapy, dzieląc wybrany obszar na siatkę kwadratowych segmentów (do 2048×2048 px). Pobrane segmenty map można następnie:
 * **scalić w jeden duży plik rastrowy** (GeoTIFF, JPEG, PNG) przy użyciu wbudowanej funkcji *"złącz pobrane segmenty w jeden arkusz"*,
-* **wyeksportować do map dla odbiorników GPS i aplikacji mobilnych:** KMZ (Garmin Custom Maps, Locus Map, OruxMaps) i MBTiles (Locus Map, OsmAnd, OruxMaps),
+* **wyeksportować do map dla odbiorników GPS i aplikacji mobilnych:** KMZ (Garmin Custom Maps, Locus Map, OruxMaps), MBTiles (Locus Map, OsmAnd, OruxMaps), SQLiteDB (OsmAnd, Locus Map) i mapy offline OruxMaps - także jako przezroczyste nakładki lub z kilkoma warstwami nałożonymi na siebie,
 * **wgrać do urządzeń GPS** i aplikacji turystycznych (np. [TrekBuddy](http://www.trekbuddy.net/forum/index.php), [OziExplorer](http://www.oziexplorer.com/)),
 * **wyświetlić jako podkład georeferencyjny** w programach GIS i GPS: [QGIS](https://www.qgis.org/), [Google Earth](https://www.google.pl/intl/pl/earth/), ArcGIS, GPS Tuner, MapInfo.
 
@@ -28,6 +28,13 @@ Najnowsze wydania programu można pobrać bezpośrednio w paczce ZIP:
 
 ## Aktualności
 
+* **19.10.2026 – Zmiany przygotowywane do kolejnej wersji:**
+  * **Obszar pobierania wzdłuż trasy** (menu *Sesja pobierania*): po wskazaniu pliku GPX, KML lub KMZ (np. trasy zaplanowanej w Mapy.com, Komoot czy Locus Map) i szerokości pasa pobierane są tylko segmenty leżące wzdłuż trasy, a nie cały prostokąt - przy trasie ukośnej lub krętej wielokrotnie mniej danych; trasa i wybrane segmenty widoczne są na mapie, a korytarz zapisywany jest w folderze sesji (`korytarz.txt`),
+  * **Przezroczyste nakładki:** opcja *przezroczyste tło* w ustawieniach (parametr `TRANSPARENT=TRUE` zapytań WMS dla segmentów PNG / GIF), w eksporcie opcja *nakładka* (kafle PNG, w MBTiles typ `overlay`) oraz zamiana białego tła na przezroczyste dla serwerów, które przezroczystości nie obsługują,
+  * **Łączenie warstw podczas eksportu:** na mapę można nałożyć warstwy z innych folderów sesji (np. granice działek lub cieniowanie rzeźby na ortofotomapie) z regulacją krycia - także pobrane w innym układzie współrzędnych,
+  * **Nowe formaty eksportu:** SQLiteDB (format RMaps dla OsmAnd i Locus Map) oraz mapy offline OruxMaps (folder z bazą `OruxMapsImages.db` i kalibracją `.otrk2.xml`); bazy po eksporcie można otwierać tylko do odczytu,
+  * **Rozmiar pliku:** szacowanie rozmiaru mapy przed eksportem (na podstawie próbnych kafli) i dobór najwyższego poziomu powiększenia do limitu w MB,
+  * **Opis mapy:** data pobrania i źródło danych zapisywane w `conf.txt` oraz w eksportowanych mapach (nazwa mapy z datą pobrania, opis i atrybucja w MBTiles, opis w KMZ), a polecenie *odśwież mapę* pobiera ponownie wszystkie segmenty sesji (stary plik segmentu jest zastępowany dopiero po udanym pobraniu nowego).
 * **08.10.2026 – Wersja 3.13:**
   * **Wydajność scalania segmentów:** jednokrotne buforowanie wiersza segmentów w pamięci RAM zamiast wielokrotnego dekodowania kafli z dysku (wielokrotne przyspieszenie tworzenia dużych arkuszy),
   * **Eksport MBTiles:** naprawa transakcji SQLite i zapytań (rozwiązanie błędu `InvalidOperationException`), optymalizacja parametrów SQL, włączenie trybów `PRAGMA synchronous = OFF` oraz `WAL`, buforowanie kodeka JPEG,
@@ -79,12 +86,12 @@ Najnowsze wydania programu można pobrać bezpośrednio w paczce ZIP:
 
 1. **Wybór zbioru map:** Wybierz z listy po prawej stronie okna programu zbiór map, z którego chcesz pobrać dane (lub pozostaw domyślny zbiór *"skany map topograficznych"*).
 2. **Wybór warstwy:** Kliknij jednokrotnie lewym przyciskiem myszy na interesującą Cię warstwę (np. *"Raster_25_1965"* – mapa 1:25 000 w układzie 1965, lub *"Raster_10_1965"*). Nazwa zaznaczonej warstwy wyświetli się w polu *"Wybrane warstwy"*.
-3. **Zaznaczenie obszaru:** Na podglądzie mapy zaznacz prawym przyciskiem myszy zasięg pobieranego obszaru.
+3. **Zaznaczenie obszaru:** Na podglądzie mapy zaznacz prawym przyciskiem myszy zasięg pobieranego obszaru albo wskaż plik trasy (*Sesja pobierania > obszar pobierania wzdłuż trasy*).
 4. **Pobieranie:** Kliknij przycisk **"Pobierz"**. Rozpocznie się pobieranie segmentów do katalogu `download`.
 5. **Przeglądanie i scalanie:**
    * Kliknij żółty folder, aby otworzyć katalog z pobranymi plikami.
    * Opcjonalnie scal pobrane segmenty w jeden arkusz ikoną szachownicy (*"scal pobrane segmenty..."*), wybierając format arkusza (GeoTIFF, JPEG lub PNG). Arkusz zapisywany jest strumieniowo, więc może mieć dowolną wielkość (JPEG - do 65 500 px na bok).
-   * Opcjonalnie wyeksportuj mapę do KMZ lub MBTiles (*Narzędzia > Eksport mapy*), aby wgrać ją do odbiornika GPS lub aplikacji mobilnej.
+   * Opcjonalnie wyeksportuj mapę do KMZ, MBTiles, SQLiteDB lub OruxMaps (*Narzędzia > Eksport mapy*), aby wgrać ją do odbiornika GPS lub aplikacji mobilnej.
 
 ![Uproszczona instrukcja obsługi](instrukcja.jpg)
 

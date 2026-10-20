@@ -62,6 +62,11 @@ Partial Class Form1
         Me.SesjaToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.ZapiszToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.WczytajToolStripMenuItem1 = New System.Windows.Forms.ToolStripMenuItem()
+        Me.SesjaSeparator1 = New System.Windows.Forms.ToolStripSeparator()
+        Me.KorytarzToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.UsunKorytarzToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.SesjaSeparator2 = New System.Windows.Forms.ToolStripSeparator()
+        Me.OdswiezToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.NarzedziaToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.ScalanieToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.EksportToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
@@ -317,7 +322,7 @@ Partial Class Form1
         '
         'SesjaToolStripMenuItem
         '
-        Me.SesjaToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.ZapiszToolStripMenuItem, Me.WczytajToolStripMenuItem1})
+        Me.SesjaToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.ZapiszToolStripMenuItem, Me.WczytajToolStripMenuItem1, Me.SesjaSeparator1, Me.KorytarzToolStripMenuItem, Me.UsunKorytarzToolStripMenuItem, Me.SesjaSeparator2, Me.OdswiezToolStripMenuItem})
         Me.SesjaToolStripMenuItem.Name = "SesjaToolStripMenuItem"
         Me.SesjaToolStripMenuItem.ShortcutKeys = CType((System.Windows.Forms.Keys.Alt Or System.Windows.Forms.Keys.S), System.Windows.Forms.Keys)
         Me.SesjaToolStripMenuItem.Size = New System.Drawing.Size(104, 20)
@@ -339,6 +344,37 @@ Partial Class Form1
         Me.WczytajToolStripMenuItem1.Size = New System.Drawing.Size(290, 22)
         Me.WczytajToolStripMenuItem1.Text = "wczytaj ustawienia sesji (conf.txt)"
         '
+        'SesjaSeparator1
+        '
+        Me.SesjaSeparator1.Name = "SesjaSeparator1"
+        Me.SesjaSeparator1.Size = New System.Drawing.Size(287, 6)
+        '
+        'KorytarzToolStripMenuItem
+        '
+        Me.KorytarzToolStripMenuItem.Name = "KorytarzToolStripMenuItem"
+        Me.KorytarzToolStripMenuItem.Size = New System.Drawing.Size(290, 22)
+        Me.KorytarzToolStripMenuItem.Text = "obszar pobierania wzdłuż trasy (GPX, KML, KMZ)..."
+        Me.KorytarzToolStripMenuItem.ToolTipText = "Pobieranie tylko segmentów w pasie wzdłuż trasy zaplanowanej np. w Mapy.com, Komoot lub Locus Map"
+        '
+        'UsunKorytarzToolStripMenuItem
+        '
+        Me.UsunKorytarzToolStripMenuItem.Enabled = False
+        Me.UsunKorytarzToolStripMenuItem.Name = "UsunKorytarzToolStripMenuItem"
+        Me.UsunKorytarzToolStripMenuItem.Size = New System.Drawing.Size(290, 22)
+        Me.UsunKorytarzToolStripMenuItem.Text = "usuń obszar wzdłuż trasy (pobieranie całego prostokąta)"
+        '
+        'SesjaSeparator2
+        '
+        Me.SesjaSeparator2.Name = "SesjaSeparator2"
+        Me.SesjaSeparator2.Size = New System.Drawing.Size(287, 6)
+        '
+        'OdswiezToolStripMenuItem
+        '
+        Me.OdswiezToolStripMenuItem.Name = "OdswiezToolStripMenuItem"
+        Me.OdswiezToolStripMenuItem.Size = New System.Drawing.Size(290, 22)
+        Me.OdswiezToolStripMenuItem.Text = "odśwież mapę - pobierz ponownie wszystkie segmenty"
+        Me.OdswiezToolStripMenuItem.ToolTipText = "Ponowne pobranie wszystkich segmentów bieżącej sesji (np. po aktualizacji ortofotomapy); stary plik segmentu jest zastępowany dopiero po udanym pobraniu nowego"
+        '
         'NarzedziaToolStripMenuItem
         '
         Me.NarzedziaToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.ScalanieToolStripMenuItem, Me.EksportToolStripMenuItem, Me.NakładanieWarstwNaSiebieToolStripMenuItem, Me.UsuwaniePustychSegmentówToolStripMenuItem})
@@ -359,7 +395,7 @@ Partial Class Form1
         Me.EksportToolStripMenuItem.Name = "EksportToolStripMenuItem"
         Me.EksportToolStripMenuItem.ShortcutKeys = CType((System.Windows.Forms.Keys.Control Or System.Windows.Forms.Keys.E), System.Windows.Forms.Keys)
         Me.EksportToolStripMenuItem.Size = New System.Drawing.Size(315, 22)
-        Me.EksportToolStripMenuItem.Text = "Eksport do KMZ (Garmin, Locus) / MBTiles"
+        Me.EksportToolStripMenuItem.Text = "Eksport do KMZ, MBTiles, SQLiteDB, OruxMaps"
         '
         'NakładanieWarstwNaSiebieToolStripMenuItem
         '
@@ -1367,6 +1403,11 @@ Partial Class Form1
     Friend WithEvents SesjaToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents ZapiszToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents WczytajToolStripMenuItem1 As System.Windows.Forms.ToolStripMenuItem
+    Friend WithEvents SesjaSeparator1 As System.Windows.Forms.ToolStripSeparator
+    Friend WithEvents KorytarzToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
+    Friend WithEvents UsunKorytarzToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
+    Friend WithEvents SesjaSeparator2 As System.Windows.Forms.ToolStripSeparator
+    Friend WithEvents OdswiezToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents NarzedziaToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents NakładanieWarstwNaSiebieToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents UstawieniaToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem

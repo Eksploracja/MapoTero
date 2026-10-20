@@ -187,6 +187,17 @@ Public Class Form3
 
         If przerwane OrElse wynik Is Nothing OrElse Me.IsDisposed OrElse Me.Disposing Then Exit Sub
 
+        'segmenty pobrane wzdłuż trasy - brak segmentów poza korytarzem jest zamierzony (białe pola w arkuszu)
+        Dim korytarz = Core.Korytarz.ZFolderu(_folderScalania)
+        If korytarz IsNot Nothing Then
+            Dim wKorytarzu As New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
+            For Each klucz In korytarz.Segmenty(s, _uklad)
+                wKorytarzu.Add(s.NazwaSegmentu(zadanie.Prefiks, zadanie.Numeracja, klucz \ s.LiczbaKolumn + 1, klucz Mod s.LiczbaKolumn + 1) &
+                               "." & zadanie.RozszerzenieSegmentow)
+            Next
+            wynik.Brakujace.RemoveAll(Function(n) Not wKorytarzu.Contains(n))
+        End If
+
         Dim nazwa As String = Path.GetFileName(wynik.Plik)
         If wynik.Brakujace.Count > 0 Then
             Komunikat("Arkusz " & nazwa & " zapisano, ale brakowało " & wynik.Brakujace.Count & " segmentów (białe pola), m.in.: " &

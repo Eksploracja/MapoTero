@@ -52,6 +52,7 @@ Public Class Form2
             Dim u = Ustawienia
             'sesja
             cmbFormat.SelectedItem = UstawieniaProgramu.NormalizujFormat(u.Format)
+            chkPrzezroczystosc.Checked = u.Przezroczystosc
             txtPrefiks.Text = u.Prefiks
             cmbNumeracja.SelectedItem = u.Numeracja
             If cmbNumeracja.SelectedIndex < 0 Then cmbNumeracja.SelectedIndex = 0
@@ -101,6 +102,7 @@ Public Class Form2
     ''' </summary>
     Private Sub OdswiezDostepnosc()
         Dim tb As Boolean = chkTrekBuddy.Checked
+        chkPrzezroczystosc.Enabled = Wms.CzyFormatZPrzezroczystoscia(CStr(cmbFormat.SelectedItem))
         grpKalibracja.Enabled = Not tb
         cmbNumeracja.Enabled = Not tb
         lblNumeracja.Enabled = Not tb
@@ -112,6 +114,11 @@ Public Class Form2
     End Sub
 
     Private Sub chkTrekBuddy_CheckedChanged(sender As Object, e As EventArgs) Handles chkTrekBuddy.CheckedChanged
+        If _wypelnianie Then Exit Sub
+        OdswiezDostepnosc()
+    End Sub
+
+    Private Sub cmbFormat_SelectedIndexChanged(sender As Object, e As EventArgs) Handles cmbFormat.SelectedIndexChanged
         If _wypelnianie Then Exit Sub
         OdswiezDostepnosc()
     End Sub
@@ -161,6 +168,7 @@ Public Class Form2
 
         'sesja (zapisywana w conf.txt przy rozpoczęciu pobierania)
         u.Format = UstawieniaProgramu.NormalizujFormat(CStr(cmbFormat.SelectedItem))
+        u.Przezroczystosc = chkPrzezroczystosc.Checked
         Form1.stFormat.Text = "." & u.Format
         u.Prefiks = txtPrefiks.Text
         If cmbNumeracja.SelectedItem IsNot Nothing Then u.Numeracja = CStr(cmbNumeracja.SelectedItem)
