@@ -200,9 +200,9 @@ Public Class Form3
 
         Dim nazwa As String = Path.GetFileName(wynik.Plik)
         If wynik.Brakujace.Count > 0 Then
-            Komunikat("Arkusz " & nazwa & " zapisano, ale brakowało " & wynik.Brakujace.Count & " segmentów (białe pola), m.in.: " &
+            Komunikat("Arkusz " & nazwa & " zapisano, ale brakowało " & wynik.Brakujace.Count & If(wynik.Brakujace.Count = 1, " segmentu", " segmentów") & " (białe pola), m.in.: " &
                       String.Join(", ", wynik.Brakujace.Take(5)), Color.Red)
-            Form1.Komunikat("Scalono segmenty do pliku " & nazwa & " - brakowało " & wynik.Brakujace.Count & " segmentów", Color.Red)
+            Form1.Komunikat("Scalono segmenty do pliku " & nazwa & " - brakowało " & wynik.Brakujace.Count & If(wynik.Brakujace.Count = 1, " segmentu", " segmentów"), Color.Red)
         Else
             Form1.Komunikat("Segmenty zostały prawidłowo scalone i zapisane do pliku " & nazwa, Color.Green)
             Me.Close()

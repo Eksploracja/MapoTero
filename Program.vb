@@ -143,6 +143,14 @@ Public Module Program
         Return MapoTero.Core.Georeferencja.Liczba(wartosc)
     End Function
 
+    ''' <summary>Polska odmiana rzeczownika po liczbie: 1 segment, 2-4 segmenty (bez 12-14), 5 segmentów.</summary>
+    Public Function Odmiana(liczba As Long, pojedyncza As String, mnoga24 As String, mnoga As String) As String
+        Dim n As Long = Math.Abs(liczba)
+        If n = 1 Then Return pojedyncza
+        If n Mod 10 >= 2 AndAlso n Mod 10 <= 4 AndAlso (n Mod 100 < 12 OrElse n Mod 100 > 14) Then Return mnoga24
+        Return mnoga
+    End Function
+
     ''' <summary>Otwiera folder w Eksploratorze Windows.</summary>
     Public Sub OtworzFolder(folder As String)
         Try

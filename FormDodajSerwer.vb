@@ -394,6 +394,12 @@ Public Class FormDodajSerwer
         If _wynikCap Is Nothing Then Exit Sub
 
         btnPobierzProbke.Enabled = False
+        'pobieranie próbki trwa nawet kilkadziesiąt sekund - widoczny stan zamiast samego wyszarzonego przycisku
+        Dim tekstPrzycisku As String = btnPobierzProbke.Text
+        btnPobierzProbke.Text = "Pobieranie próbki..."
+        Using staryPodglad = picPodglad.Image
+            picPodglad.Image = Nothing
+        End Using
         Cursor = Cursors.WaitCursor
         Try
             Dim sukcessPobrania As Boolean = False
@@ -568,6 +574,7 @@ Public Class FormDodajSerwer
         Catch ex As Exception
             MessageBox.Show("Nie udało się pobrać próbki kafelka: " & ex.Message, "Błąd podglądu", MessageBoxButtons.OK, MessageBoxIcon.Warning)
         Finally
+            btnPobierzProbke.Text = tekstPrzycisku
             btnPobierzProbke.Enabled = True
             Cursor = Cursors.Default
         End Try

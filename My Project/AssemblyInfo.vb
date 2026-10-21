@@ -9,10 +9,12 @@ Imports System.Runtime.InteropServices
 ' Review the values of the assembly attributes
 
 <Assembly: AssemblyTitle("MapoTero")>
-<Assembly: AssemblyDescription("kod: 2009-2014 pajakt, od 2015 Kazimierz Niecikowski, Paweł_gdn, AAA222; kod modułu przeliczania współrzędnych: Edward Zadorski;")>
+<Assembly: AssemblyDescription("Program stworzył i w latach 2009-2014 rozwijał pajakt." & vbCrLf &
+                               "Od 2015 roku program rozwija Kazimierz Niecikowski." & vbCrLf & vbCrLf &
+                               "Podziękowania za pomoc: Paweł_gdn, AAA222 oraz Edward Zadorski (moduł przeliczania współrzędnych).")>
 <Assembly: AssemblyCompany("Pomorskie Forum Eksploracyjne")>
 <Assembly: AssemblyProduct("Program do pobierania rastrowych map z serwerów WMS")>
-<Assembly: AssemblyCopyright("Copyright © pajakt, 2009/2020. Powszechna Licencja Publiczna GNU-GPLv3")>
+<Assembly: AssemblyCopyright("Copyright © 2009-2014 pajakt, 2015-2026 Kazimierz Niecikowski. Licencja GNU GPL v3")>
 
 <Assembly: AssemblyTrademark("MapoTero")>
 

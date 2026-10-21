@@ -1,4 +1,4 @@
-﻿Imports GMap.NET
+Imports GMap.NET
 Imports GMap.NET.MapProviders
 Imports GMap.NET.WindowsForms
 
@@ -210,7 +210,7 @@ Partial Class Form1
         Me.Label30.Name = "Label30"
         Me.Label30.Size = New System.Drawing.Size(152, 13)
         Me.Label30.TabIndex = 217
-        Me.Label30.Text = " Wybież mapę (warstwa WMS)"
+        Me.Label30.Text = " Wybierz mapę (warstwa WMS)"
         Me.ToolTip1.SetToolTip(Me.Label30, "Wskaż wybraną warst klikając na nią lewym klawiszem myszki. ")
         '
         'Label29
@@ -486,7 +486,7 @@ Partial Class Form1
         '
         Me.Label47.AutoSize = True
         Me.Label47.Enabled = False
-        Me.Label47.Location = New System.Drawing.Point(262, 94)
+        Me.Label47.Location = New System.Drawing.Point(276, 94)
         Me.Label47.Name = "Label47"
         Me.Label47.Size = New System.Drawing.Size(13, 13)
         Me.Label47.TabIndex = 221
@@ -498,7 +498,7 @@ Partial Class Form1
         '
         Me.Label46.AutoSize = True
         Me.Label46.Enabled = False
-        Me.Label46.Location = New System.Drawing.Point(263, 57)
+        Me.Label46.Location = New System.Drawing.Point(277, 57)
         Me.Label46.Name = "Label46"
         Me.Label46.Size = New System.Drawing.Size(12, 13)
         Me.Label46.TabIndex = 220
@@ -511,7 +511,7 @@ Partial Class Form1
         Me.txtZasiegSegmentuKm.Enabled = False
         Me.txtZasiegSegmentuKm.Location = New System.Drawing.Point(246, 108)
         Me.txtZasiegSegmentuKm.Name = "txtZasiegSegmentuKm"
-        Me.txtZasiegSegmentuKm.Size = New System.Drawing.Size(44, 20)
+        Me.txtZasiegSegmentuKm.Size = New System.Drawing.Size(72, 20)
         Me.txtZasiegSegmentuKm.TabIndex = 219
         Me.txtZasiegSegmentuKm.Text = "2000"
         Me.txtZasiegSegmentuKm.TextAlign = System.Windows.Forms.HorizontalAlignment.Center
@@ -520,7 +520,7 @@ Partial Class Form1
         '
         Me.txtBokSegmentu.Location = New System.Drawing.Point(246, 72)
         Me.txtBokSegmentu.Name = "txtBokSegmentu"
-        Me.txtBokSegmentu.Size = New System.Drawing.Size(44, 20)
+        Me.txtBokSegmentu.Size = New System.Drawing.Size(72, 20)
         Me.txtBokSegmentu.TabIndex = 211
         Me.txtBokSegmentu.Text = "2000"
         Me.txtBokSegmentu.TextAlign = System.Windows.Forms.HorizontalAlignment.Center
@@ -528,11 +528,11 @@ Partial Class Form1
         'Label1
         '
         Me.Label1.AutoSize = True
-        Me.Label1.Location = New System.Drawing.Point(293, 77)
+        Me.Label1.Location = New System.Drawing.Point(321, 75)
         Me.Label1.Name = "Label1"
-        Me.Label1.Size = New System.Drawing.Size(116, 13)
+        Me.Label1.Size = New System.Drawing.Size(73, 13)
         Me.Label1.TabIndex = 213
-        Me.Label1.Text = "Rozmiar segmentu [pix]"
+        Me.Label1.Text = "Segment [pix]"
         Me.ToolTip1.SetToolTip(Me.Label1, "Rozmiar pojedyńczego segmentu - najmniejszej komórki siatki kwadtatów, na które z" &
         "ostanie podzielony pobierany obszar mapy.  Uwaga - maksymalna rozmiar segmentu d" &
         "la Geoportalu2 wynosi 2048px")
@@ -540,11 +540,11 @@ Partial Class Form1
         'lblRozmiarPikselaOpis
         '
         Me.lblRozmiarPikselaOpis.AutoSize = True
-        Me.lblRozmiarPikselaOpis.Location = New System.Drawing.Point(292, 39)
+        Me.lblRozmiarPikselaOpis.Location = New System.Drawing.Point(321, 39)
         Me.lblRozmiarPikselaOpis.Name = "lblRozmiarPikselaOpis"
-        Me.lblRozmiarPikselaOpis.Size = New System.Drawing.Size(116, 13)
+        Me.lblRozmiarPikselaOpis.Size = New System.Drawing.Size(75, 13)
         Me.lblRozmiarPikselaOpis.TabIndex = 214
-        Me.lblRozmiarPikselaOpis.Text = "Rozmiar piksela [m/pix]"
+        Me.lblRozmiarPikselaOpis.Text = "Piksel [m/pix]"
         Me.ToolTip1.SetToolTip(Me.lblRozmiarPikselaOpis, "Domyślna wartość jest optymalna. Im większy rozmiar piksela, tym gorsza jakość ob" &
         "razu, ale jednocześnie tym większy jego przestrzenny zasięg.")
         '
@@ -552,7 +552,7 @@ Partial Class Form1
         '
         Me.txtRozmiarPiksela.Location = New System.Drawing.Point(246, 36)
         Me.txtRozmiarPiksela.Name = "txtRozmiarPiksela"
-        Me.txtRozmiarPiksela.Size = New System.Drawing.Size(44, 20)
+        Me.txtRozmiarPiksela.Size = New System.Drawing.Size(72, 20)
         Me.txtRozmiarPiksela.TabIndex = 212
         Me.txtRozmiarPiksela.Text = "1"
         Me.txtRozmiarPiksela.TextAlign = System.Windows.Forms.HorizontalAlignment.Center
@@ -900,11 +900,11 @@ Partial Class Form1
         '
         Me.Label42.AutoSize = True
         Me.Label42.Enabled = False
-        Me.Label42.Location = New System.Drawing.Point(292, 105)
+        Me.Label42.Location = New System.Drawing.Point(321, 105)
         Me.Label42.Name = "Label42"
         Me.Label42.Size = New System.Drawing.Size(87, 13)
         Me.Label42.TabIndex = 215
-        Me.Label42.Text = "Terenowy zasięg"
+        Me.Label42.Text = "Zasięg w terenie"
         Me.ToolTip1.SetToolTip(Me.Label42, "Rozmiar pojedyńczego segmentu - najmniejszej komórki siatki kwadtatów, na które z" &
         "ostanie podzielony pobierany obszar mapy.  Uwaga - maksymalna rozmiar segmentu d" &
         "la Geoportalu2 wynosi 2048px")
@@ -913,11 +913,11 @@ Partial Class Form1
         '
         Me.Label7.AutoSize = True
         Me.Label7.Enabled = False
-        Me.Label7.Location = New System.Drawing.Point(294, 118)
+        Me.Label7.Location = New System.Drawing.Point(321, 118)
         Me.Label7.Name = "Label7"
-        Me.Label7.Size = New System.Drawing.Size(117, 13)
+        Me.Label7.Size = New System.Drawing.Size(77, 13)
         Me.Label7.TabIndex = 316
-        Me.Label7.Text = "jednego segmentu [km]"
+        Me.Label7.Text = "segmentu [km]"
         Me.ToolTip1.SetToolTip(Me.Label7, "Rozmiar pojedyńczego segmentu - najmniejszej komórki siatki kwadtatów, na które z" &
         "ostanie podzielony pobierany obszar mapy.  Uwaga - maksymalna rozmiar segmentu d" &
         "la Geoportalu2 wynosi 2048px")
@@ -1084,7 +1084,7 @@ Partial Class Form1
         Me.lblKursorTytul.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
         Me.lblKursorTytul.AutoSize = True
         Me.lblKursorTytul.BackColor = System.Drawing.SystemColors.Window
-        Me.lblKursorTytul.Location = New System.Drawing.Point(6, 481)
+        Me.lblKursorTytul.Location = New System.Drawing.Point(6, 463)
         Me.lblKursorTytul.Name = "lblKursorTytul"
         Me.lblKursorTytul.Size = New System.Drawing.Size(109, 13)
         Me.lblKursorTytul.TabIndex = 265
@@ -1095,7 +1095,7 @@ Partial Class Form1
         Me.lblKursorUkladOpis.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
         Me.lblKursorUkladOpis.AutoSize = True
         Me.lblKursorUkladOpis.BackColor = System.Drawing.SystemColors.Window
-        Me.lblKursorUkladOpis.Location = New System.Drawing.Point(7, 498)
+        Me.lblKursorUkladOpis.Location = New System.Drawing.Point(7, 480)
         Me.lblKursorUkladOpis.Name = "lblKursorUkladOpis"
         Me.lblKursorUkladOpis.Size = New System.Drawing.Size(31, 13)
         Me.lblKursorUkladOpis.TabIndex = 266
@@ -1106,11 +1106,11 @@ Partial Class Form1
         Me.lblKursorUklad.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
         Me.lblKursorUklad.AutoSize = True
         Me.lblKursorUklad.BackColor = System.Drawing.SystemColors.Window
-        Me.lblKursorUklad.Location = New System.Drawing.Point(46, 498)
+        Me.lblKursorUklad.Location = New System.Drawing.Point(40, 480)
         Me.lblKursorUklad.Name = "lblKursorUklad"
         Me.lblKursorUklad.Size = New System.Drawing.Size(31, 13)
         Me.lblKursorUklad.TabIndex = 267
-        Me.lblKursorUklad.Text = "1992"
+        Me.lblKursorUklad.Text = ""
         '
         'lblSrodekDlug
         '
@@ -1175,7 +1175,7 @@ Partial Class Form1
         Me.lblKursorWgs.Name = "lblKursorWgs"
         Me.lblKursorWgs.Size = New System.Drawing.Size(36, 13)
         Me.lblKursorWgs.TabIndex = 260
-        Me.lblKursorWgs.Text = "kursor"
+        Me.lblKursorWgs.Text = ""
         '
         'grpSchemat
         '

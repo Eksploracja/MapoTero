@@ -53,7 +53,7 @@ Public Class UstawieniaProgramu
     ''' <summary>Przy powtórnym pobieraniu tylko segmenty o numerze wyższym niż ostatni pobrany.</summary>
     Public Property PobierajPowyzejOstatniego As Boolean
     ''' <summary>Limit czasu oczekiwania na odpowiedź serwera [s].</summary>
-    Public Property LimitCzasuSekundy As Integer = 60
+    Public Property LimitCzasuSekundy As Integer = 120
     ''' <summary>Tworzenie mapy TrekBuddy / Locus Map.</summary>
     Public Property TrekBuddy As Boolean
     ''' <summary>Dopisek do przedrostka w nazwie paczki TrekBuddy (wg stylu StylNazwyTrekBuddy).</summary>
@@ -118,6 +118,7 @@ Public Class UstawieniaProgramu
     Public Property KursorWgs84 As Boolean
     Public Property ZaznaczenieWgs84 As Boolean
     Public Property KursorISrodekMapy As Boolean = True
+    Public Property SiatkaSegmentowNaMapie As Boolean = True
     Public Property SrodekMapySzerokosc As String = "52.3"
     Public Property SrodekMapyDlugosc As String = "19.2"
     Public Property SkalaMapy As String = "6"
@@ -168,6 +169,7 @@ Public Class UstawieniaProgramu
         StylNazwyTrekBuddy = Math.Max(0, Math.Min(3, u.Calkowita("styl_nazwy_tb", StylNazwyTrekBuddy)))
         Dim epsg As Integer = u.Calkowita("uklad_domyslny", UkladDomyslny.Epsg)
         UkladDomyslny = UkladWspolrzednych.ZKodu(epsg)
+        SiatkaSegmentowNaMapie = u.Logiczna("siatka_segmentow", SiatkaSegmentowNaMapie)
     End Sub
 
     ''' <summary>Zapis lastsettings.txt - kolejność i nazwy jak w poprzednich wersjach, nowe ustawienia na końcu.</summary>
@@ -196,6 +198,7 @@ Public Class UstawieniaProgramu
         u.Ustaw("jakosc_jpeg_wmts", JakoscJpegWmts)
         u.Ustaw("styl_nazwy_tb", StylNazwyTrekBuddy)
         u.Ustaw("uklad_domyslny", UkladDomyslny.Epsg)
+        u.Ustaw("siatka_segmentow", SiatkaSegmentowNaMapie)
         u.Zapisz(sciezka, KodowanieSystemowe())
     End Sub
 
@@ -209,6 +212,7 @@ Public Class UstawieniaProgramu
         KursorWgs84 = False
         ZaznaczenieWgs84 = False
         KursorISrodekMapy = True
+        SiatkaSegmentowNaMapie = True
         PlikMap = False
         PlikKml = False
         PlikWorldFile = False
@@ -219,7 +223,7 @@ Public Class UstawieniaProgramu
         IloscProbPobrania = 3
         PrzerwaMiedzyProbami = 5
         LiczbaWatkow = 4
-        LimitCzasuSekundy = 60
+        LimitCzasuSekundy = 120
         ZachowajKafleWmts = False
         JakoscJpegWmts = 90
         TrekBuddy = False

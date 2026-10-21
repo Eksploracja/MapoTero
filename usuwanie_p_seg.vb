@@ -75,9 +75,18 @@ Public Class Usuwanie_p_seg
 
     Private Sub btnUsun_Click(sender As Object, e As EventArgs) Handles btnUsun.Click
         Dim doUsuniecia As New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
+        Dim segmenty = PlikiPonizejRozmiaru()
+        If segmenty.Count = 0 Then
+            MsgBox("Brak segmentów mniejszych niż podany rozmiar - wpisz próg w polu ""Usuń kafle mniejsze niż"".", MsgBoxStyle.Information, "Usuwanie pustych segmentów")
+            Exit Sub
+        End If
+        If MessageBox.Show("Usunąć " & segmenty.Count & " z " & _plikiBiezace.Count & " segmentów mniejszych niż " & txtProgKB.Text.Trim() &
+                           " kB (wraz z ich plikami georeferencyjnymi) z folderu" & vbCrLf & Folder & "?" & vbCrLf & vbCrLf &
+                           "Pliki zostaną przeniesione do Kosza.", "Usuwanie pustych segmentów",
+                           MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2) <> DialogResult.Yes Then Exit Sub
         btnUsun.Enabled = False
 
-        For Each plik As String In PlikiPonizejRozmiaru()
+        For Each plik As String In segmenty
             doUsuniecia.Add(plik)
             'pliki georeferencyjne towarzyszące segmentowi (jeśli istnieją)
             Dim bezRozszerzenia As String = Path.ChangeExtension(plik, Nothing)
@@ -91,19 +100,30 @@ Public Class Usuwanie_p_seg
             Next
         Next
 
-        Dim usuniete As Integer = 0
+        'do Kosza - pomyłkę przy wpisywaniu progu można cofnąć
+        Dim usuniete As Integer = 0, usunieteSegmenty As Integer = 0, bledy As Integer = 0
+        Dim zbiorSegmentow As New HashSet(Of String)(segmenty, StringComparer.OrdinalIgnoreCase)
         For Each plik As String In doUsuniecia
             Try
-                File.Delete(plik)
+                FileIO.FileSystem.DeleteFile(plik, FileIO.UIOption.OnlyErrorDialogs, FileIO.RecycleOption.SendToRecycleBin)
                 usuniete += 1
+                If zbiorSegmentow.Contains(plik) Then usunieteSegmenty += 1
             Catch
+                bledy += 1
             End Try
         Next
 
         txtProgKB.Text = "0"
-        txtDoUsuniecia.Text = usuniete.ToString()
         btnUsun.Enabled = True
         cmbRozszerzenie_SelectedIndexChanged(Nothing, Nothing)
+
+        Dim opis As String = "Przeniesiono do Kosza " & usunieteSegmenty & " " & Odmiana(usunieteSegmenty, "segment", "segmenty", "segmentów")
+        If usuniete > usunieteSegmenty Then opis &= " i " & (usuniete - usunieteSegmenty) & " " & Odmiana(usuniete - usunieteSegmenty, "plik", "pliki", "plików") & " georeferencyjnych"
+        opis &= "."
+        If bledy > 0 Then opis &= vbCrLf & "Nie udało się usunąć " & bledy & " " & Odmiana(bledy, "pliku", "plików", "plików") & "."
+        opis &= vbCrLf & vbCrLf & "Brakujące segmenty uzupełnisz, wznawiając pobieranie przyciskiem Pobierz."
+        MsgBox(opis, If(bledy > 0, MsgBoxStyle.Exclamation, MsgBoxStyle.Information), "Usuwanie pustych segmentów")
+        Form1.Komunikat(opis.Replace(vbCrLf, " "), If(bledy > 0, Color.Red, Color.Green))
     End Sub
 
     Private Sub txtProgKB_TextChanged(sender As Object, e As EventArgs) Handles txtProgKB.TextChanged

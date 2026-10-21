@@ -65,6 +65,72 @@ Public Class PlikiSesjiTesty
         Assert.Equal(2178, d.UkladEpsg)
     End Sub
 
+    Private Shared Function Sesja() As KonfiguracjaSesji
+        Dim c As New KonfiguracjaSesji With {.RodzajMapy = "ortofotomapa", .XDol = "486371", .YLewy = "505201", .XGora = "498547",
+            .YPrawy = "519275", .BokSegmentuPx = "2000", .RozmiarPiksela = "1", .LiczbaWarstw = 1, .Format = "jpeg", .Prefiks = "_",
+            .Numeracja = "NrWiersza_NrKolumny", .UkladEpsg = 2180, .AdresSerwera = "https://serwer/wms?layers="}
+        c.Warstwy(0) = "Raster"
+        Return c
+    End Function
+
+    <Fact>
+    Public Sub TaSamaSiatkaWznowienieSesji()
+        Dim a = Sesja()
+        'inny zasięg zaznaczenia w obrębie tych samych pełnych segmentów, inny środek mapy i data - ta sama siatka
+        Dim b = Sesja()
+        b.XGora = "500000" : b.YPrawy = "521201" : b.SkalaMapy = "15" : b.DataPobrania = "2026-01-01" : b.Format = "jpg"
+        Assert.True(a.TaSamaSiatka(b))
+        Assert.True(b.TaSamaSiatka(a))
+    End Sub
+
+    <Fact>
+    Public Sub TaSamaSiatkaInnaSesja()
+        Dim zmiany As New List(Of Action(Of KonfiguracjaSesji)) From {
+            Sub(c) c.XDol = "484371",
+            Sub(c) c.YLewy = "505200",
+            Sub(c) c.XGora = "500372",
+            Sub(c) c.BokSegmentuPx = "1000",
+            Sub(c) c.RozmiarPiksela = "0.5",
+            Sub(c) c.UkladEpsg = 2178,
+            Sub(c) c.Warstwy(0) = "Inna",
+            Sub(c) c.AdresSerwera = "https://inny/wms?layers=",
+            Sub(c) c.Format = "png",
+            Sub(c) c.Prefiks = "a",
+            Sub(c) c.Numeracja = "1_2_3",
+            Sub(c) c.Przezroczystosc = True}
+        For Each zmiana In zmiany
+            Dim b = Sesja()
+            zmiana(b)
+            Assert.False(Sesja().TaSamaSiatka(b))
+        Next
+        Assert.False(Sesja().TaSamaSiatka(Nothing))
+    End Sub
+
+    <Fact>
+    Public Sub TaSamaSiatkaBezAdresuSerwera()
+        'conf.txt starszych wersji nie ma adresu serwera - porównywana jest nazwa zbioru map
+        Dim a = Sesja(), b = Sesja()
+        b.AdresSerwera = ""
+        Assert.True(a.TaSamaSiatka(b))
+        b.RodzajMapy = "skany_map_topograficznych"
+        Assert.False(a.TaSamaSiatka(b))
+    End Sub
+
+    <Fact>
+    Public Sub LiczbaPlikowSegmentowWFolderze()
+        Dim folder = Path.Combine(Path.GetTempPath(), "mapotero_test_" & Guid.NewGuid().ToString("N"))
+        Directory.CreateDirectory(folder)
+        Try
+            For Each nazwa In {"_01_01.jpg", "_01_02.jpg", "_scalone.tif", "conf.txt", "a_01_01.jpg"}
+                File.WriteAllText(Path.Combine(folder, nazwa), "x")
+            Next
+            Assert.Equal(2, Sesja().LiczbaPlikowSegmentow(folder))
+            Assert.Equal(0, Sesja().LiczbaPlikowSegmentow(Path.Combine(folder, "brak")))
+        Finally
+            Directory.Delete(folder, True)
+        End Try
+    End Sub
+
     <Fact>
     Public Sub CzytnikPolWJednymWierszu()
         Dim r As New CzytnikPlikuVb("""a,b"",12,#TRUE#" & vbCrLf & """x""")

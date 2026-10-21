@@ -16,6 +16,7 @@
 Imports System.Collections.Generic
 Imports System.Globalization
 Imports System.IO
+Imports System.Linq
 Imports System.Text
 
 ''' <summary>
@@ -238,6 +239,71 @@ Public Class KonfiguracjaSesji
     Public Sub Zapisz(sciezka As String, kodowanie As Encoding)
         File.WriteAllText(sciezka, DoTekstu(), kodowanie)
     End Sub
+
+    ''' <summary>Siatka segmentów sesji (pola zasięgu, rozmiaru piksela i boku segmentu).</summary>
+    Public Function SiatkaSesji() As Siatka
+        Dim bok As Double = LiczbaZPola(BokSegmentuPx)
+        Return New Siatka(New Zasieg(LiczbaZPola(XDol), LiczbaZPola(YLewy), LiczbaZPola(XGora), LiczbaZPola(YPrawy)),
+                          LiczbaZPola(RozmiarPiksela), If(Double.IsNaN(bok), 0, CInt(Math.Round(bok))))
+    End Function
+
+    ''' <summary>
+    ''' Czy segmenty tej sesji i sesji <paramref name="inna"/> mają te same nazwy, zasięgi i źródło (ta sama siatka, układ,
+    ''' serwer, warstwy, sposób zapisu). Tylko wtedy pobieranie do folderu z segmentami drugiej sesji jest jej wznowieniem -
+    ''' w przeciwnym razie segmenty o pokrywających się nazwach zostałyby uznane za pobrane, choć przedstawiają inny teren.
+    ''' Zasięg porównywany jest po zaokrągleniu do pełnych segmentów (zasięg samego zaznaczenia może się różnić).
+    ''' </summary>
+    Public Function TaSamaSiatka(inna As KonfiguracjaSesji) As Boolean
+        If inna Is Nothing Then Return False
+        Dim a = SiatkaSesji(), b = inna.SiatkaSesji()
+        If Not a.Poprawna OrElse Not b.Poprawna Then Return False
+        If a.BokSegmentuPx <> b.BokSegmentuPx OrElse Not RowneLiczby(a.RozmiarPiksela, b.RozmiarPiksela) Then Return False
+        If a.LiczbaKolumn <> b.LiczbaKolumn OrElse a.LiczbaWierszy <> b.LiczbaWierszy Then Return False
+        If Not RowneLiczby(a.Obszar.XDol, b.Obszar.XDol) OrElse Not RowneLiczby(a.Obszar.YLewy, b.Obszar.YLewy) Then Return False
+        If UkladEpsg <> inna.UkladEpsg OrElse Przezroczystosc <> inna.Przezroczystosc Then Return False
+        If Not String.Equals(Prefiks, inna.Prefiks, StringComparison.Ordinal) Then Return False
+        If MapoTero.Core.Siatka.StylZTekstu(Numeracja) <> MapoTero.Core.Siatka.StylZTekstu(inna.Numeracja) Then Return False
+        If Wms.RozszerzeniePliku(Format) <> Wms.RozszerzeniePliku(inna.Format) Then Return False
+        'źródło: adres serwera (w starszych plikach brak - wtedy nazwa zbioru map) i lista warstw
+        If AdresSerwera <> "" AndAlso inna.AdresSerwera <> "" Then
+            If Not String.Equals(AdresSerwera, inna.AdresSerwera, StringComparison.OrdinalIgnoreCase) Then Return False
+        ElseIf Not String.Equals(RodzajMapy, inna.RodzajMapy, StringComparison.OrdinalIgnoreCase) Then
+            Return False
+        End If
+        Return WybraneWarstwy().SequenceEqual(inna.WybraneWarstwy(), StringComparer.Ordinal)
+    End Function
+
+    ''' <summary>Niepuste nazwy wybranych warstw w kolejności nakładania.</summary>
+    Public Function WybraneWarstwy() As List(Of String)
+        Dim lista As New List(Of String)
+        For i = 0 To Math.Min(LiczbaWarstw, Warstwy.Length) - 1
+            If Not String.IsNullOrEmpty(Warstwy(i)) Then lista.Add(Warstwy(i))
+        Next
+        Return lista
+    End Function
+
+    ''' <summary>
+    ''' Liczba plików segmentów w folderze, których nazwy mogą pokrywać się z segmentami tej sesji
+    ''' (przedrostek i rozszerzenie segmentów tej sesji).
+    ''' </summary>
+    Public Function LiczbaPlikowSegmentow(folder As String) As Integer
+        If String.IsNullOrEmpty(folder) OrElse Not Directory.Exists(folder) Then Return 0
+        Try
+            Return Directory.GetFiles(folder, If(Prefiks, "") & "*." & Wms.RozszerzeniePliku(Format)).Length
+        Catch
+            Return 0
+        End Try
+    End Function
+
+    Private Shared Function LiczbaZPola(tekst As String) As Double
+        Dim wynik As Double
+        If Double.TryParse(If(tekst, "").Trim().Replace(","c, "."c), NumberStyles.Float, CultureInfo.InvariantCulture, wynik) Then Return wynik
+        Return Double.NaN
+    End Function
+
+    Private Shared Function RowneLiczby(a As Double, b As Double) As Boolean
+        Return Math.Abs(a - b) <= 0.000000001 * Math.Max(1, Math.Max(Math.Abs(a), Math.Abs(b)))
+    End Function
 
 End Class
 

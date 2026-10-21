@@ -1,4 +1,4 @@
-http://integracja.gugik.gov.pl/cgi-bin/KrajowaIntegracjaEwidencjiGruntow?request=GetMap&version=1.3.0&CRS=EPSG:2180&layers=
+https://integracja.gugik.gov.pl/cgi-bin/KrajowaIntegracjaEwidencjiGruntow?request=GetMap&version=1.3.0&CRS=EPSG:2180&layers=
 uzytki
 0.5
 kontury

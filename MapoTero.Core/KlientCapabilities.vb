@@ -85,8 +85,13 @@ Public NotInheritable Class KlientCapabilities
             adresyPrób.Add(Tuple.Create(AdresCapabilitiesWmts(adresWyczyszczony), TypUslugiMapowej.Wmts))
         End If
 
+        'błędy kolejnych prób; wyświetlany jest błąd usługi próbowanej jako pierwsza (dawniej - ostatniej, przez co
+        'chwilowy błąd serwera WMS zastępował komunikat próby WMTS, np. "Can't recognize service requested")
+        Dim bledy As New List(Of String)
         Dim ostatniBlad As String = ""
         For Each proba In adresyPrób
+            If ostatniBlad <> "" Then bledy.Add(ostatniBlad)
+            ostatniBlad = ""
             Dim adresDoPobrania As String = proba.Item1
             Try
                 Dim bajty = Await PobierzBajtyAsync(adresDoPobrania, ignorujSsl, timeoutSekundy, token).ConfigureAwait(False)
@@ -170,8 +175,9 @@ Public NotInheritable Class KlientCapabilities
                 ostatniBlad = ex.Message
             End Try
         Next
+        If ostatniBlad <> "" Then bledy.Add(ostatniBlad)
 
-        wynik.KomunikatBledu = If(Not String.IsNullOrEmpty(ostatniBlad), ostatniBlad, "Nie udało się połączyć z serwerem WMS/WMTS pod podanym adresem.")
+        wynik.KomunikatBledu = If(bledy.Count > 0, bledy(0), "Nie udało się połączyć z serwerem WMS/WMTS pod podanym adresem.")
         Return wynik
     End Function
 
@@ -228,9 +234,48 @@ Public NotInheritable Class KlientCapabilities
         End If
     End Sub
 
-    ''' <summary>Pobiera surowe bajty odpowiedzi HTTP z opcją ignorowania błędów SSL.</summary>
+    ''' <summary>Liczba prób pobrania opisu usługi przy chwilowych błędach serwera.</summary>
+    Private Const LiczbaProbPobrania As Integer = 3
+
+    ''' <summary>
+    ''' Pobiera surowe bajty odpowiedzi HTTP z opcją ignorowania błędów SSL. Chwilowe błędy (brak odpowiedzi, przekroczenie
+    ''' czasu, HTTP 404/408/429/5xx) są ponawiane - serwery geoportalu potrafią losowo odpowiadać 404 na poprawne zapytanie.
+    ''' </summary>
     Private Shared Async Function PobierzBajtyAsync(url As String, ignorujSsl As Boolean, timeoutSekundy As Integer,
                                                     token As CancellationToken) As Task(Of Byte())
+        For proba = 1 To LiczbaProbPobrania
+            Try
+                Return Await PobierzBajtyRazAsync(url, ignorujSsl, timeoutSekundy, token).ConfigureAwait(False)
+            Catch ex As BladHttp When ex.Chwilowy AndAlso proba < LiczbaProbPobrania
+            Catch ex As TimeoutException When proba < LiczbaProbPobrania
+            Catch ex As HttpRequestException When proba < LiczbaProbPobrania AndAlso Not TypeOf ex Is BladHttp
+            End Try
+            Await Task.Delay(1000 * proba, token).ConfigureAwait(False)
+        Next
+        Return Nothing
+    End Function
+
+    ''' <summary>Błąd HTTP z kodem odpowiedzi (netstandard2.0 nie udostępnia kodu w HttpRequestException).</summary>
+    Private NotInheritable Class BladHttp
+        Inherits HttpRequestException
+
+        Public ReadOnly Property Kod As Integer
+
+        Public Sub New(kod As Integer, opis As String)
+            MyBase.New("Serwer zwrócił błąd HTTP " & kod & If(String.IsNullOrEmpty(opis), "", " (" & opis.TrimEnd("."c) & ")") & ".")
+            Me.Kod = kod
+        End Sub
+
+        ''' <summary>Błąd, który może zniknąć przy ponownej próbie.</summary>
+        Public ReadOnly Property Chwilowy As Boolean
+            Get
+                Return Kod = 404 OrElse Kod = 408 OrElse Kod = 429 OrElse Kod >= 500
+            End Get
+        End Property
+    End Class
+
+    Private Shared Async Function PobierzBajtyRazAsync(url As String, ignorujSsl As Boolean, timeoutSekundy As Integer,
+                                                       token As CancellationToken) As Task(Of Byte())
         Dim obsluga As New HttpClientHandler()
         obsluga.AutomaticDecompression = DecompressionMethods.GZip Or DecompressionMethods.Deflate
         If ignorujSsl Then
@@ -241,8 +286,14 @@ Public NotInheritable Class KlientCapabilities
               ctsLinked = CancellationTokenSource.CreateLinkedTokenSource(token, ctsTimeout.Token),
               klient As New HttpClient(obsluga)
             klient.DefaultRequestHeaders.UserAgent.ParseAdd("MapoTero/3.14")
-            Using odp = Await klient.GetAsync(url, HttpCompletionOption.ResponseContentRead, ctsLinked.Token).ConfigureAwait(False)
-                odp.EnsureSuccessStatusCode()
+            Dim odp As HttpResponseMessage
+            Try
+                odp = Await klient.GetAsync(url, HttpCompletionOption.ResponseContentRead, ctsLinked.Token).ConfigureAwait(False)
+            Catch ex As OperationCanceledException When Not token.IsCancellationRequested
+                Throw New TimeoutException("Serwer nie odpowiedział w ciągu " & Math.Max(5, timeoutSekundy) & " s.", ex)
+            End Try
+            Using odp
+                If Not odp.IsSuccessStatusCode Then Throw New BladHttp(CInt(odp.StatusCode), odp.ReasonPhrase)
                 Return Await odp.Content.ReadAsByteArrayAsync().ConfigureAwait(False)
             End Using
         End Using

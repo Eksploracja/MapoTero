@@ -340,4 +340,9 @@ ASALocalRun/
 healthchecksdb
 
 # Local user runtime settings
-lastsettings.txt
+lastsettings.txt
+
+# Foldery publikacji
+MapoTero/
+MapoTero_SingleFile/
+publikacja/

@@ -63,6 +63,7 @@ Public Class Form2
             chkKursorWgs.Checked = u.KursorWgs84
             chkZaznaczenieWgs.Checked = u.ZaznaczenieWgs84
             chkEdycjaXY.Checked = u.EdycjaXY
+            chkSiatkaSegmentow.Checked = u.SiatkaSegmentowNaMapie
             'pliki kalibracji
             chkMap.Checked = u.PlikMap
             chkKml.Checked = u.PlikKml
@@ -181,7 +182,12 @@ Public Class Form2
         u.KursorISrodekMapy = chkKursorISrodek.Checked
         u.KursorWgs84 = chkKursorWgs.Checked
         u.ZaznaczenieWgs84 = chkZaznaczenieWgs.Checked
+        Dim bylaSiatka As Boolean = u.SiatkaSegmentowNaMapie
         u.EdycjaXY = chkEdycjaXY.Checked
+        u.SiatkaSegmentowNaMapie = chkSiatkaSegmentow.Checked
+        If bylaSiatka <> u.SiatkaSegmentowNaMapie AndAlso Form1.SiatkaWidoczna Then
+            Form1.OdswiezSiatke()
+        End If
         Form1.UstawWidokWspolrzednych(u.KursorISrodekMapy)
         Form1.UstawWidokZaznaczeniaWgs(u.ZaznaczenieWgs84)
         Form1.UstawEdycjeXY(u.EdycjaXY)

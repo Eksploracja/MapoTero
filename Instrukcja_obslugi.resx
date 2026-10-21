@@ -118,18 +118,20 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="RichTextBox1.Text" xml:space="preserve">
-    <value>1. Wybierz z listy po lewej stronie okna programu warstwę mapy, którą chcesz pobrać klikając na nią jeden raz lewym klawiszem myszy. Nazwa prawidłowo zaznaczonej warstwy wyświetli się w polu "Wybrane warstwy";
+    <value>1. W panelu po prawej stronie okna wybierz zbiór map (serwer WMS), a z listy pod nim - warstwę mapy, klikając ją jeden raz lewym przyciskiem myszy. Nazwa wybranej warstwy pojawi się w polu "Wybrane warstwy oraz ich kolejność".
 
-2. Zaznacz na mapie prawym przyciskiem myszki zasięg obszaru do pobrania,
+2. Zaznacz na mapie prawym przyciskiem myszy obszar do pobrania. Na mapie pojawi się siatka segmentów.
 
-3. Kliknij button "Pobierz". Rozpocznie się wówczas zapis segmentów map do katalogu "download". 
+3. Zasięg siatki możesz poprawić, przeciągając lewym przyciskiem myszy kwadratowe uchwyty w narożnikach i na bokach (dodawanie i odejmowanie segmentów) albo kółko w środku siatki (przesunięcie całej siatki). Klawisz Esc anuluje przeciąganie.
 
-4. Pobrane segmenty map zapisują się w podkatalogu /download/
+4. Kliknij przycisk "Pobierz". Segmenty mapy zapisują się w folderze sesji (domyślnie "download"); jego ścieżka widoczna jest na pasku stanu. Jeśli folder zawiera segmenty innej sesji, program zaproponuje nowy podfolder.
+
+5. Pobrane segmenty połączysz w jeden arkusz (menu Narzędzia - Łączenie segmentów) albo wyeksportujesz do KMZ, MBTiles, SQLiteDB lub OruxMaps.
 ----------------------------------------------------------------------
 
-Forum dyskusyjneMapoTero www.forum.eksploracja.pl/viewforum.php?f=205
+Forum dyskusyjne MapoTero: www.forum.eksploracja.pl/viewforum.php?f=205
 
-Najnowsze wersje programu wraz z jego kodem źródłowym znajdziesz na http://mapotero.codeplex.com/</value>
+Najnowsze wersje programu wraz z jego kodem źródłowym znajdziesz na https://github.com/Eksploracja/MapoTero</value>
   </data>
   <assembly alias="System.Drawing" name="System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <data name="$this.Icon" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">

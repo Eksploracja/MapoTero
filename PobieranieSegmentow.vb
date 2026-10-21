@@ -245,7 +245,7 @@ Public NotInheritable Class PobieranieSegmentow
                 If przyczyny.IsEmpty OrElse proba >= z.IloscProb Then Exit For
 
                 postep?.Report(New PostepPobierania With {.Pobrane = 0, .Wszystkie = doPobrania.Count, .Proba = proba,
-                    .Komunikat = "Nie pobrano " & przyczyny.Count & " segmentów. Kolejna próba (" & (proba + 1) & " z " & z.IloscProb & ") za " & z.PrzerwaSekundy & " s"})
+                    .Komunikat = "Nie pobrano " & przyczyny.Count & If(przyczyny.Count = 1, " segmentu", " segmentów") & ". Kolejna próba (" & (proba + 1) & " z " & z.IloscProb & ") za " & z.PrzerwaSekundy & " s"})
                 Await Task.Delay(TimeSpan.FromSeconds(Math.Max(0, z.PrzerwaSekundy)), token).ConfigureAwait(False)
             Next
         Catch ex As OperationCanceledException

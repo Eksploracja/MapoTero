@@ -1,4 +1,4 @@
-﻿'Copyright (C) <2015>  pajakt
+'Copyright (C) <2015>  pajakt
 
 'This program is free software: you can redistribute it and/or modify
 'it under the terms of the GNU General Public License as published by
@@ -56,6 +56,7 @@ Partial Class Form2
         Me.chkKursorWgs = New System.Windows.Forms.CheckBox()
         Me.chkZaznaczenieWgs = New System.Windows.Forms.CheckBox()
         Me.chkEdycjaXY = New System.Windows.Forms.CheckBox()
+        Me.chkSiatkaSegmentow = New System.Windows.Forms.CheckBox()
         Me.grpKalibracja = New System.Windows.Forms.GroupBox()
         Me.chkMap = New System.Windows.Forms.CheckBox()
         Me.chkKml = New System.Windows.Forms.CheckBox()
@@ -230,9 +231,10 @@ Partial Class Form2
         Me.grpWidok.Controls.Add(Me.chkKursorWgs)
         Me.grpWidok.Controls.Add(Me.chkZaznaczenieWgs)
         Me.grpWidok.Controls.Add(Me.chkEdycjaXY)
+        Me.grpWidok.Controls.Add(Me.chkSiatkaSegmentow)
         Me.grpWidok.Location = New System.Drawing.Point(12, 304)
         Me.grpWidok.Name = "grpWidok"
-        Me.grpWidok.Size = New System.Drawing.Size(240, 116)
+        Me.grpWidok.Size = New System.Drawing.Size(240, 122)
         Me.grpWidok.TabIndex = 2
         Me.grpWidok.TabStop = False
         Me.grpWidok.Text = "Widok okna głównego"
@@ -241,7 +243,7 @@ Partial Class Form2
         '
         Me.chkKursorISrodek.AutoSize = True
         Me.chkKursorISrodek.UseVisualStyleBackColor = True
-        Me.chkKursorISrodek.Location = New System.Drawing.Point(12, 20)
+        Me.chkKursorISrodek.Location = New System.Drawing.Point(12, 16)
         Me.chkKursorISrodek.Name = "chkKursorISrodek"
         Me.chkKursorISrodek.Size = New System.Drawing.Size(200, 17)
         Me.chkKursorISrodek.TabIndex = 0
@@ -252,7 +254,7 @@ Partial Class Form2
         '
         Me.chkKursorWgs.AutoSize = True
         Me.chkKursorWgs.UseVisualStyleBackColor = True
-        Me.chkKursorWgs.Location = New System.Drawing.Point(12, 43)
+        Me.chkKursorWgs.Location = New System.Drawing.Point(12, 36)
         Me.chkKursorWgs.Name = "chkKursorWgs"
         Me.chkKursorWgs.Size = New System.Drawing.Size(200, 17)
         Me.chkKursorWgs.TabIndex = 1
@@ -263,7 +265,7 @@ Partial Class Form2
         '
         Me.chkZaznaczenieWgs.AutoSize = True
         Me.chkZaznaczenieWgs.UseVisualStyleBackColor = True
-        Me.chkZaznaczenieWgs.Location = New System.Drawing.Point(12, 66)
+        Me.chkZaznaczenieWgs.Location = New System.Drawing.Point(12, 56)
         Me.chkZaznaczenieWgs.Name = "chkZaznaczenieWgs"
         Me.chkZaznaczenieWgs.Size = New System.Drawing.Size(200, 17)
         Me.chkZaznaczenieWgs.TabIndex = 2
@@ -274,12 +276,23 @@ Partial Class Form2
         '
         Me.chkEdycjaXY.AutoSize = True
         Me.chkEdycjaXY.UseVisualStyleBackColor = True
-        Me.chkEdycjaXY.Location = New System.Drawing.Point(12, 89)
+        Me.chkEdycjaXY.Location = New System.Drawing.Point(12, 76)
         Me.chkEdycjaXY.Name = "chkEdycjaXY"
         Me.chkEdycjaXY.Size = New System.Drawing.Size(200, 17)
         Me.chkEdycjaXY.TabIndex = 3
         Me.chkEdycjaXY.Text = "wpisywanie zasięgu XY z klawiatury"
         Me.ToolTip1.SetToolTip(Me.chkEdycjaXY, "Umożliwia wpisywanie współrzędnych XY zasięgu pobierania z klawiatury; zaznaczanie zasięgu prawym przyciskiem myszy na mapie jest wtedy wyłączone.")
+        '
+        'chkSiatkaSegmentow
+        '
+        Me.chkSiatkaSegmentow.AutoSize = True
+        Me.chkSiatkaSegmentow.UseVisualStyleBackColor = True
+        Me.chkSiatkaSegmentow.Location = New System.Drawing.Point(12, 96)
+        Me.chkSiatkaSegmentow.Name = "chkSiatkaSegmentow"
+        Me.chkSiatkaSegmentow.Size = New System.Drawing.Size(200, 17)
+        Me.chkSiatkaSegmentow.TabIndex = 4
+        Me.chkSiatkaSegmentow.Text = "siatka segmentów na mapie"
+        Me.ToolTip1.SetToolTip(Me.chkSiatkaSegmentow, "Wyświetla na mapie siatkę kafelków (segmentów) w granicach zaznaczonego obszaru pobierania.")
         '
         'grpKalibracja
         '
@@ -685,6 +698,7 @@ Partial Class Form2
     Friend WithEvents chkKursorWgs As System.Windows.Forms.CheckBox
     Friend WithEvents chkZaznaczenieWgs As System.Windows.Forms.CheckBox
     Friend WithEvents chkEdycjaXY As System.Windows.Forms.CheckBox
+    Friend WithEvents chkSiatkaSegmentow As System.Windows.Forms.CheckBox
     Friend WithEvents grpKalibracja As System.Windows.Forms.GroupBox
     Friend WithEvents chkMap As System.Windows.Forms.CheckBox
     Friend WithEvents chkKml As System.Windows.Forms.CheckBox
