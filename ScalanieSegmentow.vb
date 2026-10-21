@@ -36,6 +36,8 @@ Public Class ZadanieScalania
     ''' <summary>Nazwa pliku arkusza bez rozszerzenia.</summary>
     Public Property NazwaArkusza As String = ""
     Public Property Georeferencja As New OpcjeGeoreferencji()
+    ''' <summary>Segmenty z przezroczystym tłem - arkusz PNG i GeoTIFF bezstratny z kanałem alfa (inne formaty: tło białe).</summary>
+    Public Property Przezroczystosc As Boolean
 End Class
 
 ''' <summary>Wynik scalania.</summary>
@@ -65,7 +67,9 @@ Public NotInheritable Class ScalanieSegmentow
         Dim bok As Integer = s.BokSegmentuPx
         Dim kolumny As Integer = s.LiczbaKolumn
         Dim wiersze As Integer = s.LiczbaWierszy
-        If s.SzerokoscPx > Integer.MaxValue \ 3 OrElse s.WysokoscPx > Integer.MaxValue Then Throw New ArgumentException("Arkusz jest zbyt duży")
+        'RGBA, gdy segmenty mają przezroczyste tło, a format arkusza ją zachowuje (dawniej zawsze RGB z białym tłem)
+        Dim kanaly As Integer = If(z.Przezroczystosc AndAlso ZapisRastra.ObslugujePrzezroczystosc(z.Format), 4, 3)
+        If s.SzerokoscPx > Integer.MaxValue \ kanaly OrElse s.WysokoscPx > Integer.MaxValue Then Throw New ArgumentException("Arkusz jest zbyt duży")
 
         Dim szer As Integer = CInt(s.SzerokoscPx)
         Dim wys As Integer = CInt(s.WysokoscPx)
@@ -81,12 +85,13 @@ Public NotInheritable Class ScalanieSegmentow
         Dim wynik As New WynikScalania With {.Plik = plik}
 
         'wysokość pasa wierszy mieszczącego się w budżecie pamięci
-        Dim pas As Integer = CInt(Math.Max(1L, Math.Min(bok, BudzetPamieci \ (CLng(szer) * 3))))
-        Dim bufor(pas * szer * 3 - 1) As Byte
-        Dim liniaSegmentu(bok * 3 - 1) As Byte
+        Dim pas As Integer = CInt(Math.Max(1L, Math.Min(bok, BudzetPamieci \ (CLng(szer) * kanaly))))
+        Dim bufor(pas * szer * kanaly - 1) As Byte
+        Dim liniaSegmentu(bok * kanaly - 1) As Byte
+        Dim formatPikseli As PixelFormat = If(kanaly = 4, PixelFormat.Format32bppArgb, PixelFormat.Format24bppRgb)
 
         Try
-            Using zapis = ZapisRastra.Utworz(z.Format, plik, szer, wys, z.JakoscJpeg, z.Uklad, s.ZasiegSiatki)
+            Using zapis = ZapisRastra.Utworz(z.Format, plik, szer, wys, z.JakoscJpeg, z.Uklad, s.ZasiegSiatki, kanaly = 4)
                 For w = 1 To wiersze
                     ' Wczytanie segmentów bieżącego wiersza raz dla wszystkich pasów wiersza
                     Dim segmentyWiersza As New Dictionary(Of Integer, Bitmap)()
@@ -100,9 +105,9 @@ Public NotInheritable Class ScalanieSegmentow
                             End If
                             Try
                                 Using zrodlo As Image = Image.FromFile(sciezka)
-                                    Dim rgb As New Bitmap(bok, bok, PixelFormat.Format24bppRgb)
+                                    Dim rgb As New Bitmap(bok, bok, formatPikseli)
                                     Using g As Graphics = Graphics.FromImage(rgb)
-                                        g.Clear(Color.White)
+                                        g.Clear(If(kanaly = 4, Color.Transparent, Color.White))
                                         If zrodlo.Width = bok AndAlso zrodlo.Height = bok Then
                                             g.InterpolationMode = InterpolationMode.NearestNeighbor
                                         Else
@@ -121,23 +126,25 @@ Public NotInheritable Class ScalanieSegmentow
                         For y0 = 0 To bok - 1 Step pas
                             token.ThrowIfCancellationRequested()
                             Dim n As Integer = Math.Min(pas, bok - y0)
-                            'tło białe - widoczne w miejscu brakujących segmentów
-                            Array.Fill(bufor, CByte(255), 0, n * szer * 3)
+                            'tło białe (przy przezroczystości - przezroczyste) - widoczne w miejscu brakujących segmentów
+                            Array.Fill(bufor, CByte(If(kanaly = 4, 0, 255)), 0, n * szer * kanaly)
 
                             For k = 1 To kolumny
                                 Dim rgb As Bitmap = Nothing
                                 If Not segmentyWiersza.TryGetValue(k, rgb) Then Continue For
-                                Dim dane As BitmapData = rgb.LockBits(New Rectangle(0, y0, bok, n), ImageLockMode.ReadOnly, PixelFormat.Format24bppRgb)
+                                Dim dane As BitmapData = rgb.LockBits(New Rectangle(0, y0, bok, n), ImageLockMode.ReadOnly, formatPikseli)
                                 Try
                                     Dim x0 As Integer = (k - 1) * bok
                                     For r = 0 To n - 1
-                                        Marshal.Copy(IntPtr.Add(dane.Scan0, r * dane.Stride), liniaSegmentu, 0, bok * 3)
-                                        Dim cel As Integer = (r * szer + x0) * 3
-                                        'GDI+ przechowuje piksele w kolejności BGR
+                                        Marshal.Copy(IntPtr.Add(dane.Scan0, r * dane.Stride), liniaSegmentu, 0, bok * kanaly)
+                                        Dim cel As Integer = (r * szer + x0) * kanaly
+                                        'GDI+ przechowuje piksele w kolejności BGR (BGRA)
                                         For i = 0 To bok - 1
-                                            bufor(cel + i * 3) = liniaSegmentu(i * 3 + 2)
-                                            bufor(cel + i * 3 + 1) = liniaSegmentu(i * 3 + 1)
-                                            bufor(cel + i * 3 + 2) = liniaSegmentu(i * 3)
+                                            Dim zr As Integer = i * kanaly, dc As Integer = cel + i * kanaly
+                                            bufor(dc) = liniaSegmentu(zr + 2)
+                                            bufor(dc + 1) = liniaSegmentu(zr + 1)
+                                            bufor(dc + 2) = liniaSegmentu(zr)
+                                            If kanaly = 4 Then bufor(dc + 3) = liniaSegmentu(zr + 3)
                                         Next
                                     Next
                                 Finally

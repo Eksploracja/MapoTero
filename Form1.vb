@@ -240,14 +240,27 @@ Public Class Form1
         End If
 
         WczytajConf(False)
-        WczytajLastsettings()
+        WczytajLastsettings(nowaSesja)
 
         'nowa sesja (brak conf.txt) - układ współrzędnych wybrany w ustawieniach jako domyślny
         If nowaSesja Then PrzelaczUklad(Ustawienia.UkladDomyslny, False)
 
-        'lista zbiorów map
-        WczytajListeZbiorowMap()
+        'widok okna głównego zapamiętany w lastsettings.txt
+        UstawWidokWspolrzednych(Ustawienia.KursorISrodekMapy)
+        UstawWidokZaznaczeniaWgs(Ustawienia.ZaznaczenieWgs84)
+        UstawEdycjeXY(Ustawienia.EdycjaXY)
+
+        'lista zbiorów map - zbiór i warstwy wczytane z conf.txt zostają (wybór zbioru na liście czyści wybrane warstwy;
+        'dawniej po ponownym uruchomieniu warstwy sesji znikały i do wznowienia pobierania trzeba je było wybrać od nowa)
+        Dim zbiorSesji As String = cmbZbiorMap.Text
+        Dim warstwySesji As New List(Of String)(_warstwy)
+        WczytajListeZbiorowMap(zbiorSesji)
         WczytajWarstwyZbioru()
+        If warstwySesji.Count > 0 AndAlso String.Equals(cmbZbiorMap.Text, zbiorSesji, StringComparison.OrdinalIgnoreCase) Then
+            _warstwy.Clear()
+            _warstwy.AddRange(warstwySesji)
+            Komunikat("Wczytano sesję pobierania z pliku conf.txt: " & zbiorSesji & ", warstwy: " & String.Join(", ", _warstwy) & ".", Color.Green)
+        End If
         PokazWarstwy()
 
         If Ustawienia.Format = "" Then Ustawienia.Format = "jpeg"
@@ -303,10 +316,10 @@ Public Class Form1
 #Region "Ustawienia programu i sesji"
 
     ''' <summary>Odczyt ostatnich ustawień programu z lastsettings.txt.</summary>
-    Public Sub WczytajLastsettings()
+    Public Sub WczytajLastsettings(Optional nowaSesja As Boolean = False)
         If File.Exists(PlikLastsettings) = False Then Exit Sub
         Try
-            Ustawienia.Wczytaj(PlikLastsettings)
+            Ustawienia.Wczytaj(PlikLastsettings, nowaSesja)
         Catch
             Exit Sub
         End Try
@@ -455,29 +468,40 @@ Public Class Form1
     End Function
 
     ''' <summary>
-    ''' Segmenty innej sesji w folderze (conf.txt z inną siatką, układem, serwerem lub warstwami i pliki segmentów
-    ''' o nazwach bieżącej sesji). Zwraca liczbę takich plików; 0 - folder pusty, nowy albo z tą samą sesją (wznowienie).
+    ''' Segmenty innej sesji w folderze: conf.txt z inną siatką, układem, serwerem lub warstwami albo brak conf.txt
+    ''' (sesja nieznana - np. folder wynikowy nakładania map) przy plikach o nazwach segmentów bieżącej sesji.
+    ''' Zwraca liczbę takich plików (0 - folder pusty, nowy albo z tą samą sesją, czyli wznowienie) i opis przyczyny.
     ''' </summary>
-    Private Function SegmentyInnejSesji(folder As String) As Integer
-        Dim plikConf As String = folder & "conf.txt"
-        If Not File.Exists(plikConf) Then Return 0
-        Dim zapisana As KonfiguracjaSesji
-        Try
-            zapisana = KonfiguracjaSesji.Wczytaj(plikConf, KodowanieSystemowe())
-        Catch
-            Return 0
-        End Try
+    Private Function SegmentyInnejSesji(folder As String, ByRef opis As String) As Integer
+        opis = ""
         Dim biezaca = BiezacaKonfiguracja()
-        If biezaca.TaSamaSiatka(zapisana) Then Return 0
-        Return biezaca.LiczbaPlikowSegmentow(folder)
+        Dim plikConf As String = folder & "conf.txt"
+        If File.Exists(plikConf) Then
+            Dim zapisana As KonfiguracjaSesji
+            Try
+                zapisana = KonfiguracjaSesji.Wczytaj(plikConf, KodowanieSystemowe())
+            Catch
+                zapisana = Nothing
+            End Try
+            If zapisana IsNot Nothing AndAlso biezaca.TaSamaSiatka(zapisana) Then Return 0
+            opis = If(zapisana Is Nothing, "z nieczytelnym plikiem conf.txt",
+                      "z innym zasięgiem siatki, rozmiarem segmentu, układem, serwerem lub warstwami")
+        Else
+            'bez conf.txt nie wiadomo, czym są pliki o nazwach segmentów - dawniej uznawano je za pobrane segmenty
+            opis = "bez pliku conf.txt - nie wiadomo, z jakiej sesji pochodzą"
+        End If
+        Dim liczba As Integer = biezaca.LiczbaPlikowSegmentow(folder)
+        Dim tekst As String = Odmiana(liczba, "plik", "pliki", "plików")
+        opis = liczba & " " & tekst & " " & opis
+        Return liczba
     End Function
 
     ''' <summary>Pyta o zgodę, gdy folder zawiera segmenty innej sesji pobierania. True - folder można użyć.</summary>
     Private Function PotwierdzFolderInnejSesji(folder As String, skutek As String) As Boolean
-        Dim liczba As Integer = SegmentyInnejSesji(folder)
+        Dim opis As String = ""
+        Dim liczba As Integer = SegmentyInnejSesji(folder, opis)
         If liczba = 0 Then Return True
-        Return MessageBox.Show("Folder " & folder & " zawiera segmenty innej sesji pobierania (" & liczba & " " & Odmiana(liczba, "plik", "pliki", "plików") &
-                               ") - z innym zasięgiem siatki, rozmiarem segmentu, układem, serwerem lub warstwami." & vbCrLf & vbCrLf &
+        Return MessageBox.Show("Folder " & folder & " zawiera segmenty innej sesji pobierania (" & opis & ")." & vbCrLf & vbCrLf &
                                skutek & vbCrLf & vbCrLf & "Kontynuować?", "Folder innej sesji",
                                MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2) = DialogResult.Yes
     End Function
@@ -488,11 +512,11 @@ Public Class Form1
     ''' False - pobieranie anulowane.
     ''' </summary>
     Private Function PrzygotujFolderSesji() As Boolean
-        Dim liczba As Integer = SegmentyInnejSesji(FolderSesji)
+        Dim opis As String = ""
+        Dim liczba As Integer = SegmentyInnejSesji(FolderSesji, opis)
         If liczba = 0 Then Return True
         Dim nowy As String = FolderDownload & "sesja_" & Date.Now.ToString("yyyy-MM-dd_HHmmss", Globalization.CultureInfo.InvariantCulture) & "\"
-        Dim odp = MessageBox.Show("Folder " & FolderSesji & " zawiera segmenty innej sesji pobierania (" & liczba & " " & Odmiana(liczba, "plik", "pliki", "plików") &
-                                  ") - z innym zasięgiem siatki, rozmiarem segmentu, układem, serwerem lub warstwami." & vbCrLf &
+        Dim odp = MessageBox.Show("Folder " & FolderSesji & " zawiera segmenty innej sesji pobierania (" & opis & ")." & vbCrLf &
                                   "Segmenty o tych samych nazwach zostałyby uznane za już pobrane i trafiłyby do scalonej mapy." & vbCrLf & vbCrLf &
                                   "Tak - pobierz nową sesję do folderu:" & vbCrLf & nowy & vbCrLf & vbCrLf &
                                   "Nie - anuluj pobieranie (aby wznowić poprzednią sesję, wczytaj jej ustawienia z menu Sesja pobierania).",
@@ -510,7 +534,6 @@ Public Class Form1
         FolderSesji = nowy
         Return True
     End Function
-
     Private Sub ZapiszToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles ZapiszToolStripMenuItem.Click
         ZapiszConf(True)
     End Sub
@@ -849,6 +872,11 @@ Public Class Form1
         End If
         If _plikWarstw.Adres = "" Then
             Komunikat("Nie wybrano zbioru map (serwera WMS).", Color.Red) : Exit Sub
+        End If
+        'przedrostek także z wczytanego conf.txt - sprawdzany przed pobraniem pierwszego segmentu
+        Dim bladPrzedrostka As String = KonfiguracjaSesji.BladPrzedrostka(Ustawienia.Prefiks)
+        If bladPrzedrostka <> "" Then
+            Komunikat(bladPrzedrostka & " Popraw go w oknie Ustawienia.", Color.Red) : Exit Sub
         End If
 
         Dim liczbaSegmentow As Integer = siatka.LiczbaSegmentow

@@ -24,6 +24,8 @@ Public Class Form3
     Private _folderScalania As String = ""
     Private _uklad As UkladWspolrzednych = UkladWspolrzednych.PL1992
     Private _ctsScalanie As CancellationTokenSource
+    ''' <summary>Segmenty pobrane z przezroczystym tłem (conf.txt) - zachowywane w arkuszu PNG i GeoTIFF bezstratnym.</summary>
+    Private _przezroczystosc As Boolean
 
     Private Sub Form3_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         _folderScalania = Form1.FolderSesji
@@ -37,15 +39,18 @@ Public Class Form3
         chkTab.Checked = Ustawienia.ScalanieTab
         cmbFormatArkusza.SelectedIndex = CInt(Ustawienia.FormatArkusza)
         trkJakosc.Enabled = Ustawienia.FormatArkusza = FormatArkusza.Jpeg OrElse Ustawienia.FormatArkusza = FormatArkusza.GeoTiffJpeg
+        OpiszWorldFile()
         WczytajParametry()
     End Sub
 
     ''' <summary>Parametry zbioru segmentów z pliku conf.txt w folderze scalania.</summary>
     Private Sub WczytajParametry()
         Dim plikConf As String = _folderScalania & "conf.txt"
+        _przezroczystosc = False
         If File.Exists(plikConf) Then
             Try
                 Dim c = KonfiguracjaSesji.Wczytaj(plikConf, KodowanieSystemowe())
+                _przezroczystosc = c.Przezroczystosc AndAlso Wms.CzyFormatZPrzezroczystoscia(c.Format)
                 txtXDol.Text = c.XDol
                 txtYLewy.Text = c.YLewy
                 txtXGora.Text = c.XGora
@@ -69,7 +74,9 @@ Public Class Form3
             Komunikat("We wskazanym katalogu segmentów nie odnaleziono pliku konfiguracyjnego conf.txt. Jesli został on bezpowrotnie utracony, istnieje możliwość samodzielnego zdefiniowania parametrów segmentów. W tym celu zaznacz opcję 'ręczne wprowadzanie parametrów'", Color.Red)
         Else
             chkRecznie.Enabled = False
-            Komunikat("Segmenty gotowe do złączenia. Wszelkie parametry scalania zostały załadowane automatycznie z pliku conf.txt", Color.Black)
+            Komunikat("Segmenty gotowe do złączenia. Wszelkie parametry scalania zostały załadowane automatycznie z pliku conf.txt" &
+                      If(_przezroczystosc, ". Segmenty mają przezroczyste tło - zachowają je formaty PNG i GeoTIFF (bezstratny), w pozostałych tło będzie białe.", ""),
+                      Color.Black)
         End If
     End Sub
 
@@ -119,6 +126,13 @@ Public Class Form3
         'jakość kompresji dotyczy formatów z kompresją JPEG
         trkJakosc.Enabled = WybranyFormat = FormatArkusza.Jpeg OrElse WybranyFormat = FormatArkusza.GeoTiffJpeg
         Ustawienia.FormatArkusza = WybranyFormat
+        OpiszWorldFile()
+    End Sub
+
+    ''' <summary>Rozszerzenie world file w opisie pola wyboru - zależy od formatu arkusza (dawniej zawsze ".jpgw").</summary>
+    Private Sub OpiszWorldFile()
+        chkWorldFile.Text = "twórz plik referencyjny QGIS, ArcGis (." &
+                            Georeferencja.RozszerzenieWorldFile(ZapisRastra.Rozszerzenie(WybranyFormat)) & ")"
     End Sub
 
     Private Async Sub btnScal_Click(sender As Object, e As EventArgs) Handles btnScal.Click
@@ -145,7 +159,8 @@ Public Class Form3
             .Numeracja = Siatka.StylZTekstu(cmbNumeracja.Text), .RozszerzenieSegmentow = Wms.RozszerzeniePliku(cmbFormat.Text),
             .Siatka = s, .Uklad = _uklad, .Format = WybranyFormat, .JakoscJpeg = trkJakosc.Value,
             .NazwaArkusza = "_scalone_segmenty_" & s.LiczbaKolumn & "x" & s.LiczbaWierszy,
-            .Georeferencja = New OpcjeGeoreferencji With {.WorldFile = chkWorldFile.Checked, .Kml = chkKml.Checked, .Map = chkMap.Checked, .Tab = chkTab.Checked}}
+            .Georeferencja = New OpcjeGeoreferencji With {.WorldFile = chkWorldFile.Checked, .Kml = chkKml.Checked, .Map = chkMap.Checked, .Tab = chkTab.Checked},
+            .Przezroczystosc = _przezroczystosc}
 
         _ctsScalanie = New CancellationTokenSource()
         btnScal.Text = "Przerwij"

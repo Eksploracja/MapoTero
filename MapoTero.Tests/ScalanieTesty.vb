@@ -452,6 +452,68 @@ Public Class ScalanieTesty
         End Try
     End Sub
 
+    <Theory>
+    <InlineData(FormatArkusza.Png)>
+    <InlineData(FormatArkusza.GeoTiff)>
+    Public Sub ScalanieZachowujePrzezroczystosc(format As FormatArkusza)
+        Dim tempFolder = Path.Combine(Path.GetTempPath(), "MapoTero_Test_" & Guid.NewGuid().ToString("N")) & "\"
+        Directory.CreateDirectory(tempFolder)
+        Try
+            Dim bok = 40
+            UtworzKafelArgb(tempFolder & "_01_01.png", bok, bok, Color.FromArgb(0, 0, 0, 0))
+            UtworzKafelArgb(tempFolder & "_01_02.png", bok, bok, Color.FromArgb(128, 255, 0, 0))
+            UtworzKafelArgb(tempFolder & "_02_01.png", bok, bok, Color.FromArgb(255, 0, 255, 0))
+            'brak kafla _02_02 - pole przezroczyste zamiast białego
+
+            Dim zadanie As New ZadanieScalania With {
+                .Folder = tempFolder, .Prefiks = "_", .Numeracja = StylNumeracji.WierszKolumna, .RozszerzenieSegmentow = "png",
+                .Siatka = Siatka2x2(bok), .Uklad = UkladWspolrzednych.PL1992, .Format = format, .NazwaArkusza = "arkusz_rgba",
+                .Przezroczystosc = True}
+            Dim wynik = ScalanieSegmentow.Scal(zadanie, Nothing, CancellationToken.None)
+            Assert.Single(wynik.Brakujace)
+
+            If format = FormatArkusza.GeoTiff Then
+                Using t = Tiff.Open(wynik.Plik, "r")
+                    Assert.Equal(4, t.GetField(TiffTag.SAMPLESPERPIXEL)(0).ToInt())
+                End Using
+            End If
+            Using arkusz As New Bitmap(wynik.Plik)
+                Assert.Equal(0, arkusz.GetPixel(20, 20).A)
+                Dim p12 = arkusz.GetPixel(60, 20)
+                Assert.InRange(p12.A, 120, 135)
+                Assert.Equal(255, p12.R)
+                Assert.Equal(255, arkusz.GetPixel(20, 60).A)
+                Assert.Equal(0, arkusz.GetPixel(60, 60).A)
+            End Using
+        Finally
+            If Directory.Exists(tempFolder) Then Directory.Delete(tempFolder, True)
+        End Try
+    End Sub
+
+    <Fact>
+    Public Sub ScalanieJpegBezPrzezroczystosci()
+        'JPEG nie ma kanału alfa - przezroczyste tło segmentów staje się białe
+        Dim tempFolder = Path.Combine(Path.GetTempPath(), "MapoTero_Test_" & Guid.NewGuid().ToString("N")) & "\"
+        Directory.CreateDirectory(tempFolder)
+        Try
+            Dim bok = 40
+            For Each n In {"_01_01", "_01_02", "_02_01", "_02_02"}
+                UtworzKafelArgb(tempFolder & n & ".png", bok, bok, Color.FromArgb(0, 0, 0, 0))
+            Next
+            Dim zadanie As New ZadanieScalania With {
+                .Folder = tempFolder, .Prefiks = "_", .Numeracja = StylNumeracji.WierszKolumna, .RozszerzenieSegmentow = "png",
+                .Siatka = Siatka2x2(bok), .Uklad = UkladWspolrzednych.PL1992, .Format = FormatArkusza.Jpeg, .JakoscJpeg = 95,
+                .NazwaArkusza = "arkusz_jpg", .Przezroczystosc = True}
+            Dim wynik = ScalanieSegmentow.Scal(zadanie, Nothing, CancellationToken.None)
+            Using arkusz As New Bitmap(wynik.Plik)
+                Assert.InRange(CInt(arkusz.GetPixel(20, 20).R), 250, 255)
+                Assert.InRange(CInt(arkusz.GetPixel(20, 20).B), 250, 255)
+            End Using
+        Finally
+            If Directory.Exists(tempFolder) Then Directory.Delete(tempFolder, True)
+        End Try
+    End Sub
+
     <Fact>
     Public Sub ScalanieKafliONiestandardowymRozmiarze()
         Dim tempFolder = Path.Combine(Path.GetTempPath(), "MapoTero_Test_" & Guid.NewGuid().ToString("N")) & "\"

@@ -273,6 +273,24 @@ Public Class KonfiguracjaSesji
         Return WybraneWarstwy().SequenceEqual(inna.WybraneWarstwy(), StringComparer.Ordinal)
     End Function
 
+    ''' <summary>
+    ''' Sprawdza przedrostek nazw segmentów; zwraca opis błędu albo pusty tekst. Przedrostek staje się początkiem
+    ''' nazwy pliku, więc znaki niedozwolone w nazwach plików lub dwukropek (np. "a:b" - ścieżka względem dysku A:)
+    ''' kierowałyby zapis segmentów poza folder sesji albo uniemożliwiały go.
+    ''' </summary>
+    Public Shared Function BladPrzedrostka(prefiks As String) As String
+        Dim p As String = If(prefiks, "")
+        Dim niedozwolone = Path.GetInvalidFileNameChars().Concat({":"c, "\"c, "/"c, "*"c, "?"c, """"c, "<"c, ">"c, "|"c}).Distinct().ToArray()
+        Dim i As Integer = p.IndexOfAny(niedozwolone)
+        If i >= 0 Then
+            Dim znak As Char = p(i)
+            Return "Przedrostek nazw segmentów zawiera niedozwolony znak " &
+                   If(Char.IsControl(znak), "sterujący", "'" & znak & "'") & ". Nie używaj znaków \ / : * ? "" < > |."
+        End If
+        If p.Length > 50 Then Return "Przedrostek nazw segmentów może mieć najwyżej 50 znaków."
+        Return ""
+    End Function
+
     ''' <summary>Niepuste nazwy wybranych warstw w kolejności nakładania.</summary>
     Public Function WybraneWarstwy() As List(Of String)
         Dim lista As New List(Of String)

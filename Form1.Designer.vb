@@ -1225,7 +1225,7 @@ Partial Class Form1
         Me.lblZaznSzerDol.AutoSize = True
         Me.lblZaznSzerDol.Font = New System.Drawing.Font("Microsoft Sans Serif", 7.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
         Me.lblZaznSzerDol.ForeColor = System.Drawing.Color.Navy
-        Me.lblZaznSzerDol.Location = New System.Drawing.Point(72, 98)
+        Me.lblZaznSzerDol.Location = New System.Drawing.Point(80, 98)
         Me.lblZaznSzerDol.Name = "lblZaznSzerDol"
         Me.lblZaznSzerDol.Size = New System.Drawing.Size(10, 13)
         Me.lblZaznSzerDol.TabIndex = 314
@@ -1236,7 +1236,7 @@ Partial Class Form1
         Me.lblZaznDlugPrawa.AutoSize = True
         Me.lblZaznDlugPrawa.Font = New System.Drawing.Font("Microsoft Sans Serif", 7.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
         Me.lblZaznDlugPrawa.ForeColor = System.Drawing.Color.Navy
-        Me.lblZaznDlugPrawa.Location = New System.Drawing.Point(134, 64)
+        Me.lblZaznDlugPrawa.Location = New System.Drawing.Point(129, 64)
         Me.lblZaznDlugPrawa.Name = "lblZaznDlugPrawa"
         Me.lblZaznDlugPrawa.Size = New System.Drawing.Size(10, 13)
         Me.lblZaznDlugPrawa.TabIndex = 313
@@ -1247,7 +1247,7 @@ Partial Class Form1
         Me.lblZaznSzerGora.AutoSize = True
         Me.lblZaznSzerGora.Font = New System.Drawing.Font("Microsoft Sans Serif", 7.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
         Me.lblZaznSzerGora.ForeColor = System.Drawing.Color.Navy
-        Me.lblZaznSzerGora.Location = New System.Drawing.Point(73, 33)
+        Me.lblZaznSzerGora.Location = New System.Drawing.Point(80, 33)
         Me.lblZaznSzerGora.Name = "lblZaznSzerGora"
         Me.lblZaznSzerGora.Size = New System.Drawing.Size(10, 13)
         Me.lblZaznSzerGora.TabIndex = 312
@@ -1257,7 +1257,7 @@ Partial Class Form1
         '
         Me.lblOpisYPrawy.AutoSize = True
         Me.lblOpisYPrawy.ForeColor = System.Drawing.Color.Blue
-        Me.lblOpisYPrawy.Location = New System.Drawing.Point(133, 79)
+        Me.lblOpisYPrawy.Location = New System.Drawing.Point(129, 79)
         Me.lblOpisYPrawy.Name = "lblOpisYPrawy"
         Me.lblOpisYPrawy.Size = New System.Drawing.Size(12, 13)
         Me.lblOpisYPrawy.TabIndex = 310
@@ -1267,7 +1267,7 @@ Partial Class Form1
         '
         Me.lblOpisXGora.AutoSize = True
         Me.lblOpisXGora.ForeColor = System.Drawing.Color.Blue
-        Me.lblOpisXGora.Location = New System.Drawing.Point(72, 52)
+        Me.lblOpisXGora.Location = New System.Drawing.Point(68, 52)
         Me.lblOpisXGora.Name = "lblOpisXGora"
         Me.lblOpisXGora.Size = New System.Drawing.Size(12, 13)
         Me.lblOpisXGora.TabIndex = 311
@@ -1276,18 +1276,18 @@ Partial Class Form1
         'txtYPrawy
         '
         Me.txtYPrawy.ForeColor = System.Drawing.Color.Blue
-        Me.txtYPrawy.Location = New System.Drawing.Point(148, 76)
+        Me.txtYPrawy.Location = New System.Drawing.Point(142, 76)
         Me.txtYPrawy.Name = "txtYPrawy"
-        Me.txtYPrawy.Size = New System.Drawing.Size(44, 20)
+        Me.txtYPrawy.Size = New System.Drawing.Size(62, 20)
         Me.txtYPrawy.TabIndex = 309
         Me.txtYPrawy.Text = "571000"
         '
         'txtXGora
         '
         Me.txtXGora.ForeColor = System.Drawing.Color.Blue
-        Me.txtXGora.Location = New System.Drawing.Point(84, 49)
+        Me.txtXGora.Location = New System.Drawing.Point(80, 49)
         Me.txtXGora.Name = "txtXGora"
-        Me.txtXGora.Size = New System.Drawing.Size(44, 20)
+        Me.txtXGora.Size = New System.Drawing.Size(62, 20)
         Me.txtXGora.TabIndex = 308
         Me.txtXGora.Text = "684000"
         '
@@ -1305,7 +1305,7 @@ Partial Class Form1
         '
         Me.lblOpisXDol.AutoSize = True
         Me.lblOpisXDol.ForeColor = System.Drawing.Color.Blue
-        Me.lblOpisXDol.Location = New System.Drawing.Point(71, 115)
+        Me.lblOpisXDol.Location = New System.Drawing.Point(68, 114)
         Me.lblOpisXDol.Name = "lblOpisXDol"
         Me.lblOpisXDol.Size = New System.Drawing.Size(12, 13)
         Me.lblOpisXDol.TabIndex = 306
@@ -1314,18 +1314,18 @@ Partial Class Form1
         'txtYLewy
         '
         Me.txtYLewy.ForeColor = System.Drawing.Color.Blue
-        Me.txtYLewy.Location = New System.Drawing.Point(21, 75)
+        Me.txtYLewy.Location = New System.Drawing.Point(18, 75)
         Me.txtYLewy.Name = "txtYLewy"
-        Me.txtYLewy.Size = New System.Drawing.Size(44, 20)
+        Me.txtYLewy.Size = New System.Drawing.Size(62, 20)
         Me.txtYLewy.TabIndex = 305
         Me.txtYLewy.Text = "569000"
         '
         'txtXDol
         '
         Me.txtXDol.ForeColor = System.Drawing.Color.Blue
-        Me.txtXDol.Location = New System.Drawing.Point(85, 111)
+        Me.txtXDol.Location = New System.Drawing.Point(80, 111)
         Me.txtXDol.Name = "txtXDol"
-        Me.txtXDol.Size = New System.Drawing.Size(44, 20)
+        Me.txtXDol.Size = New System.Drawing.Size(62, 20)
         Me.txtXDol.TabIndex = 304
         Me.txtXDol.Text = "682000"
         '

@@ -131,6 +131,21 @@ Public Class PlikiSesjiTesty
         End Try
     End Sub
 
+    <Theory>
+    <InlineData("_", True)>
+    <InlineData("", True)>
+    <InlineData("mapa_2026-", True)>
+    <InlineData("a:b", False)>
+    <InlineData("C:\x", False)>
+    <InlineData("..\x", False)>
+    <InlineData("a/b", False)>
+    <InlineData("a?", False)>
+    <InlineData("a*b", False)>
+    <InlineData("a|b", False)>
+    Public Sub WalidacjaPrzedrostka(prefiks As String, poprawny As Boolean)
+        Assert.Equal(poprawny, KonfiguracjaSesji.BladPrzedrostka(prefiks) = "")
+    End Sub
+
     <Fact>
     Public Sub CzytnikPolWJednymWierszu()
         Dim r As New CzytnikPlikuVb("""a,b"",12,#TRUE#" & vbCrLf & """x""")
@@ -253,6 +268,23 @@ Public Class GeoreferencjaTesty
         Dim p = Georeferencja.Points(Segment()).Split({vbCrLf}, StringSplitOptions.None)
         Assert.Equal("mapX mapY pixelX pixelY", p(0))
         Assert.EndsWith(vbTab & "2048.000000000000000" & vbTab & "-2048.000000000000000", p(3))
+    End Sub
+
+    <Fact>
+    Public Sub WldWStopniachZNaroznikow()
+        'world file .wld w WGS84: niezerowy piksel, odtwarza narożniki obrazu (dawniej rozmiar piksela był zerowy)
+        Dim o = Segment()
+        Dim l = Georeferencja.Wld(o).Split({vbCrLf}, StringSplitOptions.None).
+                Select(Function(t) Double.Parse(t, Globalization.CultureInfo.InvariantCulture)).ToArray()
+        Assert.Equal(6, l.Length)
+        Assert.True(l(0) > 0 AndAlso l(3) < 0)
+        Dim n = o.NaroznikiWgs84()    'LG, PG, PD, LD
+        Dim w As Double = o.SzerokoscPx, h As Double = o.WysokoscPx
+        'prawy dolny narożnik obrazu z przekształcenia (środek piksela przesunięty o pół piksela)
+        Dim lng As Double = l(4) + l(0) * (w - 0.5) + l(2) * (h - 0.5)
+        Dim lat As Double = l(5) + l(1) * (w - 0.5) + l(3) * (h - 0.5)
+        Assert.Equal(n(2).Dlugosc, lng, 6)
+        Assert.Equal(n(2).Szerokosc, lat, 6)
     End Sub
 
     <Fact>

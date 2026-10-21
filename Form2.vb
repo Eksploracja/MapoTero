@@ -167,6 +167,15 @@ Public Class Form2
     Private Sub btnOK_Click(sender As Object, e As EventArgs) Handles btnOK.Click
         Dim u = Ustawienia
 
+        'przedrostek jest początkiem nazwy pliku segmentu - niedozwolone znaki kierowały zapis poza folder sesji
+        Dim bladPrzedrostka As String = KonfiguracjaSesji.BladPrzedrostka(txtPrefiks.Text)
+        If bladPrzedrostka <> "" Then
+            MsgBox(bladPrzedrostka, MsgBoxStyle.Exclamation, "Ustawienia")
+            txtPrefiks.Focus()
+            txtPrefiks.SelectAll()
+            Exit Sub
+        End If
+
         'sesja (zapisywana w conf.txt przy rozpoczęciu pobierania)
         u.Format = UstawieniaProgramu.NormalizujFormat(CStr(cmbFormat.SelectedItem))
         u.Przezroczystosc = chkPrzezroczystosc.Checked

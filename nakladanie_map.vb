@@ -46,29 +46,34 @@ Public Class Nakladanie_Map
     End Sub
 
     ''' <summary>
-    ''' Wybór folderu warstwy. Wskazany folder staje się też folderem sesji okna głównego - dzięki temu
-    ''' kolejne pobieranie zapisze segmenty właśnie do niego (np. najpierw warstwa dolna, potem górna).
+    ''' Wybór folderu. Folder warstwy dolnej lub górnej staje się też folderem sesji okna głównego - dzięki temu
+    ''' kolejne pobieranie zapisze segmenty właśnie do niego (np. najpierw warstwa dolna, potem górna); zmiana jest
+    ''' ogłaszana w oknie głównym. Folder wynikowy nie zmienia folderu sesji (dawniej zmieniał - kolejne pobieranie
+    ''' trafiało do folderu z nałożonymi mapami, których pliki uznawano za pobrane segmenty).
     ''' </summary>
-    Private Function WybierzFolder(biezacy As String) As String
+    Private Function WybierzFolder(biezacy As String, folderSesji As Boolean) As String
         dlgFolder.SelectedPath = If(Directory.Exists(biezacy), biezacy, Form1.FolderSesji)
         If dlgFolder.ShowDialog = DialogResult.OK Then
-            Dim folder As String = dlgFolder.SelectedPath & "\"
-            Form1.FolderSesji = folder
+            Dim folder As String = dlgFolder.SelectedPath.TrimEnd("\"c) & "\"
+            If folderSesji AndAlso Not String.Equals(folder, Form1.FolderSesji, StringComparison.OrdinalIgnoreCase) Then
+                Form1.FolderSesji = folder
+                Form1.Komunikat("Folder sesji pobierania zmieniono na " & folder & " - kolejne pobieranie zapisze segmenty do tego folderu.", Color.Green)
+            End If
             Return folder
         End If
         Return biezacy
     End Function
 
     Private Sub ButtonDolna_Click(sender As Object, e As EventArgs) Handles ButtonDolna.Click
-        txtFolderDolna.Text = WybierzFolder(txtFolderDolna.Text)
+        txtFolderDolna.Text = WybierzFolder(txtFolderDolna.Text, True)
     End Sub
 
     Private Sub ButtonGorna_Click(sender As Object, e As EventArgs) Handles ButtonGorna.Click
-        txtFolderGorna.Text = WybierzFolder(txtFolderGorna.Text)
+        txtFolderGorna.Text = WybierzFolder(txtFolderGorna.Text, True)
     End Sub
 
     Private Sub ButtonPolaczone_Click(sender As Object, e As EventArgs) Handles ButtonPolaczone.Click
-        txtFolderWynik.Text = WybierzFolder(txtFolderWynik.Text)
+        txtFolderWynik.Text = WybierzFolder(txtFolderWynik.Text, False)
     End Sub
 
     Private Async Sub btnSkladaj_Click(sender As Object, e As EventArgs) Handles btnSkladaj.Click
@@ -76,8 +81,9 @@ Public Class Nakladanie_Map
         Dim gorna As String = KoniecUkosnik(txtFolderGorna.Text)
         Dim wynik As String = KoniecUkosnik(txtFolderWynik.Text)
 
-        If Not Directory.Exists(dolna) OrElse Not Directory.Exists(gorna) OrElse Not Directory.Exists(wynik) Then
-            MsgBox("Błąd. Upewnij się, czy wskazane wcześniej trzy podkatalogi istnieją i powtórz jeszcze raz operację")
+        If Not Directory.Exists(dolna) OrElse Not Directory.Exists(gorna) Then
+            MsgBox("Błąd. Folder warstwy dolnej lub górnej nie istnieje:" & vbCrLf & dolna & vbCrLf & gorna & vbCrLf & vbCrLf &
+                   "Pobierz do nich segmenty obu map (format png, te same ustawienia geometrii) i powtórz operację.")
             Exit Sub
         End If
         If String.Equals(dolna, gorna, StringComparison.OrdinalIgnoreCase) OrElse String.Equals(dolna, wynik, StringComparison.OrdinalIgnoreCase) OrElse
@@ -93,9 +99,17 @@ Public Class Nakladanie_Map
         End If
         If Directory.GetFiles(gorna, "*.png").Length = 0 Then
             MsgBox("Błąd. Katalog warstwy górnej nie zawiera plików do połączenia" & vbCrLf &
-                   "Umieść w nich segmenty nakładanej wartstwy w formacie png o identycznej nazwie oraz rozdzielczości jak katalogu warstwy dolnej")
+                   "Umieść w nich segmenty nakładanej warstwy w formacie png o identycznej nazwie oraz rozdzielczości jak katalogu warstwy dolnej")
             Exit Sub
         End If
+
+        'folder wynikowy tworzony w razie potrzeby (dawniej trzeba go było utworzyć samemu)
+        Try
+            Directory.CreateDirectory(wynik)
+        Catch ex As Exception
+            MsgBox("Nie udało się utworzyć folderu " & wynik & ": " & ex.Message, MsgBoxStyle.Exclamation)
+            Exit Sub
+        End Try
 
         btnSkladaj.Enabled = False
         Me.UseWaitCursor = True

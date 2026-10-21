@@ -185,10 +185,12 @@ Public NotInheritable Class PobieranieSegmentow
 
         ZapiszKoordynaty(z, segmenty)
 
-        'przy powtórnym pobieraniu - tylko brakujące segmenty
+        'brakujące segmenty są zawsze pobierane (istniejące pliki pomijane); opcja "powyżej ostatniego" pomija też luki
+        'przed ostatnim pobranym segmentem (dawniej filtrowała tylko istniejące pliki, więc nic nie zmieniała)
         Dim doPobrania As List(Of OpisSegmentu) = segmenty
         If z.PobierajPowyzejOstatniego AndAlso Not z.TrekBuddy AndAlso Not z.Odswiez Then
-            doPobrania = segmenty.FindAll(Function(sg) Not File.Exists(Path.Combine(folderDocelowy, sg.Nazwa & "." & ext)))
+            Dim ostatni As Integer = segmenty.FindLastIndex(Function(sg) File.Exists(Path.Combine(folderDocelowy, sg.Nazwa & "." & ext)))
+            If ostatni >= 0 Then doPobrania = segmenty.GetRange(ostatni + 1, segmenty.Count - ostatni - 1)
         End If
 
         Dim plikBledow As String = Path.Combine(z.Folder, "error.txt")

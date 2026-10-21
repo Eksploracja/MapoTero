@@ -211,15 +211,24 @@ Public NotInheritable Class Georeferencja
         Return sb.ToString()
     End Function
 
-    ''' <summary>Plik .wld towarzyszący plikowi .points (format dotychczas tworzony przez program).</summary>
+    ''' <summary>
+    ''' Plik .wld towarzyszący plikowi .points: world file w stopniach WGS84 - przekształcenie afiniczne wyznaczone
+    ''' z narożników obrazu (lewy górny, prawy górny, lewy dolny), z wyrazami obrotu, bo prostokąt układu
+    ''' odwzorowania jest w WGS84 lekko obrócony. Dawniej rozmiar piksela był zerowy i programy GIS pomijały plik.
+    ''' </summary>
     Public Shared Function Wld(o As ObrazGeoreferencyjny) As String
-        Dim lg = o.NaroznikiWgs84()(0)
-        Return "0.000000000000000" & Nl &
-               "0" & Nl &
-               "0" & Nl &
-               "-0.000000000000000" & Nl &
-               lg.Dlugosc.ToString("0.000000000000000", Ci) & Nl &
-               lg.Szerokosc.ToString("0.000000000000000", Ci)
+        Dim n = o.NaroznikiWgs84()    'LG, PG, PD, LD
+        Dim w As Double = Math.Max(1, o.SzerokoscPx), h As Double = Math.Max(1, o.WysokoscPx)
+        Dim a As Double = (n(1).Dlugosc - n(0).Dlugosc) / w     'długość na piksel w prawo
+        Dim d As Double = (n(1).Szerokosc - n(0).Szerokosc) / w 'szerokość na piksel w prawo
+        Dim b As Double = (n(3).Dlugosc - n(0).Dlugosc) / h     'długość na piksel w dół
+        Dim e As Double = (n(3).Szerokosc - n(0).Szerokosc) / h 'szerokość na piksel w dół (ujemna)
+        'world file wskazuje środek lewego górnego piksela
+        Dim c As Double = n(0).Dlugosc + (a + b) / 2
+        Dim f As Double = n(0).Szerokosc + (d + e) / 2
+        Const fmt As String = "0.000000000000000"
+        Return a.ToString(fmt, Ci) & Nl & d.ToString(fmt, Ci) & Nl & b.ToString(fmt, Ci) & Nl &
+               e.ToString(fmt, Ci) & Nl & c.ToString(fmt, Ci) & Nl & f.ToString(fmt, Ci)
     End Function
 
     ''' <summary>Plik punktów dopasowania georeferencera QGIS (.points): narożniki obrazu w WGS84.</summary>

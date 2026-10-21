@@ -40,16 +40,25 @@ Public MustInherit Class ZapisRastra
 
     Public ReadOnly Property Szerokosc As Integer
     Public ReadOnly Property Wysokosc As Integer
+    ''' <summary>Liczba kanałów piksela: 3 - RGB, 4 - RGBA (kanał przezroczystości).</summary>
+    Public ReadOnly Property Kanaly As Integer
     ''' <summary>Liczba zapisanych dotąd wierszy.</summary>
     Public Property Zapisane As Integer
 
-    Protected Sub New(szerokosc As Integer, wysokosc As Integer)
+    Protected Sub New(szerokosc As Integer, wysokosc As Integer, Optional kanaly As Integer = 3)
         If szerokosc <= 0 OrElse wysokosc <= 0 Then Throw New ArgumentException("Niepoprawny rozmiar obrazu")
+        If kanaly <> 3 AndAlso kanaly <> 4 Then Throw New ArgumentException("Obsługiwane są obrazy RGB i RGBA")
         Me.Szerokosc = szerokosc
         Me.Wysokosc = wysokosc
+        Me.Kanaly = kanaly
     End Sub
 
-    ''' <summary>Zapisuje kolejne wiersze: bufor RGB o długości liczbaWierszy * Szerokosc * 3, wierszami od góry.</summary>
+    ''' <summary>Czy format arkusza może zachować przezroczystość (kanał alfa).</summary>
+    Public Shared Function ObslugujePrzezroczystosc(format As FormatArkusza) As Boolean
+        Return format = FormatArkusza.Png OrElse format = FormatArkusza.GeoTiff
+    End Function
+
+    ''' <summary>Zapisuje kolejne wiersze: bufor RGB (RGBA) o długości liczbaWierszy * Szerokosc * Kanaly, wierszami od góry.</summary>
     Public Sub ZapiszWiersze(rgb() As Byte, liczbaWierszy As Integer)
         If Zapisane + liczbaWierszy > Wysokosc Then Throw New InvalidOperationException("Za dużo wierszy obrazu")
         ZapiszWierszeWewn(rgb, liczbaWierszy)
@@ -80,20 +89,24 @@ Public MustInherit Class ZapisRastra
         End Select
     End Function
 
-    ''' <summary>Tworzy zapis obrazu w wybranym formacie.</summary>
+    ''' <summary>
+    ''' Tworzy zapis obrazu w wybranym formacie. Przezroczystość (RGBA) zachowują PNG i GeoTIFF bezstratny;
+    ''' formaty z kompresją JPEG zapisują zawsze RGB.
+    ''' </summary>
     Public Shared Function Utworz(format As FormatArkusza, sciezka As String, szerokosc As Integer, wysokosc As Integer, jakoscJpeg As Integer,
-                                  uklad As UkladWspolrzednych, zasieg As Zasieg) As ZapisRastra
+                                  uklad As UkladWspolrzednych, zasieg As Zasieg, Optional przezroczystosc As Boolean = False) As ZapisRastra
+        Dim kanaly As Integer = If(przezroczystosc AndAlso ObslugujePrzezroczystosc(format), 4, 3)
         Select Case format
             Case FormatArkusza.Jpeg : Return New ZapisJpeg(sciezka, szerokosc, wysokosc, jakoscJpeg)
-            Case FormatArkusza.Png : Return New ZapisPng(sciezka, szerokosc, wysokosc)
+            Case FormatArkusza.Png : Return New ZapisPng(sciezka, szerokosc, wysokosc, kanaly)
             Case FormatArkusza.GeoTiffJpeg : Return New ZapisGeoTiff(sciezka, szerokosc, wysokosc, True, jakoscJpeg, uklad, zasieg)
-            Case Else : Return New ZapisGeoTiff(sciezka, szerokosc, wysokosc, False, jakoscJpeg, uklad, zasieg)
+            Case Else : Return New ZapisGeoTiff(sciezka, szerokosc, wysokosc, False, jakoscJpeg, uklad, zasieg, kanaly)
         End Select
     End Function
 
 End Class
 
-''' <summary>Strumieniowy zapis PNG (kolor RGB 8 bitów, filtr Up, kompresja Deflate).</summary>
+''' <summary>Strumieniowy zapis PNG (kolor RGB lub RGBA 8 bitów, filtr Up, kompresja Deflate).</summary>
 Public Class ZapisPng
     Inherits ZapisRastra
 
@@ -106,15 +119,15 @@ Public Class ZapisPng
     Private _adlerB As UInteger = 0
     Private _zakonczony As Boolean
 
-    Public Sub New(sciezka As String, szerokosc As Integer, wysokosc As Integer)
-        MyBase.New(szerokosc, wysokosc)
+    Public Sub New(sciezka As String, szerokosc As Integer, wysokosc As Integer, Optional kanaly As Integer = 3)
+        MyBase.New(szerokosc, wysokosc, kanaly)
         _plik = New FileStream(sciezka, FileMode.Create, FileAccess.Write, FileShare.None, 1 << 16)
         _plik.Write(New Byte() {137, 80, 78, 71, 13, 10, 26, 10}, 0, 8)
         Dim ihdr(12) As Byte
         ZapiszBE(ihdr, 0, CUInt(szerokosc))
         ZapiszBE(ihdr, 4, CUInt(wysokosc))
         ihdr(8) = 8   'głębia bitowa
-        ihdr(9) = 2   'RGB
+        ihdr(9) = CByte(If(kanaly = 4, 6, 2))   'RGBA albo RGB
         ihdr(10) = 0 : ihdr(11) = 0 : ihdr(12) = 0
         ZapiszFragment(_plik, "IHDR", ihdr, ihdr.Length)
 
@@ -122,12 +135,12 @@ Public Class ZapisPng
         'nagłówek zlib (deflate, okno 32 kB)
         _idat.Write(New Byte() {&H78, &H9C}, 0, 2)
         _deflate = New DeflateStream(_idat, CompressionLevel.Optimal, True)
-        _poprzedni = New Byte(szerokosc * 3 - 1) {}
-        _wiersz = New Byte(szerokosc * 3) {}
+        _poprzedni = New Byte(szerokosc * kanaly - 1) {}
+        _wiersz = New Byte(szerokosc * kanaly) {}
     End Sub
 
     Protected Overrides Sub ZapiszWierszeWewn(rgb() As Byte, liczbaWierszy As Integer)
-        Dim dl As Integer = Szerokosc * 3
+        Dim dl As Integer = Szerokosc * Kanaly
         For w = 0 To liczbaWierszy - 1
             Dim poz As Integer = w * dl
             _wiersz(0) = 2   'filtr Up - różnica względem wiersza powyżej (dobra kompresja map)
@@ -378,19 +391,23 @@ Public Class ZapisGeoTiff
     Private _zakonczony As Boolean
 
     Public Sub New(sciezka As String, szerokosc As Integer, wysokosc As Integer, kompresjaJpeg As Boolean, jakosc As Integer,
-                   uklad As UkladWspolrzednych, zasieg As Zasieg)
-        MyBase.New(szerokosc, wysokosc)
+                   uklad As UkladWspolrzednych, zasieg As Zasieg, Optional kanaly As Integer = 3)
+        MyBase.New(szerokosc, wysokosc, If(kompresjaJpeg, 3, kanaly))
         ZarejestrujZnaczniki()
 
         'BigTIFF, gdy nieskompresowany obraz przekracza ok. 4 GB
-        Dim duzy As Boolean = CLng(szerokosc) * wysokosc * 3 > 3900000000L
+        Dim duzy As Boolean = CLng(szerokosc) * wysokosc * Kanaly > 3900000000L
         _tiff = Tiff.Open(sciezka, If(duzy, "w8", "w"))
         If _tiff Is Nothing Then Throw New IOException("Nie można utworzyć pliku " & sciezka)
 
         _tiff.SetField(TiffTag.IMAGEWIDTH, szerokosc)
         _tiff.SetField(TiffTag.IMAGELENGTH, wysokosc)
         _tiff.SetField(TiffTag.BITSPERSAMPLE, 8)
-        _tiff.SetField(TiffTag.SAMPLESPERPIXEL, 3)
+        _tiff.SetField(TiffTag.SAMPLESPERPIXEL, Kanaly)
+        If Kanaly = 4 Then
+            'czwarty kanał - przezroczystość (alfa niezależna od kolorów)
+            _tiff.SetField(TiffTag.EXTRASAMPLES, 1, New Short() {CShort(ExtraSample.UNASSALPHA)})
+        End If
         _tiff.SetField(TiffTag.PLANARCONFIG, PlanarConfig.CONTIG)
         _tiff.SetField(TiffTag.ORIENTATION, BitMiracle.LibTiff.Classic.Orientation.TOPLEFT)
         _tiff.SetField(TiffTag.ROWSPERSTRIP, 16)
@@ -425,7 +442,7 @@ Public Class ZapisGeoTiff
         End If
         _tiff.SetField(CType(TagGeoKeyDirectory, TiffTag), klucze.Length, klucze)
 
-        _wiersz = New Byte(szerokosc * 3 - 1) {}
+        _wiersz = New Byte(szerokosc * Kanaly - 1) {}
     End Sub
 
     Private Shared Function JakoShort(kod As Integer) As Short
@@ -454,7 +471,7 @@ Public Class ZapisGeoTiff
     End Sub
 
     Protected Overrides Sub ZapiszWierszeWewn(rgb() As Byte, liczbaWierszy As Integer)
-        Dim dl As Integer = Szerokosc * 3
+        Dim dl As Integer = Szerokosc * Kanaly
         For w = 0 To liczbaWierszy - 1
             Buffer.BlockCopy(rgb, w * dl, _wiersz, 0, dl)
             If Not _tiff.WriteScanline(_wiersz, Zapisane + w) Then Throw New IOException("Błąd zapisu pliku TIFF")

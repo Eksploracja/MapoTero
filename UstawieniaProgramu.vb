@@ -140,8 +140,11 @@ Public Class UstawieniaProgramu
         End Get
     End Property
 
-    ''' <summary>Odczyt lastsettings.txt (brakujące ustawienia pozostają bez zmian).</summary>
-    Public Sub Wczytaj(sciezka As String)
+    ''' <summary>
+    ''' Odczyt lastsettings.txt (brakujące ustawienia pozostają bez zmian). Przedrostek, format i przezroczystość
+    ''' segmentów są parametrami sesji (conf.txt) - z lastsettings.txt wczytywane tylko dla nowej sesji.
+    ''' </summary>
+    Public Sub Wczytaj(sciezka As String, Optional parametryNowejSesji As Boolean = False)
         Dim u = PlikUstawien.Wczytaj(sciezka, KodowanieSystemowe())
         FolderSegmentow = u.Tekst("folder segmentow", FolderSegmentow)
         PlikGmi = u.Logiczna("chkgmi", PlikGmi)
@@ -170,6 +173,17 @@ Public Class UstawieniaProgramu
         Dim epsg As Integer = u.Calkowita("uklad_domyslny", UkladDomyslny.Epsg)
         UkladDomyslny = UkladWspolrzednych.ZKodu(epsg)
         SiatkaSegmentowNaMapie = u.Logiczna("siatka_segmentow", SiatkaSegmentowNaMapie)
+        'widok okna głównego (dawniej niezapisywany - po ponownym uruchomieniu wracały wartości domyślne)
+        KursorISrodekMapy = u.Logiczna("kursor_i_srodek", KursorISrodekMapy)
+        KursorWgs84 = u.Logiczna("kursor_wgs84", KursorWgs84)
+        ZaznaczenieWgs84 = u.Logiczna("zaznaczenie_wgs84", ZaznaczenieWgs84)
+        EdycjaXY = u.Logiczna("edycja_xy", EdycjaXY)
+        If parametryNowejSesji Then
+            'pusty przedrostek jest dozwolony - odczyt wprost, gdy ustawienie istnieje
+            If u.Zawiera("przedrostek") Then Prefiks = u.Tekst("przedrostek", "")
+            Format = NormalizujFormat(u.Tekst("format", Format))
+            Przezroczystosc = u.Logiczna("przezroczystosc", Przezroczystosc)
+        End If
     End Sub
 
     ''' <summary>Zapis lastsettings.txt - kolejność i nazwy jak w poprzednich wersjach, nowe ustawienia na końcu.</summary>
@@ -199,6 +213,13 @@ Public Class UstawieniaProgramu
         u.Ustaw("styl_nazwy_tb", StylNazwyTrekBuddy)
         u.Ustaw("uklad_domyslny", UkladDomyslny.Epsg)
         u.Ustaw("siatka_segmentow", SiatkaSegmentowNaMapie)
+        u.Ustaw("kursor_i_srodek", KursorISrodekMapy)
+        u.Ustaw("kursor_wgs84", KursorWgs84)
+        u.Ustaw("zaznaczenie_wgs84", ZaznaczenieWgs84)
+        u.Ustaw("edycja_xy", EdycjaXY)
+        u.Ustaw("przedrostek", Prefiks)
+        u.Ustaw("format", Format)
+        u.Ustaw("przezroczystosc", Przezroczystosc)
         u.Zapisz(sciezka, KodowanieSystemowe())
     End Sub
 
