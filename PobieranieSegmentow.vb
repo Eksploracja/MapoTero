@@ -117,16 +117,18 @@ Public NotInheritable Class PobieranieSegmentow
         Return "przekroczono czas oczekiwania na odpowiedź serwera (" & sekundy & " s)"
     End Function
 
-    ''' <summary>Opis segmentu siatki.</summary>
-    Private Class OpisSegmentu
+    ''' <summary>
+    ''' Segment do pobrania: sam wiersz i kolumna siatki - nazwa, zasięg i adres wyznaczane są w razie potrzeby (dawniej
+    ''' każdy segment przechowywał gotowy adres zapytania, co przy milionach segmentów wyczerpywało pamięć).
+    ''' </summary>
+    Private Structure OpisSegmentu
         Public Indeks As Integer
         Public Wiersz As Integer
         Public Kolumna As Integer
-        Public Numer As Integer
-        Public Nazwa As String = ""
-        Public Zasieg As Zasieg
-        Public Adres As String = ""
-    End Class
+    End Structure
+
+    ''' <summary>Odstęp raportów postępu [ms] - przy setkach segmentów na sekundę okno nie nadążało z ich obsługą.</summary>
+    Private Const OdstepRaportuMs As Long = 100
 
     Public Shared Async Function PobierzAsync(z As ZadaniePobierania, postep As IProgress(Of PostepPobierania),
                                               token As CancellationToken) As Task(Of WynikPobierania)
@@ -148,8 +150,18 @@ Public NotInheritable Class PobieranieSegmentow
                 kafleWmts.UsunKafle()
                 Directory.CreateDirectory(kafleWmts.FolderKafli)
             End If
-            postep?.Report(New PostepPobierania With {.Komunikat = "Trwa pobieranie segmentów (" & s.LiczbaSegmentow & ") z usługi " & kafleWmts.Opis})
+            UsunPlikiTymczasowe(kafleWmts.FolderKafli, "*.tmp")
         End If
+
+        Dim nazwa As Func(Of OpisSegmentu, String) =
+            Function(sg) If(z.TrekBuddy, s.NazwaSegmentuTrekBuddy(z.Prefiks, sg.Wiersz, sg.Kolumna), s.NazwaSegmentu(z.Prefiks, z.Numeracja, sg.Wiersz, sg.Kolumna))
+        Dim adres As Func(Of OpisSegmentu, String) =
+            Function(sg)
+                Dim zasiegSegmentu = s.Segment(sg.Wiersz, sg.Kolumna)
+                If kafleWmts IsNot Nothing Then Return kafleWmts.AdresSegmentu(zasiegSegmentu)
+                Return Wms.ZapytanieGetMap(z.AdresSerwera, z.Warstwy, z.Uklad, zasiegSegmentu, z.Format, s.BokSegmentuPx, s.BokSegmentuPx, z.ZamienOsie,
+                                           z.Przezroczystosc)
+            End Function
 
         'segmenty przecinające korytarz trasy (Nothing - wszystkie segmenty prostokąta)
         Dim wKorytarzu As HashSet(Of Integer) = Nothing
@@ -160,19 +172,14 @@ Public NotInheritable Class PobieranieSegmentow
         For w = 1 To s.LiczbaWierszy
             For k = 1 To s.LiczbaKolumn
                 If wKorytarzu IsNot Nothing AndAlso Not wKorytarzu.Contains(s.NumerKolejny(w, k) - 1) Then Continue For
-                Dim sg As New OpisSegmentu With {.Indeks = segmenty.Count, .Wiersz = w, .Kolumna = k, .Numer = s.NumerKolejny(w, k),
-                                                 .Zasieg = s.Segment(w, k)}
-                sg.Nazwa = If(z.TrekBuddy, s.NazwaSegmentuTrekBuddy(z.Prefiks, w, k), s.NazwaSegmentu(z.Prefiks, z.Numeracja, w, k))
-                If kafleWmts Is Nothing Then
-                    sg.Adres = Wms.ZapytanieGetMap(z.AdresSerwera, z.Warstwy, z.Uklad, sg.Zasieg, z.Format, s.BokSegmentuPx, s.BokSegmentuPx, z.ZamienOsie,
-                                                     z.Przezroczystosc)
-                Else
-                    sg.Adres = kafleWmts.AdresSegmentu(sg.Zasieg)
-                End If
-                segmenty.Add(sg)
+                segmenty.Add(New OpisSegmentu With {.Indeks = segmenty.Count, .Wiersz = w, .Kolumna = k})
             Next
         Next
+        wKorytarzu = Nothing
         wynik.Wszystkie = segmenty.Count
+        If kafleWmts IsNot Nothing Then
+            postep?.Report(New PostepPobierania With {.Komunikat = "Trwa pobieranie segmentów (" & segmenty.Count & ") z usługi " & kafleWmts.Opis})
+        End If
 
         'foldery mapy TrekBuddy / Locus Map
         Dim folderDocelowy As String = If(z.Folder.EndsWith("\") OrElse z.Folder.EndsWith("/"), z.Folder, z.Folder & Path.DirectorySeparatorChar)
@@ -183,20 +190,22 @@ Public NotInheritable Class PobieranieSegmentow
             folderDocelowy = tb.FolderSet
         End If
 
-        ZapiszKoordynaty(z, segmenty)
+        'pliki tymczasowe segmentów po przerwanym pobieraniu (np. zamknięciu programu w trakcie zapisu)
+        UsunPlikiTymczasowe(folderDocelowy, z.Prefiks & "*." & ext & "*.tmp")
+        ZapiszKoordynaty(z, segmenty, nazwa, adres)
 
         'brakujące segmenty są zawsze pobierane (istniejące pliki pomijane); opcja "powyżej ostatniego" pomija też luki
         'przed ostatnim pobranym segmentem (dawniej filtrowała tylko istniejące pliki, więc nic nie zmieniała)
         Dim doPobrania As List(Of OpisSegmentu) = segmenty
         If z.PobierajPowyzejOstatniego AndAlso Not z.TrekBuddy AndAlso Not z.Odswiez Then
-            Dim ostatni As Integer = segmenty.FindLastIndex(Function(sg) File.Exists(Path.Combine(folderDocelowy, sg.Nazwa & "." & ext)))
+            Dim ostatni As Integer = segmenty.FindLastIndex(Function(sg) File.Exists(Path.Combine(folderDocelowy, nazwa(sg) & "." & ext)))
             If ostatni >= 0 Then doPobrania = segmenty.GetRange(ostatni + 1, segmenty.Count - ostatni - 1)
         End If
 
         Dim plikBledow As String = Path.Combine(z.Folder, "error.txt")
         Dim przyczyny As New ConcurrentDictionary(Of Integer, String)
-        'odświeżanie: segmenty już pobrane ponownie (kolejne próby pomijają je)
-        Dim odswiezone As New ConcurrentDictionary(Of Integer, Boolean)
+        'odświeżanie: segmenty już pobrane ponownie (kolejne próby pomijają je); każdy wątek zapisuje inne pozycje
+        Dim odswiezone(Math.Max(0, segmenty.Count - 1)) As Boolean
 
         Try
             For proba = 1 To Math.Max(1, z.IloscProb)
@@ -204,45 +213,65 @@ Public NotInheritable Class PobieranieSegmentow
                 File.WriteAllText(plikBledow, "")
                 przyczyny.Clear()
                 Dim licznik As Integer = 0
+                Dim nastepny As Integer = -1
+                Dim ostatniRaport As Long = 0
                 Dim biezacaProba As Integer = proba
 
-                Using semafor As New SemaphoreSlim(Math.Max(1, z.LiczbaWatkow))
-                    Dim zadania As New List(Of Task)
-                    For Each sg In doPobrania
-                        Dim segment As OpisSegmentu = sg
-                        zadania.Add(Task.Run(
-                            Async Function()
-                                Await semafor.WaitAsync(token).ConfigureAwait(False)
+                Dim pobierzSegment =
+                    Async Function(sg As OpisSegmentu) As Task
+                        Dim nazwaSegmentu As String = nazwa(sg)
+                        Dim plik As String = Path.Combine(folderDocelowy, nazwaSegmentu & "." & ext)
+                        Try
+                            Dim blad As String = ""
+                            Dim zasieg = s.Segment(sg.Wiersz, sg.Kolumna)
+                            Dim pobierz As Boolean = Not File.Exists(plik) OrElse (z.Odswiez AndAlso Not odswiezone(sg.Indeks))
+                            If pobierz Then
+                                If kafleWmts Is Nothing Then
+                                    blad = Await PobierzSegmentAsync(adres(sg), plik, z.LimitCzasuSekundy, token).ConfigureAwait(False)
+                                Else
+                                    blad = Await kafleWmts.PobierzSegmentAsync(zasieg, s.BokSegmentuPx, z.Format, plik, token).ConfigureAwait(False)
+                                End If
+                            End If
+                            If pobierz AndAlso blad = "" Then odswiezone(sg.Indeks) = True
+                            If File.Exists(plik) AndAlso blad = "" AndAlso Not z.TrekBuddy AndAlso z.Georeferencja.Dowolna Then
                                 Try
-                                    Dim plik As String = Path.Combine(folderDocelowy, segment.Nazwa & "." & ext)
-                                    Dim blad As String = ""
-                                    Dim pobierz As Boolean = Not File.Exists(plik) OrElse (z.Odswiez AndAlso Not odswiezone.ContainsKey(segment.Indeks))
-                                    If pobierz Then
-                                        If kafleWmts Is Nothing Then
-                                            blad = Await PobierzSegmentAsync(segment.Adres, plik, z.LimitCzasuSekundy, token).ConfigureAwait(False)
-                                        Else
-                                            blad = Await kafleWmts.PobierzSegmentAsync(segment.Zasieg, s.BokSegmentuPx, z.Format, plik, token).ConfigureAwait(False)
-                                        End If
-                                    End If
-                                    If pobierz AndAlso blad = "" Then odswiezone(segment.Indeks) = True
-                                    If File.Exists(plik) AndAlso blad = "" Then
-                                        If Not z.TrekBuddy AndAlso z.Georeferencja.Dowolna Then
-                                            ZapisGeoreferencji.ZapiszPliki(ZapisGeoreferencji.Obraz(z.Uklad, segment.Zasieg, s.BokSegmentuPx, s.BokSegmentuPx,
-                                                                                                   folderDocelowy, segment.Nazwa & "." & ext),
-                                                                          folderDocelowy, segment.Nazwa, ext, z.Georeferencja)
-                                        End If
-                                    Else
-                                        przyczyny(segment.Indeks) = blad
-                                    End If
-                                Finally
-                                    semafor.Release()
-                                    Dim n As Integer = Interlocked.Increment(licznik)
-                                    postep?.Report(New PostepPobierania With {.Pobrane = n, .Wszystkie = doPobrania.Count, .Proba = biezacaProba, .Segment = segment.Nazwa})
+                                    ZapisGeoreferencji.ZapiszPliki(ZapisGeoreferencji.Obraz(z.Uklad, zasieg, s.BokSegmentuPx, s.BokSegmentuPx,
+                                                                                           folderDocelowy, nazwaSegmentu & "." & ext),
+                                                                  folderDocelowy, nazwaSegmentu, ext, z.Georeferencja)
+                                Catch ex As Exception
+                                    blad = "nie udało się zapisać plików georeferencyjnych: " & ex.Message
                                 End Try
-                            End Function, token))
-                    Next
-                    Await Task.WhenAll(zadania).ConfigureAwait(False)
-                End Using
+                            End If
+                            If blad <> "" OrElse Not File.Exists(plik) Then przyczyny(sg.Indeks) = blad
+                        Catch ex As OperationCanceledException When token.IsCancellationRequested
+                            Throw
+                        Catch ex As Exception
+                            'błąd jednego segmentu (np. zapisu na dysku) nie przerywa pobierania pozostałych - trafia do error.txt
+                            przyczyny(sg.Indeks) = ex.Message.Replace(vbCr, " ").Replace(vbLf, " ")
+                        Finally
+                            Dim n As Integer = Interlocked.Increment(licznik)
+                            Dim teraz As Long = Environment.TickCount64
+                            If n = doPobrania.Count OrElse teraz - Interlocked.Read(ostatniRaport) >= OdstepRaportuMs Then
+                                Interlocked.Exchange(ostatniRaport, teraz)
+                                postep?.Report(New PostepPobierania With {.Pobrane = n, .Wszystkie = doPobrania.Count, .Proba = biezacaProba, .Segment = nazwaSegmentu})
+                            End If
+                        End Try
+                    End Function
+
+                'stała liczba wątków pobierających kolejne segmenty (dawniej osobne zadanie dla każdego segmentu naraz)
+                Dim watki As New List(Of Task)
+                For i = 1 To Math.Max(1, Math.Min(z.LiczbaWatkow, doPobrania.Count))
+                    watki.Add(Task.Run(
+                        Async Function()
+                            Do
+                                token.ThrowIfCancellationRequested()
+                                Dim j As Integer = Interlocked.Increment(nastepny)
+                                If j >= doPobrania.Count Then Exit Do
+                                Await pobierzSegment(doPobrania(j)).ConfigureAwait(False)
+                            Loop
+                        End Function, token))
+                Next
+                Await Task.WhenAll(watki).ConfigureAwait(False)
 
                 If przyczyny.IsEmpty OrElse proba >= z.IloscProb Then Exit For
 
@@ -254,11 +283,13 @@ Public NotInheritable Class PobieranieSegmentow
             wynik.Przerwano = True
         End Try
 
-        'wykaz brakujących segmentów (także po przerwaniu - scalanie ostrzeże o niekompletnym zestawie)
+        'wykaz brakujących segmentów (także po przerwaniu - scalanie ostrzeże o niekompletnym zestawie); brakujący jest
+        'też segment z błędem ostatniej próby (np. zapisu plików georeferencyjnych) i - przy odświeżaniu - segment,
+        'którego nie udało się pobrać ponownie (pozostał stary plik)
         Dim brakujace As New List(Of OpisSegmentu)
         For Each sg In doPobrania
-            'przy odświeżaniu brakujący jest także segment, którego nie udało się pobrać ponownie (pozostał stary plik)
-            If Not File.Exists(Path.Combine(folderDocelowy, sg.Nazwa & "." & ext)) OrElse (z.Odswiez AndAlso Not odswiezone.ContainsKey(sg.Indeks)) Then
+            If Not File.Exists(Path.Combine(folderDocelowy, nazwa(sg) & "." & ext)) OrElse przyczyny.ContainsKey(sg.Indeks) OrElse
+               (z.Odswiez AndAlso Not odswiezone(sg.Indeks)) Then
                 brakujace.Add(sg)
             End If
         Next
@@ -268,22 +299,22 @@ Public NotInheritable Class PobieranieSegmentow
             'komplet segmentów - pobrane kafle WMTS nie są już potrzebne
             If kafleWmts IsNot Nothing AndAlso Not wynik.Przerwano AndAlso Not z.ZachowajKafleWmts Then kafleWmts.UsunKafle()
         Else
-            Dim tekst As New Text.StringBuilder()
-            For Each sg In brakujace
-                tekst.AppendLine(sg.Nazwa)
-                tekst.AppendLine(sg.Adres)
-                Dim przyczyna As String = Nothing
-                If przyczyny.TryGetValue(sg.Indeks, przyczyna) AndAlso przyczyna <> "" Then
-                    tekst.AppendLine("przyczyna: " & przyczyna.Replace(""""c, "'"c))
-                ElseIf wynik.Przerwano Then
-                    tekst.AppendLine("przyczyna: przerwano pobieranie")
-                End If
-            Next
-            File.WriteAllText(plikBledow, tekst.ToString(), KodowanieSystemowe())
+            Using plik As New StreamWriter(plikBledow, False, KodowanieSystemowe())
+                For Each sg In brakujace
+                    plik.WriteLine(nazwa(sg))
+                    plik.WriteLine(adres(sg))
+                    Dim przyczyna As String = Nothing
+                    If przyczyny.TryGetValue(sg.Indeks, przyczyna) AndAlso przyczyna <> "" Then
+                        plik.WriteLine("przyczyna: " & przyczyna.Replace(""""c, "'"c))
+                    ElseIf wynik.Przerwano Then
+                        plik.WriteLine("przyczyna: przerwano pobieranie")
+                    End If
+                Next
+            End Using
         End If
 
         If tb IsNot Nothing Then
-            tb.ZapiszListeSegmentow(segmenty.ConvertAll(Function(sg) sg.Nazwa & "." & ext))
+            tb.ZapiszListeSegmentow(segmenty.Select(Function(sg) nazwa(sg) & "." & ext))
             If Not wynik.Przerwano Then
                 Try
                     tb.UtworzArchiwumTar()
@@ -295,6 +326,21 @@ Public NotInheritable Class PobieranieSegmentow
 
         Return wynik
     End Function
+
+    ''' <summary>Usuwa pliki tymczasowe pasujące do wzorca (pozostałe po przerwanym zapisie); zablokowane pomija.</summary>
+    Private Shared Sub UsunPlikiTymczasowe(folder As String, wzorzec As String)
+        Try
+            If Not Directory.Exists(folder) Then Exit Sub
+            For Each plik In Directory.EnumerateFiles(folder, wzorzec)
+                If Not plik.EndsWith(".tmp", StringComparison.OrdinalIgnoreCase) Then Continue For
+                Try
+                    File.Delete(plik)
+                Catch
+                End Try
+            Next
+        Catch
+        End Try
+    End Sub
 
     ''' <summary>
     ''' Pobiera jeden segment i zapisuje go w pliku. Zwraca pusty tekst, gdy się udało, albo opis błędu
@@ -349,19 +395,22 @@ Public NotInheritable Class PobieranieSegmentow
     End Function
 
     ''' <summary>Plik koordynaty.txt - wykaz segmentów z adresami i współrzędnymi (format jak w poprzednich wersjach).</summary>
-    Private Shared Sub ZapiszKoordynaty(z As ZadaniePobierania, segmenty As List(Of OpisSegmentu))
-        Dim sb As New Text.StringBuilder()
-        sb.AppendLine("""" & z.Folder & """")
-        sb.AppendLine(z.Siatka.BokSegmentuPx.ToString(Globalization.CultureInfo.InvariantCulture))
-        For Each sg In segmenty
-            sb.AppendLine(sg.Nazwa)
-            sb.AppendLine(sg.Adres)
-            sb.AppendLine(Liczba(sg.Zasieg.YLewy))
-            sb.AppendLine(Liczba(sg.Zasieg.XDol))
-            sb.AppendLine(Liczba(sg.Zasieg.YPrawy))
-            sb.AppendLine(Liczba(sg.Zasieg.XGora))
-        Next
-        File.WriteAllText(z.Folder & "koordynaty.txt", sb.ToString(), KodowanieSystemowe())
+    Private Shared Sub ZapiszKoordynaty(z As ZadaniePobierania, segmenty As List(Of OpisSegmentu),
+                                        nazwa As Func(Of OpisSegmentu, String), adres As Func(Of OpisSegmentu, String))
+        'zapis strumieniowy - przy milionach segmentów tekst całego pliku nie mieścił się w pamięci
+        Using plik As New StreamWriter(z.Folder & "koordynaty.txt", False, KodowanieSystemowe())
+            plik.WriteLine("""" & z.Folder & """")
+            plik.WriteLine(z.Siatka.BokSegmentuPx.ToString(Globalization.CultureInfo.InvariantCulture))
+            For Each sg In segmenty
+                Dim zasieg = z.Siatka.Segment(sg.Wiersz, sg.Kolumna)
+                plik.WriteLine(nazwa(sg))
+                plik.WriteLine(adres(sg))
+                plik.WriteLine(Liczba(zasieg.YLewy))
+                plik.WriteLine(Liczba(zasieg.XDol))
+                plik.WriteLine(Liczba(zasieg.YPrawy))
+                plik.WriteLine(Liczba(zasieg.XGora))
+            Next
+        End Using
     End Sub
 
 End Class

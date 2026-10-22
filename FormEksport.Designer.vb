@@ -32,6 +32,7 @@ Partial Class FormEksport
         Me.rbSQLiteDB = New System.Windows.Forms.RadioButton()
         Me.nudMaksKafli = New System.Windows.Forms.NumericUpDown()
         Me.rbMBTiles = New System.Windows.Forms.RadioButton()
+        Me.btnWielowarstwowyMbtiles = New System.Windows.Forms.Button()
         Me.rbKmz = New System.Windows.Forms.RadioButton()
         Me.rbKmzGarmin = New System.Windows.Forms.RadioButton()
         Me.grpMBTiles = New System.Windows.Forms.GroupBox()
@@ -115,6 +116,7 @@ Partial Class FormEksport
         Me.grpFormat.Controls.Add(Me.rbOruxMaps)
         Me.grpFormat.Controls.Add(Me.rbSQLiteDB)
         Me.grpFormat.Controls.Add(Me.nudMaksKafli)
+        Me.grpFormat.Controls.Add(Me.btnWielowarstwowyMbtiles)
         Me.grpFormat.Controls.Add(Me.rbMBTiles)
         Me.grpFormat.Controls.Add(Me.rbKmz)
         Me.grpFormat.Controls.Add(Me.rbKmzGarmin)
@@ -160,7 +162,14 @@ Partial Class FormEksport
         '
         'rbMBTiles
         '
-        Me.rbMBTiles.AutoSize = True
+        Me.btnWielowarstwowyMbtiles.Location = New System.Drawing.Point(345, 61)
+        Me.btnWielowarstwowyMbtiles.Name = "btnWielowarstwowyMbtiles"
+        Me.btnWielowarstwowyMbtiles.Size = New System.Drawing.Size(130, 23)
+        Me.btnWielowarstwowyMbtiles.TabIndex = 6
+        Me.btnWielowarstwowyMbtiles.Text = "Wielowarstwowy..."
+        Me.ToolTip1.SetToolTip(Me.btnWielowarstwowyMbtiles, "Otwiera zaawansowany kreator tworzenia pliku MBTiles z różnych warstw i poziomów zoom.")
+        Me.btnWielowarstwowyMbtiles.UseVisualStyleBackColor = True
+                Me.rbMBTiles.AutoSize = True
         Me.rbMBTiles.Location = New System.Drawing.Point(10, 64)
         Me.rbMBTiles.Name = "rbMBTiles"
         Me.rbMBTiles.Size = New System.Drawing.Size(330, 17)
@@ -537,6 +546,7 @@ Partial Class FormEksport
     Friend WithEvents rbSQLiteDB As System.Windows.Forms.RadioButton
     Friend WithEvents nudMaksKafli As System.Windows.Forms.NumericUpDown
     Friend WithEvents rbMBTiles As System.Windows.Forms.RadioButton
+    Friend WithEvents btnWielowarstwowyMbtiles As System.Windows.Forms.Button
     Friend WithEvents rbKmz As System.Windows.Forms.RadioButton
     Friend WithEvents rbKmzGarmin As System.Windows.Forms.RadioButton
     Friend WithEvents grpMBTiles As System.Windows.Forms.GroupBox

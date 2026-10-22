@@ -81,11 +81,16 @@ Public Class FormKorytarz
         Dim siatka = Form1.SiatkaDlaZasiegu(_korytarz.Zasieg(uklad))
         Dim tekst As String = "Trasa: " & If(_korytarz.Nazwa <> "", _korytarz.Nazwa & ", ", "") & _korytarz.DlugoscKm.ToString("0.0") & " km, " &
                               _korytarz.LiczbaPunktow & " punktów."
+        Dim szacunek As Double = _korytarz.SzacowanaLiczbaSegmentow(siatka, uklad)
         If Not siatka.Poprawna Then
             Opis(tekst & vbCrLf & "Wpisz w oknie głównym rozmiar piksela i segmentu, aby zobaczyć liczbę segmentów.", Color.Black)
+        ElseIf szacunek > Form1.MaksSegmentowKorytarzaNaBiezaco Then
+            'bez wyznaczania milionów segmentów przy każdej zmianie szerokości pasa
+            Opis(tekst & vbCrLf & "Pobranych zostanie ok. " & Math.Round(szacunek).ToString("N0") & " segmentów (szacunek). " &
+                 "Liczba dotyczy bieżącego rozmiaru piksela (" & Form1.RozmiarPiksela & ") i segmentu (" & Form1.BokSegmentu & " px).", Color.Black)
         Else
             Dim n As Integer = _korytarz.Segmenty(siatka, uklad).Count
-            Dim wszystkie As Integer = siatka.LiczbaSegmentow
+            Dim wszystkie As Long = siatka.LiczbaSegmentow
             Opis(tekst & vbCrLf & "Pobranych zostanie " & n & " segmentów zamiast " & wszystkie & " w prostokącie obejmującym trasę" &
                  If(wszystkie > 0, " (" & Math.Round(100.0 * (wszystkie - n) / wszystkie) & "% mniej danych).", ".") & vbCrLf &
                  "Liczba dotyczy bieżącego rozmiaru piksela (" & Form1.RozmiarPiksela & ") i segmentu (" & Form1.BokSegmentu & " px).", Color.Black)

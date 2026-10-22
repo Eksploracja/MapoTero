@@ -43,13 +43,18 @@ Public Class ZrodloSegmentow
     Private ReadOnly _istnieje(,) As Boolean
     Private ReadOnly _liczbaIstniejacych As Integer
 
-    'pamięć podręczna zdekodowanych segmentów (BGRA, wierszami): klucz = wiersz * 100000 + kolumna; Nothing - brak pliku
-    Private ReadOnly _pamiec As New Dictionary(Of Integer, LinkedListNode(Of KeyValuePair(Of Integer, Byte())))
-    Private ReadOnly _kolejnosc As New LinkedList(Of KeyValuePair(Of Integer, Byte()))
+    'pamięć podręczna zdekodowanych segmentów (BGRA, wierszami): klucz = wiersz * 100000 + kolumna (Long - przy ponad
+    '21474 wierszach klucz typu Integer się przepełniał); Nothing - brak pliku
+    Private ReadOnly _pamiec As New Dictionary(Of Long, LinkedListNode(Of KeyValuePair(Of Long, Byte())))
+    Private ReadOnly _kolejnosc As New LinkedList(Of KeyValuePair(Of Long, Byte()))
     Private ReadOnly _maksSegmentow As Integer
-    Private _ostatniKlucz As Integer = -1
+    Private _ostatniKlucz As Long = -1
     Private _ostatnieDane() As Byte
     Private _bialePrzezroczyste As Boolean
+    Private _odcienieSzarosci As Boolean
+    'numer stanu pamięci podręcznej - zmiana opcji w trakcie dekodowania segmentu unieważnia jego wynik
+    Private _pokolenie As Integer
+    Private ReadOnly _blokada As New Object()
 
     Public Sub New(folder As String, prefiks As String, styl As StylNumeracji, rozszerzenie As String, siatka As Siatka)
         _folder = folder
@@ -101,17 +106,46 @@ Public Class ZrodloSegmentow
     ''' </summary>
     Public Property BialePrzezroczyste As Boolean
         Get
-            Return _bialePrzezroczyste
+            SyncLock _blokada
+                Return _bialePrzezroczyste
+            End SyncLock
         End Get
         Set(value As Boolean)
-            If value = _bialePrzezroczyste Then Exit Property
-            _bialePrzezroczyste = value
-            _pamiec.Clear()
-            _kolejnosc.Clear()
-            _ostatniKlucz = -1
-            _ostatnieDane = Nothing
+            SyncLock _blokada
+                If value = _bialePrzezroczyste Then Exit Property
+                _bialePrzezroczyste = value
+                WyczyscPamiec()
+            End SyncLock
         End Set
     End Property
+
+    ''' <summary>
+    ''' Konwertuje piksele segmentów do odcieni szarości (luminancja percepcyjna Y = 0.299R + 0.587G + 0.114B).
+    ''' Idealne jako neutralny podkład ortofoto lub czytelna mapa topo bez gryzących się barw.
+    ''' </summary>
+    Public Property OdcienieSzarosci As Boolean
+        Get
+            SyncLock _blokada
+                Return _odcienieSzarosci
+            End SyncLock
+        End Get
+        Set(value As Boolean)
+            SyncLock _blokada
+                If value = _odcienieSzarosci Then Exit Property
+                _odcienieSzarosci = value
+                WyczyscPamiec()
+            End SyncLock
+        End Set
+    End Property
+
+    ''' <summary>Opróżnia pamięć podręczną segmentów (wywoływane pod blokadą).</summary>
+    Private Sub WyczyscPamiec()
+        _pamiec.Clear()
+        _kolejnosc.Clear()
+        _ostatniKlucz = -1
+        _ostatnieDane = Nothing
+        _pokolenie += 1
+    End Sub
 
     Private Function SciezkaSegmentu(wiersz As Integer, kolumna As Integer) As String
         Return _folder & _siatka.NazwaSegmentu(_prefiks, _styl, wiersz, kolumna) & "." & _rozszerzenie
@@ -176,31 +210,45 @@ Public Class ZrodloSegmentow
         Return True
     End Function
 
-    ''' <summary>Zdekodowany segment (BGRA) albo Nothing, gdy brak pliku.</summary>
+    ''' <summary>
+    ''' Zdekodowany segment (BGRA) albo Nothing, gdy brak pliku. Dekodowanie odbywa się poza blokadą - dawniej trwało
+    ''' pod nią, więc wielowątkowe renderowanie kafli (kompilator MBTiles) czekało na jeden wątek dekodujący.
+    ''' </summary>
     Private Function Segment(wiersz As Integer, kolumna As Integer) As Byte()
-        Dim klucz As Integer = wiersz * 100000 + kolumna
-        If klucz = _ostatniKlucz Then Return _ostatnieDane
-        Dim wezel As LinkedListNode(Of KeyValuePair(Of Integer, Byte())) = Nothing
-        Dim dane() As Byte
-        If _pamiec.TryGetValue(klucz, wezel) Then
-            _kolejnosc.Remove(wezel)
-            _kolejnosc.AddFirst(wezel)
-            dane = wezel.Value.Value
-        Else
-            dane = If(_istnieje(wiersz - 1, kolumna - 1), Wczytaj(wiersz, kolumna), Nothing)
-            wezel = _kolejnosc.AddFirst(New KeyValuePair(Of Integer, Byte())(klucz, dane))
-            _pamiec(klucz) = wezel
-            While _kolejnosc.Count > _maksSegmentow
-                _pamiec.Remove(_kolejnosc.Last.Value.Key)
-                _kolejnosc.RemoveLast()
-            End While
-        End If
-        _ostatniKlucz = klucz
-        _ostatnieDane = dane
+        Dim klucz As Long = wiersz * 100000L + kolumna
+        Dim pokolenie As Integer, biale As Boolean, szare As Boolean
+        SyncLock _blokada
+            If klucz = _ostatniKlucz Then Return _ostatnieDane
+            Dim wezel As LinkedListNode(Of KeyValuePair(Of Long, Byte())) = Nothing
+            If _pamiec.TryGetValue(klucz, wezel) Then
+                _kolejnosc.Remove(wezel)
+                _kolejnosc.AddFirst(wezel)
+                _ostatniKlucz = klucz
+                _ostatnieDane = wezel.Value.Value
+                Return _ostatnieDane
+            End If
+            pokolenie = _pokolenie : biale = _bialePrzezroczyste : szare = _odcienieSzarosci
+        End SyncLock
+
+        Dim dane() As Byte = If(_istnieje(wiersz - 1, kolumna - 1), Wczytaj(wiersz, kolumna, biale, szare), Nothing)
+
+        SyncLock _blokada
+            'opcje zmieniono w trakcie dekodowania - wynik nie trafia do pamięci podręcznej
+            If pokolenie <> _pokolenie Then Return dane
+            If Not _pamiec.ContainsKey(klucz) Then
+                _pamiec(klucz) = _kolejnosc.AddFirst(New KeyValuePair(Of Long, Byte())(klucz, dane))
+                While _kolejnosc.Count > _maksSegmentow
+                    _pamiec.Remove(_kolejnosc.Last.Value.Key)
+                    _kolejnosc.RemoveLast()
+                End While
+            End If
+            _ostatniKlucz = klucz
+            _ostatnieDane = dane
+        End SyncLock
         Return dane
     End Function
 
-    Private Function Wczytaj(wiersz As Integer, kolumna As Integer) As Byte()
+    Private Function Wczytaj(wiersz As Integer, kolumna As Integer, bialePrzezroczyste As Boolean, odcienieSzarosci As Boolean) As Byte()
         Dim sciezka As String = SciezkaSegmentu(wiersz, kolumna)
         If Not File.Exists(sciezka) Then Return Nothing
         Try
@@ -221,9 +269,19 @@ Public Class ZrodloSegmentow
                     Finally
                         argb.UnlockBits(d)
                     End Try
-                    If _bialePrzezroczyste Then
+                    'białe tło wg kolorów oryginału - po przejściu do odcieni szarości także jasne barwy (np. jasnożółte)
+                    'przekraczałyby próg bieli i znikały
+                    If bialePrzezroczyste Then
                         For i = 0 To wynik.Length - 4 Step 4
                             If wynik(i) >= ProgBieli AndAlso wynik(i + 1) >= ProgBieli AndAlso wynik(i + 2) >= ProgBieli Then wynik(i + 3) = 0
+                        Next
+                    End If
+                    If odcienieSzarosci Then
+                        For i = 0 To wynik.Length - 4 Step 4
+                            Dim y As Byte = CByte((CInt(wynik(i + 2)) * 77 + CInt(wynik(i + 1)) * 150 + CInt(wynik(i)) * 29) >> 8)
+                            wynik(i) = y     ' B
+                            wynik(i + 1) = y ' G
+                            wynik(i + 2) = y ' R
                         Next
                     End If
                     Return wynik
@@ -263,6 +321,8 @@ Public Class WarstwaEksportu
     Public Property Opis As String = ""
     ''' <summary>Adres serwera, z którego pobrano warstwę (źródło danych w opisie mapy).</summary>
     Public Property AdresSerwera As String = ""
+    ''' <summary>Tryb mieszania pikseli z warstwami pod spodem (domyślnie Zwykły / Normal).</summary>
+    Public Property TrybMieszania As TrybMieszania = TrybMieszania.Zwykly
 End Class
 
 ''' <summary>Parametry eksportu.</summary>
@@ -364,12 +424,16 @@ Public NotInheritable Class EksportMapy
     ''' Liczba próbek na bok piksela kafla (do 4): gdy kafel ma mniejszą rozdzielczość niż którakolwiek z warstw,
     ''' piksel kafla uśrednia kilka pikseli źródła.
     ''' </summary>
-    Private Shared Function LiczbaProbek(z As ZadanieEksportu, pikselKaflaMetry As Double) As Integer
+    Friend Shared Function LiczbaProbek(warstwy As IEnumerable(Of WarstwaEksportu), pikselKaflaMetry As Double) As Integer
         Dim n As Integer = 1
-        For Each w In z.WarstwyRenderowania()
+        For Each w In warstwy
             n = Math.Max(n, CInt(Math.Ceiling(pikselKaflaMetry / PikselWMetrach(w.Zrodlo, w.Uklad) - 0.01)))
         Next
         Return Math.Min(4, n)
+    End Function
+
+    Private Shared Function LiczbaProbek(z As ZadanieEksportu, pikselKaflaMetry As Double) As Integer
+        Return LiczbaProbek(z.WarstwyRenderowania(), pikselKaflaMetry)
     End Function
 
     ''' <summary>Obszar eksportu w WGS84 (prostokąt opisany na mapie podstawowej).</summary>
@@ -415,16 +479,36 @@ Public NotInheritable Class EksportMapy
     Private Shared Sub UsunWynik(z As ZadanieEksportu)
         If z.Rodzaj = RodzajEksportu.OruxMaps Then
             If Not Directory.Exists(z.Plik) Then Exit Sub
-            Dim baza As String = Path.Combine(z.Plik, MapaOruxMaps.NazwaBazy)
-            If File.Exists(baza) Then File.Delete(baza)
+            UsunPlikBazy(Path.Combine(z.Plik, MapaOruxMaps.NazwaBazy))
             For Each plik In Directory.GetFiles(z.Plik, "*" & MapaOruxMaps.RozszerzenieKalibracji)
                 File.Delete(plik)
             Next
             If Directory.GetFileSystemEntries(z.Plik).Length = 0 Then Directory.Delete(z.Plik)
+        ElseIf z.Piramida Then
+            UsunPlikBazy(z.Plik)
         ElseIf File.Exists(z.Plik) Then
             File.Delete(z.Plik)
         End If
     End Sub
+
+    ''' <summary>Usuwa plik bazy SQLite wraz z plikami dziennika (-wal, -shm, -journal).</summary>
+    Friend Shared Sub UsunPlikBazy(plik As String)
+        For Each p In {plik, plik & "-wal", plik & "-shm", plik & "-journal"}
+            If File.Exists(p) Then File.Delete(p)
+        Next
+    End Sub
+
+    ''' <summary>
+    ''' Parametry połączenia z bazą SQLite. Ścieżka przekazywana przez SQLiteConnectionStringBuilder - wklejona wprost
+    ''' do tekstu połączenia ścieżka ze średnikiem (dozwolonym w nazwach folderów Windows) psuła eksport.
+    ''' </summary>
+    ''' <param name="trybDziennika">Tryb dziennika bazy, np. "Wal" albo "Memory".</param>
+    Friend Shared Function ParametryPolaczenia(plik As String, trybDziennika As String) As String
+        Dim b As New SQLiteConnectionStringBuilder With {.DataSource = plik, .Version = 3,
+            .JournalMode = DirectCast([Enum].Parse(GetType(SQLiteJournalModeEnum), trybDziennika, True), SQLiteJournalModeEnum),
+            .SyncMode = SynchronizationModes.Off}
+        Return b.ToString()
+    End Function
 
 #Region "Renderowanie"
 
@@ -434,7 +518,7 @@ Public NotInheritable Class EksportMapy
     ''' Gdy kafel ma mniejszą rozdzielczość niż źródło - nadpróbkowanie (do 4 x 4 próbek na piksel).
     ''' Zwraca bitmapę 32-bitową (piksele poza obrazem przezroczyste) albo Nothing, gdy kafel jest pusty.
     ''' </summary>
-    Private Shared Function RenderujKafel(warstwy As List(Of WarstwaEksportu), szer As Integer, wys As Integer, nadprobkowanie As Integer,
+    Friend Shared Function RenderujKafel(warstwy As List(Of WarstwaEksportu), szer As Integer, wys As Integer, nadprobkowanie As Integer,
                                           przelicz As Func(Of Double, Double, PunktGeo)) As Bitmap
         'warstwy, które mają segmenty w obszarze kafla (szybkie pominięcie pustych kafli, np. poza korytarzem trasy)
         Dim aktywne As New List(Of WarstwaEksportu)
@@ -473,11 +557,56 @@ Public NotInheritable Class EksportMapy
                     If sa <= 0 Then Continue For
                     Dim k As Double = aktywne(iw).Krycie / (n * n * 255.0)
                     sr *= k : sg *= k : sb *= k : sa *= k
-                    'nałożenie warstwy na dotychczasowy obraz
-                    wr = sr + wr * (1 - sa)
-                    wg = sg + wg * (1 - sa)
-                    wb = sb + wb * (1 - sa)
-                    wa = sa + wa * (1 - sa)
+                    'nałożenie warstwy na dotychczasowy obraz z uwzględnieniem trybu mieszania
+                    If wa > 0.001 Then
+                        Dim br As Double = wr / wa, bg As Double = wg / wa, bb As Double = wb / wa
+                        Dim lr As Double = sr / sa, lg As Double = sg / sa, lb As Double = sb / sa
+                        Dim mr As Double, mg As Double, mb As Double
+
+                        Select Case aktywne(iw).TrybMieszania
+                            Case TrybMieszania.Mnozenie
+                                ' 2 Mnożenie (Multiply): Cb * Cs
+                                mr = br * lr
+                                mg = bg * lg
+                                mb = bb * lb
+                            Case TrybMieszania.Ciemniej
+                                ' 3 Ciemniej (Darken): min(Cb, Cs)
+                                mr = Math.Min(br, lr)
+                                mg = Math.Min(bg, lg)
+                                mb = Math.Min(bb, lb)
+                            Case TrybMieszania.Jasniej
+                                ' 4 Jaśniej (Lighten): max(Cb, Cs)
+                                mr = Math.Max(br, lr)
+                                mg = Math.Max(bg, lg)
+                                mb = Math.Max(bb, lb)
+                            Case TrybMieszania.Ekran
+                                ' 5 Ekran (Screen): 1 - (1-Cb)*(1-Cs)
+                                mr = 1.0 - (1.0 - br) * (1.0 - lr)
+                                mg = 1.0 - (1.0 - bg) * (1.0 - lg)
+                                mb = 1.0 - (1.0 - bb) * (1.0 - lb)
+                            Case TrybMieszania.Nakladka
+                                ' 6 Nakładka (Overlay): połączenie mnożenia i ekranu
+                                mr = If(br < 0.5, 2.0 * br * lr, 1.0 - 2.0 * (1.0 - br) * (1.0 - lr))
+                                mg = If(bg < 0.5, 2.0 * bg * lg, 1.0 - 2.0 * (1.0 - bg) * (1.0 - lg))
+                                mb = If(bb < 0.5, 2.0 * bb * lb, 1.0 - 2.0 * (1.0 - bb) * (1.0 - lb))
+                            Case Else
+                                ' 1 Zwykły (Normal): Cs
+                                mr = lr
+                                mg = lg
+                                mb = lb
+                        End Select
+
+                        Dim tr As Double = mr * sa
+                        Dim tg As Double = mg * sa
+                        Dim tb As Double = mb * sa
+                        wr = tr + wr * (1 - sa)
+                        wg = tg + wg * (1 - sa)
+                        wb = tb + wb * (1 - sa)
+                        wa = sa + wa * (1 - sa)
+                    Else
+                        ' Pierwsza widoczna warstwa (podkład) - zawsze rysowana normalnie
+                        wr = sr : wg = sg : wb = sb : wa = sa
+                    End If
                 Next
                 If wa > 0.001 Then
                     Dim o As Integer = (py * szer + px) * 4
@@ -534,13 +663,60 @@ Public NotInheritable Class EksportMapy
         End Using
     End Function
 
+    ''' <summary>Koduje bitmapę z określonym kolorem tła dla JPEG.</summary>
+    Friend Shared Function Koduj(bmp As Bitmap, png As Boolean, jakosc As Integer, kolorTla As Color) As Byte()
+        Using ms As New MemoryStream()
+            If png Then
+                bmp.Save(ms, ImageFormat.Png)
+            Else
+                Using tlo As New Bitmap(bmp.Width, bmp.Height, PixelFormat.Format24bppRgb)
+                    Using g = Graphics.FromImage(tlo)
+                        g.Clear(kolorTla)
+                        g.DrawImage(bmp, 0, 0, bmp.Width, bmp.Height)
+                    End Using
+                    If KoderJpeg IsNot Nothing Then
+                        Using parametry As New EncoderParameters(1)
+                            parametry.Param(0) = New EncoderParameter(Imaging.Encoder.Quality, CLng(Math.Max(1, Math.Min(100, jakosc))))
+                            tlo.Save(ms, KoderJpeg, parametry)
+                        End Using
+                    Else
+                        tlo.Save(ms, ImageFormat.Jpeg)
+                    End If
+                End Using
+            End If
+            Return ms.ToArray()
+        End Using
+    End Function
+
+    ''' <summary>Sprawdza, czy bitmapa 32bpp zawiera przynajmniej jeden piksel z przezroczystością (alfa < 250).</summary>
+    Friend Shared Function CzyPosiadaPrzezroczystosc(bmp As Bitmap) As Boolean
+        If bmp.PixelFormat <> PixelFormat.Format32bppArgb Then Return False
+        Dim d = bmp.LockBits(New Rectangle(0, 0, bmp.Width, bmp.Height), ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb)
+        Try
+            Dim scan0 As IntPtr = d.Scan0
+            Dim stride As Integer = d.Stride
+            Dim w As Integer = bmp.Width
+            Dim h As Integer = bmp.Height
+            Dim bufor(w * 4 - 1) As Byte
+            For y = 0 To h - 1
+                Marshal.Copy(IntPtr.Add(scan0, y * stride), bufor, 0, bufor.Length)
+                For x = 3 To bufor.Length - 1 Step 4
+                    If bufor(x) < 250 Then Return True
+                Next
+            Next
+            Return False
+        Finally
+            bmp.UnlockBits(d)
+        End Try
+    End Function
+
     ''' <summary>Przeliczenie piksela kafla Web Mercator (lewy górny narożnik kafla: kx, ky w pikselach globalnych) do WGS84.</summary>
-    Private Shared Function PrzeliczenieKafla(kx As Double, ky As Double, poziom As Integer) As Func(Of Double, Double, PunktGeo)
+    Friend Shared Function PrzeliczenieKafla(kx As Double, ky As Double, poziom As Integer) As Func(Of Double, Double, PunktGeo)
         Return Function(x As Double, y As Double) New PunktGeo(WebMercator.Szerokosc(ky + y, poziom), WebMercator.Dlugosc(kx + x, poziom))
     End Function
 
     ''' <summary>Czy w kafelku Web Mercator jest choć jeden segment którejś z warstw (sprawdzenie bez renderowania).</summary>
-    Private Shared Function KafelMaDane(warstwy As List(Of WarstwaEksportu), tx As Integer, ty As Integer, poziom As Integer) As Boolean
+    Friend Shared Function KafelMaDane(warstwy As List(Of WarstwaEksportu), tx As Integer, ty As Integer, poziom As Integer) As Boolean
         Dim bok As Double = WebMercator.RozmiarKafla
         Dim narozniki() As PunktGeo = {
             New PunktGeo(WebMercator.Szerokosc(ty * bok, poziom), WebMercator.Dlugosc(tx * bok, poziom)),
@@ -554,7 +730,7 @@ Public NotInheritable Class EksportMapy
     End Function
 
     ''' <summary>Prostokąt w układzie obejmujący punkty WGS84.</summary>
-    Private Shared Function ObszarPunktow(uklad As UkladWspolrzednych, punkty As IEnumerable(Of PunktGeo)) As Zasieg
+    Friend Shared Function ObszarPunktow(uklad As UkladWspolrzednych, punkty As IEnumerable(Of PunktGeo)) As Zasieg
         Dim xMin As Double = Double.MaxValue, xMax As Double = Double.MinValue, yMin As Double = Double.MaxValue, yMax As Double = Double.MinValue
         For Each g In punkty
             Dim p = uklad.ZWgs84(g)
@@ -658,6 +834,10 @@ Public NotInheritable Class EksportMapy
 
     ''' <summary>Kafel poziomu niższego złożony z czterech kafli poziomu wyższego (pomniejszenie 2x).</summary>
     Private Shared Function KafelZDzieci(m As MagazynKafli, k As KafelXYZ, z As ZadanieEksportu) As Byte()
+        Return KafelZDzieci(m, k, z.Png, z.JakoscJpeg)
+    End Function
+
+    Friend Shared Function KafelZDzieci(m As MagazynKafli, k As KafelXYZ, png As Boolean, jakoscJpeg As Integer) As Byte()
         Using duzy As New Bitmap(512, 512, PixelFormat.Format32bppArgb)
             Dim jest As Boolean = False
             Using g = Graphics.FromImage(duzy)
@@ -681,7 +861,7 @@ Public NotInheritable Class EksportMapy
                     g.PixelOffsetMode = PixelOffsetMode.Half
                     g.DrawImage(duzy, New Rectangle(0, 0, 256, 256), 0, 0, 512, 512, GraphicsUnit.Pixel)
                 End Using
-                Return Koduj(maly, z.Png, z.JakoscJpeg)
+                Return Koduj(maly, png, jakoscJpeg)
             End Using
         End Using
     End Function
@@ -832,8 +1012,9 @@ Friend MustInherit Class MagazynKafli
 
     Protected Sub New(plikBazy As String, z As ZadanieEksportu)
         Zadanie = z
-        If File.Exists(plikBazy) Then File.Delete(plikBazy)
-        Polaczenie = New SQLiteConnection("Data Source=" & plikBazy & ";Version=3;Journal Mode=WAL;Synchronous=Off;")
+        'także pliki dziennika (-wal, -shm) po przerwanym eksporcie - stary dziennik mógłby uszkodzić nową bazę
+        EksportMapy.UsunPlikBazy(plikBazy)
+        Polaczenie = New SQLiteConnection(EksportMapy.ParametryPolaczenia(plikBazy, "Wal"))
         Polaczenie.Open()
         Wykonaj("PRAGMA synchronous = OFF;")
         Wykonaj("PRAGMA journal_mode = WAL;")

@@ -80,10 +80,11 @@ Public Class WarstwaWmsInfo
         Dim n As String = Nazwa.ToLowerInvariant()
         Dim t As String = Tytul.ToLowerInvariant()
         If n.Contains("orto") OrElse t.Contains("orto") Then Return 0.25
-        If n.Contains("10") OrElse n.Contains("10k") OrElse t.Contains("1:10") Then Return 1.0
-        If n.Contains("25") OrElse n.Contains("25k") OrElse t.Contains("1:25") Then Return 2.0
-        If n.Contains("50") OrElse n.Contains("50k") OrElse t.Contains("1:50") Then Return 4.0
-        If n.Contains("100") OrElse n.Contains("100k") OrElse t.Contains("1:100") Then Return 8.0
+        'od najmniejszej skali - "100" zawiera "10", a "1:100" zawiera "1:10" (warstwa 1:100 000 dostawała piksel 1 m)
+        If n.Contains("100") OrElse t.Contains("1:100") Then Return 8.0
+        If n.Contains("50") OrElse t.Contains("1:50") Then Return 4.0
+        If n.Contains("25") OrElse t.Contains("1:25") Then Return 2.0
+        If n.Contains("10") OrElse t.Contains("1:10") Then Return 1.0
         If n.Contains("dzialk") OrElse t.Contains("działk") OrElse n.Contains("budyn") Then Return 0.5
         Return 1.0
     End Function
@@ -160,9 +161,9 @@ Public NotInheritable Class WmsCapabilities
     ''' <summary>Parsuje dokument GetCapabilities z tekstu XML.</summary>
     Public Shared Function Wczytaj(xml As String, adresZgloszenia As String) As UslugaWmsInfo
         If String.IsNullOrWhiteSpace(xml) Then Throw New ArgumentException("Pusty dokument XML.", NameOf(xml))
-        Using ms As New MemoryStream(Encoding.UTF8.GetBytes(xml))
-            Return Wczytaj(ms, adresZgloszenia)
-        End Using
+        'tekst jest już zdekodowany - dawniej był kodowany w UTF-8 i ponownie dekodowany wg deklaracji encoding
+        '(np. ISO-8859-2), co przekłamywało polskie znaki
+        Return ZDokumentu(XDocument.Parse(xml), adresZgloszenia)
     End Function
 
     ''' <summary>
@@ -170,7 +171,10 @@ Public NotInheritable Class WmsCapabilities
     ''' XDocument.Load ze strumienia automatycznie odczytuje deklarację kodowania (UTF-8, ISO-8859-2, Windows-1250).
     ''' </summary>
     Public Shared Function Wczytaj(strumien As Stream, adresZgloszenia As String) As UslugaWmsInfo
-        Dim doc = XDocument.Load(strumien)
+        Return ZDokumentu(XDocument.Load(strumien), adresZgloszenia)
+    End Function
+
+    Private Shared Function ZDokumentu(doc As XDocument, adresZgloszenia As String) As UslugaWmsInfo
         Dim korzen = doc.Root
         If korzen Is Nothing Then Throw New FormatException("Pusty dokument XML.")
 
@@ -234,7 +238,7 @@ Public NotInheritable Class WmsCapabilities
         End If
 
         If String.IsNullOrEmpty(u.AdresGetMap) Then
-            u.AdresGetMap = Wms.UzupelnijAdres(adresZgloszenia)
+            u.AdresGetMap = AdresGetMapZAdresuZgloszenia(adresZgloszenia)
         End If
 
         'drzewo warstw
@@ -375,13 +379,33 @@ Public NotInheritable Class WmsCapabilities
         Return domyslna
     End Function
 
-    ''' <summary>Sprawdza, czy adres wskazuje na sieć lokalną lub loopback.</summary>
-    Private Shared Function JestAdresemLokalnym(adres As String) As Boolean
+    ''' <summary>
+    ''' Czy adres OnlineResource nie nadaje się do zapytań z zewnątrz: adres względny lub niepoprawny, localhost albo
+    ''' adres IP sieci lokalnej (10.x, 172.16-31.x, 192.168.x, 127.x). Sprawdzana jest sama nazwa serwera - dawniej
+    ''' wystarczał ciąg "10." w dowolnym miejscu adresu (np. ".../services/10.8/..."), a wtedy zbiór map dostawał
+    ''' adres dokumentu GetCapabilities.
+    ''' </summary>
+    Public Shared Function JestAdresemLokalnym(adres As String) As Boolean
         If String.IsNullOrEmpty(adres) Then Return True
-        Return adres.IndexOf("localhost", StringComparison.OrdinalIgnoreCase) >= 0 OrElse
-               adres.IndexOf("127.0.0.1", StringComparison.OrdinalIgnoreCase) >= 0 OrElse
-               adres.IndexOf("192.168.", StringComparison.OrdinalIgnoreCase) >= 0 OrElse
-               adres.IndexOf("10.", StringComparison.OrdinalIgnoreCase) >= 0
+        Dim u As Uri = Nothing
+        If Not Uri.TryCreate(adres, UriKind.Absolute, u) OrElse (u.Scheme <> Uri.UriSchemeHttp AndAlso u.Scheme <> Uri.UriSchemeHttps) Then Return True
+        If u.IsLoopback OrElse u.Host.Equals("localhost", StringComparison.OrdinalIgnoreCase) Then Return True
+        Dim ip As Net.IPAddress = Nothing
+        If Net.IPAddress.TryParse(u.Host, ip) AndAlso ip.AddressFamily = Net.Sockets.AddressFamily.InterNetwork Then
+            Dim b() As Byte = ip.GetAddressBytes()
+            Return b(0) = 10 OrElse b(0) = 127 OrElse (b(0) = 192 AndAlso b(1) = 168) OrElse (b(0) = 172 AndAlso b(1) >= 16 AndAlso b(1) <= 31)
+        End If
+        Return False
+    End Function
+
+    ''' <summary>
+    ''' Adres GetMap z adresu zgłoszenia GetCapabilities (gdy dokument nie podaje użytecznego adresu GetMap):
+    ''' bez parametrów SERVICE, REQUEST i VERSION - inaczej w zbiorze map zostawał parametr REQUEST=GetCapabilities,
+    ''' który serwer odczytywał przed REQUEST=GetMap i zamiast obrazów zwracał opis usługi.
+    ''' </summary>
+    Public Shared Function AdresGetMapZAdresuZgloszenia(adresZgloszenia As String) As String
+        If String.IsNullOrWhiteSpace(adresZgloszenia) Then Return ""
+        Return Wms.UzupelnijAdres(Wmts.AdresBazowy(adresZgloszenia))
     End Function
 
 End Class

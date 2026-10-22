@@ -59,13 +59,13 @@ Public Class ZrodloWmts
     ''' <summary>Odczyt dokumentu GetCapabilities i wybór poziomu kafli dla każdej warstwy.</summary>
     Public Shared Async Function PrzygotujAsync(z As ZadaniePobierania, token As CancellationToken) As Task(Of ZrodloWmts)
         Dim adres As String = Wmts.AdresCapabilities(z.AdresSerwera)
-        Dim xml As String = ""
+        Dim dane() As Byte = Nothing
         For proba = 1 To Math.Max(1, z.IloscProb)
             Try
                 Using limit = PobieranieSegmentow.LimitCzasu(z.LimitCzasuSekundy, token),
                       odpowiedz = Await PobieranieSegmentow.Klient.GetAsync(adres, limit.Token).ConfigureAwait(False)
                     odpowiedz.EnsureSuccessStatusCode()
-                    xml = Await odpowiedz.Content.ReadAsStringAsync().ConfigureAwait(False)
+                    dane = Await odpowiedz.Content.ReadAsByteArrayAsync(limit.Token).ConfigureAwait(False)
                 End Using
                 Exit For
             Catch ex As OperationCanceledException When token.IsCancellationRequested
@@ -82,7 +82,13 @@ Public Class ZrodloWmts
 
         Dim usluga As UslugaWmts
         Try
-            usluga = UslugaWmts.Wczytaj(xml, adres)
+            'dokument odczytywany wg deklaracji encoding w XML (ReadAsStringAsync brał kodowanie z nagłówka HTTP albo UTF-8,
+            'co przekłamywało polskie znaki w dokumentach ISO-8859-2 - także w identyfikatorach warstw)
+            Dim tekstXml As String
+            Using ms As New MemoryStream(If(dane, New Byte() {}))
+                tekstXml = System.Xml.Linq.XDocument.Load(ms).ToString(System.Xml.Linq.SaveOptions.DisableFormatting)
+            End Using
+            usluga = UslugaWmts.Wczytaj(tekstXml, adres)
         Catch ex As Exception
             Throw New InvalidOperationException("niepoprawny opis usługi WMTS (" & adres & "): " & ex.Message, ex)
         End Try

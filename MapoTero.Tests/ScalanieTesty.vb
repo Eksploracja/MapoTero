@@ -714,4 +714,63 @@ Public Class ScalanieTesty
         End Try
     End Sub
 
+    <Fact>
+    Public Sub ScalaniePasamiBezWierszaWPamieci_TakiSamWynikIRaportBrakow()
+        'bardzo szeroki arkusz: segmenty wczytywane osobno dla każdego pasa zamiast całego wiersza naraz
+        Dim tempFolder = Path.Combine(Path.GetTempPath(), "MapoTero_Test_" & Guid.NewGuid().ToString("N")) & "\"
+        Directory.CreateDirectory(tempFolder)
+        Dim poprzedni = ScalanieSegmentow.MaksWierszWPamieci
+        Try
+            Dim bok = 100
+            Dim s = Siatka2x2(bok)
+            UtworzKafel(tempFolder & "_01_01.png", bok, bok, Color.FromArgb(255, 0, 0), ImageFormat.Png)
+            UtworzKafel(tempFolder & "_01_02.png", bok, bok, Color.FromArgb(0, 255, 0), ImageFormat.Png)
+            UtworzKafel(tempFolder & "_02_01.png", bok, bok, Color.FromArgb(0, 0, 255), ImageFormat.Png)
+            Dim zadanie As New ZadanieScalania With {
+                .Folder = tempFolder, .Prefiks = "_", .Numeracja = StylNumeracji.WierszKolumna, .RozszerzenieSegmentow = "png",
+                .Siatka = s, .Uklad = UkladWspolrzednych.PL1992, .Format = FormatArkusza.Png, .NazwaArkusza = "arkusz_pasami"}
+
+            ScalanieSegmentow.MaksWierszWPamieci = 0
+            Dim wynik = ScalanieSegmentow.Scal(zadanie, Nothing, CancellationToken.None)
+
+            Assert.Equal({"_02_02.png"}, wynik.Brakujace.ToArray())
+            Using arkusz As New Bitmap(wynik.Plik)
+                Assert.Equal(Color.FromArgb(255, 0, 0).ToArgb(), arkusz.GetPixel(50, 50).ToArgb())
+                Assert.Equal(Color.FromArgb(0, 255, 0).ToArgb(), arkusz.GetPixel(150, 50).ToArgb())
+                Assert.Equal(Color.FromArgb(0, 0, 255).ToArgb(), arkusz.GetPixel(50, 150).ToArgb())
+                Assert.Equal(Color.White.ToArgb(), arkusz.GetPixel(150, 150).ToArgb())
+            End Using
+        Finally
+            ScalanieSegmentow.MaksWierszWPamieci = poprzedni
+            Try
+                Directory.Delete(tempFolder, True)
+            Catch
+            End Try
+        End Try
+    End Sub
+
+    <Fact>
+    Public Sub ScalanieUszkodzonySegment_ZglaszanyJakoBrakujacy()
+        Dim tempFolder = Path.Combine(Path.GetTempPath(), "MapoTero_Test_" & Guid.NewGuid().ToString("N")) & "\"
+        Directory.CreateDirectory(tempFolder)
+        Try
+            Dim bok = 100
+            Dim s = Siatka2x2(bok)
+            UtworzKafel(tempFolder & "_01_01.png", bok, bok, Color.Red, ImageFormat.Png)
+            UtworzKafel(tempFolder & "_01_02.png", bok, bok, Color.Red, ImageFormat.Png)
+            UtworzKafel(tempFolder & "_02_01.png", bok, bok, Color.Red, ImageFormat.Png)
+            File.WriteAllText(tempFolder & "_02_02.png", "to nie jest obraz")
+            Dim zadanie As New ZadanieScalania With {
+                .Folder = tempFolder, .Prefiks = "_", .Numeracja = StylNumeracji.WierszKolumna, .RozszerzenieSegmentow = "png",
+                .Siatka = s, .Uklad = UkladWspolrzednych.PL1992, .Format = FormatArkusza.Png, .NazwaArkusza = "arkusz_uszkodzony"}
+            Dim wynik = ScalanieSegmentow.Scal(zadanie, Nothing, CancellationToken.None)
+            Assert.Equal({"_02_02.png"}, wynik.Brakujace.ToArray())
+        Finally
+            Try
+                Directory.Delete(tempFolder, True)
+            Catch
+            End Try
+        End Try
+    End Sub
+
 End Class

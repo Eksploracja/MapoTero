@@ -148,6 +148,9 @@ Public Class PlikWarstw
         Dim ukladParam As String = If(czyWersja11, "SRS=EPSG:2180", "CRS=EPSG:2180")
         Dim verParam As String = If(czyWersja11, "version=1.1.1", "version=1.3.0")
 
+        'inny parametr REQUEST (np. GetCapabilities z adresu zgłoszenia) - serwer odczytałby go zamiast dopisanego GetMap
+        a = System.Text.RegularExpressions.Regex.Replace(a, "(?<=[?&])request=(?!getmap(&|$))[^&]*", "request=GetMap",
+                                                         System.Text.RegularExpressions.RegexOptions.IgnoreCase)
         If a.IndexOf("request=getmap", StringComparison.OrdinalIgnoreCase) < 0 Then
             Dim sep As String = If(a.Contains("?"), "&", "?")
             If a.EndsWith("?", StringComparison.Ordinal) OrElse a.EndsWith("&", StringComparison.Ordinal) Then sep = ""

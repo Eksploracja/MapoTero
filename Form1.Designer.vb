@@ -73,6 +73,7 @@ Partial Class Form1
         Me.btnDodajSerwer = New System.Windows.Forms.Button()
         Me.ScalanieToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.EksportToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.ZaawansowanyMbtilesToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.NakładanieWarstwNaSiebieToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.UsuwaniePustychSegmentówToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.UstawieniaToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
@@ -392,7 +393,7 @@ Partial Class Form1
         '
         'NarzedziaToolStripMenuItem
         '
-        Me.NarzedziaToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.DodajSerwerToolStripMenuItem, Me.NarzedziaSeparator1, Me.ScalanieToolStripMenuItem, Me.EksportToolStripMenuItem, Me.NakładanieWarstwNaSiebieToolStripMenuItem, Me.UsuwaniePustychSegmentówToolStripMenuItem})
+        Me.NarzedziaToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.DodajSerwerToolStripMenuItem, Me.NarzedziaSeparator1, Me.ScalanieToolStripMenuItem, Me.EksportToolStripMenuItem, Me.ZaawansowanyMbtilesToolStripMenuItem, Me.NakładanieWarstwNaSiebieToolStripMenuItem, Me.UsuwaniePustychSegmentówToolStripMenuItem})
         Me.NarzedziaToolStripMenuItem.Name = "NarzedziaToolStripMenuItem"
         Me.NarzedziaToolStripMenuItem.Size = New System.Drawing.Size(70, 20)
         Me.NarzedziaToolStripMenuItem.Text = "Narzędzia"
@@ -426,7 +427,11 @@ Partial Class Form1
         '
         'NakładanieWarstwNaSiebieToolStripMenuItem
         '
-        Me.NakładanieWarstwNaSiebieToolStripMenuItem.Name = "NakładanieWarstwNaSiebieToolStripMenuItem"
+        Me.ZaawansowanyMbtilesToolStripMenuItem.Name = "ZaawansowanyMbtilesToolStripMenuItem"
+        Me.ZaawansowanyMbtilesToolStripMenuItem.Size = New System.Drawing.Size(315, 22)
+        Me.ZaawansowanyMbtilesToolStripMenuItem.Text = "Zaawansowany wielowarstwowy MBTiles..."
+        Me.ZaawansowanyMbtilesToolStripMenuItem.ToolTipText = "Kompilacja pliku MBTiles z różnych warstw i poziomów zoom (np. Topo 50k -> Topo 10k -> Ortofoto)"
+                Me.NakładanieWarstwNaSiebieToolStripMenuItem.Name = "NakładanieWarstwNaSiebieToolStripMenuItem"
         Me.NakładanieWarstwNaSiebieToolStripMenuItem.ShortcutKeys = CType((System.Windows.Forms.Keys.Control Or System.Windows.Forms.Keys.N), System.Windows.Forms.Keys)
         Me.NakładanieWarstwNaSiebieToolStripMenuItem.Size = New System.Drawing.Size(315, 22)
         Me.NakładanieWarstwNaSiebieToolStripMenuItem.Text = "Nakładanie dwóch map png na siebie"
@@ -1491,6 +1496,7 @@ Partial Class Form1
     Friend WithEvents Label67 As System.Windows.Forms.Label
     Friend WithEvents ScalanieToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents EksportToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
+    Friend WithEvents ZaawansowanyMbtilesToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents grpRozmiarSiatki As System.Windows.Forms.GroupBox
     Friend WithEvents txtLiczbaWierszy As System.Windows.Forms.TextBox
     Friend WithEvents Label21 As System.Windows.Forms.Label

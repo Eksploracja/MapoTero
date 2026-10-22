@@ -78,8 +78,31 @@ Public Class FormEksport
         _folder = Form1.FolderSesji
         If _folder = "" OrElse File.Exists(_folder & "conf.txt") = False Then _folder = FolderDownload
         WczytajSesje()
+        UsunNiepasujaceNakladki()
         UstawWidok()
     End Sub
+
+    ''' <summary>
+    ''' Usuwa z listy nakładki, które nie pasują do bieżącej mapy podstawowej: folder mapy podstawowej albo segmenty poza
+    ''' jej obszarem. Zamknięte okno modalne nie jest niszczone, więc nakładki zostawały z poprzedniego otwarcia okna,
+    ''' także po zmianie mapy podstawowej.
+    ''' </summary>
+    Private Sub UsunNiepasujaceNakladki()
+        For i = lstNakladki.Items.Count - 1 To 0 Step -1
+            Dim p = TryCast(lstNakladki.Items(i), PozycjaNakladki)
+            If p Is Nothing OrElse _sesja Is Nothing OrElse String.Equals(p.Sesja.Folder, _folder, StringComparison.OrdinalIgnoreCase) OrElse
+               Not Pokrywa(_sesja, p.Sesja) Then
+                lstNakladki.Items.RemoveAt(i)
+            End If
+        Next
+    End Sub
+
+    ''' <summary>Czy segmenty sesji b pokrywają choć część obszaru sesji a.</summary>
+    Private Shared Function Pokrywa(a As Sesja, b As Sesja) As Boolean
+        Dim ga = ProstokatGeo.Opisany(a.Uklad, a.Siatka.ZasiegSiatki)
+        Dim gb = ProstokatGeo.Opisany(b.Uklad, b.Siatka.ZasiegSiatki)
+        Return Not (gb.Zachod >= ga.Wschod OrElse gb.Wschod <= ga.Zachod OrElse gb.Poludnie >= ga.Polnoc OrElse gb.Polnoc <= ga.Poludnie)
+    End Function
 
     Private Sub Komunikat(tekst As String, kolor As Color)
         txtKomunikaty.ForeColor = kolor
@@ -260,6 +283,7 @@ Public Class FormEksport
         If dlgFolder.ShowDialog = DialogResult.OK Then
             _folder = dlgFolder.SelectedPath & "\"
             WczytajSesje()
+            UsunNiepasujaceNakladki()
             UstawWidok()
         End If
     End Sub
@@ -286,9 +310,7 @@ Public Class FormEksport
             Exit Sub
         End If
         'warstwa musi pokrywać choć część mapy podstawowej
-        Dim a = ProstokatGeo.Opisany(_sesja.Uklad, _sesja.Siatka.ZasiegSiatki)
-        Dim b = ProstokatGeo.Opisany(s.Uklad, s.Siatka.ZasiegSiatki)
-        If b.Zachod >= a.Wschod OrElse b.Wschod <= a.Zachod OrElse b.Poludnie >= a.Polnoc OrElse b.Polnoc <= a.Poludnie Then
+        If Not Pokrywa(_sesja, s) Then
             MsgBox("Segmenty z tego folderu nie pokrywają obszaru mapy podstawowej.", MsgBoxStyle.Exclamation)
             Exit Sub
         End If
@@ -477,6 +499,10 @@ Public Class FormEksport
         Finally
             ZakonczPrace()
         End Try
+    End Sub
+
+    Private Sub btnWielowarstwowyMbtiles_Click(sender As Object, e As EventArgs) Handles btnWielowarstwowyMbtiles.Click
+        FormZaawansowanyMbtiles.ShowDialog(Me)
     End Sub
 
     Private Sub btnPrzerwij_Click(sender As Object, e As EventArgs) Handles btnPrzerwij.Click

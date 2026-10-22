@@ -51,11 +51,23 @@ Public Class Form1
     ''' <summary>Obszar pobierania wzdłuż trasy (zapisywany w folderze sesji w korytarz.txt); Nothing - cały prostokąt.</summary>
     Private _korytarz As Korytarz
 
+    ''' <summary>Numeracja segmentów z conf.txt wczytanej sesji (pusta - brak conf.txt lub plik z bardzo starej wersji).</summary>
+    Private _numeracjaSesji As String = ""
+
     ''' <summary>Data ostatniego pobierania sesji (rrrr-mm-dd) - z conf.txt, ustawiana na nowo przy rozpoczęciu pobierania.</summary>
     Private _dataPobrania As String = ""
 
     ''' <summary>Najwięcej segmentów korytarza rysowanych na mapie (przy większej liczbie - tylko linia trasy).</summary>
     Private Const MaksSegmentowNaMapie As Integer = 3000
+
+    ''' <summary>
+    ''' Najwięcej (szacunkowo) segmentów korytarza wyznaczanych od razu po zmianie parametrów - przy większej liczbie opis
+    ''' podaje szacunek, a na mapie rysowana jest sama trasa. Dokładna liczba liczona jest przy rozpoczęciu pobierania.
+    ''' </summary>
+    Friend Const MaksSegmentowKorytarzaNaBiezaco As Double = 200000
+
+    ''' <summary>Najwięcej segmentów jednego pobierania (wykaz segmentów, pliki koordynaty.txt i error.txt w pamięci).</summary>
+    Friend Const MaksSegmentowPobierania As Long = 10000000
     Private _siatkaWidoczna As Boolean
 
     ''' <summary>Uchwyt siatki pod kursorem myszy (Nothing - kursor poza uchwytami).</summary>
@@ -318,10 +330,15 @@ Public Class Form1
     ''' <summary>Odczyt ostatnich ustawień programu z lastsettings.txt.</summary>
     Public Sub WczytajLastsettings(Optional nowaSesja As Boolean = False)
         If File.Exists(PlikLastsettings) = False Then Exit Sub
+        'numeracja segmentów jest parametrem sesji - lastsettings.txt (np. z numeracją innej, ostatnio wczytanej sesji)
+        'nie może jej zmienić, bo nazwy segmentów przestałyby pasować do plików w folderze sesji
+        Dim numeracjaSesji As String = If(nowaSesja, "", _numeracjaSesji)
         Try
             Ustawienia.Wczytaj(PlikLastsettings, nowaSesja)
         Catch
             Exit Sub
+        Finally
+            If numeracjaSesji <> "" Then Ustawienia.Numeracja = numeracjaSesji
         End Try
         lblSrodekSzer.Text = Ustawienia.SrodekMapySzerokosc
         lblSrodekDlug.Text = Ustawienia.SrodekMapyDlugosc
@@ -386,6 +403,7 @@ Public Class Form1
         _dataPobrania = c.DataPobrania
         Ustawienia.PobierajPowyzejOstatniego = c.PobierajPowyzejOstatniego
         If c.Numeracja <> "" Then Ustawienia.Numeracja = c.Numeracja
+        _numeracjaSesji = c.Numeracja
         lblSrodekSzer.Text = c.SrodekMapySzerokosc
         lblSrodekDlug.Text = c.SrodekMapyDlugosc
         lblZoom.Text = c.SkalaMapy
@@ -535,12 +553,25 @@ Public Class Form1
         Return True
     End Function
     Private Sub ZapiszToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles ZapiszToolStripMenuItem.Click
+        If PobieranieTrwa("Zapisanie ustawień sesji w innym folderze") Then Exit Sub
         ZapiszConf(True)
     End Sub
 
     Private Sub WczytajToolStripMenuItem1_Click(sender As Object, e As EventArgs) Handles WczytajToolStripMenuItem1.Click
+        If PobieranieTrwa("Wczytanie ustawień innej sesji") Then Exit Sub
         WczytajConf(True)
     End Sub
+
+    ''' <summary>
+    ''' Czy trwa pobieranie - wtedy (z komunikatem) nie wolno zmieniać sesji: pobieranie korzysta z kopii parametrów,
+    ''' a zmiana conf.txt, warstw lub folderu w trakcie rozjeżdżała zapisane parametry z pobieranymi segmentami.
+    ''' </summary>
+    Private Function PobieranieTrwa(czynnosc As String) As Boolean
+        If _przerwanie Is Nothing Then Return False
+        MessageBox.Show(czynnosc & " będzie możliwe po zakończeniu lub przerwaniu pobierania segmentów.", "Trwa pobieranie",
+                        MessageBoxButtons.OK, MessageBoxIcon.Information)
+        Return True
+    End Function
 
 #End Region
 
@@ -668,6 +699,8 @@ Public Class Form1
     End Sub
 
     Private Sub btnResetujWarstwy_Click(sender As Object, e As EventArgs) Handles btnResetujWarstwy.Click
+        'w trakcie pobierania reset zapisywał conf.txt pobieranej sesji bez warstw i włączał przycisk Pobierz
+        If PobieranieTrwa("Zmiana listy warstw") Then Exit Sub
         WyczyscWarstwy()
         ZapiszConf(False)
         btnPobierz.Enabled = True
@@ -680,7 +713,7 @@ Public Class Form1
 #Region "Siatka segmentów"
 
     ''' <summary>Siatka segmentów wg pól formularza.</summary>
-    Private Function BiezacaSiatka() As Siatka
+    Friend Function BiezacaSiatka() As Siatka
         Dim obszar As New Zasieg(Wartosc(txtXDol.Text), Wartosc(txtYLewy.Text), Wartosc(txtXGora.Text), Wartosc(txtYPrawy.Text))
         Return New Siatka(obszar, Wartosc(txtRozmiarPiksela.Text), WartoscCalkowita(txtBokSegmentu.Text))
     End Function
@@ -848,6 +881,7 @@ Public Class Form1
 
     ''' <summary>Pobieranie segmentów; odswiez - ponownie także tych, które już są w folderze sesji.</summary>
     Private Async Sub RozpocznijPobieranie(odswiez As Boolean)
+        If _przerwanie IsNot Nothing Then Exit Sub
         'kontrola parametrów
         Dim piksel As Double = Wartosc(txtRozmiarPiksela.Text)
         Dim bok As Integer = WartoscCalkowita(txtBokSegmentu.Text)
@@ -879,7 +913,14 @@ Public Class Form1
             Komunikat(bladPrzedrostka & " Popraw go w oknie Ustawienia.", Color.Red) : Exit Sub
         End If
 
-        Dim liczbaSegmentow As Integer = siatka.LiczbaSegmentow
+        'limit wielkości pobierania - przy kilkudziesięciu milionach segmentów brakowało pamięci na ich wykaz
+        Dim liczbaSegmentow As Long = siatka.LiczbaSegmentow
+        If _korytarz IsNot Nothing Then liczbaSegmentow = CLng(Math.Min(liczbaSegmentow, _korytarz.SzacowanaLiczbaSegmentow(siatka, Ustawienia.Uklad)))
+        If siatka.ZbytDuza OrElse liczbaSegmentow > MaksSegmentowPobierania Then
+            Komunikat("Zbyt wiele segmentów do pobrania (" & If(_korytarz IsNot Nothing, "ok. ", "") & liczbaSegmentow.ToString("N0") &
+                      ", najwięcej " & MaksSegmentowPobierania.ToString("N0") &
+                      ") - zmniejsz obszar albo zwiększ rozmiar piksela lub bok segmentu.", Color.Red) : Exit Sub
+        End If
         If _korytarz IsNot Nothing Then
             liczbaSegmentow = _korytarz.Segmenty(siatka, Ustawienia.Uklad).Count
             If liczbaSegmentow = 0 Then
@@ -912,24 +953,30 @@ Public Class Form1
         cmbZbiorMap.Enabled = False
         lstWarstwy.Enabled = False
         btnScalanie.Enabled = False
+        btnResetujWarstwy.Enabled = False
+        btnUsunPobrane.Enabled = False
         OdswiezToolStripMenuItem.Enabled = False
         KorytarzToolStripMenuItem.Enabled = False
         Komunikat(If(odswiez, "Trwa odświeżanie segmentów (", "Trwa pobieranie segmentów (") & liczbaSegmentow & ")", Color.Black)
 
-        _przerwanie = New CancellationTokenSource()
+        'własna kopia - zwalniane jest zawsze źródło tego pobierania, nawet gdyby pole wskazywało już inne
+        Dim przerwanie As New CancellationTokenSource()
+        _przerwanie = przerwanie
         Dim postep As New Progress(Of PostepPobierania)(AddressOf PokazPostep)
         Dim wynik As WynikPobierania = Nothing
         Try
-            wynik = Await PobieranieSegmentow.PobierzAsync(zadanie, postep, _przerwanie.Token)
+            wynik = Await PobieranieSegmentow.PobierzAsync(zadanie, postep, przerwanie.Token)
         Catch ex As Exception
             Komunikat("Błąd pobierania: " & ex.Message, Color.Red)
         Finally
-            _przerwanie.Dispose()
-            _przerwanie = Nothing
+            If _przerwanie Is przerwanie Then _przerwanie = Nothing
+            przerwanie.Dispose()
             btnPobierz.Enabled = True
             btnPrzerwij.Enabled = False
             cmbZbiorMap.Enabled = True
             lstWarstwy.Enabled = True
+            btnResetujWarstwy.Enabled = _warstwy.Count > 0
+            btnUsunPobrane.Enabled = True
             OdswiezToolStripMenuItem.Enabled = True
             KorytarzToolStripMenuItem.Enabled = True
             stPostep.Value = 0
@@ -943,9 +990,10 @@ Public Class Form1
             Komunikat("Nie udało się ściągnąć wszystkich segmentów (" & wynik.Nieudane & " z " & wynik.Wszystkie &
                       "). Wykaz tych segmentów i przyczyny błędów w pliku error.txt", Color.Red)
         Else
-            Komunikat("Zakończono pobieranie. Mapa znajduje się w katalogu " & FolderSesji, Color.Green)
+            Komunikat("Zakończono pobieranie. Mapa znajduje się w katalogu " & zadanie.Folder, Color.Green)
         End If
-        btnScalanie.Enabled = File.Exists(FolderSesji & "error.txt") = False
+        'folder pobierania (FolderSesji mógł się w międzyczasie zmienić)
+        btnScalanie.Enabled = File.Exists(zadanie.Folder & "error.txt") = False
     End Sub
 
     Private Sub PokazPostep(p As PostepPobierania)
@@ -1039,7 +1087,7 @@ Public Class Form1
         Dim s = BiezacaSiatka()
         If s.Poprawna AndAlso Not u.Geograficzny Then
             Dim km2 As Double = s.LiczbaKolumn * s.BokSegmentu / 1000.0 * s.LiczbaWierszy * s.BokSegmentu / 1000.0
-            If s.SzerokoscPx * s.WysokoscPx < 5000000000L Then
+            If CDbl(s.SzerokoscPx) * s.WysokoscPx < 5000000000.0 Then
                 Komunikat("Zaznaczyłeś obszar do pobrania o powierzchni " & Liczba(Math.Round(km2, 3)) & " km2", Color.Green)
             Else
                 Komunikat("Zaznaczyłeś obszar do pobrania o powierzchni " & Liczba(Math.Round(km2, 3)) & " km2. To dużo. Poradzę sobie. Jednak uzbroj się lepiej w kubek gorącej kawy :)", Color.Red)
@@ -1055,8 +1103,8 @@ Public Class Form1
             If e.Button = MouseButtons.Left Then PrzeciagnijUchwyt(e) Else ZakonczPrzeciaganie(anuluj:=False)
         End If
 
-        'współrzędne zasięgu podczas przeciągania zaznaczenia
-        If Ustawienia.EdycjaXY = False AndAlso mapa.SelectedArea.IsEmpty = False Then
+        'współrzędne zasięgu podczas przeciągania zaznaczenia (nie w trakcie pobierania - zmieniałoby zasięg pobieranej sesji)
+        If Ustawienia.EdycjaXY = False AndAlso _przerwanie Is Nothing AndAlso mapa.SelectedArea.IsEmpty = False Then
             'nowe zaznaczenie prostokąta zastępuje obszar wzdłuż trasy
             If _korytarz IsNot Nothing Then UsunKorytarz(False)
             If _siatkaWidoczna Then WyczyscZnaczniki()
@@ -1151,7 +1199,11 @@ Public Class Form1
 
     ''' <summary>Znaczniki i siatka segmentów po zakończeniu zaznaczania obszaru pobierania (puszczenie prawego przycisku).</summary>
     Private Sub mapa_OnSelectionChange(Selection As RectLatLng, ZoomToFit As Boolean) Handles mapa.OnSelectionChange
-        If _przerwanie IsNot Nothing OrElse Ustawienia.EdycjaXY Then Exit Sub
+        If _przerwanie IsNot Nothing OrElse Ustawienia.EdycjaXY Then
+            'zaznaczenie bez skutku - pozostawione na mapie nadpisywało potem pola XY przy każdym ruchu myszy
+            If Not Selection.IsEmpty Then mapa.SelectedArea = RectLatLng.Empty
+            Exit Sub
+        End If
         If Selection.IsEmpty OrElse Selection.WidthLng <= 0.00001 OrElse Selection.HeightLat <= 0.00001 Then Exit Sub
         If _korytarz IsNot Nothing Then UsunKorytarz(False)
         UstawObszarZZaznaczenia(Selection)
@@ -1502,6 +1554,7 @@ Public Class Form1
     End Sub
 
     Private Sub UsunKorytarzToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles UsunKorytarzToolStripMenuItem.Click
+        If PobieranieTrwa("Usunięcie obszaru wzdłuż trasy") Then Exit Sub
         UsunKorytarz(True)
     End Sub
 
@@ -1548,8 +1601,12 @@ Public Class Form1
         Dim opis As String = "Obszar wzdłuż trasy " & If(_korytarz.Nazwa <> "", "'" & _korytarz.Nazwa & "' ", "") &
                              "(" & _korytarz.DlugoscKm.ToString("0.0") & " km, pas " & Liczba(_korytarz.SzerokoscMetry) & " m po obu stronach trasy)"
         If Not s.Poprawna Then Return opis
+        Dim szacunek As Double = _korytarz.SzacowanaLiczbaSegmentow(s, Ustawienia.Uklad)
+        If szacunek > MaksSegmentowKorytarzaNaBiezaco Then
+            Return opis & ": ok. " & Math.Round(szacunek).ToString("N0") & " segmentów (szacunek - przy tak małym segmencie dokładna liczba nie jest liczona)"
+        End If
         Dim n As Integer = _korytarz.Segmenty(s, Ustawienia.Uklad).Count
-        Dim wszystkie As Integer = s.LiczbaSegmentow
+        Dim wszystkie As Long = s.LiczbaSegmentow
         Return opis & ": pobranych zostanie " & n & " z " & wszystkie & " segmentów prostokąta" &
                If(wszystkie > 0, " (" & Math.Round(100.0 * (wszystkie - n) / wszystkie) & "% mniej danych)", "")
     End Function
@@ -1560,7 +1617,9 @@ Public Class Form1
         Dim warstwa As New GMapOverlay("korytarz")
         mapa.Overlays.Add(warstwa)
         Dim s = BiezacaSiatka()
-        If s.Poprawna Then
+        'segmenty rysowane, gdy jest ich niewiele - wyznaczanie milionów segmentów (np. w trakcie wpisywania boku
+        'segmentu, gdy po pierwszej cyfrze segment ma 2 piksele) zawieszało program na dziesiątki sekund
+        If s.Poprawna AndAlso _korytarz.SzacowanaLiczbaSegmentow(s, Ustawienia.Uklad) <= MaksSegmentowKorytarzaNaBiezaco Then
             Dim u = Ustawienia.Uklad
             Dim zbior = _korytarz.Segmenty(s, u)
             If zbior.Count <= MaksSegmentowNaMapie Then
@@ -1592,6 +1651,7 @@ Public Class Form1
     End Sub
 
     Private Sub btnUsunPobrane_Click(sender As Object, e As EventArgs) Handles btnUsunPobrane.Click
+        If PobieranieTrwa("Usunięcie pobranych map") Then Exit Sub
         Dim odp As DialogResult = MessageBox.Show("Czy na pewno usunąć cały katalog 'download' z pobranymi mapami?", "Usuwanie zawartości katalogu download",
                                                  MessageBoxButtons.YesNo, MessageBoxIcon.Question)
         If odp = DialogResult.Yes Then
@@ -1606,10 +1666,13 @@ Public Class Form1
     End Sub
 
     Private Sub btnScalanie_Click(sender As Object, e As EventArgs) Handles btnScalanie.Click
+        If PobieranieTrwa("Scalanie segmentów") Then Exit Sub
         Form3.ShowDialog()
     End Sub
 
     Private Sub DodajSerwerToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles DodajSerwerToolStripMenuItem.Click, btnDodajSerwer.Click
+        'wczytanie listy zbiorów map po dodaniu serwera zmienia wybrany zbiór - to przerywało pobieranie i czyściło warstwy
+        If PobieranieTrwa("Dodanie serwera") Then Exit Sub
         Using okno As New FormDodajSerwer()
             If okno.ShowDialog(Me) = DialogResult.OK AndAlso Not String.IsNullOrEmpty(okno.WynikNazwaZbioru) Then
                 WczytajListeZbiorowMap(okno.WynikNazwaZbioru)
@@ -1619,6 +1682,7 @@ Public Class Form1
     End Sub
 
     Private Sub ScalanieToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles ScalanieToolStripMenuItem.Click
+        If PobieranieTrwa("Scalanie segmentów") Then Exit Sub
         Form3.ShowDialog()
     End Sub
 
@@ -1626,7 +1690,13 @@ Public Class Form1
         FormEksport.ShowDialog()
     End Sub
 
+    Private Sub ZaawansowanyMbtilesToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles ZaawansowanyMbtilesToolStripMenuItem.Click
+        FormZaawansowanyMbtiles.ShowDialog()
+    End Sub
+
     Private Sub UstawieniaToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles UstawieniaToolStripMenuItem.Click
+        'okno ustawień zmienia parametry sesji (przedrostek, format, numeracja, bok segmentu TrekBuddy)
+        If PobieranieTrwa("Zmiana ustawień") Then Exit Sub
         Form2.ShowDialog()
     End Sub
 
@@ -1643,10 +1713,13 @@ Public Class Form1
     End Sub
 
     Private Sub UsuwaniePustychSegmentowToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles UsuwaniePustychSegmentówToolStripMenuItem.Click
+        If PobieranieTrwa("Usuwanie pustych segmentów") Then Exit Sub
         Usuwanie_p_seg.ShowDialog()
     End Sub
 
     Private Sub NakladanieWarstwToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles NakładanieWarstwNaSiebieToolStripMenuItem.Click
+        'okno nakładania zmienia folder sesji pobierania
+        If PobieranieTrwa("Nakładanie map") Then Exit Sub
         Nakladanie_Map.ShowDialog()
     End Sub
 

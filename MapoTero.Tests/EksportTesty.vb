@@ -322,4 +322,29 @@ Public Class EksportTesty
         End Try
     End Sub
 
+    <Fact>
+    Public Sub MBTilesSciezkaZeSrednikiemIStarymDziennikiem()
+        'średnik jest dozwolony w nazwach folderów Windows - dawniej psuł tekst połączenia z bazą;
+        'pozostały plik -wal przerwanego eksportu nie może trafić do nowej bazy
+        Dim folder = NowyFolder()
+        Try
+            Dim podfolder = folder & "mapy;2026" & Path.DirectorySeparatorChar
+            Directory.CreateDirectory(podfolder)
+            UtworzSegmenty(podfolder, "png", Sub(g, w, k) g.Clear(Color.Blue))
+            Dim plik = podfolder & "mapa.mbtiles"
+            File.WriteAllBytes(plik & "-wal", New Byte() {1, 2, 3, 4, 5, 6, 7, 8})
+            Dim z = Zadanie(RodzajEksportu.MBTiles, Zrodlo(podfolder, "png"), plik)
+            EksportMapy.Eksportuj(z, Nothing, CancellationToken.None)
+
+            Assert.False(File.Exists(plik & "-wal"))
+            Dim b As New SQLiteConnectionStringBuilder With {.DataSource = plik, .Pooling = False}
+            Using pol As New SQLiteConnection(b.ToString())
+                pol.Open()
+                Assert.True(CLng(Zapytanie(pol, "SELECT COUNT(*) FROM tiles")) > 0)
+            End Using
+        Finally
+            Usun(folder)
+        End Try
+    End Sub
+
 End Class

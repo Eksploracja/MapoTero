@@ -488,3 +488,52 @@ Public Class SiatkaPrzeliczen
     End Function
 
 End Class
+
+''' <summary>Tryb mieszania (blending mode) warstw rastrowych przy kompozycji kafelków.</summary>
+Public Enum TrybMieszania
+    ''' <summary>1 Zwykły - standardowe nakładanie z kryciem (Normal / Alpha Blending).</summary>
+    Zwykly = 0
+    ''' <summary>2 Mnożenie (Multiply) - jak w QGIS/Photoshopie; biel znika, ciemne linie zachowują maksymalny kontrast.</summary>
+    Mnozenie = 1
+    ''' <summary>3 Ciemniej (Darken) - wybiera ciemniejszy kolor z obu warstw.</summary>
+    Ciemniej = 2
+    ''' <summary>4 Jaśniej (Lighten) - wybiera jaśniejszy kolor z obu warstw (np. jasne szlaki/cieki wodne na ciemnym tle).</summary>
+    Jasniej = 3
+    ''' <summary>5 Ekran (Screen) - rozjaśnia tło, czerń staje się niewidoczna (odwrotność mnożenia).</summary>
+    Ekran = 4
+    ''' <summary>6 Nakładka (Overlay) - łączy mnożenie i ekran, podbijając kontrast (idealne dla cieniowania rzeźby terenu / hillshade).</summary>
+    Nakladka = 5
+End Enum
+
+Public Module TrybMieszaniaRozszerzenia
+    Public Function NazwaWyswietlana(t As TrybMieszania) As String
+        Select Case t
+            Case TrybMieszania.Mnozenie : Return "2 Mnożenie"
+            Case TrybMieszania.Ciemniej : Return "3 Ciemniej"
+            Case TrybMieszania.Jasniej : Return "4 Jaśniej"
+            Case TrybMieszania.Ekran : Return "5 Ekran"
+            Case TrybMieszania.Nakladka : Return "6 Nakładka"
+            Case Else : Return "1 Zwykły"
+        End Select
+    End Function
+
+    Public Function ZTekstu(tekst As String) As TrybMieszania
+        If String.IsNullOrWhiteSpace(tekst) Then Return TrybMieszania.Zwykly
+        Dim t = tekst.Trim().ToLowerInvariant()
+        If t.StartsWith("2") OrElse t.Contains("mnoż") OrElse t.Contains("mnoz") OrElse t.Contains("mult") Then Return TrybMieszania.Mnozenie
+        If t.StartsWith("3") OrElse t.Contains("ciemn") OrElse t.Contains("dark") Then Return TrybMieszania.Ciemniej
+        If t.StartsWith("4") OrElse t.Contains("jaśn") OrElse t.Contains("jasn") OrElse t.Contains("light") Then Return TrybMieszania.Jasniej
+        If t.StartsWith("5") OrElse t.Contains("ekran") OrElse t.Contains("screen") Then Return TrybMieszania.Ekran
+        If t.StartsWith("6") OrElse t.Contains("nakład") OrElse t.Contains("naklad") OrElse t.Contains("overlay") Then Return TrybMieszania.Nakladka
+        Return TrybMieszania.Zwykly
+    End Function
+
+    Public ReadOnly WszystkieNazwy As String() = {
+        "1 Zwykły",
+        "2 Mnożenie",
+        "3 Ciemniej",
+        "4 Jaśniej",
+        "5 Ekran",
+        "6 Nakładka"
+    }
+End Module

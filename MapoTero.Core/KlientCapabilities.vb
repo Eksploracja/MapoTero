@@ -141,18 +141,16 @@ Public NotInheritable Class KlientCapabilities
                 If nazwaKorzenia.Equals("Capabilities", StringComparison.OrdinalIgnoreCase) AndAlso
                    (doc.Descendants().Any(Function(x) x.Name.LocalName.Equals("TileMatrixSet", StringComparison.OrdinalIgnoreCase)) OrElse
                     proba.Item2 = TypUslugiMapowej.Wmts) Then
-                    Using msWmts As New MemoryStream(bajty)
-                        Dim xmlTekst = (New StreamReader(msWmts, True)).ReadToEnd()
-                        Dim usluga = UslugaWmts.Wczytaj(xmlTekst, adresDoPobrania)
-                        wynik.Typ = TypUslugiMapowej.Wmts
-                        wynik.UslugaWmts = usluga
-                        wynik.AdresCapabilities = adresDoPobrania
-                        wynik.AdresBazowy = adresWyczyszczony
-                        wynik.Tytul = If(usluga.Warstwy.Count > 0 AndAlso Not String.IsNullOrEmpty(usluga.Warstwy(0).Tytul),
-                                         usluga.Warstwy(0).Tytul, "Usługa WMTS")
-                        SprawdzUkładyWmts(usluga, wynik)
-                        Return wynik
-                    End Using
+                    'tekst z dokumentu odczytanego już wg deklaracji encoding (StreamReader ją pomijał - np. ISO-8859-2)
+                    Dim usluga = UslugaWmts.Wczytaj(doc.ToString(SaveOptions.DisableFormatting), adresDoPobrania)
+                    wynik.Typ = TypUslugiMapowej.Wmts
+                    wynik.UslugaWmts = usluga
+                    wynik.AdresCapabilities = adresDoPobrania
+                    wynik.AdresBazowy = adresWyczyszczony
+                    wynik.Tytul = If(usluga.Warstwy.Count > 0 AndAlso Not String.IsNullOrEmpty(usluga.Warstwy(0).Tytul),
+                                     usluga.Warstwy(0).Tytul, "Usługa WMTS")
+                    SprawdzUkładyWmts(usluga, wynik)
+                    Return wynik
                 End If
 
                 'sprawdzenie czy WMS

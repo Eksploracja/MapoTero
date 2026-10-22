@@ -38,11 +38,31 @@ Public Class MapaTrekBuddy
         Return System.Text.RegularExpressions.Regex.Replace(tekst, "[\\/:*?""<>|]", "_").Trim()
     End Function
 
+    ''' <summary>Nazwa używana, gdy przedrostek (i dopisek) są puste.</summary>
+    Private Const NazwaDomyslna As String = "mapa"
+
+    ''' <summary>
+    ''' Nazwa folderu i archiwum mapy: przedrostek z dopiskiem. Przy pustym przedrostku i dopisku folderem mapy był sam
+    ''' folder sesji, a archiwum TAR całego folderu sesji powstawało w nim samym.
+    ''' </summary>
+    Private ReadOnly Property NazwaMapy As String
+        Get
+            Dim nazwa As String = _z.Prefiks & BezpiecznaNazwa(_z.NazwaTrekBuddy)
+            Return If(nazwa.Trim() = "", NazwaDomyslna, nazwa)
+        End Get
+    End Property
+
+    ''' <summary>Nazwa plików .map i .set: przedrostek (pusty - nazwa domyślna).</summary>
+    Private ReadOnly Property NazwaPlikow As String
+        Get
+            Return If(_z.Prefiks = "", NazwaDomyslna, _z.Prefiks)
+        End Get
+    End Property
+
     ''' <summary>Główny folder mapy.</summary>
     Public ReadOnly Property FolderMapy As String
         Get
-            Dim podfolder As String = _z.Prefiks & BezpiecznaNazwa(_z.NazwaTrekBuddy)
-            Return Path.Combine(_z.Folder, podfolder) & Path.DirectorySeparatorChar
+            Return Path.Combine(_z.Folder, NazwaMapy) & Path.DirectorySeparatorChar
         End Get
     End Property
 
@@ -55,7 +75,7 @@ Public Class MapaTrekBuddy
 
     Private ReadOnly Property PlikSet As String
         Get
-            Return Path.Combine(FolderMapy, _z.Prefiks & ".set")
+            Return Path.Combine(FolderMapy, NazwaPlikow & ".set")
         End Get
     End Property
 
@@ -65,9 +85,9 @@ Public Class MapaTrekBuddy
         If File.Exists(PlikSet) Then File.Delete(PlikSet)
 
         Dim s = _z.Siatka
-        Dim nazwa As String = _z.Prefiks & "." & _z.Rozszerzenie
+        Dim nazwa As String = NazwaPlikow & "." & _z.Rozszerzenie
         Dim obraz = ZapisGeoreferencji.Obraz(_z.Uklad, s.ZasiegSiatki, s.SzerokoscPx, s.WysokoscPx, _z.Folder, nazwa)
-        Georeferencja.Zapisz(Path.Combine(FolderMapy, _z.Prefiks & ".map"), Georeferencja.MapOzi(obraz), KodowanieSystemowe())
+        Georeferencja.Zapisz(Path.Combine(FolderMapy, NazwaPlikow & ".map"), Georeferencja.MapOzi(obraz), KodowanieSystemowe())
     End Sub
 
     ''' <summary>Plik .set - lista plików segmentów (raz, w kolejności siatki; dawniej dopisywany przy każdej próbie).</summary>
@@ -77,7 +97,7 @@ Public Class MapaTrekBuddy
 
     ''' <summary>Archiwum .tar mapy (TrekBuddy, Locus Map); standardowy zapis TAR z wbudowanej biblioteki .NET (System.Formats.Tar).</summary>
     Public Sub UtworzArchiwumTar()
-        Dim nazwaTar As String = _z.Prefiks & BezpiecznaNazwa(_z.NazwaTrekBuddy) & ".tar"
+        Dim nazwaTar As String = NazwaMapy & ".tar"
         Dim plikTar As String = Path.Combine(_z.Folder, nazwaTar)
         Try
             If File.Exists(plikTar) Then File.Delete(plikTar)

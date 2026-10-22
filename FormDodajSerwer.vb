@@ -19,6 +19,7 @@ Imports System.Globalization
 Imports System.IO
 Imports System.Linq
 Imports System.Net.Http
+Imports System.Threading
 Imports System.Threading.Tasks
 Imports System.Windows.Forms
 Imports MapoTero.Core
@@ -39,6 +40,8 @@ Public Class FormDodajSerwer
     Private _wybranaWarstwaWms As WarstwaWmsInfo
     Private _wybranaWarstwaWmts As WarstwaWmts
     Private _nazwaZbioruZmienionaRecznie As Boolean = False
+    ''' <summary>Przerwanie pobierania próbki przy zamknięciu okna (dawniej trwało do odpowiedzi serwera).</summary>
+    Private _przerwanieProbki As CancellationTokenSource
 
     Public Sub New(Optional domyslnyAdres As String = "")
         InitializeComponent()
@@ -264,10 +267,10 @@ Public Class FormDodajSerwer
 
         Dim px As Double
         If _rozmiaryPiksela.TryGetValue(w.Nazwa, px) Then
-            nudRozmiarPiksela.Value = CDec(px)
+            UstawPolePiksela(px)
         Else
             px = w.ZalecanyRozmiarPiksela()
-            nudRozmiarPiksela.Value = CDec(px)
+            UstawPolePiksela(px)
         End If
         nudRozmiarPiksela.Enabled = w.CzyWarstwaDoPobrania
         btnPobierzProbke.Enabled = w.CzyWarstwaDoPobrania
@@ -289,11 +292,11 @@ Public Class FormDodajSerwer
 
         Dim px As Double
         If _rozmiaryPiksela.TryGetValue(w.Identyfikator, px) Then
-            nudRozmiarPiksela.Value = CDec(px)
+            UstawPolePiksela(px)
         Else
             Dim sugerowany As Double = WyznaczSugerowanyRozmiarPikselaWmts(w)
             _rozmiaryPiksela(w.Identyfikator) = sugerowany
-            nudRozmiarPiksela.Value = CDec(sugerowany)
+            UstawPolePiksela(sugerowany)
         End If
         nudRozmiarPiksela.Enabled = True
         btnPobierzProbke.Enabled = True
@@ -347,6 +350,15 @@ Public Class FormDodajSerwer
         Return 1.0
     End Function
 
+    ''' <summary>
+    ''' Rozmiar piksela w polu ograniczony do jego zakresu (0,01-500) - zalecany rozmiar z mianownika skali warstwy
+    ''' przeglądowej może być większy, a przypisanie spoza zakresu kończyło się wyjątkiem przy wyborze warstwy.
+    ''' </summary>
+    Private Sub UstawPolePiksela(px As Double)
+        If Double.IsNaN(px) OrElse Double.IsInfinity(px) Then px = 1.0
+        nudRozmiarPiksela.Value = Math.Max(nudRozmiarPiksela.Minimum, Math.Min(nudRozmiarPiksela.Maximum, CDec(px)))
+    End Sub
+
     Private Sub WyczyscSzczegoly()
         lblNazwaWartosc.Text = "-"
         lblTytulWartosc.Text = "-"
@@ -394,6 +406,8 @@ Public Class FormDodajSerwer
         If _wynikCap Is Nothing Then Exit Sub
 
         btnPobierzProbke.Enabled = False
+        _przerwanieProbki = New CancellationTokenSource()
+        Dim token = _przerwanieProbki.Token
         'pobieranie próbki trwa nawet kilkadziesiąt sekund - widoczny stan zamiast samego wyszarzonego przycisku
         Dim tekstPrzycisku As String = btnPobierzProbke.Text
         btnPobierzProbke.Text = "Pobieranie próbki..."
@@ -411,7 +425,7 @@ Public Class FormDodajSerwer
                 If chkIgnorujSsl.Checked Then
                     handler.ServerCertificateCustomValidationCallback = Function(m, c, ch, err) True
                 End If
-                Using klient As New HttpClient(handler)
+                Using klient As New HttpClient(handler) With {.Timeout = TimeSpan.FromSeconds(LimitCzasuProbkiSekundy)}
                     klient.DefaultRequestHeaders.UserAgent.ParseAdd("MapoTero/3.14")
 
                     If _wybranaWarstwaWms IsNot Nothing Then
@@ -460,9 +474,9 @@ Public Class FormDodajSerwer
                                                               UkladWspolrzednych.PL1992, srodekPL, format, 256, 256,
                                                               zamienOsie:=False, przezroczystosc:=True)
 
-                                Using odp = Await klient.GetAsync(url).ConfigureAwait(True)
+                                Using odp = Await klient.GetAsync(url, token).ConfigureAwait(True)
                                     ostatniStatus = CInt(odp.StatusCode)
-                                    Dim bajty = Await odp.Content.ReadAsByteArrayAsync().ConfigureAwait(True)
+                                    Dim bajty = Await odp.Content.ReadAsByteArrayAsync(token).ConfigureAwait(True)
                                     If bajty IsNot Nothing AndAlso bajty.Length > 0 AndAlso PobieranieSegmentow.CzyObraz(bajty) Then
                                         Using ms As New MemoryStream(bajty)
                                             Using staryImg = picPodglad.Image
@@ -525,9 +539,9 @@ Public Class FormDodajSerwer
                                 plan.PikselMacierzy(plan.DoUkladuKafli(New PunktXY(srodekPL.XGora, srodekPL.YLewy)), kol, wie)
                                 Dim url = plan.AdresKafla(CInt(Math.Floor(wie / plan.Macierz.WysokoscKafla)), CInt(Math.Floor(kol / plan.Macierz.SzerokoscKafla)))
 
-                                Using odp = Await klient.GetAsync(url).ConfigureAwait(True)
+                                Using odp = Await klient.GetAsync(url, token).ConfigureAwait(True)
                                     ostatniStatus = CInt(odp.StatusCode)
-                                    Dim bajty = Await odp.Content.ReadAsByteArrayAsync().ConfigureAwait(True)
+                                    Dim bajty = Await odp.Content.ReadAsByteArrayAsync(token).ConfigureAwait(True)
                                     If bajty IsNot Nothing AndAlso bajty.Length > 0 AndAlso PobieranieSegmentow.CzyObraz(bajty) Then
                                         Using ms As New MemoryStream(bajty)
                                             Using staryImg = picPodglad.Image
@@ -549,7 +563,7 @@ Public Class FormDodajSerwer
                         If sukcessPobrania Then
                             If Math.Abs(znalezionyPx - px) > 0.05 Then
                                 _rozmiaryPiksela(_wybranaWarstwaWmts.Identyfikator) = znalezionyPx
-                                nudRozmiarPiksela.Value = CDec(znalezionyPx)
+                                UstawPolePiksela(znalezionyPx)
                                 MessageBox.Show("Pobrano próbkę dla rozdzielczości " & znalezionyPx.ToString("0.##") & " m/pix." & vbCrLf &
                                                 "Serwer nie udostępnia kafelków dla wybranej dużej szczegółowości (" & px.ToString("0.##") & " m/pix) – automatycznie zaktualizowano zalecany rozmiar piksela.",
                                                 "Podgląd próbki WMTS", MessageBoxButtons.OK, MessageBoxIcon.Information)
@@ -571,13 +585,32 @@ Public Class FormDodajSerwer
                 End Using
             End Using
 
+        Catch ex As OperationCanceledException When token.IsCancellationRequested
+            'okno zamknięte w trakcie pobierania próbki
+        Catch ex As TaskCanceledException
+            If Not IsDisposed Then
+                MessageBox.Show("Serwer nie odpowiedział w ciągu " & LimitCzasuProbkiSekundy & " s.", "Błąd podglądu", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+            End If
         Catch ex As Exception
-            MessageBox.Show("Nie udało się pobrać próbki kafelka: " & ex.Message, "Błąd podglądu", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+            If Not IsDisposed Then
+                MessageBox.Show("Nie udało się pobrać próbki kafelka: " & ex.Message, "Błąd podglądu", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+            End If
         Finally
-            btnPobierzProbke.Text = tekstPrzycisku
-            btnPobierzProbke.Enabled = True
-            Cursor = Cursors.Default
+            _przerwanieProbki?.Dispose()
+            _przerwanieProbki = Nothing
+            If Not IsDisposed Then
+                btnPobierzProbke.Text = tekstPrzycisku
+                btnPobierzProbke.Enabled = True
+                Cursor = Cursors.Default
+            End If
         End Try
+    End Sub
+
+    ''' <summary>Limit czasu jednego zapytania o próbkę [s].</summary>
+    Private Const LimitCzasuProbkiSekundy As Integer = 30
+
+    Private Sub FormDodajSerwer_FormClosing(sender As Object, e As FormClosingEventArgs) Handles MyBase.FormClosing
+        _przerwanieProbki?.Cancel()
     End Sub
 
     Private Sub txtNazwaZbioru_KeyPress(sender As Object, e As KeyPressEventArgs) Handles txtNazwaZbioru.KeyPress

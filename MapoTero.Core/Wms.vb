@@ -143,6 +143,9 @@ Public NotInheritable Class Wms
     Public Shared Function RozszerzeniePliku(format As String) As String
         Dim f As String = If(format, "").Trim().ToLowerInvariant()
         If f.StartsWith("image/", StringComparison.Ordinal) Then f = f.Substring(6)
+        'parametry typu MIME, np. "png; mode=8bit"
+        Dim srednik As Integer = f.IndexOf(";"c)
+        If srednik >= 0 Then f = f.Substring(0, srednik).Trim()
         Select Case f
             Case "jpeg", "jpg" : Return "jpg"
             Case "tiff", "tif" : Return "tif"

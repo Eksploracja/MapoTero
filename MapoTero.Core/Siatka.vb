@@ -112,9 +112,13 @@ Public Class Siatka
     Public ReadOnly Property Poprawna As Boolean
         Get
             Return RozmiarPiksela > 0 AndAlso BokSegmentuPx > 0 AndAlso Obszar.Szerokosc > 0 AndAlso Obszar.Wysokosc > 0 AndAlso
-                   Not Double.IsNaN(RozmiarPiksela) AndAlso Not Double.IsInfinity(RozmiarPiksela)
+                   Not Double.IsNaN(RozmiarPiksela) AndAlso Not Double.IsInfinity(RozmiarPiksela) AndAlso
+                   Obszar.Szerokosc / BokSegmentu < MaksKolumn AndAlso Obszar.Wysokosc / BokSegmentu < MaksKolumn
         End Get
     End Property
+
+    ''' <summary>Najwięcej kolumn (wierszy) siatki - liczba musi się mieścić w typie Integer.</summary>
+    Private Const MaksKolumn As Double = 1000000000.0
 
     ''' <summary>Terenowy bok segmentu (w jednostkach układu).</summary>
     Public ReadOnly Property BokSegmentu As Double
@@ -139,9 +143,23 @@ Public Class Siatka
         End Get
     End Property
 
-    Public ReadOnly Property LiczbaSegmentow As Integer
+    ''' <summary>
+    ''' Liczba segmentów siatki (Long - przy dużym obszarze i małym pikselu iloczyn kolumn i wierszy przekraczał
+    ''' zakres Integer i zaznaczenie obszaru na mapie kończyło się wyjątkiem OverflowException).
+    ''' </summary>
+    Public ReadOnly Property LiczbaSegmentow As Long
         Get
-            Return LiczbaKolumn * LiczbaWierszy
+            Return CLng(LiczbaKolumn) * LiczbaWierszy
+        End Get
+    End Property
+
+    ''' <summary>
+    ''' Czy segmentów jest więcej, niż można ponumerować (numery kolejne i klucze segmentów korytarza są typu Integer) -
+    ''' takiej siatki nie da się pobrać.
+    ''' </summary>
+    Public ReadOnly Property ZbytDuza As Boolean
+        Get
+            Return LiczbaSegmentow > Integer.MaxValue
         End Get
     End Property
 

@@ -345,7 +345,7 @@ Public Class Korytarz
     ''' </summary>
     Public Function Segmenty(siatka As Siatka, uklad As UkladWspolrzednych) As HashSet(Of Integer)
         Dim wynik As New HashSet(Of Integer)
-        If siatka Is Nothing OrElse Not siatka.Poprawna OrElse Not Poprawny Then Return wynik
+        If siatka Is Nothing OrElse Not siatka.Poprawna OrElse siatka.ZbytDuza OrElse Not Poprawny Then Return wynik
         Dim r = UtworzRzutowanie(uklad)
         Dim kolumny As Integer = siatka.LiczbaKolumn, wiersze As Integer = siatka.LiczbaWierszy
         Dim d As Double = Math.Max(0, SzerokoscMetry)
@@ -364,13 +364,17 @@ Public Class Korytarz
             For i = 0 To odcinki - 1
                 Dim a = pkt(i)
                 Dim b = If(pkt.Count > 1, pkt(i + 1), pkt(i))
-                'segmenty siatki w zasięgu odcinka poszerzonego o szerokość pasa
-                Dim k0 As Integer = Math.Max(1, CInt(Math.Floor((Math.Min(a.Y, b.Y) - d - y0) / bokY)) + 1)
-                Dim k1 As Integer = Math.Min(kolumny, CInt(Math.Floor((Math.Max(a.Y, b.Y) + d - y0) / bokY)) + 1)
-                Dim w0 As Integer = Math.Max(1, CInt(Math.Floor((xGora - Math.Max(a.X, b.X) - d) / bokX)) + 1)
-                Dim w1 As Integer = Math.Min(wiersze, CInt(Math.Floor((xGora - Math.Min(a.X, b.X) + d) / bokX)) + 1)
+                'wiersze siatki w zasięgu odcinka poszerzonego o szerokość pasa
+                Dim w0 As Integer = Indeks((xGora - Math.Max(a.X, b.X) - d) / bokX, wiersze)
+                Dim w1 As Integer = Indeks((xGora - Math.Min(a.X, b.X) + d) / bokX, wiersze)
                 For w = w0 To w1
                     Dim xd As Double = xGora - w * bokX
+                    'kolumny tylko w zasięgu części odcinka leżącej w pasie wiersza (dawniej cały prostokąt opisany na
+                    'odcinku - przy długim ukośnym odcinku i małym segmencie miliony zbędnych sprawdzeń)
+                    Dim yMin As Double, yMax As Double
+                    If Not ZakresYWPasie(a, b, xd - d, xd + bokX + d, yMin, yMax) Then Continue For
+                    Dim k0 As Integer = Indeks((yMin - d - y0) / bokY, kolumny)
+                    Dim k1 As Integer = Indeks((yMax + d - y0) / bokY, kolumny)
                     For k = k0 To k1
                         Dim klucz As Integer = (w - 1) * kolumny + (k - 1)
                         If wynik.Contains(klucz) Then Continue For
@@ -381,6 +385,53 @@ Public Class Korytarz
             Next
         Next
         Return wynik
+    End Function
+
+    ''' <summary>Numer wiersza lub kolumny (od 1) dla położenia w segmentach, ograniczony do 1..maks (bez przepełnienia CInt).</summary>
+    Private Shared Function Indeks(polozenie As Double, maks As Integer) As Integer
+        Return CInt(Math.Max(1.0, Math.Min(maks, Math.Floor(polozenie) + 1)))
+    End Function
+
+    ''' <summary>
+    ''' Zakres współrzędnej Y części odcinka AB, której współrzędna X leży w przedziale xMin..xMax; False - odcinek nie
+    ''' przechodzi przez ten pas.
+    ''' </summary>
+    Private Shared Function ZakresYWPasie(a As PunktXY, b As PunktXY, xMin As Double, xMax As Double, ByRef yMin As Double, ByRef yMax As Double) As Boolean
+        Dim t0 As Double = 0, t1 As Double = 1
+        Dim dx As Double = b.X - a.X
+        If dx = 0 Then
+            If a.X < xMin OrElse a.X > xMax Then Return False
+        Else
+            Dim ta As Double = (xMin - a.X) / dx, tb As Double = (xMax - a.X) / dx
+            t0 = Math.Max(0, Math.Min(ta, tb))
+            t1 = Math.Min(1, Math.Max(ta, tb))
+            If t0 > t1 Then Return False
+        End If
+        Dim ya As Double = a.Y + t0 * (b.Y - a.Y), yb As Double = a.Y + t1 * (b.Y - a.Y)
+        yMin = Math.Min(ya, yb)
+        yMax = Math.Max(ya, yb)
+        Return True
+    End Function
+
+    ''' <summary>
+    ''' Szacunkowa (zawyżona) liczba segmentów korytarza bez ich wyznaczania: pole pasa wokół trasy poszerzonego o segment,
+    ''' podzielone przez pole segmentu. Pozwala uniknąć wyznaczania milionów segmentów, np. gdy bok segmentu jest
+    ''' dopiero wpisywany (po pierwszej cyfrze "256" segment ma 2 piksele).
+    ''' </summary>
+    Public Function SzacowanaLiczbaSegmentow(siatka As Siatka, uklad As UkladWspolrzednych) As Double
+        If siatka Is Nothing OrElse Not siatka.Poprawna OrElse Not Poprawny Then Return 0
+        Dim r = UtworzRzutowanie(uklad)
+        Dim bokX As Double = siatka.BokSegmentu * r.SkalaX, bokY As Double = siatka.BokSegmentu * r.SkalaY
+        Dim pas As Double = 2 * Math.Max(0, SzerokoscMetry) + bokX + bokY
+        Dim dlugosc As Double = 0
+        For Each l In Linie
+            For i = 1 To l.Count - 1
+                Dim p = r.Punkt(l(i - 1)), q = r.Punkt(l(i))
+                dlugosc += Math.Sqrt((q.X - p.X) ^ 2 + (q.Y - p.Y) ^ 2)
+            Next
+        Next
+        Dim pole As Double = dlugosc * pas + Linie.Count * pas * pas
+        Return Math.Min(siatka.LiczbaSegmentow, pole / (bokX * bokY))
     End Function
 
     ''' <summary>Odległość odcinka AB od prostokąta (0, gdy odcinek przecina prostokąt lub leży w nim).</summary>

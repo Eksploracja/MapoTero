@@ -127,7 +127,9 @@ Public Module Program
     Public Function Wartosc(tekst As String, Optional domyslna As Double = 0) As Double
         If String.IsNullOrWhiteSpace(tekst) Then Return domyslna
         Dim wynik As Double
-        If Double.TryParse(tekst.Trim().Replace(","c, "."c), NumberStyles.Float, CultureInfo.InvariantCulture, wynik) Then Return wynik
+        'NaN i nieskończoność ("nan", "1e999") nie są liczbami dla użytkownika - dawniej kończyły się wyjątkiem przy zaokrąglaniu
+        If Double.TryParse(tekst.Trim().Replace(","c, "."c), NumberStyles.Float, CultureInfo.InvariantCulture, wynik) AndAlso
+           Not Double.IsNaN(wynik) AndAlso Not Double.IsInfinity(wynik) Then Return wynik
         Return domyslna
     End Function
 

@@ -135,7 +135,8 @@ Public Class Usuwanie_p_seg
     Private Function PlikiPonizejRozmiaru() As List(Of String)
         Dim progKB As Double = Wartosc(txtProgKB.Text)
         If progKB <= 0 Then Return New List(Of String)()
-        Dim progBajtow As Long = CLng(Math.Round(progKB * 1024.0))
+        'bardzo duża wartość (np. 1e20) przekraczała zakres Long
+        Dim progBajtow As Long = CLng(Math.Min(1.0E+18, Math.Round(progKB * 1024.0)))
         Dim wynik As New List(Of String)()
         For Each fi In _plikiBiezace
             If fi.Length < progBajtow Then
