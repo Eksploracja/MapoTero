@@ -1,5 +1,6 @@
 # Kompilacja programu i testy jednostkowe przy każdej zmianie w repozytorium.
-# Gotowy program (folder do skopiowania na dysk) jest dostępny w zakładce Actions jako artefakt "MapoTero".
+# Gotowy program - jeden plik MapoTero.exe z folderem warstwy (jedyna wydawana wersja programu) - jest dostępny
+# w zakładce Actions jako artefakt "MapoTero".
 name: Kompilacja i testy
 
 on:
@@ -21,10 +22,10 @@ jobs:
         run: dotnet test MapoTero.Tests/MapoTero.Tests.vbproj -c Release
 
       - name: Kompilacja programu
-        run: dotnet publish MapoTero_v3.vbproj -c Release -o publikacja
+        run: dotnet publish MapoTero_v3.vbproj -c Release -o MapoTero_SingleFile
 
       - name: Program do pobrania
         uses: actions/upload-artifact@v4
         with:
           name: MapoTero
-          path: publikacja
+          path: MapoTero_SingleFile

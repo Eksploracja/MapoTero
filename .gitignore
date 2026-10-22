@@ -342,7 +342,5 @@ healthchecksdb
 # Local user runtime settings
 lastsettings.txt
 
-# Foldery publikacji
-MapoTero/
+# Program do uruchomienia: jeden plik MapoTero.exe (jedyna rozwijana wersja programu)
 MapoTero_SingleFile/
-publikacja/

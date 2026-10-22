@@ -1,6 +1,7 @@
 # Publikacja wydania programu: po wysłaniu tagu z numerem wersji (np. v3.12) albo po ręcznym uruchomieniu
-# (zakładka Actions > Wydanie > Run workflow, z numerem wersji) program jest testowany, kompilowany, pakowany
-# do archiwum ZIP i publikowany w zakładce Releases z opisem z pliku .github/opis_wydania.md.
+# (zakładka Actions > Wydanie > Run workflow, z numerem wersji) program jest testowany, publikowany jako jeden plik
+# MapoTero.exe (jedyna wydawana wersja programu), pakowany razem z folderem warstwy do archiwum ZIP
+# i publikowany w zakładce Releases z opisem z pliku .github/opis_wydania.md.
 name: Wydanie
 
 on:
@@ -32,11 +33,11 @@ jobs:
         run: dotnet test MapoTero.Tests/MapoTero.Tests.vbproj -c Release
 
       - name: Kompilacja programu
-        run: dotnet publish MapoTero_v3.vbproj -c Release -o MapoTero
+        run: dotnet publish MapoTero_v3.vbproj -c Release -o MapoTero_SingleFile
 
       - name: Archiwum ZIP
         shell: pwsh
-        run: Compress-Archive -Path MapoTero -DestinationPath "MapoTero_${{ env.WERSJA }}.zip"
+        run: Compress-Archive -Path MapoTero_SingleFile\* -DestinationPath "MapoTero_${{ env.WERSJA }}.zip"
 
       - name: Publikacja wydania
         uses: softprops/action-gh-release@v2
