@@ -73,6 +73,7 @@ Partial Class Form1
         Me.btnDodajSerwer = New System.Windows.Forms.Button()
         Me.ScalanieToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.EksportToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.EksportCadToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.ZaawansowanyMbtilesToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.NakładanieWarstwNaSiebieToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.UsuwaniePustychSegmentówToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
@@ -393,7 +394,7 @@ Partial Class Form1
         '
         'NarzedziaToolStripMenuItem
         '
-        Me.NarzedziaToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.DodajSerwerToolStripMenuItem, Me.NarzedziaSeparator1, Me.ScalanieToolStripMenuItem, Me.EksportToolStripMenuItem, Me.ZaawansowanyMbtilesToolStripMenuItem, Me.NakładanieWarstwNaSiebieToolStripMenuItem, Me.UsuwaniePustychSegmentówToolStripMenuItem})
+        Me.NarzedziaToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.DodajSerwerToolStripMenuItem, Me.NarzedziaSeparator1, Me.ScalanieToolStripMenuItem, Me.EksportToolStripMenuItem, Me.EksportCadToolStripMenuItem, Me.ZaawansowanyMbtilesToolStripMenuItem, Me.NakładanieWarstwNaSiebieToolStripMenuItem, Me.UsuwaniePustychSegmentówToolStripMenuItem})
         Me.NarzedziaToolStripMenuItem.Name = "NarzedziaToolStripMenuItem"
         Me.NarzedziaToolStripMenuItem.Size = New System.Drawing.Size(70, 20)
         Me.NarzedziaToolStripMenuItem.Text = "Narzędzia"
@@ -424,6 +425,13 @@ Partial Class Form1
         Me.EksportToolStripMenuItem.ShortcutKeys = CType((System.Windows.Forms.Keys.Control Or System.Windows.Forms.Keys.E), System.Windows.Forms.Keys)
         Me.EksportToolStripMenuItem.Size = New System.Drawing.Size(315, 22)
         Me.EksportToolStripMenuItem.Text = "Eksport do KMZ, MBTiles, SQLiteDB, OruxMaps"
+        '
+        'EksportCadToolStripMenuItem
+        '
+        Me.EksportCadToolStripMenuItem.Name = "EksportCadToolStripMenuItem"
+        Me.EksportCadToolStripMenuItem.Size = New System.Drawing.Size(315, 22)
+        Me.EksportCadToolStripMenuItem.Text = "Eksport do CAD (DXF, skrypt SCR)..."
+        Me.EksportCadToolStripMenuItem.ToolTipText = "Rysunek DXF i skrypt SCR dla AutoCAD, AutoCAD LT, BricsCAD, ZWCAD: rastry na właściwych współrzędnych, obrys i siatka segmentów"
         '
         'NakładanieWarstwNaSiebieToolStripMenuItem
         '
@@ -1496,6 +1504,7 @@ Partial Class Form1
     Friend WithEvents Label67 As System.Windows.Forms.Label
     Friend WithEvents ScalanieToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents EksportToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
+    Friend WithEvents EksportCadToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents ZaawansowanyMbtilesToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents grpRozmiarSiatki As System.Windows.Forms.GroupBox
     Friend WithEvents txtLiczbaWierszy As System.Windows.Forms.TextBox

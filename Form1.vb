@@ -1690,6 +1690,12 @@ Public Class Form1
         FormEksport.ShowDialog()
     End Sub
 
+    Private Sub EksportCadToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles EksportCadToolStripMenuItem.Click
+        Using f As New FormEksportCad()
+            f.ShowDialog(Me)
+        End Using
+    End Sub
+
     Private Sub ZaawansowanyMbtilesToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles ZaawansowanyMbtilesToolStripMenuItem.Click
         FormZaawansowanyMbtiles.ShowDialog()
     End Sub
