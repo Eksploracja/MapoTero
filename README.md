@@ -23,7 +23,7 @@ Program pobiera mapy, dzieląc wybrany obszar na siatkę kwadratowych segmentów
 ## Pobieranie
 
 Program to jeden plik **MapoTero.exe** (wersja 64-bitowa dla systemu Windows), dostarczany w paczce ZIP razem z folderem `warstwy` (zbiory map):
-* 📥 **[Pobierz najnowszą wersję MapoTero z GitHub Releases (MapoTero_v3.14.zip)](https://github.com/Eksploracja/MapoTero/releases/download/v3.14/MapoTero_v3.14.zip)** – po rozpakowaniu uruchom `MapoTero.exe` (folder `warstwy` musi leżeć obok niego).
+* 📥 **[Pobierz najnowszą wersję MapoTero z GitHub Releases (MapoTero_v3.15.zip)](https://github.com/Eksploracja/MapoTero/releases/download/v3.15/MapoTero_v3.15.zip)** – po rozpakowaniu uruchom `MapoTero.exe` (folder `warstwy` musi leżeć obok niego).
 * 📦 Wszystkie wydania, kody źródłowe i historia wersji: **[GitHub Releases](https://github.com/Eksploracja/MapoTero/releases/latest)**.
 
 > [!NOTE]
@@ -36,8 +36,15 @@ Program to jeden plik **MapoTero.exe** (wersja 64-bitowa dla systemu Windows), d
 
 ## Aktualności
 
+* **23.10.2026 – Wersja 3.15:**
+  * **Kreator dodawania serwerów WMS i WMTS (menu *Narzędzia* lub przycisk `[+]` przy liście map):** automatyczna analiza dokumentu `GetCapabilities` (WMS 1.3.0, WMS 1.1.1 oraz WMTS 1.0.0), prezentacja drzewa warstw z wyszukiwarką/filtrem, matematyczne wyliczanie zalecanego rozmiaru piksela ze skali minimalnej, weryfikacja obsługiwanych układów CRS, podgląd próbnego kafelka 256×256 px i bezpośredni zapis nowego zbioru map do katalogu `warstwy/` (także w folderze użytkownika przy braku uprawnień w Program Files); ponawianie chwilowych błędów HTTP i poprawne polskie znaki w dokumentach ISO-8859-2,
+  * **Siatka segmentów na mapie i zmiana zasięgu uchwytami:** po zaznaczeniu obszaru prawym przyciskiem myszy na mapie widać siatkę segmentów; uchwyty w narożnikach i na bokach przesuwają krawędzie o pełne segmenty, a uchwyt w środku przesuwa całą siatkę (Esc przywraca poprzedni zasięg); siatkę można wyłączyć w ustawieniach,
+  * **Wielowarstwowy i wieloskalowy MBTiles (menu *Narzędzia*):** kompilacja kilku pobranych sesji do jednego pliku MBTiles - każda warstwa widoczna w wybranym zakresie powiększeń (np. z daleka topo 1:100k, w zbliżeniu topo 1:10k, a najbliżej ortofotomapa) albo nałożona na inne z kryciem, trybem mieszania i odcieniami szarości; podgląd wybranego poziomu powiększenia i wbudowana pomoc,
+  * **Zbiory map:** zbiór *ortofotomapa* korzysta z usługi Geoportalu HighResolution, a adresy zbiorów map z protokołem https,
+  * **Bezpieczniejsze pobieranie:** w trakcie pobierania nie można zmienić warstw, wczytać innej sesji ani scalać map; błąd jednego segmentu nie przerywa całego pobierania; obsługa obszarów do 10 mln segmentów i szybkie wyznaczanie korytarza trasy przy małym segmencie; pobieranie innego obszaru do folderu z segmentami innej sesji proponuje nowy podfolder, a przedrostek nazw segmentów nie może zawierać znaków niedozwolonych w nazwach plików,
+  * **Poprawki:** opcja *pobieraj tylko segmenty o numerze wyższym niż ostatni pobrany* działa zgodnie z opisem, scalanie zachowuje przezroczystość PNG i GeoTIFF i nie zajmuje nadmiernie pamięci, poprawny plik `.wld` dla WGS84, usuwanie pustych segmentów do Kosza z potwierdzeniem, zapamiętywanie opcji widoku i ustawień nowej sesji, domyślny limit czasu odpowiedzi 120 s,
+  * **Jeden plik programu:** program to pojedynczy plik `MapoTero.exe` z folderem `warstwy` obok niego.
 * **20.10.2026 – Wersja 3.14:**
-  * **Kreator dodawania serwerów WMS i WMTS (menu *Narzędzia* lub przycisk `[+]` przy liście map):** automatyczna analiza dokumentu `GetCapabilities` (WMS 1.3.0, WMS 1.1.1 oraz WMTS 1.0.0), prezentacja drzewa warstw z wyszukiwarką/filtrem, matematyczne wyliczanie zalecanego rozmiaru piksela ze skali minimalnej, weryfikacja obsługiwanych układów CRS, podgląd próbnego kafelka 256×256 px i bezpośredni zapis nowego zbioru map do katalogu `warstwy/` (także w folderze użytkownika przy braku uprawnień w Program Files),
   * **Obszar pobierania wzdłuż trasy** (menu *Sesja pobierania*): po wskazaniu pliku GPX, KML lub KMZ (np. trasy zaplanowanej w Mapy.com, Komoot czy Locus Map) i szerokości pasa pobierane są tylko segmenty leżące wzdłuż trasy, a nie cały prostokąt - przy trasie ukośnej lub krętej wielokrotnie mniej danych; trasa i wybrane segmenty widoczne są na mapie, a korytarz zapisywany jest w folderze sesji (`korytarz.txt`),
   * **Przezroczyste nakładki:** opcja *przezroczyste tło* w ustawieniach (parametr `TRANSPARENT=TRUE` zapytań WMS dla segmentów PNG / GIF), w eksporcie opcja *nakładka* (kafle PNG, w MBTiles typ `overlay`) oraz zamiana białego tła na przezroczyste dla serwerów, które przezroczystości nie obsługują,
   * **Łączenie warstw podczas eksportu:** na mapę można nałożyć warstwy z innych folderów sesji (np. granice działek lub cieniowanie rzeźby na ortofotomapie) z regulacją krycia - także pobrane w innym układzie współrzędnych,

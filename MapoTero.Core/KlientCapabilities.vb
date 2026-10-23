@@ -283,7 +283,7 @@ Public NotInheritable Class KlientCapabilities
         Using ctsTimeout As New CancellationTokenSource(TimeSpan.FromSeconds(Math.Max(5, timeoutSekundy))),
               ctsLinked = CancellationTokenSource.CreateLinkedTokenSource(token, ctsTimeout.Token),
               klient As New HttpClient(obsluga)
-            klient.DefaultRequestHeaders.UserAgent.ParseAdd("MapoTero/3.14")
+            klient.DefaultRequestHeaders.UserAgent.ParseAdd("MapoTero/3.15")
             Dim odp As HttpResponseMessage
             Try
                 odp = Await klient.GetAsync(url, HttpCompletionOption.ResponseContentRead, ctsLinked.Token).ConfigureAwait(False)

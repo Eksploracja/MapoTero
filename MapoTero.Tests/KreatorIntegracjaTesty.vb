@@ -165,7 +165,7 @@ Public Class KreatorIntegracjaTesty
         Dim tileUrl = plan.AdresKafla(wierszKafla, kolumnaKafla)
 
         Using klient As New System.Net.Http.HttpClient()
-            klient.DefaultRequestHeaders.UserAgent.ParseAdd("MapoTero/3.14")
+            klient.DefaultRequestHeaders.UserAgent.ParseAdd("MapoTero/3.15")
             Dim odp = Await klient.GetAsync(tileUrl)
             Dim bajty = Await odp.Content.ReadAsByteArrayAsync()
             Assert.True(odp.IsSuccessStatusCode)
@@ -196,7 +196,7 @@ Public Class KreatorIntegracjaTesty
         Dim getMapUrl = Wms.ZapytanieGetMap(adresWms, {raster.IdentyfikatorNumeryczny}, UkladWspolrzednych.PL1992, z, "image/png", 256, 256, False, True)
 
         Using klient As New System.Net.Http.HttpClient()
-            klient.DefaultRequestHeaders.UserAgent.ParseAdd("MapoTero/3.14")
+            klient.DefaultRequestHeaders.UserAgent.ParseAdd("MapoTero/3.15")
             Dim odp = Await klient.GetAsync(getMapUrl)
             Dim bajty = Await odp.Content.ReadAsByteArrayAsync()
             Assert.True(odp.IsSuccessStatusCode)

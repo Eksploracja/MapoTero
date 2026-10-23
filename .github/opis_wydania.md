@@ -1,13 +1,35 @@
-MapoTero 3.14 - obszar pobierania wzdłuż trasy (korytarz GPX), przezroczyste nakładki, łączenie warstw, eksport do SQLiteDB i OruxMaps, rozciągane okno główne.
+MapoTero 3.15 - kreator serwerów WMS/WMTS, siatka segmentów na mapie ze zmianą zasięgu uchwytami, wielowarstwowy i wieloskalowy MBTiles, bezpieczniejsze pobieranie i wiele poprawek.
 
 ## Instalacja
 
-1. Pobierz plik **[MapoTero_v3.14.zip](https://github.com/Eksploracja/MapoTero/releases/download/v3.14/MapoTero_v3.14.zip)** (bezpośrednie pobranie lub poniżej w sekcji *Assets*).
+1. Pobierz plik **[MapoTero_v3.15.zip](https://github.com/Eksploracja/MapoTero/releases/download/v3.15/MapoTero_v3.15.zip)** (bezpośrednie pobranie lub poniżej w sekcji *Assets*).
 2. Przed rozpakowaniem kliknij plik prawym przyciskiem myszy, wybierz *Właściwości*, zaznacz **Odblokuj** i kliknij *OK* - wtedy Windows nie będzie blokował uruchomienia programu (program nie ma podpisu cyfrowego, więc filtr SmartScreen traktuje go jako nierozpoznaną aplikację; można też w oknie SmartScreen kliknąć *Więcej informacji* > *Uruchom mimo to*).
 3. Rozpakuj archiwum do dowolnego folderu i uruchom **MapoTero.exe** - program to jeden plik, obok którego musi leżeć folder `warstwy` (zbiory map).
 4. Program wymaga środowiska [.NET Desktop Runtime 8 (x64)](https://dotnet.microsoft.com/download/dotnet/8.0) - jeśli nie jest zainstalowane, Windows zaproponuje jego pobranie przy pierwszym uruchomieniu.
 
-Ustawienia i zbiory map z poprzednich wersji (plik `lastsettings.txt`, folder `warstwy`) są w pełni zgodne z wersją 3.14.
+Ustawienia i zbiory map z poprzednich wersji (plik `lastsettings.txt`, folder `warstwy`) są w pełni zgodne z wersją 3.15.
+
+## Zmiany w wersji 3.15
+
+* **Kreator dodawania serwerów WMS i WMTS** (menu *Narzędzia* lub przycisk `[+]` przy liście map): analiza dokumentu `GetCapabilities` (WMS 1.3.0, WMS 1.1.1, WMTS 1.0.0), drzewo warstw z wyszukiwarką, zalecany rozmiar piksela ze skali minimalnej, sprawdzenie obsługiwanych układów, podgląd próbnego kafla i zapis nowego zbioru map do folderu `warstwy`; ponawianie chwilowych błędów HTTP i poprawne polskie znaki w dokumentach ISO-8859-2.
+* **Siatka segmentów na mapie i zmiana zasięgu uchwytami:**
+  * Po zaznaczeniu obszaru prawym przyciskiem myszy na mapie rysowana jest siatka segmentów (opcję można wyłączyć w ustawieniach).
+  * Uchwyty w narożnikach i na środkach boków przesuwają krawędzie o pełne segmenty, uchwyt w środku przesuwa całą siatkę; Esc przywraca poprzedni zasięg.
+* **Wielowarstwowy i wieloskalowy MBTiles** (menu *Narzędzia*): kompilacja kilku pobranych sesji do jednego pliku MBTiles - każda warstwa widoczna w wybranym zakresie powiększeń (np. z daleka topo 1:100k, w zbliżeniu topo 1:10k, najbliżej ortofotomapa) albo nałożona na inne z kryciem, trybem mieszania i odcieniami szarości; podgląd poziomu powiększenia i wbudowana pomoc.
+* **Bezpieczniejsze pobieranie:**
+  * W trakcie pobierania nie można zmienić warstw, dodać serwera, wczytać innej sesji, scalać ani nakładać map.
+  * Błąd jednego segmentu (np. zapisu georeferencji) nie przerywa całego pobierania; obsługa obszarów do 10 mln segmentów, usuwanie starych plików `.tmp`.
+  * Szybkie wyznaczanie korytarza trasy także przy małym segmencie.
+  * Pobieranie innego obszaru do folderu z segmentami innej sesji proponuje nowy podfolder; przedrostek nazw segmentów nie może zawierać znaków niedozwolonych w nazwach plików.
+* **Poprawki:**
+  * Opcja *pobieraj tylko segmenty o numerze wyższym niż ostatni pobrany* działa zgodnie z opisem.
+  * Scalanie zachowuje przezroczystość w PNG i GeoTIFF bezstratnym i ogranicza zużycie pamięci; poprawny plik `.wld` dla układu WGS84.
+  * Usuwanie pustych segmentów z potwierdzeniem, do Kosza, z informacją o wyniku.
+  * Zapamiętywanie opcji widoku okna głównego oraz przedrostka, formatu i przezroczystości nowej sesji; warstwy sesji z `conf.txt` nie znikają po ponownym uruchomieniu.
+  * Eksport: średnik w ścieżce, stare pliki `-wal`; domyślny limit czasu odpowiedzi serwera 120 s.
+* **Zbiory map:** zbiór *ortofotomapa* korzysta z usługi Geoportalu HighResolution, adresy zbiorów map z protokołem https.
+* **Jeden plik programu:** program to pojedynczy plik `MapoTero.exe`, obok którego leży folder `warstwy`.
+* **Testy jednostkowe:** 593 testy zakończone sukcesem.
 
 ## Zmiany w wersji 3.14
 
