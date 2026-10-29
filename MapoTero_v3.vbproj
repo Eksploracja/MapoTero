@@ -1,13 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <!-- Program MapoTero (Windows Forms, .NET 8). Logika niezależna od interfejsu - w bibliotece MapoTero.Core.
-       Kompilacja: Visual Studio 2022 (17.8 lub nowszy) albo polecenie: dotnet build MapoTero_v3.vbproj -c Release
+  <!-- Program MapoTero (Windows Forms, .NET 10). Logika niezależna od interfejsu - w bibliotece MapoTero.Core.
+       Kompilacja: Visual Studio 2026 (18.0 lub nowszy) albo polecenie: dotnet build MapoTero_v3.vbproj -c Release
        (folder bin\ to tylko pliki pośrednie kompilacji - nie jest wersją programu).
        Program do uruchomienia i wydania: dotnet publish MapoTero_v3.vbproj -c Release -o MapoTero_SingleFile -->
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net8.0-windows</TargetFramework>
+    <TargetFramework>net10.0-windows</TargetFramework>
     <UseWindowsForms>true</UseWindowsForms>
     <!-- kompilacja (bez uruchamiania) możliwa także poza Windows, np. w GitHub Actions na Linuksie -->
     <EnableWindowsTargeting>true</EnableWindowsTargeting>
@@ -44,7 +44,7 @@
     <!-- biblioteka i testy mają własne projekty w podfolderach -->
     <DefaultItemExcludes>$(DefaultItemExcludes);MapoTero.Core\**;MapoTero.Tests\**;packages\**</DefaultItemExcludes>
     <!-- 4201x/4235x - ostrzeżenia VB o niejawnych konwersjach i składni z poprzednich wersji kodu,
-         SYSLIB0014 - ServicePointManager (w .NET 8 bez znaczenia, potrzebny przy kompilacji dla .NET Framework) -->
+         SYSLIB0014 - ServicePointManager (w .NET 10 bez znaczenia, potrzebny przy kompilacji dla .NET Framework) -->
     <NoWarn>$(NoWarn);42016;41999;42017;42018;42019;42032;42036;42020;42021;42022;42353;42354;42355;SYSLIB0014</NoWarn>
   </PropertyGroup>
 
@@ -70,6 +70,9 @@
     <!-- wykluczenie zbędnego Entity Framework 6 ciągniętego przez zależność SQLite z GMap.NET -->
     <PackageReference Include="EntityFramework" Version="6.4.4" ExcludeAssets="all" />
     <PackageReference Include="System.Data.SQLite.EF6" Version="1.0.115.5" ExcludeAssets="all" />
+    <!-- nieużywany klient MS SQL ciągnięty przez GMap.NET: wersja bez znanych luk (ostrzeżenia NU1902/NU1903)
+         i bez jego plików w programie -->
+    <PackageReference Include="System.Data.SqlClient" Version="4.9.0" ExcludeAssets="all" />
   </ItemGroup>
 
   <!-- Ochrona przed publikacją wersji wieloplikowej (np. po zmianie ustawień albo z parametrem -p:PublishSingleFile=false):

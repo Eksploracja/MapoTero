@@ -138,7 +138,7 @@ Zbiory map to pliki tekstowe w katalogu `warstwy`: w pierwszym wierszu adres ser
 
 ## Kompilacja
 
-* Wymagany Visual Studio 2022 (wersja 17.8 lub nowsza) z obsługą .NET 8 albo samo .NET 8 SDK.
+* Wymagany Visual Studio 2026 (wersja 18.0 lub nowsza) z obsługą .NET 10 albo samo .NET 10 SDK (Visual Studio 2022 nie kompiluje projektów .NET 10).
 * **Program wydawany jest wyłącznie jako jeden plik `MapoTero.exe`.** Tworzy go polecenie
   `dotnet publish MapoTero_v3.vbproj -c Release -o MapoTero_SingleFile` - w folderze `MapoTero_SingleFile` powstaje `MapoTero.exe`
   z folderem `warstwy` i plikiem `README.md`. Projekt nie pozwala opublikować wersji wieloplikowej.
@@ -146,7 +146,7 @@ Zbiory map to pliki tekstowe w katalogu `warstwy`: w pierwszym wierszu adres ser
   testy jednostkowe: `dotnet test MapoTero.Tests/MapoTero.Tests.vbproj`.
 * Każda zmiana w repozytorium jest kompilowana i testowana w GitHub Actions; gotowy program (`MapoTero.exe` z folderem `warstwy`)
   można pobrać jako artefakt *MapoTero* z zakładki **Actions**.
-* Do uruchomienia programu potrzebne jest środowisko [.NET Desktop Runtime 8](https://dotnet.microsoft.com/download/dotnet/8.0) (x64).
+* Do uruchomienia programu potrzebne jest środowisko [.NET Desktop Runtime 10](https://dotnet.microsoft.com/download/dotnet/10.0) (x64).
 
 ---
 

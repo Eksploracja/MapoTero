@@ -32,6 +32,7 @@ Imports MapoTero.Core
 Public Class FormDodajSerwer
 
     ''' <summary>Nazwa nowo dodanego zbioru map (plik bez rozszerzenia .txt) po zatwierdzeniu formularza.</summary>
+    <System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)>
     Public Property WynikNazwaZbioru As String = ""
 
     Private _wynikCap As WynikCapabilities

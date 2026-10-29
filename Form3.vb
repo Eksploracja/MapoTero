@@ -31,6 +31,7 @@ Public Class Form3
     ''' Folder segmentów do scalenia zamiast folderu bieżącej sesji (okno otwarte z eksportu do CAD); pusty - folder sesji.
     ''' Arkusz wstawiany do rysunku CAD potrzebuje położenia - zaznaczany jest wtedy plik world file.
     ''' </summary>
+    <System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)>
     Public Property FolderPoczatkowy As String = ""
 
     ''' <summary>Ścieżka zapisanego arkusza (pusta, gdy nie scalono segmentów).</summary>

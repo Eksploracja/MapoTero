@@ -153,6 +153,47 @@ Public Module Program
         Return mnoga
     End Function
 
+    ''' <summary>Adres zgłaszania błędów programu.</summary>
+    Public Const AdresZgloszenBledow As String = "https://github.com/Eksploracja/MapoTero/issues"
+
+    ''' <summary>Plik z opisem nieobsłużonych błędów programu (w folderze danych).</summary>
+    Public Const NazwaPlikuAwarii As String = "awarie.log"
+
+    ''' <summary>Maksymalny rozmiar pliku awarii - większy jest zaczynany od nowa.</summary>
+    Private Const MaksRozmiarPlikuAwarii As Long = 1024 * 1024
+
+    Private ReadOnly BlokadaAwarii As New Object()
+
+    ''' <summary>
+    ''' Dopisuje opis nieobsłużonego wyjątku (data, wersja programu, system, .NET, stos wywołań) do pliku awarie.log
+    ''' w folderze danych programu - a gdy nie jest on jeszcze ustalony, w %LocalAppData%\MapoTero.
+    ''' Zwraca ścieżkę pliku albo pusty tekst, gdy zapis się nie udał (zapis awarii sam nie może zgłosić wyjątku).
+    ''' </summary>
+    Public Function ZapiszAwarie(ex As Exception, Optional folder As String = Nothing) As String
+        Try
+            If String.IsNullOrEmpty(folder) Then folder = FolderDanych
+            If String.IsNullOrEmpty(folder) Then folder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "MapoTero")
+            Directory.CreateDirectory(folder)
+            Dim plik As String = Path.Combine(folder, NazwaPlikuAwarii)
+
+            Dim opis As New StringBuilder()
+            opis.AppendLine("==== " & DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture))
+            opis.AppendLine("MapoTero " & GetType(Program).Assembly.GetName().Version.ToString() & ", " &
+                            Runtime.InteropServices.RuntimeInformation.OSDescription & ", " &
+                            Runtime.InteropServices.RuntimeInformation.FrameworkDescription)
+            opis.AppendLine(If(ex Is Nothing, "(brak opisu wyjątku)", ex.ToString()))
+            opis.AppendLine()
+
+            SyncLock BlokadaAwarii
+                If File.Exists(plik) AndAlso New FileInfo(plik).Length > MaksRozmiarPlikuAwarii Then File.Delete(plik)
+                File.AppendAllText(plik, opis.ToString(), Encoding.UTF8)
+            End SyncLock
+            Return plik
+        Catch
+            Return ""
+        End Try
+    End Function
+
     ''' <summary>Otwiera folder w Eksploratorze Windows.</summary>
     Public Sub OtworzFolder(folder As String)
         Try

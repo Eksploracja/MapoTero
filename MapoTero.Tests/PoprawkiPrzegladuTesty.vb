@@ -213,4 +213,37 @@ Public Class PoprawkiPrzegladuTesty
         End Try
     End Function
 
+    <Fact>
+    Public Sub ZapisAwarii_DopisujeOpisBleduIOgraniczaRozmiarPliku()
+        Dim folder = Path.Combine(Path.GetTempPath(), "MapoTero_awarie_" & Guid.NewGuid().ToString("N"))
+        Try
+            Dim blad As Exception
+            Try
+                Throw New InvalidOperationException("błąd testowy ąę")
+            Catch ex As Exception
+                blad = ex
+            End Try
+
+            Dim plik = MapoTero.Program.ZapiszAwarie(blad, folder)
+            Assert.Equal(Path.Combine(folder, MapoTero.Program.NazwaPlikuAwarii), plik)
+            MapoTero.Program.ZapiszAwarie(blad, folder)
+            Dim tekst = File.ReadAllText(plik, Encoding.UTF8)
+            Assert.Equal(2, tekst.Split({"==== "}, StringSplitOptions.None).Length - 1)
+            Assert.Contains("InvalidOperationException: błąd testowy ąę", tekst)
+            Assert.Contains("MapoTero ", tekst)
+            Assert.Contains(NameOf(ZapisAwarii_DopisujeOpisBleduIOgraniczaRozmiarPliku), tekst)
+
+            'zbyt duży plik zaczynany od nowa
+            File.WriteAllText(plik, New String("x"c, 1024 * 1024 + 1))
+            MapoTero.Program.ZapiszAwarie(Nothing, folder)
+            Assert.True(New FileInfo(plik).Length < 10000)
+            Assert.Contains("brak opisu wyjątku", File.ReadAllText(plik, Encoding.UTF8))
+        Finally
+            Try
+                Directory.Delete(folder, True)
+            Catch
+            End Try
+        End Try
+    End Sub
+
 End Class

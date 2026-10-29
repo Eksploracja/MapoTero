@@ -93,6 +93,7 @@ Public Class Form1
 #Region "Dostęp dla innych okien"
 
     ''' <summary>Folder segmentów bieżącej sesji (wyświetlany na pasku stanu).</summary>
+    <System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)>
     Public Property FolderSesji As String
         Get
             Return stFolder.Text
@@ -125,6 +126,7 @@ Public Class Form1
     End Property
 
     ''' <summary>Bok segmentu w pikselach (pole formularza).</summary>
+    <System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)>
     Public Property BokSegmentu As String
         Get
             Return txtBokSegmentu.Text
@@ -135,6 +137,7 @@ Public Class Form1
     End Property
 
     ''' <summary>Rozmiar piksela (pole formularza).</summary>
+    <System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)>
     Public Property RozmiarPiksela As String
         Get
             Return txtRozmiarPiksela.Text
