@@ -46,6 +46,11 @@ Public Class ZadanieCad
     Public Property RysujTrase As Boolean = True
     ''' <summary>Opis mapy (źródło, data pobrania, układ) wpisywany w rysunku pod obrysem; pusty - bez opisu.</summary>
     Public Property Opis As String = ""
+    ''' <summary>
+    ''' Obszar zaznaczony na mapie, gdy jest mniejszy od siatki powiększonej do pełnych segmentów - rysowany razem z obrysem
+    ''' na osobnej warstwie; Nothing - pokrywa się z siatką (albo obszar wyznacza korytarz trasy).
+    ''' </summary>
+    Public Property ObszarZaznaczenia As Zasieg?
 
     ''' <summary>Folder pliku DXF: rastry w nim lub w jego podfolderach zapisywane są ze ścieżką względną; pusty - ścieżki pełne.</summary>
     Public Property FolderRysunku As String = ""
@@ -77,6 +82,7 @@ Public NotInheritable Class EksportCad
     Public Const WarstwaNumerow As String = "MAPOTERO_NUMERY"
     Public Const WarstwaTrasy As String = "MAPOTERO_TRASA"
     Public Const WarstwaOpisu As String = "MAPOTERO_OPIS"
+    Public Const WarstwaZaznaczenia As String = "MAPOTERO_ZAZNACZENIE"
 
     ''' <summary>Najwięcej rastrów w jednym rysunku - przy większej liczbie lepiej wstawić scalony arkusz.</summary>
     Public Const MaksRastrow As Integer = 10000
@@ -116,6 +122,13 @@ Public NotInheritable Class EksportCad
                 Next
                 If linia.Count >= 2 Then z.Trasa.Add(linia)
             Next
+        Else
+            'zaznaczenie z mapy: siatka rośnie w górę i w prawo do pełnych segmentów - dokładny zasięg zaznaczenia osobno
+            Dim zs = siatka.ZasiegSiatki
+            Dim tolerancja As Double = siatka.RozmiarPiksela / 2
+            If zs.XGora - siatka.Obszar.XGora > tolerancja OrElse zs.YPrawy - siatka.Obszar.YPrawy > tolerancja Then
+                z.ObszarZaznaczenia = siatka.Obszar
+            End If
         End If
 
         If wstawSegmenty Then
@@ -287,14 +300,18 @@ Public NotInheritable Class EksportCad
         Return z.SegmentyKorytarza IsNot Nothing AndAlso z.SegmentyKorytarza.Count <= MaksProstokatow
     End Function
 
-    ''' <summary>Linie całej siatki: pionowe (granice kolumn) i poziome (granice wierszy) - pary punktów.</summary>
-    Private Shared Iterator Function LinieSiatki(s As Siatka) As IEnumerable(Of PunktXY())
+    ''' <summary>
+    ''' Linie całej siatki: pionowe (granice kolumn) i poziome (granice wierszy) - pary punktów. Bez krawędzi zewnętrznych,
+    ''' gdy rysowany jest obrys: pokrywałyby się z nim, a programy CAD różnie rozstrzygają, która z dwóch linii jest na wierzchu.
+    ''' </summary>
+    Private Shared Iterator Function LinieSiatki(s As Siatka, bezKrawedzi As Boolean) As IEnumerable(Of PunktXY())
         Dim zs = s.ZasiegSiatki
-        For k = 0 To s.LiczbaKolumn
+        Dim od As Integer = If(bezKrawedzi, 1, 0)
+        For k = od To s.LiczbaKolumn - od
             Dim y As Double = s.Obszar.YLewy + k * s.BokSegmentu
             Yield {New PunktXY(zs.XDol, y), New PunktXY(zs.XGora, y)}
         Next
-        For w = 0 To s.LiczbaWierszy
+        For w = od To s.LiczbaWierszy - od
             Dim x As Double = s.Obszar.XDol + w * s.BokSegmentu
             Yield {New PunktXY(x, zs.YLewy), New PunktXY(x, zs.YPrawy)}
         Next
@@ -384,7 +401,8 @@ Public NotInheritable Class EksportCad
 
         Dim warstwy As New List(Of Tuple(Of String, Integer)) From {
             Tuple.Create("0", 7), Tuple.Create(WarstwaRastrow, 7), Tuple.Create(WarstwaObrysu, 1), Tuple.Create(WarstwaSiatki, 8),
-            Tuple.Create(WarstwaNumerow, 8), Tuple.Create(WarstwaTrasy, 6), Tuple.Create(WarstwaOpisu, 7)}
+            Tuple.Create(WarstwaNumerow, 8), Tuple.Create(WarstwaTrasy, 6), Tuple.Create(WarstwaOpisu, 7),
+            Tuple.Create(WarstwaZaznaczenia, 3)}
         tresc.Tablica("LAYER", hLayer, warstwy.Count)
         For Each w In warstwy
             tresc.K(0, "LAYER").K(5, tresc.Uchwyt()).K(330, hLayer).K(100, "AcDbSymbolTableRecord").K(100, "AcDbLayerTableRecord")
@@ -466,7 +484,7 @@ Public NotInheritable Class EksportCad
                         tresc.Polilinia(hModel, WarstwaSiatki, {q.LewyDolny, q.PrawyDolny, q.PrawyGorny, q.LewyGorny}, True)
                     Next
                 Else
-                    For Each odc In LinieSiatki(s)
+                    For Each odc In LinieSiatki(s, z.RysujObrys)
                         tresc.K(0, "LINE").K(5, tresc.Uchwyt()).K(330, hModel).K(100, "AcDbEntity").K(8, WarstwaSiatki).K(100, "AcDbLine")
                         tresc.K(10, L(odc(0).Y)).K(20, L(odc(0).X)).K(30, "0").K(11, L(odc(1).Y)).K(21, L(odc(1).X)).K(31, "0")
                     Next
@@ -486,6 +504,10 @@ Public NotInheritable Class EksportCad
             If z.RysujObrys Then
                 Dim q = s.ZasiegSiatki
                 tresc.Polilinia(hModel, WarstwaObrysu, {q.LewyDolny, q.PrawyDolny, q.PrawyGorny, q.LewyGorny}, True)
+                If z.ObszarZaznaczenia.HasValue Then
+                    Dim o = z.ObszarZaznaczenia.Value
+                    tresc.Polilinia(hModel, WarstwaZaznaczenia, {o.LewyDolny, o.PrawyDolny, o.PrawyGorny, o.LewyGorny}, True)
+                End If
             End If
         End If
         If z.RysujTrase Then
@@ -737,7 +759,10 @@ Public NotInheritable Class EksportCad
                 w("_non")
                 w(PunktCad(r.Zasieg.LewyDolny))
                 w(L(r.Zasieg.Szerokosc))
-                w("0")
+                'kąt obrotu wskazany punktem na wschód od punktu wstawienia (prawy dolny narożnik): liczba "0" oznacza
+                'kierunek ANGBASE, a przy ANGBASE = 90 (azymuty od północy) raster zostałby obrócony o 90°
+                w("_non")
+                w(PunktCad(r.Zasieg.PrawyDolny))
                 'tło nakładek PNG / GIF (np. działki pobrane z przezroczystym tłem) bez tego zakrywa podkład
                 If Przezroczysty(r) Then
                     w("_TRANSPARENCY")
@@ -763,7 +788,7 @@ Public NotInheritable Class EksportCad
                         PoliliniaScr(sb, {q.LewyDolny, q.PrawyDolny, q.PrawyGorny, q.LewyGorny}, True)
                     Next
                 Else
-                    For Each odc In LinieSiatki(s)
+                    For Each odc In LinieSiatki(s, z.RysujObrys)
                         w("_LINE")
                         w("_non") : w(PunktCad(odc(0)))
                         w("_non") : w(PunktCad(odc(1)))
@@ -775,6 +800,11 @@ Public NotInheritable Class EksportCad
                 Warstwa(sb, WarstwaObrysu, 1)
                 Dim q = s.ZasiegSiatki
                 PoliliniaScr(sb, {q.LewyDolny, q.PrawyDolny, q.PrawyGorny, q.LewyGorny}, True)
+                If z.ObszarZaznaczenia.HasValue Then
+                    Warstwa(sb, WarstwaZaznaczenia, 3)
+                    Dim o = z.ObszarZaznaczenia.Value
+                    PoliliniaScr(sb, {o.LewyDolny, o.PrawyDolny, o.PrawyGorny, o.LewyGorny}, True)
+                End If
             End If
         End If
         If z.RysujTrase AndAlso z.Trasa.Count > 0 Then
@@ -808,6 +838,8 @@ Public NotInheritable Class EksportCad
         sb.Append("_NEW").Append(Nl).Append(nazwa).Append(Nl)
         sb.Append("_THAW").Append(Nl).Append(nazwa).Append(Nl)
         sb.Append("_ON").Append(Nl).Append(nazwa).Append(Nl)
+        'na zablokowanej warstwie DRAWORDER i TRANSPARENCY nie zmienią wstawionego rastra
+        sb.Append("_UNLOCK").Append(Nl).Append(nazwa).Append(Nl)
         sb.Append("_SET").Append(Nl).Append(nazwa).Append(Nl)
         sb.Append("_COLOR").Append(Nl).Append(kolor.ToString(Ci)).Append(Nl).Append(nazwa).Append(Nl)
         sb.Append(Nl)
@@ -834,6 +866,268 @@ Public NotInheritable Class EksportCad
         Next
         Return sb.ToString()
     End Function
+
+#End Region
+
+#Region "Program LISP"
+
+    ''' <summary>
+    ''' Program AutoLISP (.lsp) dla AutoCAD, AutoCAD LT 2024 i nowszych, BricsCAD i ZWCAD - wczytany poleceniem APPLOAD
+    ''' od razu wstawia mapę do otwartego rysunku (ponownie: polecenie MAPOTERO_WSTAW). W odróżnieniu od skryptu SCR:
+    '''  - zapamiętuje i przywraca bieżącą warstwę, INSUNITS, FILEDIA i CMDECHO (także po przerwaniu klawiszem Esc),
+    '''  - nie zmienia układu UCS - punkty przeliczane są z WCS funkcją trans,
+    '''  - linie, polilinie i teksty tworzy funkcją entmake (bez pytań poleceń), więc wstawia także numery segmentów i opis,
+    '''  - pomija rastry, których plików nie ma na dysku (skrypt SCR zatrzymałby się na pytaniu o plik).
+    ''' Teksty spoza ASCII zapisywane są jako \U+XXXX (kody tekstu CAD), ścieżki - w kodowaniu pliku (ANSI).
+    ''' </summary>
+    Public Shared Function Lisp(z As ZadanieCad) As String
+        Dim sb As New StringBuilder()
+        Dim w = Sub(tekst As String) sb.Append(tekst).Append(Nl)
+        Dim metry As Boolean = Not z.Uklad.Geograficzny
+        Dim zr = ZasiegRysunku(z)
+        Dim nazwy = NazwyObrazow(z)
+
+        w(";;; MapoTero - wstawienie mapy do rysunku CAD (AutoCAD, AutoCAD LT 2024 i nowsze, BricsCAD, ZWCAD)")
+        w(";;; Wczytanie: polecenie APPLOAD albo przeciagniecie pliku do okna rysunku - mapa jest wstawiana od razu.")
+        w(";;; Ponowne wstawienie po wczytaniu: polecenie MAPOTERO_WSTAW.")
+        w(";;; Uklad wspolrzednych: " & BezPolskichZnakow(z.Uklad.Nazwa) & If(metry, ", jednostka rysunku: metr.", ", jednostka rysunku: stopien."))
+        w(";;; Os X rysunku - wschod (Y geodezyjne), os Y - polnoc (X geodezyjne). Wspolrzedne w ukladzie WCS.")
+        w(";;; Biezaca warstwa, INSUNITS, FILEDIA i CMDECHO sa po zakonczeniu przywracane. Calosc cofa polecenie U.")
+        w("")
+
+        'dane mapy
+        w("(setq mt:rastry '(")
+        For i = 0 To z.Rastry.Count - 1
+            Dim r = z.Rastry(i)
+            w(" (" & TekstLisp(nazwy(i), False) & " " & TekstLisp(r.SciezkaPliku, False) & " " & Rz(r.Zasieg.YLewy) & " " & Rz(r.Zasieg.XDol) & " " &
+              Rz(r.Zasieg.Szerokosc) & If(Przezroczysty(r), " T", " nil") & ")")
+        Next
+        w("))")
+
+        Dim linie As New List(Of PunktXY())
+        Dim prostokaty As New List(Of PunktXY())
+        Dim numery As New List(Of Tuple(Of PunktXY, String))
+        Dim wysokoscNumerow As Double = 0
+        If MaSiatke(z) Then
+            Dim s = z.Siatka
+            If z.RysujSiatke Then
+                If SiatkaKorytarza(z) Then
+                    For Each wk In SegmentySiatki(z)
+                        Dim q = s.Segment(wk.Item1, wk.Item2)
+                        prostokaty.Add({q.LewyDolny, q.PrawyDolny, q.PrawyGorny, q.LewyGorny})
+                    Next
+                Else
+                    linie.AddRange(LinieSiatki(s, z.RysujObrys))
+                End If
+            End If
+            If z.RysujNumery Then
+                If LiczbaSegmentowSiatki(z) > MaksNumerow Then
+                    If Not z.Uwagi.Any(Function(u) u.StartsWith("Pominięto numery")) Then
+                        z.Uwagi.Add("Pominięto numery segmentów - segmentów jest więcej niż " & MaksNumerow.ToString("N0", CultureInfo.CurrentCulture) & ".")
+                    End If
+                Else
+                    wysokoscNumerow = s.BokSegmentu / 8
+                    For Each wk In SegmentySiatki(z)
+                        numery.Add(Tuple.Create(s.Segment(wk.Item1, wk.Item2).Srodek, s.NazwaSegmentu(z.Prefiks, z.Numeracja, wk.Item1, wk.Item2)))
+                    Next
+                End If
+            End If
+        End If
+        w("(setq mt:siatka '(")
+        For Each odc In linie
+            w(" ((" & Rz(odc(0).Y) & " " & Rz(odc(0).X) & " 0.0) (" & Rz(odc(1).Y) & " " & Rz(odc(1).X) & " 0.0))")
+        Next
+        w("))")
+        w("(setq mt:prostokaty '(")
+        For Each p In prostokaty
+            w(" " & PunktyLisp(p))
+        Next
+        w("))")
+        w("(setq mt:numery '(")
+        For Each n In numery
+            w(" ((" & Rz(n.Item1.Y) & " " & Rz(n.Item1.X) & " 0.0) " & TekstLisp(n.Item2, True) & ")")
+        Next
+        w("))")
+        w("(setq mt:wysokosc-numerow " & Rz(wysokoscNumerow) & ")")
+
+        'obrysy: zasięg siatki i obszar zaznaczenia
+        w("(setq mt:obrysy '(")
+        If MaSiatke(z) AndAlso z.RysujObrys Then
+            Dim q = z.Siatka.ZasiegSiatki
+            w(" (" & TekstLisp(WarstwaObrysu, False) & " 1 " & PunktyLisp({q.LewyDolny, q.PrawyDolny, q.PrawyGorny, q.LewyGorny}) & ")")
+            If z.ObszarZaznaczenia.HasValue Then
+                Dim o = z.ObszarZaznaczenia.Value
+                w(" (" & TekstLisp(WarstwaZaznaczenia, False) & " 3 " & PunktyLisp({o.LewyDolny, o.PrawyDolny, o.PrawyGorny, o.LewyGorny}) & ")")
+            End If
+        End If
+        w("))")
+        w("(setq mt:trasa '(")
+        If z.RysujTrase Then
+            For Each linia In z.Trasa
+                w(" " & PunktyLisp(linia))
+            Next
+        End If
+        w("))")
+
+        'opis pod lewym dolnym narożnikiem mapy (jak w rysunku DXF)
+        w("(setq mt:opis '(")
+        Dim wysOpisu As Double = Math.Max(zr.Szerokosc, zr.Wysokosc) / 150
+        If If(z.Opis, "").Trim() <> "" Then
+            Dim wiersze = z.Opis.Replace(vbCr, "").Split(ChrW(10))
+            For i = 0 To wiersze.Length - 1
+                w(" ((" & Rz(zr.YLewy) & " " & Rz(zr.XDol - wysOpisu * 1.8 * (i + 1)) & " 0.0) " & TekstLisp(wiersze(i), True) & ")")
+            Next
+        End If
+        w("))")
+        w("(setq mt:wysokosc-opisu " & Rz(wysOpisu) & ")")
+        w("(setq mt:okno '((" & Rz(zr.YLewy) & " " & Rz(zr.XDol) & " 0.0) (" & Rz(zr.YPrawy) & " " & Rz(zr.XGora) & " 0.0)))")
+        w("")
+
+        'stała część programu
+        For Each wiersz In ProgramLisp.Split({vbLf}, StringSplitOptions.None)
+            w(wiersz.TrimEnd(ChrW(13)))
+        Next
+        w("(c:MAPOTERO_WSTAW)")
+
+        'ścieżki ze znakami spoza ASCII zależą od kodowania odczytu pliku .lsp (w AutoCAD 2021+ - zmienna LISPSYS)
+        If z.Rastry.Any(Function(r) r.SciezkaPliku.Any(Function(c) AscW(c) > 127)) Then
+            z.Uwagi.Add("Ścieżka rastrów zawiera znaki spoza ASCII (np. polskie litery). Jeśli program LISP nie znajdzie plików " &
+                        "(AutoCAD 2021 i nowsze odczytują pliki .lsp zależnie od zmiennej LISPSYS), przenieś folder z mapą albo użyj rysunku DXF.")
+        End If
+        Return sb.ToString()
+    End Function
+
+    ''' <summary>Liczba rzeczywista AutoLISP (zawsze z kropką - liczba całkowita przekroczyłaby zakres w obliczeniach).</summary>
+    Private Shared Function Rz(v As Double) As String
+        Dim t As String = L(v)
+        If t.IndexOf("."c) < 0 AndAlso t.IndexOf("E"c) < 0 Then t &= ".0"
+        Return t
+    End Function
+
+    Private Shared Function PunktyLisp(punkty As IEnumerable(Of PunktXY)) As String
+        Dim sb As New StringBuilder("(")
+        For Each p In punkty
+            If sb.Length > 1 Then sb.Append(" ")
+            sb.Append("(").Append(Rz(p.Y)).Append(" ").Append(Rz(p.X)).Append(")")
+        Next
+        Return sb.Append(")").ToString()
+    End Function
+
+    ''' <summary>
+    ''' Tekst AutoLISP w cudzysłowie: \ i " poprzedzone znakiem \. Teksty rysunku (kody) - znaki spoza ASCII jako \U+XXXX,
+    ''' które programy CAD wyświetlają jako właściwe litery niezależnie od kodowania pliku .lsp.
+    ''' </summary>
+    Private Shared Function TekstLisp(tekst As String, kodyTekstu As Boolean) As String
+        Dim sb As New StringBuilder("""")
+        For Each c In If(tekst, "")
+            If c = "\"c Then
+                sb.Append("\\")
+            ElseIf c = """"c Then
+                sb.Append("\""")
+            ElseIf Char.IsControl(c) Then
+                sb.Append(" "c)
+            ElseIf kodyTekstu AndAlso AscW(c) > 127 Then
+                sb.Append("\\U+").Append((AscW(c) And &HFFFF).ToString("X4", Ci))
+            Else
+                sb.Append(c)
+            End If
+        Next
+        Return sb.Append("""").ToString()
+    End Function
+
+    ''' <summary>Funkcje programu LISP - korzystają z danych mt:... zapisanych przed nimi.</summary>
+    Private Const ProgramLisp As String =
+";; punkt WCS w biezacym ukladzie UCS (polecenia przyjmuja punkty w UCS)
+(defun mt:ucs (p) (trans p 0 1))
+
+;; warstwa: utworzona albo odmrozona, wlaczona i odblokowana
+(defun mt:warstwa (nazwa kolor / e)
+  (if (setq e (tblobjname ""LAYER"" nazwa))
+    (progn
+      (setq e (entget e))
+      (setq e (subst (cons 70 (logand (cdr (assoc 70 e)) (~ 5))) (assoc 70 e) e))
+      (setq e (subst (cons 62 (abs (cdr (assoc 62 e)))) (assoc 62 e) e))
+      (entmod e))
+    (entmake (list '(0 . ""LAYER"") '(100 . ""AcDbSymbolTableRecord"") '(100 . ""AcDbLayerTableRecord"")
+                   (cons 2 nazwa) '(70 . 0) (cons 62 kolor) '(6 . ""Continuous""))))
+  nazwa)
+
+(defun mt:polilinia (warstwa punkty zamknieta)
+  (entmake (append (list '(0 . ""LWPOLYLINE"") '(100 . ""AcDbEntity"") (cons 8 warstwa) '(100 . ""AcDbPolyline"")
+                         (cons 90 (length punkty)) (cons 70 (if zamknieta 1 0)))
+                   (mapcar '(lambda (p) (cons 10 p)) punkty))))
+
+(defun mt:tekst (warstwa p wys tekst srodek)
+  (entmake (append (list '(0 . ""TEXT"") (cons 8 warstwa) '(7 . ""Standard"") (cons 10 p) (cons 40 wys) (cons 1 tekst))
+                   (if srodek (list '(72 . 1) (cons 11 p) '(73 . 2))))))
+
+;; raster: punkt wstawienia - lewy dolny naroznik, skala - szerokosc (przy INSUNITS = 0), obrot wskazany punktem
+;; na wschod (niezaleznie od ANGBASE / ANGDIR); potem przezroczystosc i przesuniecie pod istniejace obiekty
+(defun mt:obraz (nazwa plik x y szer przezr / ostatni)
+  (if (findfile plik)
+    (progn
+      (setq ostatni (entlast))
+      (command ""_.-IMAGE"" ""_Attach"" (strcat nazwa ""=\"""" plik ""\"""")
+               ""_non"" (mt:ucs (list x y 0.0)) szer ""_non"" (mt:ucs (list (+ x szer) y 0.0)))
+      (if (not (equal ostatni (entlast)))
+        (progn
+          (if przezr (command ""_.TRANSPARENCY"" (entlast) """" ""_ON""))
+          (command ""_.DRAWORDER"" (entlast) """" ""_Back"")
+          (setq mt:wstawione (1+ mt:wstawione)))
+        (setq mt:brak (1+ mt:brak))))
+    (setq mt:brak (1+ mt:brak))))
+
+(defun mt:przywroc ()
+  (foreach z mt:zapisane (setvar (car z) (cdr z)))
+  (setq *error* mt:stary-error))
+
+(defun mt:blad (msg)
+  (if (and msg (not (wcmatch (strcase msg) ""*CANCEL*,*QUIT*,*EXIT*,*ANULOW*,*PRZERW*"")))
+    (princ (strcat ""\nMapoTero - blad: "" msg)))
+  (if command-s (command-s ""_.UNDO"" ""_End""))
+  (mt:przywroc)
+  (princ))
+
+(defun c:MAPOTERO_WSTAW ()
+  (setq mt:zapisane (mapcar '(lambda (v) (cons v (getvar v))) '(""CLAYER"" ""INSUNITS"" ""FILEDIA"" ""CMDECHO"")))
+  (setq mt:stary-error *error* *error* mt:blad)
+  (setq mt:wstawione 0 mt:brak 0)
+  (setvar ""CMDECHO"" 0)
+  (command ""_.UNDO"" ""_BEgin"")
+  (setvar ""FILEDIA"" 0)
+  (setvar ""INSUNITS"" 0)
+  (if mt:rastry
+    (progn
+      (setvar ""CLAYER"" (mt:warstwa ""MAPOTERO_RASTER"" 7))
+      (foreach r mt:rastry (apply 'mt:obraz r))))
+  (if (or mt:siatka mt:prostokaty)
+    (progn
+      (mt:warstwa ""MAPOTERO_SIATKA"" 8)
+      (foreach l mt:siatka
+        (entmake (list '(0 . ""LINE"") '(8 . ""MAPOTERO_SIATKA"") (cons 10 (car l)) (cons 11 (cadr l)))))
+      (foreach p mt:prostokaty (mt:polilinia ""MAPOTERO_SIATKA"" p T))))
+  (if mt:numery
+    (progn
+      (mt:warstwa ""MAPOTERO_NUMERY"" 8)
+      (foreach n mt:numery (mt:tekst ""MAPOTERO_NUMERY"" (car n) mt:wysokosc-numerow (cadr n) T))))
+  (foreach o mt:obrysy
+    (mt:warstwa (car o) (cadr o))
+    (mt:polilinia (car o) (caddr o) T))
+  (if mt:trasa
+    (progn
+      (mt:warstwa ""MAPOTERO_TRASA"" 6)
+      (foreach t1 mt:trasa (mt:polilinia ""MAPOTERO_TRASA"" t1 nil))))
+  (if mt:opis
+    (progn
+      (mt:warstwa ""MAPOTERO_OPIS"" 7)
+      (foreach o mt:opis (mt:tekst ""MAPOTERO_OPIS"" (car o) mt:wysokosc-opisu (cadr o) nil))))
+  (command ""_.UNDO"" ""_End"")
+  (mt:przywroc)
+  (command ""_.ZOOM"" ""_Window"" (mt:ucs (car mt:okno)) (mt:ucs (cadr mt:okno)))
+  (princ (strcat ""\nMapoTero: wstawiono rastrow: "" (itoa mt:wstawione)
+                 (if (> mt:brak 0) (strcat "", pominieto (brak pliku): "" (itoa mt:brak)) """")))
+  (princ))
+"
 
 #End Region
 

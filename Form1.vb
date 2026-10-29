@@ -566,7 +566,7 @@ Public Class Form1
     ''' Czy trwa pobieranie - wtedy (z komunikatem) nie wolno zmieniać sesji: pobieranie korzysta z kopii parametrów,
     ''' a zmiana conf.txt, warstw lub folderu w trakcie rozjeżdżała zapisane parametry z pobieranymi segmentami.
     ''' </summary>
-    Private Function PobieranieTrwa(czynnosc As String) As Boolean
+    Friend Function PobieranieTrwa(czynnosc As String) As Boolean
         If _przerwanie Is Nothing Then Return False
         MessageBox.Show(czynnosc & " będzie możliwe po zakończeniu lub przerwaniu pobierania segmentów.", "Trwa pobieranie",
                         MessageBoxButtons.OK, MessageBoxIcon.Information)

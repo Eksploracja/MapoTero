@@ -27,8 +27,17 @@ Public Class Form3
     ''' <summary>Segmenty pobrane z przezroczystym tłem (conf.txt) - zachowywane w arkuszu PNG i GeoTIFF bezstratnym.</summary>
     Private _przezroczystosc As Boolean
 
+    ''' <summary>
+    ''' Folder segmentów do scalenia zamiast folderu bieżącej sesji (okno otwarte z eksportu do CAD); pusty - folder sesji.
+    ''' Arkusz wstawiany do rysunku CAD potrzebuje położenia - zaznaczany jest wtedy plik world file.
+    ''' </summary>
+    Public Property FolderPoczatkowy As String = ""
+
+    ''' <summary>Ścieżka zapisanego arkusza (pusta, gdy nie scalono segmentów).</summary>
+    Public ReadOnly Property PlikArkusza As String = ""
+
     Private Sub Form3_Load(sender As Object, e As EventArgs) Handles MyBase.Load
-        _folderScalania = Form1.FolderSesji
+        _folderScalania = If(FolderPoczatkowy <> "", FolderPoczatkowy, Form1.FolderSesji)
         If _folderScalania = "" OrElse File.Exists(_folderScalania & "conf.txt") = False Then _folderScalania = FolderDownload
         txtFolder.Text = _folderScalania
         txtFolder.Enabled = False
@@ -39,6 +48,7 @@ Public Class Form3
         chkTab.Checked = Ustawienia.ScalanieTab
         cmbFormatArkusza.SelectedIndex = CInt(Ustawienia.FormatArkusza)
         trkJakosc.Enabled = Ustawienia.FormatArkusza = FormatArkusza.Jpeg OrElse Ustawienia.FormatArkusza = FormatArkusza.GeoTiffJpeg
+        If FolderPoczatkowy <> "" Then chkWorldFile.Checked = True
         OpiszWorldFile()
         WczytajParametry()
     End Sub
@@ -213,6 +223,7 @@ Public Class Form3
             wynik.Brakujace.RemoveAll(Function(n) Not wKorytarzu.Contains(n))
         End If
 
+        _PlikArkusza = wynik.Plik
         Dim nazwa As String = Path.GetFileName(wynik.Plik)
         If wynik.Brakujace.Count > 0 Then
             Komunikat("Arkusz " & nazwa & " zapisano, ale brakowało " & wynik.Brakujace.Count & If(wynik.Brakujace.Count = 1, " segmentu", " segmentów") & " (białe pola), m.in.: " &

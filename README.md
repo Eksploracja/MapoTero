@@ -10,11 +10,13 @@
 Program pobiera mapy, dzieląc wybrany obszar na siatkę kwadratowych segmentów (do 2048×2048 px). Pobrane segmenty map można następnie:
 * **scalić w jeden duży plik rastrowy** (GeoTIFF, JPEG, PNG) przy użyciu wbudowanej funkcji *"złącz pobrane segmenty w jeden arkusz"*,
 * **wyeksportować do map dla odbiorników GPS i aplikacji mobilnych:** KMZ (Garmin Custom Maps, Locus Map, OruxMaps), MBTiles (Locus Map, OsmAnd, OruxMaps), SQLiteDB (OsmAnd, Locus Map) i mapy offline OruxMaps - także jako przezroczyste nakładki lub z kilkoma warstwami nałożonymi na siebie,
+* **wstawić do rysunku CAD** (AutoCAD, AutoCAD LT, BricsCAD, ZWCAD i inne): rysunek DXF z rastrami na właściwych współrzędnych, obrysem, siatką i numerami segmentów oraz skrypt SCR lub program LISP, które wstawiają mapę do otwartego rysunku,
 * **wgrać do urządzeń GPS** i aplikacji turystycznych (np. [TrekBuddy](http://www.trekbuddy.net/forum/index.php), [OziExplorer](http://www.oziexplorer.com/)),
 * **wyświetlić jako podkład georeferencyjny** w programach GIS i GPS: [QGIS](https://www.qgis.org/), [Google Earth](https://www.google.pl/intl/pl/earth/), ArcGIS, GPS Tuner, MapInfo.
 
 * **Obsługiwane formaty rastrowe:** JPEG, TIFF, PNG, GIF; arkusze scalone: GeoTIFF, JPEG, PNG.
 * **Obsługiwane formaty georeferencji:** MAP, KML, TAB, JPGW, WLD, GMI, PRJ.
+* **Eksport do CAD:** rysunek DXF (R2000), skrypt SCR i program LISP (.lsp).
 * **Układy współrzędnych:** PL-1992, PL-2000 (strefy 5-8), UTM (strefy 33N-35N), WGS84.
 * **Oficjalny profil programu:** [facebook.com/mapotero.opensource](https://www.facebook.com/mapotero.opensource)
 
@@ -108,6 +110,7 @@ Program to jeden plik **MapoTero.exe** (wersja 64-bitowa dla systemu Windows), d
    * Kliknij żółty folder, aby otworzyć katalog z pobranymi plikami.
    * Opcjonalnie scal pobrane segmenty w jeden arkusz ikoną szachownicy (*"scal pobrane segmenty..."*), wybierając format arkusza (GeoTIFF, JPEG lub PNG). Arkusz zapisywany jest strumieniowo, więc może mieć dowolną wielkość (JPEG - do 65 500 px na bok).
    * Opcjonalnie wyeksportuj mapę do KMZ, MBTiles, SQLiteDB lub OruxMaps (*Narzędzia > Eksport mapy*), aby wgrać ją do odbiornika GPS lub aplikacji mobilnej.
+   * Opcjonalnie wyeksportuj mapę do programu CAD (*Narzędzia > Eksport do CAD*): rysunek DXF otwórz w programie CAD, a skrypt SCR uruchom poleceniem `SCRIPT` w otwartym rysunku (jednostki: metry). Program LISP (AutoCAD, BricsCAD, ZWCAD, AutoCAD LT od wersji 2024) wczytaj poleceniem `APPLOAD` - wstawia też numery segmentów i opis, a po zakończeniu przywraca ustawienia rysunku. Oś X rysunku to wschód, oś Y - północ; mapa trafia na warstwy `MAPOTERO_...`. Przy setkach segmentów wygodniej wstawić scalony arkusz (GeoTIFF albo JPEG z plikiem world file) - przycisk *scal teraz...* w oknie eksportu.
 
 ![Uproszczona instrukcja obsługi](instrukcja.jpg)
 

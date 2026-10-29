@@ -31,10 +31,40 @@ Public Class FormEksportCad
     ''' <summary>Plik rysunku wybrany przez użytkownika (pusty - nazwa domyślna w folderze sesji).</summary>
     Private _plik As String = ""
 
+    ''' <summary>Folder ostatnio zapisanych plików (przycisk "otwórz folder").</summary>
+    Private _folderWyniku As String = ""
+
     Private Sub FormEksportCad_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+        'opcje zapamiętane z poprzedniego eksportu (lastsettings.txt)
+        chkObrys.Checked = Ustawienia.CadObrys
+        chkSiatka.Checked = Ustawienia.CadSiatka
+        chkNumery.Checked = Ustawienia.CadNumery
+        chkTrasa.Checked = Ustawienia.CadTrasa
+        chkOpis.Checked = Ustawienia.CadOpis
+        chkDxf.Checked = Ustawienia.CadDxf
+        chkSciezkiWzgledne.Checked = Ustawienia.CadSciezkiWzgledne
+        chkScr.Checked = Ustawienia.CadScr
+        chkLsp.Checked = Ustawienia.CadLsp
         _folder = Form1.FolderSesji
         If _folder = "" OrElse File.Exists(_folder & "conf.txt") = False Then _folder = FolderDownload
         WczytajSesje()
+    End Sub
+
+    Private Sub FormEksportCad_FormClosing(sender As Object, e As FormClosingEventArgs) Handles MyBase.FormClosing
+        'zapisywane w lastsettings.txt przy zamknięciu programu
+        Ustawienia.CadObrys = chkObrys.Checked
+        Ustawienia.CadSiatka = chkSiatka.Checked
+        Ustawienia.CadNumery = chkNumery.Checked
+        Ustawienia.CadTrasa = chkTrasa.Checked
+        Ustawienia.CadOpis = chkOpis.Checked
+        Ustawienia.CadDxf = chkDxf.Checked
+        Ustawienia.CadSciezkiWzgledne = chkSciezkiWzgledne.Checked
+        Ustawienia.CadScr = chkScr.Checked
+        Ustawienia.CadLsp = chkLsp.Checked
+    End Sub
+
+    Private Sub btnOtworzFolder_Click(sender As Object, e As EventArgs) Handles btnOtworzFolder.Click
+        If _folderWyniku <> "" AndAlso Directory.Exists(_folderWyniku) Then OtworzFolder(_folderWyniku)
     End Sub
 
     Private Sub Komunikat(tekst As String, kolor As Color)
@@ -49,6 +79,8 @@ Public Class FormEksportCad
         _konfiguracja = Nothing
         _plik = ""
         txtArkusz.Text = ""
+        _folderWyniku = ""
+        btnOtworzFolder.Enabled = False
         Dim plik As String = _folder & "conf.txt"
         If Not File.Exists(plik) Then
             Komunikat("W wybranym folderze nie ma pliku conf.txt z parametrami segmentów. Wskaż folder z pobranymi segmentami.", Color.Red)
@@ -131,17 +163,18 @@ Public Class FormEksportCad
         btnPlik.Enabled = jest
         txtArkusz.Enabled = rbArkusz.Checked
         btnArkusz.Enabled = rbArkusz.Checked
+        btnScal.Enabled = jest
         chkTrasa.Enabled = _maTrase
         chkSciezkiWzgledne.Enabled = chkDxf.Checked
         txtPlik.Text = If(Not jest, "", If(_plik <> "", _plik, DomyslnyPlik()))
         'bez rastrów i bez elementów wektorowych plik byłby pusty
         Dim cosDoZapisu As Boolean = Not rbBezRastrow.Checked OrElse chkObrys.Checked OrElse chkSiatka.Checked OrElse
-                                     (chkNumery.Checked AndAlso chkDxf.Checked) OrElse (chkTrasa.Checked AndAlso _maTrase)
-        btnEksportuj.Enabled = jest AndAlso (chkDxf.Checked OrElse chkScr.Checked) AndAlso (Not rbArkusz.Checked OrElse txtArkusz.Text <> "") AndAlso cosDoZapisu
+                                     (chkNumery.Checked AndAlso (chkDxf.Checked OrElse chkLsp.Checked)) OrElse (chkTrasa.Checked AndAlso _maTrase)
+        btnEksportuj.Enabled = jest AndAlso (chkDxf.Checked OrElse chkScr.Checked OrElse chkLsp.Checked) AndAlso (Not rbArkusz.Checked OrElse txtArkusz.Text <> "") AndAlso cosDoZapisu
     End Sub
 
     Private Sub OpcjeZmienione(sender As Object, e As EventArgs) Handles rbSegmenty.CheckedChanged, rbArkusz.CheckedChanged, rbBezRastrow.CheckedChanged,
-                                                                       chkDxf.CheckedChanged, chkScr.CheckedChanged, chkObrys.CheckedChanged,
+                                                                       chkDxf.CheckedChanged, chkScr.CheckedChanged, chkLsp.CheckedChanged, chkObrys.CheckedChanged,
                                                                        chkSiatka.CheckedChanged, chkNumery.CheckedChanged, chkTrasa.CheckedChanged
         UstawWidok()
     End Sub
@@ -157,9 +190,28 @@ Public Class FormEksportCad
     Private Sub btnArkusz_Click(sender As Object, e As EventArgs) Handles btnArkusz.Click
         dlgArkusz.InitialDirectory = _folder
         If dlgArkusz.ShowDialog(Me) <> DialogResult.OK Then Exit Sub
+        WybierzArkusz(dlgArkusz.FileName)
+    End Sub
+
+    ''' <summary>Scalenie segmentów sesji w arkusz (okno Łączenie segmentów) i wybranie go do wstawienia.</summary>
+    Private Sub btnScal_Click(sender As Object, e As EventArgs) Handles btnScal.Click
+        If _konfiguracja Is Nothing OrElse Form1.PobieranieTrwa("Scalanie segmentów") Then Exit Sub
+        Dim plik As String = ""
+        Using f As New Form3() With {.FolderPoczatkowy = _folder}
+            f.ShowDialog(Me)
+            plik = f.PlikArkusza
+        End Using
+        If plik <> "" AndAlso File.Exists(plik) Then
+            rbArkusz.Checked = True
+            WybierzArkusz(plik)
+        End If
+    End Sub
+
+    ''' <summary>Sprawdza arkusz (położenie, układ, obszar sesji) i wybiera go do wstawienia.</summary>
+    Private Sub WybierzArkusz(sciezka As String)
         Try
             Dim uwagi As New List(Of String)
-            Dim a = EksportCad.Arkusz(dlgArkusz.FileName, UkladWspolrzednych.ZKodu(_konfiguracja.UkladEpsg), uwagi)
+            Dim a = EksportCad.Arkusz(sciezka, UkladWspolrzednych.ZKodu(_konfiguracja.UkladEpsg), uwagi)
             'arkusz z innej sesji (inny obszar albo inny układ współrzędnych) nie pokryje obrysu i siatki tej sesji
             Dim zs = _konfiguracja.SiatkaSesji().ZasiegSiatki
             Dim za = a.Zasieg
@@ -167,12 +219,12 @@ Public Class FormEksportCad
                 uwagi.Insert(0, "Uwaga: arkusz leży poza obszarem tej sesji - może pochodzić z innej sesji lub być zapisany w innym układzie " &
                                 "współrzędnych niż " & UkladWspolrzednych.ZKodu(_konfiguracja.UkladEpsg).Nazwa & ".")
             End If
-            txtArkusz.Text = dlgArkusz.FileName
+            txtArkusz.Text = sciezka
             Komunikat("Arkusz " & a.SzerokoscPx & " x " & a.WysokoscPx & " px." & If(uwagi.Count > 0, vbCrLf & String.Join(vbCrLf, uwagi), ""),
                       If(uwagi.Any(Function(u) u.StartsWith("Uwaga")), Color.Red, Color.Black))
         Catch ex As Exception
             txtArkusz.Text = ""
-            Komunikat("Nie można wstawić arkusza " & Path.GetFileName(dlgArkusz.FileName) & ": " & ex.Message, Color.Red)
+            Komunikat("Nie można wstawić arkusza " & Path.GetFileName(sciezka) & ": " & ex.Message, Color.Red)
         End Try
         UstawWidok()
     End Sub
@@ -191,12 +243,13 @@ Public Class FormEksportCad
         If _konfiguracja Is Nothing Then Exit Sub
         Dim plikDxf As String = txtPlik.Text
         Dim plikScr As String = Path.ChangeExtension(plikDxf, ".scr")
+        Dim plikLsp As String = Path.ChangeExtension(plikDxf, ".lsp")
         Dim folder As String = _folder
         Dim konfiguracja = _konfiguracja
         Dim numeracja = Siatka.StylZTekstu(If(konfiguracja.Numeracja = "", Ustawienia.Numeracja, konfiguracja.Numeracja))
         Dim segmenty As Boolean = rbSegmenty.Checked
         Dim arkusz As String = If(rbArkusz.Checked, txtArkusz.Text, "")
-        Dim dxf As Boolean = chkDxf.Checked, scr As Boolean = chkScr.Checked
+        Dim dxf As Boolean = chkDxf.Checked, scr As Boolean = chkScr.Checked, lsp As Boolean = chkLsp.Checked
         Dim wzgledne As Boolean = chkSciezkiWzgledne.Checked
         Dim obrys As Boolean = chkObrys.Checked, siatkaSegmentow As Boolean = chkSiatka.Checked, numery As Boolean = chkNumery.Checked
         Dim trasa As Boolean = chkTrasa.Checked AndAlso _maTrase
@@ -228,6 +281,14 @@ Public Class FormEksportCad
                         End If
                         File.WriteAllText(plikScr, skrypt, kod)
                     End If
+                    If lsp Then
+                        Dim program As String = EksportCad.Lisp(zad)
+                        If EksportCad.ZnakiSpozaKodowania(program, kod) AndAlso Not zad.Uwagi.Any(Function(u) u.StartsWith("Ścieżka rastrów zawiera znaki spoza strony")) Then
+                            zad.Uwagi.Add("Ścieżka rastrów zawiera znaki spoza strony kodowej " & kod.WebName & " - program LISP nie znajdzie tych plików. " &
+                                          "Przenieś folder z mapą do ścieżki bez takich znaków albo użyj rysunku DXF.")
+                        End If
+                        File.WriteAllText(plikLsp, program, kod)
+                    End If
                     Return zad
                 End Function)
 
@@ -238,6 +299,10 @@ Public Class FormEksportCad
                           "poleceniem PASTEORIG (wkleja na tych samych współrzędnych).").Append(vbCrLf)
             End If
             If scr Then sb.Append(plikScr).Append(" - w otwartym rysunku (jednostki: metry) polecenie SCRIPT i wskaż ten plik.").Append(vbCrLf)
+            If lsp Then
+                sb.Append(plikLsp).Append(" - w otwartym rysunku polecenie APPLOAD i wczytaj ten plik (mapa wstawi się od razu, " &
+                          "ponownie: polecenie MAPOTERO_WSTAW).").Append(vbCrLf)
+            End If
             sb.Append("Oś X rysunku to wschód, oś Y - północ. Warstwy: ").Append(EksportCad.WarstwaRastrow).Append(", ").
                Append(EksportCad.WarstwaObrysu).Append(", ").Append(EksportCad.WarstwaSiatki).Append(", ").Append(EksportCad.WarstwaNumerow).Append(".")
             If dxf AndAlso z.Rastry.Count > 0 Then
@@ -247,6 +312,8 @@ Public Class FormEksportCad
                 sb.Append(vbCrLf).Append(u)
             Next
             Komunikat(sb.ToString(), Color.Green)
+            _folderWyniku = Path.GetDirectoryName(plikDxf)
+            btnOtworzFolder.Enabled = True
         Catch ex As Exception
             Komunikat("Eksport nie powiódł się: " & ex.Message, Color.Red)
         Finally

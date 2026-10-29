@@ -32,6 +32,7 @@ Partial Class FormEksportCad
         Me.rbArkusz = New System.Windows.Forms.RadioButton()
         Me.txtArkusz = New System.Windows.Forms.TextBox()
         Me.btnArkusz = New System.Windows.Forms.Button()
+        Me.btnScal = New System.Windows.Forms.Button()
         Me.rbBezRastrow = New System.Windows.Forms.RadioButton()
         Me.grpWektory = New System.Windows.Forms.GroupBox()
         Me.chkObrys = New System.Windows.Forms.CheckBox()
@@ -43,12 +44,14 @@ Partial Class FormEksportCad
         Me.chkDxf = New System.Windows.Forms.CheckBox()
         Me.chkSciezkiWzgledne = New System.Windows.Forms.CheckBox()
         Me.chkScr = New System.Windows.Forms.CheckBox()
+        Me.chkLsp = New System.Windows.Forms.CheckBox()
         Me.lblPlik = New System.Windows.Forms.Label()
         Me.txtPlik = New System.Windows.Forms.TextBox()
         Me.btnPlik = New System.Windows.Forms.Button()
         Me.txtKomunikaty = New System.Windows.Forms.TextBox()
         Me.btnEksportuj = New System.Windows.Forms.Button()
         Me.btnZamknij = New System.Windows.Forms.Button()
+        Me.btnOtworzFolder = New System.Windows.Forms.Button()
         Me.dlgFolder = New System.Windows.Forms.FolderBrowserDialog()
         Me.dlgArkusz = New System.Windows.Forms.OpenFileDialog()
         Me.dlgPlik = New System.Windows.Forms.SaveFileDialog()
@@ -97,6 +100,7 @@ Partial Class FormEksportCad
         Me.grpRastry.Controls.Add(Me.rbArkusz)
         Me.grpRastry.Controls.Add(Me.txtArkusz)
         Me.grpRastry.Controls.Add(Me.btnArkusz)
+        Me.grpRastry.Controls.Add(Me.btnScal)
         Me.grpRastry.Controls.Add(Me.rbBezRastrow)
         Me.grpRastry.Location = New System.Drawing.Point(12, 104)
         Me.grpRastry.Name = "grpRastry"
@@ -134,7 +138,7 @@ Partial Class FormEksportCad
         Me.txtArkusz.Location = New System.Drawing.Point(116, 43)
         Me.txtArkusz.Name = "txtArkusz"
         Me.txtArkusz.ReadOnly = True
-        Me.txtArkusz.Size = New System.Drawing.Size(274, 20)
+        Me.txtArkusz.Size = New System.Drawing.Size(180, 20)
         Me.txtArkusz.TabIndex = 2
         '
         'btnArkusz
@@ -145,6 +149,16 @@ Partial Class FormEksportCad
         Me.btnArkusz.TabIndex = 3
         Me.btnArkusz.Text = "wybierz..."
         Me.btnArkusz.UseVisualStyleBackColor = True
+        '
+        'btnScal
+        '
+        Me.btnScal.Location = New System.Drawing.Point(302, 41)
+        Me.btnScal.Name = "btnScal"
+        Me.btnScal.Size = New System.Drawing.Size(90, 23)
+        Me.btnScal.TabIndex = 5
+        Me.btnScal.Text = "scal teraz..."
+        Me.ToolTip1.SetToolTip(Me.btnScal, "Łączenie segmentów tej sesji w jeden arkusz (z plikiem world file) - po scaleniu arkusz zostanie wybrany do wstawienia.")
+        Me.btnScal.UseVisualStyleBackColor = True
         '
         'rbBezRastrow
         '
@@ -180,6 +194,7 @@ Partial Class FormEksportCad
         Me.chkObrys.Size = New System.Drawing.Size(92, 17)
         Me.chkObrys.TabIndex = 0
         Me.chkObrys.Text = "obrys zasięgu"
+        Me.ToolTip1.SetToolTip(Me.chkObrys, "Czerwony - zasięg siatki (pełne segmenty); zielony - obszar zaznaczony na mapie, gdy jest mniejszy od siatki.")
         Me.chkObrys.UseVisualStyleBackColor = True
         '
         'chkSiatka
@@ -203,7 +218,7 @@ Partial Class FormEksportCad
         Me.chkNumery.Name = "chkNumery"
         Me.chkNumery.Size = New System.Drawing.Size(170, 17)
         Me.chkNumery.TabIndex = 2
-        Me.chkNumery.Text = "numery segmentów (tylko DXF)"
+        Me.chkNumery.Text = "numery segmentów (DXF, LISP)"
         Me.chkNumery.UseVisualStyleBackColor = True
         '
         'chkTrasa
@@ -228,7 +243,7 @@ Partial Class FormEksportCad
         Me.chkOpis.Name = "chkOpis"
         Me.chkOpis.Size = New System.Drawing.Size(270, 17)
         Me.chkOpis.TabIndex = 4
-        Me.chkOpis.Text = "opis mapy: źródło, data pobrania, układ (tylko DXF)"
+        Me.chkOpis.Text = "opis mapy: źródło, data pobrania, układ (DXF, LISP)"
         Me.chkOpis.UseVisualStyleBackColor = True
         '
         'grpPliki
@@ -236,9 +251,10 @@ Partial Class FormEksportCad
         Me.grpPliki.Controls.Add(Me.chkDxf)
         Me.grpPliki.Controls.Add(Me.chkSciezkiWzgledne)
         Me.grpPliki.Controls.Add(Me.chkScr)
+        Me.grpPliki.Controls.Add(Me.chkLsp)
         Me.grpPliki.Location = New System.Drawing.Point(12, 282)
         Me.grpPliki.Name = "grpPliki"
-        Me.grpPliki.Size = New System.Drawing.Size(496, 92)
+        Me.grpPliki.Size = New System.Drawing.Size(496, 114)
         Me.grpPliki.TabIndex = 6
         Me.grpPliki.TabStop = False
         Me.grpPliki.Text = "Pliki wynikowe"
@@ -282,18 +298,29 @@ Partial Class FormEksportCad
         Me.ToolTip1.SetToolTip(Me.chkScr, "AutoCAD, AutoCAD LT, BricsCAD, ZWCAD - rastry, obrys, siatka i trasa na właściwych współrzędnych w bieżącym rysunku.")
         Me.chkScr.UseVisualStyleBackColor = True
         '
+        'chkLsp
+        '
+        Me.chkLsp.AutoSize = True
+        Me.chkLsp.Location = New System.Drawing.Point(10, 88)
+        Me.chkLsp.Name = "chkLsp"
+        Me.chkLsp.Size = New System.Drawing.Size(420, 17)
+        Me.chkLsp.TabIndex = 3
+        Me.chkLsp.Text = "program LISP (APPLOAD): przywraca ustawienia rysunku, dodaje numery i opis"
+        Me.ToolTip1.SetToolTip(Me.chkLsp, "AutoCAD, AutoCAD LT 2024 i nowsze, BricsCAD, ZWCAD - jak skrypt SCR, ale po wstawieniu przywraca bieżącą warstwę, INSUNITS i FILEDIA, nie zmienia UCS i pomija brakujące pliki.")
+        Me.chkLsp.UseVisualStyleBackColor = True
+        '
         'lblPlik
         '
         Me.lblPlik.AutoSize = True
-        Me.lblPlik.Location = New System.Drawing.Point(12, 382)
+        Me.lblPlik.Location = New System.Drawing.Point(12, 404)
         Me.lblPlik.Name = "lblPlik"
         Me.lblPlik.Size = New System.Drawing.Size(260, 13)
         Me.lblPlik.TabIndex = 7
-        Me.lblPlik.Text = "Plik rysunku (skrypt .scr otrzyma tę samą nazwę):"
+        Me.lblPlik.Text = "Plik rysunku (skrypt .scr i program .lsp otrzymają tę samą nazwę):"
         '
         'txtPlik
         '
-        Me.txtPlik.Location = New System.Drawing.Point(12, 400)
+        Me.txtPlik.Location = New System.Drawing.Point(12, 422)
         Me.txtPlik.Name = "txtPlik"
         Me.txtPlik.ReadOnly = True
         Me.txtPlik.Size = New System.Drawing.Size(400, 20)
@@ -301,7 +328,7 @@ Partial Class FormEksportCad
         '
         'btnPlik
         '
-        Me.btnPlik.Location = New System.Drawing.Point(418, 398)
+        Me.btnPlik.Location = New System.Drawing.Point(418, 420)
         Me.btnPlik.Name = "btnPlik"
         Me.btnPlik.Size = New System.Drawing.Size(90, 23)
         Me.btnPlik.TabIndex = 9
@@ -310,7 +337,7 @@ Partial Class FormEksportCad
         '
         'txtKomunikaty
         '
-        Me.txtKomunikaty.Location = New System.Drawing.Point(12, 430)
+        Me.txtKomunikaty.Location = New System.Drawing.Point(12, 452)
         Me.txtKomunikaty.Multiline = True
         Me.txtKomunikaty.Name = "txtKomunikaty"
         Me.txtKomunikaty.ReadOnly = True
@@ -320,7 +347,7 @@ Partial Class FormEksportCad
         '
         'btnEksportuj
         '
-        Me.btnEksportuj.Location = New System.Drawing.Point(330, 534)
+        Me.btnEksportuj.Location = New System.Drawing.Point(330, 556)
         Me.btnEksportuj.Name = "btnEksportuj"
         Me.btnEksportuj.Size = New System.Drawing.Size(86, 26)
         Me.btnEksportuj.TabIndex = 11
@@ -330,12 +357,23 @@ Partial Class FormEksportCad
         'btnZamknij
         '
         Me.btnZamknij.DialogResult = System.Windows.Forms.DialogResult.Cancel
-        Me.btnZamknij.Location = New System.Drawing.Point(422, 534)
+        Me.btnZamknij.Location = New System.Drawing.Point(422, 556)
         Me.btnZamknij.Name = "btnZamknij"
         Me.btnZamknij.Size = New System.Drawing.Size(86, 26)
         Me.btnZamknij.TabIndex = 12
         Me.btnZamknij.Text = "Zamknij"
         Me.btnZamknij.UseVisualStyleBackColor = True
+        '
+        'btnOtworzFolder
+        '
+        Me.btnOtworzFolder.Enabled = False
+        Me.btnOtworzFolder.Location = New System.Drawing.Point(12, 556)
+        Me.btnOtworzFolder.Name = "btnOtworzFolder"
+        Me.btnOtworzFolder.Size = New System.Drawing.Size(130, 26)
+        Me.btnOtworzFolder.TabIndex = 13
+        Me.btnOtworzFolder.Text = "otwórz folder"
+        Me.ToolTip1.SetToolTip(Me.btnOtworzFolder, "Folder z zapisanym rysunkiem DXF i skryptem SCR.")
+        Me.btnOtworzFolder.UseVisualStyleBackColor = True
         '
         'dlgFolder
         '
@@ -358,7 +396,8 @@ Partial Class FormEksportCad
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.CancelButton = Me.btnZamknij
-        Me.ClientSize = New System.Drawing.Size(520, 572)
+        Me.ClientSize = New System.Drawing.Size(520, 594)
+        Me.Controls.Add(Me.btnOtworzFolder)
         Me.Controls.Add(Me.btnZamknij)
         Me.Controls.Add(Me.btnEksportuj)
         Me.Controls.Add(Me.txtKomunikaty)
@@ -378,7 +417,7 @@ Partial Class FormEksportCad
         Me.Name = "FormEksportCad"
         Me.ShowInTaskbar = False
         Me.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent
-        Me.Text = "Eksport do CAD (DXF, skrypt SCR)"
+        Me.Text = "Eksport do CAD (DXF, skrypt SCR, LISP)"
         Me.grpRastry.ResumeLayout(False)
         Me.grpRastry.PerformLayout()
         Me.grpWektory.ResumeLayout(False)
@@ -399,6 +438,7 @@ Partial Class FormEksportCad
     Friend WithEvents rbArkusz As System.Windows.Forms.RadioButton
     Friend WithEvents txtArkusz As System.Windows.Forms.TextBox
     Friend WithEvents btnArkusz As System.Windows.Forms.Button
+    Friend WithEvents btnScal As System.Windows.Forms.Button
     Friend WithEvents rbBezRastrow As System.Windows.Forms.RadioButton
     Friend WithEvents grpWektory As System.Windows.Forms.GroupBox
     Friend WithEvents chkObrys As System.Windows.Forms.CheckBox
@@ -410,12 +450,14 @@ Partial Class FormEksportCad
     Friend WithEvents chkDxf As System.Windows.Forms.CheckBox
     Friend WithEvents chkSciezkiWzgledne As System.Windows.Forms.CheckBox
     Friend WithEvents chkScr As System.Windows.Forms.CheckBox
+    Friend WithEvents chkLsp As System.Windows.Forms.CheckBox
     Friend WithEvents lblPlik As System.Windows.Forms.Label
     Friend WithEvents txtPlik As System.Windows.Forms.TextBox
     Friend WithEvents btnPlik As System.Windows.Forms.Button
     Friend WithEvents txtKomunikaty As System.Windows.Forms.TextBox
     Friend WithEvents btnEksportuj As System.Windows.Forms.Button
     Friend WithEvents btnZamknij As System.Windows.Forms.Button
+    Friend WithEvents btnOtworzFolder As System.Windows.Forms.Button
     Friend WithEvents dlgFolder As System.Windows.Forms.FolderBrowserDialog
     Friend WithEvents dlgArkusz As System.Windows.Forms.OpenFileDialog
     Friend WithEvents dlgPlik As System.Windows.Forms.SaveFileDialog

@@ -126,7 +126,7 @@
 
 4. Kliknij przycisk "Pobierz". Segmenty mapy zapisują się w folderze sesji (domyślnie "download"); jego ścieżka widoczna jest na pasku stanu. Jeśli folder zawiera segmenty innej sesji, program zaproponuje nowy podfolder.
 
-5. Pobrane segmenty połączysz w jeden arkusz (menu Narzędzia - Łączenie segmentów) albo wyeksportujesz do KMZ, MBTiles, SQLiteDB lub OruxMaps.
+5. Pobrane segmenty połączysz w jeden arkusz (menu Narzędzia - Łączenie segmentów) albo wyeksportujesz do KMZ, MBTiles, SQLiteDB lub OruxMaps. Do programów CAD (AutoCAD, BricsCAD, ZWCAD) mapę przeniesiesz poleceniem Narzędzia - Eksport do CAD: rysunek DXF otwórz w programie CAD, a skrypt SCR uruchom poleceniem SCRIPT w otwartym rysunku.
 ----------------------------------------------------------------------
 
 Forum dyskusyjne MapoTero: www.forum.eksploracja.pl/viewforum.php?f=205

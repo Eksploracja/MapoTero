@@ -40,6 +40,11 @@ Public Class NaglowekObrazu
 
     ''' <summary>Kod EPSG układu współrzędnych zapisany w GeoTIFF (0 - brak lub układ niestandardowy).</summary>
     Public Property Epsg As Integer
+    ''' <summary>
+    ''' GTRasterTypeGeoKey = PixelIsPoint: punkt dowiązania wskazuje środek piksela, a nie jego narożnik (PixelIsArea,
+    ''' wartość domyślna - tak zapisują MapoTero i GDAL).
+    ''' </summary>
+    Public Property PikselJakoPunkt As Boolean
 
     ''' <summary>Czy plik GeoTIFF zawiera położenie obrazu (rozmiar piksela i punkt dowiązania).</summary>
     Public ReadOnly Property MaGeoreferencje As Boolean
@@ -51,13 +56,14 @@ Public Class NaglowekObrazu
     End Property
 
     ''' <summary>
-    ''' Zasięg obrazu z georeferencji GeoTIFF (punkt dowiązania wskazuje narożnik piksela - PixelIsArea, tak jak
-    ''' zapisuje MapoTero). X - północ, Y - wschód.
+    ''' Zasięg obrazu z georeferencji GeoTIFF (zewnętrzne krawędzie skrajnych pikseli). Przy PixelIsPoint punkt
+    ''' dowiązania jest środkiem piksela - narożnik obrazu leży pół piksela dalej. X - północ, Y - wschód.
     ''' </summary>
     Public Function ZasiegGeoTiff() As Zasieg
         Dim t = PunktDowiazania, s = SkalaPiksela
-        Dim yLewy As Double = t(3) - t(0) * s(0)
-        Dim xGora As Double = t(4) + t(1) * s(1)
+        Dim polowa As Double = If(PikselJakoPunkt, 0.5, 0)
+        Dim yLewy As Double = t(3) - (t(0) + polowa) * s(0)
+        Dim xGora As Double = t(4) + (t(1) + polowa) * s(1)
         Return New Zasieg(xGora - WysokoscPx * s(1), yLewy, xGora, yLewy + SzerokoscPx * s(0))
     End Function
 
@@ -186,6 +192,8 @@ Public Class NaglowekObrazu
                         If polozenie = 0 AndAlso wartosc > 0 AndAlso wartosc < 32767 AndAlso (klucz = 3072 OrElse (klucz = 2048 AndAlso wynik.Epsg = 0)) Then
                             wynik.Epsg = CInt(wartosc)
                         End If
+                        'GTRasterTypeGeoKey: 1 - PixelIsArea, 2 - PixelIsPoint
+                        If klucz = 1025 AndAlso polozenie = 0 Then wynik.PikselJakoPunkt = (wartosc = 2)
                     Next
             End Select
         Next

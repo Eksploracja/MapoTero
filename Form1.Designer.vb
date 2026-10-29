@@ -430,7 +430,7 @@ Partial Class Form1
         '
         Me.EksportCadToolStripMenuItem.Name = "EksportCadToolStripMenuItem"
         Me.EksportCadToolStripMenuItem.Size = New System.Drawing.Size(315, 22)
-        Me.EksportCadToolStripMenuItem.Text = "Eksport do CAD (DXF, skrypt SCR)..."
+        Me.EksportCadToolStripMenuItem.Text = "Eksport do CAD (DXF, skrypt SCR, LISP)..."
         Me.EksportCadToolStripMenuItem.ToolTipText = "Rysunek DXF i skrypt SCR dla AutoCAD, AutoCAD LT, BricsCAD, ZWCAD: rastry na właściwych współrzędnych, obrys i siatka segmentów"
         '
         'NakładanieWarstwNaSiebieToolStripMenuItem

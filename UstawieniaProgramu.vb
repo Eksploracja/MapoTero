@@ -133,6 +133,21 @@ Public Class UstawieniaProgramu
     Public Property FormatArkusza As FormatArkusza = FormatArkusza.GeoTiff
 #End Region
 
+#Region "Eksport do CAD"
+    ''' <summary>Elementy wektorowe rysunku CAD: obrys zasięgu, siatka i numery segmentów, trasa korytarza, opis mapy.</summary>
+    Public Property CadObrys As Boolean = True
+    Public Property CadSiatka As Boolean = True
+    Public Property CadNumery As Boolean = True
+    Public Property CadTrasa As Boolean = True
+    Public Property CadOpis As Boolean = True
+    ''' <summary>Pliki wynikowe: rysunek DXF (ze ścieżkami rastrów względem pliku DXF) i skrypt SCR.</summary>
+    Public Property CadDxf As Boolean = True
+    Public Property CadSciezkiWzgledne As Boolean = True
+    Public Property CadScr As Boolean = True
+    ''' <summary>Program LISP (.lsp) - wariant skryptu przywracający ustawienia rysunku (AutoCAD, BricsCAD, ZWCAD, LT 2024+).</summary>
+    Public Property CadLsp As Boolean
+#End Region
+
     ''' <summary>Rozszerzenie plików segmentów dla bieżącego formatu.</summary>
     Public ReadOnly Property Rozszerzenie As String
         Get
@@ -178,6 +193,18 @@ Public Class UstawieniaProgramu
         KursorWgs84 = u.Logiczna("kursor_wgs84", KursorWgs84)
         ZaznaczenieWgs84 = u.Logiczna("zaznaczenie_wgs84", ZaznaczenieWgs84)
         EdycjaXY = u.Logiczna("edycja_xy", EdycjaXY)
+        'opcje okna eksportu do CAD
+        CadObrys = u.Logiczna("cad_obrys", CadObrys)
+        CadSiatka = u.Logiczna("cad_siatka", CadSiatka)
+        CadNumery = u.Logiczna("cad_numery", CadNumery)
+        CadTrasa = u.Logiczna("cad_trasa", CadTrasa)
+        CadOpis = u.Logiczna("cad_opis", CadOpis)
+        CadDxf = u.Logiczna("cad_dxf", CadDxf)
+        CadSciezkiWzgledne = u.Logiczna("cad_sciezki_wzgledne", CadSciezkiWzgledne)
+        CadScr = u.Logiczna("cad_scr", CadScr)
+        CadLsp = u.Logiczna("cad_lsp", CadLsp)
+        'co najmniej jeden plik wynikowy - inaczej przycisk Eksportuj byłby nieaktywny bez widocznej przyczyny
+        If Not CadDxf AndAlso Not CadScr AndAlso Not CadLsp Then CadDxf = True
         If parametryNowejSesji Then
             'pusty przedrostek jest dozwolony - odczyt wprost, gdy ustawienie istnieje
             If u.Zawiera("przedrostek") Then Prefiks = u.Tekst("przedrostek", "")
@@ -220,6 +247,15 @@ Public Class UstawieniaProgramu
         u.Ustaw("przedrostek", Prefiks)
         u.Ustaw("format", Format)
         u.Ustaw("przezroczystosc", Przezroczystosc)
+        u.Ustaw("cad_obrys", CadObrys)
+        u.Ustaw("cad_siatka", CadSiatka)
+        u.Ustaw("cad_numery", CadNumery)
+        u.Ustaw("cad_trasa", CadTrasa)
+        u.Ustaw("cad_opis", CadOpis)
+        u.Ustaw("cad_dxf", CadDxf)
+        u.Ustaw("cad_sciezki_wzgledne", CadSciezkiWzgledne)
+        u.Ustaw("cad_scr", CadScr)
+        u.Ustaw("cad_lsp", CadLsp)
         u.Zapisz(sciezka, KodowanieSystemowe())
     End Sub
 
@@ -256,6 +292,15 @@ Public Class UstawieniaProgramu
         SrodekMapySzerokosc = "52.3"
         SrodekMapyDlugosc = "19.2"
         SkalaMapy = "6"
+        CadObrys = True
+        CadSiatka = True
+        CadNumery = True
+        CadTrasa = True
+        CadOpis = True
+        CadDxf = True
+        CadSciezkiWzgledne = True
+        CadScr = True
+        CadLsp = False
     End Sub
 
 End Class

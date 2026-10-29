@@ -151,8 +151,12 @@ Public Class EksportCadTesty
     <Fact>
     Public Sub DxfSiatkaNumeryIObrys()
         Dim ob = Obiekty(Pary(EksportCad.Dxf(Zadanie(), Encoding.ASCII)))
-        'siatka 2 x 2: 3 linie pionowe i 3 poziome, 4 numery, obrys
-        Assert.Equal(6, ob.Where(Function(o) o.Key = "LINE").Count())
+        'siatka 2 x 2 z obrysem: tylko wewnętrzna linia pionowa i pozioma (zewnętrzne pokrywałyby się z obrysem), 4 numery, obrys
+        Dim linie = ob.Where(Function(o) o.Key = "LINE").Select(Function(o) o.Value).ToList()
+        Assert.Equal(2, linie.Count)
+        Assert.Equal(637256.0, Liczba(Wartosc(linie(0), 10)))
+        Assert.Equal(637256.0, Liczba(Wartosc(linie(0), 11)))
+        Assert.Equal(487256.0, Liczba(Wartosc(linie(1), 20)))
         Dim teksty = ob.Where(Function(o) o.Key = "TEXT").Select(Function(o) Wartosc(o.Value, 1)).ToList()
         Assert.Equal({"_01_01", "_01_02", "_02_01", "_02_02"}, teksty.ToArray())
         Dim obrys = ob.Single(Function(o) o.Key = "LWPOLYLINE").Value
@@ -164,6 +168,49 @@ Public Class EksportCadTesty
         Assert.Equal(637512.0, xs.Max())
         Assert.Equal(487000.0, ys.Min())
         Assert.Equal(487512.0, ys.Max())
+    End Sub
+
+    <Fact>
+    Public Sub OpcjeEksportuCadWLastsettings()
+        Dim plik = Path.GetTempFileName()
+        Try
+            Dim u As New MapoTero.UstawieniaProgramu With {.CadObrys = False, .CadNumery = False, .CadScr = False, .CadSciezkiWzgledne = False}
+            u.Zapisz(plik)
+            Dim w As New MapoTero.UstawieniaProgramu()
+            w.Wczytaj(plik)
+            Assert.False(w.CadObrys)
+            Assert.True(w.CadSiatka)
+            Assert.False(w.CadNumery)
+            Assert.True(w.CadDxf)
+            Assert.False(w.CadScr)
+            Assert.False(w.CadSciezkiWzgledne)
+
+            'bez żadnego pliku wynikowego przycisk Eksportuj byłby nieaktywny - wraca rysunek DXF
+            Dim bez As New MapoTero.UstawieniaProgramu With {.CadDxf = False, .CadScr = False}
+            bez.Zapisz(plik)
+            Dim w2 As New MapoTero.UstawieniaProgramu()
+            w2.Wczytaj(plik)
+            Assert.True(w2.CadDxf)
+
+            'plik ze starszej wersji (bez opcji CAD) - wartości domyślne
+            File.WriteAllText(plik, "watki" & vbCrLf & "4" & vbCrLf)
+            Dim w3 As New MapoTero.UstawieniaProgramu()
+            w3.Wczytaj(plik)
+            Assert.True(w3.CadObrys AndAlso w3.CadNumery AndAlso w3.CadDxf AndAlso w3.CadScr)
+        Finally
+            File.Delete(plik)
+        End Try
+    End Sub
+
+    <Fact>
+    Public Sub SiatkaBezObrysuZKrawedziami()
+        Dim z = Zadanie()
+        z.RysujObrys = False
+        Dim ob = Obiekty(Pary(EksportCad.Dxf(z, Encoding.ASCII)))
+        'bez obrysu siatka ma także krawędzie zewnętrzne: 3 linie pionowe i 3 poziome
+        Assert.Equal(6, ob.Where(Function(o) o.Key = "LINE").Count())
+        Assert.False(ob.Any(Function(o) o.Key = "LWPOLYLINE"))
+        Assert.Equal(6, EksportCad.Skrypt(z).Split({vbCrLf}, StringSplitOptions.None).Where(Function(x) x = "_LINE").Count())
     End Sub
 
     <Fact>
@@ -257,9 +304,11 @@ Public Class EksportCadTesty
         Assert.Equal("_non", w(i + 3))
         Assert.Equal("637000,487256", w(i + 4))
         Assert.Equal("256", w(i + 5))
-        Assert.Equal("0", w(i + 6))
+        'obrót wskazany punktem na wschód (prawy dolny narożnik) - niezależnie od ANGBASE / ANGDIR
+        Assert.Equal("_non", w(i + 6))
+        Assert.Equal("637256,487256", w(i + 7))
         'raster pod istniejące obiekty rysunku
-        Assert.Equal({"_DRAWORDER", "_LAST", "", "_BACK"}, w.Skip(i + 7).Take(4).ToArray())
+        Assert.Equal({"_DRAWORDER", "_LAST", "", "_BACK"}, w.Skip(i + 8).Take(4).ToArray())
         Assert.Equal(4, w.Where(Function(x) x = "_-IMAGE").Count())
         Assert.Equal(4, w.Where(Function(x) x = "_DRAWORDER").Count())
         'INSUNITS = 0 przed wstawieniem rastrów, na koniec metry; współrzędne w WCS, na koniec poprzedni UCS
@@ -270,12 +319,13 @@ Public Class EksportCadTesty
         'warstwa rastrów: utworzona, odmrożona, włączona i bieżąca
         Dim iw = Array.IndexOf(w, "_-LAYER")
         Assert.Equal({"_NEW", EksportCad.WarstwaRastrow, "_THAW", EksportCad.WarstwaRastrow, "_ON", EksportCad.WarstwaRastrow,
-                      "_SET", EksportCad.WarstwaRastrow, "_COLOR", "7", EksportCad.WarstwaRastrow, ""}, w.Skip(iw + 1).Take(12).ToArray())
+                      "_UNLOCK", EksportCad.WarstwaRastrow, "_SET", EksportCad.WarstwaRastrow, "_COLOR", "7", EksportCad.WarstwaRastrow, ""},
+                     w.Skip(iw + 1).Take(14).ToArray())
         Assert.Equal("_UNDO _BEGIN", w.First(Function(x) Not x.StartsWith(";")))
         Assert.Equal("_UNDO _END", w(w.Length - 2))
         Assert.Equal("", w(w.Length - 1))
-        'siatka 6 linii, obrys - zamknięta polilinia
-        Assert.Equal(6, w.Where(Function(x) x = "_LINE").Count())
+        'siatka - 2 linie wewnętrzne (zewnętrzne pokrywa obrys), obrys - zamknięta polilinia
+        Assert.Equal(2, w.Where(Function(x) x = "_LINE").Count())
         Assert.Equal(1, w.Where(Function(x) x = "_PLINE").Count())
         Assert.Contains("_CLOSE", w)
         'każdy punkt poprzedzony _non
@@ -295,7 +345,7 @@ Public Class EksportCadTesty
         Next
         Dim w = EksportCad.Skrypt(z).Split({vbCrLf}, StringSplitOptions.None)
         Dim i = Array.IndexOf(w, "_-IMAGE")
-        Assert.Equal({"_TRANSPARENCY", "_LAST", "", "_ON", "_DRAWORDER"}, w.Skip(i + 7).Take(5).ToArray())
+        Assert.Equal({"_TRANSPARENCY", "_LAST", "", "_ON", "_DRAWORDER"}, w.Skip(i + 8).Take(5).ToArray())
         Assert.Equal(4, w.Where(Function(x) x = "_TRANSPARENCY").Count())
         Dim ob = Obiekty(Pary(EksportCad.Dxf(z, Encoding.ASCII)))
         Assert.Equal("15", Wartosc(ob.First(Function(o) o.Key = "IMAGE").Value, 70))
@@ -323,6 +373,46 @@ Public Class EksportCadTesty
         Assert.Empty(z2.Uwagi)
     End Sub
 
+    ''' <summary>Nagłówek GeoTIFF 64 x 40 px (bez danych obrazu): piksel 0,5 m, punkt dowiązania (600000; 500020), typ rastra.</summary>
+    Private Shared Function NaglowekGeoTiff(typRastra As Short) As Byte()
+        Dim ms As New MemoryStream()
+        Dim bw As New BinaryWriter(ms)
+        bw.Write(New Byte() {AscW("I"c), AscW("I"c)}) : bw.Write(CShort(42)) : bw.Write(8)
+        Dim wpis = Sub(tag As Integer, typ As Short, ile As Integer, wartosc As Integer, krotka As Boolean)
+                       bw.Write(CUShort(tag)) : bw.Write(typ) : bw.Write(ile)
+                       If krotka Then bw.Write(CShort(wartosc)) : bw.Write(CShort(0)) Else bw.Write(wartosc)
+                   End Sub
+        bw.Write(CShort(5))
+        wpis(256, 3, 1, 64, True)
+        wpis(257, 3, 1, 40, True)
+        wpis(33550, 12, 3, 74, False)
+        wpis(33922, 12, 6, 98, False)
+        wpis(34735, 3, 8, 146, False)
+        bw.Write(0)
+        For Each d In {0.5, 0.5, 0.0, 0.0, 0.0, 0.0, 600000.0, 500020.0, 0.0}
+            bw.Write(d)
+        Next
+        For Each k In New Short() {1, 1, 0, 1, 1025, 0, 1, typRastra}
+            bw.Write(k)
+        Next
+        Return ms.ToArray()
+    End Function
+
+    <Theory>
+    <InlineData(1, 600000.0, 500020.0)>
+    <InlineData(2, 599999.75, 500020.25)>
+    Public Sub GeoTiffPixelIsPointPolPiksela(typRastra As Integer, yLewy As Double, xGora As Double)
+        Using ms As New MemoryStream(NaglowekGeoTiff(CShort(typRastra)))
+            Dim n = NaglowekObrazu.Odczytaj(ms)
+            Assert.Equal(typRastra = 2, n.PikselJakoPunkt)
+            Dim z = n.ZasiegGeoTiff()
+            Assert.Equal(yLewy, z.YLewy, 9)
+            Assert.Equal(xGora, z.XGora, 9)
+            Assert.Equal(xGora - 20, z.XDol, 9)
+            Assert.Equal(yLewy + 32, z.YPrawy, 9)
+        End Using
+    End Sub
+
     <Fact>
     Public Sub ArkuszGeoTiffWInnymUkladzie()
         Dim folder = NowyFolder()
@@ -343,6 +433,94 @@ Public Class EksportCadTesty
         Finally
             Directory.Delete(folder, True)
         End Try
+    End Sub
+
+    ''' <summary>
+    ''' Wyrażenia najwyższego poziomu programu AutoLISP (sprawdzenie składni: komentarze ;, teksty "..." ze znakami \,
+    ''' domknięte nawiasy). Wyjątek przy błędzie składni.
+    ''' </summary>
+    Private Shared Function WyrazeniaLisp(program As String) As List(Of String)
+        Dim wynik As New List(Of String)
+        Dim glebokosc As Integer = 0, poczatek As Integer = -1
+        Dim i As Integer = 0
+        While i < program.Length
+            Dim c = program(i)
+            If c = ";"c Then
+                While i < program.Length AndAlso program(i) <> ChrW(10)
+                    i += 1
+                End While
+                Continue While
+            End If
+            If c = """"c Then
+                i += 1
+                While program(i) <> """"c
+                    If program(i) = "\"c Then i += 1
+                    If program(i) = ChrW(10) Then Throw New Exception("Tekst przechodzi do następnego wiersza na pozycji " & i)
+                    i += 1
+                End While
+            ElseIf c = "("c Then
+                If glebokosc = 0 Then poczatek = i
+                glebokosc += 1
+            ElseIf c = ")"c Then
+                glebokosc -= 1
+                If glebokosc < 0 Then Throw New Exception("Nadmiarowy nawias na pozycji " & i)
+                If glebokosc = 0 Then wynik.Add(program.Substring(poczatek, i - poczatek + 1))
+            End If
+            i += 1
+        End While
+        If glebokosc <> 0 Then Throw New Exception("Niedomknięte nawiasy: " & glebokosc)
+        Return wynik
+    End Function
+
+    <Fact>
+    Public Sub LispSkladniaIDane()
+        Dim z = Zadanie()
+        z.Opis = "Mapa: Łódź ""test"" \ x"
+        z.ObszarZaznaczenia = New Zasieg(487000, 637000, 487400, 637500)
+        z.Trasa.Add(New List(Of PunktXY) From {New PunktXY(487050, 637050), New PunktXY(487300, 637400)})
+        z.Rastry(1).SciezkaPliku = "C:\mapy z ""cudzysłowem""\_01_02.png"
+        z.Rastry(1).NazwaPliku = "_01_02.png"
+        Dim program = EksportCad.Lisp(z)
+        Dim wyr = WyrazeniaLisp(program)
+        'dane, funkcje i na końcu uruchomienie wstawiania
+        Assert.Equal("(c:MAPOTERO_WSTAW)", wyr.Last())
+        Assert.Contains(wyr, Function(x) x.StartsWith("(defun c:MAPOTERO_WSTAW"))
+        Assert.Contains(wyr, Function(x) x.StartsWith("(defun mt:blad"))
+        Dim rastry = wyr.First(Function(x) x.StartsWith("(setq mt:rastry"))
+        Assert.Contains("(""MT_test__01_01"" ""C:\\mapy\\sesja\\_01_01.jpg"" 637000.0 487256.0 256.0 nil)", rastry)
+        Assert.Contains("""C:\\mapy z \""cudzys", rastry)
+        Assert.Contains("256.0 T)", rastry)
+        'siatka 2 x 2 z obrysem: 2 linie wewnętrzne; obrys i zaznaczenie; numery; trasa; opis z kodami \U+
+        Assert.Equal(2, wyr.First(Function(x) x.StartsWith("(setq mt:siatka")).Split({"0.0) ("}, StringSplitOptions.None).Length - 1)
+        Dim obrysy = wyr.First(Function(x) x.StartsWith("(setq mt:obrysy"))
+        Assert.Contains("""MAPOTERO_ZASIEG"" 1 ((637000.0 487000.0) (637512.0 487000.0)", obrysy)
+        Assert.Contains("""MAPOTERO_ZAZNACZENIE"" 3", obrysy)
+        Assert.Contains("""_02_02""", wyr.First(Function(x) x.StartsWith("(setq mt:numery")))
+        Assert.Contains("((637050.0 487050.0) (637400.0 487300.0))", wyr.First(Function(x) x.StartsWith("(setq mt:trasa")))
+        Assert.Contains("""Mapa: \\U+0141\\U+00F3d\\U+017A \""test\"" \\ x""", wyr.First(Function(x) x.StartsWith("(setq mt:opis")))
+        'cały program w ASCII, gdy ścieżki są w ASCII (kodowanie odczytu .lsp zależy od programu CAD)
+        Dim z2 = Zadanie()
+        z2.Opis = "Mapa: Łódź"
+        Assert.True(EksportCad.Lisp(z2).All(Function(c) AscW(c) < 128))
+        Assert.Empty(z2.Uwagi)
+        'ścieżka z polską literą - uwaga o kodowaniu
+        z2.Rastry(0).SciezkaPliku = "C:\Łódź\_01_01.jpg"
+        EksportCad.Lisp(z2)
+        Assert.Single(z2.Uwagi)
+    End Sub
+
+    <Fact>
+    Public Sub LispBezDanychIKorytarz()
+        Dim z = Zadanie()
+        z.Rastry.Clear()
+        z.RysujNumery = False
+        z.SegmentyKorytarza = New HashSet(Of Integer) From {0, 3}
+        Dim wyr = WyrazeniaLisp(EksportCad.Lisp(z))
+        Assert.Equal("(setq mt:rastry '(" & vbCrLf & "))", wyr.First(Function(x) x.StartsWith("(setq mt:rastry")))
+        Assert.Equal("(setq mt:numery '(" & vbCrLf & "))", wyr.First(Function(x) x.StartsWith("(setq mt:numery")))
+        'korytarz: prostokąty segmentów zamiast linii
+        Assert.Equal("(setq mt:siatka '(" & vbCrLf & "))", wyr.First(Function(x) x.StartsWith("(setq mt:siatka")))
+        Assert.Equal(2, wyr.First(Function(x) x.StartsWith("(setq mt:prostokaty")).Split({vbCrLf}, StringSplitOptions.None).Length - 2)
     End Sub
 
     <Fact>
@@ -440,6 +618,34 @@ Public Class EksportCadTesty
             'bez georeferencji - wyjątek z opisem
             File.Delete(folder & "arkusz.jpgw")
             Assert.Throws(Of InvalidDataException)(Function() EksportCad.Arkusz(plik, UkladWspolrzednych.PL1992, Nothing))
+        Finally
+            Directory.Delete(folder, True)
+        End Try
+    End Sub
+
+    <Fact>
+    Public Sub ObrysZaznaczeniaMniejszegoOdSiatki()
+        Dim folder = NowyFolder()
+        Try
+            'zaznaczenie 500 x 400 m przy segmencie 256 m - siatka 2 x 2 (512 x 512 m)
+            Dim c As New KonfiguracjaSesji With {.XDol = "487000", .YLewy = "637000", .XGora = "487400", .YPrawy = "637500",
+                                                 .BokSegmentuPx = "256", .RozmiarPiksela = "1", .Format = "image/jpeg", .Prefiks = "_", .UkladEpsg = 2180}
+            Dim z = EksportCad.ZSesji(folder, c, StylNumeracji.WierszKolumna, False)
+            Assert.True(z.ObszarZaznaczenia.HasValue)
+            Assert.Equal(487400.0, z.ObszarZaznaczenia.Value.XGora)
+            Assert.Equal(637500.0, z.ObszarZaznaczenia.Value.YPrawy)
+            Dim ob = Obiekty(Pary(EksportCad.Dxf(z, Encoding.ASCII)))
+            Dim zazn = ob.Single(Function(o) o.Key = "LWPOLYLINE" AndAlso Wartosc(o.Value, 8) = EksportCad.WarstwaZaznaczenia).Value
+            Assert.Equal(637500.0, zazn.Where(Function(x) x.Key = 10).Max(Function(x) Liczba(x.Value)))
+            Assert.Equal(487400.0, zazn.Where(Function(x) x.Key = 20).Max(Function(x) Liczba(x.Value)))
+            Assert.Contains(EksportCad.WarstwaZaznaczenia, EksportCad.Skrypt(z))
+            'bez obrysu - bez zaznaczenia
+            z.RysujObrys = False
+            Assert.DoesNotContain(EksportCad.WarstwaZaznaczenia, EksportCad.Skrypt(z))
+
+            'zaznaczenie równe siatce - tylko obrys
+            c.XGora = "487512" : c.YPrawy = "637512"
+            Assert.False(EksportCad.ZSesji(folder, c, StylNumeracji.WierszKolumna, False).ObszarZaznaczenia.HasValue)
         Finally
             Directory.Delete(folder, True)
         End Try
