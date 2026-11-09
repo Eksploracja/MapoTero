@@ -136,6 +136,9 @@ Public NotInheritable Class PobieranieSegmentow
         Dim ext As String = z.Rozszerzenie
         Dim wynik As New WynikPobierania()
 
+        'łącznie (segmenty WMS i kafle WMTS) najwyżej tyle jednoczesnych zapytań do serwera, ile wątków; hamowanie przy przeciążeniu
+        RegulatorZapytan.Pobieranie.Rozpocznij(z.LiczbaWatkow, Sub(tekst) postep?.Report(New PostepPobierania With {.Komunikat = tekst}))
+
         'usługa WMTS (adres w pliku warstw wskazuje WMTS) - segmenty składane z kafli usługi
         Dim kafleWmts As ZrodloWmts = Nothing
         If Wmts.CzyAdresWmts(z.AdresSerwera) Then
@@ -348,10 +351,15 @@ Public NotInheritable Class PobieranieSegmentow
     ''' </summary>
     Public Shared Async Function PobierzSegmentAsync(adres As String, plikDocelowy As String, limitCzasuSekundy As Integer,
                                                      token As CancellationToken) As Task(Of String)
+        'regulacja obciążenia serwera - limit czasu odpowiedzi liczony od wysłania zapytania, bez oczekiwania na przepustkę
+        Dim przepustka As RegulatorZapytan.Przepustka = Nothing
         Try
+            przepustka = Await RegulatorZapytan.Pobieranie.WejdzAsync(adres, token).ConfigureAwait(False)
             Using limit = LimitCzasu(limitCzasuSekundy, token),
                   odpowiedz = Await Klient.GetAsync(adres, HttpCompletionOption.ResponseContentRead, limit.Token).ConfigureAwait(False)
+                przepustka.Odpowiedz(odpowiedz)
                 Dim dane() As Byte = Await odpowiedz.Content.ReadAsByteArrayAsync(limit.Token).ConfigureAwait(False)
+                przepustka.Dispose()
                 Dim typ As String = If(odpowiedz.Content.Headers.ContentType?.MediaType, "")
 
                 If Not CzyObraz(dane) Then
@@ -372,11 +380,15 @@ Public NotInheritable Class PobieranieSegmentow
         Catch ex As OperationCanceledException When token.IsCancellationRequested
             Throw
         Catch ex As OperationCanceledException
+            przepustka?.Blad()
             Return OpisLimituCzasu(limitCzasuSekundy)
         Catch ex As Exception
+            If TypeOf ex Is HttpRequestException Then przepustka?.Blad()
             Dim opis As String = ex.Message
             If ex.InnerException IsNot Nothing Then opis &= " (" & ex.InnerException.Message & ")"
             Return opis.Replace(vbCr, " ").Replace(vbLf, " ")
+        Finally
+            przepustka?.Dispose()
         End Try
     End Function
 

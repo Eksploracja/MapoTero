@@ -344,3 +344,6 @@ lastsettings.txt
 
 # Program do uruchomienia: jeden plik MapoTero.exe (jedyna rozwijana wersja programu)
 MapoTero_SingleFile/
+
+# Brudnopis: jednorazowe skrypty poprawek i wyniki prób (nie są częścią programu)
+scratch/

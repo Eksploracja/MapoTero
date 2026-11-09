@@ -284,7 +284,8 @@ Public Class ZrodloWmts
     Private Async Function PobierzKafelAsync(adres As String, token As CancellationToken) As Task(Of Tuple(Of Byte(), String))
         Dim plik As String = Path.Combine(FolderKafli, NazwaKafla(adres))
         If File.Exists(plik) Then Return Tuple.Create(File.ReadAllBytes(plik), "")
-        Dim zadanie = _wTrakcie.GetOrAdd(adres, Function(a) New Lazy(Of Task(Of Tuple(Of Byte(), String)))(Function() PobierzKafelZSerweraAsync(a, plik, _limitCzasu)))
+        'token pobierania (wspólny dla wszystkich segmentów) przerywa tylko oczekiwanie na przepustkę regulatora
+        Dim zadanie = _wTrakcie.GetOrAdd(adres, Function(a) New Lazy(Of Task(Of Tuple(Of Byte(), String)))(Function() PobierzKafelZSerweraAsync(a, plik, _limitCzasu, token)))
         Try
             Return Await zadanie.Value.WaitAsync(token).ConfigureAwait(False)
         Finally
@@ -294,11 +295,17 @@ Public Class ZrodloWmts
         End Try
     End Function
 
-    Private Shared Async Function PobierzKafelZSerweraAsync(adres As String, plik As String, limitCzasuSekundy As Integer) As Task(Of Tuple(Of Byte(), String))
+    Private Shared Async Function PobierzKafelZSerweraAsync(adres As String, plik As String, limitCzasuSekundy As Integer,
+                                                            token As CancellationToken) As Task(Of Tuple(Of Byte(), String))
+        'regulacja obciążenia serwera: łącznie z kaflami innych segmentów najwyżej tyle zapytań naraz, ile wątków pobierania
+        Dim przepustka As RegulatorZapytan.Przepustka = Nothing
         Try
+            przepustka = Await RegulatorZapytan.Pobieranie.WejdzAsync(adres, token).ConfigureAwait(False)
             Using limit = PobieranieSegmentow.LimitCzasu(limitCzasuSekundy, CancellationToken.None),
                   odpowiedz = Await PobieranieSegmentow.Klient.GetAsync(adres, HttpCompletionOption.ResponseContentRead, limit.Token).ConfigureAwait(False)
+                przepustka.Odpowiedz(odpowiedz)
                 Dim dane() As Byte = Await odpowiedz.Content.ReadAsByteArrayAsync(limit.Token).ConfigureAwait(False)
+                przepustka.Dispose()
                 If odpowiedz.StatusCode = HttpStatusCode.NotFound OrElse odpowiedz.StatusCode = HttpStatusCode.NoContent Then
                     dane = New Byte() {}
                 ElseIf Not PobieranieSegmentow.CzyObraz(dane) Then
@@ -317,12 +324,19 @@ Public Class ZrodloWmts
                 If File.Exists(tymczasowy) Then File.Delete(tymczasowy)
                 Return Tuple.Create(dane, "")
             End Using
+        Catch ex As OperationCanceledException When przepustka Is Nothing
+            'pobieranie przerwane w trakcie oczekiwania na przepustkę - zapytania nie wysłano
+            Return Tuple.Create(CType(Nothing, Byte()), "przerwano pobieranie")
         Catch ex As OperationCanceledException
+            przepustka.Blad()
             Return Tuple.Create(CType(Nothing, Byte()), PobieranieSegmentow.OpisLimituCzasu(limitCzasuSekundy))
         Catch ex As Exception
+            If TypeOf ex Is HttpRequestException Then przepustka?.Blad()
             Dim opis As String = ex.Message
             If ex.InnerException IsNot Nothing Then opis &= " (" & ex.InnerException.Message & ")"
             Return Tuple.Create(CType(Nothing, Byte()), opis.Replace(vbCr, " ").Replace(vbLf, " "))
+        Finally
+            przepustka?.Dispose()
         End Try
     End Function
 

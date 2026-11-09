@@ -1,7 +1,7 @@
 # MapoTero
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
-[![Platform](https://img.shields.io/badge/.NET-8-purple.svg)](https://dotnet.microsoft.com/)
+[![Platform](https://img.shields.io/badge/.NET-10-purple.svg)](https://dotnet.microsoft.com/)
 [![Kompilacja i testy](https://github.com/Eksploracja/MapoTero/actions/workflows/kompilacja.yml/badge.svg)](https://github.com/Eksploracja/MapoTero/actions/workflows/kompilacja.yml)
 [![Facebook](https://img.shields.io/badge/Facebook-MapoTero-1877F2?logo=facebook&logoColor=white)](https://www.facebook.com/mapotero.opensource)
 
@@ -143,7 +143,7 @@ Zbiory map to pliki tekstowe w katalogu `warstwy`: w pierwszym wierszu adres ser
   `dotnet publish MapoTero_v3.vbproj -c Release -o MapoTero_SingleFile` - w folderze `MapoTero_SingleFile` powstaje `MapoTero.exe`
   z folderem `warstwy` i plikiem `README.md`. Projekt nie pozwala opublikować wersji wieloplikowej.
 * Kompilacja do sprawdzenia kodu: `dotnet build MapoTero_v3.vbproj -c Release` (folder `bin` zawiera tylko pliki pośrednie kompilacji),
-  testy jednostkowe: `dotnet test MapoTero.Tests/MapoTero.Tests.vbproj`.
+  testy jednostkowe: `dotnet test MapoTero.Tests/MapoTero.Tests.vbproj -c Release`.
 * Każda zmiana w repozytorium jest kompilowana i testowana w GitHub Actions; gotowy program (`MapoTero.exe` z folderem `warstwy`)
   można pobrać jako artefakt *MapoTero* z zakładki **Actions**.
 * Do uruchomienia programu potrzebne jest środowisko [.NET Desktop Runtime 10](https://dotnet.microsoft.com/download/dotnet/10.0) (x64).
