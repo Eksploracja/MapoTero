@@ -14,7 +14,7 @@ on:
   workflow_dispatch:
     inputs:
       wersja:
-        description: 'Numer wersji (tag), np. v3.12'
+        description: 'Numer wersji (tag), np. v3.16 - samo 3.16 też zadziała'
         required: true
 
 permissions:
@@ -23,9 +23,19 @@ permissions:
 jobs:
   wydanie:
     runs-on: windows-latest
-    env:
-      WERSJA: ${{ inputs.wersja || github.ref_name }}
     steps:
+      - name: Numer wersji
+        # wpisane ręcznie "3.16" zamiast "v3.16" tworzyło osobne wydanie z tagiem 3.16 - dopisujemy "v"
+        shell: pwsh
+        env:
+          WEJSCIE: ${{ inputs.wersja || github.ref_name }}
+        run: |
+          $w = $env:WEJSCIE.Trim()
+          if ($w -notmatch '^v') { $w = "v$w" }
+          if ($w -notmatch '^v\d+\.\d+$') { throw "Nieprawidłowy numer wersji: '$w' (oczekiwany np. v3.16)" }
+          Write-Output "Wersja wydania: $w"
+          "WERSJA=$w" | Out-File $env:GITHUB_ENV -Append -Encoding utf8
+
       - uses: actions/checkout@v4
 
       - uses: actions/setup-dotnet@v4
