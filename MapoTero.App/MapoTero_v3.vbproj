@@ -1,9 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <!-- Program MapoTero (Windows Forms, .NET 10). Logika niezależna od interfejsu - w bibliotece MapoTero.Core.
-       Kompilacja: Visual Studio 2026 (18.0 lub nowszy) albo polecenie: dotnet build MapoTero_v3.vbproj -c Release
+       Kompilacja: Visual Studio 2026 (18.0 lub nowszy) - MapoTero.sln - albo polecenie (z folderu głównego repozytorium):
+       dotnet build MapoTero.App/MapoTero_v3.vbproj -c Release
        (folder bin\ to tylko pliki pośrednie kompilacji - nie jest wersją programu).
-       Program do uruchomienia i wydania: dotnet publish MapoTero_v3.vbproj -c Release -o MapoTero_SingleFile -->
+       Program do uruchomienia i wydania: dotnet publish MapoTero.App/MapoTero_v3.vbproj -c Release -o MapoTero_SingleFile
+       (folder MapoTero_SingleFile w folderze głównym repozytorium, obok MapoTero.App) -->
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
@@ -34,15 +36,15 @@
     <PublishSingleFile>true</PublishSingleFile>
     <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
     <SelfContained>false</SelfContained>
-    <PublishDir>$(MSBuildProjectDirectory)\MapoTero_SingleFile\</PublishDir>
+    <!-- folder programu w folderze głównym repozytorium (projekt jest w podfolderze MapoTero.App) -->
+    <PublishDir>$(MSBuildProjectDirectory)\..\MapoTero_SingleFile\</PublishDir>
     <!-- zasoby formularzy (obrazy) w formacie wymaganym przez MSBuild .NET -->
     <GenerateResourceUsePreserializedResources>true</GenerateResourceUsePreserializedResources>
     <!-- przestrzenie nazw importowane w całym projekcie - jak w poprzednich wersjach -->
     <DisableImplicitNamespaceImports>true</DisableImplicitNamespaceImports>
     <AssemblyOriginatorKeyFile>MapoTero.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>false</SignAssembly>
-    <!-- biblioteka i testy mają własne projekty w podfolderach -->
-    <DefaultItemExcludes>$(DefaultItemExcludes);MapoTero.Core\**;MapoTero.Tests\**;packages\**</DefaultItemExcludes>
+    <DefaultItemExcludes>$(DefaultItemExcludes);packages\**</DefaultItemExcludes>
     <!-- 4201x/4235x - ostrzeżenia VB o niejawnych konwersjach i składni z poprzednich wersji kodu,
          SYSLIB0014 - ServicePointManager (w .NET 10 bez znaczenia, potrzebny przy kompilacji dla .NET Framework) -->
     <NoWarn>$(NoWarn);42016;41999;42017;42018;42019;42032;42036;42020;42021;42022;42353;42354;42355;SYSLIB0014</NoWarn>
@@ -61,7 +63,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="MapoTero.Core\MapoTero.Core.vbproj" />
+    <ProjectReference Include="..\MapoTero.Core\MapoTero.Core.vbproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -123,9 +125,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <!-- pliki zbiorów map i opis programu kopiowane do folderu wydania -->
-    <None Update="warstwy\*.txt" CopyToOutputDirectory="PreserveNewest" />
-    <None Update="README.md" CopyToOutputDirectory="PreserveNewest" />
+    <!-- pliki zbiorów map i opis programu (w folderze głównym repozytorium) kopiowane do folderu wydania -->
+    <None Include="..\warstwy\*.txt" Link="warstwy\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\README.md" Link="README.md" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>

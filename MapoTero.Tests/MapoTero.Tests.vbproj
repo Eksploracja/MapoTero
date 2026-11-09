@@ -19,7 +19,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\MapoTero.Core\MapoTero.Core.vbproj" />
-    <ProjectReference Include="..\MapoTero_v3.vbproj" />
+    <ProjectReference Include="..\MapoTero.App\MapoTero_v3.vbproj" />
   </ItemGroup>
 
 </Project>

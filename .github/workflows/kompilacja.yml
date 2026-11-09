@@ -22,7 +22,7 @@ jobs:
         run: dotnet test MapoTero.Tests/MapoTero.Tests.vbproj -c Release
 
       - name: Kompilacja programu
-        run: dotnet publish MapoTero_v3.vbproj -c Release -o MapoTero_SingleFile
+        run: dotnet publish MapoTero.App/MapoTero_v3.vbproj -c Release -o MapoTero_SingleFile
 
       - name: Program do pobrania
         uses: actions/upload-artifact@v4

@@ -33,7 +33,7 @@ Program to jeden plik **MapoTero.exe** (wersja 64-bitowa dla systemu Windows), d
 > Program jest w pełni bezpieczny i otwartoźródłowy (GPLv3), lecz nie posiada kosztownego komercyjnego certyfikatu podpisu cyfrowego. System Windows może przy pierwszym uruchomieniu wyświetlić niebieski monit *"System Windows ochronił ten komputer"*.  
 > * **Jak uruchomić:** Kliknij odnośnik **„Więcej informacji”**, a następnie przycisk **„Uruchom mimo to”**.  
 >
-> ![Okno SmartScreen: najpierw „Więcej informacji”, potem „Uruchom mimo to”](smartscreen.png)
+> ![Okno SmartScreen: najpierw „Więcej informacji”, potem „Uruchom mimo to”](obrazy/smartscreen.png)
 >
 > * **Wskazówka:** Możesz także przed rozpakowaniem kliknąć prawym przyciskiem myszy na pobranym pliku ZIP → **Właściwości** → zaznaczyć pole **„Odblokuj”** na dole i kliknąć **OK**.
 > * **Jak sprawdzić plik:** w opisie każdego [wydania](https://github.com/Eksploracja/MapoTero/releases/latest) są sumy kontrolne SHA-256 archiwum ZIP i pliku `MapoTero.exe` oraz odnośnik do wyniku skanu programami antywirusowymi w serwisie VirusTotal.
@@ -122,17 +122,17 @@ Program to jeden plik **MapoTero.exe** (wersja 64-bitowa dla systemu Windows), d
    * Opcjonalnie wyeksportuj mapę do KMZ, MBTiles, SQLiteDB lub OruxMaps (*Narzędzia > Eksport mapy*), aby wgrać ją do odbiornika GPS lub aplikacji mobilnej.
    * Opcjonalnie wyeksportuj mapę do programu CAD (*Narzędzia > Eksport do CAD*): rysunek DXF otwórz w programie CAD, a skrypt SCR uruchom poleceniem `SCRIPT` w otwartym rysunku (jednostki: metry). Program LISP (AutoCAD, BricsCAD, ZWCAD, AutoCAD LT od wersji 2024) wczytaj poleceniem `APPLOAD` - wstawia też numery segmentów i opis, a po zakończeniu przywraca ustawienia rysunku. Oś X rysunku to wschód, oś Y - północ; mapa trafia na warstwy `MAPOTERO_...`. Przy setkach segmentów wygodniej wstawić scalony arkusz (GeoTIFF albo JPEG z plikiem world file) - przycisk *scal teraz...* w oknie eksportu.
 
-![Uproszczona instrukcja obsługi](instrukcja.jpg)
+![Uproszczona instrukcja obsługi](obrazy/instrukcja.jpg)
 
 ---
 
 ## Wygląd okien programu
 
 ### Główne okno programu
-![Główne okno programu](przod.jpg)
+![Główne okno programu](obrazy/przod.jpg)
 
 ### Okno ustawień
-![Okno ustawień](tyl.jpg)
+![Okno ustawień](obrazy/tyl.jpg)
 
 ---
 
@@ -149,10 +149,11 @@ Zbiory map to pliki tekstowe w katalogu `warstwy`: w pierwszym wierszu adres ser
 ## Kompilacja
 
 * Wymagany Visual Studio 2026 (wersja 18.0 lub nowsza) z obsługą .NET 10 albo samo .NET 10 SDK (Visual Studio 2022 nie kompiluje projektów .NET 10).
+* Kod źródłowy: `MapoTero.App` - program (okna Windows Forms), `MapoTero.Core` - obliczenia i formaty plików, `MapoTero.Tests` - testy jednostkowe, `warstwy` - zbiory map; w Visual Studio otwórz `MapoTero.sln`.
 * **Program wydawany jest wyłącznie jako jeden plik `MapoTero.exe`.** Tworzy go polecenie
-  `dotnet publish MapoTero_v3.vbproj -c Release -o MapoTero_SingleFile` - w folderze `MapoTero_SingleFile` powstaje `MapoTero.exe`
+  `dotnet publish MapoTero.App/MapoTero_v3.vbproj -c Release -o MapoTero_SingleFile` - w folderze `MapoTero_SingleFile` powstaje `MapoTero.exe`
   z folderem `warstwy` i plikiem `README.md`. Projekt nie pozwala opublikować wersji wieloplikowej.
-* Kompilacja do sprawdzenia kodu: `dotnet build MapoTero_v3.vbproj -c Release` (folder `bin` zawiera tylko pliki pośrednie kompilacji),
+* Kompilacja do sprawdzenia kodu: `dotnet build MapoTero.App/MapoTero_v3.vbproj -c Release` (folder `bin` zawiera tylko pliki pośrednie kompilacji),
   testy jednostkowe: `dotnet test MapoTero.Tests/MapoTero.Tests.vbproj -c Release`.
 * Każda zmiana w repozytorium jest kompilowana i testowana w GitHub Actions; gotowy program (`MapoTero.exe` z folderem `warstwy`)
   można pobrać jako artefakt *MapoTero* z zakładki **Actions**.
