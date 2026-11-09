@@ -32,7 +32,11 @@ Program to jeden plik **MapoTero.exe** (wersja 64-bitowa dla systemu Windows), d
 > **Pierwsze uruchomienie w systemie Windows (komunikat SmartScreen):**  
 > Program jest w pełni bezpieczny i otwartoźródłowy (GPLv3), lecz nie posiada kosztownego komercyjnego certyfikatu podpisu cyfrowego. System Windows może przy pierwszym uruchomieniu wyświetlić niebieski monit *"System Windows ochronił ten komputer"*.  
 > * **Jak uruchomić:** Kliknij odnośnik **„Więcej informacji”**, a następnie przycisk **„Uruchom mimo to”**.  
+>
+> ![Okno SmartScreen: najpierw „Więcej informacji”, potem „Uruchom mimo to”](smartscreen.png)
+>
 > * **Wskazówka:** Możesz także przed rozpakowaniem kliknąć prawym przyciskiem myszy na pobranym pliku ZIP → **Właściwości** → zaznaczyć pole **„Odblokuj”** na dole i kliknąć **OK**.
+> * **Jak sprawdzić plik:** w opisie każdego [wydania](https://github.com/Eksploracja/MapoTero/releases/latest) są sumy kontrolne SHA-256 archiwum ZIP i pliku `MapoTero.exe` oraz odnośnik do wyniku skanu programami antywirusowymi w serwisie VirusTotal.
 
 ---
 

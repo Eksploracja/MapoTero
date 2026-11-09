@@ -3,7 +3,9 @@ MapoTero 3.16 - eksport do CAD (DXF, skrypt SCR, program LISP), ochrona serweró
 ## Instalacja
 
 1. Pobierz plik **[MapoTero_v3.16.zip](https://github.com/Eksploracja/MapoTero/releases/download/v3.16/MapoTero_v3.16.zip)** (bezpośrednie pobranie lub poniżej w sekcji *Assets*).
-2. Przed rozpakowaniem kliknij plik prawym przyciskiem myszy, wybierz *Właściwości*, zaznacz **Odblokuj** i kliknij *OK* - wtedy Windows nie będzie blokował uruchomienia programu (program nie ma podpisu cyfrowego, więc filtr SmartScreen traktuje go jako nierozpoznaną aplikację; można też w oknie SmartScreen kliknąć *Więcej informacji* > *Uruchom mimo to*).
+2. Przed rozpakowaniem kliknij plik prawym przyciskiem myszy, wybierz *Właściwości*, zaznacz **Odblokuj** i kliknij *OK* - wtedy Windows nie będzie blokował uruchomienia programu (program nie ma podpisu cyfrowego, więc filtr SmartScreen traktuje go jako nierozpoznaną aplikację; można też w oknie SmartScreen kliknąć *Więcej informacji* > *Uruchom mimo to*). Sumy kontrolne plików i wynik skanu antywirusowego - niżej, w sekcji *Sumy kontrolne SHA-256*.
+
+   ![Okno SmartScreen: najpierw „Więcej informacji”, potem „Uruchom mimo to”](https://raw.githubusercontent.com/Eksploracja/MapoTero/master/smartscreen.png)
 3. Rozpakuj archiwum do dowolnego folderu i uruchom **MapoTero.exe** - program to jeden plik, obok którego musi leżeć folder `warstwy` (zbiory map).
 4. Program wymaga środowiska [.NET Desktop Runtime 10 (x64)](https://dotnet.microsoft.com/download/dotnet/10.0) - jeśli nie jest zainstalowane, Windows zaproponuje jego pobranie przy pierwszym uruchomieniu.
 

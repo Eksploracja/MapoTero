@@ -2,6 +2,9 @@
 # (zakładka Actions > Wydanie > Run workflow, z numerem wersji) program jest testowany, publikowany jako jeden plik
 # MapoTero.exe (jedyna wydawana wersja programu), pakowany razem z folderem warstwy do archiwum ZIP
 # i publikowany w zakładce Releases z opisem z pliku .github/opis_wydania.md.
+# Do opisu dopisywane są sumy kontrolne SHA-256 (MapoTero.exe i archiwum ZIP) oraz odnośnik do skanu VirusTotal;
+# plik MapoTero.exe jest wysyłany do skanu w VirusTotal, jeśli w ustawieniach repozytorium
+# (Settings > Secrets and variables > Actions) jest sekret VIRUSTOTAL_API_KEY z kluczem API konta VirusTotal.
 name: Wydanie
 
 on:
@@ -39,11 +42,58 @@ jobs:
         shell: pwsh
         run: Compress-Archive -Path MapoTero_SingleFile\* -DestinationPath "MapoTero_${{ env.WERSJA }}.zip"
 
+      - name: Sumy kontrolne SHA-256 i opis wydania
+        shell: pwsh
+        run: |
+          $zip = "MapoTero_$env:WERSJA.zip"
+          # małe litery - jak w sha256sum i w adresach VirusTotal
+          $exeSha = (Get-FileHash MapoTero_SingleFile\MapoTero.exe -Algorithm SHA256).Hash.ToLowerInvariant()
+          $zipSha = (Get-FileHash $zip -Algorithm SHA256).Hash.ToLowerInvariant()
+          # plik w formacie sha256sum: sprawdzenie poleceniem sha256sum -c po rozpakowaniu archiwum
+          "$zipSha *$zip`n$exeSha *MapoTero.exe`n" | Set-Content "MapoTero_$env:WERSJA.sha256" -NoNewline -Encoding ascii
+          $dopisek = @(
+            ''
+            '## Sumy kontrolne SHA-256'
+            ''
+            'Sumy pozwalają sprawdzić, że pobrany plik jest dokładnie tym, który zbudował GitHub Actions z kodu źródłowego tego wydania.'
+            ''
+            '| Plik | SHA-256 |'
+            '|---|---|'
+            "| ``$zip`` | ``$zipSha`` |"
+            "| ``MapoTero.exe`` (w archiwum) | ``$exeSha`` |"
+            ''
+            'Sprawdzenie w Windows (PowerShell): `Get-FileHash .\MapoTero.exe` - wynik ma być taki sam jak w tabeli (wielkość liter nie ma znaczenia).'
+            ''
+            "Wynik skanu pliku MapoTero.exe programami antywirusowymi: **[VirusTotal](https://www.virustotal.com/gui/file/$exeSha)**."
+          )
+          # sumy zaraz po instrukcji instalacji - przed opisem zmian kolejnych wersji
+          $opis = (Get-Content .github/opis_wydania.md -Raw -Encoding utf8) -replace "`r`n", "`n"
+          $tekst = ($dopisek -join "`n") + "`n"
+          $i = $opis.IndexOf("`n## Zmiany w wersji")
+          if ($i -ge 0) { $opis = $opis.Insert($i, $tekst) } else { $opis = $opis.TrimEnd() + "`n" + $tekst }
+          $opis | Set-Content opis_wydania_z_sumami.md -NoNewline -Encoding utf8
+
+      - name: Skan w VirusTotal
+        # wysłanie pliku nie może zablokować wydania (limit zapytań, awaria serwisu)
+        continue-on-error: true
+        shell: pwsh
+        env:
+          VIRUSTOTAL_API_KEY: ${{ secrets.VIRUSTOTAL_API_KEY }}
+        run: |
+          if (-not $env:VIRUSTOTAL_API_KEY) {
+            Write-Output 'Brak sekretu VIRUSTOTAL_API_KEY - plik nie został wysłany do skanu (odnośnik w opisie pokaże wynik, gdy ktoś wyśle plik).'
+            exit 0
+          }
+          curl.exe --fail-with-body -sS -X POST https://www.virustotal.com/api/v3/files `
+            -H "x-apikey: $env:VIRUSTOTAL_API_KEY" -F "file=@MapoTero_SingleFile/MapoTero.exe"
+
       - name: Publikacja wydania
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ env.WERSJA }}
           target_commitish: ${{ github.sha }}
           name: MapoTero ${{ env.WERSJA }}
-          body_path: .github/opis_wydania.md
-          files: MapoTero_${{ env.WERSJA }}.zip
+          body_path: opis_wydania_z_sumami.md
+          files: |
+            MapoTero_${{ env.WERSJA }}.zip
+            MapoTero_${{ env.WERSJA }}.sha256
