@@ -178,12 +178,6 @@ Zbiory map to pliki tekstowe w katalogu `warstwy`: w pierwszym wierszu adres ser
 
 ---
 
-## Alternatywne rozwiązania
-
-* **Kafelkarz** (autor: AAA222) – program umożliwiający pobieranie danych zarówno z serwerów WMS, jak i WMTS.
-
----
-
 ## Licencja
 
 Program jest wolnym oprogramowaniem udostępnianym na warunkach licencji **GNU General Public License v3 (GPLv3)**. Szczegóły licencji znajdują się w pliku [LICENSE](LICENSE).
