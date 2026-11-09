@@ -1,13 +1,29 @@
-MapoTero 3.15 - kreator serwerów WMS/WMTS, siatka segmentów na mapie ze zmianą zasięgu uchwytami, wielowarstwowy i wieloskalowy MBTiles, bezpieczniejsze pobieranie i wiele poprawek.
+MapoTero 3.16 - eksport do CAD (DXF, skrypt SCR, program LISP), ochrona serwerów map przed przeciążeniem, przejście na .NET 10 i zapis awarii programu.
 
 ## Instalacja
 
-1. Pobierz plik **[MapoTero_v3.15.zip](https://github.com/Eksploracja/MapoTero/releases/download/v3.15/MapoTero_v3.15.zip)** (bezpośrednie pobranie lub poniżej w sekcji *Assets*).
+1. Pobierz plik **[MapoTero_v3.16.zip](https://github.com/Eksploracja/MapoTero/releases/download/v3.16/MapoTero_v3.16.zip)** (bezpośrednie pobranie lub poniżej w sekcji *Assets*).
 2. Przed rozpakowaniem kliknij plik prawym przyciskiem myszy, wybierz *Właściwości*, zaznacz **Odblokuj** i kliknij *OK* - wtedy Windows nie będzie blokował uruchomienia programu (program nie ma podpisu cyfrowego, więc filtr SmartScreen traktuje go jako nierozpoznaną aplikację; można też w oknie SmartScreen kliknąć *Więcej informacji* > *Uruchom mimo to*).
 3. Rozpakuj archiwum do dowolnego folderu i uruchom **MapoTero.exe** - program to jeden plik, obok którego musi leżeć folder `warstwy` (zbiory map).
 4. Program wymaga środowiska [.NET Desktop Runtime 10 (x64)](https://dotnet.microsoft.com/download/dotnet/10.0) - jeśli nie jest zainstalowane, Windows zaproponuje jego pobranie przy pierwszym uruchomieniu.
 
-Ustawienia i zbiory map z poprzednich wersji (plik `lastsettings.txt`, folder `warstwy`) są w pełni zgodne z wersją 3.15.
+Ustawienia i zbiory map z poprzednich wersji (plik `lastsettings.txt`, folder `warstwy`) są w pełni zgodne z wersją 3.16.
+
+## Zmiany w wersji 3.16
+
+* **Eksport do CAD** (menu *Narzędzia > Eksport do CAD*):
+  * Rysunek DXF (R2000) z odnośnikami do rastrów na właściwych współrzędnych - segmenty sesji albo scalony arkusz (world file lub GeoTIFF); obrys, siatka i numery segmentów, trasa korytarza i opis mapy na warstwach `MAPOTERO_...`; ścieżki względne do rastrów.
+  * Skrypt SCR dla AutoCAD, AutoCAD LT, BricsCAD i ZWCAD (polecenie `SCRIPT`) wstawiający mapę do otwartego rysunku pod istniejące obiekty, jako jedna operacja cofania.
+  * Program LISP (polecenie `APPLOAD`; AutoCAD, BricsCAD, ZWCAD, AutoCAD LT od wersji 2024) - wstawia też numery segmentów i opis, nie zmienia układu UCS i przywraca ustawienia rysunku także po Esc.
+  * Obrys samego zaznaczenia, gdy jest mniejsze od siatki; przycisk *scal teraz...* (złączenie segmentów w arkusz z plikiem world file) i *otwórz folder*; zapamiętywanie opcji eksportu.
+* **Ochrona serwerów map przed przeciążeniem:**
+  * Łączna liczba jednoczesnych zapytań do jednego serwera nie przekracza liczby wątków z ustawień - także przy pobieraniu kafli WMTS, które wysyłało dotąd do 4 zapytań na wątek.
+  * Po odpowiedzi HTTP 429, 502, 503, 504 albo serii przekroczeń czasu program robi przerwę w zapytaniach do serwera (z uwzględnieniem nagłówka `Retry-After`) i zmniejsza liczbę jednoczesnych zapytań o połowę, a po udanych odpowiedziach stopniowo ją przywraca; informuje o tym w oknie programu.
+  * Oczekiwanie w kolejce nie wlicza się do limitu czasu odpowiedzi serwera; przerwanie pobierania zatrzymuje też zapytania czekające w kolejce.
+* **.NET 10:** program wymaga środowiska .NET Desktop Runtime 10 (x64) - wsparcie .NET 8 kończy się 10.11.2026. Z programu usunięto nieużywany klient MS SQL ze znanymi lukami bezpieczeństwa.
+* **Obsługa awarii:** opis nieoczekiwanego błędu (wersja programu, system, stos wywołań) zapisywany jest w pliku `awarie.log` w folderze danych programu; okno komunikatu podaje adres zgłoszeń i pozwala kontynuować pracę.
+* **Poprawki:** położenie arkuszy GeoTIFF zapisanych jako *PixelIsPoint* (przesunięcie o pół piksela).
+* **Testy jednostkowe:** 638 testów zakończonych sukcesem.
 
 ## Zmiany w wersji 3.15
 

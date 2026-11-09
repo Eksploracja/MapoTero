@@ -25,7 +25,7 @@ Program pobiera mapy, dzieląc wybrany obszar na siatkę kwadratowych segmentów
 ## Pobieranie
 
 Program to jeden plik **MapoTero.exe** (wersja 64-bitowa dla systemu Windows), dostarczany w paczce ZIP razem z folderem `warstwy` (zbiory map):
-* 📥 **[Pobierz najnowszą wersję MapoTero z GitHub Releases (MapoTero_v3.15.zip)](https://github.com/Eksploracja/MapoTero/releases/download/v3.15/MapoTero_v3.15.zip)** – po rozpakowaniu uruchom `MapoTero.exe` (folder `warstwy` musi leżeć obok niego).
+* 📥 **[Pobierz najnowszą wersję MapoTero z GitHub Releases (MapoTero_v3.16.zip)](https://github.com/Eksploracja/MapoTero/releases/download/v3.16/MapoTero_v3.16.zip)** – po rozpakowaniu uruchom `MapoTero.exe` (folder `warstwy` musi leżeć obok niego).
 * 📦 Wszystkie wydania, kody źródłowe i historia wersji: **[GitHub Releases](https://github.com/Eksploracja/MapoTero/releases/latest)**.
 
 > [!NOTE]
@@ -38,6 +38,12 @@ Program to jeden plik **MapoTero.exe** (wersja 64-bitowa dla systemu Windows), d
 
 ## Aktualności
 
+* **09.11.2026 – Wersja 3.16:**
+  * **Eksport do CAD (menu *Narzędzia > Eksport do CAD*):** rysunek DXF (R2000) z odnośnikami do rastrów na właściwych współrzędnych - segmenty sesji albo scalony arkusz (world file lub GeoTIFF) - z obrysem, siatką i numerami segmentów, trasą korytarza i opisem mapy na warstwach `MAPOTERO_...`; skrypt SCR (AutoCAD, AutoCAD LT, BricsCAD, ZWCAD) i program LISP (`APPLOAD`), które wstawiają mapę do otwartego rysunku pod istniejące obiekty i przywracają ustawienia rysunku; w oknie eksportu przycisk *scal teraz...* do złączenia segmentów w jeden arkusz,
+  * **Ochrona serwerów map przed przeciążeniem:** łączna liczba jednoczesnych zapytań do jednego serwera nie przekracza liczby wątków z ustawień (także przy WMTS); po odpowiedzi serwera o przeciążeniu (HTTP 429, 502, 503, 504) lub serii przekroczeń czasu program robi przerwę i zmniejsza liczbę zapytań o połowę, a potem stopniowo ją przywraca - mniejsze ryzyko zablokowania adresu IP przez serwer,
+  * **.NET 10:** program działa w środowisku .NET Desktop Runtime 10 (x64) - wsparcie .NET 8 kończy się 10.11.2026,
+  * **Obsługa awarii:** opis nieoczekiwanego błędu zapisywany jest w pliku `awarie.log`, a okno komunikatu podaje adres zgłoszeń i pozwala kontynuować pracę,
+  * **Poprawki:** położenie arkuszy GeoTIFF zapisanych jako *PixelIsPoint* (przesunięcie o pół piksela).
 * **23.10.2026 – Wersja 3.15:**
   * **Kreator dodawania serwerów WMS i WMTS (menu *Narzędzia* lub przycisk `[+]` przy liście map):** automatyczna analiza dokumentu `GetCapabilities` (WMS 1.3.0, WMS 1.1.1 oraz WMTS 1.0.0), prezentacja drzewa warstw z wyszukiwarką/filtrem, matematyczne wyliczanie zalecanego rozmiaru piksela ze skali minimalnej, weryfikacja obsługiwanych układów CRS, podgląd próbnego kafelka 256×256 px i bezpośredni zapis nowego zbioru map do katalogu `warstwy/` (także w folderze użytkownika przy braku uprawnień w Program Files); ponawianie chwilowych błędów HTTP i poprawne polskie znaki w dokumentach ISO-8859-2,
   * **Siatka segmentów na mapie i zmiana zasięgu uchwytami:** po zaznaczeniu obszaru prawym przyciskiem myszy na mapie widać siatkę segmentów; uchwyty w narożnikach i na bokach przesuwają krawędzie o pełne segmenty, a uchwyt w środku przesuwa całą siatkę (Esc przywraca poprzedni zasięg); siatkę można wyłączyć w ustawieniach,

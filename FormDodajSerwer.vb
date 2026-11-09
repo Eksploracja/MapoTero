@@ -427,7 +427,7 @@ Public Class FormDodajSerwer
                     handler.ServerCertificateCustomValidationCallback = Function(m, c, ch, err) True
                 End If
                 Using klient As New HttpClient(handler) With {.Timeout = TimeSpan.FromSeconds(LimitCzasuProbkiSekundy)}
-                    klient.DefaultRequestHeaders.UserAgent.ParseAdd("MapoTero/3.15")
+                    klient.DefaultRequestHeaders.UserAgent.ParseAdd("MapoTero/3.16")
 
                     If _wybranaWarstwaWms IsNot Nothing Then
                         Dim format As String = If(_wynikCap.UslugaWms.Formaty.Contains("image/png"), "image/png", "image/jpeg")
