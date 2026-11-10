@@ -37,6 +37,8 @@ Public Class ZrodloWmts
 
     ''' <summary>Plany kolejnych warstw (kolejność rysowania jak w WMS - pierwsza warstwa na spodzie).</summary>
     Public ReadOnly Property Plany As New List(Of PlanWmts)
+    'plany wg nazwy warstwy podanej w zbiorze map
+    Private ReadOnly _planyWgNazwy As New Dictionary(Of String, PlanWmts)(StringComparer.Ordinal)
     Public ReadOnly Property FolderKafli As String
 
     'liczba kafli pobieranych jednocześnie dla jednego segmentu
@@ -57,8 +59,9 @@ Public Class ZrodloWmts
     End Sub
 
     ''' <summary>Odczyt dokumentu GetCapabilities i wybór poziomu kafli dla każdej warstwy.</summary>
-    Public Shared Async Function PrzygotujAsync(z As ZadaniePobierania, token As CancellationToken) As Task(Of ZrodloWmts)
-        Dim adres As String = Wmts.AdresCapabilities(z.AdresSerwera)
+    Public Shared Async Function PrzygotujAsync(z As ZadaniePobierania, adresUslugi As String, nazwy As IEnumerable(Of String),
+                                                token As CancellationToken, Optional folderKafli As String = Nothing) As Task(Of ZrodloWmts)
+        Dim adres As String = Wmts.AdresCapabilities(adresUslugi)
         Dim dane() As Byte = Nothing
         For proba = 1 To Math.Max(1, z.IloscProb)
             Try
@@ -92,9 +95,13 @@ Public Class ZrodloWmts
         Catch ex As Exception
             Throw New InvalidOperationException("niepoprawny opis usługi WMTS (" & adres & "): " & ex.Message, ex)
         End Try
-        Dim zrodlo As New ZrodloWmts(z.Folder & "_kafle_wmts\", z.LimitCzasuSekundy, Math.Max(1, Math.Min(100, z.JakoscJpegWmts)))
-        For Each w In z.Warstwy
-            zrodlo.Plany.Add(New PlanWmts(usluga, w, z.Uklad, z.Siatka.ZasiegSiatki, z.Siatka.RozmiarPiksela, z.Format))
+        'wspólny folder kafli wszystkich usług sesji - nazwa kafla to skrót jego adresu
+        Dim zrodlo As New ZrodloWmts(If(folderKafli, z.Folder & "_kafle_wmts\"), z.LimitCzasuSekundy, Math.Max(1, Math.Min(100, z.JakoscJpegWmts)))
+        For Each nazwa In nazwy
+            If zrodlo._planyWgNazwy.ContainsKey(nazwa) Then Continue For
+            Dim plan As New PlanWmts(usluga, nazwa, z.Uklad, z.Siatka.ZasiegSiatki, z.Siatka.RozmiarPiksela, z.Format)
+            zrodlo.Plany.Add(plan)
+            zrodlo._planyWgNazwy(nazwa) = plan
         Next
         If zrodlo.Plany.Count = 0 Then Throw New InvalidOperationException("nie wybrano warstwy WMTS")
         Directory.CreateDirectory(zrodlo.FolderKafli)
@@ -128,6 +135,8 @@ Public Class ZrodloWmts
     ''' <summary>Mozaika kafli jednej warstwy obejmująca segment.</summary>
     Private Class Mozaika
         Public Plan As PlanWmts
+        ''' <summary>Krycie warstwy (0-1).</summary>
+        Public Krycie As Double = 1
         Public Przeliczenia As SiatkaPrzeliczen
         Public Kolumna0 As Integer
         Public Wiersz0 As Integer
@@ -140,32 +149,30 @@ Public Class ZrodloWmts
     End Class
 
     ''' <summary>
-    ''' Składa segment z kafli i zapisuje w pliku. Zwraca pusty tekst, gdy się udało, albo opis błędu.
+    ''' Piksele segmentu (ARGB wierszami) złożone z kafli wskazanych warstw usługi, nałożonych w podanej kolejności.
+    ''' Wynik: (piksele, pusty tekst) albo (Nothing, opis błędu).
     ''' </summary>
-    Public Async Function PobierzSegmentAsync(zasieg As Zasieg, bok As Integer, format As String, plikDocelowy As String,
-                                              token As CancellationToken) As Task(Of String)
+    Public Async Function PikseleAsync(nazwy As IEnumerable(Of String), zasieg As Zasieg, bok As Integer,
+                                       token As CancellationToken) As Task(Of Tuple(Of Integer(), String))
         Try
             Dim mozaiki As New List(Of Mozaika)
-            For Each plan In Plany
+            For Each nazwa In nazwy
+                Dim plan As PlanWmts = Nothing
+                If Not _planyWgNazwy.TryGetValue(nazwa, plan) Then Return Tuple.Create(CType(Nothing, Integer()), "brak warstwy " & nazwa & " w usłudze WMTS")
                 Dim m = PrzygotujMozaike(plan, zasieg, bok)
                 Dim blad As String = Await WypelnijMozaikeAsync(m, token).ConfigureAwait(False)
-                If blad <> "" Then Return blad
+                If blad <> "" Then Return Tuple.Create(CType(Nothing, Integer()), blad)
                 mozaiki.Add(m)
             Next
             token.ThrowIfCancellationRequested()
-
-            Dim dane() As Byte = Await Task.Run(Function() Koduj(Renderuj(mozaiki, bok), format, _jakoscJpeg), token).ConfigureAwait(False)
-            Dim tymczasowy As String = plikDocelowy & ".tmp"
-            File.WriteAllBytes(tymczasowy, dane)
-            If File.Exists(plikDocelowy) Then File.Delete(plikDocelowy)
-            File.Move(tymczasowy, plikDocelowy)
-            Return ""
+            Dim piksele() As Integer = Await Task.Run(Function() RenderujPiksele(mozaiki, bok), token).ConfigureAwait(False)
+            Return Tuple.Create(piksele, "")
         Catch ex As OperationCanceledException When token.IsCancellationRequested
             Throw
         Catch ex As Exception
             Dim opis As String = ex.Message
             If ex.InnerException IsNot Nothing Then opis &= " (" & ex.InnerException.Message & ")"
-            Return opis.Replace(vbCr, " ").Replace(vbLf, " ")
+            Return Tuple.Create(CType(Nothing, Integer()), opis.Replace(vbCr, " ").Replace(vbLf, " "))
         End Try
     End Function
 
@@ -350,9 +357,9 @@ Public Class ZrodloWmts
 
     ''' <summary>
     ''' Piksele segmentu: interpolacja dwuliniowa kafli (z nadpróbkowaniem, gdy kafle są dokładniejsze od segmentu),
-    ''' warstwy nakładane kolejno z uwzględnieniem przezroczystości. Wynik - bitmapa 32-bitowa.
+    ''' warstwy nakładane kolejno z uwzględnieniem przezroczystości. Wynik - piksele ARGB wierszami.
     ''' </summary>
-    Private Shared Function Renderuj(mozaiki As List(Of Mozaika), bok As Integer) As Bitmap
+    Private Shared Function RenderujPiksele(mozaiki As List(Of Mozaika), bok As Integer) As Integer()
         Dim wynik(bok * bok - 1) As Integer
         For py = 0 To bok - 1
             For px = 0 To bok - 1
@@ -368,7 +375,8 @@ Public Class ZrodloWmts
                             Probka(m, p.Y, p.X, sr, sg, sb, sa)
                         Next
                     Next
-                    Dim nn As Double = n * n
+                    'krycie warstwy mnoży kolor premnożony razem z przezroczystością
+                    Dim nn As Double = n * n / m.Krycie
                     sr /= nn : sg /= nn : sb /= nn : sa /= nn
                     r = sr + r * (1 - sa) : g = sg + g * (1 - sa) : b = sb + b * (1 - sa) : a = sa + a * (1 - sa)
                 Next
@@ -378,16 +386,7 @@ Public Class ZrodloWmts
                 End If
             Next
         Next
-        Dim bmp As New Bitmap(bok, bok, PixelFormat.Format32bppArgb)
-        Dim d = bmp.LockBits(New Rectangle(0, 0, bok, bok), ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb)
-        Try
-            For y = 0 To bok - 1
-                Marshal.Copy(wynik, y * bok, IntPtr.Add(d.Scan0, y * d.Stride), bok)
-            Next
-        Finally
-            bmp.UnlockBits(d)
-        End Try
-        Return bmp
+        Return wynik
     End Function
 
     Private Shared Function Bajt(v As Double) As Integer
@@ -422,7 +421,7 @@ Public Class ZrodloWmts
     End Sub
 
     ''' <summary>Zapis segmentu w formacie wybranym w ustawieniach (JPEG na białym tle, PNG z przezroczystością).</summary>
-    Private Shared Function Koduj(bmp As Bitmap, format As String, jakoscJpeg As Integer) As Byte()
+    Friend Shared Function Koduj(bmp As Bitmap, format As String, jakoscJpeg As Integer) As Byte()
         Using bmp
             Select Case Wms.RozszerzeniePliku(format)
                 Case "png"

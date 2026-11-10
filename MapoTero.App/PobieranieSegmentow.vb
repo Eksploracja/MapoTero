@@ -25,6 +25,10 @@ Imports MapoTero.Core
 Public Class ZadaniePobierania
     Public Property AdresSerwera As String = ""
     Public Property Warstwy As New List(Of String)
+    ''' <summary>Krycie kolejnych warstw (procent); brak wartości - warstwa w pełni kryjąca.</summary>
+    Public Property Krycia As New List(Of Integer)
+    ''' <summary>Adresy serwerów WMS / usług WMTS kolejnych warstw; brak wartości - AdresSerwera.</summary>
+    Public Property Adresy As New List(Of String)
     Public Property Uklad As UkladWspolrzednych = UkladWspolrzednych.PL1992
     Public Property Siatka As Siatka
     Public Property Format As String = "jpeg"
@@ -62,6 +66,16 @@ Public Class ZadaniePobierania
             Return Wms.RozszerzeniePliku(Format)
         End Get
     End Property
+
+    ''' <summary>Warstwy z kryciem i adresem serwera.</summary>
+    Public Function WybranyZestaw() As ZestawWarstw
+        Dim z As New ZestawWarstw()
+        For i = 0 To Warstwy.Count - 1
+            Dim adres As String = If(i < Adresy.Count AndAlso Not String.IsNullOrEmpty(Adresy(i)), Adresy(i), AdresSerwera)
+            z.Dodaj(Warstwy(i), If(i < Krycia.Count, Krycia(i), ZestawWarstw.PelneKrycie), adres)
+        Next
+        Return z
+    End Function
 End Class
 
 ''' <summary>Stan pobierania przekazywany do okna programu.</summary>
@@ -139,30 +153,44 @@ Public NotInheritable Class PobieranieSegmentow
         'łącznie (segmenty WMS i kafle WMTS) najwyżej tyle jednoczesnych zapytań do serwera, ile wątków; hamowanie przy przeciążeniu
         RegulatorZapytan.Pobieranie.Rozpocznij(z.LiczbaWatkow, Sub(tekst) postep?.Report(New PostepPobierania With {.Komunikat = tekst}))
 
-        'usługa WMTS (adres w pliku warstw wskazuje WMTS) - segmenty składane z kafli usługi
-        Dim kafleWmts As ZrodloWmts = Nothing
-        If Wmts.CzyAdresWmts(z.AdresSerwera) Then
+        'grupy warstw: z jednego serwera i o pełnym kryciu - razem, pozostałe osobno (nakładane w programie)
+        Dim grupy As List(Of GrupaZapytania) = z.WybranyZestaw().GrupyZapytan()
+        If grupy.Count = 0 Then Throw New InvalidOperationException("nie wybrano żadnej warstwy")
+
+        'usługi WMTS (adres w pliku zbioru map wskazuje WMTS) - warstwy składane z kafli; wspólny folder kafli sesji
+        Dim uslugiWmts As New Dictionary(Of String, ZrodloWmts)(StringComparer.OrdinalIgnoreCase)
+        For Each adresUslugi In grupy.Where(Function(g) g.CzyWmts).Select(Function(g) g.Adres).Distinct(StringComparer.OrdinalIgnoreCase).ToList()
+            Dim nazwyWarstw = grupy.Where(Function(g) String.Equals(g.Adres, adresUslugi, StringComparison.OrdinalIgnoreCase)).SelectMany(Function(g) g.Warstwy).ToList()
             Try
-                kafleWmts = Await ZrodloWmts.PrzygotujAsync(z, token)
+                uslugiWmts(adresUslugi) = Await ZrodloWmts.PrzygotujAsync(z, adresUslugi, nazwyWarstw, token)
             Catch ex As OperationCanceledException
                 wynik.Przerwano = True
                 Return wynik
             End Try
+        Next
+        If uslugiWmts.Count > 0 Then
+            Dim pierwsza = uslugiWmts.Values.First()
             'odświeżenie - kafle zachowane z poprzedniego pobierania są nieaktualne
             If z.Odswiez Then
-                kafleWmts.UsunKafle()
-                Directory.CreateDirectory(kafleWmts.FolderKafli)
+                pierwsza.UsunKafle()
+                Directory.CreateDirectory(pierwsza.FolderKafli)
             End If
-            UsunPlikiTymczasowe(kafleWmts.FolderKafli, "*.tmp")
+            UsunPlikiTymczasowe(pierwsza.FolderKafli, "*.tmp")
         End If
+
+        'jedna grupa WMS o pełnym kryciu - jedno zapytanie i zapis tego, co przysłał serwer (jak w starszych wersjach);
+        'w pozostałych przypadkach segment składany jest z grup w programie
+        Dim skladanie As Boolean = grupy.Count > 1 OrElse grupy(0).CzyWmts OrElse grupy(0).Krycie < ZestawWarstw.PelneKrycie
 
         Dim nazwa As Func(Of OpisSegmentu, String) =
             Function(sg) If(z.TrekBuddy, s.NazwaSegmentuTrekBuddy(z.Prefiks, sg.Wiersz, sg.Kolumna), s.NazwaSegmentu(z.Prefiks, z.Numeracja, sg.Wiersz, sg.Kolumna))
+        'adres do wykazów koordynaty.txt i error.txt - zapytanie (lub kafel) pierwszej grupy
         Dim adres As Func(Of OpisSegmentu, String) =
             Function(sg)
                 Dim zasiegSegmentu = s.Segment(sg.Wiersz, sg.Kolumna)
-                If kafleWmts IsNot Nothing Then Return kafleWmts.AdresSegmentu(zasiegSegmentu)
-                Return Wms.ZapytanieGetMap(z.AdresSerwera, z.Warstwy, z.Uklad, zasiegSegmentu, z.Format, s.BokSegmentuPx, s.BokSegmentuPx, z.ZamienOsie,
+                Dim g = grupy(0)
+                If g.CzyWmts Then Return uslugiWmts(g.Adres).AdresSegmentu(zasiegSegmentu)
+                Return Wms.ZapytanieGetMap(g.Adres, g.Warstwy, z.Uklad, zasiegSegmentu, z.Format, s.BokSegmentuPx, s.BokSegmentuPx, z.ZamienOsie,
                                            z.Przezroczystosc)
             End Function
 
@@ -180,8 +208,9 @@ Public NotInheritable Class PobieranieSegmentow
         Next
         wKorytarzu = Nothing
         wynik.Wszystkie = segmenty.Count
-        If kafleWmts IsNot Nothing Then
-            postep?.Report(New PostepPobierania With {.Komunikat = "Trwa pobieranie segmentów (" & segmenty.Count & ") z usługi " & kafleWmts.Opis})
+        If uslugiWmts.Count > 0 Then
+            postep?.Report(New PostepPobierania With {.Komunikat = "Trwa pobieranie segmentów (" & segmenty.Count & "); kafle WMTS: " &
+                                                                    String.Join("; ", uslugiWmts.Values.Select(Function(u) u.Opis))})
         End If
 
         'foldery mapy TrekBuddy / Locus Map
@@ -229,10 +258,10 @@ Public NotInheritable Class PobieranieSegmentow
                             Dim zasieg = s.Segment(sg.Wiersz, sg.Kolumna)
                             Dim pobierz As Boolean = Not File.Exists(plik) OrElse (z.Odswiez AndAlso Not odswiezone(sg.Indeks))
                             If pobierz Then
-                                If kafleWmts Is Nothing Then
-                                    blad = Await PobierzSegmentAsync(adres(sg), plik, z.LimitCzasuSekundy, token).ConfigureAwait(False)
+                                If skladanie Then
+                                    blad = Await ZlozSegmentAsync(z, grupy, uslugiWmts, zasieg, s.BokSegmentuPx, plik, token).ConfigureAwait(False)
                                 Else
-                                    blad = Await kafleWmts.PobierzSegmentAsync(zasieg, s.BokSegmentuPx, z.Format, plik, token).ConfigureAwait(False)
+                                    blad = Await PobierzSegmentAsync(adres(sg), plik, z.LimitCzasuSekundy, token).ConfigureAwait(False)
                                 End If
                             End If
                             If pobierz AndAlso blad = "" Then odswiezone(sg.Indeks) = True
@@ -300,7 +329,7 @@ Public NotInheritable Class PobieranieSegmentow
         If brakujace.Count = 0 Then
             If File.Exists(plikBledow) Then File.Delete(plikBledow)
             'komplet segmentów - pobrane kafle WMTS nie są już potrzebne
-            If kafleWmts IsNot Nothing AndAlso Not wynik.Przerwano AndAlso Not z.ZachowajKafleWmts Then kafleWmts.UsunKafle()
+            If uslugiWmts.Count > 0 AndAlso Not wynik.Przerwano AndAlso Not z.ZachowajKafleWmts Then uslugiWmts.Values.First().UsunKafle()
         Else
             Using plik As New StreamWriter(plikBledow, False, KodowanieSystemowe())
                 For Each sg In brakujace
@@ -351,6 +380,29 @@ Public NotInheritable Class PobieranieSegmentow
     ''' </summary>
     Public Shared Async Function PobierzSegmentAsync(adres As String, plikDocelowy As String, limitCzasuSekundy As Integer,
                                                      token As CancellationToken) As Task(Of String)
+        Dim wynik = Await PobierzObrazAsync(adres, limitCzasuSekundy, token).ConfigureAwait(False)
+        If wynik.Item2 <> "" Then Return wynik.Item2
+        Try
+            'zapisuje dokładnie to, co przysłał serwer - bez ponownej kompresji obrazka
+            ZapiszPlik(plikDocelowy, wynik.Item1)
+            Return ""
+        Catch ex As Exception
+            Return ex.Message.Replace(vbCr, " ").Replace(vbLf, " ")
+        End Try
+    End Function
+
+    ''' <summary>Zapis przez plik tymczasowy - przerwany zapis nie zostawia uszkodzonego segmentu.</summary>
+    Private Shared Sub ZapiszPlik(plikDocelowy As String, dane() As Byte)
+        Dim tymczasowy As String = plikDocelowy & "." & Guid.NewGuid().ToString("N") & ".tmp"
+        File.WriteAllBytes(tymczasowy, dane)
+        File.Move(tymczasowy, plikDocelowy, overwrite:=True)
+    End Sub
+
+    ''' <summary>
+    ''' Pobiera obraz z serwera WMS. Wynik: (dane obrazu, pusty tekst) albo (Nothing, opis błędu - np. komunikat serwera).
+    ''' </summary>
+    Friend Shared Async Function PobierzObrazAsync(adres As String, limitCzasuSekundy As Integer,
+                                                   token As CancellationToken) As Task(Of Tuple(Of Byte(), String))
         'regulacja obciążenia serwera - limit czasu odpowiedzi liczony od wysłania zapytania, bez oczekiwania na przepustkę
         Dim przepustka As RegulatorZapytan.Przepustka = Nothing
         Try
@@ -366,30 +418,78 @@ Public NotInheritable Class PobieranieSegmentow
                     'serwer WMS w razie błędu zwraca zwykle dokument XML (ServiceException) zamiast obrazka
                     Dim tekst As String = Text.Encoding.UTF8.GetString(dane, 0, Math.Min(dane.Length, 500)).Replace(vbCr, " ").Replace(vbLf, " ")
                     If Not odpowiedz.IsSuccessStatusCode Then
-                        Return "HTTP " & CInt(odpowiedz.StatusCode) & " " & odpowiedz.ReasonPhrase & ": " & tekst
+                        Return Blad("HTTP " & CInt(odpowiedz.StatusCode) & " " & odpowiedz.ReasonPhrase & ": " & tekst)
                     End If
-                    Return "serwer nie zwrócił obrazka (" & typ & "): " & tekst
+                    Return Blad("serwer nie zwrócił obrazka (" & typ & "): " & tekst)
                 End If
-
-                'zapisuje dokładnie to, co przysłał serwer - bez ponownej kompresji obrazka
-                Dim tymczasowy As String = plikDocelowy & "." & Guid.NewGuid().ToString("N") & ".tmp"
-                File.WriteAllBytes(tymczasowy, dane)
-                File.Move(tymczasowy, plikDocelowy, overwrite:=True)
-                Return ""
+                Return Tuple.Create(dane, "")
             End Using
         Catch ex As OperationCanceledException When token.IsCancellationRequested
             Throw
         Catch ex As OperationCanceledException
             przepustka?.Blad()
-            Return OpisLimituCzasu(limitCzasuSekundy)
+            Return Blad(OpisLimituCzasu(limitCzasuSekundy))
         Catch ex As Exception
             If TypeOf ex Is HttpRequestException Then przepustka?.Blad()
             Dim opis As String = ex.Message
             If ex.InnerException IsNot Nothing Then opis &= " (" & ex.InnerException.Message & ")"
-            Return opis.Replace(vbCr, " ").Replace(vbLf, " ")
+            Return Blad(opis.Replace(vbCr, " ").Replace(vbLf, " "))
         Finally
             przepustka?.Dispose()
         End Try
+    End Function
+
+    Private Shared Function Blad(opis As String) As Tuple(Of Byte(), String)
+        Return Tuple.Create(CType(Nothing, Byte()), opis)
+    End Function
+
+    ''' <summary>
+    ''' Segment złożony z grup warstw (różne serwery WMS, usługi WMTS, krycie): każda grupa WMS pobierana osobnym
+    ''' zapytaniem (nad podkładem - z przezroczystym tłem), grupa WMTS składana z kafli; wyniki nakładane z kryciem grup
+    ''' i zapisywane w formacie sesji.
+    ''' </summary>
+    Private Shared Async Function ZlozSegmentAsync(z As ZadaniePobierania, grupy As List(Of GrupaZapytania),
+                                                   uslugiWmts As Dictionary(Of String, ZrodloWmts), zasieg As Zasieg,
+                                                   bok As Integer, plikDocelowy As String, token As CancellationToken) As Task(Of String)
+        Dim wynik = Await ZlozWarstwyAsync(z, grupy, uslugiWmts, zasieg, bok, token).ConfigureAwait(False)
+        If wynik.Item2 <> "" Then Return wynik.Item2
+        Try
+            Dim dane() As Byte = Await Task.Run(Function() ZrodloWmts.Koduj(NakladanieObrazow.DoBitmapy(wynik.Item1, bok, bok), z.Format, z.JakoscJpegWmts), token).ConfigureAwait(False)
+            ZapiszPlik(plikDocelowy, dane)
+            Return ""
+        Catch ex As OperationCanceledException When token.IsCancellationRequested
+            Throw
+        Catch ex As Exception
+            Return ex.Message.Replace(vbCr, " ").Replace(vbLf, " ")
+        End Try
+    End Function
+
+    ''' <summary>
+    ''' Pobiera grupy warstw obszaru i nakłada je z kryciem. Wynik: (piksele ARGB wierszami, pusty tekst) albo (Nothing, błąd).
+    ''' </summary>
+    Friend Shared Async Function ZlozWarstwyAsync(z As ZadaniePobierania, grupy As List(Of GrupaZapytania),
+                                                  uslugiWmts As Dictionary(Of String, ZrodloWmts), zasieg As Zasieg, bok As Integer,
+                                                  token As CancellationToken) As Task(Of Tuple(Of Integer(), String))
+        Dim szerokosc As Integer = bok, wysokosc As Integer = bok
+        Dim piksele(szerokosc * wysokosc - 1) As Integer
+        For i = 0 To grupy.Count - 1
+            Dim g = grupy(i)
+            If g.CzyWmts Then
+                'kafle WMTS mają już przezroczystość pikseli - nakładane jak warstwy WMS
+                Dim kafle = Await uslugiWmts(g.Adres).PikseleAsync(g.Warstwy, zasieg, bok, token).ConfigureAwait(False)
+                If kafle.Item2 <> "" Then Return Tuple.Create(CType(Nothing, Integer()), "warstwa " & String.Join(",", g.Warstwy) & ": " & kafle.Item2)
+                NakladanieWarstw.Naloz(piksele, kafle.Item1, g.Krycie)
+                Continue For
+            End If
+            'warstwy nad podkładem i warstwa częściowo przezroczysta - PNG z przezroczystym tłem (JPEG przykryłby niższe warstwy bielą)
+            Dim przezroczyste As Boolean = i > 0 OrElse g.Krycie < ZestawWarstw.PelneKrycie OrElse z.Przezroczystosc
+            Dim format As String = If(przezroczyste, "png", z.Format)
+            Dim adres As String = Wms.ZapytanieGetMap(g.Adres, g.Warstwy, z.Uklad, zasieg, format, szerokosc, wysokosc, z.ZamienOsie, przezroczyste)
+            Dim obraz = Await PobierzObrazAsync(adres, z.LimitCzasuSekundy, token).ConfigureAwait(False)
+            If obraz.Item2 <> "" Then Return Tuple.Create(CType(Nothing, Integer()), "warstwa " & String.Join(",", g.Warstwy) & ": " & obraz.Item2)
+            NakladanieWarstw.Naloz(piksele, NakladanieObrazow.Piksele(obraz.Item1, szerokosc, wysokosc), g.Krycie)
+        Next
+        Return Tuple.Create(piksele, "")
     End Function
 
     ''' <summary>Czy dane są poprawnym obrazem (dekodowanie przez GDI+).</summary>

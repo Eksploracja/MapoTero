@@ -120,6 +120,12 @@
   <data name="RichTextBox1.Text" xml:space="preserve">
     <value>1. W panelu po prawej stronie okna wybierz zbiór map (serwer WMS), a z listy pod nim - warstwę mapy, klikając ją jeden raz lewym przyciskiem myszy. Nazwa wybranej warstwy pojawi się w polu "Wybrane warstwy oraz ich kolejność".
 
+   Możesz wybrać do 12 warstw - pierwsza (na dole listy) jest podkładem, kolejne kładą się na niej. Kliknij warstwę na tej liście, aby ją zaznaczyć: przycisk ✕ (lub klawisz Delete) usuwa ją, przyciski ▲ ▼ (lub Ctrl+strzałka, albo przeciągnięcie myszą) zmieniają jej miejsce w kanapce, a pole "Krycie %" nadaje jej przezroczystość - np. przy 50% widać przez nią warstwę leżącą niżej. Kosz usuwa wszystkie warstwy. Prawy przycisk myszy na warstwie otwiera menu z tymi samymi poleceniami. Przycisk … otwiera okno "Warstwy - zaawansowane" z suwakami krycia i podglądem kanapki. Warstwy o kryciu mniejszym niż 100% pobierane są z serwera WMS osobnymi zapytaniami, więc pobieranie trwa wtedy dłużej.
+
+   Warstwy mogą pochodzić z różnych zbiorów map (serwerów WMS i usług WMTS): po wybraniu innego zbioru na liście kliknij jego warstwę - wcześniej wybrane warstwy zostają na liście. Przykład: zbiór skany_map_topograficznych, warstwa Raster_25_1965, potem zbiór numer_mod_terenu_ISOK_cieniowanie, warstwa Raster z kryciem 50% - mapa topograficzna z cieniowaniem rzeźby. Przy warstwach z różnych zbiorów lista pokazuje szarym nazwę zbioru.
+
+   Rozmiar piksela program dobiera sam: najmniejszy zalecany spośród wybranych warstw, żeby żadna nie traciła szczegółów (np. ortofotomapa 0,25 m i mapa topograficzna 2 m - piksel 0,25 m, a mapa topograficzna zostanie przeskalowana). Po usunięciu warstwy rozmiar jest przeliczany. Jeśli wpiszesz rozmiar piksela ręcznie, program go nie zmieni - poda tylko w komunikacie wartość zalecaną. Zalecany piksel każdej warstwy widać w podpowiedzi na liście.
+
 2. Zaznacz na mapie prawym przyciskiem myszy obszar do pobrania. Na mapie pojawi się siatka segmentów.
 
 3. Zasięg siatki możesz poprawić, przeciągając lewym przyciskiem myszy kwadratowe uchwyty w narożnikach i na bokach (dodawanie i odejmowanie segmentów) albo kółko w środku siatki (przesunięcie całej siatki). Klawisz Esc anuluje przeciąganie.

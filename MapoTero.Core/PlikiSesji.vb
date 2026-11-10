@@ -168,6 +168,15 @@ Public Class KonfiguracjaSesji
     Public Property DataPobrania As String = ""
     ''' <summary>Adres serwera WMS / WMTS, z którego pobrano segmenty (źródło danych w opisie eksportowanej mapy).</summary>
     Public Property AdresSerwera As String = ""
+    ''' <summary>
+    ''' Krycie kolejnych warstw w procentach, np. "100;60;100" (nowe pole; pusty tekst lub brak w starszych plikach -
+    ''' wszystkie warstwy w pełni kryjące). Format: <see cref="ZestawWarstw.TekstKrycia"/>.
+    ''' </summary>
+    Public Property KrycieWarstw As String = ""
+    ''' <summary>Adresy serwerów kolejnych warstw rozdzielone znakiem | (warstwy z różnych serwerów; puste - AdresSerwera).</summary>
+    Public Property AdresyWarstw As String = ""
+    ''' <summary>Zbiory map kolejnych warstw rozdzielone znakiem | (puste - RodzajMapy).</summary>
+    Public Property ZbioryWarstw As String = ""
 
     Public Sub New()
         For i = 0 To 11
@@ -205,6 +214,9 @@ Public Class KonfiguracjaSesji
         If Not r.KoniecPliku Then c.Przezroczystosc = r.NastepnyLogiczny()
         If Not r.KoniecPliku Then c.DataPobrania = r.Nastepne()
         If Not r.KoniecPliku Then c.AdresSerwera = r.Nastepne()
+        If Not r.KoniecPliku Then c.KrycieWarstw = r.Nastepne()
+        If Not r.KoniecPliku Then c.AdresyWarstw = r.Nastepne()
+        If Not r.KoniecPliku Then c.ZbioryWarstw = r.Nastepne()
         Return c
     End Function
 
@@ -233,6 +245,9 @@ Public Class KonfiguracjaSesji
         w.Logiczny(Przezroczystosc)
         w.Tekst(DataPobrania)
         w.Tekst(AdresSerwera)
+        w.Tekst(KrycieWarstw)
+        w.Tekst(AdresyWarstw)
+        w.Tekst(ZbioryWarstw)
         Return w.ToString()
     End Function
 
@@ -270,7 +285,31 @@ Public Class KonfiguracjaSesji
         ElseIf Not String.Equals(RodzajMapy, inna.RodzajMapy, StringComparison.OrdinalIgnoreCase) Then
             Return False
         End If
-        Return WybraneWarstwy().SequenceEqual(inna.WybraneWarstwy(), StringComparer.Ordinal)
+        If Not WybraneWarstwy().SequenceEqual(inna.WybraneWarstwy(), StringComparer.Ordinal) Then Return False
+        'inne krycie warstw - segmenty wyglądają inaczej, wznowienie mieszałoby je z nowymi
+        If Not KryciaWarstw().SequenceEqual(inna.KryciaWarstw()) Then Return False
+        'warstwy o tych samych nazwach z innych serwerów (brak adresu - plik starszej wersji, porównany wyżej zbiór map)
+        Dim a1 = AdresyWybranychWarstw(), a2 = inna.AdresyWybranychWarstw()
+        For i = 0 To Math.Min(a1.Count, a2.Count) - 1
+            If a1(i) <> "" AndAlso a2(i) <> "" AndAlso Not String.Equals(a1(i), a2(i), StringComparison.OrdinalIgnoreCase) Then Return False
+        Next
+        Return True
+    End Function
+
+    ''' <summary>Krycie kolejnych wybranych warstw (procent) wg pola KrycieWarstw.</summary>
+    Public Function KryciaWarstw() As List(Of Integer)
+        Return ZestawWarstw.KryciaZTekstu(KrycieWarstw, WybraneWarstwy().Count)
+    End Function
+
+    ''' <summary>Wybrane warstwy z kryciem.</summary>
+    Public Function WybranyZestaw() As ZestawWarstw
+        Dim n As Integer = WybraneWarstwy().Count
+        Return ZestawWarstw.ZNazw(WybraneWarstwy(), KrycieWarstw, AdresyWybranychWarstw(), ZestawWarstw.Rozdziel(ZbioryWarstw, n, RodzajMapy))
+    End Function
+
+    ''' <summary>Adresy serwerów kolejnych wybranych warstw (brak w polu - adres serwera sesji).</summary>
+    Public Function AdresyWybranychWarstw() As List(Of String)
+        Return ZestawWarstw.Rozdziel(AdresyWarstw, WybraneWarstwy().Count, AdresSerwera)
     End Function
 
     ''' <summary>

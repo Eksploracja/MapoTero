@@ -28,9 +28,21 @@ Public Class Form1
     ''' <summary>Wskazuje, że okno zostało już załadowane (wczytanie sesji z menu pyta wtedy o folder).</summary>
     Private _zaladowany As Boolean
 
-    ''' <summary>Wybrane warstwy mapy (maksymalnie 12).</summary>
-    Private ReadOnly _warstwy As New List(Of String)
-    Private Const MaksLiczbaWarstw As Integer = 12
+    ''' <summary>Wybrane warstwy mapy z kryciem (maksymalnie 12) - „kanapka” wyświetlana w lstWybraneWarstwy.</summary>
+    Private _zestaw As New ZestawWarstw()
+
+    ''' <summary>Programowe ustawianie pola krycia (bez zmiany krycia warstwy).</summary>
+    Private _ustawianieKrycia As Boolean
+
+    ''' <summary>Menu warstwy na liście wybranych warstw (prawy przycisk myszy).</summary>
+    Private _menuWarstwy As ContextMenuStrip
+
+    ''' <summary>
+    ''' Rozmiar piksela wpisany ostatnio przez program wg najdokładniejszej warstwy kanapki: w metrach i jako tekst pola
+    ''' (0 / pusty - brak). Gdy pole nadal go zawiera, program przelicza je po zmianie warstw; wartości wpisanej ręcznie nie zmienia.
+    ''' </summary>
+    Private _automatycznyPikselMetry As Double
+    Private _automatycznyPikselTekst As String = ""
 
     ''' <summary>Bieżący zbiór map (adres serwera i lista warstw).</summary>
     Private _plikWarstw As New PlikWarstw()
@@ -107,6 +119,7 @@ Public Class Form1
     ''' <summary>Nazwa bieżącego zbioru map.</summary>
     Public ReadOnly Property ZbiorMap As String
         Get
+            If _zestaw.Liczba > 0 AndAlso _zestaw(0).Zbior <> "" Then Return _zestaw(0).Zbior
             Return cmbZbiorMap.Text
         End Get
     End Property
@@ -114,7 +127,7 @@ Public Class Form1
     ''' <summary>Nazwa pierwszej wybranej warstwy.</summary>
     Public ReadOnly Property PierwszaWarstwa As String
         Get
-            Return If(_warstwy.Count > 0, _warstwy(0), "")
+            Return If(_zestaw.Liczba > 0, _zestaw(0).Nazwa, "")
         End Get
     End Property
 
@@ -239,6 +252,7 @@ Public Class Form1
 
         UstawEdycjeXY(False)
         UstawWidokZaznaczeniaWgs(False)
+        PrzygotujListeWarstw()
 
         _ustawianieUkladu = True
         For Each u In UkladWspolrzednych.Wszystkie
@@ -265,16 +279,13 @@ Public Class Form1
         UstawWidokZaznaczeniaWgs(Ustawienia.ZaznaczenieWgs84)
         UstawEdycjeXY(Ustawienia.EdycjaXY)
 
-        'lista zbiorów map - zbiór i warstwy wczytane z conf.txt zostają (wybór zbioru na liście czyści wybrane warstwy;
-        'dawniej po ponownym uruchomieniu warstwy sesji znikały i do wznowienia pobierania trzeba je było wybrać od nowa)
+        'lista zbiorów map - warstwy wczytane z conf.txt zostają (każda pamięta swój serwer, więc zmiana zbioru na liście
+        'ich nie czyści; dawniej po ponownym uruchomieniu warstwy sesji znikały i trzeba je było wybrać od nowa)
         Dim zbiorSesji As String = cmbZbiorMap.Text
-        Dim warstwySesji As New List(Of String)(_warstwy)
         WczytajListeZbiorowMap(zbiorSesji)
         WczytajWarstwyZbioru()
-        If warstwySesji.Count > 0 AndAlso String.Equals(cmbZbiorMap.Text, zbiorSesji, StringComparison.OrdinalIgnoreCase) Then
-            _warstwy.Clear()
-            _warstwy.AddRange(warstwySesji)
-            Komunikat("Wczytano sesję pobierania z pliku conf.txt: " & zbiorSesji & ", warstwy: " & String.Join(", ", _warstwy) & ".", Color.Green)
+        If _zestaw.Liczba > 0 Then
+            Komunikat("Wczytano sesję pobierania z pliku conf.txt, warstwy: " & OpisWarstw() & ".", Color.Green)
         End If
         PokazWarstwy()
 
@@ -393,10 +404,12 @@ Public Class Form1
         txtBokSegmentu.Text = c.BokSegmentuPx
         txtRozmiarPiksela.Text = c.RozmiarPiksela
 
-        _warstwy.Clear()
-        For i = 0 To Math.Min(c.LiczbaWarstw, MaksLiczbaWarstw) - 1
-            If c.Warstwy(i) <> "" Then _warstwy.Add(c.Warstwy(i))
-        Next
+        _zestaw = c.WybranyZestaw()
+        'rozmiar piksela sesji równy zalecanemu dla najdokładniejszej warstwy - nadal dobierany automatycznie
+        UzupelnijZalecanePiksele()
+        Dim najdokladniejsza = _zestaw.NajdokladniejszaWarstwa()
+        _automatycznyPikselMetry = If(najdokladniejsza IsNot Nothing, najdokladniejsza.ZalecanyPiksel, 0)
+        _automatycznyPikselTekst = If(najdokladniejsza IsNot Nothing, RozmiarPikselaWarstwy(Liczba(najdokladniejsza.ZalecanyPiksel)), "")
         PokazWarstwy()
 
         'format spoza listy obsługiwanych (np. svg+xml z dawnych wersji) - jpeg
@@ -474,16 +487,18 @@ Public Class Form1
     ''' <summary>Parametry bieżącej sesji (pola formularza i ustawienia) w postaci zapisywanej w conf.txt.</summary>
     Private Function BiezacaKonfiguracja() As KonfiguracjaSesji
         Dim c As New KonfiguracjaSesji With {
-            .Folder = FolderSesji, .RodzajMapy = cmbZbiorMap.Text,
+            .Folder = FolderSesji, .RodzajMapy = If(_zestaw.Liczba > 0 AndAlso _zestaw(0).Zbior <> "", _zestaw(0).Zbior, cmbZbiorMap.Text),
             .XDol = txtXDol.Text, .YLewy = txtYLewy.Text, .XGora = txtXGora.Text, .YPrawy = txtYPrawy.Text,
             .BokSegmentuPx = txtBokSegmentu.Text, .RozmiarPiksela = txtRozmiarPiksela.Text,
-            .LiczbaWarstw = _warstwy.Count, .Format = Ustawienia.Format, .Prefiks = Ustawienia.Prefiks,
+            .LiczbaWarstw = _zestaw.Liczba, .KrycieWarstw = _zestaw.TekstKrycia(), .Format = Ustawienia.Format, .Prefiks = Ustawienia.Prefiks,
             .PobierajPowyzejOstatniego = Ustawienia.PobierajPowyzejOstatniego,
             .SrodekMapySzerokosc = lblSrodekSzer.Text.Replace(","c, "."c), .SrodekMapyDlugosc = lblSrodekDlug.Text.Replace(","c, "."c),
             .SkalaMapy = lblZoom.Text.Replace(","c, "."c), .Numeracja = Ustawienia.Numeracja, .UkladEpsg = Ustawienia.Uklad.Epsg,
-            .Przezroczystosc = Ustawienia.Przezroczystosc, .DataPobrania = _dataPobrania, .AdresSerwera = _plikWarstw.Adres}
-        For i = 0 To _warstwy.Count - 1
-            c.Warstwy(i) = _warstwy(i)
+            .Przezroczystosc = Ustawienia.Przezroczystosc, .DataPobrania = _dataPobrania,
+            .AdresSerwera = If(_zestaw.Liczba > 0, _zestaw(0).Adres, _plikWarstw.Adres),
+            .AdresyWarstw = ZestawWarstw.Polacz(_zestaw.Adresy()), .ZbioryWarstw = ZestawWarstw.Polacz(_zestaw.Zbiory())}
+        For i = 0 To _zestaw.Liczba - 1
+            c.Warstwy(i) = _zestaw(i).Nazwa
         Next
         Return c
     End Function
@@ -638,48 +653,132 @@ Public Class Form1
         Next
     End Sub
 
-    ''' <summary>Wyświetla wybrane warstwy w etykietach 1) ... 12).</summary>
-    Private Sub PokazWarstwy()
-        Dim etykiety() As Label = {lblWarstwa01, lblWarstwa02, lblWarstwa03, lblWarstwa04, lblWarstwa05, lblWarstwa06,
-                                   lblWarstwa07, lblWarstwa08, lblWarstwa09, lblWarstwa10, lblWarstwa11, lblWarstwa12}
-        For i = 0 To etykiety.Length - 1
-            etykiety(i).Text = (i + 1).ToString() & ") " & If(i < _warstwy.Count, _warstwy(i), "")
+    ''' <summary>Lista wybranych warstw: obraz kanapki w tle, menu warstwy, podpowiedzi.</summary>
+    Private Sub PrzygotujListeWarstw()
+        lstWybraneWarstwy.ObrazTla = My.Resources.kanapka_gis
+        lstWybraneWarstwy.Podpowiedz = ToolTip1
+        lstWybraneWarstwy.OpisListy = ToolTip1.GetToolTip(grpWybraneWarstwy)
+        lstWybraneWarstwy.Zestaw = _zestaw
+
+        _menuWarstwy = New ContextMenuStrip(components)
+        _menuWarstwy.Items.Add("Przesuń wyżej", Nothing, Sub() PrzesunZaznaczonaWarstwe(1))
+        _menuWarstwy.Items.Add("Przesuń niżej", Nothing, Sub() PrzesunZaznaczonaWarstwe(-1))
+        _menuWarstwy.Items.Add(New ToolStripSeparator())
+        For Each k In {100, 75, 50, 25}
+            Dim krycie As Integer = k
+            Dim poz As New ToolStripMenuItem("Krycie " & krycie & " %", Nothing, Sub() UstawKrycieZaznaczonej(krycie)) With {.Tag = krycie}
+            _menuWarstwy.Items.Add(poz)
         Next
-        btnResetujWarstwy.Enabled = _warstwy.Count > 0
+        _menuWarstwy.Items.Add("Krycie - zaawansowane…", Nothing, Sub() OtworzWarstwyZaawansowane())
+        _menuWarstwy.Items.Add(New ToolStripSeparator())
+        _menuWarstwy.Items.Add("Usuń warstwę", My.Resources.kosz, Sub() UsunZaznaczonaWarstwe())
+        AddHandler _menuWarstwy.Opening,
+            Sub(s, e)
+                Dim i As Integer = lstWybraneWarstwy.Zaznaczona
+                If i < 0 Then e.Cancel = True : Exit Sub
+                _menuWarstwy.Items(0).Enabled = i < _zestaw.Liczba - 1
+                _menuWarstwy.Items(1).Enabled = i > 0
+                For Each poz In _menuWarstwy.Items.OfType(Of ToolStripMenuItem)()
+                    If TypeOf poz.Tag Is Integer Then poz.Checked = CInt(poz.Tag) = _zestaw(i).Krycie
+                Next
+            End Sub
+        lstWybraneWarstwy.MenuWarstwy = _menuWarstwy
+    End Sub
+
+    ''' <summary>Wyświetla wybrane warstwy (lista z kanapką) i stan przycisków panelu.</summary>
+    Private Sub PokazWarstwy()
+        If lstWybraneWarstwy.Zestaw IsNot _zestaw Then lstWybraneWarstwy.Zestaw = _zestaw Else lstWybraneWarstwy.Odswiez()
+        OdswiezPrzyciskiWarstw()
+    End Sub
+
+    ''' <summary>Przyciski i pole krycia wg zaznaczonej warstwy.</summary>
+    Private Sub OdswiezPrzyciskiWarstw()
+        Dim i As Integer = lstWybraneWarstwy.Zaznaczona
+        Dim pobieranie As Boolean = _przerwanie IsNot Nothing
+        btnResetujWarstwy.Enabled = _zestaw.Liczba > 0 AndAlso Not pobieranie
+        btnUsunWarstwe.Enabled = i >= 0 AndAlso Not pobieranie
+        btnWarstwaWyzej.Enabled = i >= 0 AndAlso i < _zestaw.Liczba - 1 AndAlso Not pobieranie
+        btnWarstwaNizej.Enabled = i > 0 AndAlso Not pobieranie
+        numKrycie.Enabled = i >= 0 AndAlso Not pobieranie
+        lblKrycie.Enabled = numKrycie.Enabled
+        btnWarstwyZaawansowane.Enabled = _zestaw.Liczba > 0 AndAlso Not pobieranie
+        _ustawianieKrycia = True
+        numKrycie.Value = If(i >= 0, _zestaw(i).Krycie, ZestawWarstw.PelneKrycie)
+        _ustawianieKrycia = False
+    End Sub
+
+    ''' <summary>Opis warstw do komunikatów, np. "orto, dzialki (krycie 60 %)".</summary>
+    Private Function OpisWarstw() As String
+        Dim zbiory As Boolean = _zestaw.WieleZrodel
+        Return String.Join(", ", _zestaw.Warstwy.Select(Function(w) w.Nazwa & If(zbiory AndAlso w.Zbior <> "", " [" & w.Zbior & "]", "") &
+                                                           If(w.Krycie < ZestawWarstw.PelneKrycie, " (krycie " & w.Krycie & " %)", "")))
+    End Function
+
+    ''' <summary>Po zmianie listy warstw: widok, nazwa paczki TrekBuddy.</summary>
+    Private Sub PoZmianieWarstw(zaznacz As Integer)
+        PokazWarstwy()
+        lstWybraneWarstwy.Zaznaczona = zaznacz
+        OdswiezPrzyciskiWarstw()
+        Form2.OdswiezNazweTrekBuddy()
     End Sub
 
     ''' <summary>Czyści listę wybranych warstw.</summary>
     Private Sub WyczyscWarstwy()
-        _warstwy.Clear()
+        _zestaw.Wyczysc()
         PokazWarstwy()
     End Sub
 
+    ''' <summary>
+    ''' Zmiana zbioru map pokazuje jego warstwy do wyboru. Wybrane już warstwy zostają - każda pamięta swój serwer, więc
+    ''' na mapę topograficzną z jednego serwera można nałożyć np. cieniowanie z innego (dawniej zmiana zbioru czyściła listę).
+    ''' </summary>
     Private Sub cmbZbiorMap_SelectedIndexChanged(sender As Object, e As EventArgs) Handles cmbZbiorMap.SelectedIndexChanged
         PrzerwijPobieranie()
         WczytajWarstwyZbioru()
-        WyczyscWarstwy()
-        Komunikat("Zmieniono rodzaj mapy. Wybierz która dokładnie jej warstwa ma zostać pobrana, klikając na nią myszką", Color.Red)
+        If _zaladowany Then
+            Komunikat("Zbiór map " & cmbZbiorMap.Text & ": kliknij warstwę, aby dodać ją do kanapki" &
+                      If(_zestaw.Liczba > 0, " (wybrane warstwy innych zbiorów zostają; kosz usuwa wszystkie).", "."), Color.Blue)
+        End If
     End Sub
 
     'dodawanie warstw
     Private Sub lstWarstwy_SelectedIndexChanged(sender As Object, e As EventArgs) Handles lstWarstwy.SelectedIndexChanged
         If lstWarstwy.SelectedItem Is Nothing Then Exit Sub
-        Dim nazwa As String = lstWarstwy.SelectedItem.ToString()
+        DodajWarstwe(lstWarstwy.SelectedItem.ToString())
+    End Sub
 
-        If _warstwy.Count >= MaksLiczbaWarstw Then
-            MsgBox("TEJ WARSTWY NIE MOŻNA JUŻ DODAĆ.")
-            Exit Sub
+    ''' <summary>
+    ''' Kliknięcie warstwy, która jest już zaznaczona na liście WMS (np. po usunięciu jej z kanapki) - zmiana zaznaczenia
+    ''' nie następuje, więc warstwa dodawana jest tutaj; warstwa już wybrana nie jest dodawana ponownie.
+    ''' </summary>
+    Private Sub lstWarstwy_MouseClick(sender As Object, e As MouseEventArgs) Handles lstWarstwy.MouseClick
+        Dim i As Integer = lstWarstwy.IndexFromPoint(e.Location)
+        If i < 0 Then Exit Sub
+        Dim nazwa As String = lstWarstwy.Items(i).ToString()
+        If Not _zestaw.Zawiera(_plikWarstw.Adres, nazwa) Then DodajWarstwe(nazwa)
+    End Sub
+
+    Private Sub DodajWarstwe(nazwa As String)
+        If PobieranieTrwa("Zmiana listy warstw") Then Exit Sub
+        If _plikWarstw.Adres = "" Then
+            Komunikat("Zbiór map " & cmbZbiorMap.Text & " nie ma adresu serwera.", Color.Red) : Exit Sub
         End If
+        Dim zWarstwy = _plikWarstw.Znajdz(nazwa)
+        Dim zalecany As Double = If(zWarstwy IsNot Nothing, Wartosc(zWarstwy.RozmiarPiksela), 0)
+        Dim bylaPusta As Boolean = _zestaw.Liczba = 0
+        Select Case _zestaw.Dodaj(nazwa, adres:=_plikWarstw.Adres, zbior:=cmbZbiorMap.Text, zalecanyPiksel:=zalecany)
+            Case WynikDodania.BrakMiejsca
+                MsgBox("TEJ WARSTWY NIE MOŻNA JUŻ DODAĆ - wybrano już " & ZestawWarstw.MaksLiczba & " warstw.")
+                Exit Sub
+            Case WynikDodania.JuzWybrana
+                Komunikat("Warstwa " & nazwa & " zbioru " & cmbZbiorMap.Text & " jest już na liście wybranych warstw.", Color.Blue)
+                Exit Sub
+        End Select
+        PoZmianieWarstw(_zestaw.Liczba - 1)
 
-        _warstwy.Add(nazwa)
-        PokazWarstwy()
-        Form2.OdswiezNazweTrekBuddy()
-
-        'rozmiar piksela przypisany do warstwy w pliku zbioru map
-        Dim w = _plikWarstw.Znajdz(nazwa)
-        If w IsNot Nothing AndAlso w.RozmiarPiksela <> "" Then txtRozmiarPiksela.Text = RozmiarPikselaWarstwy(w.RozmiarPiksela)
-
-        Komunikat("Wskazano warstwę: " & nazwa, Color.Green)
+        'rozmiar piksela wg najdokładniejszej warstwy kanapki (dawniej - wg ostatnio klikniętej)
+        Dim opisPiksela As String = DobierzRozmiarPiksela(bylaPusta)
+        Komunikat("Wskazano warstwę: " & nazwa & "." & If(opisPiksela <> "", " " & opisPiksela, ""), Color.Green)
 
         'komunikaty o warstwach WMS HGIS, które ograniczają maksymalny rozmiar segmentu do 256 px
         Dim opis As String = ""
@@ -705,10 +804,97 @@ Public Class Form1
         'w trakcie pobierania reset zapisywał conf.txt pobieranej sesji bez warstw i włączał przycisk Pobierz
         If PobieranieTrwa("Zmiana listy warstw") Then Exit Sub
         WyczyscWarstwy()
+        'pusta kanapka - piksel pierwszej dodanej warstwy wpisywany jest zawsze
+        _automatycznyPikselMetry = 0
+        _automatycznyPikselTekst = ""
         ZapiszConf(False)
         btnPobierz.Enabled = True
         btnPrzerwij.Enabled = False
         Komunikat("Zresetowano listę wprowadzonych warstw mapy wskazanych do pobrania", Color.Green)
+    End Sub
+
+    Private Sub btnUsunWarstwe_Click(sender As Object, e As EventArgs) Handles btnUsunWarstwe.Click
+        UsunZaznaczonaWarstwe()
+    End Sub
+
+    Private Sub btnWarstwaWyzej_Click(sender As Object, e As EventArgs) Handles btnWarstwaWyzej.Click
+        PrzesunZaznaczonaWarstwe(1)
+    End Sub
+
+    Private Sub btnWarstwaNizej_Click(sender As Object, e As EventArgs) Handles btnWarstwaNizej.Click
+        PrzesunZaznaczonaWarstwe(-1)
+    End Sub
+
+    Private Sub btnWarstwyZaawansowane_Click(sender As Object, e As EventArgs) Handles btnWarstwyZaawansowane.Click
+        OtworzWarstwyZaawansowane()
+    End Sub
+
+    Private Sub lstWybraneWarstwy_ZaznaczenieZmienione(sender As Object, e As EventArgs) Handles lstWybraneWarstwy.ZaznaczenieZmienione
+        OdswiezPrzyciskiWarstw()
+    End Sub
+
+    Private Sub lstWybraneWarstwy_UsuniecieZadane(sender As Object, e As EventArgs) Handles lstWybraneWarstwy.UsuniecieZadane
+        UsunZaznaczonaWarstwe()
+    End Sub
+
+    Private Sub lstWybraneWarstwy_PrzeniesienieZadane(sender As Object, e As PrzeniesienieWarstwyEventArgs) Handles lstWybraneWarstwy.PrzeniesienieZadane
+        PrzeniesWarstwe(e.ZIndeksu, e.NaIndeks)
+    End Sub
+
+    Private Sub numKrycie_ValueChanged(sender As Object, e As EventArgs) Handles numKrycie.ValueChanged
+        If _ustawianieKrycia Then Exit Sub
+        UstawKrycieZaznaczonej(CInt(numKrycie.Value))
+    End Sub
+
+    Private Sub UsunZaznaczonaWarstwe()
+        Dim i As Integer = lstWybraneWarstwy.Zaznaczona
+        If i < 0 OrElse PobieranieTrwa("Zmiana listy warstw") Then Exit Sub
+        Dim nazwa As String = _zestaw(i).Nazwa
+        _zestaw.Usun(i)
+        PoZmianieWarstw(Math.Min(i, _zestaw.Liczba - 1))
+        Dim opisPiksela As String = If(_zestaw.Liczba > 0, DobierzRozmiarPiksela(False), "")
+        Komunikat("Usunięto warstwę " & nazwa & " z listy wybranych warstw." & If(opisPiksela <> "", " " & opisPiksela, ""), Color.Green)
+    End Sub
+
+    ''' <summary>Przesuwa zaznaczoną warstwę o jedno miejsce: 1 - wyżej w kanapce, -1 - niżej.</summary>
+    Private Sub PrzesunZaznaczonaWarstwe(kierunek As Integer)
+        Dim i As Integer = lstWybraneWarstwy.Zaznaczona
+        If i >= 0 Then PrzeniesWarstwe(i, i + kierunek)
+    End Sub
+
+    Private Sub PrzeniesWarstwe(zIndeksu As Integer, naIndeks As Integer)
+        If zIndeksu < 0 OrElse zIndeksu >= _zestaw.Liczba OrElse naIndeks < 0 OrElse naIndeks >= _zestaw.Liczba OrElse naIndeks = zIndeksu Then Exit Sub
+        If PobieranieTrwa("Zmiana kolejności warstw") Then Exit Sub
+        Dim nowa As Integer = _zestaw.Przenies(zIndeksu, naIndeks)
+        PoZmianieWarstw(nowa)
+        Komunikat("Warstwa " & _zestaw(nowa).Nazwa & " jest teraz na miejscu " & (nowa + 1) & If(nowa = 0, " (podkład)", "") & ".", Color.Green)
+    End Sub
+
+    Private Sub UstawKrycieZaznaczonej(krycie As Integer)
+        Dim i As Integer = lstWybraneWarstwy.Zaznaczona
+        If i < 0 Then Exit Sub
+        If PobieranieTrwa("Zmiana krycia warstwy") Then
+            OdswiezPrzyciskiWarstw()
+            Exit Sub
+        End If
+        _zestaw.UstawKrycie(i, krycie)
+        PoZmianieWarstw(i)
+        Komunikat("Krycie warstwy " & _zestaw(i).Nazwa & ": " & _zestaw(i).Krycie & " %." &
+                  If(_zestaw(i).CzyWmts OrElse _zestaw(i).Krycie >= ZestawWarstw.PelneKrycie, "",
+                     " Warstwy o kryciu mniejszym niż 100% pobierane są osobnymi zapytaniami (" & _zestaw.GrupyZapytan().Count & " grup na segment)."),
+                  Color.Green)
+    End Sub
+
+    ''' <summary>Okno „Warstwy - zaawansowane”: krycie suwakami, kolejność i podgląd kanapki; zmiany przyjmowane po OK.</summary>
+    Private Sub OtworzWarstwyZaawansowane()
+        If _zestaw.Liczba = 0 OrElse PobieranieTrwa("Zmiana listy warstw") Then Exit Sub
+        Using okno As New FormWarstwyZaawansowane(_zestaw.Kopia(), ZadanieDoPodgladu(), lstWybraneWarstwy.Zaznaczona)
+            If okno.ShowDialog(Me) <> DialogResult.OK Then Exit Sub
+            _zestaw = okno.Zestaw
+            PoZmianieWarstw(Math.Min(okno.Zaznaczona, _zestaw.Liczba - 1))
+            Dim opisPiksela As String = DobierzRozmiarPiksela(False)
+            Komunikat("Wybrane warstwy: " & OpisWarstw() & "." & If(opisPiksela <> "", " " & opisPiksela, ""), Color.Green)
+        End Using
     End Sub
 
 #End Region
@@ -856,6 +1042,72 @@ Public Class Form1
         End If
     End Sub
 
+    ''' <summary>
+    ''' Rozmiar piksela sesji wg najdokładniejszej warstwy kanapki (najmniejszy zalecany): żadna warstwa nie traci szczegółów,
+    ''' mniej dokładne są przeskalowane. Pole zmieniane jest, gdy kanapka była pusta albo zawiera wartość wpisaną wcześniej
+    ''' przez program; wartość wpisaną ręcznie zostawia. Zwraca opis do komunikatu (pusty - żadna warstwa nie ma zalecanego rozmiaru).
+    ''' </summary>
+    Private Function DobierzRozmiarPiksela(bylaPusta As Boolean) As String
+        UzupelnijZalecanePiksele()
+        Dim najdokladniejsza = _zestaw.NajdokladniejszaWarstwa()
+        If najdokladniejsza Is Nothing Then Return ""
+        Dim jednostka As String = If(Ustawienia.Uklad.Geograficzny, "°", " m")
+        Dim zalecany As String = RozmiarPikselaWarstwy(Liczba(najdokladniejsza.ZalecanyPiksel))
+        Dim zrodlo As String = najdokladniejsza.Nazwa & If(_zestaw.WieleZrodel AndAlso najdokladniejsza.Zbior <> "", " (" & najdokladniejsza.Zbior & ")", "")
+        Dim opis As String
+        If bylaPusta OrElse PikselAutomatyczny() Then
+            If txtRozmiarPiksela.Text.Trim() <> zalecany Then txtRozmiarPiksela.Text = zalecany
+            _automatycznyPikselMetry = najdokladniejsza.ZalecanyPiksel
+            _automatycznyPikselTekst = zalecany
+            opis = "Rozmiar piksela " & zalecany & jednostka & If(_zestaw.Liczba > 1, " - wg najdokładniejszej warstwy " & zrodlo & ".", ".")
+        Else
+            opis = "Rozmiar piksela wpisany ręcznie (" & txtRozmiarPiksela.Text.Trim() & jednostka & ") pozostaje; zalecany dla wybranych warstw: " &
+                   zalecany & jednostka & " (warstwa " & zrodlo & ")."
+        End If
+        Dim najmniej = _zestaw.NajmniejDokladnaWarstwa()
+        If najmniej IsNot Nothing AndAlso najmniej.ZalecanyPiksel >= 4 * najdokladniejsza.ZalecanyPiksel Then
+            opis &= " Warstwa " & najmniej.Nazwa & " (zalecany " & Liczba(najmniej.ZalecanyPiksel) & " m) zostanie przeskalowana; mały piksel to więcej segmentów i danych."
+        End If
+        Return opis
+    End Function
+
+    ''' <summary>Czy pole rozmiaru piksela zawiera wartość wpisaną przez program (nie przez użytkownika).</summary>
+    Private Function PikselAutomatyczny() As Boolean
+        If _automatycznyPikselMetry <= 0 Then Return False
+        Dim tekst As String = txtRozmiarPiksela.Text.Trim()
+        If tekst = _automatycznyPikselTekst Then Return True
+        'po zmianie układu metrycznego (np. PL-1992 na PL-2000) wartość w metrach pozostaje ta sama
+        If Ustawienia.Uklad.Geograficzny Then Return False
+        Return Math.Abs(Wartosc(tekst) - _automatycznyPikselMetry) <= _automatycznyPikselMetry * 0.000001
+    End Function
+
+    ''' <summary>Zalecany rozmiar piksela warstw bez niego (np. wczytanych z conf.txt) - z plików ich zbiorów map.</summary>
+    Private Sub UzupelnijZalecanePiksele()
+        Dim pliki As New Dictionary(Of String, PlikWarstw)(StringComparer.OrdinalIgnoreCase)
+        For Each w In _zestaw.Warstwy
+            If w.ZalecanyPiksel > 0 OrElse w.Zbior = "" Then Continue For
+            Dim plik As PlikWarstw = Nothing
+            If Not pliki.TryGetValue(w.Zbior, plik) Then
+                plik = PlikZbioruMap(w.Zbior)
+                pliki(w.Zbior) = plik
+            End If
+            Dim wm = plik?.Znajdz(w.Nazwa)
+            If wm IsNot Nothing Then w.ZalecanyPiksel = Math.Max(0, Wartosc(wm.RozmiarPiksela))
+        Next
+    End Sub
+
+    ''' <summary>Plik zbioru map (folder programu, potem folder danych); Nothing - brak pliku lub błąd odczytu.</summary>
+    Private Function PlikZbioruMap(zbior As String) As PlikWarstw
+        Dim plik As String = Path.Combine(FolderWarstwProgramu, zbior & ".txt")
+        If Not File.Exists(plik) Then plik = Path.Combine(FolderWarstwDanych, zbior & ".txt")
+        If Not File.Exists(plik) Then Return Nothing
+        Try
+            Return PlikWarstw.Wczytaj(plik)
+        Catch
+            Return Nothing
+        End Try
+    End Function
+
     ''' <summary>Rozmiar piksela z pliku zbioru map (w metrach) w bieżącym układzie.</summary>
     Private Function RozmiarPikselaWarstwy(tekst As String) As String
         Dim u = Ustawienia.Uklad
@@ -883,6 +1135,20 @@ Public Class Form1
     End Sub
 
     ''' <summary>Pobieranie segmentów; odswiez - ponownie także tych, które już są w folderze sesji.</summary>
+    ''' <summary>
+    ''' Parametry podglądu kanapki w oknie „Warstwy - zaawansowane”: serwer, układ, format i siatka jak przy pobieraniu
+    ''' (siatka Nothing - niepoprawne pola zasięgu).
+    ''' </summary>
+    Private Function ZadanieDoPodgladu() As ZadaniePobierania
+        Dim siatka = BiezacaSiatka()
+        Return New ZadaniePobierania With {
+            .Uklad = Ustawienia.Uklad, .Siatka = If(siatka.Poprawna, siatka, Nothing),
+            .Format = Ustawienia.Format, .ZamienOsie = Ustawienia.ZamienXY, .LimitCzasuSekundy = Ustawienia.LimitCzasuSekundy,
+            .IloscProb = Math.Max(1, Ustawienia.IloscProbPobrania), .JakoscJpegWmts = Ustawienia.JakoscJpegWmts,
+            .Przezroczystosc = Ustawienia.Przezroczystosc,
+            .Folder = Path.Combine(Path.GetTempPath(), "MapoTero_podglad") & "\"}
+    End Function
+
     Private Async Sub RozpocznijPobieranie(odswiez As Boolean)
         If _przerwanie IsNot Nothing Then Exit Sub
         'kontrola parametrów
@@ -904,11 +1170,11 @@ Public Class Form1
         If Not siatka.Poprawna Then
             Komunikat("Niepoprawne współrzędne X, Y.", Color.Red) : Exit Sub
         End If
-        If _warstwy.Count = 0 Then
+        If _zestaw.Liczba = 0 Then
             Komunikat("Nie wybrano żadnej warstwy. Aby wybrać warstwę kliknij w jej nazwę.", Color.Red) : Exit Sub
         End If
-        If _plikWarstw.Adres = "" Then
-            Komunikat("Nie wybrano zbioru map (serwera WMS).", Color.Red) : Exit Sub
+        If _zestaw.Warstwy.Any(Function(w) w.Adres = "") Then
+            Komunikat("Nie znam serwera którejś z wybranych warstw - usuń ją i wybierz ponownie ze zbioru map.", Color.Red) : Exit Sub
         End If
         'przedrostek także z wczytanego conf.txt - sprawdzany przed pobraniem pierwszego segmentu
         Dim bladPrzedrostka As String = KonfiguracjaSesji.BladPrzedrostka(Ustawienia.Prefiks)
@@ -941,7 +1207,7 @@ Public Class Form1
         ZapiszConf(False)
 
         Dim zadanie As New ZadaniePobierania With {
-            .AdresSerwera = _plikWarstw.Adres, .Warstwy = New List(Of String)(_warstwy), .Uklad = Ustawienia.Uklad,
+            .AdresSerwera = _zestaw(0).Adres, .Warstwy = _zestaw.Nazwy(), .Krycia = _zestaw.Krycia(), .Adresy = _zestaw.Adresy(), .Uklad = Ustawienia.Uklad,
             .Siatka = siatka, .Format = Ustawienia.Format, .Prefiks = Ustawienia.Prefiks,
             .Numeracja = Siatka.StylZTekstu(Ustawienia.Numeracja), .Folder = FolderSesji, .ZamienOsie = Ustawienia.ZamienXY,
             .IloscProb = Math.Max(1, Ustawienia.IloscProbPobrania), .PrzerwaSekundy = Ustawienia.PrzerwaMiedzyProbami,
@@ -956,7 +1222,6 @@ Public Class Form1
         cmbZbiorMap.Enabled = False
         lstWarstwy.Enabled = False
         btnScalanie.Enabled = False
-        btnResetujWarstwy.Enabled = False
         btnUsunPobrane.Enabled = False
         OdswiezToolStripMenuItem.Enabled = False
         KorytarzToolStripMenuItem.Enabled = False
@@ -965,6 +1230,7 @@ Public Class Form1
         'własna kopia - zwalniane jest zawsze źródło tego pobierania, nawet gdyby pole wskazywało już inne
         Dim przerwanie As New CancellationTokenSource()
         _przerwanie = przerwanie
+        OdswiezPrzyciskiWarstw()
         Dim postep As New Progress(Of PostepPobierania)(AddressOf PokazPostep)
         Dim wynik As WynikPobierania = Nothing
         Try
@@ -978,12 +1244,12 @@ Public Class Form1
             btnPrzerwij.Enabled = False
             cmbZbiorMap.Enabled = True
             lstWarstwy.Enabled = True
-            btnResetujWarstwy.Enabled = _warstwy.Count > 0
             btnUsunPobrane.Enabled = True
             OdswiezToolStripMenuItem.Enabled = True
             KorytarzToolStripMenuItem.Enabled = True
             stPostep.Value = 0
             stSegment.Text = ""
+            OdswiezPrzyciskiWarstw()
         End Try
 
         If wynik Is Nothing Then Exit Sub

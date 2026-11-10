@@ -93,19 +93,13 @@ Partial Class Form1
         Me.ToolTip1 = New System.Windows.Forms.ToolTip(Me.components)
         Me.grpWybraneWarstwy = New System.Windows.Forms.GroupBox()
         Me.btnResetujWarstwy = New System.Windows.Forms.Button()
-        Me.lblWarstwa12 = New System.Windows.Forms.Label()
-        Me.lblWarstwa08 = New System.Windows.Forms.Label()
-        Me.lblWarstwa11 = New System.Windows.Forms.Label()
-        Me.lblWarstwa10 = New System.Windows.Forms.Label()
-        Me.lblWarstwa07 = New System.Windows.Forms.Label()
-        Me.lblWarstwa09 = New System.Windows.Forms.Label()
-        Me.lblWarstwa06 = New System.Windows.Forms.Label()
-        Me.lblWarstwa02 = New System.Windows.Forms.Label()
-        Me.lblWarstwa05 = New System.Windows.Forms.Label()
-        Me.lblWarstwa04 = New System.Windows.Forms.Label()
-        Me.lblWarstwa01 = New System.Windows.Forms.Label()
-        Me.lblWarstwa03 = New System.Windows.Forms.Label()
-        Me.PictureBox1 = New System.Windows.Forms.PictureBox()
+        Me.lstWybraneWarstwy = New MapoTero.ListaWarstw()
+        Me.btnWarstwaWyzej = New System.Windows.Forms.Button()
+        Me.btnWarstwaNizej = New System.Windows.Forms.Button()
+        Me.btnUsunWarstwe = New System.Windows.Forms.Button()
+        Me.lblKrycie = New System.Windows.Forms.Label()
+        Me.numKrycie = New System.Windows.Forms.NumericUpDown()
+        Me.btnWarstwyZaawansowane = New System.Windows.Forms.Button()
         Me.btnPowieksz = New System.Windows.Forms.Button()
         Me.btnPomniejsz = New System.Windows.Forms.Button()
         Me.grpRozmiarSiatki = New System.Windows.Forms.GroupBox()
@@ -166,7 +160,7 @@ Partial Class Form1
         Me.StatusStrip1.SuspendLayout()
         Me.MenuStrip1.SuspendLayout()
         Me.grpWybraneWarstwy.SuspendLayout()
-        CType(Me.PictureBox1, System.ComponentModel.ISupportInitialize).BeginInit()
+        CType(Me.numKrycie, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.grpRozmiarSiatki.SuspendLayout()
         Me.grpSchemat.SuspendLayout()
         CType(Me.PictureBox2, System.ComponentModel.ISupportInitialize).BeginInit()
@@ -576,20 +570,14 @@ Partial Class Form1
         '
         'grpWybraneWarstwy
         '
+        Me.grpWybraneWarstwy.Controls.Add(Me.lstWybraneWarstwy)
+        Me.grpWybraneWarstwy.Controls.Add(Me.btnWarstwaWyzej)
+        Me.grpWybraneWarstwy.Controls.Add(Me.btnWarstwaNizej)
+        Me.grpWybraneWarstwy.Controls.Add(Me.btnUsunWarstwe)
         Me.grpWybraneWarstwy.Controls.Add(Me.btnResetujWarstwy)
-        Me.grpWybraneWarstwy.Controls.Add(Me.lblWarstwa12)
-        Me.grpWybraneWarstwy.Controls.Add(Me.lblWarstwa08)
-        Me.grpWybraneWarstwy.Controls.Add(Me.lblWarstwa11)
-        Me.grpWybraneWarstwy.Controls.Add(Me.lblWarstwa10)
-        Me.grpWybraneWarstwy.Controls.Add(Me.lblWarstwa07)
-        Me.grpWybraneWarstwy.Controls.Add(Me.lblWarstwa09)
-        Me.grpWybraneWarstwy.Controls.Add(Me.lblWarstwa06)
-        Me.grpWybraneWarstwy.Controls.Add(Me.lblWarstwa02)
-        Me.grpWybraneWarstwy.Controls.Add(Me.lblWarstwa05)
-        Me.grpWybraneWarstwy.Controls.Add(Me.lblWarstwa04)
-        Me.grpWybraneWarstwy.Controls.Add(Me.lblWarstwa01)
-        Me.grpWybraneWarstwy.Controls.Add(Me.lblWarstwa03)
-        Me.grpWybraneWarstwy.Controls.Add(Me.PictureBox1)
+        Me.grpWybraneWarstwy.Controls.Add(Me.lblKrycie)
+        Me.grpWybraneWarstwy.Controls.Add(Me.numKrycie)
+        Me.grpWybraneWarstwy.Controls.Add(Me.btnWarstwyZaawansowane)
         Me.grpWybraneWarstwy.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
         Me.grpWybraneWarstwy.Location = New System.Drawing.Point(5, 258)
         Me.grpWybraneWarstwy.Name = "grpWybraneWarstwy"
@@ -601,134 +589,91 @@ Partial Class Form1
         "ymi warstwami o wyższym numerze, o ile mają one przeźroczyste tło, lub mają niep" &
         "ełne pokrycie.")
         '
+        'lstWybraneWarstwy
+        '
+        Me.lstWybraneWarstwy.Location = New System.Drawing.Point(4, 15)
+        Me.lstWybraneWarstwy.Name = "lstWybraneWarstwy"
+        Me.lstWybraneWarstwy.Size = New System.Drawing.Size(202, 188)
+        Me.lstWybraneWarstwy.TabIndex = 300
+        '
+        'btnWarstwaWyzej
+        '
+        Me.btnWarstwaWyzej.Font = New System.Drawing.Font("Segoe UI Symbol", 8.25!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
+        Me.btnWarstwaWyzej.Location = New System.Drawing.Point(4, 206)
+        Me.btnWarstwaWyzej.Margin = New System.Windows.Forms.Padding(0)
+        Me.btnWarstwaWyzej.Name = "btnWarstwaWyzej"
+        Me.btnWarstwaWyzej.Size = New System.Drawing.Size(23, 23)
+        Me.btnWarstwaWyzej.TabIndex = 301
+        Me.btnWarstwaWyzej.Text = "▲"
+        Me.ToolTip1.SetToolTip(Me.btnWarstwaWyzej, "Przesuń zaznaczoną warstwę wyżej w kanapce (Ctrl+↑)")
+        Me.btnWarstwaWyzej.UseVisualStyleBackColor = True
+        '
+        'btnWarstwaNizej
+        '
+        Me.btnWarstwaNizej.Font = New System.Drawing.Font("Segoe UI Symbol", 8.25!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
+        Me.btnWarstwaNizej.Location = New System.Drawing.Point(28, 206)
+        Me.btnWarstwaNizej.Margin = New System.Windows.Forms.Padding(0)
+        Me.btnWarstwaNizej.Name = "btnWarstwaNizej"
+        Me.btnWarstwaNizej.Size = New System.Drawing.Size(23, 23)
+        Me.btnWarstwaNizej.TabIndex = 302
+        Me.btnWarstwaNizej.Text = "▼"
+        Me.ToolTip1.SetToolTip(Me.btnWarstwaNizej, "Przesuń zaznaczoną warstwę niżej w kanapce (Ctrl+↓)")
+        Me.btnWarstwaNizej.UseVisualStyleBackColor = True
+        '
+        'btnUsunWarstwe
+        '
+        Me.btnUsunWarstwe.Font = New System.Drawing.Font("Segoe UI Symbol", 8.25!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
+        Me.btnUsunWarstwe.Location = New System.Drawing.Point(52, 206)
+        Me.btnUsunWarstwe.Margin = New System.Windows.Forms.Padding(0)
+        Me.btnUsunWarstwe.Name = "btnUsunWarstwe"
+        Me.btnUsunWarstwe.Size = New System.Drawing.Size(23, 23)
+        Me.btnUsunWarstwe.TabIndex = 303
+        Me.btnUsunWarstwe.Text = "✕"
+        Me.ToolTip1.SetToolTip(Me.btnUsunWarstwe, "Usuń zaznaczoną warstwę (Delete)")
+        Me.btnUsunWarstwe.UseVisualStyleBackColor = True
+        '
         'btnResetujWarstwy
         '
         Me.btnResetujWarstwy.Image = Global.MapoTero.My.Resources.Resources.kosz
-        Me.btnResetujWarstwy.Location = New System.Drawing.Point(4, 209)
+        Me.btnResetujWarstwy.Location = New System.Drawing.Point(76, 206)
+        Me.btnResetujWarstwy.Margin = New System.Windows.Forms.Padding(0)
         Me.btnResetujWarstwy.Name = "btnResetujWarstwy"
-        Me.btnResetujWarstwy.Size = New System.Drawing.Size(26, 22)
+        Me.btnResetujWarstwy.Size = New System.Drawing.Size(24, 23)
         Me.btnResetujWarstwy.TabIndex = 304
+        Me.ToolTip1.SetToolTip(Me.btnResetujWarstwy, "Usuń wszystkie wybrane warstwy")
         Me.btnResetujWarstwy.UseVisualStyleBackColor = True
         '
-        'lblWarstwa12
+        'lblKrycie
         '
-        Me.lblWarstwa12.AutoSize = True
-        Me.lblWarstwa12.Location = New System.Drawing.Point(1, 16)
-        Me.lblWarstwa12.Name = "lblWarstwa12"
-        Me.lblWarstwa12.Size = New System.Drawing.Size(22, 13)
-        Me.lblWarstwa12.TabIndex = 229
-        Me.lblWarstwa12.Text = "12)"
+        Me.lblKrycie.AutoSize = True
+        Me.lblKrycie.Location = New System.Drawing.Point(102, 211)
+        Me.lblKrycie.Name = "lblKrycie"
+        Me.lblKrycie.Size = New System.Drawing.Size(47, 13)
+        Me.lblKrycie.TabIndex = 305
+        Me.lblKrycie.Text = "Krycie %"
+        Me.ToolTip1.SetToolTip(Me.lblKrycie, "Krycie zaznaczonej warstwy: 100% - warstwa nieprzezroczysta, mniej - prześwituje przez nią niższa warstwa.")
         '
-        'lblWarstwa08
+        'numKrycie
         '
-        Me.lblWarstwa08.AutoSize = True
-        Me.lblWarstwa08.Location = New System.Drawing.Point(6, 78)
-        Me.lblWarstwa08.Name = "lblWarstwa08"
-        Me.lblWarstwa08.Size = New System.Drawing.Size(16, 13)
-        Me.lblWarstwa08.TabIndex = 225
-        Me.lblWarstwa08.Text = "8)"
+        Me.numKrycie.Increment = New Decimal(New Integer() {5, 0, 0, 0})
+        Me.numKrycie.Location = New System.Drawing.Point(148, 208)
+        Me.numKrycie.Minimum = New Decimal(New Integer() {5, 0, 0, 0})
+        Me.numKrycie.Name = "numKrycie"
+        Me.numKrycie.Size = New System.Drawing.Size(36, 20)
+        Me.numKrycie.TabIndex = 306
+        Me.numKrycie.Value = New Decimal(New Integer() {100, 0, 0, 0})
+        Me.ToolTip1.SetToolTip(Me.numKrycie, "Krycie zaznaczonej warstwy: 100% - warstwa nieprzezroczysta, mniej - prześwituje przez nią niższa warstwa.")
         '
-        'lblWarstwa11
+        'btnWarstwyZaawansowane
         '
-        Me.lblWarstwa11.AutoSize = True
-        Me.lblWarstwa11.Location = New System.Drawing.Point(1, 31)
-        Me.lblWarstwa11.Name = "lblWarstwa11"
-        Me.lblWarstwa11.Size = New System.Drawing.Size(22, 13)
-        Me.lblWarstwa11.TabIndex = 228
-        Me.lblWarstwa11.Text = "11)"
-        '
-        'lblWarstwa10
-        '
-        Me.lblWarstwa10.AutoSize = True
-        Me.lblWarstwa10.Location = New System.Drawing.Point(1, 47)
-        Me.lblWarstwa10.Name = "lblWarstwa10"
-        Me.lblWarstwa10.Size = New System.Drawing.Size(22, 13)
-        Me.lblWarstwa10.TabIndex = 227
-        Me.lblWarstwa10.Text = "10)"
-        '
-        'lblWarstwa07
-        '
-        Me.lblWarstwa07.AutoSize = True
-        Me.lblWarstwa07.Location = New System.Drawing.Point(6, 93)
-        Me.lblWarstwa07.Name = "lblWarstwa07"
-        Me.lblWarstwa07.Size = New System.Drawing.Size(16, 13)
-        Me.lblWarstwa07.TabIndex = 224
-        Me.lblWarstwa07.Text = "7)"
-        '
-        'lblWarstwa09
-        '
-        Me.lblWarstwa09.AutoSize = True
-        Me.lblWarstwa09.Location = New System.Drawing.Point(6, 63)
-        Me.lblWarstwa09.Name = "lblWarstwa09"
-        Me.lblWarstwa09.Size = New System.Drawing.Size(16, 13)
-        Me.lblWarstwa09.TabIndex = 226
-        Me.lblWarstwa09.Text = "9)"
-        '
-        'lblWarstwa06
-        '
-        Me.lblWarstwa06.AutoSize = True
-        Me.lblWarstwa06.Location = New System.Drawing.Point(6, 109)
-        Me.lblWarstwa06.Name = "lblWarstwa06"
-        Me.lblWarstwa06.Size = New System.Drawing.Size(16, 13)
-        Me.lblWarstwa06.TabIndex = 223
-        Me.lblWarstwa06.Text = "6)"
-        '
-        'lblWarstwa02
-        '
-        Me.lblWarstwa02.AutoSize = True
-        Me.lblWarstwa02.Location = New System.Drawing.Point(6, 178)
-        Me.lblWarstwa02.Name = "lblWarstwa02"
-        Me.lblWarstwa02.Size = New System.Drawing.Size(16, 13)
-        Me.lblWarstwa02.TabIndex = 219
-        Me.lblWarstwa02.Text = "2)"
-        Me.ToolTip1.SetToolTip(Me.lblWarstwa02, "Kolejna nakładana warstwa, która przykryje podkład")
-        '
-        'lblWarstwa05
-        '
-        Me.lblWarstwa05.AutoSize = True
-        Me.lblWarstwa05.Location = New System.Drawing.Point(6, 126)
-        Me.lblWarstwa05.Name = "lblWarstwa05"
-        Me.lblWarstwa05.Size = New System.Drawing.Size(16, 13)
-        Me.lblWarstwa05.TabIndex = 222
-        Me.lblWarstwa05.Text = "5)"
-        '
-        'lblWarstwa04
-        '
-        Me.lblWarstwa04.AutoSize = True
-        Me.lblWarstwa04.Location = New System.Drawing.Point(6, 143)
-        Me.lblWarstwa04.Name = "lblWarstwa04"
-        Me.lblWarstwa04.Size = New System.Drawing.Size(16, 13)
-        Me.lblWarstwa04.TabIndex = 221
-        Me.lblWarstwa04.Text = "4)"
-        '
-        'lblWarstwa01
-        '
-        Me.lblWarstwa01.AutoSize = True
-        Me.lblWarstwa01.Location = New System.Drawing.Point(6, 194)
-        Me.lblWarstwa01.Name = "lblWarstwa01"
-        Me.lblWarstwa01.Size = New System.Drawing.Size(16, 13)
-        Me.lblWarstwa01.TabIndex = 218
-        Me.lblWarstwa01.Text = "1)"
-        Me.ToolTip1.SetToolTip(Me.lblWarstwa01, "Główna warstwa podkładowa, którą można przykryć kolejnymi warstwami (o ile mają p" &
-        "rzeźroczyste tło lub nie pokrywają całkowicie podkładu)")
-        '
-        'lblWarstwa03
-        '
-        Me.lblWarstwa03.AutoSize = True
-        Me.lblWarstwa03.Location = New System.Drawing.Point(6, 161)
-        Me.lblWarstwa03.Name = "lblWarstwa03"
-        Me.lblWarstwa03.Size = New System.Drawing.Size(16, 13)
-        Me.lblWarstwa03.TabIndex = 220
-        Me.lblWarstwa03.Text = "3)"
-        '
-        'PictureBox1
-        '
-        Me.PictureBox1.Image = Global.MapoTero.My.Resources.Resources.kanapka_gis
-        Me.PictureBox1.Location = New System.Drawing.Point(92, 91)
-        Me.PictureBox1.Name = "PictureBox1"
-        Me.PictureBox1.Size = New System.Drawing.Size(113, 138)
-        Me.PictureBox1.TabIndex = 305
-        Me.PictureBox1.TabStop = False
+        Me.btnWarstwyZaawansowane.Location = New System.Drawing.Point(185, 206)
+        Me.btnWarstwyZaawansowane.Margin = New System.Windows.Forms.Padding(0)
+        Me.btnWarstwyZaawansowane.Name = "btnWarstwyZaawansowane"
+        Me.btnWarstwyZaawansowane.Size = New System.Drawing.Size(21, 23)
+        Me.btnWarstwyZaawansowane.TabIndex = 307
+        Me.btnWarstwyZaawansowane.Text = "…"
+        Me.ToolTip1.SetToolTip(Me.btnWarstwyZaawansowane, "Warstwy - zaawansowane: suwaki krycia i podgląd kanapki")
+        Me.btnWarstwyZaawansowane.UseVisualStyleBackColor = True
         '
         'btnPowieksz
         '
@@ -1419,7 +1364,7 @@ Partial Class Form1
         Me.MenuStrip1.PerformLayout()
         Me.grpWybraneWarstwy.ResumeLayout(False)
         Me.grpWybraneWarstwy.PerformLayout()
-        CType(Me.PictureBox1, System.ComponentModel.ISupportInitialize).EndInit()
+        CType(Me.numKrycie, System.ComponentModel.ISupportInitialize).EndInit()
         Me.grpRozmiarSiatki.ResumeLayout(False)
         Me.grpRozmiarSiatki.PerformLayout()
         Me.grpSchemat.ResumeLayout(False)
@@ -1484,18 +1429,6 @@ Partial Class Form1
     Friend WithEvents lblKursorUkladOpis As System.Windows.Forms.Label
     Friend WithEvents lblKursorUklad As System.Windows.Forms.Label
     Friend WithEvents grpWybraneWarstwy As System.Windows.Forms.GroupBox
-    Friend WithEvents lblWarstwa12 As System.Windows.Forms.Label
-    Friend WithEvents lblWarstwa08 As System.Windows.Forms.Label
-    Friend WithEvents lblWarstwa11 As System.Windows.Forms.Label
-    Friend WithEvents lblWarstwa10 As System.Windows.Forms.Label
-    Friend WithEvents lblWarstwa07 As System.Windows.Forms.Label
-    Friend WithEvents lblWarstwa09 As System.Windows.Forms.Label
-    Friend WithEvents lblWarstwa06 As System.Windows.Forms.Label
-    Friend WithEvents lblWarstwa02 As System.Windows.Forms.Label
-    Friend WithEvents lblWarstwa05 As System.Windows.Forms.Label
-    Friend WithEvents lblWarstwa04 As System.Windows.Forms.Label
-    Friend WithEvents lblWarstwa01 As System.Windows.Forms.Label
-    Friend WithEvents lblWarstwa03 As System.Windows.Forms.Label
     Friend WithEvents lblSrodekDlug As System.Windows.Forms.Label
     Friend WithEvents lblZoom As System.Windows.Forms.Label
     Friend WithEvents lblSrodekOpisDlug As System.Windows.Forms.Label
@@ -1543,9 +1476,15 @@ Partial Class Form1
     Friend WithEvents btnOtworzFolder As System.Windows.Forms.Button
     Friend WithEvents btnScalanie As System.Windows.Forms.Button
     Friend WithEvents btnResetujWarstwy As System.Windows.Forms.Button
+    Friend WithEvents lstWybraneWarstwy As MapoTero.ListaWarstw
+    Friend WithEvents btnWarstwaWyzej As System.Windows.Forms.Button
+    Friend WithEvents btnWarstwaNizej As System.Windows.Forms.Button
+    Friend WithEvents btnUsunWarstwe As System.Windows.Forms.Button
+    Friend WithEvents lblKrycie As System.Windows.Forms.Label
+    Friend WithEvents numKrycie As System.Windows.Forms.NumericUpDown
+    Friend WithEvents btnWarstwyZaawansowane As System.Windows.Forms.Button
     Friend WithEvents Label42 As System.Windows.Forms.Label
     Friend WithEvents Label7 As System.Windows.Forms.Label
-    Friend WithEvents PictureBox1 As System.Windows.Forms.PictureBox
     Friend WithEvents btnZnaczniki As System.Windows.Forms.Button
     Friend WithEvents Panel2 As System.Windows.Forms.Panel
     Friend WithEvents Panel3 As System.Windows.Forms.Panel

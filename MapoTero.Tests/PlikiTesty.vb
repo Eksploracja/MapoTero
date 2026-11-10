@@ -97,7 +97,8 @@ Public Class PlikiSesjiTesty
             Sub(c) c.Format = "png",
             Sub(c) c.Prefiks = "a",
             Sub(c) c.Numeracja = "1_2_3",
-            Sub(c) c.Przezroczystosc = True}
+            Sub(c) c.Przezroczystosc = True,
+            Sub(c) c.KrycieWarstw = "50"}
         For Each zmiana In zmiany
             Dim b = Sesja()
             zmiana(b)
