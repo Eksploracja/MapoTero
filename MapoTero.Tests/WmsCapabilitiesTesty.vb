@@ -225,4 +225,13 @@ Public Class WmsCapabilitiesTesty
         Assert.Contains("REQUEST=GetCapabilities", wmtsUrl)
     End Sub
 
+    <Theory>
+    <InlineData("https://serwer.pl/wms?VERSION=1.3.0&CRS=EPSG:2180&LAYERS=", "https://serwer.pl/wms?SERVICE=WMS&REQUEST=GetCapabilities")>
+    <InlineData("""https://serwer.pl/cgi?map=a.map&version=1.1.1&srs=EPSG:2180&format=image/png""", "https://serwer.pl/cgi?map=a.map&SERVICE=WMS&REQUEST=GetCapabilities")>
+    <InlineData("https://serwer.pl/wms?token=x&LAYERS=a&STYLES=", "https://serwer.pl/wms?token=x&SERVICE=WMS&REQUEST=GetCapabilities")>
+    <InlineData("https://serwer.pl/wms", "https://serwer.pl/wms?SERVICE=WMS&REQUEST=GetCapabilities")>
+    Public Sub AdresCapabilitiesWmsZAdresuPliku_UsuwaParametryGetMap(adres As String, oczekiwany As String)
+        Assert.Equal(oczekiwany, KlientCapabilities.AdresCapabilitiesWmsZAdresuPliku(adres))
+    End Sub
+
 End Class

@@ -188,6 +188,18 @@ Public NotInheritable Class KlientCapabilities
         Return a & separator & "SERVICE=WMS&REQUEST=GetCapabilities"
     End Function
 
+    ''' <summary>
+    ''' Tworzy adres GetCapabilities WMS z adresu zapisanego w pliku zbioru map (warstwy/*.txt).
+    ''' Taki adres zawiera parametry GetMap (VERSION, CRS, LAYERS, FORMAT…), które trzeba usunąć;
+    ''' parametry niestandardowe (np. map=, token=) zostają.
+    ''' </summary>
+    Public Shared Function AdresCapabilitiesWmsZAdresuPliku(adres As String) As String
+        Dim a = adres.Trim().Trim(""""c)
+        a = Regex.Replace(a, "(?<=[?&])(service|request|version|crs|srs|layers|format|styles|width|height|bbox|transparent)=[^&]*&?", "", RegexOptions.IgnoreCase)
+        a = a.TrimEnd("&"c)
+        Return AdresCapabilitiesWms(a)
+    End Function
+
     ''' <summary>Tworzy adres GetCapabilities dla WMTS.</summary>
     Public Shared Function AdresCapabilitiesWmts(adres As String) As String
         Return Wmts.AdresCapabilities(adres)
