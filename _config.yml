@@ -62,16 +62,16 @@ gh_edit_view_mode: "tree"
 callouts:
   wskazowka:
     title: Wskazówka
-    color: blue
+    color: green
   uwaga:
     title: Uwaga
     color: red
   informacja:
     title: Informacja
-    color: purple
+    color: blue
   nowosc:
     title: Nowość
-    color: green
+    color: purple
   w_przygotowaniu:
     title: W przygotowaniu
     color: yellow

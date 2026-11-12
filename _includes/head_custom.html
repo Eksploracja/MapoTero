@@ -1,26 +1,592 @@
-<!-- Custom head styles for MapoTero documentation -->
+<!-- Nowoczesna stylizacja MapoTero (kartograficzno-szmaragdowa paleta GIS & Slate) -->
 <style>
-/* Wyświetlanie obrazów i podpisów */
+/* === TYPOGRAFIA I PODSTAWA STRONY === */
+body, .main-content {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji" !important;
+  color: #334155 !important;
+  line-height: 1.68 !important;
+  font-size: 16px !important;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Nagłówki */
+.main-content h1,
+.main-content h2,
+.main-content h3,
+.main-content h4,
+.main-content h5,
+.main-content h6 {
+  color: #0f172a !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.02em !important;
+}
+
+.main-content h1 {
+  font-size: 2.15rem !important;
+  line-height: 1.25 !important;
+  margin-top: 0.5rem !important;
+  margin-bottom: 0.85rem !important;
+}
+
+.main-content h2 {
+  font-size: 1.45rem !important;
+  line-height: 1.35 !important;
+  margin-top: 2.25rem !important;
+  margin-bottom: 0.85rem !important;
+  padding-bottom: 0.5rem !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+}
+
+.main-content h3 {
+  font-size: 1.15rem !important;
+  line-height: 1.4 !important;
+  margin-top: 1.75rem !important;
+  margin-bottom: 0.6rem !important;
+}
+
+/* Podtytuł strony pod H1 */
+.main-content p.fs-6 {
+  font-size: 1.125rem !important;
+  color: #475569 !important;
+  font-weight: 400 !important;
+  line-height: 1.6 !important;
+  margin-bottom: 1.5rem !important;
+}
+
+/* Odnośniki (linki) */
+a,
+.main-content a {
+  color: #047857 !important;
+  text-decoration: none !important;
+  font-weight: 500;
+  transition: color 0.15s ease, border-color 0.15s ease;
+  border-bottom: 1px solid transparent;
+}
+
+a:hover,
+.main-content a:hover {
+  color: #059669 !important;
+  border-bottom: 1px solid #10b981 !important;
+}
+
+/* Wyłączenie podkreślenia dla przycisków, tytułu i elementów nawigacji */
+.btn,
+.btn:hover,
+.site-title,
+.site-title:hover,
+.site-button,
+.site-button:hover,
+.nav-list-link,
+.nav-list-link:hover,
+.aux-nav-list-item a,
+.aux-nav-list-item a:hover,
+.breadcrumb-nav-list-item a,
+.breadcrumb-nav-list-item a:hover,
+a:has(> img),
+a:has(> .icon) {
+  border-bottom: none !important;
+}
+
+/* Rozdzielacze hr */
+hr {
+  border: 0 !important;
+  border-top: 1px solid #e2e8f0 !important;
+  margin: 2rem 0 !important;
+}
+
+/* === PRZYCISKI (BUTTONS) === */
+.btn-primary,
+.site-button {
+  background-color: #059669 !important;
+  background-image: none !important;
+  border: 1px solid #047857 !important;
+  color: #ffffff !important;
+  font-weight: 600 !important;
+  font-size: 0.875rem !important;
+  border-radius: 6px !important;
+  padding: 0.45rem 1rem !important;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
+  text-shadow: none !important;
+  transition: all 0.15s ease-in-out !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+}
+
+.btn-primary:hover,
+.site-button:hover {
+  background-color: #047857 !important;
+  background-image: none !important;
+  border-color: #065f46 !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1) !important;
+  transform: translateY(-1px);
+}
+
+.btn-primary:active,
+.site-button:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
+}
+
+/* === PANEL BOCZNY (SIDEBAR) === */
+.side-bar {
+  background-color: #f8fafc !important;
+  border-right: 1px solid #e2e8f0 !important;
+}
+
+.site-header {
+  border-bottom: 1px solid #e2e8f0 !important;
+  background-color: #f8fafc !important;
+}
+
+.site-title {
+  color: #0f172a !important;
+  font-weight: 700 !important;
+  font-size: 1.25rem !important;
+  letter-spacing: -0.02em !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+/* Odznaka aktualnej wersji v3.17 przy nazwie programu */
+.site-title::after {
+  content: "v3.17";
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #047857;
+  background: #dcfce7;
+  border: 1px solid #bbf7d0;
+  padding: 1px 7px;
+  border-radius: 9999px;
+  margin-left: 8px;
+  letter-spacing: 0;
+}
+
+/* Lista nawigacyjna */
+.nav-list .nav-list-item .nav-list-link {
+  color: #475569 !important;
+  font-size: 0.9rem !important;
+  font-weight: 500 !important;
+  border-radius: 6px !important;
+  margin: 2px 8px !important;
+  padding: 0.45rem 0.75rem !important;
+  min-height: auto !important;
+  line-height: 1.4 !important;
+  transition: all 0.15s ease !important;
+  background-image: none !important;
+}
+
+.nav-list .nav-list-item .nav-list-link:hover {
+  color: #0f172a !important;
+  background-color: #f1f5f9 !important;
+  background-image: none !important;
+}
+
+/* Aktywna pozycja w menu */
+.nav-list .nav-list-item .nav-list-link.active {
+  color: #047857 !important;
+  background-color: #ecfdf5 !important;
+  font-weight: 600 !important;
+  border-left: 3px solid #059669 !important;
+  border-top-left-radius: 0 !important;
+  border-bottom-left-radius: 0 !important;
+  padding-left: calc(0.75rem - 3px) !important;
+  background-image: none !important;
+}
+
+.nav-list-expander {
+  color: #64748b !important;
+}
+
+.nav-list-expander:hover {
+  color: #0f172a !important;
+}
+
+/* Odnośniki zewnętrzne w panelu bocznym */
+.nav-external-links {
+  border-top: 1px solid #e2e8f0 !important;
+  margin-top: 1rem !important;
+  padding-top: 0.75rem !important;
+}
+
+.nav-external-links .nav-list-item .nav-list-link {
+  color: #64748b !important;
+  font-size: 0.85rem !important;
+}
+
+.nav-external-links .nav-list-item .nav-list-link:hover {
+  color: #047857 !important;
+}
+
+/* === NAGŁÓWEK GŁÓWNY I WYSZUKIWARKA === */
+.main-header {
+  background-color: #ffffff !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+}
+
+.search-input-wrap {
+  border-radius: 8px !important;
+  border: 1px solid #cbd5e1 !important;
+  background-color: #f8fafc !important;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.04) !important;
+  transition: all 0.2s ease !important;
+  height: 2.75rem !important;
+}
+
+.search-input-wrap:focus-within {
+  border-color: #10b981 !important;
+  background-color: #ffffff !important;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15) !important;
+}
+
+.search-input {
+  color: #0f172a !important;
+  font-size: 0.875rem !important;
+}
+
+.search-label .search-icon {
+  color: #64748b !important;
+  transition: color 0.15s ease !important;
+}
+
+.search-input-wrap:focus-within .search-label .search-icon {
+  color: #059669 !important;
+}
+
+/* Wyniki wyszukiwania */
+.search-results {
+  border-radius: 8px !important;
+  border: 1px solid #e2e8f0 !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05) !important;
+}
+
+.search-result:hover,
+.search-result.active {
+  background-color: #ecfdf5 !important;
+}
+
+.search-result-doc-title {
+  color: #047857 !important;
+  font-weight: 600 !important;
+}
+
+.search-result-doc svg {
+  color: #059669 !important;
+}
+
+.search-result-preview {
+  color: #475569 !important;
+}
+
+.search-result-highlight {
+  background-color: #fef08a !important;
+  color: #854d0e !important;
+  font-weight: 600 !important;
+  border-radius: 2px;
+  padding: 0 2px;
+}
+
+/* Pasek pomocniczy u góry (Aux Nav) */
+.aux-nav-list-item a {
+  color: #475569 !important;
+  font-weight: 500 !important;
+  font-size: 0.85rem !important;
+  padding: 0.35rem 0.65rem !important;
+  border-radius: 6px !important;
+  transition: all 0.15s ease !important;
+  border-bottom: none !important;
+}
+
+.aux-nav-list-item a:hover {
+  color: #047857 !important;
+  background-color: #f1f5f9 !important;
+}
+
+/* Wyróżniony przycisk "Pobierz program" w prawym górnym rogu */
+.aux-nav-list-item:first-child a {
+  background-color: #ecfdf5 !important;
+  color: #047857 !important;
+  font-weight: 600 !important;
+  border: 1px solid #a7f3d0 !important;
+}
+
+.aux-nav-list-item:first-child a:hover {
+  background-color: #059669 !important;
+  color: #ffffff !important;
+  border-color: #047857 !important;
+}
+
+/* === RAMKI WYRÓŻNIONE (CALLOUTS) === */
+p.informacja, blockquote.informacja, p.informacja-title, blockquote.informacja-title,
+p.wskazowka, blockquote.wskazowka, p.wskazowka-title, blockquote.wskazowka-title,
+p.uwaga, blockquote.uwaga, p.uwaga-title, blockquote.uwaga-title,
+p.nowosc, blockquote.nowosc, p.nowosc-title, blockquote.nowosc-title,
+p.w_przygotowaniu, blockquote.w_przygotowaniu, p.w_przygotowaniu-title, blockquote.w_przygotowaniu-title,
+.callout {
+  border-radius: 8px !important;
+  padding: 0.95rem 1.2rem !important;
+  margin: 1.35rem 0 !important;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 1px 2px -1px rgba(0, 0, 0, 0.02) !important;
+  font-size: 0.925rem !important;
+  line-height: 1.62 !important;
+}
+
+/* Informacja (niebieski / błękit) */
+p.informacja, blockquote.informacja, p.informacja-title, blockquote.informacja-title,
+.callout-blue, .callout-purple {
+  background-color: #f0f9ff !important;
+  border: 1px solid #bae6fd !important;
+  border-left: 4px solid #0284c7 !important;
+  color: #0c4a6e !important;
+}
+
+p.informacja::before, blockquote.informacja::before,
+p.informacja > .informacja-title, blockquote.informacja > .informacja-title,
+p.informacja-title > p:first-child, blockquote.informacja-title > p:first-child {
+  color: #0369a1 !important;
+  font-size: 0.78rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.05em !important;
+  text-transform: uppercase !important;
+  margin-bottom: 0.35rem !important;
+}
+
+/* Wskazówka (szmaragd / zieleń) */
+p.wskazowka, blockquote.wskazowka, p.wskazowka-title, blockquote.wskazowka-title,
+.callout-green {
+  background-color: #f0fdf4 !important;
+  border: 1px solid #bbf7d0 !important;
+  border-left: 4px solid #10b981 !important;
+  color: #064e3b !important;
+}
+
+p.wskazowka::before, blockquote.wskazowka::before,
+p.wskazowka > .wskazowka-title, blockquote.wskazowka > .wskazowka-title,
+p.wskazowka-title > p:first-child, blockquote.wskazowka-title > p:first-child {
+  color: #047857 !important;
+  font-size: 0.78rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.05em !important;
+  text-transform: uppercase !important;
+  margin-bottom: 0.35rem !important;
+}
+
+/* Uwaga (róż / czerwień) */
+p.uwaga, blockquote.uwaga, p.uwaga-title, blockquote.uwaga-title,
+.callout-red {
+  background-color: #fff1f2 !important;
+  border: 1px solid #fecdd3 !important;
+  border-left: 4px solid #f43f5e !important;
+  color: #881337 !important;
+}
+
+p.uwaga::before, blockquote.uwaga::before,
+p.uwaga > .uwaga-title, blockquote.uwaga > .uwaga-title,
+p.uwaga-title > p:first-child, blockquote.uwaga-title > p:first-child {
+  color: #be123c !important;
+  font-size: 0.78rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.05em !important;
+  text-transform: uppercase !important;
+  margin-bottom: 0.35rem !important;
+}
+
+/* Nowość (fiolet / indygo) */
+p.nowosc, blockquote.nowosc, p.nowosc-title, blockquote.nowosc-title {
+  background-color: #f5f3ff !important;
+  border: 1px solid #ddd6fe !important;
+  border-left: 4px solid #8b5cf6 !important;
+  color: #4c1d95 !important;
+}
+
+p.nowosc::before, blockquote.nowosc::before,
+p.nowosc > .nowosc-title, blockquote.nowosc > .nowosc-title,
+p.nowosc-title > p:first-child, blockquote.nowosc-title > p:first-child {
+  color: #6d28d9 !important;
+  font-size: 0.78rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.05em !important;
+  text-transform: uppercase !important;
+  margin-bottom: 0.35rem !important;
+}
+
+/* W przygotowaniu (bursztyn / żółty) */
+p.w_przygotowaniu, blockquote.w_przygotowaniu, p.w_przygotowaniu-title, blockquote.w_przygotowaniu-title,
+.callout-yellow {
+  background-color: #fffbeb !important;
+  border: 1px solid #fde68a !important;
+  border-left: 4px solid #f59e0b !important;
+  color: #78350f !important;
+}
+
+p.w_przygotowaniu::before, blockquote.w_przygotowaniu::before,
+p.w_przygotowaniu > .w_przygotowaniu-title, blockquote.w_przygotowaniu > .w_przygotowaniu-title,
+p.w_przygotowaniu-title > p:first-child, blockquote.w_przygotowaniu-title > p:first-child {
+  color: #b45309 !important;
+  font-size: 0.78rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.05em !important;
+  text-transform: uppercase !important;
+  margin-bottom: 0.35rem !important;
+}
+
+/* === TABELE === */
+.main-content table {
+  width: 100% !important;
+  border-collapse: separate !important;
+  border-spacing: 0 !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 8px !important;
+  overflow: hidden !important;
+  margin: 1.5rem 0 !important;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.03) !important;
+  display: table !important;
+}
+
+.main-content table th {
+  background-color: #f8fafc !important;
+  color: #475569 !important;
+  font-weight: 600 !important;
+  font-size: 0.78rem !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+  padding: 0.75rem 1rem !important;
+  border-bottom: 1px solid #cbd5e1 !important;
+  border-top: none !important;
+  border-left: none !important;
+  border-right: none !important;
+  text-align: left !important;
+}
+
+.main-content table td {
+  padding: 0.75rem 1rem !important;
+  color: #334155 !important;
+  border-bottom: 1px solid #f1f5f9 !important;
+  border-top: none !important;
+  border-left: none !important;
+  border-right: none !important;
+  font-size: 0.9rem !important;
+  line-height: 1.55 !important;
+  vertical-align: top !important;
+}
+
+.main-content table tr:last-child td {
+  border-bottom: none !important;
+}
+
+.main-content table tbody tr:hover td {
+  background-color: #f8fafc !important;
+}
+
+/* === KOD I SKRÓTY KLAWISZOWE === */
+kbd {
+  background-color: #f8fafc !important;
+  border: 1px solid #cbd5e1 !important;
+  border-bottom: 2px solid #94a3b8 !important;
+  border-radius: 5px !important;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.06) !important;
+  color: #0f172a !important;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace !important;
+  font-size: 0.8em !important;
+  font-weight: 600 !important;
+  padding: 2px 7px !important;
+  display: inline-block !important;
+  vertical-align: baseline !important;
+}
+
+:not(pre) > code {
+  background-color: #f1f5f9 !important;
+  color: #0f172a !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 4px !important;
+  padding: 0.15em 0.4em !important;
+  font-size: 0.875em !important;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
+}
+
+pre {
+  border-radius: 8px !important;
+  border: 1px solid #334155 !important;
+  padding: 1rem 1.25rem !important;
+}
+
+/* === ZDJĘCIA, ZRZUTY EKRANU I PODPISY === */
 .main-content img,
 .doc-img,
 img {
   display: block !important;
   max-width: 100% !important;
   height: auto !important;
-  border-radius: 6px;
-  margin-top: 14px;
-  margin-bottom: 6px;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.08), 0 2px 6px -2px rgba(15, 23, 42, 0.04) !important;
+  margin-top: 1.25rem !important;
+  margin-bottom: 0.5rem !important;
+  background-color: #ffffff !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+}
+
+.main-content img:hover {
+  box-shadow: 0 8px 30px -4px rgba(15, 23, 42, 0.12), 0 4px 10px -2px rgba(15, 23, 42, 0.06) !important;
 }
 
 /* Podpisy pod rysunkami dociągnięte do lewej krawędzi */
 .doc-caption,
 p:has(> em:only-child) {
-  display: block;
-  color: #64748b;
-  font-size: 0.85rem;
-  margin-top: 2px;
-  margin-bottom: 18px;
-  line-height: 1.4;
-  text-align: left;
+  display: block !important;
+  color: #64748b !important;
+  font-size: 0.85rem !important;
+  margin-top: 0.35rem !important;
+  margin-bottom: 1.75rem !important;
+  line-height: 1.45 !important;
+  text-align: left !important;
+}
+
+/* Ikony kotwic i ogólne ikony */
+.main-content .anchor-heading svg,
+.icon {
+  color: #059669 !important;
+}
+
+/* Okruszki chleba (breadcrumbs) */
+.breadcrumb-nav-list-item a {
+  color: #64748b !important;
+  font-size: 0.85rem !important;
+}
+
+.breadcrumb-nav-list-item a:hover {
+  color: #047857 !important;
+}
+
+/* Przycisk Na górę */
+.back-to-top {
+  color: #047857 !important;
+  font-weight: 500 !important;
+  font-size: 0.85rem !important;
+}
+
+.back-to-top:hover {
+  color: #059669 !important;
+}
+
+/* Stopka */
+.site-footer {
+  border-top: 1px solid #e2e8f0 !important;
+  color: #64748b !important;
+  font-size: 0.85rem !important;
+  padding-top: 1.5rem !important;
+  padding-bottom: 2rem !important;
+}
+
+.site-footer a {
+  color: #047857 !important;
+}
+
+.site-footer a:hover {
+  color: #059669 !important;
 }
 </style>
