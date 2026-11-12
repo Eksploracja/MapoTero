@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 280" width="680" height="280" font-family="Segoe UI, Arial, sans-serif">
+  <rect width="680" height="280" fill="#f8fafc" rx="8"/>
+  <text x="24" y="30" font-size="15" font-weight="bold" fill="#1e293b">Siatka segmentów i styl numeracji (NrWiersza_NrKolumny)</text>
+
+  <!-- Grid 3x2 -->
+  <!-- Row 1 (top) -->
+  <rect x="80" y="68" width="110" height="72" fill="#dbeafe" stroke="#2563eb" stroke-width="1.8"/>
+  <rect x="190" y="68" width="110" height="72" fill="#dbeafe" stroke="#2563eb" stroke-width="1.8"/>
+  <rect x="300" y="68" width="110" height="72" fill="#dbeafe" stroke="#2563eb" stroke-width="1.8"/>
+  <!-- Row 2 (bottom) -->
+  <rect x="80" y="140" width="110" height="72" fill="#dbeafe" stroke="#2563eb" stroke-width="1.8"/>
+  <rect x="190" y="140" width="110" height="72" fill="#dbeafe" stroke="#2563eb" stroke-width="1.8"/>
+  <rect x="300" y="140" width="110" height="72" fill="#dbeafe" stroke="#2563eb" stroke-width="1.8"/>
+
+  <!-- User selection rectangle (smaller, grows up and right) -->
+  <rect x="80" y="96" width="275" height="116" fill="none" stroke="#16a34a" stroke-width="2.5" stroke-dasharray="6,4"/>
+
+  <!-- Segment labels -->
+  <text x="135" y="108" text-anchor="middle" font-size="13" font-weight="bold" fill="#1e3a8a">_01_01</text>
+  <text x="245" y="108" text-anchor="middle" font-size="13" font-weight="bold" fill="#1e3a8a">_01_02</text>
+  <text x="355" y="108" text-anchor="middle" font-size="13" font-weight="bold" fill="#1e3a8a">_01_03</text>
+  <text x="135" y="180" text-anchor="middle" font-size="13" font-weight="bold" fill="#1e3a8a">_02_01</text>
+  <text x="245" y="180" text-anchor="middle" font-size="13" font-weight="bold" fill="#1e3a8a">_02_02</text>
+  <text x="355" y="180" text-anchor="middle" font-size="13" font-weight="bold" fill="#1e3a8a">_02_03</text>
+
+  <!-- Origin dot (bottom-left) -->
+  <circle cx="80" cy="212" r="6" fill="#dc2626"/>
+  <text x="80" y="234" text-anchor="middle" font-size="11.5" font-weight="bold" fill="#b91c1c">Start (x dolne, y lewe)</text>
+
+  <!-- Axes hints -->
+  <text x="48" y="108" text-anchor="middle" font-size="11.5" fill="#475569">Wiersz 1</text>
+  <text x="48" y="180" text-anchor="middle" font-size="11.5" fill="#475569">Wiersz 2</text>
+  <text x="135" y="56" text-anchor="middle" font-size="11.5" fill="#475569">Kol. 1</text>
+  <text x="245" y="56" text-anchor="middle" font-size="11.5" fill="#475569">Kol. 2</text>
+  <text x="355" y="56" text-anchor="middle" font-size="11.5" fill="#475569">Kol. 3</text>
+
+  <!-- Legend on right -->
+  <rect x="440" y="68" width="218" height="144" rx="6" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.2"/>
+  <line x1="454" y1="94" x2="484" y2="94" stroke="#16a34a" stroke-width="2.5" stroke-dasharray="5,3"/>
+  <text x="494" y="98" font-size="12" fill="#1e293b">Obszar zaznaczony myszą</text>
+  <rect x="454" y="114" width="30" height="18" fill="#dbeafe" stroke="#2563eb" stroke-width="1.5"/>
+  <text x="494" y="127" font-size="12" fill="#1e293b">Pełne segmenty siatki</text>
+  <circle cx="469" cy="154" r="5" fill="#dc2626"/>
+  <text x="494" y="158" font-size="12" fill="#1e293b">Początek siatki (lewy dół)</text>
+  <text x="454" y="188" font-size="11.5" fill="#475569">Siatka rośnie w górę i w prawo</text>
+  <text x="454" y="203" font-size="11.5" fill="#475569">do pełnych kwadratów.</text>
+
+  <text x="24" y="262" font-size="11.5" fill="#475569">Wiersze numerowane są od północy (z góry na dół), a kolumny z zachodu na wschód (od lewej do prawej).</text>
+</svg>

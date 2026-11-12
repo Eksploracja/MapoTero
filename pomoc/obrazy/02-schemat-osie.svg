@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 230" width="680" height="230" font-family="Segoe UI, Arial, sans-serif">
+  <rect width="680" height="230" fill="#f8fafc" rx="8"/>
+  <text x="24" y="30" font-size="15" font-weight="bold" fill="#1e293b">Konwencja współrzędnych X i Y: MapoTero vs GIS / CAD</text>
+
+  <!-- Left box: MapoTero (geodesy) -->
+  <rect x="24" y="48" width="296" height="158" rx="6" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+  <text x="40" y="72" font-size="13" font-weight="bold" fill="#1d4ed8">MapoTero (konwencja geodezyjna)</text>
+  <!-- Axes -->
+  <line x1="76" y1="168" x2="76" y2="96" stroke="#dc2626" stroke-width="2.5"/>
+  <polygon points="71,100 76,88 81,100" fill="#dc2626"/>
+  <text x="86" y="102" font-size="13" font-weight="bold" fill="#dc2626">X = Północ (N)</text>
+
+  <line x1="76" y1="168" x2="186" y2="168" stroke="#2563eb" stroke-width="2.5"/>
+  <polygon points="182,163 194,168 182,173" fill="#2563eb"/>
+  <text x="200" y="172" font-size="13" font-weight="bold" fill="#2563eb">Y = Wschód (E)</text>
+  <text x="40" y="194" font-size="11" fill="#475569">Pola: x dolne/górne (pion), y lewe/prawe (poziom)</text>
+
+  <!-- Right box: CAD / GIS (math) -->
+  <rect x="356" y="48" width="300" height="158" rx="6" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+  <text x="372" y="72" font-size="13" font-weight="bold" fill="#047857">Programy CAD / GIS (układ matematyczny)</text>
+  <!-- Axes -->
+  <line x1="408" y1="168" x2="408" y2="96" stroke="#2563eb" stroke-width="2.5"/>
+  <polygon points="403,100 408,88 413,100" fill="#2563eb"/>
+  <text x="418" y="102" font-size="13" font-weight="bold" fill="#2563eb">Y = Północ (N)</text>
+
+  <line x1="408" y1="168" x2="518" y2="168" stroke="#dc2626" stroke-width="2.5"/>
+  <polygon points="514,163 526,168 514,173" fill="#dc2626"/>
+  <text x="532" y="172" font-size="13" font-weight="bold" fill="#dc2626">X = Wschód (E)</text>
+  <text x="372" y="194" font-size="11" fill="#475569">Pliki kalibracji i DXF/SCR/LISP zamieniają osie same.</text>
+</svg>

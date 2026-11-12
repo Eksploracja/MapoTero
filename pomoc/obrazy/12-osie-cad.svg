@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 230" width="680" height="230" font-family="Segoe UI, Arial, sans-serif">
+  <rect width="680" height="230" fill="#f8fafc" rx="8"/>
+  <text x="24" y="30" font-size="15" font-weight="bold" fill="#1e293b">Zamiana osi podczas eksportu do CAD (DXF / SCR / LISP)</text>
+
+  <rect x="24" y="48" width="276" height="156" rx="6" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+  <text x="40" y="72" font-size="13" font-weight="bold" fill="#1d4ed8">MapoTero (np. okolice Łabędzi, PL-1992)</text>
+  <text x="40" y="102" font-size="12.5" fill="#1e293b">Punkt w programie: (X, Y)</text>
+  <text x="40" y="126" font-size="12.5" fill="#dc2626" font-weight="bold">X = 647 938 m (północ)</text>
+  <text x="40" y="148" font-size="12.5" fill="#2563eb" font-weight="bold">Y = 288 983 m (wschód)</text>
+  <text x="40" y="182" font-size="11" fill="#475569">Geodezyjna kolejność współrzędnych</text>
+
+  <path d="M 312 126 L 366 126" stroke="#64748b" stroke-width="2.5" fill="none"/>
+  <polygon points="362,120 374,126 362,132" fill="#64748b"/>
+  <text x="342" y="114" text-anchor="middle" font-size="11" font-weight="bold" fill="#475569">Eksport</text>
+
+  <rect x="382" y="48" width="274" height="156" rx="6" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+  <text x="398" y="72" font-size="13" font-weight="bold" fill="#047857">Rysunek CAD (AutoCAD, BricsCAD, ZWCAD)</text>
+  <text x="398" y="102" font-size="12.5" fill="#1e293b">Punkt w rysunku: (X, Y) = (Y, X)</text>
+  <text x="398" y="126" font-size="12.5" fill="#2563eb" font-weight="bold">X = 288 983 m (wschód)</text>
+  <text x="398" y="148" font-size="12.5" fill="#dc2626" font-weight="bold">Y = 647 938 m (północ)</text>
+  <text x="398" y="182" font-size="11" fill="#475569">Jednostka rysunku: 1 m (PL-1992 / PL-2000)</text>
+</svg>

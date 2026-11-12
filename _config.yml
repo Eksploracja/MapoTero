@@ -1,1 +1,108 @@
-theme: jekyll-theme-minimal
+# Strona programu w GitHub Pages: https://eksploracja.github.io/MapoTero/
+# Strona główna = README.md, pomoc programu = folder pomoc/.
+# Motyw Just the Docs (menu boczne, wyszukiwarka) - wczytywany przez jekyll-remote-theme,
+# które działa w zwykłym budowaniu GitHub Pages (bez własnego workflow).
+
+title: MapoTero
+description: Pobieranie rastrowych map z serwerów WMS i WMTS - pomoc programu
+lang: pl
+remote_theme: just-the-docs/just-the-docs@v0.12.0
+
+plugins:
+  - jekyll-remote-theme
+  - jekyll-seo-tag
+  - jekyll-include-cache
+  - jekyll-relative-links
+  - jekyll-optional-front-matter
+  - jekyll-readme-index
+  - jekyll-titles-from-headings
+
+# Wersja programu, której dotyczy pomoc ({{ site.wersja_programu }} na stronach pomocy).
+wersja_programu: "3.16"
+
+permalink: pretty
+color_scheme: light
+heading_anchors: true
+back_to_top: true
+back_to_top_text: "Na górę"
+
+search_enabled: true
+search:
+  heading_level: 3
+  previews: 3
+  preview_words_before: 5
+  preview_words_after: 10
+  tokenizer_separator: /[\s/]+/
+  rel_url: true
+  button: false
+
+aux_links:
+  "Pobierz program":
+    - "https://github.com/Eksploracja/MapoTero/releases/latest"
+  "GitHub":
+    - "https://github.com/Eksploracja/MapoTero"
+aux_links_new_tab: true
+
+nav_external_links:
+  - title: Historia wersji
+    url: https://github.com/Eksploracja/MapoTero#aktualności
+    hide_icon: false
+  - title: Forum (pomoc, dyskusja)
+    url: https://forum.eksploracja.pl/viewforum.php?f=205
+
+footer_content: 'MapoTero - wolne oprogramowanie na licencji <a href="https://github.com/Eksploracja/MapoTero/blob/master/LICENSE">GNU GPL v3</a>.'
+
+gh_edit_link: true
+gh_edit_link_text: "Zaproponuj poprawkę tej strony na GitHubie"
+gh_edit_repository: "https://github.com/Eksploracja/MapoTero"
+gh_edit_branch: "master"
+gh_edit_view_mode: "tree"
+
+# Ramki w tekście: {: .wskazowka } nad akapitem itd.
+callouts:
+  wskazowka:
+    title: Wskazówka
+    color: blue
+  uwaga:
+    title: Uwaga
+    color: red
+  informacja:
+    title: Informacja
+    color: purple
+  nowosc:
+    title: Nowość
+    color: green
+  w_przygotowaniu:
+    title: W przygotowaniu
+    color: yellow
+
+defaults:
+  - scope:
+      path: ""
+    values:
+      layout: default
+  - scope:
+      path: "README.md"
+    values:
+      title: Strona główna
+      nav_order: 1
+
+# Foldery, które nie są stroną. Lista zastępuje domyślne wykluczenia Jekylla, więc zawiera też je.
+# Pliki dla asystentów AI nie są w repozytorium, ale wykluczone na wypadek podglądu lokalnego.
+exclude:
+  - MapoTero.App
+  - MapoTero.Core
+  - MapoTero.Tests
+  - MapoTero_SingleFile
+  - scratch
+  - warstwy
+  - docs-ai
+  - AGENTS.md
+  - CLAUDE.md
+  - "*.sln"
+  - Gemfile
+  - Gemfile.lock
+  - node_modules
+  - vendor
+  - .sass-cache
+  - .jekyll-cache
