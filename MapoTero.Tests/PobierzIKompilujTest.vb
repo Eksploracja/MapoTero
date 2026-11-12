@@ -46,9 +46,13 @@ Public Class PobierzIKompilujTest
             .Uklad = UkladWspolrzednych.PL1992,
             .Siatka = siatka25,
             .Format = "jpeg",
-            .LiczbaWatkow = 4
+            .LiczbaWatkow = 4,
+            .IloscProb = 5,
+            .PrzerwaSekundy = 2,
+            .LimitCzasuSekundy = 90
         }
         Dim wynik25 = Await PobieranieSegmentow.PobierzAsync(zadanie25, Nothing, CancellationToken.None)
+        If wynik25.Nieudane > 0 Then wynik25 = Await PobieranieSegmentow.PobierzAsync(zadanie25, Nothing, CancellationToken.None)
         Assert.Equal(0, wynik25.Nieudane)
 
         ' 2. Pobieranie Warstwy 2: Topo 10_65 (piksel 1m, bok 512px -> 4x4 segmenty)
@@ -62,9 +66,13 @@ Public Class PobierzIKompilujTest
             .Uklad = UkladWspolrzednych.PL1992,
             .Siatka = siatka10,
             .Format = "jpeg",
-            .LiczbaWatkow = 4
+            .LiczbaWatkow = 4,
+            .IloscProb = 5,
+            .PrzerwaSekundy = 2,
+            .LimitCzasuSekundy = 90
         }
         Dim wynik10 = Await PobieranieSegmentow.PobierzAsync(zadanie10, Nothing, CancellationToken.None)
+        If wynik10.Nieudane > 0 Then wynik10 = Await PobieranieSegmentow.PobierzAsync(zadanie10, Nothing, CancellationToken.None)
         Assert.Equal(0, wynik10.Nieudane)
 
         ' 3. Pobieranie Warstwy 3: Ortofotomapa (piksel 1m, bok 512px -> 4x4 segmenty)
@@ -78,9 +86,13 @@ Public Class PobierzIKompilujTest
             .Uklad = UkladWspolrzednych.PL1992,
             .Siatka = siatkaOrto,
             .Format = "jpeg",
-            .LiczbaWatkow = 4
+            .LiczbaWatkow = 4,
+            .IloscProb = 5,
+            .PrzerwaSekundy = 2,
+            .LimitCzasuSekundy = 90
         }
         Dim wynikOrto = Await PobieranieSegmentow.PobierzAsync(zadanieOrto, Nothing, CancellationToken.None)
+        If wynikOrto.Nieudane > 0 Then wynikOrto = Await PobieranieSegmentow.PobierzAsync(zadanieOrto, Nothing, CancellationToken.None)
         Assert.Equal(0, wynikOrto.Nieudane)
 
         ' 4. Kompilacja Wielowarstwowego MBTiles

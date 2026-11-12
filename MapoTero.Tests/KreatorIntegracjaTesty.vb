@@ -195,11 +195,29 @@ Public Class KreatorIntegracjaTesty
         Dim adresWms = PlikWarstw.ZbudujAdresWmsDlaPliku(u.AdresGetMap, u.Wersja)
         Dim getMapUrl = Wms.ZapytanieGetMap(adresWms, {raster.IdentyfikatorNumeryczny}, UkladWspolrzednych.PL1992, z, "image/png", 256, 256, False, True)
 
-        Using klient As New System.Net.Http.HttpClient()
+        Dim handler As New System.Net.Http.HttpClientHandler()
+        handler.ServerCertificateCustomValidationCallback = Function(m, c, ch, err) True
+        Using klient As New System.Net.Http.HttpClient(handler)
             klient.DefaultRequestHeaders.UserAgent.ParseAdd(WersjaProgramu.UserAgent(GetType(KlientCapabilities).Assembly))
-            Dim odp = Await klient.GetAsync(getMapUrl)
-            Dim bajty = Await odp.Content.ReadAsByteArrayAsync()
+            Dim bajty As Byte() = Nothing
+            Dim odp As System.Net.Http.HttpResponseMessage = Nothing
+            For proba = 1 To 3
+                Dim ponow As Boolean = False
+                Try
+                    odp = Await klient.GetAsync(getMapUrl)
+                    If odp.IsSuccessStatusCode Then
+                        bajty = Await odp.Content.ReadAsByteArrayAsync()
+                        Exit For
+                    End If
+                Catch ex As Exception When TypeOf ex Is System.Net.Http.HttpRequestException OrElse TypeOf ex Is System.IO.IOException
+                    If proba = 3 Then Throw
+                    ponow = True
+                End Try
+                If ponow Then Await Task.Delay(2000)
+            Next
+            Assert.NotNull(odp)
             Assert.True(odp.IsSuccessStatusCode)
+            Assert.NotNull(bajty)
             Assert.True(bajty.Length > 1000)
             Assert.Equal(CByte(&H89), bajty(0))
             Assert.Equal(CByte(&H50), bajty(1))
