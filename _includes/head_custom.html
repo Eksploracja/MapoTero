@@ -75,8 +75,6 @@ a:hover,
 .btn:hover,
 .site-title,
 .site-title:hover,
-.site-button,
-.site-button:hover,
 .nav-list-link,
 .nav-list-link:hover,
 .aux-nav-list-item a,
@@ -95,9 +93,10 @@ hr {
   margin: 2rem 0 !important;
 }
 
-/* === PRZYCISKI (BUTTONS) === */
-.btn-primary,
-.site-button {
+/* === PRZYCISKI GŁÓWNE (BUTTONS) === */
+.main-content a.btn-primary,
+a.btn-primary,
+.btn-primary {
   background-color: #059669 !important;
   background-image: none !important;
   border: 1px solid #047857 !important;
@@ -105,7 +104,7 @@ hr {
   font-weight: 600 !important;
   font-size: 0.875rem !important;
   border-radius: 6px !important;
-  padding: 0.45rem 1rem !important;
+  padding: 0.45rem 1.15rem !important;
   box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
   text-shadow: none !important;
   transition: all 0.15s ease-in-out !important;
@@ -113,22 +112,46 @@ hr {
   align-items: center !important;
   justify-content: center !important;
   cursor: pointer !important;
+  border-bottom: none !important;
+  vertical-align: middle !important;
 }
 
-.btn-primary:hover,
-.site-button:hover {
+.main-content a.btn-primary:hover,
+a.btn-primary:hover,
+.btn-primary:hover {
   background-color: #047857 !important;
   background-image: none !important;
   border-color: #065f46 !important;
   color: #ffffff !important;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1) !important;
   transform: translateY(-1px);
+  border-bottom: none !important;
 }
 
-.btn-primary:active,
-.site-button:active {
+.main-content a.btn-primary:active,
+a.btn-primary:active,
+.btn-primary:active {
   transform: translateY(0);
   box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Przycisk menu mobilnego */
+#menu-button {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  color: #0f172a !important;
+  padding: 0.5rem !important;
+}
+
+#menu-button .icon {
+  color: #0f172a !important;
+}
+
+@media (min-width: 50rem) {
+  #menu-button {
+    display: none !important;
+  }
 }
 
 /* === PANEL BOCZNY (SIDEBAR) === */
@@ -291,33 +314,46 @@ hr {
 }
 
 /* Pasek pomocniczy u góry (Aux Nav) */
-.aux-nav-list-item a {
+.aux-nav-list-item a.site-button {
+  background-color: transparent !important;
+  background-image: none !important;
+  border: 1px solid #cbd5e1 !important;
   color: #475569 !important;
   font-weight: 500 !important;
   font-size: 0.85rem !important;
-  padding: 0.35rem 0.65rem !important;
+  padding: 0.35rem 0.75rem !important;
   border-radius: 6px !important;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03) !important;
   transition: all 0.15s ease !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  height: auto !important;
+  min-height: auto !important;
+  line-height: normal !important;
   border-bottom: none !important;
 }
 
-.aux-nav-list-item a:hover {
-  color: #047857 !important;
+.aux-nav-list-item a.site-button:hover {
+  color: #0f172a !important;
+  border-color: #94a3b8 !important;
   background-color: #f1f5f9 !important;
+  transform: translateY(-1px);
 }
 
-/* Wyróżniony przycisk "Pobierz program" w prawym górnym rogu */
-.aux-nav-list-item:first-child a {
-  background-color: #ecfdf5 !important;
-  color: #047857 !important;
-  font-weight: 600 !important;
-  border: 1px solid #a7f3d0 !important;
-}
-
-.aux-nav-list-item:first-child a:hover {
+/* Wyróżniony główny przycisk "Pobierz program" */
+.aux-nav-list-item:first-child a.site-button {
   background-color: #059669 !important;
   color: #ffffff !important;
+  font-weight: 600 !important;
   border-color: #047857 !important;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
+}
+
+.aux-nav-list-item:first-child a.site-button:hover {
+  background-color: #047857 !important;
+  border-color: #065f46 !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
 }
 
 /* === RAMKI WYRÓŻNIONE (CALLOUTS) === */
