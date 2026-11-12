@@ -59,6 +59,10 @@ Program to jeden plik **MapoTero.exe** (wersja 64-bitowa dla systemu Windows), d
   * **Okno *Warstwy - zaawansowane* (przycisk … w panelu):** suwaki krycia wszystkich warstw, kolejność, liczba zapytań na segment i podgląd kanapki - próbka ze środka siatki, odświeżana od razu po zmianie krycia lub kolejności,
   * **Regulowana szerokość prawego panelu:** pasek między mapą a panelem *Dane źródłowe* można przeciągnąć myszą w lewo - drzewo map, lista wybranych warstw i pole komunikatów poszerzają się, więc widać długie nazwy warstw; panel można poszerzyć, gdy okno jest szersze od najmniejszego (np. zmaksymalizowane), a w węższym oknie panel zwęża się sam, żeby zmieściła się mapa i schemat siatki; szerokość zapisywana jest w `lastsettings.txt`,
   * **Pełna pomoc programu w GitHub Pages:** 39 rozdziałów przewodnika użytkownika z motywem Just the Docs, instrukcje, tabele parametrów i zrzuty ekranu pod adresem [eksploracja.github.io/MapoTero/pomoc/](https://eksploracja.github.io/MapoTero/pomoc/).
+
+<details>
+<summary><b>Historia wcześniejszych wydań (od wersji 3.16 do 3.0.0.9)</b> — kliknij, aby rozwinąć</summary>
+
 * **09.11.2026 – Wersja 3.16:**
   * **Eksport do CAD (menu *Narzędzia > Eksport do CAD*):** rysunek DXF (R2000) z odnośnikami do rastrów na właściwych współrzędnych - segmenty sesji albo scalony arkusz (world file lub GeoTIFF) - z obrysem, siatką i numerami segmentów, trasą korytarza i opisem mapy na warstwach `MAPOTERO_...`; skrypt SCR (AutoCAD, AutoCAD LT, BricsCAD, ZWCAD) i program LISP (`APPLOAD`), które wstawiają mapę do otwartego rysunku pod istniejące obiekty i przywracają ustawienia rysunku; w oknie eksportu przycisk *scal teraz...* do złączenia segmentów w jeden arkusz,
   * **Ochrona serwerów map przed przeciążeniem:** łączna liczba jednoczesnych zapytań do jednego serwera nie przekracza liczby wątków z ustawień (także przy WMTS); po odpowiedzi serwera o przeciążeniu (HTTP 429, 502, 503, 504) lub serii przekroczeń czasu program robi przerwę i zmniejsza liczbę zapytań o połowę, a potem stopniowo ją przywraca - mniejsze ryzyko zablokowania adresu IP przez serwer,
@@ -124,6 +128,8 @@ Program to jeden plik **MapoTero.exe** (wersja 64-bitowa dla systemu Windows), d
   * Aktualizacja warstw WMS,
   * Zmiana platformy programistycznej .NET Framework z wersji 3.5 na 4.5,
   * Naprawa błędu wyświetlania podkładowej warstwy OpenStreetMap.
+
+</details>
 
 ---
 
