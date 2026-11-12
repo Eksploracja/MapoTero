@@ -79,9 +79,11 @@ Partial Class Form1
         Me.UsuwaniePustychSegmentówToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.UstawieniaToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.HelpToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
-        Me.AboutToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.PomocOnlineToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.InstrukcjaObsługiToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.PomocPomorskieForumEksploracyjneToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.HelpSeparator1 = New System.Windows.Forms.ToolStripSeparator()
+        Me.AboutToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.MenuStrip1 = New System.Windows.Forms.MenuStrip()
         Me.Label47 = New System.Windows.Forms.Label()
         Me.Label46 = New System.Windows.Forms.Label()
@@ -459,17 +461,18 @@ Partial Class Form1
         '
         'HelpToolStripMenuItem
         '
-        Me.HelpToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.AboutToolStripMenuItem, Me.InstrukcjaObsługiToolStripMenuItem, Me.PomocPomorskieForumEksploracyjneToolStripMenuItem})
+        Me.HelpToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.PomocOnlineToolStripMenuItem, Me.InstrukcjaObsługiToolStripMenuItem, Me.PomocPomorskieForumEksploracyjneToolStripMenuItem, Me.HelpSeparator1, Me.AboutToolStripMenuItem})
         Me.HelpToolStripMenuItem.Name = "HelpToolStripMenuItem"
         Me.HelpToolStripMenuItem.Size = New System.Drawing.Size(57, 20)
         Me.HelpToolStripMenuItem.Text = "Pomoc"
         '
-        'AboutToolStripMenuItem
+        'PomocOnlineToolStripMenuItem
         '
-        Me.AboutToolStripMenuItem.Name = "AboutToolStripMenuItem"
-        Me.AboutToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F1
-        Me.AboutToolStripMenuItem.Size = New System.Drawing.Size(335, 22)
-        Me.AboutToolStripMenuItem.Text = "O programie"
+        Me.PomocOnlineToolStripMenuItem.Name = "PomocOnlineToolStripMenuItem"
+        Me.PomocOnlineToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F1
+        Me.PomocOnlineToolStripMenuItem.Size = New System.Drawing.Size(335, 22)
+        Me.PomocOnlineToolStripMenuItem.Text = "Podręcznik użytkownika (pomoc online)"
+        Me.PomocOnlineToolStripMenuItem.ToolTipText = "Otwiera pełny podręcznik użytkownika i pomoc programu w przeglądarce internetowej"
         '
         'InstrukcjaObsługiToolStripMenuItem
         '
@@ -484,6 +487,17 @@ Partial Class Form1
         Me.PomocPomorskieForumEksploracyjneToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F3
         Me.PomocPomorskieForumEksploracyjneToolStripMenuItem.Size = New System.Drawing.Size(335, 22)
         Me.PomocPomorskieForumEksploracyjneToolStripMenuItem.Text = "Pomoc na Pomorskim Forum Eksploracyjnym"
+        '
+        'HelpSeparator1
+        '
+        Me.HelpSeparator1.Name = "HelpSeparator1"
+        Me.HelpSeparator1.Size = New System.Drawing.Size(332, 6)
+        '
+        'AboutToolStripMenuItem
+        '
+        Me.AboutToolStripMenuItem.Name = "AboutToolStripMenuItem"
+        Me.AboutToolStripMenuItem.Size = New System.Drawing.Size(335, 22)
+        Me.AboutToolStripMenuItem.Text = "O programie"
         '
         'MenuStrip1
         '
@@ -1418,6 +1432,8 @@ Partial Class Form1
     Friend WithEvents NakładanieWarstwNaSiebieToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents UstawieniaToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents HelpToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
+    Friend WithEvents PomocOnlineToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
+    Friend WithEvents HelpSeparator1 As System.Windows.Forms.ToolStripSeparator
     Friend WithEvents AboutToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents PomocPomorskieForumEksploracyjneToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents MenuStrip1 As System.Windows.Forms.MenuStrip

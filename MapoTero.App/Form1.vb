@@ -2533,6 +2533,26 @@ Public Class Form1
         Form2.ShowDialog()
     End Sub
 
+    ''' <summary>Adres oficjalnej strony pomocy i podręcznika użytkownika MapoTero w serwisie GitHub Pages.</summary>
+    Public Const UrlPomocyOnline As String = "https://eksploracja.github.io/MapoTero/pomoc/"
+
+    Private Sub PomocOnlineToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles PomocOnlineToolStripMenuItem.Click
+        OtworzPomocOnline()
+    End Sub
+
+    ''' <summary>Otwiera podręcznik użytkownika programu w domyślnej przeglądarce internetowej.</summary>
+    Public Shared Sub OtworzPomocOnline(Optional podstrona As String = "")
+        Dim url = UrlPomocyOnline
+        If Not String.IsNullOrWhiteSpace(podstrona) Then
+            url = UrlPomocyOnline.TrimEnd("/"c) & "/" & podstrona.TrimStart("/"c)
+        End If
+        Try
+            Process.Start(New ProcessStartInfo(url) With {.UseShellExecute = True})
+        Catch ex As Exception
+            MsgBox("Nie można otworzyć strony pomocy: " & ex.Message, MsgBoxStyle.Exclamation)
+        End Try
+    End Sub
+
     Private Sub AboutToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles AboutToolStripMenuItem.Click
         AboutBox1.ShowDialog()
     End Sub

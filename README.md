@@ -3,6 +3,7 @@
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/.NET-10-purple.svg)](https://dotnet.microsoft.com/)
 [![Kompilacja i testy](https://github.com/Eksploracja/MapoTero/actions/workflows/kompilacja.yml/badge.svg)](https://github.com/Eksploracja/MapoTero/actions/workflows/kompilacja.yml)
+[![Dokumentacja](https://img.shields.io/badge/Dokumentacja-GitHub%20Pages-brightgreen.svg)](https://eksploracja.github.io/MapoTero/pomoc/)
 [![Facebook](https://img.shields.io/badge/Facebook-MapoTero-1877F2?logo=facebook&logoColor=white)](https://www.facebook.com/mapotero.opensource)
 
 **MapoTero** to darmowy program służący do pobierania rastrowych map z internetu, opublikowanych za pośrednictwem serwerów WMS (takich jak Geoportal2, PIG, GDOŚ) oraz usług kafelkowych WMTS i XYZ/TMS (np. Waymarked Trails, OSMapa.pl, UMP-pcPL). 
@@ -18,14 +19,16 @@ Program pobiera mapy, dzieląc wybrany obszar na siatkę kwadratowych segmentów
 * **Obsługiwane formaty georeferencji:** MAP, KML, TAB, JPGW, WLD, GMI, PRJ.
 * **Eksport do CAD:** rysunek DXF (R2000), skrypt SCR i program LISP (.lsp).
 * **Układy współrzędnych:** PL-1992, PL-2000 (strefy 5-8), UTM (strefy 33N-35N), WGS84.
+* **Podręcznik użytkownika online:** [eksploracja.github.io/MapoTero/pomoc/](https://eksploracja.github.io/MapoTero/pomoc/)
 * **Oficjalny profil programu:** [facebook.com/mapotero.opensource](https://www.facebook.com/mapotero.opensource)
 
 ---
 
-## Pobieranie
+## Pobieranie i dokumentacja
 
 Program to jeden plik **MapoTero.exe** (wersja 64-bitowa dla systemu Windows), dostarczany w paczce ZIP razem z folderem `warstwy` (zbiory map):
 * 📥 **[Pobierz najnowszą wersję MapoTero z GitHub Releases (MapoTero_v3.17.zip)](https://github.com/Eksploracja/MapoTero/releases/download/v3.17/MapoTero_v3.17.zip)** – po rozpakowaniu uruchom `MapoTero.exe` (folder `warstwy` musi leżeć obok niego).
+* 📖 **[Podręcznik użytkownika i pomoc online](https://eksploracja.github.io/MapoTero/pomoc/)** – 39 rozdziałów instrukcji krok po kroku z motywem Just the Docs, opis narzędzi, formatów i konfiguracji.
 * 📦 Wszystkie wydania, kody źródłowe i historia wersji: **[GitHub Releases](https://github.com/Eksploracja/MapoTero/releases/latest)**.
 
 > [!NOTE]
@@ -178,6 +181,7 @@ Zbiory map to pliki tekstowe w katalogu `warstwy`: w pierwszym wierszu adres ser
 
 ## Źródła informacji i społeczność
 
+* 📖 **Podręcznik użytkownika online:** [eksploracja.github.io/MapoTero/pomoc/](https://eksploracja.github.io/MapoTero/pomoc/) – pełna dokumentacja z opisem wszystkich okien, narzędzi, formatów plików i poradnikami dla aplikacji mobilnych oraz CAD,
 * 👥 **Oficjalny fanpage na Facebooku:** [facebook.com/mapotero.opensource](https://www.facebook.com/mapotero.opensource) – aktualności, informacje o kolejnych wydaniach, dyskusje i ciekawostki,
 * 💬 **Dyskusja i wsparcie techniczne:** dział *"Programy GPS/GIS wspierające eksplorację"* na [Pomorskim Forum Eksploracyjnym](https://forum.eksploracja.pl/viewforum.php?f=205).
 

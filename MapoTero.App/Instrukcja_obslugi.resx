@@ -137,6 +137,9 @@
 5. Pobrane segmenty połączysz w jeden arkusz (menu Narzędzia - Łączenie segmentów) albo wyeksportujesz do KMZ, MBTiles, SQLiteDB lub OruxMaps. Do programów CAD (AutoCAD, BricsCAD, ZWCAD) mapę przeniesiesz poleceniem Narzędzia - Eksport do CAD: rysunek DXF otwórz w programie CAD, a skrypt SCR uruchom poleceniem SCRIPT w otwartym rysunku.
 ----------------------------------------------------------------------
 
+Pełny podręcznik użytkownika online (39 rozdziałów, opisy narzędzi, formatów i zrzuty ekranu):
+https://eksploracja.github.io/MapoTero/pomoc/
+
 Forum dyskusyjne MapoTero: www.forum.eksploracja.pl/viewforum.php?f=205
 
 Najnowsze wersje programu wraz z jego kodem źródłowym znajdziesz na https://github.com/Eksploracja/MapoTero</value>
