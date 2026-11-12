@@ -126,8 +126,20 @@
 
   <ItemGroup>
     <!-- pliki zbiorów map i opis programu (w folderze głównym repozytorium) kopiowane do folderu wydania -->
-    <None Include="..\warstwy\*.txt" Link="warstwy\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
-    <None Include="..\README.md" Link="README.md" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\warstwy\*.txt" Link="warstwy\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <None Include="..\README.md" Link="README.md" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
+
+  <Target Name="KopiujWarstwyPoPublikacji" AfterTargets="Publish">
+    <ItemGroup>
+      <PlikiWarstw Include="$(MSBuildProjectDirectory)\..\warstwy\*.txt" />
+    </ItemGroup>
+    <Copy SourceFiles="@(PlikiWarstw)"
+          DestinationFolder="$(PublishDir)warstwy\"
+          SkipUnchangedFiles="true" />
+    <Copy SourceFiles="$(MSBuildProjectDirectory)\..\README.md"
+          DestinationFolder="$(PublishDir)"
+          SkipUnchangedFiles="true" />
+  </Target>
 
 </Project>
