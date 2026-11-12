@@ -18,7 +18,7 @@ plugins:
   - jekyll-titles-from-headings
 
 # Wersja programu, której dotyczy pomoc ({{ site.wersja_programu }} na stronach pomocy).
-wersja_programu: "3.16"
+wersja_programu: "3.17"
 
 permalink: pretty
 color_scheme: light

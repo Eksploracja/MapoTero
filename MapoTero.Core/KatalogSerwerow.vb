@@ -81,7 +81,7 @@ End Class
 Public NotInheritable Class KatalogSerwerow
 
     Public Const NazwaZasobuWbudowanego As String = "MapoTero.Core.serwery_dodatkowe.json"
-    Public Const TekstStanuMoznaDodac As String = "Można dodać"
+    Public Const TekstStanuMoznaDodac As String = ""
 
     Private Structure WpisZnanejPoduslugi
         Public ReadOnly Wzorzec As String

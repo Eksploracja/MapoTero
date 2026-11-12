@@ -74,10 +74,41 @@ Public Class PanelKatalogSerwerow
         If istniejaceZbiory IsNot Nothing Then
             _istniejaceZbiory.AddRange(istniejaceZbiory)
         End If
+        UpewnijIstniejaceZbiory()
         If _biezaceWpisy.Count > 0 Then
             KatalogSerwerow.DopasujIstniejace(_biezaceWpisy, _istniejaceZbiory)
             WypelnijListe(bezFiltraFrazy:=(cmbZrodlo.SelectedIndex = TrybEziudpLokalne))
         End If
+    End Sub
+
+    ''' <summary>Zapewnia obecność listy zbiorów map do porównania (fallback z dysku, gdy nie przekazano listy z Form1).</summary>
+    Private Sub UpewnijIstniejaceZbiory()
+        If _istniejaceZbiory.Count > 0 Then Exit Sub
+        Dim foldery As New List(Of String)()
+        If Not String.IsNullOrWhiteSpace(FolderWarstwProgramu) AndAlso Directory.Exists(FolderWarstwProgramu) Then
+            foldery.Add(FolderWarstwProgramu)
+        End If
+        If Not String.IsNullOrWhiteSpace(FolderWarstwDanych) AndAlso Directory.Exists(FolderWarstwDanych) Then
+            foldery.Add(FolderWarstwDanych)
+        End If
+
+        Dim dodaneNazwy As New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
+        For Each kat In foldery
+            Dim pliki = Directory.GetFiles(kat, "*.txt")
+            For Each p In pliki
+                Dim fn = Path.GetFileNameWithoutExtension(p)
+                If String.Equals(fn, "katalog", StringComparison.OrdinalIgnoreCase) OrElse
+                   String.Equals(fn, "warstwy", StringComparison.OrdinalIgnoreCase) Then Continue For
+                If Not dodaneNazwy.Add(fn) Then Continue For
+                Try
+                    Dim pw = PlikWarstw.Wczytaj(p)
+                    If pw IsNot Nothing AndAlso Not String.IsNullOrWhiteSpace(pw.Adres) Then
+                        _istniejaceZbiory.Add(New KeyValuePair(Of String, String)(fn, pw.Adres))
+                    End If
+                Catch
+                End Try
+            Next
+        Next
     End Sub
 
     Public Sub FokusujSzukaj()
@@ -180,6 +211,7 @@ Public Class PanelKatalogSerwerow
         WyczyscSzczegoly()
 
         If tryb = TrybWbudowany Then
+            UpewnijIstniejaceZbiory()
             Dim sciezkaZewn = If(String.IsNullOrWhiteSpace(FolderWarstwProgramu), "", Path.Combine(FolderWarstwProgramu, "serwery_dodatkowe.json"))
             Dim wpisy = KatalogSerwerow.WczytajWbudowany(sciezkaZewn)
             KatalogSerwerow.DopasujIstniejace(wpisy, _istniejaceZbiory)
@@ -376,6 +408,19 @@ Public Class PanelKatalogSerwerow
         Dim kategoria = If(cmbKategoria.SelectedItem IsNot Nothing, cmbKategoria.SelectedItem.ToString(), "Wszystkie")
         Dim widoczne = KatalogSerwerow.Filtruj(_biezaceWpisy, fraza, kategoria, chkUkryjDodane.Checked, chkUkryjSkorowidze.Checked)
 
+        'dynamiczny licznik i dostępność filtrów ukrywania
+        Dim liczbaDodanych = _biezaceWpisy.Where(Function(w) w.CzyJuzDodany).Count()
+        Dim liczbaSkorowidzow = _biezaceWpisy.Where(Function(w) w.CzySkorowidz).Count()
+        _blokadaZdarzen = True
+        Try
+            chkUkryjDodane.Text = "Ukryj już w MapoTero (" & liczbaDodanych & ")"
+            chkUkryjDodane.Enabled = (liczbaDodanych > 0)
+            chkUkryjSkorowidze.Text = "Ukryj skorowidze (" & liczbaSkorowidzow & ")"
+            chkUkryjSkorowidze.Enabled = (liczbaSkorowidzow > 0)
+        Finally
+            _blokadaZdarzen = False
+        End Try
+
         lvUslugi.BeginUpdate()
         Try
             lvUslugi.ListViewItemSorter = Nothing
@@ -396,9 +441,7 @@ Public Class PanelKatalogSerwerow
                 Dim subStan = item.SubItems.Add(stan)
                 If w.CzyJuzDodany Then
                     item.ForeColor = SystemColors.GrayText
-                    subStan.ForeColor = SystemColors.GrayText
-                Else
-                    subStan.ForeColor = Color.DarkGreen
+                    subStan.ForeColor = Color.DimGray
                 End If
                 lvUslugi.Items.Add(item)
             Next
@@ -511,9 +554,7 @@ Public Class PanelKatalogSerwerow
         txtAdresPodglad.Text = w.Adres
         Dim linie As New List(Of String)()
         If w.CzyJuzDodany Then
-            linie.Add("Uwaga: ta usługa jest już dodana w MapoTero jako zbiór """ & w.JuzDodanyZbior & """ (możesz pobrać ją ponownie pod inną nazwą).")
-        Else
-            linie.Add("Status w MapoTero: można dodać (brak w bieżących zbiorach programu).")
+            linie.Add("ℹ Ta usługa jest już w MapoTero jako zbiór """ & w.JuzDodanyZbior & """. Możesz kliknąć ""Dalej"", aby wybrać inne warstwy tego serwera (np. punkty, linie) i zapisać je pod nową nazwą.")
         End If
         If w.CzySkorowidz Then
             linie.Add("Skorowidz / siatka arkuszy (pokazuje zasięgi lub numery arkuszy danych).")

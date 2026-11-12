@@ -12,7 +12,7 @@
     <OptionInfer>On</OptionInfer>
     <OptionCompare>Binary</OptionCompare>
     <LangVersion>latest</LangVersion>
-    <Version>3.16</Version>
+    <Version>3.17</Version>
     <Authors>MapoTero</Authors>
     <Copyright>GNU GPL v3</Copyright>
   </PropertyGroup>

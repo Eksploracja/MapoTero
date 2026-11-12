@@ -44,7 +44,7 @@ Okno dzieli się na trzy części:
 * **po prawej**: panel *Dane źródłowe* z drzewem map, listą wybranych warstw, ustawieniami układu, segmentu i piksela oraz współrzędnymi zasięgu,
 * **na dole**: komunikaty oraz pasek stanu.
 
-Tytuł okna podaje nazwę i numer wersji programu (np. `MapoTero 3.16`). Pasek oddzielający mapę od panelu *Dane źródłowe* można przeciągać myszą, żeby poszerzyć listę warstw.
+Tytuł okna podaje nazwę i numer wersji programu (np. `MapoTero {{ site.wersja_programu }}`). Pasek oddzielający mapę od panelu *Dane źródłowe* można przeciągać myszą, żeby poszerzyć listę warstw.
 
 ---
 

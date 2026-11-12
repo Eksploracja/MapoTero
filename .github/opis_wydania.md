@@ -1,15 +1,39 @@
-MapoTero 3.16 - eksport do CAD (DXF, skrypt SCR, program LISP), ochrona serwerów map przed przeciążeniem, przejście na .NET 10 i zapis awarii programu.
+MapoTero 3.17 - drzewo warstw w grupach tematycznych, obsługa kafelków XYZ/TMS, wbudowany katalog publicznych usług mapowych i pełna pomoc online.
 
 ## Instalacja
 
-1. Pobierz plik **[MapoTero_v3.16.zip](https://github.com/Eksploracja/MapoTero/releases/download/v3.16/MapoTero_v3.16.zip)** (bezpośrednie pobranie lub poniżej w sekcji *Assets*).
+1. Pobierz plik **[MapoTero_v3.17.zip](https://github.com/Eksploracja/MapoTero/releases/download/v3.17/MapoTero_v3.17.zip)** (bezpośrednie pobranie lub poniżej w sekcji *Assets*).
 2. Przed rozpakowaniem kliknij plik prawym przyciskiem myszy, wybierz *Właściwości*, zaznacz **Odblokuj** i kliknij *OK* - wtedy Windows nie będzie blokował uruchomienia programu (program nie ma podpisu cyfrowego, więc filtr SmartScreen traktuje go jako nierozpoznaną aplikację; można też w oknie SmartScreen kliknąć *Więcej informacji* > *Uruchom mimo to*). Sumy kontrolne plików i wynik skanu antywirusowego - niżej, w sekcji *Sumy kontrolne SHA-256*.
 
    ![Okno SmartScreen: najpierw „Więcej informacji”, potem „Uruchom mimo to”](https://raw.githubusercontent.com/Eksploracja/MapoTero/master/obrazy/smartscreen.png)
 3. Rozpakuj archiwum do dowolnego folderu i uruchom **MapoTero.exe** - program to jeden plik, obok którego musi leżeć folder `warstwy` (zbiory map).
 4. Program wymaga środowiska [.NET Desktop Runtime 10 (x64)](https://dotnet.microsoft.com/download/dotnet/10.0) - jeśli nie jest zainstalowane, Windows zaproponuje jego pobranie przy pierwszym uruchomieniu.
 
-Ustawienia i zbiory map z poprzednich wersji (plik `lastsettings.txt`, folder `warstwy`) są w pełni zgodne z wersją 3.16.
+Ustawienia i zbiory map z poprzednich wersji (plik `lastsettings.txt`, folder `warstwy`) są w pełni zgodne z wersją 3.17.
+
+## Zmiany w wersji 3.17
+
+* **Kreator dodawania serwerów – wbudowany katalog gotowych usług publicznych i rejestr EZiUDP:**
+  * Okno kreatora otwiera się od razu na katalogu z listą ponad 100 sprawdzonych usług dodatkowych bez uciążliwych skorowidzów (m.in. archiwalne ortofotomapy GUGiK, BDOT10k/BDOO/TOPO, NMT cieniowanie i hipsometria, K-GESUT, osnowy podstawowe i specjalne, INSPIRE, hydrografia i zagrożenie powodziowe PGW Wody Polskie, osuwiska SOPO, jaskinie, złoża MIDAS i geologia PIG-PIB, mapy hałasu i pożary lasów Ekoportalu, IMGW, GUS oraz kafelki XYZ z katalogu NextGIS QMS: ESRI, Sentinel-2 2024, OpenTopoMap, CyclOSM, Freemap.sk).
+  * Bezpośredni dostęp online do oficjalnego wykazu Geoportal.gov.pl oraz rejestru EZiUDP z wyszukiwarką usług powiatowych i gminnych po nazwie lub kodzie TERYT.
+  * Opcja wpisania własnego adresu URL serwera WMS/WMTS/XYZ (przycisk pod listą lub wklejenie linku w polu wyszukiwania) oraz możliwość powrotu z podglądu warstw do katalogu.
+  * Warstwy zapisane kreatorem zachowują w grupie *Dodane serwery* i na liście wybranych warstw swoje czytelne nazwy.
+* **Obsługa kafelków XYZ / TMS:**
+  * Bezpośrednie pobieranie map z serwerów kafli `{z}/{x}/{y}` i TMS (`{-y}`), w tym wbudowane zbiory *OSMapa.pl*, *UMP-pcPL* i przezroczyste nakładki szlaków turystycznych *Waymarked Trails* (piesze, rowerowe, MTB, konne, rolkowe, narciarskie).
+  * Rozpoznawanie szablonów `{z}/{x}/{y}`, parametrów `{quadkey}` i `{r}`, metadanych TileJSON oraz specyfikacji `tilemapresource.xml`.
+  * Podkład dodany po nakładce automatycznie trafia na spód stosu warstw, a pobieranie samych nakładek w pełni obsługuje przezroczyste tło PNG.
+  * Ostrzeżenie przed pobieraniem obszaru leżącego w całości poza zasięgiem mapy, inteligentne zastępowanie brakujących kafli (HTTP 404) powiększonym fragmentem z niższego poziomu powiększenia oraz natychmiastowe zatrzymanie z podpowiedzią przy odmowie dostępu (HTTP 403).
+* **Drzewo warstw w grupach tematycznych i wyszukiwarka:**
+  * Zbiory map z folderu `warstwy` pogrupowane w czytelnym drzewie według definicji w `warstwy/katalog.txt`.
+  * Szybka wyszukiwarka warstw i grup tematycznych w panelu map (niewrażliwa na wielkość liter i polskie znaki diakrytyczne).
+* **Nowy panel wybranych warstw i zaawansowana kompozycja:**
+  * Warstwy z różnych serwerów WMS i WMTS można łączyć w jedną kompozycję („kanapkę”) – wybór kolejnej warstwy nie czyści już wcześniej zaznaczonych.
+  * Nowe okno *Warstwy – zaawansowane* z suwakami krycia (0–100%), zmianą kolejności warstw, licznikiem zapytań i podglądem na żywo.
+  * Automatyczne dobieranie rozmiaru piksela według najdokładniejszej z wybranych warstw.
+  * Możliwość przeciągania myszą paska bocznego w celu poszerzenia panelu danych i wygodnego czytania długich nazw warstw.
+* **Pełna dokumentacja i pomoc online:**
+  * 39 rozdziałów instrukcji obsługi w serwisie GitHub Pages z nowoczesnym motywem Just the Docs, ilustracjami, tabelami parametrów i wyszukiwarką pod adresem [eksploracja.github.io/MapoTero/pomoc/](https://eksploracja.github.io/MapoTero/pomoc/).
+* **Testy jednostkowe:** 722 testy zakończone sukcesem.
 
 ## Zmiany w wersji 3.16
 

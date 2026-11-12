@@ -429,10 +429,10 @@ Public Class KatalogSerwerowTesty
     End Sub
 
     <Fact>
-    Public Sub StanWMapoTero_ZwracaMoznaDodacLubWMapoTero()
+    Public Sub StanWMapoTero_ZwracaPustyDlaNowychLubWMapoTero()
         Dim wNowy As New WpisKataloguSerwerow With {.Nazwa = "Testowa usługa", .Adres = "https://a.test/wms"}
         Assert.Equal(KatalogSerwerow.TekstStanuMoznaDodac, KatalogSerwerow.TekstStanuWMapoTero(wNowy))
-        Assert.Equal("Można dodać", KatalogSerwerow.TekstStanuWMapoTero(wNowy))
+        Assert.Equal("", KatalogSerwerow.TekstStanuWMapoTero(wNowy))
 
         Dim wDodany As New WpisKataloguSerwerow With {.Nazwa = "Ortofotomapa", .Adres = "https://b.test/wms", .JuzDodanyZbior = "ortofotomapa_WMTS"}
         Assert.Equal("W MapoTero (ortofotomapa_WMTS)", KatalogSerwerow.TekstStanuWMapoTero(wDodany))
