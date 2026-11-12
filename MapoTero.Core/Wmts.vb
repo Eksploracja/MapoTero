@@ -138,16 +138,35 @@ Public Class PowiazanieZestawu
     Public ReadOnly Property Limity As New Dictionary(Of String, Integer())
 End Class
 
-''' <summary>Szablon adresu kafla w trybie REST (ResourceURL resourceType="tile").</summary>
+''' <summary>Szablon adresu kafla w trybie REST (ResourceURL resourceType="tile") lub XYZ/TMS.</summary>
 Public Class SzablonKafla
     Public Property Format As String = ""
     Public Property Szablon As String = ""
+    ''' <summary>Lista subdomen podstawianych pod {s} (np. a, b, c).</summary>
+    Public ReadOnly Property Subdomeny As New List(Of String)
+    ''' <summary>Schemat TMS: numer wiersza liczony od południa (2^z - 1 - wiersz).</summary>
+    Public Property OdwroconeY As Boolean
+End Class
+
+''' <summary>Kafel poziomu mniej szczegółowego obejmujący brakujący kafel (wynik <see cref="PlanWmts.KafelNadrzedny"/>).</summary>
+Public Class KafelNadrzednyWmts
+    Public Property Adres As String = ""
+    ''' <summary>Klucz kafla do pamięci podręcznej (bez podstawionej subdomeny).</summary>
+    Public Property Klucz As String = ""
+    ''' <summary>O ile poziomów wyżej leży kafel; jego bok dzieli się na 2^Poziomy części.</summary>
+    Public Property Poziomy As Integer
+    ''' <summary>Numer części (od 0, od północy) kafla nadrzędnego, która odpowiada brakującemu kaflowi.</summary>
+    Public Property CzescWiersz As Integer
+    ''' <summary>Numer części (od 0, od zachodu) kafla nadrzędnego, która odpowiada brakującemu kaflowi.</summary>
+    Public Property CzescKolumna As Integer
 End Class
 
 ''' <summary>Warstwa usługi WMTS.</summary>
 Public Class WarstwaWmts
     Public Property Identyfikator As String = ""
     Public Property Tytul As String = ""
+    ''' <summary>Nazwa typu usługi w opisach planu (domyślnie "WMTS"; dla kafelków z/x/y - "XYZ" lub "TMS").</summary>
+    Public Property TypUslugiOpis As String = "WMTS"
     Public ReadOnly Property Formaty As New List(Of String)
     Public Property Styl As String = "default"
     Public ReadOnly Property Powiazania As New List(Of PowiazanieZestawu)
@@ -364,7 +383,9 @@ Public Class PlanWmts
 
     Private ReadOnly _usluga As UslugaWmts
     Private ReadOnly _szablon As String = ""
+    Private ReadOnly _szablonObiekt As SzablonKafla
     Private _limity As Integer()
+    Private _powiazanie As PowiazanieZestawu
 
     ''' <param name="zasieg">Zasięg całej siatki segmentów.</param>
     ''' <param name="rozmiarPiksela">Rozmiar piksela segmentów w jednostkach układu segmentów.</param>
@@ -437,6 +458,7 @@ Public Class PlanWmts
             _BezPrzeliczania = uk.Uklad IsNot Nothing AndAlso uk.Uklad.Epsg = uklad.Epsg
             _Nadprobkowanie = Math.Max(1, Math.Min(4, CInt(Math.Ceiling(Math.Max(de, dn) / _Rozdzielczosc - 0.01))))
             If Not powiazanie.Limity.TryGetValue(wybrana.Identyfikator, _limity) Then _limity = Nothing
+            _powiazanie = powiazanie
             Exit For
         Next
         If _Zestaw Is Nothing Then
@@ -448,7 +470,8 @@ Public Class PlanWmts
             Format = Wmts.WybierzFormat(Warstwa.Formaty, formatSegmentow)
         Else
             Format = Wmts.WybierzFormat(Warstwa.Szablony.Select(Function(s) s.Format).ToList(), formatSegmentow)
-            _szablon = Warstwa.Szablony.First(Function(s) String.Equals(s.Format, Format, StringComparison.OrdinalIgnoreCase)).Szablon
+            _szablonObiekt = Warstwa.Szablony.First(Function(s) String.Equals(s.Format, Format, StringComparison.OrdinalIgnoreCase))
+            _szablon = _szablonObiekt.Szablon
         End If
     End Sub
 
@@ -485,26 +508,83 @@ Public Class PlanWmts
         Return wiersz >= _limity(0) AndAlso wiersz <= _limity(1) AndAlso kolumna >= _limity(2) AndAlso kolumna <= _limity(3)
     End Function
 
-    ''' <summary>Adres kafla (KVP GetTile albo szablon REST).</summary>
+    ''' <summary>Adres kafla (KVP GetTile albo szablon REST / XYZ / TMS).</summary>
     Public Function AdresKafla(wiersz As Integer, kolumna As Integer) As String
-        Dim w As String = wiersz.ToString(CultureInfo.InvariantCulture)
+        Return ZbudujAdresKafla(Macierz, wiersz, kolumna, rozwinSubdomeny:=True)
+    End Function
+
+    ''' <summary>
+    ''' Kafel poziomu mniej szczegółowego o <paramref name="poziomyWyzej"/>, który obejmuje kafel (wiersz, kolumna).
+    ''' Służy do zastąpienia kafla brakującego na serwerze (HTTP 404) powiększonym fragmentem kafla nadrzędnego.
+    ''' Nothing - zestaw nie ma takiego poziomu (o skali dokładnie 2^n razy mniejszej i tym samym narożniku) albo kafel leży poza limitami warstwy.
+    ''' </summary>
+    Public Function KafelNadrzedny(wiersz As Integer, kolumna As Integer, poziomyWyzej As Integer) As KafelNadrzednyWmts
+        If poziomyWyzej < 1 OrElse poziomyWyzej > 10 OrElse wiersz < 0 OrElse kolumna < 0 Then Return Nothing
+        Dim mnoznik As Integer = 1 << poziomyWyzej
+        Dim cel = Zestaw.Macierze.FirstOrDefault(
+            Function(m) m.SzerokoscKafla = Macierz.SzerokoscKafla AndAlso m.WysokoscKafla = Macierz.WysokoscKafla AndAlso
+                        Math.Abs(m.MianownikSkali / (Macierz.MianownikSkali * mnoznik) - 1.0) < 0.001 AndAlso
+                        Math.Abs(m.NarozA - Macierz.NarozA) < 0.001 AndAlso Math.Abs(m.NarozB - Macierz.NarozB) < 0.001)
+        If cel Is Nothing Then Return Nothing
+        Dim w As Integer = wiersz \ mnoznik
+        Dim k As Integer = kolumna \ mnoznik
+        If w >= cel.LiczbaWierszy OrElse k >= cel.LiczbaKolumn Then Return Nothing
+        If _powiazanie IsNot Nothing AndAlso _powiazanie.Limity.Count > 0 Then
+            Dim lim As Integer() = Nothing
+            If Not _powiazanie.Limity.TryGetValue(cel.Identyfikator, lim) Then Return Nothing
+            If w < lim(0) OrElse w > lim(1) OrElse k < lim(2) OrElse k > lim(3) Then Return Nothing
+        End If
+        Return New KafelNadrzednyWmts With {
+            .Adres = ZbudujAdresKafla(cel, w, k, rozwinSubdomeny:=True),
+            .Klucz = ZbudujAdresKafla(cel, w, k, rozwinSubdomeny:=False),
+            .Poziomy = poziomyWyzej,
+            .CzescWiersz = wiersz Mod mnoznik,
+            .CzescKolumna = kolumna Mod mnoznik}
+    End Function
+
+    ''' <summary>
+    ''' Kanoniczny klucz kafla do pamięci podręcznej (bez podstawiania losowanej/rotowanej subdomeny {s},
+    ''' dzięki czemu zmiana listy subdomen nie unieważnia zapisanych kafli).
+    ''' </summary>
+    Public Function KluczKafla(wiersz As Integer, kolumna As Integer) As String
+        Return ZbudujAdresKafla(Macierz, wiersz, kolumna, rozwinSubdomeny:=False)
+    End Function
+
+    Private Function ZbudujAdresKafla(mc As MacierzKafliWmts, wiersz As Integer, kolumna As Integer, rozwinSubdomeny As Boolean) As String
+        Dim wierszSzablonu As Integer = If(_szablonObiekt IsNot Nothing AndAlso _szablonObiekt.OdwroconeY AndAlso mc.LiczbaWierszy > 0,
+                                           mc.LiczbaWierszy - 1 - wiersz,
+                                           wiersz)
+        Dim w As String = wierszSzablonu.ToString(CultureInfo.InvariantCulture)
         Dim k As String = kolumna.ToString(CultureInfo.InvariantCulture)
         If _szablon <> "" Then
             Dim a As String = _szablon
             a = Zamien(a, "TileMatrixSet", Zestaw.Identyfikator)
-            a = Zamien(a, "TileMatrix", Macierz.Identyfikator)
+            a = Zamien(a, "TileMatrix", mc.Identyfikator)
             a = Zamien(a, "TileRow", w)
             a = Zamien(a, "TileCol", k)
+            If a.IndexOf("{QuadKey}", StringComparison.OrdinalIgnoreCase) >= 0 Then
+                'Bing: klucz liczony z numeru poziomu i wiersza od północy (bez odwracania osi TMS)
+                Dim poziom As Integer = CInt(Math.Round(Math.Log(Math.Max(1, mc.LiczbaKolumn), 2)))
+                a = Zamien(a, "QuadKey", KafleXyz.QuadKey(poziom, kolumna, wiersz))
+            End If
+            If a.IndexOf("{-y}", StringComparison.OrdinalIgnoreCase) >= 0 AndAlso mc.LiczbaWierszy > 0 Then
+                Dim wTms As String = (mc.LiczbaWierszy - 1 - wiersz).ToString(CultureInfo.InvariantCulture)
+                a = Zamien(a, "-y", wTms)
+            End If
             a = Zamien(a, "Style", Warstwa.Styl)
             For Each wym In Warstwa.Wymiary
                 a = Zamien(a, wym.Key, wym.Value)
             Next
+            If rozwinSubdomeny AndAlso _szablonObiekt IsNot Nothing AndAlso _szablonObiekt.Subdomeny.Count > 0 Then
+                Dim idx As Integer = CInt(Math.Abs(CLng(wiersz) + CLng(kolumna)) Mod _szablonObiekt.Subdomeny.Count)
+                a = Zamien(a, "s", _szablonObiekt.Subdomeny(idx))
+            End If
             Return a
         End If
         Return Wmts.AdresBazowy(_usluga.AdresKvp) & "SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0" &
                "&LAYER=" & Uri.EscapeDataString(Warstwa.Identyfikator) & "&STYLE=" & Uri.EscapeDataString(Warstwa.Styl) &
                "&FORMAT=" & Uri.EscapeDataString(Format) & "&TILEMATRIXSET=" & Uri.EscapeDataString(Zestaw.Identyfikator) &
-               "&TILEMATRIX=" & Uri.EscapeDataString(Macierz.Identyfikator) & "&TILEROW=" & w & "&TILECOL=" & k
+               "&TILEMATRIX=" & Uri.EscapeDataString(mc.Identyfikator) & "&TILEROW=" & w & "&TILECOL=" & k
     End Function
 
     Private Shared Function Zamien(tekst As String, nazwa As String, wartosc As String) As String
@@ -514,7 +594,7 @@ Public Class PlanWmts
     ''' <summary>Opis planu do komunikatów i plików z wykazem segmentów.</summary>
     Public ReadOnly Property Opis As String
         Get
-            Return "WMTS " & Warstwa.Identyfikator & ", zestaw " & Zestaw.Identyfikator & ", poziom " & Macierz.Identyfikator &
+            Return Warstwa.TypUslugiOpis & " " & Warstwa.Identyfikator & ", zestaw " & Zestaw.Identyfikator & ", poziom " & Macierz.Identyfikator &
                    ", piksel " & Rozdzielczosc.ToString("0.######", CultureInfo.InvariantCulture) & If(UkladKafli.Geograficzny, "°", " m") &
                    If(BezPrzeliczania, "", ", przeliczane z " & Zestaw.Crs)
         End Get

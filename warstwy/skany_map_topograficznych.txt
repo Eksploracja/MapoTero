@@ -17,5 +17,3 @@ Raster_50tys_VMap
 4
 Raster_50_UTM
 4
-Raster_100_1980
-8

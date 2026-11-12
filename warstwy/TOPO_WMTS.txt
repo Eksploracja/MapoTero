@@ -1,0 +1,3 @@
+https://mapy.geoportal.gov.pl/wss/service/WMTS/guest/wmts/TOPO?SERVICE=WMTS&REQUEST=GetCapabilities
+MAPA TOPOGRAFICZNA
+2

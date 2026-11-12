@@ -151,9 +151,9 @@ Public Class FormWarstwyZaawansowane
 
             Dim lblNr As New Label With {.Text = (i + 1) & ")", .Dock = DockStyle.Fill, .TextAlign = ContentAlignment.MiddleLeft, .BackColor = tlo}
             'jedna linia z wielokropkiem (etykieta wysokości wiersza zawijała długie nazwy)
-            Dim lblNazwa As New Label With {.Text = w.Nazwa & If(_zestaw.WieleZrodel AndAlso w.Zbior <> "", "  [" & w.Zbior & "]", ""), .Anchor = AnchorStyles.Left Or AnchorStyles.Right, .Height = 16,
+            Dim lblNazwa As New Label With {.Text = Form1.NazwaWarstwy(w) & If(_zestaw.WieleZrodel AndAlso Form1.ZrodloWarstwy(w) <> "", "  [" & Form1.ZrodloWarstwy(w) & "]", ""), .Anchor = AnchorStyles.Left Or AnchorStyles.Right, .Height = 16,
                                             .TextAlign = ContentAlignment.MiddleLeft, .AutoEllipsis = True, .BackColor = tlo, .UseMnemonic = False}
-            _podpowiedz.SetToolTip(lblNazwa, w.Nazwa & If(i = 0, " - podkład", "") & vbCrLf & "Zbiór map: " & w.Zbior & If(w.CzyWmts, " (WMTS)", " (WMS)") &
+            _podpowiedz.SetToolTip(lblNazwa, Form1.NazwaWarstwy(w) & If(i = 0, " - podkład", "") & vbCrLf & "Warstwa " & w.Nazwa & ", zbiór map " & w.Zbior & " (" & KafleXyz.NazwaTypu(w.EfektywnyTyp) & ")" &
                                    If(w.ZalecanyPiksel > 0, vbCrLf & "Zalecany rozmiar piksela: " & w.ZalecanyPiksel.ToString("0.###") & " m", ""))
             Dim suwak As New TrackBar With {.Minimum = ZestawWarstw.MinKrycie, .Maximum = ZestawWarstw.PelneKrycie, .SmallChange = 5,
                                             .LargeChange = 25, .TickFrequency = 25, .Value = w.Krycie, .AutoSize = False,
@@ -235,12 +235,18 @@ Public Class FormWarstwyZaawansowane
 
     Private Sub OdswiezLiczbeZapytan()
         Dim grupy = _zestaw.GrupyZapytan()
-        Dim wms As Integer = grupy.Where(Function(g) Not g.CzyWmts).Count()
+        Dim wms As Integer = grupy.Where(Function(g) Not g.CzyKafelkowa).Count()
         Dim serwery As Integer = grupy.Select(Function(g) g.Adres.ToLowerInvariant()).Distinct().Count()
+        Dim ostrzezenieNakladki As String = ""
+        Dim przykryta = _zestaw.ZnajdzPrzykrytaNakladke()
+        If przykryta IsNot Nothing Then
+            ostrzezenieNakladki = " Uwaga: nakładka """ & Form1.NazwaWarstwy(przykryta) & """ może zostać zasłonięta."
+        End If
         _lblZapytania.Text = "Zapytań WMS na segment: " & wms &
-            If(grupy.Count > wms, ", warstw z kafli WMTS: " & (grupy.Count - wms), "") &
+            If(grupy.Count > wms, ", warstw z kafli: " & (grupy.Count - wms), "") &
             If(serwery > 1, "; serwerów: " & serwery, "") &
-            If(grupy.Count > 1, ". Grupy warstw (inny serwer lub krycie poniżej 100%) pobierane są osobno i nakładane w programie.", ".")
+            If(grupy.Count > 1, ". Grupy warstw (inny serwer lub krycie poniżej 100%) pobierane są osobno i nakładane w programie.", ".") &
+            ostrzezenieNakladki
     End Sub
 
     Private Shared Function Klucz(w As WarstwaWybrana) As String
@@ -266,12 +272,18 @@ Public Class FormWarstwyZaawansowane
                 _lblStan.Text = "Pobieranie warstwy " & nazwa & "…"
                 Dim piksele() As Integer
                 Dim blad As String
-                If w.CzyWmts Then
-                    'kafle WMTS - usługa przygotowana raz dla wszystkich jej warstw w kanapce
+                If w.CzyKafelkowa Then
+                    'kafle WMTS/XYZ/TMS - usługa przygotowana raz dla wszystkich jej warstw w kanapce
                     Dim usluga As ZrodloWmts = Nothing
                     If Not _uslugiWmts.TryGetValue(w.Adres, usluga) Then
                         Dim nazwyUslugi = _zestaw.Warstwy.Where(Function(x) String.Equals(x.Adres, w.Adres, StringComparison.OrdinalIgnoreCase)).Select(Function(x) x.Nazwa).ToList()
-                        usluga = Await ZrodloWmts.PrzygotujAsync(_zadanie, w.Adres, nazwyUslugi, przerwanie.Token)
+                        Dim zrodloPliku As PlikWarstw = Nothing
+                        If Not String.IsNullOrEmpty(w.Zbior) AndAlso _zadanie.ZrodlaMap IsNot Nothing Then
+                            _zadanie.ZrodlaMap.TryGetValue(w.Zbior, zrodloPliku)
+                        End If
+                        If zrodloPliku Is Nothing Then zrodloPliku = _zadanie.ZnajdzZrodlo(-1, w.Adres)
+                        usluga = Await ZrodloWmts.PrzygotujAsync(_zadanie, w.Adres, nazwyUslugi, przerwanie.Token,
+                                                                 typUslugi:=w.EfektywnyTyp, plikWarstw:=zrodloPliku)
                         _uslugiWmts(w.Adres) = usluga
                     End If
                     Dim wynikWmts = Await usluga.PikseleAsync({nazwa}, zasieg, BokPodgladu, przerwanie.Token)
@@ -280,7 +292,7 @@ Public Class FormWarstwyZaawansowane
                 Else
                     Dim adres As String = Wms.ZapytanieGetMap(w.Adres, {nazwa}, _zadanie.Uklad, zasieg, "png",
                                                               BokPodgladu, BokPodgladu, _zadanie.ZamienOsie, True)
-                    Dim wynik = Await PobieranieSegmentow.PobierzObrazAsync(adres, Math.Max(5, _zadanie.LimitCzasuSekundy), przerwanie.Token)
+                    Dim wynik = Await PobieranieSegmentow.PobierzObrazAsync(adres, Math.Max(5, _zadanie.LimitCzasuSekundy), przerwanie.Token, w.IgnorujSsl)
                     blad = wynik.Item2
                     piksele = If(blad = "", NakladanieObrazow.Piksele(wynik.Item1, BokPodgladu, BokPodgladu), Nothing)
                 End If

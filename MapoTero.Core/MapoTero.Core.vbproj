@@ -2,10 +2,9 @@
 
   <!-- Biblioteka z logiką programu MapoTero niezależną od interfejsu użytkownika:
        układy współrzędnych, siatka segmentów, formaty plików sesji i plików georeferencyjnych.
-       netstandard2.0 - używana zarówno przez program w .NET Framework, jak i w nowszych wersjach .NET,
-       a testy jednostkowe można uruchamiać na dowolnym systemie. -->
+       net10.0 (niezależny od WinForms) - testy jednostkowe można uruchamiać na dowolnym systemie. -->
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <RootNamespace>MapoTero.Core</RootNamespace>
     <AssemblyName>MapoTero.Core</AssemblyName>
     <OptionStrict>On</OptionStrict>
@@ -13,7 +12,7 @@
     <OptionInfer>On</OptionInfer>
     <OptionCompare>Binary</OptionCompare>
     <LangVersion>latest</LangVersion>
-    <Version>3.16.0</Version>
+    <Version>3.16</Version>
     <Authors>MapoTero</Authors>
     <Copyright>GNU GPL v3</Copyright>
   </PropertyGroup>
@@ -22,6 +21,10 @@
     <!-- zapis GeoTIFF i strumieniowy zapis JPEG dużych arkuszy (licencje BSD) -->
     <PackageReference Include="BitMiracle.LibTiff.NET" Version="2.4.660" />
     <PackageReference Include="BitMiracle.LibJpeg.NET" Version="1.5.324" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="serwery_dodatkowe.json" LogicalName="MapoTero.Core.serwery_dodatkowe.json" />
   </ItemGroup>
 
   <ItemGroup>

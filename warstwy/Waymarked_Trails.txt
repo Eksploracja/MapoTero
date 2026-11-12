@@ -1,0 +1,19 @@
+{
+  "typ": "xyz",
+  "adres": "https://tile.waymarkedtrails.org/{layer}/{z}/{x}/{y}.png",
+  "zMin": 0,
+  "zMax": 18,
+  "rozmiarKafla": 256,
+  "nakladka": true,
+  "odstepMs": 120,
+  "maksWatkow": 2,
+  "atrybucja": "Waymarked Trails / © autorzy OpenStreetMap",
+  "warstwy": [
+    { "nazwa": "hiking", "piksel": 2 },
+    { "nazwa": "cycling", "piksel": 2 },
+    { "nazwa": "mtb", "piksel": 2 },
+    { "nazwa": "riding", "piksel": 2 },
+    { "nazwa": "skating", "piksel": 2 },
+    { "nazwa": "slopes", "piksel": 2 }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "typ": "xyz",
+  "adres": "http://{s}.tiles.ump.waw.pl/ump_tiles/{z}/{x}/{y}.png",
+  "subdomeny": ["1", "2", "3"],
+  "zMin": 0,
+  "zMax": 19,
+  "rozmiarKafla": 256,
+  "nakladka": false,
+  "odstepMs": 100,
+  "maksWatkow": 2,
+  "zasieg": [13.5, 48.7, 24.6, 55.2],
+  "atrybucja": "© UMP-pcPL",
+  "warstwy": [
+    { "nazwa": "ump_pcPL", "piksel": 2 }
+  ]
+}

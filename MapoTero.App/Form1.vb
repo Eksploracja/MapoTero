@@ -44,8 +44,32 @@ Public Class Form1
     Private _automatycznyPikselMetry As Double
     Private _automatycznyPikselTekst As String = ""
 
-    ''' <summary>Bieżący zbiór map (adres serwera i lista warstw).</summary>
-    Private _plikWarstw As New PlikWarstw()
+    ''' <summary>Katalog warstw: grupy tematyczne drzewa i nazwy wyświetlane warstw (warstwy\katalog.txt).</summary>
+    Private _katalog As New KatalogWarstw()
+
+    ''' <summary>Nazwy wyświetlane i grupy warstw według serwera i nazwy warstwy (<see cref="KatalogWarstw.MapaNazw"/>).</summary>
+    Private _nazwyWarstw As New Dictionary(Of String, (Nazwa As String, Grupa As String))
+
+    ''' <summary>Czytelne nazwy warstw i zbiorów zapisane w plikach zbiorów dodanych przez użytkownika.</summary>
+    Private _tytulyDodanychWarstw As New Dictionary(Of String, (Nazwa As String, Grupa As String))(StringComparer.Ordinal)
+
+    Private Const GrupaDodanychSerwerow As String = "Dodane serwery"
+
+    ''' <summary>Zbiory map z warstwy.txt w kolejności drzewa warstw.</summary>
+    Private ReadOnly _zbiory As New List(Of ZbiorMapy)
+
+    ''' <summary>
+    ''' Ostatnio wskazany zbiór map (kliknięty w drzewie, z conf.txt) - nazwa sesji, gdy kanapka jest pusta
+    ''' (dawniej wybrany na liście zbiorów map).
+    ''' </summary>
+    Private _biezacyZbior As String = DomyslnyZbiorMap
+    Private Const DomyslnyZbiorMap As String = "skany_map_topograficznych"
+
+    ''' <summary>Grupy drzewa rozwinięte przez użytkownika - klucze węzłów (zachowane przy przebudowie drzewa i po wyczyszczeniu wyszukiwania).</summary>
+    Private ReadOnly _rozwinieteZbiory As New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
+
+    ''' <summary>Programowe ustawianie pól wyboru i rozwinięć drzewa (bez dodawania/usuwania warstw).</summary>
+    Private _synchronizacjaDrzewa As Boolean
 
     ''' <summary>Przerywanie trwającego pobierania.</summary>
     Private _przerwanie As CancellationTokenSource
@@ -53,12 +77,22 @@ Public Class Form1
     ''' <summary>Programowe ustawianie listy układów (bez przeliczania zasięgu).</summary>
     Private _ustawianieUkladu As Boolean
 
-    ''' <summary>Szerokość prawego panelu (bez paska przewijania) i jego najmniejsza wysokość, przy której nie jest przewijany.</summary>
+    ''' <summary>Szerokość prawego panelu wybrana przez użytkownika (bez paska przewijania) i jego najmniejsza wysokość, przy której nie jest przewijany.</summary>
     Private _szerokoscPanelu As Integer
     Private _minWysokoscPanelu As Integer
 
-    ''' <summary>Liczba wierszy listy warstw WMS widocznych w najmniejszym oknie.</summary>
-    Private Const MinWierszyListyWarstw As Integer = 5
+    ''' <summary>Najmniejsza szerokość prawego panelu (z projektu formularza) i obszaru mapy z dolnym panelem siatki.</summary>
+    Private _minSzerokoscPanelu As Integer
+    Private _minSzerokoscMapy As Integer
+
+    ''' <summary>Elementy leżące na mapie przy jej prawej krawędzi i ich odległość od tej krawędzi (<see cref="PrzypnijNakladkiDoMapy"/>).</summary>
+    Private ReadOnly _nakladkiMapy As New List(Of (Kontrolka As Control, OdPrawejMapy As Integer))
+
+    ''' <summary>Wysokość prawego panelu przy ostatnim dopasowaniu jego szerokości.</summary>
+    Private _wysokoscPanelu As Integer
+
+    ''' <summary>Liczba wierszy drzewa warstw widocznych w najmniejszym oknie.</summary>
+    Private Const MinWierszyListyWarstw As Integer = 8
 
     ''' <summary>Obszar pobierania wzdłuż trasy (zapisywany w folderze sesji w korytarz.txt); Nothing - cały prostokąt.</summary>
     Private _korytarz As Korytarz
@@ -120,7 +154,7 @@ Public Class Form1
     Public ReadOnly Property ZbiorMap As String
         Get
             If _zestaw.Liczba > 0 AndAlso _zestaw(0).Zbior <> "" Then Return _zestaw(0).Zbior
-            Return cmbZbiorMap.Text
+            Return _biezacyZbior
         End Get
     End Property
 
@@ -190,9 +224,10 @@ Public Class Form1
         Next
     End Sub
 
-    ''' <summary>Wybiera zbiór map z listy.</summary>
+    ''' <summary>Wskazuje zbiór map: rozwija go w drzewie warstw i zaznacza.</summary>
     Public Sub UstawZbiorMap(nazwa As String)
-        cmbZbiorMap.Text = nazwa
+        _biezacyZbior = nazwa
+        RozwinZbioryWybranych(nazwa)
     End Sub
 
     ''' <summary>Przywraca domyślny widok mapy (cała Polska).</summary>
@@ -222,7 +257,7 @@ Public Class Form1
         RejestrujKodowania()
 
         'wyświetla nazwę i wersję
-        Me.Text = My.Application.Info.Title & " " & My.Application.Info.Version.ToString
+        Me.Text = My.Application.Info.Title & " " & Program.Wersja
 
         'bez końcowego ukośnika (w .NET 8 StartupPath go zawiera - ścieżki miały postać ...\\download\)
         FolderProgramu = Application.StartupPath
@@ -278,12 +313,11 @@ Public Class Form1
         UstawWidokWspolrzednych(Ustawienia.KursorISrodekMapy)
         UstawWidokZaznaczeniaWgs(Ustawienia.ZaznaczenieWgs84)
         UstawEdycjeXY(Ustawienia.EdycjaXY)
+        UstawSzerokoscPanelu(Ustawienia.SzerokoscPanelu)
 
-        'lista zbiorów map - warstwy wczytane z conf.txt zostają (każda pamięta swój serwer, więc zmiana zbioru na liście
+        'drzewo zbiorów map - warstwy wczytane z conf.txt zostają (każda pamięta swój serwer, więc zbiór sesji na liście
         'ich nie czyści; dawniej po ponownym uruchomieniu warstwy sesji znikały i trzeba je było wybrać od nowa)
-        Dim zbiorSesji As String = cmbZbiorMap.Text
-        WczytajListeZbiorowMap(zbiorSesji)
-        WczytajWarstwyZbioru()
+        WczytajListeZbiorowMap(_biezacyZbior)
         If _zestaw.Liczba > 0 Then
             Komunikat("Wczytano sesję pobierania z pliku conf.txt, warstwy: " & OpisWarstw() & ".", Color.Green)
         End If
@@ -319,22 +353,129 @@ Public Class Form1
     ''' niższym nawet od tego prawy panel jest przewijany.
     ''' </summary>
     Private Sub UstawRozmiarOkna()
-        Dim minWysokoscListy As Integer = lstWarstwy.ItemHeight * MinWierszyListyWarstw + (lstWarstwy.Height - lstWarstwy.ClientSize.Height)
-        Dim zapasListy As Integer = Math.Max(0, lstWarstwy.Height - minWysokoscListy)
-        _szerokoscPanelu = Panel2.Width
+        Dim minWysokoscListy As Integer = tvWarstwy.ItemHeight * MinWierszyListyWarstw + (tvWarstwy.Height - tvWarstwy.ClientSize.Height)
+        Dim zapasListy As Integer = Math.Max(0, tvWarstwy.Height - minWysokoscListy)
+        _minSzerokoscPanelu = Panel2.Width
+        _minSzerokoscMapy = ClientSize.Width - Panel2.Width - splPanel.Width
+        _szerokoscPanelu = _minSzerokoscPanelu
+        PrzypnijNakladkiDoMapy()
         _minWysokoscPanelu = Panel2.ClientSize.Height - zapasListy
         Panel2.AutoScrollMinSize = New Size(0, _minWysokoscPanelu)
+        splPanel.MinSize = _minSzerokoscPanelu
+        splPanel.MinExtra = _minSzerokoscMapy
+        ToolTip1.SetToolTip(splPanel, "Przeciągnij, aby zmienić szerokość prawego panelu")
 
         Dim ekran As Rectangle = Screen.FromControl(Me).WorkingArea
         Me.MinimumSize = New Size(Math.Min(Me.Width, ekran.Width), Math.Min(Me.Height - zapasListy, ekran.Height))
         Me.Size = New Size(Math.Min(Me.Width, ekran.Width), Math.Min(Me.Height, ekran.Height))
     End Sub
 
-    ''' <summary>Przewijany prawy panel (ekran niższy niż najmniejsze okno) poszerza się o pasek przewijania.</summary>
-    Private Sub Panel2_SizeChanged(sender As Object, e As EventArgs) Handles Panel2.SizeChanged
+    ''' <summary>Szerokość prawego panelu zapamiętana w lastsettings.txt (0 - domyślna).</summary>
+    Private Sub UstawSzerokoscPanelu(szerokosc As Integer)
+        _szerokoscPanelu = Math.Max(_minSzerokoscPanelu, szerokosc)
+        DopasujSzerokoscPanelu()
+    End Sub
+
+    ''' <summary>
+    ''' Szerokość prawego panelu: wybrana przez użytkownika, ale w węższym oknie zmniejszona tak, żeby mapa z panelem
+    ''' siatki pod nią się zmieściła (po poszerzeniu okna panel wraca do wybranej szerokości). Przewijany panel
+    ''' (ekran niższy niż najmniejsze okno) poszerza się o pasek przewijania.
+    ''' </summary>
+    Private Sub DopasujSzerokoscPanelu()
         If _szerokoscPanelu = 0 Then Exit Sub
-        Dim szerokosc As Integer = _szerokoscPanelu + If(Panel2.Height < _minWysokoscPanelu, SystemInformation.VerticalScrollBarWidth, 0)
+        Dim pasek As Integer = If(Panel2.Height < _minWysokoscPanelu, SystemInformation.VerticalScrollBarWidth, 0)
+        Dim dostepna As Integer = ClientSize.Width - splPanel.Width - _minSzerokoscMapy - pasek
+        Dim szerokosc As Integer = Math.Max(_minSzerokoscPanelu, Math.Min(_szerokoscPanelu, dostepna)) + pasek
         If Panel2.Width <> szerokosc Then Panel2.Width = szerokosc
+    End Sub
+
+    ''' <summary>
+    ''' Tylko zmiana wysokości panelu (pasek przewijania). Szerokość zmienia Splitter, a wybraną szerokość podaje
+    ''' dopiero po niej w SplitterMoved - dopasowanie przy zmianie szerokości przywracałoby poprzednią. (Znacznik
+    ''' przeciągania kasowany w MouseUp paska nie wystarcza: Splitter zgłasza MouseUp przed zmianą szerokości.)
+    ''' </summary>
+    Private Sub Panel2_SizeChanged(sender As Object, e As EventArgs) Handles Panel2.SizeChanged
+        If Panel2.Height = _wysokoscPanelu Then Exit Sub
+        _wysokoscPanelu = Panel2.Height
+        DopasujSzerokoscPanelu()
+    End Sub
+
+    ''' <summary>
+    ''' Przełączniki podkładu i współrzędne środka mapy leżą na formularzu nad mapą, w projekcie zakotwiczone do prawej
+    ''' krawędzi okna. Przy szerszym prawym panelu zasłaniałyby go, więc trzymają się prawej krawędzi mapy: kotwica
+    ''' zmieniona na lewą, a położenie ustawiane po każdym ułożeniu okna. (Przesuwanie ich z kotwicą do prawej w czasie
+    ''' zmiany rozmiaru okna nie działa - WinForms przelicza je potem jeszcze raz według kotwicy.)
+    ''' </summary>
+    Private Sub PrzypnijNakladkiDoMapy()
+        For Each c As Control In Me.Controls
+            If c.Dock = DockStyle.None AndAlso (c.Anchor And AnchorStyles.Right) <> 0 AndAlso (c.Anchor And AnchorStyles.Left) = 0 Then
+                _nakladkiMapy.Add((c, mapa.Right - c.Left))
+                c.Anchor = (c.Anchor And Not AnchorStyles.Right) Or AnchorStyles.Left
+            End If
+        Next
+    End Sub
+
+    Private Sub Form1_Layout(sender As Object, e As LayoutEventArgs) Handles MyBase.Layout
+        For Each n In _nakladkiMapy
+            Dim lewa As Integer = mapa.Right - n.OdPrawejMapy
+            If n.Kontrolka.Left <> lewa Then n.Kontrolka.Left = lewa
+        Next
+    End Sub
+
+    ''' <summary>
+    ''' Zmiana rozmiaru okna. Formularz nie może mieć AutoScroll: po poszerzeniu panelu pokazywał poziomy pasek
+    ''' przewijania, a zgłoszony przez to Resize cofał szerokość panelu (na niskim ekranie przewija się sam panel).
+    ''' Szerokość panelu jest dopasowywana przed ułożeniem okna (MyBase.OnResize): dopasowana dopiero w zdarzeniu
+    ''' Resize, po przywróceniu zmaksymalizowanego okna panel był najpierw układany w starej szerokości, więc przez
+    ''' chwilę było widać jego prawą część przesuniętą w lewo, zanim się przerysował.
+    ''' </summary>
+    Protected Overrides Sub OnResize(e As EventArgs)
+        If WindowState <> FormWindowState.Minimized Then DopasujSzerokoscPanelu()
+        MyBase.OnResize(e)
+    End Sub
+
+    ''' <summary>Kursor nad paskiem między mapą a prawym panelem (pasek podświetlony).</summary>
+    Private _kursorNadPaskiem As Boolean
+
+    ''' <summary>
+    ''' Pasek między mapą a prawym panelem: krawędzie i uchwyt z kropek na środku, żeby było widać, że panel można
+    ''' poszerzyć; pod kursorem pasek jest podświetlony.
+    ''' </summary>
+    Private Sub splPanel_Paint(sender As Object, e As PaintEventArgs) Handles splPanel.Paint
+        Dim g As Graphics = e.Graphics
+        Dim w As Integer = splPanel.Width, h As Integer = splPanel.Height
+        g.Clear(If(_kursorNadPaskiem, SystemColors.Highlight, ControlPaint.Dark(SystemColors.Control, 0.05F)))
+        Using krawedz As New Pen(SystemColors.ControlDark)
+            g.DrawLine(krawedz, 0, 0, 0, h)
+            g.DrawLine(krawedz, w - 1, 0, w - 1, h)
+        End Using
+        'uchwyt: dwie kolumny kropek na przemian, jak w uchwytach pasków narzędzi
+        Dim kropka As Integer = Math.Max(1, (w - 2) \ 2)
+        Dim wiersze As Integer = 12
+        Dim y As Integer = (h - wiersze * kropka * 2) \ 2
+        Using pedzel As New SolidBrush(If(_kursorNadPaskiem, SystemColors.HighlightText, SystemColors.ControlDarkDark))
+            For i = 0 To wiersze - 1
+                g.FillRectangle(pedzel, 1 + (i Mod 2) * kropka, y + i * kropka * 2, kropka, kropka)
+            Next
+        End Using
+    End Sub
+
+    Private Sub splPanel_MouseEnter(sender As Object, e As EventArgs) Handles splPanel.MouseEnter
+        _kursorNadPaskiem = True
+        splPanel.Invalidate()
+    End Sub
+
+    Private Sub splPanel_MouseLeave(sender As Object, e As EventArgs) Handles splPanel.MouseLeave
+        _kursorNadPaskiem = False
+        splPanel.Invalidate()
+    End Sub
+
+    ''' <summary>Szerokość wybrana przeciągnięciem paska - zapamiętana w lastsettings.txt.</summary>
+    Private Sub splPanel_SplitterMoved(sender As Object, e As SplitterEventArgs) Handles splPanel.SplitterMoved
+        Dim pasek As Integer = If(Panel2.Height < _minWysokoscPanelu, SystemInformation.VerticalScrollBarWidth, 0)
+        _szerokoscPanelu = Math.Max(_minSzerokoscPanelu, Panel2.Width - pasek)
+        Ustawienia.SzerokoscPanelu = If(_szerokoscPanelu = _minSzerokoscPanelu, 0, _szerokoscPanelu)
+        DopasujSzerokoscPanelu()
     End Sub
 
 #End Region
@@ -394,8 +535,8 @@ Public Class Form1
             Exit Sub
         End Try
 
-        'zbiór map - zmiana wywołuje wczytanie listy warstw i wyczyszczenie wybranych
-        cmbZbiorMap.Text = c.RodzajMapy
+        'zbiór map sesji - nazwa sesji przy pustej kanapce, rozwijany w drzewie warstw
+        If c.RodzajMapy <> "" Then _biezacyZbior = c.RodzajMapy
         Ustawienia.Uklad = UkladWspolrzednych.ZKodu(c.UkladEpsg)
         txtXDol.Text = c.XDol
         txtYLewy.Text = c.YLewy
@@ -411,6 +552,10 @@ Public Class Form1
         _automatycznyPikselMetry = If(najdokladniejsza IsNot Nothing, najdokladniejsza.ZalecanyPiksel, 0)
         _automatycznyPikselTekst = If(najdokladniejsza IsNot Nothing, RozmiarPikselaWarstwy(Liczba(najdokladniejsza.ZalecanyPiksel)), "")
         PokazWarstwy()
+        If _zestaw.Liczba > 0 AndAlso lstWybraneWarstwy.Zaznaczona < 0 Then
+            lstWybraneWarstwy.Zaznaczona = 0
+        End If
+        RozwinZbioryWybranych(_biezacyZbior)
 
         'format spoza listy obsługiwanych (np. svg+xml z dawnych wersji) - jpeg
         If c.Format <> "" Then Ustawienia.Format = UstawieniaProgramu.NormalizujFormat(c.Format)
@@ -487,15 +632,15 @@ Public Class Form1
     ''' <summary>Parametry bieżącej sesji (pola formularza i ustawienia) w postaci zapisywanej w conf.txt.</summary>
     Private Function BiezacaKonfiguracja() As KonfiguracjaSesji
         Dim c As New KonfiguracjaSesji With {
-            .Folder = FolderSesji, .RodzajMapy = If(_zestaw.Liczba > 0 AndAlso _zestaw(0).Zbior <> "", _zestaw(0).Zbior, cmbZbiorMap.Text),
+            .Folder = FolderSesji, .RodzajMapy = If(_zestaw.Liczba > 0 AndAlso _zestaw(0).Zbior <> "", _zestaw(0).Zbior, _biezacyZbior),
             .XDol = txtXDol.Text, .YLewy = txtYLewy.Text, .XGora = txtXGora.Text, .YPrawy = txtYPrawy.Text,
             .BokSegmentuPx = txtBokSegmentu.Text, .RozmiarPiksela = txtRozmiarPiksela.Text,
             .LiczbaWarstw = _zestaw.Liczba, .KrycieWarstw = _zestaw.TekstKrycia(), .Format = Ustawienia.Format, .Prefiks = Ustawienia.Prefiks,
             .PobierajPowyzejOstatniego = Ustawienia.PobierajPowyzejOstatniego,
             .SrodekMapySzerokosc = lblSrodekSzer.Text.Replace(","c, "."c), .SrodekMapyDlugosc = lblSrodekDlug.Text.Replace(","c, "."c),
             .SkalaMapy = lblZoom.Text.Replace(","c, "."c), .Numeracja = Ustawienia.Numeracja, .UkladEpsg = Ustawienia.Uklad.Epsg,
-            .Przezroczystosc = Ustawienia.Przezroczystosc, .DataPobrania = _dataPobrania,
-            .AdresSerwera = If(_zestaw.Liczba > 0, _zestaw(0).Adres, _plikWarstw.Adres),
+            .Przezroczystosc = EfektywnaPrzezroczystosc(), .DataPobrania = _dataPobrania,
+            .AdresSerwera = If(_zestaw.Liczba > 0, _zestaw(0).Adres, If(ZnajdzZbior(_biezacyZbior)?.Plik?.Adres, "")),
             .AdresyWarstw = ZestawWarstw.Polacz(_zestaw.Adresy()), .ZbioryWarstw = ZestawWarstw.Polacz(_zestaw.Zbiory())}
         For i = 0 To _zestaw.Liczba - 1
             c.Warstwy(i) = _zestaw(i).Nazwa
@@ -595,9 +740,12 @@ Public Class Form1
 
 #Region "Zbiory map i warstwy"
 
-    ''' <summary>Lista zbiorów map z pliku warstwy\warstwy.txt.</summary>
-    Public Sub WczytajListeZbiorowMap(Optional wybranyZbior As String = "")
-        cmbZbiorMap.Items.Clear()
+    ''' <summary>
+    ''' Wczytuje zbiory map z plików warstwy\warstwy.txt (folder programu i folder danych), katalog grup i nazw warstw
+    ''' (warstwy\katalog.txt) i buduje drzewo warstw. Zbiór <paramref name="pokazZbior"/> (np. dodany kreatorem) jest
+    ''' rozwijany i wskazywany w drzewie.
+    ''' </summary>
+    Public Sub WczytajListeZbiorowMap(Optional pokazZbior As String = "")
         Dim znalezione As New List(Of String)()
         Dim dodane As New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
 
@@ -608,20 +756,93 @@ Public Class Form1
             DodajZbioryZIndeksu(Path.Combine(FolderWarstwDanych, "warstwy.txt"), znalezione, dodane)
         End If
 
+        'wszystkie pliki od razu - są małe (kilkadziesiąt plików po kilkadziesiąt wierszy), a wyszukiwanie warstw,
+        'liczniki wybranych warstw i „rozwiń wszystkie” potrzebują zawartości każdego zbioru
+        _zbiory.Clear()
         For Each nazwa In znalezione
-            cmbZbiorMap.Items.Add(nazwa)
+            Dim z As New ZbiorMapy With {.Nazwa = nazwa}
+            Dim plik As String = SciezkaZbioruMap(nazwa)
+            If plik = "" Then
+                z.Blad = "brak pliku " & nazwa & ".txt w folderze warstwy"
+            Else
+                Try
+                    z.Plik = PlikWarstw.Wczytaj(plik)
+                Catch ex As Exception
+                    z.Blad = ex.Message
+                End Try
+            End If
+            _zbiory.Add(z)
         Next
+        WczytajKatalog()
 
-        If cmbZbiorMap.Items.Count = 0 Then
+        If _zbiory.Count = 0 Then
             Komunikat("Brak plików z listą zbiorów map.", Color.Red)
-        ElseIf Not String.IsNullOrEmpty(wybranyZbior) AndAlso cmbZbiorMap.Items.Contains(wybranyZbior) Then
-            cmbZbiorMap.SelectedItem = wybranyZbior
-        ElseIf cmbZbiorMap.Items.Contains("skany_map_topograficznych") Then
-            cmbZbiorMap.SelectedItem = "skany_map_topograficznych"
-        ElseIf cmbZbiorMap.Items.Count > 0 Then
-            cmbZbiorMap.SelectedIndex = 0
+        ElseIf ZnajdzZbior(_biezacyZbior) Is Nothing Then
+            _biezacyZbior = If(ZnajdzZbior(DomyslnyZbiorMap) IsNot Nothing, DomyslnyZbiorMap, _zbiory(0).Nazwa)
         End If
+        If pokazZbior <> "" AndAlso ZnajdzZbior(pokazZbior) IsNot Nothing Then _biezacyZbior = pokazZbior
+
+        BudujDrzewo()
+        RozwinZbioryWybranych(_biezacyZbior)
+        PokazWarstwy()
     End Sub
+
+    ''' <summary>
+    ''' Katalog grup i nazw warstw (folder programu, potem folder danych) oraz nazwy wyświetlane warstw kanapki.
+    ''' Brak katalogu - drzewo pokazuje zbiory map z nazwami z plików (grupa „Dodane serwery”).
+    ''' </summary>
+    Private Sub WczytajKatalog()
+        _katalog = New KatalogWarstw()
+        Dim plik As String = Path.Combine(FolderWarstwProgramu, KatalogWarstw.NazwaPliku)
+        If Not File.Exists(plik) Then plik = Path.Combine(FolderWarstwDanych, KatalogWarstw.NazwaPliku)
+        If File.Exists(plik) Then
+            Try
+                _katalog = KatalogWarstw.Wczytaj(plik)
+                If _katalog.Bledy.Count > 0 Then
+                    Komunikat("Pominięto błędne wiersze katalogu warstw (" & _katalog.Bledy.Count & "): " & _katalog.Bledy(0), Color.Red)
+                End If
+            Catch ex As Exception
+                Komunikat("Nie udało się odczytać katalogu warstw: " & ex.Message, Color.Red)
+            End Try
+        End If
+        Dim pliki As New Dictionary(Of String, PlikWarstw)(StringComparer.OrdinalIgnoreCase)
+        _tytulyDodanychWarstw.Clear()
+        For Each z In _zbiory
+            If z.Plik IsNot Nothing Then
+                pliki(z.Nazwa) = z.Plik
+                Dim maCzytelnyZbior = Not String.IsNullOrWhiteSpace(z.Plik.Tytul)
+                Dim nazwaZbioru As String = If(maCzytelnyZbior, z.Plik.Tytul, z.Nazwa)
+                For Each wm In z.Plik.Warstwy
+                    Dim maCzytelnaWarstwe = Not String.IsNullOrWhiteSpace(wm.Tytul)
+                    If Not maCzytelnyZbior AndAlso Not maCzytelnaWarstwe Then Continue For
+                    Dim klucz = KatalogWarstw.KluczAliasu(z.Plik.Adres, wm.Nazwa)
+                    Dim nazwaW = If(maCzytelnaWarstwe, wm.Tytul, wm.Nazwa)
+                    If Not _tytulyDodanychWarstw.ContainsKey(klucz) Then
+                        _tytulyDodanychWarstw(klucz) = (nazwaW, nazwaZbioru)
+                    End If
+                Next
+            End If
+        Next
+        _nazwyWarstw = _katalog.MapaNazw(pliki)
+    End Sub
+
+    ''' <summary>Nazwa warstwy kanapki do wyświetlania: z katalogu warstw albo z tytułu w pliku zbioru, inaczej nazwa na serwerze.</summary>
+    Friend Function NazwaWarstwy(w As WarstwaWybrana) As String
+        Dim n As (Nazwa As String, Grupa As String) = Nothing
+        Dim klucz = KatalogWarstw.KluczAliasu(w.Adres, w.Nazwa)
+        If _nazwyWarstw.TryGetValue(klucz, n) Then Return n.Nazwa
+        If _tytulyDodanychWarstw.TryGetValue(klucz, n) Then Return n.Nazwa
+        Return w.Nazwa
+    End Function
+
+    ''' <summary>Źródło warstwy kanapki do wyświetlania: grupa z katalogu warstw albo tytuł zbioru, inaczej nazwa pliku zbioru.</summary>
+    Friend Function ZrodloWarstwy(w As WarstwaWybrana) As String
+        Dim n As (Nazwa As String, Grupa As String) = Nothing
+        Dim klucz = KatalogWarstw.KluczAliasu(w.Adres, w.Nazwa)
+        If _nazwyWarstw.TryGetValue(klucz, n) Then Return n.Grupa
+        If _tytulyDodanychWarstw.TryGetValue(klucz, n) Then Return n.Grupa
+        Return w.Zbior
+    End Function
 
     Private Sub DodajZbioryZIndeksu(plik As String, lista As List(Of String), dodane As HashSet(Of String))
         If Not File.Exists(plik) Then Exit Sub
@@ -631,26 +852,276 @@ Public Class Form1
         Next
     End Sub
 
-    ''' <summary>Warstwy bieżącego zbioru map do listy wyboru.</summary>
-    Private Sub WczytajWarstwyZbioru()
-        lstWarstwy.Items.Clear()
-        _plikWarstw = New PlikWarstw()
+    ''' <summary>Ścieżka pliku zbioru map (folder programu, potem folder danych); pusty tekst - brak pliku.</summary>
+    Private Function SciezkaZbioruMap(zbior As String) As String
+        Dim plik As String = Path.Combine(FolderWarstwProgramu, zbior & ".txt")
+        If File.Exists(plik) Then Return plik
+        plik = Path.Combine(FolderWarstwDanych, zbior & ".txt")
+        Return If(File.Exists(plik), plik, "")
+    End Function
 
-        Dim nazwaPliku As String = cmbZbiorMap.Text & ".txt"
-        Dim plik As String = Path.Combine(FolderWarstwProgramu, nazwaPliku)
-        If Not File.Exists(plik) Then
-            plik = Path.Combine(FolderWarstwDanych, nazwaPliku)
-        End If
-        If File.Exists(plik) = False Then Exit Sub
+    ''' <summary>Zbiór map wczytany do drzewa (Nothing - brak).</summary>
+    Private Function ZnajdzZbior(nazwa As String) As ZbiorMapy
+        Return _zbiory.FirstOrDefault(Function(z) String.Equals(z.Nazwa, nazwa, StringComparison.OrdinalIgnoreCase))
+    End Function
+
+    ''' <summary>Czy wyszukiwanie warstw jest włączone (pole wyszukiwania zawiera słowa).</summary>
+    Private ReadOnly Property SzukanieWarstw As Boolean
+        Get
+            Return FiltrWarstw.Slowa(txtSzukajWarstwy.Text).Length > 0
+        End Get
+    End Property
+
+    ''' <summary>
+    ''' Drzewo warstw: grupy i podgrupy z katalogu warstw, w nich warstwy z polami wyboru (nazwy z katalogu), na końcu
+    ''' grupa „Dodane serwery” ze zbiorami i warstwami spoza katalogu. Przy wyszukiwaniu - tylko pasujące warstwy
+    ''' (do frazy pasują nazwy grup, nazwy warstw i nazwy techniczne), wszystkie grupy rozwinięte. Pola wyboru
+    ''' odpowiadają warstwom kanapki (<see cref="OdswiezZaznaczeniaDrzewa"/>). Klucz węzła (Name) - ścieżka grup.
+    ''' </summary>
+    Private Sub BudujDrzewo()
+        Dim fraza As String = txtSzukajWarstwy.Text
+        Dim szukanie As Boolean = SzukanieWarstw
+        Dim kluczZaznaczonego As String = If(tvWarstwy.SelectedNode?.Name, "")
+
+        _synchronizacjaDrzewa = True
+        tvWarstwy.BeginUpdate()
         Try
-            _plikWarstw = PlikWarstw.Wczytaj(plik)
-        Catch ex As Exception
-            Komunikat("Nie udało się odczytać pliku zbioru map: " & ex.Message, Color.Red)
-            Exit Sub
+            tvWarstwy.Nodes.Clear()
+            For Each g In _katalog.Grupy
+                Dim wezel = WezelGrupy(g, "", "", fraza, szukanie)
+                If wezel IsNot Nothing Then tvWarstwy.Nodes.Add(wezel)
+            Next
+            Dim dodane = WezelDodanychSerwerow(fraza, szukanie)
+            If dodane IsNot Nothing Then tvWarstwy.Nodes.Add(dodane)
+
+            For Each wezel In tvWarstwy.WszystkieWezly().Where(Function(w) DrzewoWarstw.CzyGrupa(w)).ToList()
+                If szukanie OrElse _rozwinieteZbiory.Contains(wezel.Name) Then wezel.Expand()
+            Next
+
+            'zaznaczenie sprzed przebudowy (np. po wpisaniu kolejnej litery w polu wyszukiwania)
+            If kluczZaznaczonego <> "" Then
+                Dim znalezione = tvWarstwy.Nodes.Find(kluczZaznaczonego, True)
+                If znalezione.Length > 0 Then tvWarstwy.SelectedNode = znalezione(0)
+            End If
+        Finally
+            tvWarstwy.EndUpdate()
+            _synchronizacjaDrzewa = False
         End Try
-        For Each w In _plikWarstw.Warstwy
-            lstWarstwy.Items.Add(w.Nazwa)
+        tvWarstwy.UkryjPolaGrup()
+        OdswiezZaznaczeniaDrzewa()
+        OdswiezPrzyciskZwijania()
+    End Sub
+
+    ''' <summary>Węzeł grupy katalogu z podgrupami i warstwami (Nothing - grupa pusta, np. nic nie pasuje do wyszukiwania).</summary>
+    Private Function WezelGrupy(g As WezelKatalogu, kluczRodzica As String, nazwyRodzicow As String, fraza As String, szukanie As Boolean) As TreeNode
+        Dim klucz As String = kluczRodzica & "/" & g.Nazwa
+        Dim nazwy As String = nazwyRodzicow & " " & g.Nazwa
+        Dim wezel As New TreeNode(g.Nazwa) With {.Name = klucz, .Tag = g.Nazwa}
+        For Each d In g.Dzieci
+            If d.CzyWarstwa Then
+                Dim z = ZnajdzZbior(d.Zbior)
+                If z Is Nothing OrElse z.Plik Is Nothing Then Continue For
+                If szukanie AndAlso Not FiltrWarstw.Pasuje(nazwy & " " & z.Nazwa, d.Nazwa & " " & d.Warstwa, fraza) Then Continue For
+                wezel.Nodes.Add(WezelWarstwy(z, d.Warstwa, d.Nazwa, klucz))
+            Else
+                Dim podgrupa = WezelGrupy(d, klucz, nazwy, fraza, szukanie)
+                If podgrupa IsNot Nothing Then wezel.Nodes.Add(podgrupa)
+            End If
         Next
+        Return If(wezel.Nodes.Count > 0, wezel, Nothing)
+    End Function
+
+    ''' <summary>
+    ''' Grupa „Dodane serwery”: zbiory map spoza katalogu (np. dodane kreatorem lub w folderze użytkownika) i warstwy
+    ''' zbiorów z katalogu, których katalog nie wymienia - z nazwami z plików; zbiory, których nie udało się odczytać, szare.
+    ''' </summary>
+    Private Function WezelDodanychSerwerow(fraza As String, szukanie As Boolean) As TreeNode
+        Dim klucz As String = "/" & GrupaDodanychSerwerow
+        Dim grupa As New TreeNode(GrupaDodanychSerwerow) With {.Name = klucz, .Tag = GrupaDodanychSerwerow,
+            .ToolTipText = "Zbiory map i warstwy spoza katalogu warstw (warstwy\katalog.txt), np. dodane kreatorem serwerów."}
+        For Each z In _zbiory
+            Dim wyswietlanyZbior As String = If(z.Plik IsNot Nothing AndAlso Not String.IsNullOrWhiteSpace(z.Plik.Tytul), z.Plik.Tytul, z.Nazwa)
+            Dim wezel As New TreeNode(wyswietlanyZbior) With {.Name = klucz & "/" & z.Nazwa, .Tag = wyswietlanyZbior}
+            If z.Plik Is Nothing Then
+                If szukanie AndAlso Not FiltrWarstw.Pasuje(GrupaDodanychSerwerow, wyswietlanyZbior & " " & z.Nazwa, fraza) Then Continue For
+                wezel.ForeColor = SystemColors.GrayText
+                wezel.ToolTipText = "Nie udało się odczytać zbioru map: " & z.Blad
+                grupa.Nodes.Add(wezel)
+                Continue For
+            End If
+            wezel.ToolTipText = wyswietlanyZbior & If(wyswietlanyZbior <> z.Nazwa, " (" & z.Nazwa & ")", "") &
+                                vbCrLf & If(z.Plik.Adres <> "", MetadaneMapy.MaskujSekrety(z.Plik.Adres), "Brak adresu serwera w pliku zbioru map.")
+            For Each w In _katalog.NiewymienioneWarstwy(z.Nazwa, z.Plik)
+                Dim wyswietlanaNazwa As String = If(Not String.IsNullOrWhiteSpace(w.Tytul), w.Tytul, w.Nazwa)
+                If szukanie AndAlso Not FiltrWarstw.Pasuje(GrupaDodanychSerwerow & " " & wyswietlanyZbior & " " & z.Nazwa, wyswietlanaNazwa & " " & w.Nazwa, fraza) Then Continue For
+                wezel.Nodes.Add(WezelWarstwy(z, w.Nazwa, wyswietlanaNazwa, wezel.Name))
+            Next
+            If wezel.Nodes.Count > 0 Then grupa.Nodes.Add(wezel)
+        Next
+        Return If(grupa.Nodes.Count > 0, grupa, Nothing)
+    End Function
+
+    ''' <summary>Węzeł warstwy z podpowiedzią: nazwa warstwy na serwerze, zbiór map, typ, zakres powiększeń, zalecany rozmiar piksela.</summary>
+    Private Function WezelWarstwy(z As ZbiorMapy, warstwa As String, nazwa As String, kluczRodzica As String) As TreeNode
+        Dim wm = z.Plik.Znajdz(warstwa)
+        Dim opisTechniczny As String = KafleXyz.OpisWarstwy(z.Plik.EfektywnyTyp, z.Plik.OpcjeKafli(warstwa))
+        Dim opis As String = nazwa & vbCrLf & "Warstwa " & warstwa & " zbioru map " & z.Nazwa &
+                             If(opisTechniczny <> "", vbCrLf & opisTechniczny, "") &
+                             If(wm IsNot Nothing AndAlso Wartosc(wm.RozmiarPiksela) > 0, vbCrLf & "Zalecany rozmiar piksela: " & wm.RozmiarPiksela & " m", "")
+        Return New TreeNode(nazwa) With {.Name = kluczRodzica & "/" & z.Nazwa & "|" & warstwa, .ToolTipText = opis,
+                                         .Tag = New WarstwaWDrzewie With {.Zbior = z, .Warstwa = warstwa, .Nazwa = nazwa}}
+    End Function
+
+    ''' <summary>
+    ''' Pola wyboru warstw według kanapki (warstwa zaznaczona = wybrana z tego samego serwera, więc ta sama warstwa
+    ''' w kilku grupach jest zaznaczona wszędzie) i liczba wybranych warstw przy nazwach grup. Wywoływane po każdej
+    ''' zmianie kanapki, także gdy dodanie warstwy się nie udało.
+    ''' </summary>
+    Private Sub OdswiezZaznaczeniaDrzewa()
+        If tvWarstwy.Nodes.Count = 0 Then Exit Sub
+        _synchronizacjaDrzewa = True
+        Try
+            For Each wezel As TreeNode In tvWarstwy.Nodes
+                OdswiezWezel(wezel)
+            Next
+        Finally
+            _synchronizacjaDrzewa = False
+        End Try
+    End Sub
+
+    ''' <summary>Zaznaczenie warstwy albo licznik grupy; zwraca liczbę wybranych warstw w węźle.</summary>
+    Private Function OdswiezWezel(wezel As TreeNode) As Integer
+        Dim w = DrzewoWarstw.WarstwaWezla(wezel)
+        If w IsNot Nothing Then
+            Dim wybrana As Boolean = _zestaw.Zawiera(w.Zbior.Plik.Adres, w.Warstwa)
+            If wezel.Checked <> wybrana Then wezel.Checked = wybrana
+            Return If(wybrana, 1, 0)
+        End If
+        Dim suma As Integer = 0
+        For Each d As TreeNode In wezel.Nodes
+            suma += OdswiezWezel(d)
+        Next
+        Dim tekst As String = CStr(wezel.Tag) & If(suma > 0, " (" & suma & ")", "")
+        If wezel.Text <> tekst Then wezel.Text = tekst
+        Return suma
+    End Function
+
+    ''' <summary>
+    ''' Rozwija grupy z wybranymi warstwami oraz grupę pierwszej warstwy zbioru <paramref name="pokazZbior"/>, którą
+    ''' wskazuje w drzewie.
+    ''' </summary>
+    Private Sub RozwinZbioryWybranych(Optional pokazZbior As String = "")
+        If tvWarstwy.Nodes.Count = 0 Then Exit Sub
+        Dim cel As TreeNode = Nothing
+        For Each wezel In tvWarstwy.WszystkieWezly().ToList()
+            Dim w = DrzewoWarstw.WarstwaWezla(wezel)
+            If w Is Nothing Then Continue For
+            Dim zeZbioru As Boolean = String.Equals(w.Zbior.Nazwa, pokazZbior, StringComparison.OrdinalIgnoreCase)
+            If zeZbioru AndAlso cel Is Nothing Then cel = wezel.Parent
+            If wezel.Checked OrElse (zeZbioru AndAlso cel Is wezel.Parent) Then RozwinNadrzedne(wezel)
+        Next
+        If cel IsNot Nothing Then
+            tvWarstwy.SelectedNode = cel
+            tvWarstwy.PokazWezel(cel)
+        End If
+        OdswiezPrzyciskZwijania()
+    End Sub
+
+    Private Shared Sub RozwinNadrzedne(wezel As TreeNode)
+        Dim rodzic As TreeNode = wezel.Parent
+        While rodzic IsNot Nothing
+            If Not rodzic.IsExpanded Then rodzic.Expand()
+            rodzic = rodzic.Parent
+        End While
+    End Sub
+
+    ''' <summary>Przycisk zwijania: zwija wszystko, gdy któraś grupa jest rozwinięta, w przeciwnym razie rozwija wszystkie.</summary>
+    Private Sub OdswiezPrzyciskZwijania()
+        Dim zwin As Boolean = tvWarstwy.Nodes.Cast(Of TreeNode)().Any(Function(n) n.IsExpanded)
+        btnZwinRozwin.Text = If(zwin, "⊟", "⊞")
+        ToolTip1.SetToolTip(btnZwinRozwin, If(zwin, "Zwiń wszystkie grupy", "Rozwiń wszystkie grupy i podgrupy"))
+    End Sub
+
+    Private Sub btnZwinRozwin_Click(sender As Object, e As EventArgs) Handles btnZwinRozwin.Click
+        Dim zwin As Boolean = tvWarstwy.Nodes.Cast(Of TreeNode)().Any(Function(n) n.IsExpanded)
+        tvWarstwy.BeginUpdate()
+        Try
+            If zwin Then tvWarstwy.CollapseAll() Else tvWarstwy.ExpandAll()
+        Finally
+            tvWarstwy.EndUpdate()
+        End Try
+        If zwin AndAlso tvWarstwy.Nodes.Count > 0 Then
+            tvWarstwy.PokazWezel(tvWarstwy.Nodes(0))
+        ElseIf tvWarstwy.SelectedNode IsNot Nothing Then
+            tvWarstwy.PokazWezel(tvWarstwy.SelectedNode)
+        End If
+        OdswiezPrzyciskZwijania()
+    End Sub
+
+    Private Sub tvWarstwy_AfterExpandCollapse(sender As Object, e As TreeViewEventArgs) Handles tvWarstwy.AfterExpand, tvWarstwy.AfterCollapse
+        'przy wyszukiwaniu grupy rozwija program - zapamiętywane są tylko rozwinięcia bez wyszukiwania
+        If Not _synchronizacjaDrzewa AndAlso Not SzukanieWarstw AndAlso DrzewoWarstw.CzyGrupa(e.Node) Then
+            If e.Node.IsExpanded Then _rozwinieteZbiory.Add(e.Node.Name) Else _rozwinieteZbiory.Remove(e.Node.Name)
+        End If
+        If Not _synchronizacjaDrzewa Then OdswiezPrzyciskZwijania()
+    End Sub
+
+    Private Sub tvWarstwy_AfterSelect(sender As Object, e As TreeViewEventArgs) Handles tvWarstwy.AfterSelect
+        If _synchronizacjaDrzewa Then Exit Sub
+        Dim w = DrzewoWarstw.WarstwaWezla(e.Node)
+        If w IsNot Nothing Then _biezacyZbior = w.Zbior.Nazwa
+    End Sub
+
+    ''' <summary>Kliknięcie nazwy warstwy zaznacza ją lub odznacza (jak pole wyboru), kliknięcie nazwy grupy rozwija ją lub zwija.</summary>
+    Private Sub tvWarstwy_NodeMouseClick(sender As Object, e As TreeNodeMouseClickEventArgs) Handles tvWarstwy.NodeMouseClick
+        If e.Button <> MouseButtons.Left OrElse tvWarstwy.HitTest(e.Location).Location <> TreeViewHitTestLocations.Label Then Exit Sub
+        If DrzewoWarstw.CzyGrupa(e.Node) Then
+            e.Node.Toggle()
+        Else
+            e.Node.Checked = Not e.Node.Checked
+        End If
+    End Sub
+
+    ''' <summary>Zaznaczenie warstwy dodaje ją na wierzch kanapki, odznaczenie - usuwa z kanapki.</summary>
+    Private Sub tvWarstwy_AfterCheck(sender As Object, e As TreeViewEventArgs) Handles tvWarstwy.AfterCheck
+        Dim w = DrzewoWarstw.WarstwaWezla(e.Node)
+        If _synchronizacjaDrzewa OrElse w Is Nothing Then Exit Sub
+        _biezacyZbior = w.Zbior.Nazwa
+        If e.Node.Checked Then DodajWarstwe(w) Else UsunWarstweZbioru(w)
+        'pola wyboru zgodne z kanapką także wtedy, gdy zmiana się nie udała (pobieranie, 12 warstw, brak adresu),
+        'i przy tej samej warstwie w innych grupach
+        OdswiezZaznaczeniaDrzewa()
+    End Sub
+
+    Private Sub txtSzukajWarstwy_TextChanged(sender As Object, e As EventArgs) Handles txtSzukajWarstwy.TextChanged
+        BudujDrzewo()
+    End Sub
+
+    ''' <summary>Esc czyści wyszukiwanie, strzałka w dół lub Enter przechodzą do drzewa warstw.</summary>
+    Private Sub txtSzukajWarstwy_KeyDown(sender As Object, e As KeyEventArgs) Handles txtSzukajWarstwy.KeyDown
+        Select Case e.KeyCode
+            Case Keys.Escape
+                txtSzukajWarstwy.Clear()
+            Case Keys.Down, Keys.Enter
+                If tvWarstwy.Nodes.Count = 0 Then Exit Sub
+                If tvWarstwy.SelectedNode Is Nothing Then
+                    'przy wyszukiwaniu - pierwsza znaleziona warstwa
+                    tvWarstwy.SelectedNode = If(tvWarstwy.WszystkieWezly().FirstOrDefault(Function(w) Not DrzewoWarstw.CzyGrupa(w) AndAlso w.IsVisible),
+                                                tvWarstwy.Nodes(0))
+                End If
+                tvWarstwy.Focus()
+            Case Else
+                Exit Sub
+        End Select
+        e.Handled = True
+        e.SuppressKeyPress = True
+    End Sub
+
+    ''' <summary>Blokuje drzewo warstw w trakcie pobierania (kanapki nie można wtedy zmieniać).</summary>
+    Private Sub UstawDostepnoscDrzewa(dostepne As Boolean)
+        tvWarstwy.Enabled = dostepne
+        txtSzukajWarstwy.Enabled = dostepne
+        btnZwinRozwin.Enabled = dostepne
     End Sub
 
     ''' <summary>Lista wybranych warstw: obraz kanapki w tle, menu warstwy, podpowiedzi.</summary>
@@ -659,6 +1130,8 @@ Public Class Form1
         lstWybraneWarstwy.Podpowiedz = ToolTip1
         lstWybraneWarstwy.OpisListy = ToolTip1.GetToolTip(grpWybraneWarstwy)
         lstWybraneWarstwy.Zestaw = _zestaw
+        lstWybraneWarstwy.NazwaWarstwy = AddressOf NazwaWarstwy
+        lstWybraneWarstwy.ZrodloWarstwy = AddressOf ZrodloWarstwy
 
         _menuWarstwy = New ContextMenuStrip(components)
         _menuWarstwy.Items.Add("Przesuń wyżej", Nothing, Sub() PrzesunZaznaczonaWarstwe(1))
@@ -685,9 +1158,10 @@ Public Class Form1
         lstWybraneWarstwy.MenuWarstwy = _menuWarstwy
     End Sub
 
-    ''' <summary>Wyświetla wybrane warstwy (lista z kanapką) i stan przycisków panelu.</summary>
+    ''' <summary>Wyświetla wybrane warstwy (lista z kanapką, pola wyboru w drzewie warstw) i stan przycisków panelu.</summary>
     Private Sub PokazWarstwy()
         If lstWybraneWarstwy.Zestaw IsNot _zestaw Then lstWybraneWarstwy.Zestaw = _zestaw Else lstWybraneWarstwy.Odswiez()
+        OdswiezZaznaczeniaDrzewa()
         OdswiezPrzyciskiWarstw()
     End Sub
 
@@ -695,8 +1169,8 @@ Public Class Form1
     Private Sub OdswiezPrzyciskiWarstw()
         Dim i As Integer = lstWybraneWarstwy.Zaznaczona
         Dim pobieranie As Boolean = _przerwanie IsNot Nothing
-        btnResetujWarstwy.Enabled = _zestaw.Liczba > 0 AndAlso Not pobieranie
-        btnUsunWarstwe.Enabled = i >= 0 AndAlso Not pobieranie
+        btnResetujWarstwy.Enabled = (i >= 0 OrElse _zestaw.Liczba = 1) AndAlso _zestaw.Liczba > 0 AndAlso Not pobieranie
+        btnUsunWarstwe.Enabled = (i >= 0 OrElse _zestaw.Liczba = 1) AndAlso _zestaw.Liczba > 0 AndAlso Not pobieranie
         btnWarstwaWyzej.Enabled = i >= 0 AndAlso i < _zestaw.Liczba - 1 AndAlso Not pobieranie
         btnWarstwaNizej.Enabled = i > 0 AndAlso Not pobieranie
         numKrycie.Enabled = i >= 0 AndAlso Not pobieranie
@@ -710,7 +1184,7 @@ Public Class Form1
     ''' <summary>Opis warstw do komunikatów, np. "orto, dzialki (krycie 60 %)".</summary>
     Private Function OpisWarstw() As String
         Dim zbiory As Boolean = _zestaw.WieleZrodel
-        Return String.Join(", ", _zestaw.Warstwy.Select(Function(w) w.Nazwa & If(zbiory AndAlso w.Zbior <> "", " [" & w.Zbior & "]", "") &
+        Return String.Join(", ", _zestaw.Warstwy.Select(Function(w) NazwaWarstwy(w) & If(zbiory AndAlso ZrodloWarstwy(w) <> "", " [" & ZrodloWarstwy(w) & "]", "") &
                                                            If(w.Krycie < ZestawWarstw.PelneKrycie, " (krycie " & w.Krycie & " %)", "")))
     End Function
 
@@ -728,89 +1202,59 @@ Public Class Form1
         PokazWarstwy()
     End Sub
 
-    ''' <summary>
-    ''' Zmiana zbioru map pokazuje jego warstwy do wyboru. Wybrane już warstwy zostają - każda pamięta swój serwer, więc
-    ''' na mapę topograficzną z jednego serwera można nałożyć np. cieniowanie z innego (dawniej zmiana zbioru czyściła listę).
-    ''' </summary>
-    Private Sub cmbZbiorMap_SelectedIndexChanged(sender As Object, e As EventArgs) Handles cmbZbiorMap.SelectedIndexChanged
-        PrzerwijPobieranie()
-        WczytajWarstwyZbioru()
-        If _zaladowany Then
-            Komunikat("Zbiór map " & cmbZbiorMap.Text & ": kliknij warstwę, aby dodać ją do kanapki" &
-                      If(_zestaw.Liczba > 0, " (wybrane warstwy innych zbiorów zostają; kosz usuwa wszystkie).", "."), Color.Blue)
-        End If
-    End Sub
-
-    'dodawanie warstw
-    Private Sub lstWarstwy_SelectedIndexChanged(sender As Object, e As EventArgs) Handles lstWarstwy.SelectedIndexChanged
-        If lstWarstwy.SelectedItem Is Nothing Then Exit Sub
-        DodajWarstwe(lstWarstwy.SelectedItem.ToString())
+    ''' <summary>Usuwa z kanapki warstwę (odznaczenie warstwy w drzewie).</summary>
+    Private Sub UsunWarstweZbioru(w As WarstwaWDrzewie)
+        For i = 0 To _zestaw.Liczba - 1
+            If _zestaw(i).TaSama(w.Zbior.Plik.Adres, w.Warstwa) Then
+                lstWybraneWarstwy.Zaznaczona = i
+                UsunZaznaczonaWarstwe()
+                Exit Sub
+            End If
+        Next
     End Sub
 
     ''' <summary>
-    ''' Kliknięcie warstwy, która jest już zaznaczona na liście WMS (np. po usunięciu jej z kanapki) - zmiana zaznaczenia
-    ''' nie następuje, więc warstwa dodawana jest tutaj; warstwa już wybrana nie jest dodawana ponownie.
+    ''' Dodaje warstwę na wierzch kanapki. Wybrane już warstwy innych zbiorów zostają - każda pamięta swój serwer,
+    ''' więc na mapę topograficzną z jednego serwera można nałożyć np. cieniowanie z innego.
     ''' </summary>
-    Private Sub lstWarstwy_MouseClick(sender As Object, e As MouseEventArgs) Handles lstWarstwy.MouseClick
-        Dim i As Integer = lstWarstwy.IndexFromPoint(e.Location)
-        If i < 0 Then Exit Sub
-        Dim nazwa As String = lstWarstwy.Items(i).ToString()
-        If Not _zestaw.Zawiera(_plikWarstw.Adres, nazwa) Then DodajWarstwe(nazwa)
-    End Sub
-
-    Private Sub DodajWarstwe(nazwa As String)
+    Private Sub DodajWarstwe(w As WarstwaWDrzewie)
         If PobieranieTrwa("Zmiana listy warstw") Then Exit Sub
-        If _plikWarstw.Adres = "" Then
-            Komunikat("Zbiór map " & cmbZbiorMap.Text & " nie ma adresu serwera.", Color.Red) : Exit Sub
+        Dim zbior As ZbiorMapy = w.Zbior
+        If zbior.Plik.Adres = "" Then
+            Komunikat("Zbiór map " & zbior.Nazwa & " nie ma adresu serwera.", Color.Red) : Exit Sub
         End If
-        Dim zWarstwy = _plikWarstw.Znajdz(nazwa)
+        Dim zWarstwy = zbior.Plik.Znajdz(w.Warstwa)
         Dim zalecany As Double = If(zWarstwy IsNot Nothing, Wartosc(zWarstwy.RozmiarPiksela), 0)
         Dim bylaPusta As Boolean = _zestaw.Liczba = 0
-        Select Case _zestaw.Dodaj(nazwa, adres:=_plikWarstw.Adres, zbior:=cmbZbiorMap.Text, zalecanyPiksel:=zalecany)
+        Dim typZrodla As TypUslugiMapowej = zbior.Plik.EfektywnyTyp
+        Dim jestNakladka As Boolean = zbior.Plik.OpcjeKafli(w.Warstwa).Nakladka
+        Select Case _zestaw.Dodaj(w.Warstwa, adres:=zbior.Plik.Adres, zbior:=zbior.Nazwa, zalecanyPiksel:=zalecany,
+                                   typZrodla:=typZrodla, nakladka:=jestNakladka, umiescPodNakladkami:=True,
+                                   ignorujSsl:=zbior.Plik.IgnorujSsl)
             Case WynikDodania.BrakMiejsca
                 MsgBox("TEJ WARSTWY NIE MOŻNA JUŻ DODAĆ - wybrano już " & ZestawWarstw.MaksLiczba & " warstw.")
                 Exit Sub
             Case WynikDodania.JuzWybrana
-                Komunikat("Warstwa " & nazwa & " zbioru " & cmbZbiorMap.Text & " jest już na liście wybranych warstw.", Color.Blue)
+                Komunikat("Warstwa " & w.Nazwa & " jest już na liście wybranych warstw.", Color.Blue)
                 Exit Sub
         End Select
-        PoZmianieWarstw(_zestaw.Liczba - 1)
+        Dim indeksNowej As Integer = Enumerable.Range(0, _zestaw.Liczba).FirstOrDefault(
+            Function(ix) _zestaw(ix).TaSama(zbior.Plik.Adres, w.Warstwa), _zestaw.Liczba - 1)
+        PoZmianieWarstw(indeksNowej)
 
         'rozmiar piksela wg najdokładniejszej warstwy kanapki (dawniej - wg ostatnio klikniętej)
+        'dawne komunikaty o limicie 256 px serwera hgis.cartomatic.pl usunięte - serwer nie działa, a jego następca
+        '(pastmaps.cenagis.edu.pl, IHPAN) zwraca obrazy 2000 px; nazwy warstw (m25k_2180…) i tak już ich nie wywoływały
         Dim opisPiksela As String = DobierzRozmiarPiksela(bylaPusta)
-        Komunikat("Wskazano warstwę: " & nazwa & "." & If(opisPiksela <> "", " " & opisPiksela, ""), Color.Green)
-
-        'komunikaty o warstwach WMS HGIS, które ograniczają maksymalny rozmiar segmentu do 256 px
-        Dim opis As String = ""
-        Select Case nazwa
-            Case "m25k"
-                opis = "Wybrałeś warstwę niemieckiej mapy topograficznej 1:25 000 Messtischblatt. Pokrywa ona swoim zasięgiem terytorium Zaboru Pruskiego. Wskazany WMS portalu hgis.cartomatic.pl, który posiada ograniczenia maksymalnego rozmiaru segmentu 256px."
-            Case "wig25k"
-                opis = "Wybrałeś warstwę polskiej mapy topograficznej 1:25 000 Wojskowego Instytutu Geograficznego. Pokrywa ona głównie środkową i północną część terytorium II RP. Wybrany WMS historycznych map hgis.cartomatic.pl,który posiada ograniczenia maksymalnego rozmiaru segmentu 256px."
-            Case "wig100k"
-                opis = "Wybrałeś warstwę polskiej mapy topograficznej 1:100 000 Wojskowego Instytutu Geograficznego. Pokrywa ona terytorium II RP. Wybrany WMS historycznych map hgis.cartomatic.pl,który posiada ograniczenia maksymalnego rozmiaru segmentu 256px."
-            Case "kdr"
-                opis = "Wybrałeś warstwę niemieckiej mapy topograficznej 1:100 000  Karte des Deutschen Reiches. Obejmuje ona terytorium Zaboru Pruskiego. Wybrany WMS historycznych map hgis.cartomatic.pl posiada ograniczenia maksymalnego rozmiaru segmentu 256px."
-            Case "kdr_gb"
-                opis = "Wybrałeś warstwę niemieckiej mapy topograficznej 1:100 000  Grossblatt. Obejmuje ona większość terytorium IIIRP. Wybrany WMS historycznych map hgis.cartomatic.pl posiada ograniczenia maksymalnego rozmiaru segmentu 256px."
-        End Select
-        If opis <> "" Then
-            txtBokSegmentu.Text = "250"
-            Komunikat(opis, Color.Blue)
-        End If
+        Dim infoWstawienia As String = If(indeksNowej < _zestaw.Liczba - 1, " (umieszczono pod nakładką)", "")
+        Dim ostrzezenieFormat As String = If(_zestaw.CzySameNakladki() AndAlso Not Wms.CzyFormatZPrzezroczystoscia(Ustawienia.Format),
+                                             " Uwaga: wybrano same nakładki, a format pobierania to ." & Ustawienia.Format & " (bez przezroczystości).", "")
+        Komunikat("Wskazano warstwę: " & w.Nazwa & infoWstawienia & "." & If(opisPiksela <> "", " " & opisPiksela, "") & ostrzezenieFormat, Color.Green)
     End Sub
 
     Private Sub btnResetujWarstwy_Click(sender As Object, e As EventArgs) Handles btnResetujWarstwy.Click
-        'w trakcie pobierania reset zapisywał conf.txt pobieranej sesji bez warstw i włączał przycisk Pobierz
         If PobieranieTrwa("Zmiana listy warstw") Then Exit Sub
-        WyczyscWarstwy()
-        'pusta kanapka - piksel pierwszej dodanej warstwy wpisywany jest zawsze
-        _automatycznyPikselMetry = 0
-        _automatycznyPikselTekst = ""
-        ZapiszConf(False)
-        btnPobierz.Enabled = True
-        btnPrzerwij.Enabled = False
-        Komunikat("Zresetowano listę wprowadzonych warstw mapy wskazanych do pobrania", Color.Green)
+        UsunZaznaczonaWarstwe()
     End Sub
 
     Private Sub btnUsunWarstwe_Click(sender As Object, e As EventArgs) Handles btnUsunWarstwe.Click
@@ -847,11 +1291,18 @@ Public Class Form1
     End Sub
 
     Private Sub UsunZaznaczonaWarstwe()
+        If _zestaw.Liczba = 1 AndAlso lstWybraneWarstwy.Zaznaczona < 0 Then
+            lstWybraneWarstwy.Zaznaczona = 0
+        End If
         Dim i As Integer = lstWybraneWarstwy.Zaznaczona
         If i < 0 OrElse PobieranieTrwa("Zmiana listy warstw") Then Exit Sub
-        Dim nazwa As String = _zestaw(i).Nazwa
+        Dim nazwa As String = NazwaWarstwy(_zestaw(i))
         _zestaw.Usun(i)
         PoZmianieWarstw(Math.Min(i, _zestaw.Liczba - 1))
+        If _zestaw.Liczba = 0 Then
+            _automatycznyPikselMetry = 0
+            _automatycznyPikselTekst = ""
+        End If
         Dim opisPiksela As String = If(_zestaw.Liczba > 0, DobierzRozmiarPiksela(False), "")
         Komunikat("Usunięto warstwę " & nazwa & " z listy wybranych warstw." & If(opisPiksela <> "", " " & opisPiksela, ""), Color.Green)
     End Sub
@@ -867,7 +1318,12 @@ Public Class Form1
         If PobieranieTrwa("Zmiana kolejności warstw") Then Exit Sub
         Dim nowa As Integer = _zestaw.Przenies(zIndeksu, naIndeks)
         PoZmianieWarstw(nowa)
-        Komunikat("Warstwa " & _zestaw(nowa).Nazwa & " jest teraz na miejscu " & (nowa + 1) & If(nowa = 0, " (podkład)", "") & ".", Color.Green)
+        Dim przykryta = _zestaw.ZnajdzPrzykrytaNakladke()
+        If przykryta IsNot Nothing Then
+            Komunikat("Uwaga: nakładka " & NazwaWarstwy(przykryta) & " może zostać zasłonięta przez warstwę nad nią.", Color.DarkOrange)
+        Else
+            Komunikat("Warstwa " & NazwaWarstwy(_zestaw(nowa)) & " jest teraz na miejscu " & (nowa + 1) & If(nowa = 0, " (podkład)", "") & ".", Color.Green)
+        End If
     End Sub
 
     Private Sub UstawKrycieZaznaczonej(krycie As Integer)
@@ -879,8 +1335,8 @@ Public Class Form1
         End If
         _zestaw.UstawKrycie(i, krycie)
         PoZmianieWarstw(i)
-        Komunikat("Krycie warstwy " & _zestaw(i).Nazwa & ": " & _zestaw(i).Krycie & " %." &
-                  If(_zestaw(i).CzyWmts OrElse _zestaw(i).Krycie >= ZestawWarstw.PelneKrycie, "",
+        Komunikat("Krycie warstwy " & NazwaWarstwy(_zestaw(i)) & ": " & _zestaw(i).Krycie & " %." &
+                  If(_zestaw(i).CzyKafelkowa OrElse _zestaw(i).Krycie >= ZestawWarstw.PelneKrycie, "",
                      " Warstwy o kryciu mniejszym niż 100% pobierane są osobnymi zapytaniami (" & _zestaw.GrupyZapytan().Count & " grup na segment)."),
                   Color.Green)
     End Sub
@@ -893,7 +1349,12 @@ Public Class Form1
             _zestaw = okno.Zestaw
             PoZmianieWarstw(Math.Min(okno.Zaznaczona, _zestaw.Liczba - 1))
             Dim opisPiksela As String = DobierzRozmiarPiksela(False)
-            Komunikat("Wybrane warstwy: " & OpisWarstw() & "." & If(opisPiksela <> "", " " & opisPiksela, ""), Color.Green)
+            Dim przykryta = _zestaw.ZnajdzPrzykrytaNakladke()
+            If przykryta IsNot Nothing Then
+                Komunikat("Uwaga: nakładka " & NazwaWarstwy(przykryta) & " może zostać zasłonięta przez warstwę nad nią.", Color.DarkOrange)
+            Else
+                Komunikat("Wybrane warstwy: " & OpisWarstw() & "." & If(opisPiksela <> "", " " & opisPiksela, ""), Color.Green)
+            End If
         End Using
     End Sub
 
@@ -1081,26 +1542,64 @@ Public Class Form1
         Return Math.Abs(Wartosc(tekst) - _automatycznyPikselMetry) <= _automatycznyPikselMetry * 0.000001
     End Function
 
-    ''' <summary>Zalecany rozmiar piksela warstw bez niego (np. wczytanych z conf.txt) - z plików ich zbiorów map.</summary>
+    ''' <summary>Zalecany rozmiar piksela, typ źródła i flaga nakładki warstw sesji (np. po wczytaniu conf.txt) - z plików zbiorów map.</summary>
     Private Sub UzupelnijZalecanePiksele()
         Dim pliki As New Dictionary(Of String, PlikWarstw)(StringComparer.OrdinalIgnoreCase)
         For Each w In _zestaw.Warstwy
-            If w.ZalecanyPiksel > 0 OrElse w.Zbior = "" Then Continue For
+            If w.Zbior = "" Then Continue For
             Dim plik As PlikWarstw = Nothing
             If Not pliki.TryGetValue(w.Zbior, plik) Then
-                plik = PlikZbioruMap(w.Zbior)
+                Dim z = ZnajdzZbior(w.Zbior)
+                plik = If(z?.Plik, PlikZbioruMap(w.Zbior))
                 pliki(w.Zbior) = plik
             End If
-            Dim wm = plik?.Znajdz(w.Nazwa)
-            If wm IsNot Nothing Then w.ZalecanyPiksel = Math.Max(0, Wartosc(wm.RozmiarPiksela))
+            If plik Is Nothing Then Continue For
+            w.TypZrodla = plik.EfektywnyTyp
+            w.Nakladka = plik.OpcjeKafli(w.Nazwa).Nakladka
+            w.IgnorujSsl = plik.IgnorujSsl
+            If w.ZalecanyPiksel <= 0 Then
+                Dim wm = plik.Znajdz(w.Nazwa)
+                If wm IsNot Nothing Then w.ZalecanyPiksel = Math.Max(0, Wartosc(wm.RozmiarPiksela))
+            End If
         Next
     End Sub
 
+    Private Function ZrodlaMapSesji() As Dictionary(Of String, PlikWarstw)
+        Dim zrodla As New Dictionary(Of String, PlikWarstw)(StringComparer.OrdinalIgnoreCase)
+        For Each z In _zbiory
+            If z.Plik IsNot Nothing AndAlso Not zrodla.ContainsKey(z.Nazwa) Then
+                zrodla(z.Nazwa) = z.Plik
+            End If
+        Next
+        For Each w In _zestaw.Warstwy
+            If String.IsNullOrEmpty(w.Zbior) OrElse zrodla.ContainsKey(w.Zbior) Then Continue For
+            Dim plik = PlikZbioruMap(w.Zbior)
+            If plik IsNot Nothing Then zrodla(w.Zbior) = plik
+        Next
+        Return zrodla
+    End Function
+
+    Friend Function AtrybucjaZbioru(zbior As String, Optional adres As String = "") As String
+        If Not String.IsNullOrEmpty(zbior) Then
+            Dim z = ZnajdzZbior(zbior)
+            Dim p = If(z?.Plik, PlikZbioruMap(zbior))
+            If p IsNot Nothing AndAlso Not String.IsNullOrWhiteSpace(p.Atrybucja) Then Return p.Atrybucja
+        End If
+        If Not String.IsNullOrEmpty(adres) Then
+            Dim wgAdresu = _zbiory.FirstOrDefault(Function(x) x.Plik IsNot Nothing AndAlso String.Equals(x.Plik.Adres, adres, StringComparison.OrdinalIgnoreCase))
+            If wgAdresu IsNot Nothing AndAlso Not String.IsNullOrWhiteSpace(wgAdresu.Plik.Atrybucja) Then Return wgAdresu.Plik.Atrybucja
+        End If
+        Return ""
+    End Function
+
+    Private Function EfektywnaPrzezroczystosc() As Boolean
+        Return Ustawienia.Przezroczystosc OrElse (_zestaw.CzySameNakladki() AndAlso Wms.CzyFormatZPrzezroczystoscia(Ustawienia.Format))
+    End Function
+
     ''' <summary>Plik zbioru map (folder programu, potem folder danych); Nothing - brak pliku lub błąd odczytu.</summary>
     Private Function PlikZbioruMap(zbior As String) As PlikWarstw
-        Dim plik As String = Path.Combine(FolderWarstwProgramu, zbior & ".txt")
-        If Not File.Exists(plik) Then plik = Path.Combine(FolderWarstwDanych, zbior & ".txt")
-        If Not File.Exists(plik) Then Return Nothing
+        Dim plik As String = SciezkaZbioruMap(zbior)
+        If plik = "" Then Return Nothing
         Try
             Return PlikWarstw.Wczytaj(plik)
         Catch
@@ -1143,9 +1642,10 @@ Public Class Form1
         Dim siatka = BiezacaSiatka()
         Return New ZadaniePobierania With {
             .Uklad = Ustawienia.Uklad, .Siatka = If(siatka.Poprawna, siatka, Nothing),
+            .Zbiory = _zestaw.Zbiory(), .ZrodlaMap = ZrodlaMapSesji(),
             .Format = Ustawienia.Format, .ZamienOsie = Ustawienia.ZamienXY, .LimitCzasuSekundy = Ustawienia.LimitCzasuSekundy,
             .IloscProb = Math.Max(1, Ustawienia.IloscProbPobrania), .JakoscJpegWmts = Ustawienia.JakoscJpegWmts,
-            .Przezroczystosc = Ustawienia.Przezroczystosc,
+            .Przezroczystosc = EfektywnaPrzezroczystosc(),
             .Folder = Path.Combine(Path.GetTempPath(), "MapoTero_podglad") & "\"}
     End Function
 
@@ -1175,6 +1675,63 @@ Public Class Form1
         End If
         If _zestaw.Warstwy.Any(Function(w) w.Adres = "") Then
             Komunikat("Nie znam serwera którejś z wybranych warstw - usuń ją i wybierz ponownie ze zbioru map.", Color.Red) : Exit Sub
+        End If
+        Dim przykryta = _zestaw.ZnajdzPrzykrytaNakladke()
+        If przykryta IsNot Nothing Then
+            If MessageBox.Show("Nakładka """ & NazwaWarstwy(przykryta) & """ znajduje się pod nieprzezroczystą warstwą (krycie 100%) i może być niewidoczna." & vbCrLf & vbCrLf &
+                               "Kontynuować pobieranie?", "Kolejność warstw", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) <> DialogResult.Yes Then
+                Exit Sub
+            End If
+        End If
+        If _zestaw.CzySameNakladki() AndAlso Not Wms.CzyFormatZPrzezroczystoscia(Ustawienia.Format) Then
+            Dim odpFormat = MessageBox.Show("Wybrano wyłącznie przezroczyste nakładki (szlaki), ale obecny format segmentów to ." & Ustawienia.Format &
+                                            " (tło będzie nieprzezroczyste)." & vbCrLf & vbCrLf &
+                                            "Przełączyć na PNG z przezroczystym tłem?", "Przezroczystość nakładki",
+                                            MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question)
+            If odpFormat = DialogResult.Cancel Then Exit Sub
+            If odpFormat = DialogResult.Yes Then
+                Ustawienia.Format = "png"
+                Ustawienia.Przezroczystosc = True
+                stFormat.Text = ".png"
+                Ustawienia.Zapisz(PlikLastsettings)
+            End If
+        End If
+
+        Dim zrodlaSesji = ZrodlaMapSesji()
+        Dim grupyKafelkowe = _zestaw.GrupyZapytan().Where(Function(g) g.EfektywnyTyp = TypUslugiMapowej.Xyz OrElse g.EfektywnyTyp = TypUslugiMapowej.Tms).ToList()
+        If grupyKafelkowe.Count > 0 Then
+            Dim planySzacunku As New List(Of PlanWmts)
+            Dim warstwyPozaZasiegiem As New List(Of String)
+            For Each g In grupyKafelkowe
+                Dim pierwszaWarstwa = _zestaw.Warstwy.FirstOrDefault(Function(x) String.Equals(x.Adres, g.Adres, StringComparison.OrdinalIgnoreCase))
+                Dim src As PlikWarstw = Nothing
+                If pierwszaWarstwa IsNot Nothing AndAlso Not String.IsNullOrEmpty(pierwszaWarstwa.Zbior) Then zrodlaSesji.TryGetValue(pierwszaWarstwa.Zbior, src)
+                If src Is Nothing Then src = zrodlaSesji.Values.FirstOrDefault(Function(v) String.Equals(v.Adres, g.Adres, StringComparison.OrdinalIgnoreCase))
+                Dim usl = KafleXyz.UtworzUslugeZbioru(g.Adres, g.Warstwy, src, g.EfektywnyTyp)
+                For Each n In g.Warstwy
+                    planySzacunku.Add(New PlanWmts(usl.Usluga, n, Ustawienia.Uklad, siatka.ZasiegSiatki, siatka.RozmiarPiksela, Ustawienia.Format))
+                    If KafleXyz.ObszarPozaZasiegiem(usl.OpcjeWarstw(n), Ustawienia.Uklad, siatka.ZasiegSiatki) Then
+                        warstwyPozaZasiegiem.Add(If(String.IsNullOrEmpty(pierwszaWarstwa?.Zbior), n, pierwszaWarstwa.Zbior & ": " & n))
+                    End If
+                Next
+            Next
+            'kafle poza polem "zasieg" zbioru map nie są pobierane - bez ostrzeżenia użytkownik dostałby puste segmenty
+            If warstwyPozaZasiegiem.Count > 0 Then
+                If MessageBox.Show("Wybrany obszar leży w całości poza zasięgiem danych map:" & vbCrLf & vbCrLf &
+                                   String.Join(vbCrLf, warstwyPozaZasiegiem) & vbCrLf & vbCrLf &
+                                   "Segmenty tych map będą puste. Kontynuować pobieranie?", "Obszar poza zasięgiem mapy",
+                                   MessageBoxButtons.YesNo, MessageBoxIcon.Warning) <> DialogResult.Yes Then
+                    Exit Sub
+                End If
+            End If
+            Const ProgOstrzezeniaKafli As Long = 4000
+            If KafleXyz.SzacujLiczbeKafli(planySzacunku, siatka, Ustawienia.Uklad, _korytarz, ProgOstrzezeniaKafli + 1) > ProgOstrzezeniaKafli Then
+                If MessageBox.Show("Wybrany obszar wymaga pobrania ponad " & ProgOstrzezeniaKafli.ToString("N0") &
+                                   " kafelków z serwera XYZ/TMS. Może to zająć dużo czasu lub obciążyć serwer." & vbCrLf & vbCrLf &
+                                   "Kontynuować pobieranie?", "Duża liczba kafelków", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) <> DialogResult.Yes Then
+                    Exit Sub
+                End If
+            End If
         End If
         'przedrostek także z wczytanego conf.txt - sprawdzany przed pobraniem pierwszego segmentu
         Dim bladPrzedrostka As String = KonfiguracjaSesji.BladPrzedrostka(Ustawienia.Prefiks)
@@ -1207,7 +1764,8 @@ Public Class Form1
         ZapiszConf(False)
 
         Dim zadanie As New ZadaniePobierania With {
-            .AdresSerwera = _zestaw(0).Adres, .Warstwy = _zestaw.Nazwy(), .Krycia = _zestaw.Krycia(), .Adresy = _zestaw.Adresy(), .Uklad = Ustawienia.Uklad,
+            .AdresSerwera = _zestaw(0).Adres, .Warstwy = _zestaw.Nazwy(), .Krycia = _zestaw.Krycia(), .Adresy = _zestaw.Adresy(),
+            .Zbiory = _zestaw.Zbiory(), .ZrodlaMap = zrodlaSesji, .Uklad = Ustawienia.Uklad,
             .Siatka = siatka, .Format = Ustawienia.Format, .Prefiks = Ustawienia.Prefiks,
             .Numeracja = Siatka.StylZTekstu(Ustawienia.Numeracja), .Folder = FolderSesji, .ZamienOsie = Ustawienia.ZamienXY,
             .IloscProb = Math.Max(1, Ustawienia.IloscProbPobrania), .PrzerwaSekundy = Ustawienia.PrzerwaMiedzyProbami,
@@ -1215,12 +1773,11 @@ Public Class Form1
             .ZachowajKafleWmts = Ustawienia.ZachowajKafleWmts, .JakoscJpegWmts = Ustawienia.JakoscJpegWmts,
             .PobierajPowyzejOstatniego = Ustawienia.PobierajPowyzejOstatniego,
             .Georeferencja = Ustawienia.OpcjeGeoreferencji(), .TrekBuddy = Ustawienia.TrekBuddy, .NazwaTrekBuddy = Ustawienia.NazwaTrekBuddy,
-            .Przezroczystosc = Ustawienia.Przezroczystosc, .Korytarz = _korytarz, .Odswiez = odswiez}
+            .Przezroczystosc = EfektywnaPrzezroczystosc(), .Korytarz = _korytarz, .Odswiez = odswiez}
 
         btnPobierz.Enabled = False
         btnPrzerwij.Enabled = True
-        cmbZbiorMap.Enabled = False
-        lstWarstwy.Enabled = False
+        UstawDostepnoscDrzewa(False)
         btnScalanie.Enabled = False
         btnUsunPobrane.Enabled = False
         OdswiezToolStripMenuItem.Enabled = False
@@ -1236,14 +1793,13 @@ Public Class Form1
         Try
             wynik = Await PobieranieSegmentow.PobierzAsync(zadanie, postep, przerwanie.Token)
         Catch ex As Exception
-            Komunikat("Błąd pobierania: " & ex.Message, Color.Red)
+            Komunikat("Błąd pobierania: " & MetadaneMapy.MaskujSekrety(ex.Message), Color.Red)
         Finally
             If _przerwanie Is przerwanie Then _przerwanie = Nothing
             przerwanie.Dispose()
             btnPobierz.Enabled = True
             btnPrzerwij.Enabled = False
-            cmbZbiorMap.Enabled = True
-            lstWarstwy.Enabled = True
+            UstawDostepnoscDrzewa(True)
             btnUsunPobrane.Enabled = True
             OdswiezToolStripMenuItem.Enabled = True
             KorytarzToolStripMenuItem.Enabled = True
@@ -1291,7 +1847,7 @@ Public Class Form1
     'zdarzenie CheckedChanged zachodzi także przy ODZNACZANIU przycisku - reaguje tylko zaznaczony
     Private Sub rbOsm_CheckedChanged(sender As Object, e As EventArgs) Handles rbOsm.CheckedChanged
         If rbOsm.Checked = False Then Exit Sub
-        GMapProvider.UserAgent = "MapoTero/" & My.Application.Info.Version.ToString
+        GMapProvider.UserAgent = Program.UserAgentProgramu
         ZmienPodkladMapy(GMapProviders.OpenStreetMap)
     End Sub
 
@@ -1942,7 +2498,9 @@ Public Class Form1
     Private Sub DodajSerwerToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles DodajSerwerToolStripMenuItem.Click, btnDodajSerwer.Click
         'wczytanie listy zbiorów map po dodaniu serwera zmienia wybrany zbiór - to przerywało pobieranie i czyściło warstwy
         If PobieranieTrwa("Dodanie serwera") Then Exit Sub
-        Using okno As New FormDodajSerwer()
+        Dim istniejace = _zbiory.Where(Function(z) z.Plik IsNot Nothing AndAlso Not String.IsNullOrWhiteSpace(z.Plik.Adres)).
+            Select(Function(z) New KeyValuePair(Of String, String)(z.Nazwa, z.Plik.Adres)).ToList()
+        Using okno As New FormDodajSerwer(srodekMapy:=New PunktGeo(mapa.Position.Lat, mapa.Position.Lng), istniejaceZbiory:=istniejace)
             If okno.ShowDialog(Me) = DialogResult.OK AndAlso Not String.IsNullOrEmpty(okno.WynikNazwaZbioru) Then
                 WczytajListeZbiorowMap(okno.WynikNazwaZbioru)
                 Komunikat("Dodano zbiór map: " & okno.WynikNazwaZbioru, Color.Green)

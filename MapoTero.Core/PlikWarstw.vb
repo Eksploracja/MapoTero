@@ -14,50 +14,130 @@
 'along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 Imports System.Collections.Generic
+Imports System.Globalization
 Imports System.IO
+Imports System.Linq
 Imports System.Text
+Imports System.Text.Json
 
-''' <summary>Warstwa mapy z pliku zbioru map: nazwa warstwy na serwerze i zalecany rozmiar piksela.</summary>
+''' <summary>Warstwa mapy z pliku zbioru map: nazwa warstwy na serwerze, opcjonalny czytelny tytuł, zalecany rozmiar piksela i opcjonalne nadpisania XYZ/TMS.</summary>
 Public Class WarstwaMapy
     Public Property Nazwa As String = ""
+    ''' <summary>Opcjonalna czytelna nazwa wyświetlana warstwy (np. z dokumentu GetCapabilities dla dodanych serwerów).</summary>
+    Public Property Tytul As String = ""
     ''' <summary>Rozmiar piksela zapisany w pliku (tekst, np. "2" lub "0.25"); może być pusty.</summary>
     Public Property RozmiarPiksela As String = ""
+    Public Property ZMin As Integer?
+    Public Property ZMax As Integer?
+    Public Property Nakladka As Boolean?
 
     Public Overrides Function ToString() As String
-        Return Nazwa
+        Return If(Not String.IsNullOrWhiteSpace(Tytul), Tytul, Nazwa)
     End Function
 End Class
 
 ''' <summary>
-''' Plik zbioru map z katalogu "warstwy": pierwsze pole - adres serwera, dalej pary pól: nazwa warstwy, rozmiar piksela.
-''' Pola mogą być w cudzysłowach i rozdzielone końcami wierszy lub przecinkami (format instrukcji Write/Input).
+''' Plik zbioru map z katalogu "warstwy": obsługuje zarówno klasyczny format tekstowy (Windows-1250: adres serwera,
+''' dalej pary nazwa warstwy, rozmiar piksela), jak i format JSON (UTF-8, z jawnymi metadanymi XYZ/TMS oraz czytelnymi tytułami).
 ''' </summary>
 Public Class PlikWarstw
 
     Public Property Adres As String = ""
+    ''' <summary>Opcjonalna czytelna nazwa zbioru (np. tytuł usługi z GetCapabilities).</summary>
+    Public Property Tytul As String = ""
     Public ReadOnly Property Warstwy As New List(Of WarstwaMapy)
+    Public Property Typ As TypUslugiMapowej = TypUslugiMapowej.Nieznana
+    Public ReadOnly Property Subdomeny As New List(Of String)
+    Public Property ZMin As Integer = 0
+    Public Property ZMax As Integer = 18
+    Public Property RozmiarKafla As Integer = 256
+    Public Property Nakladka As Boolean
+    Public Property OdstepMs As Integer = 0
+    Public Property MaksWatkow As Integer = 0
+    Public Property Referer As String = ""
+    Public Property Atrybucja As String = ""
+    Public Property FormatObrazu As String = ""
+    Public Property IgnorujSsl As Boolean
+    Public Property ZasiegGeo As ProstokatGeo?
 
-    ''' <summary>Pliki warstw są zapisane w kodowaniu Windows-1250 (polskie znaki w nazwach warstw).</summary>
+    ''' <summary>Faktyczny typ usługi: jawny z pliku albo rozpoznany z adresu (XYZ/TMS przed WMTS).</summary>
+    Public ReadOnly Property EfektywnyTyp As TypUslugiMapowej
+        Get
+            Return KafleXyz.WybierzTyp(Adres, Typ)
+        End Get
+    End Property
+
+    ''' <summary>Parametry kafli XYZ/TMS dla całego zbioru lub wskazanej warstwy (z uwzględnieniem nadpisań warstwy).</summary>
+    Public Function OpcjeKafli(Optional nazwaWarstwy As String = Nothing) As OpcjeKafliXyz
+        Dim t As TypUslugiMapowej = EfektywnyTyp
+        Dim opcje As New OpcjeKafliXyz With {
+            .Typ = If(t = TypUslugiMapowej.Tms, TypUslugiMapowej.Tms, TypUslugiMapowej.Xyz),
+            .ZMin = ZMin,
+            .ZMax = ZMax,
+            .RozmiarKafla = RozmiarKafla,
+            .Nakladka = Nakladka,
+            .OdstepMs = If(OdstepMs > 0, OdstepMs, If(t = TypUslugiMapowej.Xyz OrElse t = TypUslugiMapowej.Tms, 100, 0)),
+            .MaksWatkow = If(MaksWatkow > 0, MaksWatkow, If(t = TypUslugiMapowej.Xyz OrElse t = TypUslugiMapowej.Tms, 2, 0)),
+            .Referer = Referer,
+            .Atrybucja = Atrybucja,
+            .FormatObrazu = FormatObrazu,
+            .IgnorujSsl = IgnorujSsl,
+            .ZasiegGeo = ZasiegGeo}
+        opcje.Subdomeny.AddRange(Subdomeny)
+        If Not String.IsNullOrEmpty(nazwaWarstwy) Then
+            Dim wm = Znajdz(nazwaWarstwy)
+            If wm IsNot Nothing Then
+                If wm.ZMin.HasValue Then opcje.ZMin = wm.ZMin.Value
+                If wm.ZMax.HasValue Then opcje.ZMax = wm.ZMax.Value
+                If wm.Nakladka.HasValue Then opcje.Nakladka = wm.Nakladka.Value
+            End If
+        End If
+        Return opcje
+    End Function
+
+    ''' <summary>Pliki warstw w klasycznym formacie są zapisane w kodowaniu Windows-1250 (polskie znaki w nazwach warstw).</summary>
     Public Shared Function Kodowanie() As Encoding
         Try
-            Dim providerType = Type.GetType("System.Text.CodePagesEncodingProvider, System.Text.Encoding.CodePages")
-            If providerType IsNot Nothing Then
-                Dim prop = providerType.GetProperty("Instance")
-                Dim instance = TryCast(prop?.GetValue(Nothing), EncodingProvider)
-                If instance IsNot Nothing Then Encoding.RegisterProvider(instance)
-            End If
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance)
             Return Encoding.GetEncoding(1250)
         Catch ex As Exception
-            'platforma bez stron kodowych Windows - teksty ASCII odczytane zostaną poprawnie
             Return Encoding.UTF8
         End Try
     End Function
 
     Public Shared Function Wczytaj(sciezka As String) As PlikWarstw
-        Return ZTekstu(File.ReadAllText(sciezka, Kodowanie()))
+        Dim bajty = File.ReadAllBytes(sciezka)
+        If CzyWygladaJakJson(bajty) Then
+            Return ZTekstu(Encoding.UTF8.GetString(PominBomUtf8(bajty)))
+        End If
+        Return ZTekstu(Kodowanie().GetString(bajty))
+    End Function
+
+    Private Shared Function PominBomUtf8(bajty() As Byte) As Byte()
+        If bajty.Length >= 3 AndAlso bajty(0) = &HEF AndAlso bajty(1) = &HBB AndAlso bajty(2) = &HBF Then
+            Dim wynik(bajty.Length - 4) As Byte
+            Array.Copy(bajty, 3, wynik, 0, wynik.Length)
+            Return wynik
+        End If
+        Return bajty
+    End Function
+
+    Private Shared Function CzyWygladaJakJson(bajty() As Byte) As Boolean
+        Dim start As Integer = If(bajty.Length >= 3 AndAlso bajty(0) = &HEF AndAlso bajty(1) = &HBB AndAlso bajty(2) = &HBF, 3, 0)
+        For i = start To bajty.Length - 1
+            Dim b = bajty(i)
+            If b = 32 OrElse b = 9 OrElse b = 10 OrElse b = 13 Then Continue For
+            Return b = AscW("{"c)
+        Next
+        Return False
     End Function
 
     Public Shared Function ZTekstu(tekst As String) As PlikWarstw
+        Dim przyciety As String = If(tekst, "").TrimStart(ChrW(&HFEFF), " "c, ChrW(9), ChrW(10), ChrW(13))
+        If przyciety.StartsWith("{", StringComparison.Ordinal) Then
+            Return ZJsona(przyciety)
+        End If
+
         Dim p As New PlikWarstw()
         Dim r As New CzytnikPlikuVb(tekst)
         If r.KoniecPliku Then Return p
@@ -70,6 +150,143 @@ Public Class PlikWarstw
         Return p
     End Function
 
+    Private Shared Function ZJsona(json As String) As PlikWarstw
+        Dim p As New PlikWarstw()
+        Using doc = JsonDocument.Parse(json)
+            Dim root = doc.RootElement
+            If root.ValueKind <> JsonValueKind.Object Then Throw New FormatException("Plik zbioru JSON musi być obiektem")
+            p.Adres = TekstJson(root, "adres")
+            p.Tytul = TekstJson(root, "tytul")
+            p.Typ = ParsujTyp(TekstJson(root, "typ"))
+            p.ZMin = CalkowitaJson(root, "zMin", 0)
+            p.ZMax = CalkowitaJson(root, "zMax", 18)
+            p.RozmiarKafla = Math.Max(64, CalkowitaJson(root, "rozmiarKafla", 256))
+            p.Nakladka = LogicznaJson(root, "nakladka", False)
+            p.OdstepMs = Math.Max(0, CalkowitaJson(root, "odstepMs", 0))
+            p.MaksWatkow = Math.Max(0, CalkowitaJson(root, "maksWatkow", 0))
+            p.Referer = TekstJson(root, "referer")
+            p.Atrybucja = TekstJson(root, "atrybucja")
+            p.FormatObrazu = TekstJson(root, "format")
+            p.IgnorujSsl = LogicznaJson(root, "ignorujSsl", False)
+
+            Dim subEl As JsonElement
+            If PobierzWlasciwosc(root, "subdomeny", subEl) AndAlso subEl.ValueKind = JsonValueKind.Array Then
+                For Each s In subEl.EnumerateArray()
+                    If s.ValueKind = JsonValueKind.String Then
+                        Dim val = If(s.GetString(), "").Trim()
+                        If val <> "" Then p.Subdomeny.Add(val)
+                    End If
+                Next
+            End If
+
+            Dim zasEl As JsonElement
+            If PobierzWlasciwosc(root, "zasieg", zasEl) AndAlso zasEl.ValueKind = JsonValueKind.Array AndAlso zasEl.GetArrayLength() = 4 Then
+                Dim vals = zasEl.EnumerateArray().ToArray()
+                Dim zach, polud, wsch, poln As Double
+                If vals(0).TryGetDouble(zach) AndAlso vals(1).TryGetDouble(polud) AndAlso
+                   vals(2).TryGetDouble(wsch) AndAlso vals(3).TryGetDouble(poln) Then
+                    Dim g As New ProstokatGeo(poln, polud, wsch, zach)
+                    If g.Poprawny Then p.ZasiegGeo = g
+                End If
+            End If
+
+            Dim wEl As JsonElement
+            If PobierzWlasciwosc(root, "warstwy", wEl) AndAlso wEl.ValueKind = JsonValueKind.Array Then
+                For Each item In wEl.EnumerateArray()
+                    If item.ValueKind <> JsonValueKind.Object Then Continue For
+                    Dim nazwa = TekstJson(item, "nazwa")
+                    If nazwa = "" Then Continue For
+                    Dim wm As New WarstwaMapy With {
+                        .Nazwa = nazwa,
+                        .Tytul = TekstJson(item, "tytul"),
+                        .RozmiarPiksela = TekstLubLiczbaJson(item, "piksel")
+                    }
+                    Dim zMinEl As JsonElement
+                    If PobierzWlasciwosc(item, "zMin", zMinEl) AndAlso zMinEl.ValueKind = JsonValueKind.Number Then
+                        Dim v As Integer
+                        If zMinEl.TryGetInt32(v) Then wm.ZMin = v
+                    End If
+                    Dim zMaxEl As JsonElement
+                    If PobierzWlasciwosc(item, "zMax", zMaxEl) AndAlso zMaxEl.ValueKind = JsonValueKind.Number Then
+                        Dim v As Integer
+                        If zMaxEl.TryGetInt32(v) Then wm.ZMax = v
+                    End If
+                    Dim nakEl As JsonElement
+                    If PobierzWlasciwosc(item, "nakladka", nakEl) AndAlso (nakEl.ValueKind = JsonValueKind.True OrElse nakEl.ValueKind = JsonValueKind.False) Then
+                        wm.Nakladka = nakEl.GetBoolean()
+                    End If
+                    p.Warstwy.Add(wm)
+                Next
+            End If
+        End Using
+        Return p
+    End Function
+
+    Private Shared Function ParsujTyp(tekst As String) As TypUslugiMapowej
+        Select Case If(tekst, "").Trim().ToLowerInvariant()
+            Case "wms" : Return TypUslugiMapowej.Wms
+            Case "wmts" : Return TypUslugiMapowej.Wmts
+            Case "xyz" : Return TypUslugiMapowej.Xyz
+            Case "tms" : Return TypUslugiMapowej.Tms
+            Case Else : Return TypUslugiMapowej.Nieznana
+        End Select
+    End Function
+
+    Private Shared Function TekstTypu(t As TypUslugiMapowej) As String
+        Select Case t
+            Case TypUslugiMapowej.Wms : Return "wms"
+            Case TypUslugiMapowej.Wmts : Return "wmts"
+            Case TypUslugiMapowej.Xyz : Return "xyz"
+            Case TypUslugiMapowej.Tms : Return "tms"
+            Case Else : Return ""
+        End Select
+    End Function
+
+    Private Shared Function PobierzWlasciwosc(obj As JsonElement, nazwa As String, ByRef wynik As JsonElement) As Boolean
+        For Each prop In obj.EnumerateObject()
+            If prop.Name.Equals(nazwa, StringComparison.OrdinalIgnoreCase) Then
+                wynik = prop.Value
+                Return True
+            End If
+        Next
+        wynik = Nothing
+        Return False
+    End Function
+
+    Private Shared Function TekstJson(obj As JsonElement, nazwa As String) As String
+        Dim el As JsonElement
+        If PobierzWlasciwosc(obj, nazwa, el) AndAlso el.ValueKind = JsonValueKind.String Then
+            Return If(el.GetString(), "").Trim()
+        End If
+        Return ""
+    End Function
+
+    Private Shared Function TekstLubLiczbaJson(obj As JsonElement, nazwa As String) As String
+        Dim el As JsonElement
+        If Not PobierzWlasciwosc(obj, nazwa, el) Then Return ""
+        If el.ValueKind = JsonValueKind.String Then Return If(el.GetString(), "").Trim()
+        If el.ValueKind = JsonValueKind.Number Then Return el.GetRawText()
+        Return ""
+    End Function
+
+    Private Shared Function CalkowitaJson(obj As JsonElement, nazwa As String, domyslna As Integer) As Integer
+        Dim el As JsonElement
+        Dim w As Integer
+        If PobierzWlasciwosc(obj, nazwa, el) AndAlso el.ValueKind = JsonValueKind.Number AndAlso el.TryGetInt32(w) Then
+            Return w
+        End If
+        Return domyslna
+    End Function
+
+    Private Shared Function LogicznaJson(obj As JsonElement, nazwa As String, domyslna As Boolean) As Boolean
+        Dim el As JsonElement
+        If PobierzWlasciwosc(obj, nazwa, el) Then
+            If el.ValueKind = JsonValueKind.True Then Return True
+            If el.ValueKind = JsonValueKind.False Then Return False
+        End If
+        Return domyslna
+    End Function
+
     ''' <summary>Warstwa o podanej nazwie albo Nothing.</summary>
     Public Function Znajdz(nazwa As String) As WarstwaMapy
         For Each w In Warstwy
@@ -78,8 +295,26 @@ Public Class PlikWarstw
         Return Nothing
     End Function
 
-    ''' <summary>Zapisuje zbiór map do pliku tekstowego z zachowaniem kodowania programu.</summary>
+    ''' <summary>Czy plik wymaga zapisu w formacie JSON (usługa XYZ/TMS, dodatkowe metadane lub czytelne tytuły).</summary>
+    Private ReadOnly Property WymagaJson As Boolean
+        Get
+            Dim t = EfektywnyTyp
+            Return t = TypUslugiMapowej.Xyz OrElse t = TypUslugiMapowej.Tms OrElse
+                   Not String.IsNullOrWhiteSpace(Tytul) OrElse
+                   Subdomeny.Count > 0 OrElse Nakladka OrElse OdstepMs > 0 OrElse MaksWatkow > 0 OrElse
+                   RozmiarKafla <> 256 OrElse Referer <> "" OrElse Atrybucja <> "" OrElse
+                   FormatObrazu <> "" OrElse IgnorujSsl OrElse ZasiegGeo.HasValue OrElse
+                   Warstwy.Any(Function(w) w.ZMin.HasValue OrElse w.ZMax.HasValue OrElse w.Nakladka.HasValue OrElse
+                                           (Not String.IsNullOrWhiteSpace(w.Tytul) AndAlso Not String.Equals(w.Tytul, w.Nazwa, StringComparison.Ordinal)))
+        End Get
+    End Property
+
+    ''' <summary>Zapisuje zbiór map do pliku tekstowego (JSON UTF-8 dla XYZ/TMS, klasyczny format dla WMS/WMTS).</summary>
     Public Sub Zapisz(sciezka As String)
+        If WymagaJson Then
+            ZapiszJson(sciezka)
+            Exit Sub
+        End If
         Dim sb As New ZapisPlikuVb()
         sb.Tekst(Adres)
         For Each w In Warstwy
@@ -87,6 +322,63 @@ Public Class PlikWarstw
             sb.Tekst(If(Not String.IsNullOrEmpty(w.RozmiarPiksela), w.RozmiarPiksela, "1"))
         Next
         sb.Zapisz(sciezka, Kodowanie())
+    End Sub
+
+    Private Sub ZapiszJson(sciezka As String)
+        Using ms As New MemoryStream()
+            Using w As New Utf8JsonWriter(ms, New JsonWriterOptions With {.Indented = True, .Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping})
+                w.WriteStartObject()
+                Dim t = EfektywnyTyp
+                Dim tStr = TekstTypu(t)
+                If tStr <> "" Then w.WriteString("typ", tStr)
+                If Not String.IsNullOrWhiteSpace(Tytul) Then w.WriteString("tytul", Tytul.Trim())
+                w.WriteString("adres", Adres)
+                If Subdomeny.Count > 0 Then
+                    w.WriteStartArray("subdomeny")
+                    For Each s In Subdomeny
+                        w.WriteStringValue(s)
+                    Next
+                    w.WriteEndArray()
+                End If
+                If t = TypUslugiMapowej.Xyz OrElse t = TypUslugiMapowej.Tms Then
+                    w.WriteNumber("zMin", ZMin)
+                    w.WriteNumber("zMax", ZMax)
+                End If
+                If RozmiarKafla <> 256 Then w.WriteNumber("rozmiarKafla", RozmiarKafla)
+                If Nakladka Then w.WriteBoolean("nakladka", True)
+                If MaksWatkow > 0 Then w.WriteNumber("maksWatkow", MaksWatkow)
+                If OdstepMs > 0 Then w.WriteNumber("odstepMs", OdstepMs)
+                If Referer <> "" Then w.WriteString("referer", Referer)
+                If Atrybucja <> "" Then w.WriteString("atrybucja", Atrybucja)
+                If FormatObrazu <> "" Then w.WriteString("format", FormatObrazu)
+                If IgnorujSsl Then w.WriteBoolean("ignorujSsl", True)
+                If ZasiegGeo.HasValue AndAlso ZasiegGeo.Value.Poprawny Then
+                    Dim g = ZasiegGeo.Value
+                    w.WriteStartArray("zasieg")
+                    w.WriteNumberValue(g.Zachod)
+                    w.WriteNumberValue(g.Poludnie)
+                    w.WriteNumberValue(g.Wschod)
+                    w.WriteNumberValue(g.Polnoc)
+                    w.WriteEndArray()
+                End If
+                w.WriteStartArray("warstwy")
+                For Each war In Warstwy
+                    w.WriteStartObject()
+                    w.WriteString("nazwa", war.Nazwa)
+                    If Not String.IsNullOrWhiteSpace(war.Tytul) AndAlso Not String.Equals(war.Tytul, war.Nazwa, StringComparison.Ordinal) Then
+                        w.WriteString("tytul", war.Tytul.Trim())
+                    End If
+                    w.WriteString("piksel", If(Not String.IsNullOrEmpty(war.RozmiarPiksela), war.RozmiarPiksela, "1"))
+                    If war.ZMin.HasValue Then w.WriteNumber("zMin", war.ZMin.Value)
+                    If war.ZMax.HasValue Then w.WriteNumber("zMax", war.ZMax.Value)
+                    If war.Nakladka.HasValue Then w.WriteBoolean("nakladka", war.Nakladka.Value)
+                    w.WriteEndObject()
+                Next
+                w.WriteEndArray()
+                w.WriteEndObject()
+            End Using
+            File.WriteAllBytes(sciezka, ms.ToArray())
+        End Using
     End Sub
 
     ''' <summary>Sprawdza, czy nazwa zbioru map jest poprawna dla systemu plików i nie koliduje z nazwami zarezerwowanymi.</summary>

@@ -236,4 +236,48 @@ Public Class RegulatorZapytanTesty
         Assert.Equal(serwer, RegulatorZapytan.NazwaSerwera(adres))
     End Sub
 
+    <Fact>
+    Public Async Function WspolnyKluczSerweraGrupujeSubdomenyILimitWatkow() As Task
+        Dim r = Regulator(8)
+        Using p1 = Await r.WejdzAsync("https://a.tile.test/1/0/0.png", CancellationToken.None, kluczSerwera:="tile.test", maksRownoleglych:=2)
+            Using p2 = Await r.WejdzAsync("https://b.tile.test/1/0/1.png", CancellationToken.None, kluczSerwera:="tile.test", maksRownoleglych:=2)
+                'trzecia subdomena c dzieli limit 2 z subdomenami a i b
+                Dim trzecia = r.WejdzAsync("https://c.tile.test/1/0/2.png", CancellationToken.None, kluczSerwera:="tile.test", maksRownoleglych:=2)
+                Await Task.Delay(120)
+                Assert.False(trzecia.IsCompleted)
+                p1.Odpowiedz(HttpStatusCode.OK)
+                p1.Dispose()
+                Using p3 = Await trzecia.WaitAsync(TimeSpan.FromSeconds(5))
+                    p3.Odpowiedz(HttpStatusCode.OK)
+                End Using
+                p2.Odpowiedz(HttpStatusCode.OK)
+            End Using
+        End Using
+    End Function
+
+    <Fact>
+    Public Async Function OdstepMsRozsuwaKolejneZapytaniaIHamujeNa403Oraz418() As Task
+        Dim r = Regulator(4)
+        Dim sw = Stopwatch.StartNew()
+        Using p1 = Await r.WejdzAsync(Adres, CancellationToken.None, kluczSerwera:="pacing.test", maksRownoleglych:=2, odstepMs:=120)
+            p1.Odpowiedz(HttpStatusCode.OK)
+        End Using
+        Using p2 = Await r.WejdzAsync(Adres, CancellationToken.None, kluczSerwera:="pacing.test", maksRownoleglych:=2, odstepMs:=120)
+            p2.Odpowiedz(HttpStatusCode.OK)
+        End Using
+        Using p3 = Await r.WejdzAsync(Adres, CancellationToken.None, kluczSerwera:="pacing.test", maksRownoleglych:=2, odstepMs:=120)
+            sw.Stop()
+            'dwa interwały po >=120 ms między kolejnymi wywołaniami (ok. 240 ms)
+            Assert.True(sw.ElapsedMilliseconds >= 180, "Za szybkie zapytania mimo odstepMs=120: " & sw.ElapsedMilliseconds & " ms")
+            p3.Odpowiedz(HttpStatusCode.Forbidden)
+        End Using
+        Assert.Equal(1, r.Limit(Adres, kluczSerwera:="pacing.test"))
+        Assert.True(r.PozostalaPrzerwa(Adres, kluczSerwera:="pacing.test") > TimeSpan.Zero)
+
+        Using p4 = Await r.WejdzAsync("https://teapot.test/1/0/0.png", CancellationToken.None)
+            p4.Odpowiedz(CType(418, HttpStatusCode))
+        End Using
+        Assert.Equal(2, r.Limit("https://teapot.test/1/0/0.png"))
+    End Function
+
 End Class

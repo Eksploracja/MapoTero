@@ -34,6 +34,20 @@ Public Module Program
     ''' <summary>Ustawienia programu i bieżącej sesji pobierania.</summary>
     Public ReadOnly Ustawienia As New UstawieniaProgramu()
 
+    ''' <summary>Krótka wersja programu bez końcowych zer (np. „3.16”, „3.16.1”).</summary>
+    Public ReadOnly Property Wersja As String
+        Get
+            Return MapoTero.Core.WersjaProgramu.Z(GetType(Program).Assembly)
+        End Get
+    End Property
+
+    ''' <summary>Nagłówek User-Agent programu dla zapytań HTTP (np. „MapoTero/3.16”).</summary>
+    Public ReadOnly Property UserAgentProgramu As String
+        Get
+            Return MapoTero.Core.WersjaProgramu.UserAgent(GetType(Program).Assembly)
+        End Get
+    End Property
+
     ''' <summary>Folder pobierania domyślny dla programu.</summary>
     Public ReadOnly Property FolderDownload As String
         Get
@@ -178,7 +192,7 @@ Public Module Program
 
             Dim opis As New StringBuilder()
             opis.AppendLine("==== " & DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture))
-            opis.AppendLine("MapoTero " & GetType(Program).Assembly.GetName().Version.ToString() & ", " &
+            opis.AppendLine("MapoTero " & Wersja & ", " &
                             Runtime.InteropServices.RuntimeInformation.OSDescription & ", " &
                             Runtime.InteropServices.RuntimeInformation.FrameworkDescription)
             opis.AppendLine(If(ex Is Nothing, "(brak opisu wyjątku)", ex.ToString()))

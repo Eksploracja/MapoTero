@@ -7,15 +7,7 @@ budynki
 0.5
 numery_dzialek
 0.5
-geoportal
-0.5
 dzialki
 0.5
 obreby
-0.5
-powiaty_uzytki
-0.5
-powiaty_obreby
-0.5
-powiaty
-0.5
+4

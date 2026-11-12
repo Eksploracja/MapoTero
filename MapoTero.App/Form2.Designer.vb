@@ -527,7 +527,7 @@ Partial Class Form2
         Me.nudLimitCzasu.Name = "nudLimitCzasu"
         Me.nudLimitCzasu.Size = New System.Drawing.Size(58, 20)
         Me.nudLimitCzasu.TabIndex = 7
-        Me.ToolTip1.SetToolTip(Me.nudLimitCzasu, "Jak długo czekać na odpowiedź serwera na jedno zapytanie. Wolne serwery (np. mapy historyczne HGIS) mogą wymagać dłuższego czasu.")
+        Me.ToolTip1.SetToolTip(Me.nudLimitCzasu, "Jak długo czekać na odpowiedź serwera na jedno zapytanie. Wolne serwery (np. mapy historyczne IHPAN) mogą wymagać dłuższego czasu.")
         Me.nudLimitCzasu.Value = New Decimal(New Integer() {10, 0, 0, 0})
         '
         'grpWmts
@@ -540,7 +540,7 @@ Partial Class Form2
         Me.grpWmts.Size = New System.Drawing.Size(252, 80)
         Me.grpWmts.TabIndex = 6
         Me.grpWmts.TabStop = False
-        Me.grpWmts.Text = "Usługi WMTS"
+        Me.grpWmts.Text = "Usługi kafelkowe (WMTS / XYZ)"
         '
         'chkZachowajKafle
         '
@@ -551,7 +551,7 @@ Partial Class Form2
         Me.chkZachowajKafle.Size = New System.Drawing.Size(230, 17)
         Me.chkZachowajKafle.TabIndex = 0
         Me.chkZachowajKafle.Text = "zachowuj pobrane kafle w folderze sesji"
-        Me.ToolTip1.SetToolTip(Me.chkZachowajKafle, "Pobrane kafle WMTS pozostają w podfolderze _kafle_wmts folderu sesji - ponowne pobranie tego samego obszaru (np. z innym bokiem segmentu) nie wymaga łączenia z serwerem. Kafle zajmują miejsce na dysku.")
+        Me.ToolTip1.SetToolTip(Me.chkZachowajKafle, "Pobrane kafle WMTS/XYZ/TMS pozostają w podfolderze _kafle_wmts folderu sesji - ponowne pobranie tego samego obszaru (np. z innym bokiem segmentu) nie wymaga łączenia z serwerem. Kafle zajmują miejsce na dysku.")
         '
         'lblJakoscWmts
         '
@@ -569,7 +569,7 @@ Partial Class Form2
         Me.nudJakoscWmts.Name = "nudJakoscWmts"
         Me.nudJakoscWmts.Size = New System.Drawing.Size(58, 20)
         Me.nudJakoscWmts.TabIndex = 2
-        Me.ToolTip1.SetToolTip(Me.nudJakoscWmts, "Jakość kompresji JPEG segmentów składanych z kafli WMTS (segmenty z serwerów WMS zapisywane są bez ponownej kompresji).")
+        Me.ToolTip1.SetToolTip(Me.nudJakoscWmts, "Jakość kompresji JPEG segmentów składanych z kafli WMTS/XYZ/TMS (segmenty z serwerów WMS zapisywane są bez ponownej kompresji).")
         Me.nudJakoscWmts.Value = New Decimal(New Integer() {90, 0, 0, 0})
         '
         'grpZaawansowane

@@ -1,0 +1,3 @@
+https://mapy.geoportal.gov.pl/wss/service/PZGIK/NMT/GRID1/WMTS/Hypsometry?SERVICE=WMTS&REQUEST=GetCapabilities
+Hipsometria
+1

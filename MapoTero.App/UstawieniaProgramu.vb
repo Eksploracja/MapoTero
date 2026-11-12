@@ -119,6 +119,8 @@ Public Class UstawieniaProgramu
     Public Property ZaznaczenieWgs84 As Boolean
     Public Property KursorISrodekMapy As Boolean = True
     Public Property SiatkaSegmentowNaMapie As Boolean = True
+    ''' <summary>Szerokość prawego panelu ustawiona przez użytkownika w pikselach; 0 - szerokość domyślna.</summary>
+    Public Property SzerokoscPanelu As Integer
     Public Property SrodekMapySzerokosc As String = "52.3"
     Public Property SrodekMapyDlugosc As String = "19.2"
     Public Property SkalaMapy As String = "6"
@@ -193,6 +195,7 @@ Public Class UstawieniaProgramu
         KursorWgs84 = u.Logiczna("kursor_wgs84", KursorWgs84)
         ZaznaczenieWgs84 = u.Logiczna("zaznaczenie_wgs84", ZaznaczenieWgs84)
         EdycjaXY = u.Logiczna("edycja_xy", EdycjaXY)
+        SzerokoscPanelu = Math.Max(0, u.Calkowita("szerokosc_panelu", SzerokoscPanelu))
         'opcje okna eksportu do CAD
         CadObrys = u.Logiczna("cad_obrys", CadObrys)
         CadSiatka = u.Logiczna("cad_siatka", CadSiatka)
@@ -256,6 +259,7 @@ Public Class UstawieniaProgramu
         u.Ustaw("cad_sciezki_wzgledne", CadSciezkiWzgledne)
         u.Ustaw("cad_scr", CadScr)
         u.Ustaw("cad_lsp", CadLsp)
+        u.Ustaw("szerokosc_panelu", SzerokoscPanelu)
         u.Zapisz(sciezka, KodowanieSystemowe())
     End Sub
 

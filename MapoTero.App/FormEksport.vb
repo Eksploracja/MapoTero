@@ -153,7 +153,7 @@ Public Class FormEksport
         _sesja = s
         Dim c = s.Konfiguracja
 
-        Dim zrodlo As String = MetadaneMapy.ZrodloDanych(s.AdresSerwera)
+        Dim zrodlo As String = MetadaneMapy.ZrodloDanych(s.AdresSerwera, Form1.AtrybucjaZbioru(c.RodzajMapy, s.AdresSerwera))
         lblInfo.Text = "Segmenty: " & s.Siatka.LiczbaKolumn & " x " & s.Siatka.LiczbaWierszy & " po " & s.Siatka.BokSegmentuPx & " px (istniejące: " &
                        s.Zrodlo.LiczbaSegmentow & "), piksel " & c.RozmiarPiksela & If(s.Uklad.Geograficzny, "°", " m") & ", układ " & s.Uklad.Nazwa & vbCrLf &
                        "Mapa: " & s.Opis & vbCrLf &
@@ -202,11 +202,11 @@ Public Class FormEksport
         Dim m As New MetadaneMapy With {.DataPobrania = MetadaneMapy.DataZTekstu(_sesja.Konfiguracja.DataPobrania)}
         Dim tytuly As New List(Of String) From {_sesja.Opis}
         m.Warstwy.Add(_sesja.Opis)
-        m.DodajZrodlo(MetadaneMapy.ZrodloDanych(_sesja.AdresSerwera))
+        m.DodajZrodlo(MetadaneMapy.ZrodloDanych(_sesja.AdresSerwera, Form1.AtrybucjaZbioru(_sesja.Konfiguracja.RodzajMapy, _sesja.AdresSerwera)))
         For Each p In lstNakladki.Items.Cast(Of PozycjaNakladki)()
             tytuly.Add(p.Warstwa.Opis)
             m.Warstwy.Add(p.Warstwa.Opis)
-            m.DodajZrodlo(MetadaneMapy.ZrodloDanych(p.Warstwa.AdresSerwera))
+            m.DodajZrodlo(MetadaneMapy.ZrodloDanych(p.Warstwa.AdresSerwera, Form1.AtrybucjaZbioru("", p.Warstwa.AdresSerwera)))
         Next
         m.Tytul = String.Join(" + ", tytuly)
         Return m

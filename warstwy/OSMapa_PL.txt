@@ -1,0 +1,16 @@
+{
+  "typ": "xyz",
+  "adres": "https://{s}.tile.openstreetmap.pl/osmapa.pl/{z}/{x}/{y}.png",
+  "subdomeny": ["a", "b", "c"],
+  "zMin": 0,
+  "zMax": 18,
+  "rozmiarKafla": 256,
+  "nakladka": false,
+  "odstepMs": 100,
+  "maksWatkow": 2,
+  "zasieg": [13.5, 48.7, 24.6, 55.2],
+  "atrybucja": "OSMapa.pl / © autorzy OpenStreetMap",
+  "warstwy": [
+    { "nazwa": "osmapa", "piksel": 2 }
+  ]
+}

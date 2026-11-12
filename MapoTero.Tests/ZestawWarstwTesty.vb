@@ -217,4 +217,40 @@ Public Class ZestawWarstwTesty
         Assert.Equal(&HFF336699, cel(0))
     End Sub
 
+    <Fact>
+    Public Sub InteligentneWstawianiePodkladuPodNakladkami()
+        Dim z As New ZestawWarstw()
+        'użytkownik wybiera najpierw nakładkę (szlaki), potem podkład
+        Assert.Equal(WynikDodania.Dodano, z.Dodaj("hiking", adres:="https://tile.waymarkedtrails.org/{layer}/{z}/{x}/{y}.png",
+                                                  typZrodla:=TypUslugiMapowej.Xyz, nakladka:=True, umiescPodNakladkami:=True))
+        Assert.True(z.CzySameNakladki())
+
+        Assert.Equal(WynikDodania.Dodano, z.Dodaj("osmapa", adres:="https://{s}.tile.openstreetmap.pl/osmapa.pl/{z}/{x}/{y}.png",
+                                                  typZrodla:=TypUslugiMapowej.Xyz, nakladka:=False, umiescPodNakladkami:=True))
+        Assert.False(z.CzySameNakladki())
+        Assert.Equal({"osmapa", "hiking"}, z.Nazwy())
+        Assert.Null(z.ZnajdzPrzykrytaNakladke())
+
+        'przesunięcie podkładu nad nakładkę uruchamia ostrzeżenie
+        z.Przenies(0, 1)
+        Assert.Equal({"hiking", "osmapa"}, z.Nazwy())
+        Assert.Same(z(0), z.ZnajdzPrzykrytaNakladke())
+        'zmiana krycia górnej warstwy poniżej 100% przestaje zasłaniać nakładkę
+        z.UstawKrycie(1, 50)
+        Assert.Null(z.ZnajdzPrzykrytaNakladke())
+    End Sub
+
+    <Fact>
+    Public Sub GrupaZapytania_RozpoznajeXyzZKatalogiemWmtsWSciezce()
+        Dim z As New ZestawWarstw()
+        z.Dodaj("kafel", adres:="https://serwer.example/wmts/{z}/{x}/{y}.png", ignorujSsl:=True)
+        Dim kopia = z.Kopia()
+        Assert.True(kopia(0).IgnorujSsl)
+        Dim g = kopia.GrupyZapytan().Single()
+        Assert.Equal(TypUslugiMapowej.Xyz, g.EfektywnyTyp)
+        Assert.True(g.CzyKafelkowa)
+        Assert.False(g.CzyWmts)
+        Assert.True(g.IgnorujSsl)
+    End Sub
+
 End Class

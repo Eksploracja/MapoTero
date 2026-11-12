@@ -1,0 +1,3 @@
+https://mapy.geoportal.gov.pl/wss/service/PZGIK/NMT/GRID1/WMTS/ShadedRelief?SERVICE=WMTS&REQUEST=GetCapabilities
+ISOK_Cien
+1

@@ -165,7 +165,7 @@ Public Class KreatorIntegracjaTesty
         Dim tileUrl = plan.AdresKafla(wierszKafla, kolumnaKafla)
 
         Using klient As New System.Net.Http.HttpClient()
-            klient.DefaultRequestHeaders.UserAgent.ParseAdd("MapoTero/3.16")
+            klient.DefaultRequestHeaders.UserAgent.ParseAdd(WersjaProgramu.UserAgent(GetType(KlientCapabilities).Assembly))
             Dim odp = Await klient.GetAsync(tileUrl)
             Dim bajty = Await odp.Content.ReadAsByteArrayAsync()
             Assert.True(odp.IsSuccessStatusCode)
@@ -196,7 +196,7 @@ Public Class KreatorIntegracjaTesty
         Dim getMapUrl = Wms.ZapytanieGetMap(adresWms, {raster.IdentyfikatorNumeryczny}, UkladWspolrzednych.PL1992, z, "image/png", 256, 256, False, True)
 
         Using klient As New System.Net.Http.HttpClient()
-            klient.DefaultRequestHeaders.UserAgent.ParseAdd("MapoTero/3.16")
+            klient.DefaultRequestHeaders.UserAgent.ParseAdd(WersjaProgramu.UserAgent(GetType(KlientCapabilities).Assembly))
             Dim odp = Await klient.GetAsync(getMapUrl)
             Dim bajty = Await odp.Content.ReadAsByteArrayAsync()
             Assert.True(odp.IsSuccessStatusCode)
@@ -206,6 +206,30 @@ Public Class KreatorIntegracjaTesty
             Assert.Equal(CByte(&H4E), bajty(2))
             Assert.Equal(CByte(&H47), bajty(3))
         End Using
+    End Function
+
+    <Fact>
+    Public Async Function TestujPobieranieKatalogowPublicznychLive() As Task
+        Dim geoportal = Await KlientKataloguSerwerow.PobierzGeoportalAsync(timeoutSekundy:=20)
+        Assert.True(geoportal.Sukces, geoportal.KomunikatBledu)
+        Assert.True(geoportal.Wpisy.Count >= 60)
+        Assert.Contains(geoportal.Wpisy, Function(w) w.CzySkorowidz)
+
+        Dim eziudp = Await KlientKataloguSerwerow.PobierzEziudpCentralneIWojewodzkieAsync(timeoutSekundy:=25)
+        Assert.True(eziudp.Sukces, eziudp.KomunikatBledu)
+        Assert.True(eziudp.Wpisy.Count >= 60)
+
+        Dim lokalne = Await KlientKataloguSerwerow.SzukajEziudpLokalneAsync("Wieliczka", "oba", timeoutSekundy:=25)
+        Assert.True(lokalne.Sukces, lokalne.KomunikatBledu)
+        Assert.NotEmpty(lokalne.Wpisy)
+
+        Dim lodz = Await KlientKataloguSerwerow.SzukajEziudpLokalneAsync("Łódź", "oba", timeoutSekundy:=25)
+        Assert.True(lodz.Sukces, lodz.KomunikatBledu)
+        Assert.Contains(lodz.Wpisy, Function(w) w.Adres.IndexOf("lodz", StringComparison.OrdinalIgnoreCase) >= 0 OrElse w.Obszar.Contains("Łódź"))
+
+        Dim nowySacz = Await KlientKataloguSerwerow.SzukajEziudpLokalneAsync("Nowy Sącz", "gminy", timeoutSekundy:=25)
+        Assert.True(nowySacz.Sukces, nowySacz.KomunikatBledu)
+        Assert.NotEmpty(nowySacz.Wpisy)
     End Function
 
 End Class

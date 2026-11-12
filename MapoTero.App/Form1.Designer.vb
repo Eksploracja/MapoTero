@@ -45,10 +45,10 @@ Partial Class Form1
         Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(Form1))
         Me.btnPobierz = New System.Windows.Forms.Button()
         Me.grpDaneZrodlowe = New System.Windows.Forms.GroupBox()
-        Me.Label30 = New System.Windows.Forms.Label()
         Me.Label29 = New System.Windows.Forms.Label()
-        Me.lstWarstwy = New System.Windows.Forms.ListBox()
-        Me.cmbZbiorMap = New System.Windows.Forms.ComboBox()
+        Me.tvWarstwy = New MapoTero.DrzewoWarstw()
+        Me.txtSzukajWarstwy = New System.Windows.Forms.TextBox()
+        Me.btnZwinRozwin = New System.Windows.Forms.Button()
         Me.lblUklad = New System.Windows.Forms.Label()
         Me.cmbUklad = New System.Windows.Forms.ComboBox()
         Me.Panel1 = New System.Windows.Forms.Panel()
@@ -155,6 +155,7 @@ Partial Class Form1
         Me.txtXDol = New System.Windows.Forms.TextBox()
         Me.PictureBox2 = New System.Windows.Forms.PictureBox()
         Me.Panel2 = New System.Windows.Forms.Panel()
+        Me.splPanel = New System.Windows.Forms.Splitter()
         Me.Panel3 = New System.Windows.Forms.Panel()
         Me.grpDaneZrodlowe.SuspendLayout()
         Me.StatusStrip1.SuspendLayout()
@@ -184,65 +185,69 @@ Partial Class Form1
         '
         'grpDaneZrodlowe
         '
-        Me.grpDaneZrodlowe.Controls.Add(Me.Label30)
         Me.grpDaneZrodlowe.Controls.Add(Me.Label29)
-        Me.grpDaneZrodlowe.Controls.Add(Me.lstWarstwy)
-        Me.grpDaneZrodlowe.Controls.Add(Me.cmbZbiorMap)
+        Me.grpDaneZrodlowe.Controls.Add(Me.tvWarstwy)
+        Me.grpDaneZrodlowe.Controls.Add(Me.txtSzukajWarstwy)
+        Me.grpDaneZrodlowe.Controls.Add(Me.btnZwinRozwin)
         Me.grpDaneZrodlowe.Controls.Add(Me.btnDodajSerwer)
         Me.grpDaneZrodlowe.Controls.Add(Me.lblUklad)
         Me.grpDaneZrodlowe.Controls.Add(Me.cmbUklad)
-        Me.grpDaneZrodlowe.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
+        Me.grpDaneZrodlowe.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.grpDaneZrodlowe.Location = New System.Drawing.Point(5, 3)
         Me.grpDaneZrodlowe.Name = "grpDaneZrodlowe"
-        Me.grpDaneZrodlowe.Size = New System.Drawing.Size(212, 254)
+        Me.grpDaneZrodlowe.Size = New System.Drawing.Size(212, 318)
         Me.grpDaneZrodlowe.TabIndex = 210
         Me.grpDaneZrodlowe.TabStop = False
         Me.grpDaneZrodlowe.Text = "Dane źródłowe"
         '
-        'Label30
-        '
-        Me.Label30.AutoSize = True
-        Me.Label30.Location = New System.Drawing.Point(6, 58)
-        Me.Label30.Name = "Label30"
-        Me.Label30.Size = New System.Drawing.Size(152, 13)
-        Me.Label30.TabIndex = 217
-        Me.Label30.Text = " Wybierz mapę (warstwa WMS)"
-        Me.ToolTip1.SetToolTip(Me.Label30, "Wskaż wybraną warst klikając na nią lewym klawiszem myszki. ")
-        '
         'Label29
         '
         Me.Label29.AutoSize = True
+        Me.Label29.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.Label29.Location = New System.Drawing.Point(6, 16)
         Me.Label29.Name = "Label29"
-        Me.Label29.Size = New System.Drawing.Size(166, 13)
+        Me.Label29.Size = New System.Drawing.Size(196, 13)
         Me.Label29.TabIndex = 216
-        Me.Label29.Text = " Wybierz zbiór map (serwer WMS)"
-        Me.ToolTip1.SetToolTip(Me.Label29, "Spis dostępnych serwerów WMS, których definicje znajdują się w plikach tekstowych" &
-        " katalogu /warstwy/")
+        Me.Label29.Text = " Wybierz mapy (zbiory map i ich warstwy)"
+        Me.ToolTip1.SetToolTip(Me.Label29, "Zbiory map (serwery WMS / WMTS z plików w folderze warstwy) i ich warstwy. Zaznacz warstwy jednego " &
+        "lub kilku serwerów - trafią na listę wybranych warstw poniżej.")
         '
-        'lstWarstwy
+        'tvWarstwy
         '
-        Me.lstWarstwy.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
-        Me.lstWarstwy.FormattingEnabled = True
-        Me.lstWarstwy.IntegralHeight = False
-        Me.lstWarstwy.Location = New System.Drawing.Point(6, 72)
-        Me.lstWarstwy.Name = "lstWarstwy"
-        Me.lstWarstwy.Size = New System.Drawing.Size(198, 134)
-        Me.lstWarstwy.TabIndex = 216
+        Me.tvWarstwy.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.tvWarstwy.Location = New System.Drawing.Point(6, 54)
+        Me.tvWarstwy.Name = "tvWarstwy"
+        Me.tvWarstwy.Size = New System.Drawing.Size(198, 216)
+        Me.tvWarstwy.TabIndex = 219
         '
-        'cmbZbiorMap
+        'txtSzukajWarstwy
         '
-        Me.cmbZbiorMap.FormattingEnabled = True
-        Me.cmbZbiorMap.Location = New System.Drawing.Point(6, 29)
-        Me.cmbZbiorMap.MaxDropDownItems = 18
-        Me.cmbZbiorMap.Name = "cmbZbiorMap"
-        Me.cmbZbiorMap.Size = New System.Drawing.Size(170, 21)
-        Me.cmbZbiorMap.TabIndex = 216
-        Me.cmbZbiorMap.Text = "skany_map_topograficznych"
+        Me.txtSzukajWarstwy.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.txtSzukajWarstwy.Location = New System.Drawing.Point(6, 30)
+        Me.txtSzukajWarstwy.Name = "txtSzukajWarstwy"
+        Me.txtSzukajWarstwy.PlaceholderText = "szukaj warstwy…"
+        Me.txtSzukajWarstwy.Size = New System.Drawing.Size(144, 20)
+        Me.txtSzukajWarstwy.TabIndex = 215
+        Me.ToolTip1.SetToolTip(Me.txtSzukajWarstwy, "Pokaż tylko warstwy, których nazwa lub nazwa zbioru map zawiera wpisane słowa" & _
+        " (wielkość liter i polskie znaki nie mają znaczenia). Esc - wyczyść.")
+        '
+        'btnZwinRozwin
+        '
+        Me.btnZwinRozwin.Font = New System.Drawing.Font("Segoe UI Symbol", 8.25!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
+        Me.btnZwinRozwin.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.btnZwinRozwin.Location = New System.Drawing.Point(153, 28)
+        Me.btnZwinRozwin.Margin = New System.Windows.Forms.Padding(0)
+        Me.btnZwinRozwin.Name = "btnZwinRozwin"
+        Me.btnZwinRozwin.Size = New System.Drawing.Size(25, 23)
+        Me.btnZwinRozwin.TabIndex = 216
+        Me.btnZwinRozwin.Text = "⊞"
+        Me.ToolTip1.SetToolTip(Me.btnZwinRozwin, "Rozwiń wszystkie zbiory map")
+        Me.btnZwinRozwin.UseVisualStyleBackColor = True
         '
         'btnDodajSerwer
         '
         Me.btnDodajSerwer.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
+        Me.btnDodajSerwer.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.btnDodajSerwer.Location = New System.Drawing.Point(179, 28)
         Me.btnDodajSerwer.Name = "btnDodajSerwer"
         Me.btnDodajSerwer.Size = New System.Drawing.Size(25, 23)
@@ -255,7 +260,7 @@ Partial Class Form1
         '
         Me.lblUklad.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
         Me.lblUklad.AutoSize = True
-        Me.lblUklad.Location = New System.Drawing.Point(6, 208)
+        Me.lblUklad.Location = New System.Drawing.Point(6, 272)
         Me.lblUklad.Name = "lblUklad"
         Me.lblUklad.Size = New System.Drawing.Size(160, 13)
         Me.lblUklad.TabIndex = 217
@@ -264,10 +269,10 @@ Partial Class Form1
         '
         'cmbUklad
         '
-        Me.cmbUklad.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
+        Me.cmbUklad.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.cmbUklad.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
         Me.cmbUklad.FormattingEnabled = True
-        Me.cmbUklad.Location = New System.Drawing.Point(6, 223)
+        Me.cmbUklad.Location = New System.Drawing.Point(6, 287)
         Me.cmbUklad.Name = "cmbUklad"
         Me.cmbUklad.Size = New System.Drawing.Size(198, 21)
         Me.cmbUklad.TabIndex = 218
@@ -288,7 +293,7 @@ Partial Class Form1
         Me.StatusStrip1.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.stPostep, Me.stFormat, Me.stFolder, Me.stSegment})
         Me.StatusStrip1.Location = New System.Drawing.Point(0, 662)
         Me.StatusStrip1.Name = "StatusStrip1"
-        Me.StatusStrip1.Size = New System.Drawing.Size(878, 22)
+        Me.StatusStrip1.Size = New System.Drawing.Size(884, 22)
         Me.StatusStrip1.TabIndex = 237
         Me.StatusStrip1.Text = "StatusStrip1"
         Me.ToolTip1.SetToolTip(Me.StatusStrip1, "Informacje o aktualnym formacie plików rastrowych oraz lokalizacji katalogu ""down" &
@@ -485,7 +490,7 @@ Partial Class Form1
         Me.MenuStrip1.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.SesjaToolStripMenuItem, Me.NarzedziaToolStripMenuItem, Me.UstawieniaToolStripMenuItem, Me.HelpToolStripMenuItem})
         Me.MenuStrip1.Location = New System.Drawing.Point(0, 0)
         Me.MenuStrip1.Name = "MenuStrip1"
-        Me.MenuStrip1.Size = New System.Drawing.Size(878, 24)
+        Me.MenuStrip1.Size = New System.Drawing.Size(884, 24)
         Me.MenuStrip1.TabIndex = 230
         Me.MenuStrip1.Text = "MenuStrip1"
         '
@@ -578,10 +583,10 @@ Partial Class Form1
         Me.grpWybraneWarstwy.Controls.Add(Me.lblKrycie)
         Me.grpWybraneWarstwy.Controls.Add(Me.numKrycie)
         Me.grpWybraneWarstwy.Controls.Add(Me.btnWarstwyZaawansowane)
-        Me.grpWybraneWarstwy.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
-        Me.grpWybraneWarstwy.Location = New System.Drawing.Point(5, 258)
+        Me.grpWybraneWarstwy.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.grpWybraneWarstwy.Location = New System.Drawing.Point(5, 322)
         Me.grpWybraneWarstwy.Name = "grpWybraneWarstwy"
-        Me.grpWybraneWarstwy.Size = New System.Drawing.Size(210, 234)
+        Me.grpWybraneWarstwy.Size = New System.Drawing.Size(210, 170)
         Me.grpWybraneWarstwy.TabIndex = 268
         Me.grpWybraneWarstwy.TabStop = False
         Me.grpWybraneWarstwy.Text = "Wybrane warstwy oraz ich kolejność"
@@ -591,15 +596,16 @@ Partial Class Form1
         '
         'lstWybraneWarstwy
         '
+        Me.lstWybraneWarstwy.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.lstWybraneWarstwy.Location = New System.Drawing.Point(4, 15)
         Me.lstWybraneWarstwy.Name = "lstWybraneWarstwy"
-        Me.lstWybraneWarstwy.Size = New System.Drawing.Size(202, 188)
+        Me.lstWybraneWarstwy.Size = New System.Drawing.Size(202, 124)
         Me.lstWybraneWarstwy.TabIndex = 300
         '
         'btnWarstwaWyzej
         '
         Me.btnWarstwaWyzej.Font = New System.Drawing.Font("Segoe UI Symbol", 8.25!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
-        Me.btnWarstwaWyzej.Location = New System.Drawing.Point(4, 206)
+        Me.btnWarstwaWyzej.Location = New System.Drawing.Point(4, 142)
         Me.btnWarstwaWyzej.Margin = New System.Windows.Forms.Padding(0)
         Me.btnWarstwaWyzej.Name = "btnWarstwaWyzej"
         Me.btnWarstwaWyzej.Size = New System.Drawing.Size(23, 23)
@@ -611,7 +617,7 @@ Partial Class Form1
         'btnWarstwaNizej
         '
         Me.btnWarstwaNizej.Font = New System.Drawing.Font("Segoe UI Symbol", 8.25!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
-        Me.btnWarstwaNizej.Location = New System.Drawing.Point(28, 206)
+        Me.btnWarstwaNizej.Location = New System.Drawing.Point(28, 142)
         Me.btnWarstwaNizej.Margin = New System.Windows.Forms.Padding(0)
         Me.btnWarstwaNizej.Name = "btnWarstwaNizej"
         Me.btnWarstwaNizej.Size = New System.Drawing.Size(23, 23)
@@ -623,7 +629,7 @@ Partial Class Form1
         'btnUsunWarstwe
         '
         Me.btnUsunWarstwe.Font = New System.Drawing.Font("Segoe UI Symbol", 8.25!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
-        Me.btnUsunWarstwe.Location = New System.Drawing.Point(52, 206)
+        Me.btnUsunWarstwe.Location = New System.Drawing.Point(52, 142)
         Me.btnUsunWarstwe.Margin = New System.Windows.Forms.Padding(0)
         Me.btnUsunWarstwe.Name = "btnUsunWarstwe"
         Me.btnUsunWarstwe.Size = New System.Drawing.Size(23, 23)
@@ -635,18 +641,19 @@ Partial Class Form1
         'btnResetujWarstwy
         '
         Me.btnResetujWarstwy.Image = Global.MapoTero.My.Resources.Resources.kosz
-        Me.btnResetujWarstwy.Location = New System.Drawing.Point(76, 206)
+        Me.btnResetujWarstwy.Location = New System.Drawing.Point(76, 142)
         Me.btnResetujWarstwy.Margin = New System.Windows.Forms.Padding(0)
         Me.btnResetujWarstwy.Name = "btnResetujWarstwy"
         Me.btnResetujWarstwy.Size = New System.Drawing.Size(24, 23)
         Me.btnResetujWarstwy.TabIndex = 304
-        Me.ToolTip1.SetToolTip(Me.btnResetujWarstwy, "Usuń wszystkie wybrane warstwy")
+        Me.ToolTip1.SetToolTip(Me.btnResetujWarstwy, "Usuń zaznaczoną warstwę (Delete)")
         Me.btnResetujWarstwy.UseVisualStyleBackColor = True
         '
         'lblKrycie
         '
         Me.lblKrycie.AutoSize = True
-        Me.lblKrycie.Location = New System.Drawing.Point(102, 211)
+        Me.lblKrycie.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.lblKrycie.Location = New System.Drawing.Point(102, 147)
         Me.lblKrycie.Name = "lblKrycie"
         Me.lblKrycie.Size = New System.Drawing.Size(47, 13)
         Me.lblKrycie.TabIndex = 305
@@ -656,7 +663,8 @@ Partial Class Form1
         'numKrycie
         '
         Me.numKrycie.Increment = New Decimal(New Integer() {5, 0, 0, 0})
-        Me.numKrycie.Location = New System.Drawing.Point(148, 208)
+        Me.numKrycie.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.numKrycie.Location = New System.Drawing.Point(148, 144)
         Me.numKrycie.Minimum = New Decimal(New Integer() {5, 0, 0, 0})
         Me.numKrycie.Name = "numKrycie"
         Me.numKrycie.Size = New System.Drawing.Size(36, 20)
@@ -666,7 +674,8 @@ Partial Class Form1
         '
         'btnWarstwyZaawansowane
         '
-        Me.btnWarstwyZaawansowane.Location = New System.Drawing.Point(185, 206)
+        Me.btnWarstwyZaawansowane.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.btnWarstwyZaawansowane.Location = New System.Drawing.Point(185, 142)
         Me.btnWarstwyZaawansowane.Margin = New System.Windows.Forms.Padding(0)
         Me.btnWarstwyZaawansowane.Name = "btnWarstwyZaawansowane"
         Me.btnWarstwyZaawansowane.Size = New System.Drawing.Size(21, 23)
@@ -893,7 +902,7 @@ Partial Class Form1
         '
         'btnUsunPobrane
         '
-        Me.btnUsunPobrane.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.btnUsunPobrane.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
         Me.btnUsunPobrane.Image = Global.MapoTero.My.Resources.Resources.ico_folde_delete
         Me.btnUsunPobrane.Location = New System.Drawing.Point(39, 603)
         Me.btnUsunPobrane.Margin = New System.Windows.Forms.Padding(0)
@@ -905,7 +914,7 @@ Partial Class Form1
         '
         'btnZnaczniki
         '
-        Me.btnZnaczniki.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.btnZnaczniki.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
         Me.btnZnaczniki.Font = New System.Drawing.Font("Microsoft Sans Serif", 6.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
         Me.btnZnaczniki.Image = Global.MapoTero.My.Resources.Resources.marker_ico
         Me.btnZnaczniki.Location = New System.Drawing.Point(39, 569)
@@ -913,13 +922,12 @@ Partial Class Form1
         Me.btnZnaczniki.Name = "btnZnaczniki"
         Me.btnZnaczniki.Size = New System.Drawing.Size(30, 30)
         Me.btnZnaczniki.TabIndex = 306
-        Me.ToolTip1.SetToolTip(Me.btnZnaczniki, "wyświetl rzeczywisty zasięg pobieranego obszaru, uwzględniający rozmiar siatki se" &
-        "gmentów")
+        Me.ToolTip1.SetToolTip(Me.btnZnaczniki, "pokaż na mapie siatkę segmentów dla zasięgu z pól XY i wyśrodkuj na niej mapę")
         Me.btnZnaczniki.UseVisualStyleBackColor = True
         '
         'btnScalanie
         '
-        Me.btnScalanie.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.btnScalanie.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
         Me.btnScalanie.Image = Global.MapoTero.My.Resources.Resources.ico_merge
         Me.btnScalanie.Location = New System.Drawing.Point(5, 603)
         Me.btnScalanie.Margin = New System.Windows.Forms.Padding(0)
@@ -931,7 +939,7 @@ Partial Class Form1
         '
         'btnOtworzFolder
         '
-        Me.btnOtworzFolder.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.btnOtworzFolder.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
         Me.btnOtworzFolder.Image = Global.MapoTero.My.Resources.Resources.ico_folder
         Me.btnOtworzFolder.Location = New System.Drawing.Point(5, 569)
         Me.btnOtworzFolder.Margin = New System.Windows.Forms.Padding(0)
@@ -1115,7 +1123,7 @@ Partial Class Form1
         '
         'txtKomunikaty
         '
-        Me.txtKomunikaty.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.txtKomunikaty.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.txtKomunikaty.BackColor = System.Drawing.SystemColors.ButtonFace
         Me.txtKomunikaty.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
         Me.txtKomunikaty.ForeColor = System.Drawing.SystemColors.WindowText
@@ -1309,10 +1317,19 @@ Partial Class Form1
         Me.Panel2.Controls.Add(Me.btnPrzerwij)
         Me.Panel2.AutoScroll = True
         Me.Panel2.Dock = System.Windows.Forms.DockStyle.Right
-        Me.Panel2.Location = New System.Drawing.Point(661, 24)
+        Me.Panel2.Location = New System.Drawing.Point(667, 24)
         Me.Panel2.Name = "Panel2"
         Me.Panel2.Size = New System.Drawing.Size(217, 638)
         Me.Panel2.TabIndex = 307
+        '
+        'splPanel
+        '
+        Me.splPanel.Dock = System.Windows.Forms.DockStyle.Right
+        Me.splPanel.Location = New System.Drawing.Point(661, 24)
+        Me.splPanel.Name = "splPanel"
+        Me.splPanel.Size = New System.Drawing.Size(6, 638)
+        Me.splPanel.TabIndex = 309
+        Me.splPanel.TabStop = False
         '
         'Panel3
         '
@@ -1328,8 +1345,8 @@ Partial Class Form1
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.AutoScroll = True
-        Me.ClientSize = New System.Drawing.Size(878, 684)
+        Me.AutoScroll = False
+        Me.ClientSize = New System.Drawing.Size(884, 684)
         Me.Controls.Add(Me.lblKursorWgs)
         Me.Controls.Add(Me.lblKursorUklad)
         Me.Controls.Add(Me.lblKursorUkladOpis)
@@ -1347,6 +1364,7 @@ Partial Class Form1
         Me.Controls.Add(Me.rbOsm)
         Me.Controls.Add(Me.mapa)
         Me.Controls.Add(Me.Panel3)
+        Me.Controls.Add(Me.splPanel)
         Me.Controls.Add(Me.Panel2)
         Me.Controls.Add(Me.Label67)
         Me.Controls.Add(Me.StatusStrip1)
@@ -1403,12 +1421,12 @@ Partial Class Form1
     Friend WithEvents AboutToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents PomocPomorskieForumEksploracyjneToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents MenuStrip1 As System.Windows.Forms.MenuStrip
-    Friend WithEvents cmbZbiorMap As System.Windows.Forms.ComboBox
+    Friend WithEvents txtSzukajWarstwy As System.Windows.Forms.TextBox
+    Friend WithEvents btnZwinRozwin As System.Windows.Forms.Button
     Friend WithEvents lblUklad As System.Windows.Forms.Label
     Friend WithEvents cmbUklad As System.Windows.Forms.ComboBox
-    Friend WithEvents lstWarstwy As System.Windows.Forms.ListBox
+    Friend WithEvents tvWarstwy As MapoTero.DrzewoWarstw
     Friend WithEvents InstrukcjaObsługiToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
-    Friend WithEvents Label30 As System.Windows.Forms.Label
     Friend WithEvents Label29 As System.Windows.Forms.Label
     Friend WithEvents UsuwaniePustychSegmentówToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents txtBokSegmentu As System.Windows.Forms.TextBox
@@ -1487,6 +1505,7 @@ Partial Class Form1
     Friend WithEvents Label7 As System.Windows.Forms.Label
     Friend WithEvents btnZnaczniki As System.Windows.Forms.Button
     Friend WithEvents Panel2 As System.Windows.Forms.Panel
+    Friend WithEvents splPanel As System.Windows.Forms.Splitter
     Friend WithEvents Panel3 As System.Windows.Forms.Panel
     Friend WithEvents Label8 As Label
     Friend WithEvents btnUsunPobrane As Button

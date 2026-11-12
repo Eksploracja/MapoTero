@@ -1,4 +1,10 @@
 https://mapserver.bdl.lasy.gov.pl/ArcGIS/services/WMS_BDL/mapserver/WMSServer?request=GetMap&version=1.3.0&CRS=EPSG:2180&layers=
+6
+32
+5
+16
+4
+8
 3
 2
 1
@@ -7,7 +13,3 @@ https://mapserver.bdl.lasy.gov.pl/ArcGIS/services/WMS_BDL/mapserver/WMSServer?re
 4
 0
 4
-4
-8
-5
-16

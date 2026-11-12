@@ -29,15 +29,36 @@ Public Class WarstwaWybrana
     Public Property Krycie As Integer = ZestawWarstw.PelneKrycie
     ''' <summary>Zalecany rozmiar piksela z pliku zbioru map [m]; 0 - nieznany.</summary>
     Public Property ZalecanyPiksel As Double
+    ''' <summary>Typ usługi ze zbioru map (Nieznana - wykrywany z adresu).</summary>
+    Public Property TypZrodla As TypUslugiMapowej = TypUslugiMapowej.Nieznana
+    ''' <summary>Czy warstwa jest przezroczystą nakładką (np. szlaki turystyczne).</summary>
+    Public Property Nakladka As Boolean
+    ''' <summary>Czy pomijać błędy certyfikatu SSL przy pobieraniu tej warstwy.</summary>
+    Public Property IgnorujSsl As Boolean
+
+    Public ReadOnly Property EfektywnyTyp As TypUslugiMapowej
+        Get
+            Return KafleXyz.WybierzTyp(Adres, TypZrodla)
+        End Get
+    End Property
+
+    Public ReadOnly Property CzyKafelkowa As Boolean
+        Get
+            Return KafleXyz.CzyKafelkowy(EfektywnyTyp)
+        End Get
+    End Property
 
     Public ReadOnly Property CzyWmts As Boolean
         Get
-            Return Wmts.CzyAdresWmts(Adres)
+            Return EfektywnyTyp = TypUslugiMapowej.Wmts
         End Get
     End Property
 
     Public Function Kopia() As WarstwaWybrana
-        Return New WarstwaWybrana With {.Nazwa = Nazwa, .Zbior = Zbior, .Adres = Adres, .Krycie = Krycie, .ZalecanyPiksel = ZalecanyPiksel}
+        Return New WarstwaWybrana With {
+            .Nazwa = Nazwa, .Zbior = Zbior, .Adres = Adres, .Krycie = Krycie,
+            .ZalecanyPiksel = ZalecanyPiksel, .TypZrodla = TypZrodla, .Nakladka = Nakladka,
+            .IgnorujSsl = IgnorujSsl}
     End Function
 
     ''' <summary>Ta sama warstwa tego samego serwera.</summary>
@@ -48,17 +69,32 @@ Public Class WarstwaWybrana
 End Class
 
 ''' <summary>
-''' Warstwy pobierane razem z jednego serwera (WMS - jednym zapytaniem, serwer składa je sam; WMTS - z kafli tej
+''' Warstwy pobierane razem z jednego serwera (WMS - jednym zapytaniem, serwer składa je sam; WMTS/XYZ/TMS - z kafli tej
 ''' samej usługi) i krycie, z jakim wynik jest nakładany na niższe grupy.
 ''' </summary>
 Public Class GrupaZapytania
     Public ReadOnly Property Warstwy As New List(Of String)
     Public Property Krycie As Integer = ZestawWarstw.PelneKrycie
     Public Property Adres As String = ""
+    Public Property TypZrodla As TypUslugiMapowej = TypUslugiMapowej.Nieznana
+    Public Property Nakladka As Boolean
+    Public Property IgnorujSsl As Boolean
+
+    Public ReadOnly Property EfektywnyTyp As TypUslugiMapowej
+        Get
+            Return KafleXyz.WybierzTyp(Adres, TypZrodla)
+        End Get
+    End Property
+
+    Public ReadOnly Property CzyKafelkowa As Boolean
+        Get
+            Return KafleXyz.CzyKafelkowy(EfektywnyTyp)
+        End Get
+    End Property
 
     Public ReadOnly Property CzyWmts As Boolean
         Get
-            Return Wmts.CzyAdresWmts(Adres)
+            Return EfektywnyTyp = TypUslugiMapowej.Wmts
         End Get
     End Property
 End Class
@@ -146,14 +182,54 @@ Public Class ZestawWarstw
     End Function
 
     Public Function Dodaj(nazwa As String, Optional krycie As Integer = PelneKrycie, Optional adres As String = "",
-                          Optional zbior As String = "", Optional zalecanyPiksel As Double = 0) As WynikDodania
+                          Optional zbior As String = "", Optional zalecanyPiksel As Double = 0,
+                          Optional typZrodla As TypUslugiMapowej = TypUslugiMapowej.Nieznana,
+                          Optional nakladka As Boolean = False,
+                          Optional umiescPodNakladkami As Boolean = False,
+                          Optional ignorujSsl As Boolean = False) As WynikDodania
         If String.IsNullOrEmpty(nazwa) Then Return WynikDodania.JuzWybrana
         'ta sama warstwa dwa razy - serwer narysowałby ją podwójnie, a pomyłkowe kliknięcie trudno było cofnąć
         If Zawiera(If(adres, ""), nazwa) Then Return WynikDodania.JuzWybrana
         If _warstwy.Count >= MaksLiczba Then Return WynikDodania.BrakMiejsca
-        _warstwy.Add(New WarstwaWybrana With {.Nazwa = nazwa, .Adres = If(adres, ""), .Zbior = If(zbior, ""), .Krycie = PoprawneKrycie(krycie),
-                                              .ZalecanyPiksel = If(zalecanyPiksel > 0 AndAlso Not Double.IsInfinity(zalecanyPiksel), zalecanyPiksel, 0)})
+        Dim nowa As New WarstwaWybrana With {
+            .Nazwa = nazwa,
+            .Adres = If(adres, ""),
+            .Zbior = If(zbior, ""),
+            .Krycie = PoprawneKrycie(krycie),
+            .ZalecanyPiksel = If(zalecanyPiksel > 0 AndAlso Not Double.IsInfinity(zalecanyPiksel), zalecanyPiksel, 0),
+            .TypZrodla = typZrodla,
+            .Nakladka = nakladka,
+            .IgnorujSsl = ignorujSsl
+        }
+        If umiescPodNakladkami AndAlso Not nakladka AndAlso _warstwy.Count > 0 Then
+            'podkład dodany po wybraniu nakładki (np. szlaków) wsuwany jest pod końcowe nakładki, żeby nie zakrył ich sobą
+            Dim indeksWstawienia As Integer = _warstwy.Count
+            While indeksWstawienia > 0 AndAlso _warstwy(indeksWstawienia - 1).Nakladka
+                indeksWstawienia -= 1
+            End While
+            _warstwy.Insert(indeksWstawienia, nowa)
+        Else
+            _warstwy.Add(nowa)
+        End If
         Return WynikDodania.Dodano
+    End Function
+
+    ''' <summary>Czy wszystkie wybrane warstwy są przezroczystymi nakładkami (brak podkładu pod spodem).</summary>
+    Public Function CzySameNakladki() As Boolean
+        Return _warstwy.Count > 0 AndAlso _warstwy.All(Function(w) w.Nakladka)
+    End Function
+
+    ''' <summary>Zwraca pierwszą nakładkę przykrytą przez pełnokryjącą warstwę niebędącą nakładką leżącą nad nią, albo Nothing.</summary>
+    Public Function ZnajdzPrzykrytaNakladke() As WarstwaWybrana
+        For i = 0 To _warstwy.Count - 2
+            If Not _warstwy(i).Nakladka Then Continue For
+            For j = i + 1 To _warstwy.Count - 1
+                If Not _warstwy(j).Nakladka AndAlso _warstwy(j).Krycie >= PelneKrycie Then
+                    Return _warstwy(i)
+                End If
+            Next
+        Next
+        Return Nothing
     End Function
 
     Public Sub Usun(indeks As Integer)
@@ -208,10 +284,12 @@ Public Class ZestawWarstw
         Dim biezaca As GrupaZapytania = Nothing
         For Each w In _warstwy
             If w.Krycie >= PelneKrycie AndAlso biezaca IsNot Nothing AndAlso biezaca.Krycie >= PelneKrycie AndAlso
-               String.Equals(biezaca.Adres, w.Adres, StringComparison.OrdinalIgnoreCase) Then
+               String.Equals(biezaca.Adres, w.Adres, StringComparison.OrdinalIgnoreCase) AndAlso
+               biezaca.EfektywnyTyp = w.EfektywnyTyp AndAlso
+               biezaca.IgnorujSsl = w.IgnorujSsl Then
                 biezaca.Warstwy.Add(w.Nazwa)
             Else
-                biezaca = New GrupaZapytania With {.Krycie = w.Krycie, .Adres = w.Adres}
+                biezaca = New GrupaZapytania With {.Krycie = w.Krycie, .Adres = w.Adres, .TypZrodla = w.TypZrodla, .Nakladka = w.Nakladka, .IgnorujSsl = w.IgnorujSsl}
                 biezaca.Warstwy.Add(w.Nazwa)
                 grupy.Add(biezaca)
             End If

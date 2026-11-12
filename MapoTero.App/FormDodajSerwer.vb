@@ -41,68 +41,267 @@ Public Class FormDodajSerwer
     Private _wybranaWarstwaWms As WarstwaWmsInfo
     Private _wybranaWarstwaWmts As WarstwaWmts
     Private _nazwaZbioruZmienionaRecznie As Boolean = False
-    ''' <summary>Przerwanie pobierania próbki przy zamknięciu okna (dawniej trwało do odpowiedzi serwera).</summary>
+    Private _nazwaZbioruZKatalogu As Boolean = False
+    Private ReadOnly _srodekMapy As PunktGeo?
+    Private ReadOnly _istniejaceZbiory As New List(Of KeyValuePair(Of String, String))
+    Private _wybranyKatalogowyTytul As String = ""
+    Private _wybranyKatalogowyAdres As String = ""
+    Private _opcjeKafli As OpcjeKafliXyz
+    ''' <summary>Przerwanie pobierania próbki lub listy warstw przy zamknięciu okna.</summary>
     Private _przerwanieProbki As CancellationTokenSource
+    Private _przerwaniePolaczenia As CancellationTokenSource
 
-    Public Sub New(Optional domyslnyAdres As String = "")
+    Public Sub New(Optional domyslnyAdres As String = "",
+                   Optional srodekMapy As PunktGeo? = Nothing,
+                   Optional istniejaceZbiory As IEnumerable(Of KeyValuePair(Of String, String)) = Nothing)
         InitializeComponent()
+        _srodekMapy = srodekMapy
+        If istniejaceZbiory IsNot Nothing Then
+            _istniejaceZbiory.AddRange(istniejaceZbiory)
+        End If
+        pnlKatalog.UstawIstniejaceZbiory(_istniejaceZbiory)
         If Not String.IsNullOrWhiteSpace(domyslnyAdres) Then
             txtAdres.Text = domyslnyAdres.Trim()
+            PokazKrokWarstwy()
+        Else
+            PokazKrokKatalog()
+        End If
+    End Sub
+
+    Private Sub PokazKrokKatalog()
+        pnlKatalog.Visible = True
+        pnlKrokWarstwy.Visible = False
+        Me.CancelButton = pnlKatalog.PrzyciskAnuluj
+        pnlKatalog.FokusujSzukaj()
+    End Sub
+
+    Private Sub PokazKrokWarstwy()
+        pnlKatalog.Visible = False
+        pnlKrokWarstwy.Visible = True
+        Me.CancelButton = btnAnuluj
+    End Sub
+
+    Private Sub FormDodajSerwer_Shown(sender As Object, e As EventArgs) Handles MyBase.Shown
+        If pnlKatalog.Visible Then
+            pnlKatalog.FokusujSzukaj()
+        End If
+    End Sub
+
+    Private Sub UstawWidocznoscOpcjiXyz(widoczne As Boolean)
+        lblZoomZakres.Visible = widoczne
+        nudZMin.Visible = widoczne
+        lblZoomDo.Visible = widoczne
+        nudZMax.Visible = widoczne
+        chkTms.Visible = widoczne
+        chkNakladka.Visible = widoczne
+    End Sub
+
+    Private Sub WypelnijOpcjeXyzZResultatu()
+        If _wynikCap Is Nothing OrElse (_wynikCap.Typ <> TypUslugiMapowej.Xyz AndAlso _wynikCap.Typ <> TypUslugiMapowej.Tms) Then
+            _opcjeKafli = Nothing
+            UstawWidocznoscOpcjiXyz(False)
+            Exit Sub
+        End If
+        _opcjeKafli = If(_wynikCap.OpcjeKafli, New OpcjeKafliXyz With {.Typ = _wynikCap.Typ}).Kopia()
+        nudZMin.Value = Math.Max(nudZMin.Minimum, Math.Min(nudZMin.Maximum, CDec(_opcjeKafli.ZMin)))
+        nudZMax.Value = Math.Max(nudZMin.Value, Math.Min(nudZMax.Maximum, CDec(_opcjeKafli.ZMax)))
+        chkTms.Checked = (_opcjeKafli.Typ = TypUslugiMapowej.Tms)
+        chkNakladka.Checked = _opcjeKafli.Nakladka
+        UstawWidocznoscOpcjiXyz(True)
+    End Sub
+
+    Private Sub OdswiezOpcjeKafliZPol()
+        If _opcjeKafli Is Nothing Then Exit Sub
+        Dim z0 As Integer = CInt(nudZMin.Value)
+        Dim z1 As Integer = Math.Max(z0, CInt(nudZMax.Value))
+        If CInt(nudZMax.Value) < z0 Then nudZMax.Value = CDec(z0)
+        _opcjeKafli.ZMin = z0
+        _opcjeKafli.ZMax = z1
+        _opcjeKafli.Typ = If(chkTms.Checked, TypUslugiMapowej.Tms, TypUslugiMapowej.Xyz)
+        _opcjeKafli.Nakladka = chkNakladka.Checked
+        If _wynikCap IsNot Nothing AndAlso _wynikCap.SzablonKafli <> "" Then
+            Dim nazwaWarstwy = If(_wybranaWarstwaWmts IsNot Nothing, _wybranaWarstwaWmts.Identyfikator, _wynikCap.Tytul)
+            _wynikCap.UslugaWmts = KafleXyz.UtworzUsluge(_wynikCap.SzablonKafli, {nazwaWarstwy}, _opcjeKafli)
+            If _wynikCap.UslugaWmts.Warstwy.Count > 0 Then _wybranaWarstwaWmts = _wynikCap.UslugaWmts.Warstwy(0)
+        End If
+    End Sub
+
+    Private Async Sub pnlKatalog_UslugaWybrana(wpis As WpisKataloguSerwerow) Handles pnlKatalog.UslugaWybrana
+        If wpis Is Nothing Then Exit Sub
+        _wybranyKatalogowyTytul = If(wpis.Nazwa, "").Trim()
+        _wybranyKatalogowyAdres = If(wpis.Adres, "").Trim()
+        txtAdres.Text = wpis.Adres
+        chkIgnorujSsl.Checked = wpis.IgnorujSsl
+        txtFiltr.Clear()
+        Dim sugerowana = If(Not String.IsNullOrWhiteSpace(wpis.SugerowanaNazwaZbioru),
+                            wpis.SugerowanaNazwaZbioru,
+                            PlikWarstw.OczyscNazweZbioru(wpis.Nazwa))
+        If Not String.IsNullOrWhiteSpace(sugerowana) Then
+            txtNazwaZbioru.Text = sugerowana
+            _nazwaZbioruZKatalogu = True
+            _nazwaZbioruZmienionaRecznie = False
+        Else
+            _nazwaZbioruZKatalogu = False
+            _nazwaZbioruZmienionaRecznie = False
+        End If
+        PokazKrokWarstwy()
+        Await PolaczIZaladujWarstwyAsync()
+    End Sub
+
+    Private Async Sub pnlKatalog_WlasnyAdresKlikniety(wstepnyAdres As String) Handles pnlKatalog.WlasnyAdresKlikniety
+        _wybranyKatalogowyTytul = ""
+        _wybranyKatalogowyAdres = ""
+        _nazwaZbioruZKatalogu = False
+        _nazwaZbioruZmienionaRecznie = False
+        txtFiltr.Clear()
+
+        If Not String.IsNullOrWhiteSpace(wstepnyAdres) Then
+            txtAdres.Text = wstepnyAdres.Trim()
+            chkIgnorujSsl.Checked = False
+            txtNazwaZbioru.Clear()
+            PokazKrokWarstwy()
+            Await PolaczIZaladujWarstwyAsync()
+        Else
+            If _wynikCap IsNot Nothing Then
+                _wynikCap = Nothing
+                _wybranaWarstwaWms = Nothing
+                _wybranaWarstwaWmts = Nothing
+                _rozmiaryPiksela.Clear()
+                txtAdres.Clear()
+                txtNazwaZbioru.Clear()
+                tvWarstwy.Nodes.Clear()
+                WyczyscSzczegoly()
+                UstawWidocznoscOpcjiXyz(False)
+                AktualizujLiczbeZaznaczonych()
+                lblStatus.ForeColor = Color.Black
+                lblStatus.Text = "Wpisz lub wklej adres serwera WMS / WMTS lub szablon kafelków XYZ/TMS i kliknij ""Pobierz listę warstw""."
+            End If
+            PokazKrokWarstwy()
+            txtAdres.Focus()
+            txtAdres.SelectAll()
+        End If
+    End Sub
+
+    Private Sub pnlKatalog_AnulujKlikniete() Handles pnlKatalog.AnulujKlikniete
+        Me.DialogResult = DialogResult.Cancel
+        Me.Close()
+    End Sub
+
+    Private Sub btnWrocDoKatalogu_Click(sender As Object, e As EventArgs) Handles btnWrocDoKatalogu.Click
+        _przerwaniePolaczenia?.Cancel()
+        _przerwanieProbki?.Cancel()
+        UstawStanPolaczenia(trwa:=False)
+        PokazKrokKatalog()
+    End Sub
+
+    Private Async Sub txtAdres_KeyDown(sender As Object, e As KeyEventArgs) Handles txtAdres.KeyDown
+        If e.KeyCode = Keys.Enter Then
+            e.Handled = True
+            e.SuppressKeyPress = True
+            Await PolaczIZaladujWarstwyAsync()
         End If
     End Sub
 
     Private Async Sub btnPolacz_Click(sender As Object, e As EventArgs) Handles btnPolacz.Click
+        Await PolaczIZaladujWarstwyAsync()
+    End Sub
+
+    Private Async Function PolaczIZaladujWarstwyAsync() As Task
         Dim adres As String = txtAdres.Text.Trim()
+        If Not String.Equals(adres, _wybranyKatalogowyAdres, StringComparison.OrdinalIgnoreCase) Then
+            _wybranyKatalogowyTytul = ""
+            _wybranyKatalogowyAdres = ""
+            _nazwaZbioruZKatalogu = False
+        End If
         If String.IsNullOrWhiteSpace(adres) Then
             lblStatus.ForeColor = Color.Red
-            lblStatus.Text = "Wpisz lub wklej adres serwera WMS / WMTS."
+            lblStatus.Text = "Wpisz lub wklej adres serwera WMS / WMTS lub szablon kafelków XYZ/TMS."
             txtAdres.Focus()
-            Exit Sub
+            Exit Function
         End If
+
+        _przerwaniePolaczenia?.Cancel()
+        _przerwaniePolaczenia?.Dispose()
+        _przerwaniePolaczenia = New CancellationTokenSource()
+        Dim token = _przerwaniePolaczenia.Token
+
+        _wynikCap = Nothing
+        _wybranaWarstwaWms = Nothing
+        _wybranaWarstwaWmts = Nothing
+        _rozmiaryPiksela.Clear()
+        tvWarstwy.Nodes.Clear()
+        WyczyscSzczegoly()
+        UstawWidocznoscOpcjiXyz(False)
+        AktualizujLiczbeZaznaczonych()
 
         UstawStanPolaczenia(trwa:=True)
         lblStatus.ForeColor = Color.Black
-        lblStatus.Text = "Łączenie z serwerem i pobieranie opisu usługi (GetCapabilities)..."
+        lblStatus.Text = If(KafleXyz.CzyAdresXyz(adres),
+                            "Sprawdzanie szablonu kafelków XYZ/TMS...",
+                            "Łączenie z serwerem i pobieranie opisu usługi...")
 
         Try
-            _wynikCap = Await KlientCapabilities.PobierzAsync(adres, chkIgnorujSsl.Checked, timeoutSekundy:=25)
+            _wynikCap = Await KlientCapabilities.PobierzAsync(adres, chkIgnorujSsl.Checked, timeoutSekundy:=25, token:=token, srodekTestowy:=_srodekMapy)
+            If token.IsCancellationRequested OrElse IsDisposed Then Exit Function
 
             If Not _wynikCap.Sukces Then
                 lblStatus.ForeColor = Color.Red
-                lblStatus.Text = "Błąd: " & _wynikCap.KomunikatBledu
-                Exit Sub
+                lblStatus.Text = "Błąd: " & MetadaneMapy.MaskujSekrety(_wynikCap.KomunikatBledu)
+                UstawWidocznoscOpcjiXyz(False)
+                Exit Function
             End If
 
             'sukces - wypełnienie danych usługi
+            WypelnijOpcjeXyzZResultatu()
             lblStatus.ForeColor = Color.DarkGreen
-            Dim typOpis As String = If(_wynikCap.Typ = TypUslugiMapowej.Wms,
-                                       "Serwer WMS " & _wynikCap.UslugaWms.Wersja,
-                                       "Usługa kafelkowa WMTS")
+            Dim typOpis As String
+            If _wynikCap.Typ = TypUslugiMapowej.Wms Then
+                typOpis = "Serwer WMS " & _wynikCap.UslugaWms.Wersja
+            ElseIf _wynikCap.Typ = TypUslugiMapowej.Xyz OrElse _wynikCap.Typ = TypUslugiMapowej.Tms Then
+                typOpis = "Usługa kafelkowa " & KafleXyz.NazwaTypu(_wynikCap.Typ) &
+                          " (z=" & _opcjeKafli.ZMin & ".." & _opcjeKafli.ZMax & ", " & _opcjeKafli.RozmiarKafla & " px)"
+            Else
+                typOpis = "Usługa kafelkowa WMTS"
+            End If
             lblStatus.Text = "Połączono pomyślnie: " & typOpis & " - " & _wynikCap.Tytul
             If _wynikCap.Ostrzezenia.Count > 0 Then
                 lblStatus.Text &= " (" & String.Join("; ", _wynikCap.Ostrzezenia) & ")"
             End If
 
             'propozycja nazwy pliku zbioru
-            If Not _nazwaZbioruZmienionaRecznie OrElse String.IsNullOrWhiteSpace(txtNazwaZbioru.Text) Then
+            If (Not _nazwaZbioruZmienionaRecznie AndAlso Not _nazwaZbioruZKatalogu) OrElse String.IsNullOrWhiteSpace(txtNazwaZbioru.Text) Then
                 txtNazwaZbioru.Text = PlikWarstw.OczyscNazweZbioru(_wynikCap.Tytul)
                 _nazwaZbioruZmienionaRecznie = False
+                _nazwaZbioruZKatalogu = False
+            End If
+
+            If _wybranyKatalogowyTytul <> "" AndAlso
+               (_wynikCap.Typ = TypUslugiMapowej.Xyz OrElse _wynikCap.Typ = TypUslugiMapowej.Tms) AndAlso
+               _wynikCap.UslugaWmts IsNot Nothing AndAlso
+               _wynikCap.UslugaWmts.Warstwy.Count = 1 AndAlso
+               String.IsNullOrWhiteSpace(_wynikCap.UslugaWmts.Warstwy(0).Tytul) Then
+                _wynikCap.UslugaWmts.Warstwy(0).Tytul = _wybranyKatalogowyTytul
             End If
 
             WypelnijDrzewoWarstw()
 
+        Catch ex As OperationCanceledException When token.IsCancellationRequested
+            'anulowane przez zamknięcie okna lub nowe połączenie
         Catch ex As Exception
-            lblStatus.ForeColor = Color.Red
-            lblStatus.Text = "Nieoczekiwany błąd: " & ex.Message
+            If Not IsDisposed Then
+                lblStatus.ForeColor = Color.Red
+                lblStatus.Text = "Nieoczekiwany błąd: " & MetadaneMapy.MaskujSekrety(ex.Message)
+            End If
         Finally
-            UstawStanPolaczenia(trwa:=False)
+            If Not IsDisposed Then UstawStanPolaczenia(trwa:=False)
         End Try
-    End Sub
+    End Function
 
     Private Sub UstawStanPolaczenia(trwa As Boolean)
         btnPolacz.Enabled = Not trwa
         txtAdres.Enabled = Not trwa
         chkIgnorujSsl.Enabled = Not trwa
+        If trwa Then btnZapisz.Enabled = False
         prgPostep.Visible = trwa
         Cursor = If(trwa, Cursors.WaitCursor, Cursors.Default)
     End Sub
@@ -122,10 +321,10 @@ Public Class FormDodajSerwer
                 Dim node = UtworzWezelWms(w, filtr)
                 If node IsNot Nothing Then tvWarstwy.Nodes.Add(node)
             Next
-        ElseIf _wynikCap.Typ = TypUslugiMapowej.Wmts AndAlso _wynikCap.UslugaWmts IsNot Nothing Then
+        ElseIf KafleXyz.CzyKafelkowy(_wynikCap.Typ) AndAlso _wynikCap.UslugaWmts IsNot Nothing Then
             For Each w In _wynikCap.UslugaWmts.Warstwy
                 If PasujeDoFiltra(w.Identyfikator, w.Tytul, filtr) Then
-                    Dim node As New TreeNode(If(w.Tytul <> "", w.Tytul & " (" & w.Identyfikator & ")", w.Identyfikator)) With {
+                    Dim node As New TreeNode(If(w.Tytul <> "" AndAlso w.Tytul <> w.Identyfikator, w.Tytul & " (" & w.Identyfikator & ")", w.Identyfikator)) With {
                         .Tag = w
                     }
                     tvWarstwy.Nodes.Add(node)
@@ -140,6 +339,7 @@ Public Class FormDodajSerwer
         Dim wszystkie = PobierzZaznaczoneWarstwyZDrzewa()
         If tvWarstwy.Nodes.Count = 1 AndAlso tvWarstwy.Nodes(0).Tag IsNot Nothing Then
             tvWarstwy.Nodes(0).Checked = True
+            tvWarstwy.SelectedNode = tvWarstwy.Nodes(0)
         End If
         AktualizujLiczbeZaznaczonych()
     End Sub
@@ -281,7 +481,14 @@ Public Class FormDodajSerwer
     Private Sub PokazSzczegolyWmts(w As WarstwaWmts)
         lblNazwaWartosc.Text = w.Identyfikator
         lblTytulWartosc.Text = If(w.Tytul <> "", w.Tytul, "-")
-        txtAbstrakt.Text = "Warstwa kafelkowa WMTS. Formaty: " & String.Join(", ", w.Formaty)
+        Dim opisDodatkowy As String = ""
+        If _opcjeKafli IsNot Nothing Then
+            opisDodatkowy = ", zakres zoom " & _opcjeKafli.ZMin & ".." & _opcjeKafli.ZMax &
+                            ", kafel " & _opcjeKafli.RozmiarKafla & " px" &
+                            If(_opcjeKafli.Subdomeny.Count > 0, ", subdomeny: " & String.Join(",", _opcjeKafli.Subdomeny), "")
+        End If
+        txtAbstrakt.Text = "Warstwa kafelkowa " & KafleXyz.NazwaTypu(_wynikCap.Typ) &
+                           ". Formaty: " & String.Join(", ", w.Formaty) & opisDodatkowy
 
         Dim uklady As New List(Of String)
         For Each p In w.Powiazania
@@ -289,7 +496,7 @@ Public Class FormDodajSerwer
             If z IsNot Nothing AndAlso Not String.IsNullOrEmpty(z.Crs) Then uklady.Add(z.Crs)
         Next
         lblUkladyWartosc.Text = If(uklady.Count > 0, String.Join(", ", uklady.Take(5)), "-")
-        lblSkalaWartosc.Text = "zestawy kafli: " & w.Powiazania.Count
+        lblSkalaWartosc.Text = If(_opcjeKafli IsNot Nothing, "poziomy z=" & _opcjeKafli.ZMin & ".." & _opcjeKafli.ZMax, "zestawy kafli: " & w.Powiazania.Count)
 
         Dim px As Double
         If _rozmiaryPiksela.TryGetValue(w.Identyfikator, px) Then
@@ -301,54 +508,24 @@ Public Class FormDodajSerwer
         End If
         nudRozmiarPiksela.Enabled = True
         btnPobierzProbke.Enabled = True
-        picPodglad.Image = Nothing
+        If _wynikCap IsNot Nothing AndAlso _wynikCap.PrzykladowyKafel IsNot Nothing AndAlso _wynikCap.PrzykladowyKafel.Length > 0 Then
+            Try
+                Using ms As New MemoryStream(_wynikCap.PrzykladowyKafel)
+                    Using staryImg = picPodglad.Image
+                        picPodglad.Image = New Bitmap(Image.FromStream(ms))
+                    End Using
+                End Using
+            Catch
+                picPodglad.Image = Nothing
+            End Try
+        Else
+            picPodglad.Image = Nothing
+        End If
     End Sub
 
-    ''' <summary>Wyznacza sugerowany rozmiar piksela dla warstwy WMTS na podstawie jej nazwy i dostępnych macierzy.</summary>
+    ''' <summary>Wyznacza sugerowany rozmiar piksela dla warstwy WMTS/XYZ/TMS na podstawie jej nazwy i dostępnych macierzy.</summary>
     Private Function WyznaczSugerowanyRozmiarPikselaWmts(w As WarstwaWmts) As Double
-        If w Is Nothing Then Return 1.0
-
-        Dim tekst = (w.Identyfikator & " " & w.Tytul).ToLowerInvariant()
-        If tekst.Contains("bdoo") OrElse tekst.Contains("ogolnogeograf") OrElse tekst.Contains("ogólnogeograf") Then
-            Return 25.0
-        End If
-        If tekst.Contains("highresolution") OrElse tekst.Contains("ortofotomapa_high") Then
-            Return 0.1
-        End If
-        If tekst.Contains("orto") OrElse tekst.Contains("ortho") OrElse tekst.Contains("aerial") OrElse
-           tekst.Contains("dzialk") OrElse tekst.Contains("ewid") OrElse tekst.Contains("katastr") Then
-            Return 0.25
-        End If
-        If tekst.Contains("bdot10k") OrElse tekst.Contains("10k") OrElse tekst.Contains("topograf") OrElse
-           tekst.Contains("cieniowan") OrElse tekst.Contains("nmt") OrElse tekst.Contains("isok") Then
-            Return 1.0
-        End If
-        If tekst.Contains("skan") OrElse tekst.Contains("wig") OrElse tekst.Contains("messtischblatt") Then
-            Return 2.0
-        End If
-        If tekst.Contains("geolog") OrElse tekst.Contains("sozo") OrElse tekst.Contains("hydro") Then
-            Return 5.0
-        End If
-
-        'analiza macierzy kafelkowych w powiązanym zestawie kafli
-        If _wynikCap IsNot Nothing AndAlso _wynikCap.UslugaWmts IsNot Nothing Then
-            For Each p In w.Powiazania
-                Dim z = _wynikCap.UslugaWmts.Zestaw(p.Zestaw)
-                If z IsNot Nothing AndAlso z.Macierze.Count > 0 Then
-                    Dim uk = z.Uklad
-                    Dim mnj As Double = If(uk IsNot Nothing, uk.MetrowNaJednostke, 1.0)
-                    Dim rozdz = z.Macierze.Select(Function(m) m.Rozdzielczosc(mnj)).OrderBy(Function(r) r).ToList()
-                    If rozdz.Any(Function(r) r >= 0.5 AndAlso r <= 2.5) Then Return 1.0
-                    If rozdz.First() > 5.0 Then
-                        Dim minR = rozdz.First()
-                        If minR >= 20.0 AndAlso minR <= 35.0 Then Return 25.0
-                        Return Math.Round(minR, 1)
-                    End If
-                End If
-            Next
-        End If
-
-        Return 1.0
+        Return KafleXyz.SugerowanyRozmiarPiksela(_wynikCap?.UslugaWmts, w)
     End Function
 
     ''' <summary>
@@ -427,7 +604,7 @@ Public Class FormDodajSerwer
                     handler.ServerCertificateCustomValidationCallback = Function(m, c, ch, err) True
                 End If
                 Using klient As New HttpClient(handler) With {.Timeout = TimeSpan.FromSeconds(LimitCzasuProbkiSekundy)}
-                    klient.DefaultRequestHeaders.UserAgent.ParseAdd("MapoTero/3.16")
+                    klient.DefaultRequestHeaders.UserAgent.ParseAdd(Program.UserAgentProgramu)
 
                     If _wybranaWarstwaWms IsNot Nothing Then
                         Dim format As String = If(_wynikCap.UslugaWms.Formaty.Contains("image/png"), "image/png", "image/jpeg")
@@ -518,6 +695,7 @@ Public Class FormDodajSerwer
                         End If
 
                     ElseIf _wybranaWarstwaWmts IsNot Nothing AndAlso _wynikCap.UslugaWmts IsNot Nothing Then
+                        OdswiezOpcjeKafliZPol()
                         Dim px As Double = If(_rozmiaryPiksela.ContainsKey(_wybranaWarstwaWmts.Identyfikator),
                                               _rozmiaryPiksela(_wybranaWarstwaWmts.Identyfikator),
                                               WyznaczSugerowanyRozmiarPikselaWmts(_wybranaWarstwaWmts))
@@ -530,10 +708,13 @@ Public Class FormDodajSerwer
                                 kandydujacePx.Add(altPx)
                             End If
                         Next
+                        Dim srodekPlProbka As PunktXY = If(_opcjeKafli IsNot Nothing AndAlso _srodekMapy.HasValue,
+                                                           UkladWspolrzednych.PL1992.ZWgs84(_srodekMapy.Value),
+                                                           New PunktXY(500000, 500000))
 
                         For Each testPx In kandydujacePx
                             Dim bok As Double = Math.Max(50.0, 256.0 * testPx)
-                            Dim srodekPL As New Zasieg(500000, 500000, 500000 + bok, 500000 + bok)
+                            Dim srodekPL As New Zasieg(srodekPlProbka.X, srodekPlProbka.Y, srodekPlProbka.X + bok, srodekPlProbka.Y + bok)
                             Try
                                 Dim plan As New PlanWmts(_wynikCap.UslugaWmts, _wybranaWarstwaWmts.Identyfikator, UkladWspolrzednych.PL1992, srodekPL, testPx, "png")
                                 Dim kol As Double, wie As Double
@@ -543,7 +724,20 @@ Public Class FormDodajSerwer
                                 Using odp = Await klient.GetAsync(url, token).ConfigureAwait(True)
                                     ostatniStatus = CInt(odp.StatusCode)
                                     Dim bajty = Await odp.Content.ReadAsByteArrayAsync(token).ConfigureAwait(True)
-                                    If bajty IsNot Nothing AndAlso bajty.Length > 0 AndAlso PobieranieSegmentow.CzyObraz(bajty) Then
+                                    Dim ct As String = If(odp.Content.Headers.ContentType IsNot Nothing, If(odp.Content.Headers.ContentType.MediaType, ""), "")
+                                    If odp.IsSuccessStatusCode AndAlso bajty IsNot Nothing AndAlso bajty.Length > 0 AndAlso
+                                       KafleXyz.DiagnozujOdpowiedzKafla(bajty, ct, adres:=url) = "" Then
+                                        If _opcjeKafli IsNot Nothing Then
+                                            Dim wykrytyMime = KafleXyz.WykryjMimeZObrazu(bajty, ct)
+                                            If wykrytyMime <> "" Then
+                                                _opcjeKafli.FormatObrazu = wykrytyMime
+                                                If _wybranaWarstwaWmts.Formaty.Count = 0 Then
+                                                    _wybranaWarstwaWmts.Formaty.Add(wykrytyMime)
+                                                Else
+                                                    _wybranaWarstwaWmts.Formaty(0) = wykrytyMime
+                                                End If
+                                            End If
+                                        End If
                                         Using ms As New MemoryStream(bajty)
                                             Using staryImg = picPodglad.Image
                                                 picPodglad.Image = New Bitmap(Image.FromStream(ms))
@@ -611,11 +805,14 @@ Public Class FormDodajSerwer
     Private Const LimitCzasuProbkiSekundy As Integer = 30
 
     Private Sub FormDodajSerwer_FormClosing(sender As Object, e As FormClosingEventArgs) Handles MyBase.FormClosing
+        _przerwaniePolaczenia?.Cancel()
         _przerwanieProbki?.Cancel()
+        pnlKatalog.AnulujAktywneZapytanie()
     End Sub
 
     Private Sub txtNazwaZbioru_KeyPress(sender As Object, e As KeyPressEventArgs) Handles txtNazwaZbioru.KeyPress
         _nazwaZbioruZmienionaRecznie = True
+        _nazwaZbioruZKatalogu = False
     End Sub
 
     Private Sub btnZapisz_Click(sender As Object, e As EventArgs) Handles btnZapisz.Click
@@ -645,30 +842,60 @@ Public Class FormDodajSerwer
         End If
 
         Try
-            Dim p As New PlikWarstw()
+            Dim czyZKatalogu = Not String.IsNullOrWhiteSpace(_wybranyKatalogowyTytul) AndAlso
+                               String.Equals(txtAdres.Text.Trim(), _wybranyKatalogowyAdres, StringComparison.OrdinalIgnoreCase)
+            Dim czytelnyTytul = If(czyZKatalogu, _wybranyKatalogowyTytul, If(_wynikCap?.Tytul, "").Trim())
+            Dim p As New PlikWarstw With {.IgnorujSsl = chkIgnorujSsl.Checked, .Tytul = czytelnyTytul}
 
             If _wynikCap.Typ = TypUslugiMapowej.Wms Then
+                If p.IgnorujSsl Then p.Typ = TypUslugiMapowej.Wms
                 p.Adres = PlikWarstw.ZbudujAdresWmsDlaPliku(_wynikCap.UslugaWms.AdresGetMap, _wynikCap.UslugaWms.Wersja)
                 For Each item In zaznaczone
                     If TypeOf item Is WarstwaWmsInfo Then
                         Dim w = DirectCast(item, WarstwaWmsInfo)
                         Dim px As Double = w.ZalecanyRozmiarPiksela()
                         If _rozmiaryPiksela.ContainsKey(w.Nazwa) Then px = _rozmiaryPiksela(w.Nazwa)
+                        Dim tytulW = If(w.Tytul, "").Trim()
                         p.Warstwy.Add(New WarstwaMapy With {
                             .Nazwa = w.Nazwa,
+                            .Tytul = If(tytulW <> "" AndAlso Not String.Equals(tytulW, w.Nazwa, StringComparison.Ordinal), tytulW, ""),
                             .RozmiarPiksela = px.ToString("0.##", CultureInfo.InvariantCulture)
                         })
                     End If
                 Next
-            ElseIf _wynikCap.Typ = TypUslugiMapowej.Wmts Then
-                p.Adres = _wynikCap.AdresCapabilities
+            ElseIf KafleXyz.CzyKafelkowy(_wynikCap.Typ) Then
+                Dim czyXyzTms As Boolean = (_wynikCap.Typ = TypUslugiMapowej.Xyz OrElse _wynikCap.Typ = TypUslugiMapowej.Tms)
+                If Not czyXyzTms AndAlso p.IgnorujSsl Then p.Typ = TypUslugiMapowej.Wmts
+                p.Adres = If(czyXyzTms AndAlso Not String.IsNullOrEmpty(_wynikCap.SzablonKafli), _wynikCap.SzablonKafli, _wynikCap.AdresCapabilities)
+                If czyXyzTms Then
+                    OdswiezOpcjeKafliZPol()
+                    If _opcjeKafli IsNot Nothing Then
+                        p.Typ = _opcjeKafli.Typ
+                        p.ZMin = _opcjeKafli.ZMin
+                        p.ZMax = _opcjeKafli.ZMax
+                        p.RozmiarKafla = _opcjeKafli.RozmiarKafla
+                        p.Nakladka = _opcjeKafli.Nakladka
+                        p.OdstepMs = _opcjeKafli.OdstepMs
+                        p.MaksWatkow = _opcjeKafli.MaksWatkow
+                        p.Referer = _opcjeKafli.Referer
+                        p.Atrybucja = _opcjeKafli.Atrybucja
+                        p.FormatObrazu = _opcjeKafli.FormatObrazu
+                        p.ZasiegGeo = _opcjeKafli.ZasiegGeo
+                        p.Subdomeny.AddRange(_opcjeKafli.Subdomeny)
+                    End If
+                End If
                 For Each item In zaznaczone
                     If TypeOf item Is WarstwaWmts Then
                         Dim w = DirectCast(item, WarstwaWmts)
-                        Dim px As Double = 0.25
+                        Dim px As Double = 1.0
                         If _rozmiaryPiksela.ContainsKey(w.Identyfikator) Then px = _rozmiaryPiksela(w.Identyfikator)
+                        Dim tytulW = If(w.Tytul, "").Trim()
+                        If tytulW = "" AndAlso czyXyzTms AndAlso zaznaczone.Count = 1 AndAlso czytelnyTytul <> "" Then
+                            tytulW = czytelnyTytul
+                        End If
                         p.Warstwy.Add(New WarstwaMapy With {
                             .Nazwa = w.Identyfikator,
+                            .Tytul = If(tytulW <> "" AndAlso Not String.Equals(tytulW, w.Identyfikator, StringComparison.Ordinal), tytulW, ""),
                             .RozmiarPiksela = px.ToString("0.##", CultureInfo.InvariantCulture)
                         })
                     End If

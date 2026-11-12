@@ -68,6 +68,7 @@ Public NotInheritable Class RegulatorZapytan
         ''' <summary>Przepustki zatrzymywane po zmniejszeniu limitu (zwalniane przepustki nie wracają do semafora).</summary>
         Public Dlug As Integer
         Public PrzerwaDo As DateTime = DateTime.MinValue
+        Public NastepneZapytanieOd As DateTime = DateTime.MinValue
         Public OstatnieHamowanie As DateTime = DateTime.MinValue
         Public KolejneHamowania As Integer
         Public KolejneBledy As Integer
@@ -143,8 +144,11 @@ Public NotInheritable Class RegulatorZapytan
     ''' Czeka na wolne miejsce dla zapytania do serwera z adresu (i na koniec przerwy po przeciążeniu serwera).
     ''' Przepustkę trzeba zwolnić (Dispose) po otrzymaniu odpowiedzi.
     ''' </summary>
-    Public Async Function WejdzAsync(adres As String, token As CancellationToken) As Task(Of Przepustka)
-        Dim stan As StanSerwera = StanDla(adres)
+    Public Async Function WejdzAsync(adres As String, token As CancellationToken,
+                                     Optional kluczSerwera As String = Nothing,
+                                     Optional maksRownoleglych As Integer = 0,
+                                     Optional odstepMs As Integer = 0) As Task(Of Przepustka)
+        Dim stan As StanSerwera = StanDla(adres, kluczSerwera, maksRownoleglych)
         Await stan.Semafor.WaitAsync(token).ConfigureAwait(False)
         Try
             Do
@@ -155,6 +159,29 @@ Public NotInheritable Class RegulatorZapytan
                 If czekaj <= TimeSpan.Zero Then Exit Do
                 Await Task.Delay(czekaj, token).ConfigureAwait(False)
             Loop
+
+            If odstepMs > 0 Then
+                Dim opoznienie As TimeSpan = TimeSpan.Zero
+                Dim interwal = TimeSpan.FromMilliseconds(odstepMs)
+                SyncLock stan.Blokada
+                    Dim teraz As DateTime = DateTime.UtcNow
+                    Dim baza As DateTime = If(teraz > stan.NastepneZapytanieOd, teraz, stan.NastepneZapytanieOd)
+                    If stan.PrzerwaDo > baza Then baza = stan.PrzerwaDo
+                    stan.NastepneZapytanieOd = baza.Add(interwal)
+                    opoznienie = baza - teraz
+                End SyncLock
+                If opoznienie > TimeSpan.Zero Then
+                    Await Task.Delay(opoznienie, token).ConfigureAwait(False)
+                End If
+                Do
+                    Dim czekaj As TimeSpan
+                    SyncLock stan.Blokada
+                        czekaj = stan.PrzerwaDo - DateTime.UtcNow
+                    End SyncLock
+                    If czekaj <= TimeSpan.Zero Then Exit Do
+                    Await Task.Delay(czekaj, token).ConfigureAwait(False)
+                Loop
+            End If
         Catch
             Zwolnij(stan)
             Throw
@@ -163,16 +190,16 @@ Public NotInheritable Class RegulatorZapytan
     End Function
 
     ''' <summary>Bieżąca liczba jednoczesnych zapytań do serwera z adresu.</summary>
-    Public Function Limit(adres As String) As Integer
-        Dim stan As StanSerwera = StanDla(adres)
+    Public Function Limit(adres As String, Optional kluczSerwera As String = Nothing) As Integer
+        Dim stan As StanSerwera = StanDla(adres, kluczSerwera)
         SyncLock stan.Blokada
             Return stan.Limit
         End SyncLock
     End Function
 
     ''' <summary>Pozostała przerwa w zapytaniach do serwera z adresu (zero - bez przerwy).</summary>
-    Public Function PozostalaPrzerwa(adres As String) As TimeSpan
-        Dim stan As StanSerwera = StanDla(adres)
+    Public Function PozostalaPrzerwa(adres As String, Optional kluczSerwera As String = Nothing) As TimeSpan
+        Dim stan As StanSerwera = StanDla(adres, kluczSerwera)
         SyncLock stan.Blokada
             Dim czas As TimeSpan = stan.PrzerwaDo - DateTime.UtcNow
             Return If(czas > TimeSpan.Zero, czas, TimeSpan.Zero)
@@ -186,9 +213,12 @@ Public NotInheritable Class RegulatorZapytan
         Return If(adres, "")
     End Function
 
-    Private Function StanDla(adres As String) As StanSerwera
+    Private Function StanDla(adres As String, Optional kluczSerwera As String = Nothing, Optional maksRownoleglych As Integer = 0) As StanSerwera
+        Dim klucz As String = If(Not String.IsNullOrWhiteSpace(kluczSerwera), kluczSerwera, NazwaSerwera(adres))
         Dim maksimum As Integer = _maksimum
-        Return _serwery.GetOrAdd(NazwaSerwera(adres), Function(serwer) New StanSerwera(serwer, maksimum))
+        If maksRownoleglych > 0 Then maksimum = Math.Min(maksimum, maksRownoleglych)
+        maksimum = Math.Max(1, maksimum)
+        Return _serwery.GetOrAdd(klucz, Function(serwer) New StanSerwera(serwer, maksimum))
     End Function
 
     Private Shared Sub Zwolnij(stan As StanSerwera)
@@ -207,7 +237,7 @@ Public NotInheritable Class RegulatorZapytan
         SyncLock stan.Blokada
             stan.KolejneBledy = 0
             Select Case CInt(kod)
-                Case 429, 502, 503, 504
+                Case 403, 418, 429, 502, 503, 504
                     komunikat = Hamuj(stan, wyslano, "HTTP " & CInt(kod), retryAfter)
                 Case 200 To 299, 404
                     'przyspieszanie po serii udanych odpowiedzi (404 - kafel WMTS poza obszarem danych, też poprawna odpowiedź)

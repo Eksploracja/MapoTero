@@ -183,6 +183,30 @@ Public Class PlikiSesjiTesty
         Assert.Equal("chkgmi" & vbCrLf & "True" & vbCrLf & "iloscProbPobrania" & vbCrLf & "3" & vbCrLf & "x_start" & vbCrLf & "52.3" & vbCrLf, u.DoTekstu())
     End Sub
 
+    <Fact>
+    Public Sub SzerokoscPaneluWLastsettings()
+        Dim plik = Path.GetTempFileName()
+        Try
+            Dim u As New MapoTero.UstawieniaProgramu With {.SzerokoscPanelu = 340}
+            u.Zapisz(plik)
+            Dim w As New MapoTero.UstawieniaProgramu()
+            w.Wczytaj(plik)
+            Assert.Equal(340, w.SzerokoscPanelu)
+
+            'plik ze starszej wersji (bez tego ustawienia) albo z błędną wartością - szerokość domyślna (0)
+            File.WriteAllText(plik, "watki" & vbCrLf & "4" & vbCrLf)
+            Dim w2 As New MapoTero.UstawieniaProgramu()
+            w2.Wczytaj(plik)
+            Assert.Equal(0, w2.SzerokoscPanelu)
+            File.WriteAllText(plik, "szerokosc_panelu" & vbCrLf & "-50" & vbCrLf)
+            Dim w3 As New MapoTero.UstawieniaProgramu()
+            w3.Wczytaj(plik)
+            Assert.Equal(0, w3.SzerokoscPanelu)
+        Finally
+            File.Delete(plik)
+        End Try
+    End Sub
+
     ''' <summary>Pomocnik: odczyt konfiguracji z tekstu przez plik tymczasowy.</summary>
     Private Class CzytnikPlikuVbTest
         Private ReadOnly _tekst As String
@@ -351,6 +375,56 @@ Public Class PlikWarstwTesty
             Assert.StartsWith("http", p.Adres)
             Assert.NotEmpty(p.Warstwy)
         Next
+    End Sub
+
+    <Fact>
+    Public Sub FormatJson_ZapisIOdczytXyzBezBom()
+        Dim p As New PlikWarstw With {
+            .Typ = TypUslugiMapowej.Tms,
+            .Adres = "https://{s}.tiles.example/{layer}/{z}/{x}/{-y}.png",
+            .ZMin = 2,
+            .ZMax = 17,
+            .RozmiarKafla = 512,
+            .Nakladka = True,
+            .OdstepMs = 150,
+            .MaksWatkow = 2,
+            .Referer = "https://example.org/",
+            .Atrybucja = "© Zażółć gęślą jaźń",
+            .ZasiegGeo = New ProstokatGeo(55.0, 49.0, 24.5, 13.8)
+        }
+        p.Subdomeny.AddRange({"a", "b"})
+        p.FormatObrazu = "image/jpeg"
+        p.IgnorujSsl = True
+        p.Warstwy.Add(New WarstwaMapy With {.Nazwa = "hiking", .RozmiarPiksela = "1", .ZMax = 16, .Nakladka = True})
+        p.Warstwy.Add(New WarstwaMapy With {.Nazwa = "podklad", .RozmiarPiksela = "2", .Nakladka = False})
+
+        Dim plik = Path.GetTempFileName()
+        Try
+            p.Zapisz(plik)
+            'UTF-8 bez BOM (pierwszy bajt to '{')
+            Dim bajty = File.ReadAllBytes(plik)
+            Assert.Equal(AscW("{"c), CInt(bajty(0)))
+
+            Dim odczytany = PlikWarstw.Wczytaj(plik)
+            Assert.Equal(TypUslugiMapowej.Tms, odczytany.EfektywnyTyp)
+            Assert.Equal({"a", "b"}, odczytany.Subdomeny)
+            Assert.Equal(2, odczytany.ZMin)
+            Assert.Equal(17, odczytany.ZMax)
+            Assert.Equal(512, odczytany.RozmiarKafla)
+            Assert.True(odczytany.Nakladka)
+            Assert.Equal(150, odczytany.OdstepMs)
+            Assert.Equal(2, odczytany.MaksWatkow)
+            Assert.Equal("https://example.org/", odczytany.Referer)
+            Assert.Equal("© Zażółć gęślą jaźń", odczytany.Atrybucja)
+            Assert.Equal("image/jpeg", odczytany.FormatObrazu)
+            Assert.True(odczytany.IgnorujSsl)
+            Assert.True(odczytany.OpcjeKafli("hiking").IgnorujSsl)
+            Assert.True(odczytany.ZasiegGeo.HasValue)
+            Assert.Equal(16, odczytany.OpcjeKafli("hiking").ZMax)
+            Assert.False(odczytany.OpcjeKafli("podklad").Nakladka)
+        Finally
+            If File.Exists(plik) Then File.Delete(plik)
+        End Try
     End Sub
 
 End Class

@@ -1,0 +1,3 @@
+https://mapy.geoportal.gov.pl/wss/service/img/guest/WMS/Szczyty?request=GetMap&version=1.3.0&CRS=EPSG:2180&layers=
+szczyty
+4

@@ -89,7 +89,34 @@ Public Class MetadaneMapy
     ''' Źródło danych wg adresu serwera WMS / WMTS: instytucja udostępniająca dane dla znanych serwerów,
     ''' a dla pozostałych - nazwa serwera. Pusty tekst, gdy adres jest pusty.
     ''' </summary>
+    ''' <summary>Maskuje klucze API i tokeny w adresie URL przed zapisaniem do logów lub raportów błędów.</summary>
+    Public Shared Function MaskujSekrety(adres As String) As String
+        If String.IsNullOrWhiteSpace(adres) Then Return ""
+        Dim wynik As String = System.Text.RegularExpressions.Regex.Replace(
+            adres,
+            "([?&](?:key|api[_-]?key|apikey|token|access_token|auth|secret|signature|sig|app_id|app_code|client_id|subscription-key)=)([^&\s]+)",
+            "$1***",
+            System.Text.RegularExpressions.RegexOptions.IgnoreCase)
+        wynik = System.Text.RegularExpressions.Regex.Replace(
+            wynik,
+            "(https?://[^:@/\s]+:)([^@/\s]+)(@)",
+            "$1***$3",
+            System.Text.RegularExpressions.RegexOptions.IgnoreCase)
+        Return wynik
+    End Function
+
+    ''' <summary>
+    ''' Krótki opis źródła danych do umieszczenia w opisie mapy (np. Copyright w KMZ/MBTiles).
+    ''' Dla polskich urzędów zwraca nazwę instytucji, dla OSM - wymagane uznanie autorstwa,
+    ''' a dla pozostałych - nazwa serwera. Pusty tekst, gdy adres jest pusty.
+    ''' </summary>
     Public Shared Function ZrodloDanych(adres As String) As String
+        Return ZrodloDanych(adres, Nothing)
+    End Function
+
+    ''' <summary>Zwraca jawny tekst atrybucji jeśli podano, a w przeciwnym razie wyprowadza go z adresu serwera.</summary>
+    Public Shared Function ZrodloDanych(adres As String, atrybucja As String) As String
+        If Not String.IsNullOrWhiteSpace(atrybucja) Then Return atrybucja.Trim()
         Dim host As String = Serwer(adres)
         If host = "" Then Return ""
         Dim h As String = host.ToLowerInvariant()
@@ -103,6 +130,12 @@ Public Class MetadaneMapy
             Return "Bank Danych o Lasach"
         ElseIf h.EndsWith("zabytek.gov.pl", StringComparison.Ordinal) Then
             Return "Narodowy Instytut Dziedzictwa"
+        ElseIf h.EndsWith("waymarkedtrails.org", StringComparison.Ordinal) Then
+            Return "Waymarked Trails / © autorzy OpenStreetMap"
+        ElseIf h.EndsWith("openstreetmap.pl", StringComparison.Ordinal) OrElse h.EndsWith("osmapa.pl", StringComparison.Ordinal) Then
+            Return "OSMapa.pl / © autorzy OpenStreetMap"
+        ElseIf h.EndsWith("ump.waw.pl", StringComparison.Ordinal) Then
+            Return "© UMP-pcPL"
         ElseIf h.EndsWith("terrestris.de", StringComparison.Ordinal) OrElse h.Contains("openstreetmap") Then
             Return "© autorzy OpenStreetMap"
         ElseIf h.EndsWith("cenagis.edu.pl", StringComparison.Ordinal) Then

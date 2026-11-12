@@ -29,6 +29,10 @@ Public Class ZadaniePobierania
     Public Property Krycia As New List(Of Integer)
     ''' <summary>Adresy serwerów WMS / usług WMTS kolejnych warstw; brak wartości - AdresSerwera.</summary>
     Public Property Adresy As New List(Of String)
+    ''' <summary>Nazwy zbiorów map kolejnych warstw (indeksy w <see cref="ZrodlaMap"/>).</summary>
+    Public Property Zbiory As New List(Of String)
+    ''' <summary>Odczytane zbiory map sesji (np. metadane XYZ/TMS: zakres powiększeń, nakładka, subdomeny, odstęp zapytań).</summary>
+    Public Property ZrodlaMap As New Dictionary(Of String, PlikWarstw)(StringComparer.OrdinalIgnoreCase)
     Public Property Uklad As UkladWspolrzednych = UkladWspolrzednych.PL1992
     Public Property Siatka As Siatka
     Public Property Format As String = "jpeg"
@@ -60,6 +64,10 @@ Public Class ZadaniePobierania
     ''' udanym pobraniu nowego), a kafle WMTS zachowane w folderze sesji - usuwane przed pobieraniem.
     ''' </summary>
     Public Property Odswiez As Boolean
+    ''' <summary>Pobieranie segmentów bez weryfikacji certyfikatu SSL (dla serwerów dodanych z opcją ignorowania błędów SSL).</summary>
+    Public Property IgnorujSsl As Boolean
+    ''' <summary>Po ilu sekundach buforowany na dysku kafel sprawdza na serwerze aktualizację przez ETag / Last-Modified (domyślnie 15 min).</summary>
+    Public Property WiekWalidacjiCacheSekundy As Integer = 900
 
     Public ReadOnly Property Rozszerzenie As String
         Get
@@ -67,12 +75,31 @@ Public Class ZadaniePobierania
         End Get
     End Property
 
-    ''' <summary>Warstwy z kryciem i adresem serwera.</summary>
+    Friend Function ZnajdzZrodlo(indeks As Integer, adres As String) As PlikWarstw
+        If ZrodlaMap Is Nothing OrElse ZrodlaMap.Count = 0 Then Return Nothing
+        If indeks >= 0 AndAlso indeks < Zbiory.Count AndAlso Not String.IsNullOrEmpty(Zbiory(indeks)) Then
+            Dim zb As PlikWarstw = Nothing
+            If ZrodlaMap.TryGetValue(Zbiory(indeks), zb) AndAlso zb IsNot Nothing Then Return zb
+        End If
+        If Not String.IsNullOrEmpty(adres) Then
+            For Each zb In ZrodlaMap.Values
+                If zb IsNot Nothing AndAlso String.Equals(zb.Adres, adres, StringComparison.OrdinalIgnoreCase) Then Return zb
+            Next
+        End If
+        Return Nothing
+    End Function
+
+    ''' <summary>Warstwy z kryciem, adresem serwera i typem źródła.</summary>
     Public Function WybranyZestaw() As ZestawWarstw
         Dim z As New ZestawWarstw()
         For i = 0 To Warstwy.Count - 1
             Dim adres As String = If(i < Adresy.Count AndAlso Not String.IsNullOrEmpty(Adresy(i)), Adresy(i), AdresSerwera)
-            z.Dodaj(Warstwy(i), If(i < Krycia.Count, Krycia(i), ZestawWarstw.PelneKrycie), adres)
+            Dim zbior As String = If(i < Zbiory.Count, Zbiory(i), "")
+            Dim src = ZnajdzZrodlo(i, adres)
+            Dim typZrodla As TypUslugiMapowej = If(src IsNot Nothing, src.EfektywnyTyp, TypUslugiMapowej.Nieznana)
+            Dim nakladka As Boolean = If(src IsNot Nothing, src.OpcjeKafli(Warstwy(i)).Nakladka, False)
+            Dim bezSsl As Boolean = IgnorujSsl OrElse If(src IsNot Nothing, src.IgnorujSsl, False)
+            z.Dodaj(Warstwy(i), If(i < Krycia.Count, Krycia(i), ZestawWarstw.PelneKrycie), adres, zbior, 0, typZrodla, nakladka, False, bezSsl)
         Next
         Return z
     End Function
@@ -106,13 +133,37 @@ Public NotInheritable Class PobieranieSegmentow
     Private Sub New()
     End Sub
 
-    Friend Shared ReadOnly Klient As HttpClient = UtworzKlienta()
+    Private Shared _klient As HttpClient = UtworzKlienta(Nothing, False)
+    Private Shared _klientBezSsl As HttpClient = UtworzKlienta(Nothing, True)
+    Private Shared _nadpisanyKlient As Boolean
 
-    Private Shared Function UtworzKlienta() As HttpClient
-        Dim obsluga As New HttpClientHandler() With {.AutomaticDecompression = DecompressionMethods.GZip Or DecompressionMethods.Deflate}
+    Friend Shared Property Klient As HttpClient
+        Get
+            Return _klient
+        End Get
+        Set(value As HttpClient)
+            _nadpisanyKlient = (value IsNot Nothing)
+            _klient = If(value, UtworzKlienta(Nothing, False))
+        End Set
+    End Property
+
+    Friend Shared Function WybierzKlienta(ignorujSsl As Boolean) As HttpClient
+        If _nadpisanyKlient OrElse Not ignorujSsl Then Return _klient
+        Return _klientBezSsl
+    End Function
+
+    Friend Shared Function UtworzKlienta(handler As HttpMessageHandler, Optional ignorujSsl As Boolean = False) As HttpClient
+        Dim obsluga As HttpMessageHandler = handler
+        If obsluga Is Nothing Then
+            Dim h As New HttpClientHandler() With {.AutomaticDecompression = DecompressionMethods.GZip Or DecompressionMethods.Deflate}
+            If ignorujSsl Then
+                h.ServerCertificateCustomValidationCallback = Function(m, c, ch, err) True
+            End If
+            obsluga = h
+        End If
         'limit czasu ustawiany osobno dla każdego zapytania (LimitCzasu) - wartość z ustawień może się zmieniać
-        Dim k As New HttpClient(obsluga) With {.Timeout = Threading.Timeout.InfiniteTimeSpan}
-        k.DefaultRequestHeaders.UserAgent.ParseAdd("MapoTero/" & My.Application.Info.Version.ToString())
+        Dim k As New HttpClient(obsluga, disposeHandler:=handler Is Nothing) With {.Timeout = Threading.Timeout.InfiniteTimeSpan}
+        k.DefaultRequestHeaders.UserAgent.ParseAdd(Program.UserAgentProgramu & " (+https://github.com/Eksploracja/MapoTero)")
         Return k
     End Function
 
@@ -157,12 +208,26 @@ Public NotInheritable Class PobieranieSegmentow
         Dim grupy As List(Of GrupaZapytania) = z.WybranyZestaw().GrupyZapytan()
         If grupy.Count = 0 Then Throw New InvalidOperationException("nie wybrano żadnej warstwy")
 
-        'usługi WMTS (adres w pliku zbioru map wskazuje WMTS) - warstwy składane z kafli; wspólny folder kafli sesji
-        Dim uslugiWmts As New Dictionary(Of String, ZrodloWmts)(StringComparer.OrdinalIgnoreCase)
-        For Each adresUslugi In grupy.Where(Function(g) g.CzyWmts).Select(Function(g) g.Adres).Distinct(StringComparer.OrdinalIgnoreCase).ToList()
-            Dim nazwyWarstw = grupy.Where(Function(g) String.Equals(g.Adres, adresUslugi, StringComparison.OrdinalIgnoreCase)).SelectMany(Function(g) g.Warstwy).ToList()
+        'usługi kafelkowe (WMTS, XYZ, TMS) - warstwy składane z kafli; wspólny folder kafli sesji
+        Dim maKafelkowe As Boolean = grupy.Any(Function(g) g.CzyKafelkowa)
+        Dim domyslnyFolderKafli As String = z.Folder & "_kafle_wmts\"
+        If maKafelkowe AndAlso z.Odswiez Then
             Try
-                uslugiWmts(adresUslugi) = Await ZrodloWmts.PrzygotujAsync(z, adresUslugi, nazwyWarstw, token)
+                If Directory.Exists(domyslnyFolderKafli) Then Directory.Delete(domyslnyFolderKafli, True)
+            Catch
+            End Try
+        End If
+        Dim uslugiWmts As New Dictionary(Of String, ZrodloWmts)(StringComparer.OrdinalIgnoreCase)
+        For Each adresUslugi In grupy.Where(Function(g) g.CzyKafelkowa).Select(Function(g) g.Adres).Distinct(StringComparer.OrdinalIgnoreCase).ToList()
+            Dim grupyAdresu = grupy.Where(Function(g) g.CzyKafelkowa AndAlso String.Equals(g.Adres, adresUslugi, StringComparison.OrdinalIgnoreCase)).ToList()
+            Dim nazwyWarstw = grupyAdresu.SelectMany(Function(g) g.Warstwy).Distinct(StringComparer.Ordinal).ToList()
+            Dim typUslugi = grupyAdresu(0).EfektywnyTyp
+            Dim idx = Enumerable.Range(0, z.Warstwy.Count).FirstOrDefault(
+                Function(ix) String.Equals(If(ix < z.Adresy.Count AndAlso Not String.IsNullOrEmpty(z.Adresy(ix)), z.Adresy(ix), z.AdresSerwera), adresUslugi, StringComparison.OrdinalIgnoreCase), -1)
+            Dim zrodloPliku As PlikWarstw = z.ZnajdzZrodlo(idx, adresUslugi)
+            Try
+                uslugiWmts(adresUslugi) = Await ZrodloWmts.PrzygotujAsync(z, adresUslugi, nazwyWarstw, token,
+                                                                           typUslugi:=typUslugi, plikWarstw:=zrodloPliku)
             Catch ex As OperationCanceledException
                 wynik.Przerwano = True
                 Return wynik
@@ -170,17 +235,12 @@ Public NotInheritable Class PobieranieSegmentow
         Next
         If uslugiWmts.Count > 0 Then
             Dim pierwsza = uslugiWmts.Values.First()
-            'odświeżenie - kafle zachowane z poprzedniego pobierania są nieaktualne
-            If z.Odswiez Then
-                pierwsza.UsunKafle()
-                Directory.CreateDirectory(pierwsza.FolderKafli)
-            End If
             UsunPlikiTymczasowe(pierwsza.FolderKafli, "*.tmp")
         End If
 
         'jedna grupa WMS o pełnym kryciu - jedno zapytanie i zapis tego, co przysłał serwer (jak w starszych wersjach);
         'w pozostałych przypadkach segment składany jest z grup w programie
-        Dim skladanie As Boolean = grupy.Count > 1 OrElse grupy(0).CzyWmts OrElse grupy(0).Krycie < ZestawWarstw.PelneKrycie
+        Dim skladanie As Boolean = grupy.Count > 1 OrElse grupy(0).CzyKafelkowa OrElse grupy(0).Krycie < ZestawWarstw.PelneKrycie
 
         Dim nazwa As Func(Of OpisSegmentu, String) =
             Function(sg) If(z.TrekBuddy, s.NazwaSegmentuTrekBuddy(z.Prefiks, sg.Wiersz, sg.Kolumna), s.NazwaSegmentu(z.Prefiks, z.Numeracja, sg.Wiersz, sg.Kolumna))
@@ -189,7 +249,7 @@ Public NotInheritable Class PobieranieSegmentow
             Function(sg)
                 Dim zasiegSegmentu = s.Segment(sg.Wiersz, sg.Kolumna)
                 Dim g = grupy(0)
-                If g.CzyWmts Then Return uslugiWmts(g.Adres).AdresSegmentu(zasiegSegmentu)
+                If g.CzyKafelkowa Then Return uslugiWmts(g.Adres).AdresSegmentu(zasiegSegmentu)
                 Return Wms.ZapytanieGetMap(g.Adres, g.Warstwy, z.Uklad, zasiegSegmentu, z.Format, s.BokSegmentuPx, s.BokSegmentuPx, z.ZamienOsie,
                                            z.Przezroczystosc)
             End Function
@@ -209,7 +269,7 @@ Public NotInheritable Class PobieranieSegmentow
         wKorytarzu = Nothing
         wynik.Wszystkie = segmenty.Count
         If uslugiWmts.Count > 0 Then
-            postep?.Report(New PostepPobierania With {.Komunikat = "Trwa pobieranie segmentów (" & segmenty.Count & "); kafle WMTS: " &
+            postep?.Report(New PostepPobierania With {.Komunikat = "Trwa pobieranie segmentów (" & segmenty.Count & "); kafle: " &
                                                                     String.Join("; ", uslugiWmts.Values.Select(Function(u) u.Opis))})
         End If
 
@@ -261,7 +321,7 @@ Public NotInheritable Class PobieranieSegmentow
                                 If skladanie Then
                                     blad = Await ZlozSegmentAsync(z, grupy, uslugiWmts, zasieg, s.BokSegmentuPx, plik, token).ConfigureAwait(False)
                                 Else
-                                    blad = Await PobierzSegmentAsync(adres(sg), plik, z.LimitCzasuSekundy, token).ConfigureAwait(False)
+                                    blad = Await PobierzSegmentAsync(adres(sg), plik, z.LimitCzasuSekundy, token, z.IgnorujSsl OrElse grupy(0).IgnorujSsl).ConfigureAwait(False)
                                 End If
                             End If
                             If pobierz AndAlso blad = "" Then odswiezone(sg.Indeks) = True
@@ -274,7 +334,9 @@ Public NotInheritable Class PobieranieSegmentow
                                     blad = "nie udało się zapisać plików georeferencyjnych: " & ex.Message
                                 End Try
                             End If
-                            If blad <> "" OrElse Not File.Exists(plik) Then przyczyny(sg.Indeks) = blad
+                            If blad <> "" OrElse Not File.Exists(plik) OrElse New FileInfo(plik).Length = 0 Then
+                                przyczyny(sg.Indeks) = If(blad <> "", blad, "brak lub pusty plik segmentu po pobraniu")
+                            End If
                         Catch ex As OperationCanceledException When token.IsCancellationRequested
                             Throw
                         Catch ex As Exception
@@ -305,6 +367,16 @@ Public NotInheritable Class PobieranieSegmentow
                 Next
                 Await Task.WhenAll(watki).ConfigureAwait(False)
 
+                'przed zakończeniem pętli upewnij się, że wszystkie pliki segmentów faktycznie istnieją i nie są puste
+                For Each sg In doPobrania
+                    Dim sciezkaSeg As String = Path.Combine(folderDocelowy, nazwa(sg) & "." & ext)
+                    If Not File.Exists(sciezkaSeg) OrElse New FileInfo(sciezkaSeg).Length = 0 Then
+                        If Not przyczyny.ContainsKey(sg.Indeks) Then
+                            przyczyny(sg.Indeks) = "brak kompletnego pliku segmentu"
+                        End If
+                    End If
+                Next
+
                 If przyczyny.IsEmpty OrElse proba >= z.IloscProb Then Exit For
 
                 postep?.Report(New PostepPobierania With {.Pobrane = 0, .Wszystkie = doPobrania.Count, .Proba = proba,
@@ -334,10 +406,10 @@ Public NotInheritable Class PobieranieSegmentow
             Using plik As New StreamWriter(plikBledow, False, KodowanieSystemowe())
                 For Each sg In brakujace
                     plik.WriteLine(nazwa(sg))
-                    plik.WriteLine(adres(sg))
+                    plik.WriteLine(MetadaneMapy.MaskujSekrety(adres(sg)))
                     Dim przyczyna As String = Nothing
                     If przyczyny.TryGetValue(sg.Indeks, przyczyna) AndAlso przyczyna <> "" Then
-                        plik.WriteLine("przyczyna: " & przyczyna.Replace(""""c, "'"c))
+                        plik.WriteLine("przyczyna: " & MetadaneMapy.MaskujSekrety(przyczyna).Replace(""""c, "'"c))
                     ElseIf wynik.Przerwano Then
                         plik.WriteLine("przyczyna: przerwano pobieranie")
                     End If
@@ -379,8 +451,8 @@ Public NotInheritable Class PobieranieSegmentow
     ''' (np. komunikat serwera WMS), gdy segmentu nie pobrano.
     ''' </summary>
     Public Shared Async Function PobierzSegmentAsync(adres As String, plikDocelowy As String, limitCzasuSekundy As Integer,
-                                                     token As CancellationToken) As Task(Of String)
-        Dim wynik = Await PobierzObrazAsync(adres, limitCzasuSekundy, token).ConfigureAwait(False)
+                                                     token As CancellationToken, Optional ignorujSsl As Boolean = False) As Task(Of String)
+        Dim wynik = Await PobierzObrazAsync(adres, limitCzasuSekundy, token, ignorujSsl).ConfigureAwait(False)
         If wynik.Item2 <> "" Then Return wynik.Item2
         Try
             'zapisuje dokładnie to, co przysłał serwer - bez ponownej kompresji obrazka
@@ -402,13 +474,13 @@ Public NotInheritable Class PobieranieSegmentow
     ''' Pobiera obraz z serwera WMS. Wynik: (dane obrazu, pusty tekst) albo (Nothing, opis błędu - np. komunikat serwera).
     ''' </summary>
     Friend Shared Async Function PobierzObrazAsync(adres As String, limitCzasuSekundy As Integer,
-                                                   token As CancellationToken) As Task(Of Tuple(Of Byte(), String))
+                                                   token As CancellationToken, Optional ignorujSsl As Boolean = False) As Task(Of Tuple(Of Byte(), String))
         'regulacja obciążenia serwera - limit czasu odpowiedzi liczony od wysłania zapytania, bez oczekiwania na przepustkę
         Dim przepustka As RegulatorZapytan.Przepustka = Nothing
         Try
             przepustka = Await RegulatorZapytan.Pobieranie.WejdzAsync(adres, token).ConfigureAwait(False)
             Using limit = LimitCzasu(limitCzasuSekundy, token),
-                  odpowiedz = Await Klient.GetAsync(adres, HttpCompletionOption.ResponseContentRead, limit.Token).ConfigureAwait(False)
+                  odpowiedz = Await WybierzKlienta(ignorujSsl).GetAsync(adres, HttpCompletionOption.ResponseContentRead, limit.Token).ConfigureAwait(False)
                 przepustka.Odpowiedz(odpowiedz)
                 Dim dane() As Byte = Await odpowiedz.Content.ReadAsByteArrayAsync(limit.Token).ConfigureAwait(False)
                 przepustka.Dispose()
@@ -474,8 +546,8 @@ Public NotInheritable Class PobieranieSegmentow
         Dim piksele(szerokosc * wysokosc - 1) As Integer
         For i = 0 To grupy.Count - 1
             Dim g = grupy(i)
-            If g.CzyWmts Then
-                'kafle WMTS mają już przezroczystość pikseli - nakładane jak warstwy WMS
+            If g.CzyKafelkowa Then
+                'kafle WMTS/XYZ/TMS mają już przezroczystość pikseli - nakładane jak warstwy WMS
                 Dim kafle = Await uslugiWmts(g.Adres).PikseleAsync(g.Warstwy, zasieg, bok, token).ConfigureAwait(False)
                 If kafle.Item2 <> "" Then Return Tuple.Create(CType(Nothing, Integer()), "warstwa " & String.Join(",", g.Warstwy) & ": " & kafle.Item2)
                 NakladanieWarstw.Naloz(piksele, kafle.Item1, g.Krycie)
@@ -485,7 +557,7 @@ Public NotInheritable Class PobieranieSegmentow
             Dim przezroczyste As Boolean = i > 0 OrElse g.Krycie < ZestawWarstw.PelneKrycie OrElse z.Przezroczystosc
             Dim format As String = If(przezroczyste, "png", z.Format)
             Dim adres As String = Wms.ZapytanieGetMap(g.Adres, g.Warstwy, z.Uklad, zasieg, format, szerokosc, wysokosc, z.ZamienOsie, przezroczyste)
-            Dim obraz = Await PobierzObrazAsync(adres, z.LimitCzasuSekundy, token).ConfigureAwait(False)
+            Dim obraz = Await PobierzObrazAsync(adres, z.LimitCzasuSekundy, token, z.IgnorujSsl OrElse g.IgnorujSsl).ConfigureAwait(False)
             If obraz.Item2 <> "" Then Return Tuple.Create(CType(Nothing, Integer()), "warstwa " & String.Join(",", g.Warstwy) & ": " & obraz.Item2)
             NakladanieWarstw.Naloz(piksele, NakladanieObrazow.Piksele(obraz.Item1, szerokosc, wysokosc), g.Krycie)
         Next
@@ -516,7 +588,7 @@ Public NotInheritable Class PobieranieSegmentow
             For Each sg In segmenty
                 Dim zasieg = z.Siatka.Segment(sg.Wiersz, sg.Kolumna)
                 plik.WriteLine(nazwa(sg))
-                plik.WriteLine(adres(sg))
+                plik.WriteLine(MetadaneMapy.MaskujSekrety(adres(sg)))
                 plik.WriteLine(Liczba(zasieg.YLewy))
                 plik.WriteLine(Liczba(zasieg.XDol))
                 plik.WriteLine(Liczba(zasieg.YPrawy))

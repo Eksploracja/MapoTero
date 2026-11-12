@@ -230,7 +230,7 @@ Public Class PoprawkiPrzegladuTesty
             Dim tekst = File.ReadAllText(plik, Encoding.UTF8)
             Assert.Equal(2, tekst.Split({"==== "}, StringSplitOptions.None).Length - 1)
             Assert.Contains("InvalidOperationException: błąd testowy ąę", tekst)
-            Assert.Contains("MapoTero ", tekst)
+            Assert.Contains("MapoTero " & MapoTero.Program.Wersja & ",", tekst)
             Assert.Contains(NameOf(ZapisAwarii_DopisujeOpisBleduIOgraniczaRozmiarPliku), tekst)
 
             'zbyt duży plik zaczynany od nowa

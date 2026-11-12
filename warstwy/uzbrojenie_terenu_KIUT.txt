@@ -13,3 +13,7 @@ przewod_telekomunikacyjny
 0.25
 przewod_urzadzenia
 0.25
+przewod_niezidentyfikowany
+0.25
+przewod_specjalny
+0.25
