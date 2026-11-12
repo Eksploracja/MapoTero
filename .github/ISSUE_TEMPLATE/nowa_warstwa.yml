@@ -1,0 +1,30 @@
+name: Propozycja nowej warstwy / serwera
+description: Zaproponuj dodanie nowego serwera WMS/WMTS lub warstwy do wbudowanego drzewa map
+title: "[Nowa warstwa]: "
+labels: ["warstwy"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Zaproponuj publiczną usługę WMS lub WMTS (np. z geoportali krajowych, regionalnych lub powiatowych), którą warto dodać do MapoTero.
+  - type: input
+    id: nazwa
+    attributes:
+      label: Nazwa warstwy lub instytucji
+      placeholder: np. BDOŚ, BDOT10k, Geoportal Powiatu...
+    validations:
+      required: true
+  - type: input
+    id: adres_wms
+    attributes:
+      label: Adres URL usługi (GetCapabilities)
+      placeholder: np. https://.../geoserver/wms?service=WMS&request=GetCapabilities
+    validations:
+      required: true
+  - type: textarea
+    id: opis_warstwy
+    attributes:
+      label: Opis i przeznaczenie warstwy
+      description: Co przedstawia mapa, jaki ma zasięg przestrzenny i w jakich skalach jest dostępna?
+    validations:
+      required: true

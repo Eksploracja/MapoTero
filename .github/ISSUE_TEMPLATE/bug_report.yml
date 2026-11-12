@@ -1,0 +1,74 @@
+name: Zgłoszenie błędu
+description: Zgłoś problem lub nieprawidłowe działanie programu MapoTero
+title: "[Błąd]: "
+labels: ["błąd"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Dziękujemy za zgłoszenie! Przed wysłaniem upewnij się, że korzystasz z najnowszej wersji programu z [zakładki Releases](https://github.com/Eksploracja/MapoTero/releases).
+  - type: input
+    id: wersja
+    attributes:
+      label: Wersja MapoTero
+      description: Podaj wersję programu widoczną na pasku tytułu lub w menu Pomoc -> O programie.
+      placeholder: np. 3.17
+    validations:
+      required: true
+  - type: input
+    id: system
+    attributes:
+      label: Wersja systemu Windows
+      placeholder: np. Windows 11 x64, Windows 10
+    validations:
+      required: true
+  - type: input
+    id: warstwa
+    attributes:
+      label: Wybrana warstwa / serwer
+      description: Z jakiego zbioru map i jakiej warstwy korzystasz w drzewie „Wybierz mapy”?
+      placeholder: np. Geoportal 2 -> Ortofotomapa (wysoka rozdzielczość)
+    validations:
+      required: false
+  - type: dropdown
+    id: uklad
+    attributes:
+      label: Układ współrzędnych pobierania
+      options:
+        - PL-1992 (EPSG:2180)
+        - PL-2000 strefa 5 (EPSG:2176)
+        - PL-2000 strefa 6 (EPSG:2177)
+        - PL-2000 strefa 7 (EPSG:2178)
+        - PL-2000 strefa 8 (EPSG:2179)
+        - UTM (strefy 33N, 34N, 35N)
+        - WGS84 (EPSG:4326)
+        - Nie dotyczy / Inny
+    validations:
+      required: false
+  - type: textarea
+    id: opis
+    attributes:
+      label: Opis problemu
+      description: Co dokładnie się wydarzyło, a czego się spodziewałeś?
+    validations:
+      required: true
+  - type: textarea
+    id: kroki
+    attributes:
+      label: Kroki do odtworzenia problemu
+      description: Wskaż krok po kroku, jak wywołać błąd.
+      placeholder: |
+        1. Uruchom MapoTero
+        2. Wybierz warstwę X
+        3. Ustaw siatkę w rejonie Y
+        4. Kliknij Pobierz...
+    validations:
+      required: true
+  - type: textarea
+    id: logi
+    attributes:
+      label: Zawartość awarie.log lub szczegóły błędu
+      description: Jeśli program zgłosił błąd lub się zamknął, wklej tu zawartość pliku awarie.log (znajdziesz go w folderze programu lub w %LocalAppData%\MapoTero).
+      render: text
+    validations:
+      required: false

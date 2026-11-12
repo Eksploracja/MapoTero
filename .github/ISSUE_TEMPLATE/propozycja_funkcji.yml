@@ -1,0 +1,26 @@
+name: Propozycja funkcji
+description: Zaproponuj nową funkcję lub ulepszenie działania MapoTero
+title: "[Propozycja]: "
+labels: ["propozycja"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Jaki problem lub potrzebę rozwiązuje ta propozycja?
+      description: Zwięzły opis sytuacji, w której nowa funkcja byłaby pomocna.
+    validations:
+      required: true
+  - type: textarea
+    id: rozwiazanie
+    attributes:
+      label: Proponowane rozwiązanie
+      description: Jak wyobrażasz sobie działanie tej funkcji w programie?
+    validations:
+      required: true
+  - type: textarea
+    id: alternatywy
+    attributes:
+      label: Rozważane alternatywy
+      description: Czy znasz inne rozwiązania lub obejścia tego problemu?
+    validations:
+      required: false
