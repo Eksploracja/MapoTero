@@ -177,6 +177,11 @@ Public Class KonfiguracjaSesji
     Public Property AdresyWarstw As String = ""
     ''' <summary>Zbiory map kolejnych warstw rozdzielone znakiem | (puste - RodzajMapy).</summary>
     Public Property ZbioryWarstw As String = ""
+    ''' <summary>
+    ''' Tryby mieszania kolejnych warstw, np. "0;1;0" (nowe pole; pusty tekst lub brak w starszych plikach -
+    ''' wszystkie warstwy w trybie zwykłym).
+    ''' </summary>
+    Public Property TrybyMieszaniaWarstw As String = ""
 
     Public Sub New()
         For i = 0 To 11
@@ -217,6 +222,7 @@ Public Class KonfiguracjaSesji
         If Not r.KoniecPliku Then c.KrycieWarstw = r.Nastepne()
         If Not r.KoniecPliku Then c.AdresyWarstw = r.Nastepne()
         If Not r.KoniecPliku Then c.ZbioryWarstw = r.Nastepne()
+        If Not r.KoniecPliku Then c.TrybyMieszaniaWarstw = r.Nastepne()
         Return c
     End Function
 
@@ -248,6 +254,7 @@ Public Class KonfiguracjaSesji
         w.Tekst(KrycieWarstw)
         w.Tekst(AdresyWarstw)
         w.Tekst(ZbioryWarstw)
+        w.Tekst(TrybyMieszaniaWarstw)
         Return w.ToString()
     End Function
 
@@ -288,6 +295,8 @@ Public Class KonfiguracjaSesji
         If Not WybraneWarstwy().SequenceEqual(inna.WybraneWarstwy(), StringComparer.Ordinal) Then Return False
         'inne krycie warstw - segmenty wyglądają inaczej, wznowienie mieszałoby je z nowymi
         If Not KryciaWarstw().SequenceEqual(inna.KryciaWarstw()) Then Return False
+        'inny tryb mieszania warstw - segmenty wyglądają inaczej, wznowienie mieszałoby je z nowymi
+        If Not TrybyMieszaniaWarstwLista().SequenceEqual(inna.TrybyMieszaniaWarstwLista()) Then Return False
         'warstwy o tych samych nazwach z innych serwerów (brak adresu - plik starszej wersji, porównany wyżej zbiór map)
         Dim a1 = AdresyWybranychWarstw(), a2 = inna.AdresyWybranychWarstw()
         For i = 0 To Math.Min(a1.Count, a2.Count) - 1
@@ -301,10 +310,15 @@ Public Class KonfiguracjaSesji
         Return ZestawWarstw.KryciaZTekstu(KrycieWarstw, WybraneWarstwy().Count)
     End Function
 
-    ''' <summary>Wybrane warstwy z kryciem.</summary>
+    ''' <summary>Tryby mieszania kolejnych wybranych warstw wg pola TrybyMieszaniaWarstw.</summary>
+    Public Function TrybyMieszaniaWarstwLista() As List(Of TrybMieszania)
+        Return ZestawWarstw.TrybyMieszaniaZTekstu(TrybyMieszaniaWarstw, WybraneWarstwy().Count)
+    End Function
+
+    ''' <summary>Wybrane warstwy z kryciem i trybami mieszania.</summary>
     Public Function WybranyZestaw() As ZestawWarstw
         Dim n As Integer = WybraneWarstwy().Count
-        Return ZestawWarstw.ZNazw(WybraneWarstwy(), KrycieWarstw, AdresyWybranychWarstw(), ZestawWarstw.Rozdziel(ZbioryWarstw, n, RodzajMapy))
+        Return ZestawWarstw.ZNazw(WybraneWarstwy(), KrycieWarstw, AdresyWybranychWarstw(), ZestawWarstw.Rozdziel(ZbioryWarstw, n, RodzajMapy), TrybyMieszaniaWarstw)
     End Function
 
     ''' <summary>Adresy serwerów kolejnych wybranych warstw (brak w polu - adres serwera sesji).</summary>

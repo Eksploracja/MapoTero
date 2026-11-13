@@ -43,7 +43,7 @@ Public Class FormWarstwyZaawansowane
     Private ReadOnly _btnPodglad As New Button()
     Private ReadOnly _lblStan As New Label()
     Private ReadOnly _lblZapytania As New Label()
-    Private ReadOnly _podpowiedz As New ToolTip()
+    Private ReadOnly _podpowiedz As New ToolTip() With {.InitialDelay = 500, .ReshowDelay = 500, .AutoPopDelay = 15000}
 
     Public Sub New(zestaw As ZestawWarstw, zadanie As ZadaniePobierania, zaznaczona As Integer)
         _zestaw = zestaw
@@ -56,52 +56,53 @@ Public Class FormWarstwyZaawansowane
         ShowInTaskbar = False
         StartPosition = FormStartPosition.CenterParent
         AutoScaleMode = AutoScaleMode.Font
-        ClientSize = New Size(760, 420)
+        ClientSize = New Size(880, 425)
 
         Dim lblOpis As New Label With {
-            .Location = New Point(10, 8), .Size = New Size(420, 42),
-            .Text = "Kanapka warstw: na górze warstwa najwyższa, na dole podkład (1). Krycie poniżej 100% sprawia, że przez warstwę prześwituje to, co leży pod nią."}
+            .Location = New Point(10, 8), .Size = New Size(540, 42),
+            .Text = "Kanapka warstw: na górze warstwa najwyższa, na dole podkład (1). Krycie poniżej 100% i tryby mieszania sprawiają, że warstwy łączą się z podkładem."}
         Controls.Add(lblOpis)
 
         _wiersze.Location = New Point(10, 54)
-        _wiersze.Size = New Size(420, 316)
+        _wiersze.Size = New Size(540, 316)
         _wiersze.AutoScroll = True
-        _wiersze.ColumnCount = 6
+        _wiersze.ColumnCount = 7
         _wiersze.ColumnStyles.Add(New ColumnStyle(SizeType.Absolute, 26))
         _wiersze.ColumnStyles.Add(New ColumnStyle(SizeType.Percent, 100))
-        _wiersze.ColumnStyles.Add(New ColumnStyle(SizeType.Absolute, 110))
-        _wiersze.ColumnStyles.Add(New ColumnStyle(SizeType.Absolute, 46))
+        _wiersze.ColumnStyles.Add(New ColumnStyle(SizeType.Absolute, 105))
+        _wiersze.ColumnStyles.Add(New ColumnStyle(SizeType.Absolute, 95))
+        _wiersze.ColumnStyles.Add(New ColumnStyle(SizeType.Absolute, 45))
         _wiersze.ColumnStyles.Add(New ColumnStyle(SizeType.Absolute, 24))
         _wiersze.ColumnStyles.Add(New ColumnStyle(SizeType.Absolute, 48))
         _wiersze.BorderStyle = BorderStyle.Fixed3D
         _wiersze.BackColor = SystemColors.Window
         Controls.Add(_wiersze)
 
-        _lblZapytania.Location = New Point(10, 376)
-        _lblZapytania.Size = New Size(420, 30)
+        _lblZapytania.Location = New Point(10, 374)
+        _lblZapytania.Size = New Size(540, 44)
         Controls.Add(_lblZapytania)
 
-        Dim lblPodglad As New Label With {.Location = New Point(440, 8), .AutoSize = True,
+        Dim lblPodglad As New Label With {.Location = New Point(560, 8), .AutoSize = True,
                                           .Text = "Podgląd kanapki - próbka ze środka siatki segmentów:"}
         Controls.Add(lblPodglad)
-        _podglad.Location = New Point(440, 26)
+        _podglad.Location = New Point(560, 26)
         _podglad.Size = New Size(BokPodgladu, BokPodgladu)
         _podglad.BorderStyle = BorderStyle.FixedSingle
         _podglad.BackColor = Color.White
         _podglad.SizeMode = PictureBoxSizeMode.Zoom
         Controls.Add(_podglad)
 
-        _btnPodglad.Location = New Point(440, 332)
+        _btnPodglad.Location = New Point(560, 332)
         _btnPodglad.Size = New Size(110, 24)
         _btnPodglad.Text = "Pobierz podgląd"
         AddHandler _btnPodglad.Click, AddressOf PobierzPodglad
         Controls.Add(_btnPodglad)
-        _lblStan.Location = New Point(556, 330)
-        _lblStan.Size = New Size(184, 40)
+        _lblStan.Location = New Point(676, 330)
+        _lblStan.Size = New Size(190, 44)
         Controls.Add(_lblStan)
 
-        Dim btnOk As New Button With {.Text = "OK", .DialogResult = DialogResult.OK, .Location = New Point(590, 386), .Size = New Size(75, 24)}
-        Dim btnAnuluj As New Button With {.Text = "Anuluj", .DialogResult = DialogResult.Cancel, .Location = New Point(675, 386), .Size = New Size(75, 24)}
+        Dim btnOk As New Button With {.Text = "OK", .DialogResult = DialogResult.OK, .Location = New Point(710, 386), .Size = New Size(75, 24)}
+        Dim btnAnuluj As New Button With {.Text = "Anuluj", .DialogResult = DialogResult.Cancel, .Location = New Point(795, 386), .Size = New Size(75, 24)}
         Controls.Add(btnOk)
         Controls.Add(btnAnuluj)
         AcceptButton = btnOk
@@ -155,6 +156,23 @@ Public Class FormWarstwyZaawansowane
                                             .TextAlign = ContentAlignment.MiddleLeft, .AutoEllipsis = True, .BackColor = tlo, .UseMnemonic = False}
             _podpowiedz.SetToolTip(lblNazwa, Form1.NazwaWarstwy(w) & If(i = 0, " - podkład", "") & vbCrLf & "Warstwa " & w.Nazwa & ", zbiór map " & w.Zbior & " (" & KafleXyz.NazwaTypu(w.EfektywnyTyp) & ")" &
                                    If(w.ZalecanyPiksel > 0, vbCrLf & "Zalecany rozmiar piksela: " & w.ZalecanyPiksel.ToString("0.###") & " m", ""))
+
+            Dim cmbTryb As New ComboBox With {
+                .DropDownStyle = ComboBoxStyle.DropDownList,
+                .Dock = DockStyle.Fill,
+                .Margin = New Padding(1, 2, 1, 1),
+                .Font = New Font(Font.FontFamily, 8.25!)
+            }
+            cmbTryb.Items.AddRange(TrybMieszaniaRozszerzenia.WszystkieNazwy)
+            If i = 0 Then
+                cmbTryb.SelectedIndex = 0
+                cmbTryb.Enabled = False
+                _podpowiedz.SetToolTip(cmbTryb, "Podkład (warstwa 1) rysowany jest jako tło w trybie zwykłym.")
+            Else
+                cmbTryb.SelectedIndex = CInt(w.TrybMieszania)
+                _podpowiedz.SetToolTip(cmbTryb, "Tryb mieszania tej warstwy z warstwami leżącymi pod nią.")
+            End If
+
             Dim suwak As New TrackBar With {.Minimum = ZestawWarstw.MinKrycie, .Maximum = ZestawWarstw.PelneKrycie, .SmallChange = 5,
                                             .LargeChange = 25, .TickFrequency = 25, .Value = w.Krycie, .AutoSize = False,
                                             .Dock = DockStyle.Fill, .BackColor = tlo, .Margin = New Padding(0)}
@@ -174,6 +192,13 @@ Public Class FormWarstwyZaawansowane
             Dim przyKliknieciu As EventHandler = Sub(s, e) Zaznacz(indeks)
             AddHandler lblNr.Click, przyKliknieciu
             AddHandler lblNazwa.Click, przyKliknieciu
+            AddHandler cmbTryb.SelectedIndexChanged,
+                Sub(s, e)
+                    Zaznacz(indeks)
+                    Dim wybranyTryb As TrybMieszania = CType(cmbTryb.SelectedIndex, TrybMieszania)
+                    _zestaw.UstawTrybMieszania(indeks, wybranyTryb)
+                    OdswiezPodglad()
+                End Sub
             AddHandler suwak.MouseDown, Sub(s, e) Zaznacz(indeks)
             AddHandler suwak.ValueChanged,
                 Sub(s, e)
@@ -200,10 +225,11 @@ Public Class FormWarstwyZaawansowane
 
             _wiersze.Controls.Add(lblNr, 0, wiersz)
             _wiersze.Controls.Add(lblNazwa, 1, wiersz)
-            _wiersze.Controls.Add(suwak, 2, wiersz)
-            _wiersze.Controls.Add(lblProcent, 3, wiersz)
-            _wiersze.Controls.Add(btnUsun, 4, wiersz)
-            _wiersze.Controls.Add(panelStrzalek, 5, wiersz)
+            _wiersze.Controls.Add(cmbTryb, 2, wiersz)
+            _wiersze.Controls.Add(suwak, 3, wiersz)
+            _wiersze.Controls.Add(lblProcent, 4, wiersz)
+            _wiersze.Controls.Add(btnUsun, 5, wiersz)
+            _wiersze.Controls.Add(panelStrzalek, 6, wiersz)
             wiersz += 1
         Next
         _wiersze.RowStyles.Add(New RowStyle(SizeType.Percent, 100))
@@ -218,7 +244,7 @@ Public Class FormWarstwyZaawansowane
         For Each c As Control In _wiersze.Controls
             Dim poz = _wiersze.GetPositionFromControl(c)
             Dim i As Integer = _zestaw.Liczba - 1 - poz.Row
-            If TypeOf c Is Button Then Continue For
+            If TypeOf c Is Button OrElse TypeOf c Is ComboBox Then Continue For
             c.BackColor = If(i = _zaznaczona, SystemColors.GradientInactiveCaption, SystemColors.Window)
         Next
     End Sub
@@ -245,7 +271,7 @@ Public Class FormWarstwyZaawansowane
         _lblZapytania.Text = "Zapytań WMS na segment: " & wms &
             If(grupy.Count > wms, ", warstw z kafli: " & (grupy.Count - wms), "") &
             If(serwery > 1, "; serwerów: " & serwery, "") &
-            If(grupy.Count > 1, ". Grupy warstw (inny serwer lub krycie poniżej 100%) pobierane są osobno i nakładane w programie.", ".") &
+            If(grupy.Count > 1, ". Grupy warstw (inny serwer, krycie lub tryb mieszania) pobierane są osobno i nakładane w programie.", ".") &
             ostrzezenieNakladki
     End Sub
 
@@ -266,12 +292,15 @@ Public Class FormWarstwyZaawansowane
             Dim srodek = s.ZasiegSiatki.Srodek
             Dim pol As Double = BokPodgladu * s.RozmiarPiksela / 2
             Dim zasieg As New Zasieg(srodek.X - pol, srodek.Y - pol, srodek.X + pol, srodek.Y + pol)
-            For Each w In _zestaw.Warstwy.ToList()
+            Dim bledy As New List(Of String)()
+            Dim listaWarstw = _zestaw.Warstwy.ToList()
+            For i = 0 To listaWarstw.Count - 1
+                Dim w = listaWarstw(i)
                 Dim nazwa As String = w.Nazwa
                 If _obrazy.ContainsKey(Klucz(w)) Then Continue For
                 _lblStan.Text = "Pobieranie warstwy " & nazwa & "…"
-                Dim piksele() As Integer
-                Dim blad As String
+                Dim piksele() As Integer = Nothing
+                Dim blad As String = ""
                 If w.CzyKafelkowa Then
                     'kafle WMTS/XYZ/TMS - usługa przygotowana raz dla wszystkich jej warstw w kanapce
                     Dim usluga As ZrodloWmts = Nothing
@@ -290,24 +319,52 @@ Public Class FormWarstwyZaawansowane
                     piksele = wynikWmts.Item1
                     blad = wynikWmts.Item2
                 Else
-                    Dim adres As String = Wms.ZapytanieGetMap(w.Adres, {nazwa}, _zadanie.Uklad, zasieg, "png",
-                                                              BokPodgladu, BokPodgladu, _zadanie.ZamienOsie, True)
-                    Dim wynik = Await PobieranieSegmentow.PobierzObrazAsync(adres, Math.Max(5, _zadanie.LimitCzasuSekundy), przerwanie.Token, w.IgnorujSsl)
+                    Dim czystyAdres As String = w.Adres.Trim(""""c, " "c)
+                    Dim ignorujSsl As Boolean = w.IgnorujSsl OrElse _zadanie.IgnorujSsl
+                    'podkład (i = 0) nie musi mieć przezroczystości, chyba że cała sesja ma przezroczystość
+                    Dim przezroczysty As Boolean = i > 0 OrElse _zadanie.Przezroczystosc
+                    Dim formatWms As String = If(przezroczysty, "png", _zadanie.Format)
+                    Dim adres As String = Wms.ZapytanieGetMap(czystyAdres, {nazwa}, _zadanie.Uklad, zasieg, formatWms,
+                                                              BokPodgladu, BokPodgladu, _zadanie.ZamienOsie, przezroczysty)
+                    Dim wynik = Await PobieranieSegmentow.PobierzObrazBezRegulatoraAsync(adres, Math.Max(5, _zadanie.LimitCzasuSekundy), przerwanie.Token, ignorujSsl)
+                    
+                    ' Jeśli serwer odrzucił transparentne png, spróbuj fallback na jpeg / bez przezroczystości
+                    If wynik.Item1 Is Nothing AndAlso przezroczysty Then
+                        Dim adresJpg As String = Wms.ZapytanieGetMap(czystyAdres, {nazwa}, _zadanie.Uklad, zasieg, "jpeg",
+                                                                     BokPodgladu, BokPodgladu, _zadanie.ZamienOsie, False)
+                        Dim wynikJpg = Await PobieranieSegmentow.PobierzObrazBezRegulatoraAsync(adresJpg, Math.Max(5, _zadanie.LimitCzasuSekundy), przerwanie.Token, ignorujSsl)
+                        If wynikJpg.Item1 IsNot Nothing Then
+                            wynik = wynikJpg
+                        End If
+                    End If
+
                     blad = wynik.Item2
                     piksele = If(blad = "", NakladanieObrazow.Piksele(wynik.Item1, BokPodgladu, BokPodgladu), Nothing)
                 End If
+
                 If blad <> "" Then
-                    _lblStan.Text = "Nie pobrano warstwy " & nazwa & ": " & blad
-                    _podpowiedz.SetToolTip(_lblStan, _lblStan.Text)
-                    Exit Sub
+                    bledy.Add(nazwa & ": " & blad)
+                ElseIf piksele IsNot Nothing Then
+                    _obrazy(Klucz(w)) = piksele
                 End If
-                _obrazy(Klucz(w)) = piksele
             Next
-            _lblStan.Text = "Zmiana krycia lub kolejności odświeża podgląd od razu."
+
             OdswiezPodglad()
+
+            If bledy.Count = 0 Then
+                _lblStan.Text = "Zmiana krycia, trybu lub kolejności odświeża podgląd od razu."
+                _podpowiedz.SetToolTip(_lblStan, "")
+            ElseIf _obrazy.Count > 0 Then
+                _lblStan.Text = "Pobrano " & _obrazy.Count & " z " & listaWarstw.Count & " warstw. Błędy: " & String.Join("; ", bledy)
+                _podpowiedz.SetToolTip(_lblStan, String.Join(vbCrLf, bledy))
+            Else
+                _lblStan.Text = "Błąd pobierania: " & String.Join("; ", bledy)
+                _podpowiedz.SetToolTip(_lblStan, String.Join(vbCrLf, bledy))
+            End If
         Catch ex As OperationCanceledException
         Catch ex As Exception
             _lblStan.Text = "Błąd podglądu: " & ex.Message
+            _podpowiedz.SetToolTip(_lblStan, ex.ToString())
         Finally
             If _przerwanie Is przerwanie Then _przerwanie = Nothing
             przerwanie.Dispose()
@@ -315,7 +372,7 @@ Public Class FormWarstwyZaawansowane
         End Try
     End Sub
 
-    ''' <summary>Nakłada pobrane obrazy warstw wg bieżącego krycia i kolejności (warstwy jeszcze niepobrane są pomijane).</summary>
+    ''' <summary>Nakłada pobrane obrazy warstw wg bieżącego krycia, trybu i kolejności (warstwy jeszcze niepobrane są pomijane).</summary>
     Private Sub OdswiezPodglad()
         OdswiezLiczbeZapytan()
         If _obrazy.Count = 0 Then Exit Sub
@@ -325,7 +382,9 @@ Public Class FormWarstwyZaawansowane
         Next
         For Each w In _zestaw.Warstwy
             Dim obraz() As Integer = Nothing
-            If _obrazy.TryGetValue(Klucz(w), obraz) Then NakladanieWarstw.Naloz(piksele, obraz, w.Krycie)
+            If _obrazy.TryGetValue(Klucz(w), obraz) Then
+                NakladanieWarstw.Naloz(piksele, obraz, w.Krycie, w.TrybMieszania)
+            End If
         Next
         Dim stary = _podglad.Image
         _podglad.Image = NakladanieObrazow.DoBitmapy(piksele, BokPodgladu, BokPodgladu)

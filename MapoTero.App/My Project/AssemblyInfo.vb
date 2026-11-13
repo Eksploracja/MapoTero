@@ -47,3 +47,5 @@ Imports System.Runtime.InteropServices
 #If NETCOREAPP Then
 <Assembly: System.Runtime.Versioning.SupportedOSPlatform("windows7.0")>
 #End If
+
+<Assembly: System.Runtime.CompilerServices.InternalsVisibleTo("MapoTero.Tests")>

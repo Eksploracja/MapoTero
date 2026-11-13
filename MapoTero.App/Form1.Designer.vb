@@ -585,7 +585,10 @@ Partial Class Form1
         '
         'ToolTip1
         '
+        Me.ToolTip1.AutoPopDelay = 15000
+        Me.ToolTip1.InitialDelay = 500
         Me.ToolTip1.IsBalloon = True
+        Me.ToolTip1.ReshowDelay = 500
         '
         'grpWybraneWarstwy
         '

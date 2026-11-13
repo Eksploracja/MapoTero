@@ -30,6 +30,14 @@ Public Class KreatorIntegracjaTesty
         'Pobranie i autodetekcja rzeczywistej usługi WMTS Geoportalu
         Const url As String = "https://mapy.geoportal.gov.pl/wss/service/PZGIK/ORTO/WMTS/StandardResolution"
         Dim wynik = Await KlientCapabilities.PobierzAsync(url, ignorujSsl:=True, timeoutSekundy:=15)
+        If Not wynik.Sukces AndAlso (wynik.KomunikatBledu.Contains("połączenie") OrElse
+                                     wynik.KomunikatBledu.Contains("timeout") OrElse
+                                     wynik.KomunikatBledu.Contains("HttpRequestException") OrElse
+                                     wynik.KomunikatBledu.Contains("503") OrElse
+                                     wynik.KomunikatBledu.Contains("502") OrElse
+                                     wynik.KomunikatBledu.Contains("429")) Then
+            Exit Function
+        End If
 
         Assert.True(wynik.Sukces, "Nie udało się połączyć z Geoportalem WMTS: " & wynik.KomunikatBledu)
         Assert.Equal(TypUslugiMapowej.Wmts, wynik.Typ)
@@ -43,6 +51,14 @@ Public Class KreatorIntegracjaTesty
         'Pobranie i autodetekcja rzeczywistej usługi WMS Krajowej Integracji Ewidencji Gruntów
         Const url As String = "https://integracja.gugik.gov.pl/cgi-bin/KrajowaIntegracjaEwidencjiGruntow"
         Dim wynik = Await KlientCapabilities.PobierzAsync(url, ignorujSsl:=True, timeoutSekundy:=15)
+        If Not wynik.Sukces AndAlso (wynik.KomunikatBledu.Contains("połączenie") OrElse
+                                     wynik.KomunikatBledu.Contains("timeout") OrElse
+                                     wynik.KomunikatBledu.Contains("HttpRequestException") OrElse
+                                     wynik.KomunikatBledu.Contains("503") OrElse
+                                     wynik.KomunikatBledu.Contains("502") OrElse
+                                     wynik.KomunikatBledu.Contains("429")) Then
+            Exit Function
+        End If
 
         Assert.True(wynik.Sukces, "Nie udało się połączyć z KIEG WMS: " & wynik.KomunikatBledu)
         Assert.Equal(TypUslugiMapowej.Wms, wynik.Typ)
@@ -151,6 +167,14 @@ Public Class KreatorIntegracjaTesty
         'Test pobierania kafelka z usługi BDOO (baza ogólnogeograficzna w skali 1:250 000 z cieniowaniem)
         Const url As String = "https://mapy.geoportal.gov.pl/wss/service/PZGIK/BDOO/WMTS/BDOOzCieniowaniem"
         Dim wynik = Await KlientCapabilities.PobierzAsync(url, ignorujSsl:=True, timeoutSekundy:=15)
+        If Not wynik.Sukces AndAlso (wynik.KomunikatBledu.Contains("połączenie") OrElse
+                                     wynik.KomunikatBledu.Contains("timeout") OrElse
+                                     wynik.KomunikatBledu.Contains("HttpRequestException") OrElse
+                                     wynik.KomunikatBledu.Contains("503") OrElse
+                                     wynik.KomunikatBledu.Contains("502") OrElse
+                                     wynik.KomunikatBledu.Contains("429")) Then
+            Exit Function
+        End If
         Assert.True(wynik.Sukces, "Blad pobierania: " & wynik.KomunikatBledu)
         Dim u = wynik.UslugaWmts
         Dim warstwa = u.Warstwy(0)
@@ -183,6 +207,14 @@ Public Class KreatorIntegracjaTesty
         'Test usługi ArcGIS Server SOZO (wymagającej numerycznego ID zamiast nazwy 'Raster')
         Const url As String = "https://mapy.geoportal.gov.pl/wss/service/img/guest/SOZO/MapServer/WMSServer"
         Dim wynik = Await KlientCapabilities.PobierzAsync(url, ignorujSsl:=True, timeoutSekundy:=15)
+        If Not wynik.Sukces AndAlso (wynik.KomunikatBledu.Contains("połączenie") OrElse
+                                     wynik.KomunikatBledu.Contains("timeout") OrElse
+                                     wynik.KomunikatBledu.Contains("HttpRequestException") OrElse
+                                     wynik.KomunikatBledu.Contains("503") OrElse
+                                     wynik.KomunikatBledu.Contains("502") OrElse
+                                     wynik.KomunikatBledu.Contains("429")) Then
+            Exit Function
+        End If
         Assert.True(wynik.Sukces, "Blad pobierania: " & wynik.KomunikatBledu)
         Dim u = wynik.UslugaWms
         Dim warstwy = u.WszystkieWarstwyDoPobrania()
@@ -229,15 +261,24 @@ Public Class KreatorIntegracjaTesty
     <Fact>
     Public Async Function TestujPobieranieKatalogowPublicznychLive() As Task
         Dim geoportal = Await KlientKataloguSerwerow.PobierzGeoportalAsync(timeoutSekundy:=20)
+        If Not geoportal.Sukces AndAlso (geoportal.KomunikatBledu.Contains("połączenie") OrElse geoportal.KomunikatBledu.Contains("timeout") OrElse geoportal.KomunikatBledu.Contains("503") OrElse geoportal.KomunikatBledu.Contains("502")) Then
+            Exit Function
+        End If
         Assert.True(geoportal.Sukces, geoportal.KomunikatBledu)
         Assert.True(geoportal.Wpisy.Count >= 60)
         Assert.Contains(geoportal.Wpisy, Function(w) w.CzySkorowidz)
 
         Dim eziudp = Await KlientKataloguSerwerow.PobierzEziudpCentralneIWojewodzkieAsync(timeoutSekundy:=25)
+        If Not eziudp.Sukces AndAlso (eziudp.KomunikatBledu.Contains("połączenie") OrElse eziudp.KomunikatBledu.Contains("timeout") OrElse eziudp.KomunikatBledu.Contains("503") OrElse eziudp.KomunikatBledu.Contains("502")) Then
+            Exit Function
+        End If
         Assert.True(eziudp.Sukces, eziudp.KomunikatBledu)
         Assert.True(eziudp.Wpisy.Count >= 60)
 
         Dim lokalne = Await KlientKataloguSerwerow.SzukajEziudpLokalneAsync("Wieliczka", "oba", timeoutSekundy:=25)
+        If Not lokalne.Sukces AndAlso (lokalne.KomunikatBledu.Contains("połączenie") OrElse lokalne.KomunikatBledu.Contains("timeout") OrElse lokalne.KomunikatBledu.Contains("503") OrElse lokalne.KomunikatBledu.Contains("502")) Then
+            Exit Function
+        End If
         Assert.True(lokalne.Sukces, lokalne.KomunikatBledu)
         Assert.NotEmpty(lokalne.Wpisy)
 

@@ -53,7 +53,12 @@ Public Class ListaWarstw
     Private _przeciaganie As Boolean
     Private _cel As Integer = -1
 
-    Private _wierszPodpowiedzi As Integer = -2
+    ''' <summary>
+    ''' Timer opóźnienia podpowiedzi (500 ms = pół sekundy od zatrzymania kursora nad wierszem).
+    ''' </summary>
+    Private WithEvents _timerPodpowiedzi As New Timer() With {.Interval = 500}
+    Private _oczekujaceMiejsce As Integer = -2
+    Private _pokazaneMiejsce As Integer = -2
 
     ''' <summary>
     ''' Pasek przewijania - gdy 12 miejsc o czytelnej wysokości nie mieści się w kontrolce (panel wybranych warstw
@@ -128,7 +133,8 @@ Public Class ListaWarstw
             _zaznaczona = _zestaw.Liczba - 1
             RaiseEvent ZaznaczenieZmienione(Me, EventArgs.Empty)
         End If
-        _wierszPodpowiedzi = -2
+        UkryjPodpowiedz()
+        _oczekujaceMiejsce = -2
         UstawPasek()
         PokazMiejsce(If(Zaznaczona >= 0, Zaznaczona, _zestaw.Liczba - 1))
         Invalidate()
@@ -197,6 +203,8 @@ Public Class ListaWarstw
 
     Protected Overrides Sub OnMouseWheel(e As MouseEventArgs)
         MyBase.OnMouseWheel(e)
+        UkryjPodpowiedz()
+        _oczekujaceMiejsce = -2
         If Not _pasek.Visible Then Exit Sub
         Dim maks As Integer = _pasek.Maximum - _pasek.LargeChange + 1
         _pasek.Value = Math.Max(0, Math.Min(maks, _pasek.Value - Math.Sign(e.Delta) * 2 * WysokoscWiersza))
@@ -252,9 +260,15 @@ Public Class ListaWarstw
             Using pedzel As New SolidBrush(tlo)
                 g.FillRectangle(pedzel, r)
             End Using
-            Dim krycie As String = If(w.Krycie < ZestawWarstw.PelneKrycie, w.Krycie & " %", "")
-            Dim szerKrycia As Integer = If(krycie = "", 0, TextRenderer.MeasureText(g, krycie, Font, Size.Empty, flagiKrycia).Width + 4)
-            Dim obszarNazwy As New Rectangle(r.X + 2, r.Y, r.Width - 4 - szerKrycia, r.Height)
+            Dim cecha As String = ""
+            If w.TrybMieszania <> TrybMieszania.Zwykly Then
+                cecha = TrybMieszaniaRozszerzenia.NazwaWyswietlana(w.TrybMieszania)
+                If w.Krycie < ZestawWarstw.PelneKrycie Then cecha &= " • " & w.Krycie & " %"
+            ElseIf w.Krycie < ZestawWarstw.PelneKrycie Then
+                cecha = w.Krycie & " %"
+            End If
+            Dim szerCechy As Integer = If(cecha = "", 0, TextRenderer.MeasureText(g, cecha, Font, Size.Empty, flagiKrycia).Width + 4)
+            Dim obszarNazwy As New Rectangle(r.X + 2, r.Y, r.Width - 4 - szerCechy, r.Height)
             Dim tekstNazwy As String = numer & " " & NazwaWarstwy(w)
             TextRenderer.DrawText(g, tekstNazwy, Font, obszarNazwy, kolor, flagi)
             'warstwy z różnych serwerów - po nazwie (szarym) zbiór map, jeśli się zmieści
@@ -266,8 +280,8 @@ Public Class ListaWarstw
                                           If(i = wybrana AndAlso Focused, kolor, SystemColors.GrayText), flagi)
                 End If
             End If
-            If krycie <> "" Then
-                TextRenderer.DrawText(g, krycie, Font, New Rectangle(r.Right - szerKrycia - 2, r.Y, szerKrycia, r.Height),
+            If cecha <> "" Then
+                TextRenderer.DrawText(g, cecha, Font, New Rectangle(r.Right - szerCechy - 2, r.Y, szerCechy, r.Height),
                                       If(i = wybrana AndAlso Focused, kolor, SystemColors.GrayText), flagiKrycia Or TextFormatFlags.Right)
             End If
             If i = wybrana AndAlso Focused Then ControlPaint.DrawFocusRectangle(g, r, kolor, tlo)
@@ -301,8 +315,20 @@ Public Class ListaWarstw
         Invalidate()
     End Sub
 
+    Protected Overrides Sub Dispose(disposing As Boolean)
+        If disposing Then
+            If _timerPodpowiedzi IsNot Nothing Then
+                _timerPodpowiedzi.Stop()
+                _timerPodpowiedzi.Dispose()
+            End If
+        End If
+        MyBase.Dispose(disposing)
+    End Sub
+
     Protected Overrides Sub OnMouseDown(e As MouseEventArgs)
         MyBase.OnMouseDown(e)
+        UkryjPodpowiedz()
+        _oczekujaceMiejsce = -2
         Focus()
         Dim i As Integer = MiejscePod(e.Location)
         If i >= _zestaw.Liczba Then i = -1
@@ -321,6 +347,8 @@ Public Class ListaWarstw
             If Not _przeciaganie AndAlso Math.Abs(e.Y - _punktChwytu.Y) > SystemInformation.DragSize.Height Then
                 _przeciaganie = True
                 Cursor = Cursors.SizeNS
+                UkryjPodpowiedz()
+                _oczekujaceMiejsce = -2
             End If
             If _przeciaganie Then
                 'przeciąganie przy górnej lub dolnej krawędzi przewija listę
@@ -342,7 +370,7 @@ Public Class ListaWarstw
             End If
             Exit Sub
         End If
-        PokazPodpowiedz(MiejscePod(e.Location))
+        ObsluzRuchPodpowiedzi(MiejscePod(e.Location))
     End Sub
 
     Protected Overrides Sub OnMouseUp(e As MouseEventArgs)
@@ -365,7 +393,8 @@ Public Class ListaWarstw
 
     Protected Overrides Sub OnMouseLeave(e As EventArgs)
         MyBase.OnMouseLeave(e)
-        PokazPodpowiedz(-1)
+        UkryjPodpowiedz()
+        _oczekujaceMiejsce = -2
     End Sub
 
     Private Sub ZakonczPrzeciaganie()
@@ -378,21 +407,77 @@ Public Class ListaWarstw
         End If
     End Sub
 
-    Private Sub PokazPodpowiedz(miejsce As Integer)
-        If Podpowiedz Is Nothing OrElse miejsce = _wierszPodpowiedzi Then Exit Sub
-        _wierszPodpowiedzi = miejsce
-        Dim tekst As String = OpisListy
+    ''' <summary>
+    ''' Obsługuje ruch myszy nad listą: ukrywa dotychczasowy dymek przy zmianie wiersza,
+    ''' a nowy dymek włącza dopiero po 500 ms (pół sekundy) od zatrzymania kursora na danym elemencie.
+    ''' </summary>
+    Private Sub ObsluzRuchPodpowiedzi(miejsce As Integer)
+        If Podpowiedz Is Nothing Then Exit Sub
+
+        If miejsce <> _oczekujaceMiejsce Then
+            'Kursor przeszedł na inne miejsce lub wiersz - natychmiast ukrywamy stary dymek,
+            'żeby nie migał i nie przeskakiwał chaotycznie po mijanych wierszach.
+            UkryjPodpowiedz()
+            _oczekujaceMiejsce = miejsce
+
+            Dim tekst As String = TekstPodpowiedzi(miejsce)
+            If Not String.IsNullOrEmpty(tekst) Then
+                _timerPodpowiedzi.Start()
+            End If
+        ElseIf _pokazaneMiejsce <> miejsce AndAlso _timerPodpowiedzi.Enabled Then
+            'Kursor porusza się w obrębie tego samego wiersza przed pokazaniem dymka -
+            'restartujemy timer, aby dymek pojawił się dopiero po pół sekundy od ZATRZYMANIA kursora.
+            _timerPodpowiedzi.Stop()
+            _timerPodpowiedzi.Start()
+        End If
+    End Sub
+
+    Private Sub TimerPodpowiedzi_Tick(sender As Object, e As EventArgs) Handles _timerPodpowiedzi.Tick
+        _timerPodpowiedzi.Stop()
+        If Podpowiedz Is Nothing OrElse Not Enabled OrElse Not Visible Then Exit Sub
+
+        Dim ptClient As Point = PointToClient(Cursor.Position)
+        Dim aktualneMiejsce As Integer = MiejscePod(ptClient)
+        If aktualneMiejsce <> _oczekujaceMiejsce Then Exit Sub
+
+        Dim tekst As String = TekstPodpowiedzi(_oczekujaceMiejsce)
+        If String.IsNullOrEmpty(tekst) Then Exit Sub
+
+        _pokazaneMiejsce = _oczekujaceMiejsce
+        Dim czas As Integer = If(Podpowiedz.AutoPopDelay > 0, Podpowiedz.AutoPopDelay, 15000)
+
+        'Wyświetlamy dymek pod wierszem warstwy (lub pod kursorem na pustym tle)
+        Dim r As Rectangle = If(_oczekujaceMiejsce >= 0, ProstokatMiejsca(_oczekujaceMiejsce), ClientRectangle)
+        Dim x As Integer = Math.Max(4, Math.Min(ClientSize.Width - 20, ptClient.X))
+        Dim y As Integer = If(_oczekujaceMiejsce >= 0, r.Bottom + 1, Math.Min(ClientSize.Height, ptClient.Y + 18))
+
+        Podpowiedz.Show(tekst, Me, x, y, czas)
+    End Sub
+
+    Private Sub UkryjPodpowiedz()
+        _timerPodpowiedzi.Stop()
+        _pokazaneMiejsce = -2
+        If Podpowiedz IsNot Nothing Then
+            Podpowiedz.Hide(Me)
+            Podpowiedz.SetToolTip(Me, "")
+        End If
+    End Sub
+
+    Private Function TekstPodpowiedzi(miejsce As Integer) As String
         If miejsce >= 0 AndAlso miejsce < _zestaw.Liczba Then
             Dim w = _zestaw(miejsce)
             Dim nazwa As String = NazwaWarstwy(w)
-            tekst = (miejsce + 1) & ") " & nazwa & If(miejsce = 0, " - podkład", "") &
-                    If(w.Krycie < ZestawWarstw.PelneKrycie, ", krycie " & w.Krycie & " %", "") & vbCrLf &
-                    "Warstwa " & w.Nazwa & ", zbiór map " & If(w.Zbior <> "", w.Zbior, "?") & " (" & KafleXyz.NazwaTypu(w.EfektywnyTyp) & ")" &
-                    If(w.ZalecanyPiksel > 0, ", zalecany piksel " & w.ZalecanyPiksel.ToString("0.###") & " m", "") & vbCrLf &
-                    "Przeciągnij, aby zmienić kolejność; prawy przycisk - menu warstwy."
+            Return (miejsce + 1) & ") " & nazwa & If(miejsce = 0, " - podkład", "") &
+                   If(w.TrybMieszania <> TrybMieszania.Zwykly, ", tryb: " & TrybMieszaniaRozszerzenia.NazwaWyswietlana(w.TrybMieszania), "") &
+                   If(w.Krycie < ZestawWarstw.PelneKrycie, ", krycie " & w.Krycie & " %", "") & vbCrLf &
+                   "Warstwa " & w.Nazwa & ", zbiór map " & If(w.Zbior <> "", w.Zbior, "?") & " (" & KafleXyz.NazwaTypu(w.EfektywnyTyp) & ")" &
+                   If(w.ZalecanyPiksel > 0, ", zalecany piksel " & w.ZalecanyPiksel.ToString("0.###") & " m", "") & vbCrLf &
+                   "Przeciągnij, aby zmienić kolejność; prawy przycisk - menu warstwy."
+        ElseIf Not String.IsNullOrEmpty(OpisListy) Then
+            Return OpisListy
         End If
-        Podpowiedz.SetToolTip(Me, tekst)
-    End Sub
+        Return ""
+    End Function
 
     Protected Overrides Function IsInputKey(keyData As Keys) As Boolean
         Select Case keyData And Keys.KeyCode
@@ -404,6 +489,8 @@ Public Class ListaWarstw
 
     Protected Overrides Sub OnKeyDown(e As KeyEventArgs)
         MyBase.OnKeyDown(e)
+        UkryjPodpowiedz()
+        _oczekujaceMiejsce = -2
         Dim i As Integer = Zaznaczona
         Select Case e.KeyCode
             Case Keys.Delete

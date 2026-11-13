@@ -641,7 +641,8 @@ Public Class Form1
             .SkalaMapy = lblZoom.Text.Replace(","c, "."c), .Numeracja = Ustawienia.Numeracja, .UkladEpsg = Ustawienia.Uklad.Epsg,
             .Przezroczystosc = EfektywnaPrzezroczystosc(), .DataPobrania = _dataPobrania,
             .AdresSerwera = If(_zestaw.Liczba > 0, _zestaw(0).Adres, If(ZnajdzZbior(_biezacyZbior)?.Plik?.Adres, "")),
-            .AdresyWarstw = ZestawWarstw.Polacz(_zestaw.Adresy()), .ZbioryWarstw = ZestawWarstw.Polacz(_zestaw.Zbiory())}
+            .AdresyWarstw = ZestawWarstw.Polacz(_zestaw.Adresy()), .ZbioryWarstw = ZestawWarstw.Polacz(_zestaw.Zbiory()),
+            .TrybyMieszaniaWarstw = _zestaw.TekstTrybowMieszania()}
         For i = 0 To _zestaw.Liczba - 1
             c.Warstwy(i) = _zestaw(i).Nazwa
         Next
@@ -1593,7 +1594,10 @@ Public Class Form1
     End Function
 
     Private Function EfektywnaPrzezroczystosc() As Boolean
-        Return Ustawienia.Przezroczystosc OrElse (_zestaw.CzySameNakladki() AndAlso Wms.CzyFormatZPrzezroczystoscia(Ustawienia.Format))
+        Dim maPrzezroczystosc As Boolean = _zestaw.CzySameNakladki() OrElse
+                                           (_zestaw.Liczba > 0 AndAlso (_zestaw(0).Krycie < 100 OrElse _zestaw(0).Nakladka)) OrElse
+                                           _zestaw.Warstwy.Any(Function(w) w.Krycie < 100 OrElse w.Nakladka)
+        Return Ustawienia.Przezroczystosc OrElse (maPrzezroczystosc AndAlso Wms.CzyFormatZPrzezroczystoscia(Ustawienia.Format))
     End Function
 
     ''' <summary>Plik zbioru map (folder programu, potem folder danych); Nothing - brak pliku lub błąd odczytu.</summary>
@@ -1683,10 +1687,13 @@ Public Class Form1
                 Exit Sub
             End If
         End If
-        If _zestaw.CzySameNakladki() AndAlso Not Wms.CzyFormatZPrzezroczystoscia(Ustawienia.Format) Then
-            Dim odpFormat = MessageBox.Show("Wybrano wyłącznie przezroczyste nakładki (szlaki), ale obecny format segmentów to ." & Ustawienia.Format &
-                                            " (tło będzie nieprzezroczyste)." & vbCrLf & vbCrLf &
-                                            "Przełączyć na PNG z przezroczystym tłem?", "Przezroczystość nakładki",
+        Dim maPrzezroczystosc As Boolean = _zestaw.CzySameNakladki() OrElse
+                                           (_zestaw.Liczba > 0 AndAlso (_zestaw(0).Krycie < 100 OrElse _zestaw(0).Nakladka)) OrElse
+                                           _zestaw.Warstwy.Any(Function(w) w.Krycie < 100 OrElse w.Nakladka)
+        If maPrzezroczystosc AndAlso Not Wms.CzyFormatZPrzezroczystoscia(Ustawienia.Format) Then
+            Dim odpFormat = MessageBox.Show("Wybrane warstwy zawierają nakładki lub krycie mniejsze niż 100%, ale obecny format segmentów to ." & Ustawienia.Format &
+                                            " (tło i przezroczystości zostaną wypalone bez kanału alfa)." & vbCrLf & vbCrLf &
+                                            "Przełączyć na format PNG z przezroczystym tłem?", "Format z przezroczystością",
                                             MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question)
             If odpFormat = DialogResult.Cancel Then Exit Sub
             If odpFormat = DialogResult.Yes Then
@@ -1812,8 +1819,17 @@ Public Class Form1
         If wynik.Przerwano Then
             Komunikat("Przerwano pobieranie segmentów", Color.Red)
         ElseIf wynik.Nieudane > 0 Then
-            Komunikat("Nie udało się ściągnąć wszystkich segmentów (" & wynik.Nieudane & " z " & wynik.Wszystkie &
-                      "). Wykaz tych segmentów i przyczyny błędów w pliku error.txt", Color.Red)
+            Dim plikErr As String = zadanie.Folder & "error.txt"
+            Dim trescErr As String = If(File.Exists(plikErr), File.ReadAllText(plikErr), "")
+            If trescErr.IndexOf("InvalidCRS", StringComparison.OrdinalIgnoreCase) >= 0 OrElse
+               trescErr.IndexOf("układu współrzędnych", StringComparison.OrdinalIgnoreCase) >= 0 OrElse
+               trescErr.IndexOf("CRS not supported", StringComparison.OrdinalIgnoreCase) >= 0 Then
+                Komunikat("Nie udało się ściągnąć segmentów (" & wynik.Nieudane & " z " & wynik.Wszystkie &
+                          "). Serwer może nie obsługiwać układu " & Ustawienia.Uklad.Nazwa & " - zmień układ na PL-1992 lub sprawdź error.txt.", Color.Red)
+            Else
+                Komunikat("Nie udało się ściągnąć wszystkich segmentów (" & wynik.Nieudane & " z " & wynik.Wszystkie &
+                          "). Wykaz tych segmentów i przyczyny błędów w pliku error.txt", Color.Red)
+            End If
         Else
             Komunikat("Zakończono pobieranie. Mapa znajduje się w katalogu " & zadanie.Folder, Color.Green)
         End If
@@ -2471,21 +2487,51 @@ Public Class Form1
 #Region "Przyciski i menu"
 
     Private Sub btnOtworzFolder_Click(sender As Object, e As EventArgs) Handles btnOtworzFolder.Click
-        Directory.CreateDirectory(FolderDownload)
-        OtworzFolder(FolderDownload)
+        Dim folder = If(Not String.IsNullOrWhiteSpace(FolderSesji), FolderSesji, FolderDownload)
+        Directory.CreateDirectory(folder)
+        OtworzFolder(folder)
     End Sub
 
     Private Sub btnUsunPobrane_Click(sender As Object, e As EventArgs) Handles btnUsunPobrane.Click
         If PobieranieTrwa("Usunięcie pobranych map") Then Exit Sub
-        Dim odp As DialogResult = MessageBox.Show("Czy na pewno usunąć cały katalog 'download' z pobranymi mapami?", "Usuwanie zawartości katalogu download",
-                                                 MessageBoxButtons.YesNo, MessageBoxIcon.Question)
+        Dim folder = If(Not String.IsNullOrWhiteSpace(FolderSesji), FolderSesji, FolderDownload)
+        If Not Directory.Exists(folder) Then
+            Komunikat("Folder bieżącej sesji nie istnieje: " & folder, Color.Red)
+            Exit Sub
+        End If
+
+        Dim czyGlownyDownload As Boolean = String.Equals(Path.GetFullPath(folder).TrimEnd("\"c, "/"c),
+                                                         Path.GetFullPath(FolderDownload).TrimEnd("\"c, "/"c),
+                                                         StringComparison.OrdinalIgnoreCase)
+
+        Dim komunikatPytania As String
+        If czyGlownyDownload Then
+            komunikatPytania = "Czy na pewno przenieść do Kosza pliki bieżącej sesji z folderu download?" & vbCrLf & vbCrLf &
+                               "Pliki segmentów i konfiguracji zostaną przeniesione do Kosza (podkatalogi innych sesji pozostaną nienaruszone)."
+        Else
+            komunikatPytania = "Czy na pewno przenieść do Kosza folder bieżącej sesji?" & vbCrLf & vbCrLf &
+                               folder & vbCrLf & vbCrLf &
+                               "Zawartość folderu zostanie bezpiecznie przeniesiona do Kosza."
+        End If
+
+        Dim odp As DialogResult = MessageBox.Show(komunikatPytania, "Usuwanie plików bieżącej sesji",
+                                                 MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2)
         If odp = DialogResult.Yes Then
             Try
-                If Directory.Exists(FolderDownload) Then Directory.Delete(FolderDownload, True)
-                Directory.CreateDirectory(FolderDownload)
-                Komunikat("Usunięto całą zawartość katalogu download", Color.Green)
+                If czyGlownyDownload Then
+                    Dim usuniete As Integer = 0
+                    For Each plik In Directory.GetFiles(folder)
+                        FileIO.FileSystem.DeleteFile(plik, FileIO.UIOption.OnlyErrorDialogs, FileIO.RecycleOption.SendToRecycleBin)
+                        usuniete += 1
+                    Next
+                    Komunikat("Przeniesiono do Kosza pliki bieżącej sesji (" & usuniete & " plików) z folderu download", Color.Green)
+                Else
+                    FileIO.FileSystem.DeleteDirectory(folder, FileIO.UIOption.OnlyErrorDialogs, FileIO.RecycleOption.SendToRecycleBin)
+                    FolderSesji = FolderDownload
+                    Komunikat("Przeniesiono do Kosza folder sesji: " & folder, Color.Green)
+                End If
             Catch ex As Exception
-                Komunikat("Nie udało się usunąć zawartości katalogu download: " & ex.Message, Color.Red)
+                Komunikat("Nie udało się przenieść sesji do Kosza: " & ex.Message, Color.Red)
             End Try
         End If
     End Sub

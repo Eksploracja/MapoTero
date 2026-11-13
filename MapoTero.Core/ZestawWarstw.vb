@@ -35,6 +35,8 @@ Public Class WarstwaWybrana
     Public Property Nakladka As Boolean
     ''' <summary>Czy pomijać błędy certyfikatu SSL przy pobieraniu tej warstwy.</summary>
     Public Property IgnorujSsl As Boolean
+    ''' <summary>Tryb mieszania warstwy z warstwami leżącymi poniżej (domyślnie Zwykły).</summary>
+    Public Property TrybMieszania As TrybMieszania = TrybMieszania.Zwykly
 
     Public ReadOnly Property EfektywnyTyp As TypUslugiMapowej
         Get
@@ -58,7 +60,7 @@ Public Class WarstwaWybrana
         Return New WarstwaWybrana With {
             .Nazwa = Nazwa, .Zbior = Zbior, .Adres = Adres, .Krycie = Krycie,
             .ZalecanyPiksel = ZalecanyPiksel, .TypZrodla = TypZrodla, .Nakladka = Nakladka,
-            .IgnorujSsl = IgnorujSsl}
+            .IgnorujSsl = IgnorujSsl, .TrybMieszania = TrybMieszania}
     End Function
 
     ''' <summary>Ta sama warstwa tego samego serwera.</summary>
@@ -75,6 +77,8 @@ End Class
 Public Class GrupaZapytania
     Public ReadOnly Property Warstwy As New List(Of String)
     Public Property Krycie As Integer = ZestawWarstw.PelneKrycie
+    ''' <summary>Tryb mieszania grupy z warstwami leżącymi poniżej (domyślnie Zwykły).</summary>
+    Public Property TrybMieszania As TrybMieszania = TrybMieszania.Zwykly
     Public Property Adres As String = ""
     Public Property TypZrodla As TypUslugiMapowej = TypUslugiMapowej.Nieznana
     Public Property Nakladka As Boolean
@@ -162,10 +166,10 @@ Public Class ZestawWarstw
         End Get
     End Property
 
-    ''' <summary>Czy któraś warstwa ma krycie mniejsze niż 100% (pobieranie wymaga wtedy nakładania warstw w programie).</summary>
+    ''' <summary>Czy któraś warstwa ma krycie mniejsze niż 100% lub nietypowy tryb mieszania (pobieranie wymaga wtedy nakładania warstw w programie).</summary>
     Public ReadOnly Property CzesciowoPrzezroczysty As Boolean
         Get
-            Return _warstwy.Any(Function(w) w.Krycie < PelneKrycie)
+            Return _warstwy.Any(Function(w) w.Krycie < PelneKrycie OrElse w.TrybMieszania <> TrybMieszania.Zwykly)
         End Get
     End Property
 
@@ -186,7 +190,8 @@ Public Class ZestawWarstw
                           Optional typZrodla As TypUslugiMapowej = TypUslugiMapowej.Nieznana,
                           Optional nakladka As Boolean = False,
                           Optional umiescPodNakladkami As Boolean = False,
-                          Optional ignorujSsl As Boolean = False) As WynikDodania
+                          Optional ignorujSsl As Boolean = False,
+                          Optional trybMieszania As TrybMieszania = TrybMieszania.Zwykly) As WynikDodania
         If String.IsNullOrEmpty(nazwa) Then Return WynikDodania.JuzWybrana
         'ta sama warstwa dwa razy - serwer narysowałby ją podwójnie, a pomyłkowe kliknięcie trudno było cofnąć
         If Zawiera(If(adres, ""), nazwa) Then Return WynikDodania.JuzWybrana
@@ -199,7 +204,8 @@ Public Class ZestawWarstw
             .ZalecanyPiksel = If(zalecanyPiksel > 0 AndAlso Not Double.IsInfinity(zalecanyPiksel), zalecanyPiksel, 0),
             .TypZrodla = typZrodla,
             .Nakladka = nakladka,
-            .IgnorujSsl = ignorujSsl
+            .IgnorujSsl = ignorujSsl,
+            .TrybMieszania = trybMieszania
         }
         If umiescPodNakladkami AndAlso Not nakladka AndAlso _warstwy.Count > 0 Then
             'podkład dodany po wybraniu nakładki (np. szlaków) wsuwany jest pod końcowe nakładki, żeby nie zakrył ich sobą
@@ -269,27 +275,38 @@ Public Class ZestawWarstw
         If indeks >= 0 AndAlso indeks < _warstwy.Count Then _warstwy(indeks).Krycie = PoprawneKrycie(krycie)
     End Sub
 
+    Public Sub UstawTrybMieszania(indeks As Integer, tryb As TrybMieszania)
+        If indeks >= 0 AndAlso indeks < _warstwy.Count Then _warstwy(indeks).TrybMieszania = tryb
+    End Sub
+
     Public Shared Function PoprawneKrycie(krycie As Integer) As Integer
         Return Math.Max(MinKrycie, Math.Min(PelneKrycie, krycie))
     End Function
 
     ''' <summary>
     ''' Grupy warstw pobieranych razem dla jednego segmentu. Sąsiednie warstwy tego samego serwera o pełnym kryciu
-    ''' pobierane są razem (WMS - jednym zapytaniem, serwer nakłada je sam), a osobno: każda warstwa o kryciu
-    ''' mniejszym niż 100% (krycie da się nadać tylko w programie) i każda zmiana serwera. Jedna grupa WMS o pełnym
-    ''' kryciu - jedno zapytanie ze wszystkimi warstwami, jak w starszych wersjach.
+    ''' i zwykłym trybie mieszania pobierane są razem (WMS - jednym zapytaniem, serwer nakłada je sam), a osobno:
+    ''' każda warstwa o kryciu mniejszym niż 100%, z innym trybem mieszania i każda zmiana serwera.
     ''' </summary>
     Public Function GrupyZapytan() As List(Of GrupaZapytania)
         Dim grupy As New List(Of GrupaZapytania)
         Dim biezaca As GrupaZapytania = Nothing
         For Each w In _warstwy
-            If w.Krycie >= PelneKrycie AndAlso biezaca IsNot Nothing AndAlso biezaca.Krycie >= PelneKrycie AndAlso
+            If w.Krycie >= PelneKrycie AndAlso w.TrybMieszania = TrybMieszania.Zwykly AndAlso
+               biezaca IsNot Nothing AndAlso biezaca.Krycie >= PelneKrycie AndAlso biezaca.TrybMieszania = TrybMieszania.Zwykly AndAlso
                String.Equals(biezaca.Adres, w.Adres, StringComparison.OrdinalIgnoreCase) AndAlso
                biezaca.EfektywnyTyp = w.EfektywnyTyp AndAlso
                biezaca.IgnorujSsl = w.IgnorujSsl Then
                 biezaca.Warstwy.Add(w.Nazwa)
             Else
-                biezaca = New GrupaZapytania With {.Krycie = w.Krycie, .Adres = w.Adres, .TypZrodla = w.TypZrodla, .Nakladka = w.Nakladka, .IgnorujSsl = w.IgnorujSsl}
+                biezaca = New GrupaZapytania With {
+                    .Krycie = w.Krycie,
+                    .TrybMieszania = w.TrybMieszania,
+                    .Adres = w.Adres,
+                    .TypZrodla = w.TypZrodla,
+                    .Nakladka = w.Nakladka,
+                    .IgnorujSsl = w.IgnorujSsl
+                }
                 biezaca.Warstwy.Add(w.Nazwa)
                 grupy.Add(biezaca)
             End If
@@ -299,8 +316,14 @@ Public Class ZestawWarstw
 
     ''' <summary>Krycie warstw w polu conf.txt, np. "100;60;100"; same pełne krycia - pusty tekst.</summary>
     Public Function TekstKrycia() As String
-        If Not CzesciowoPrzezroczysty Then Return ""
+        If Not _warstwy.Any(Function(w) w.Krycie < PelneKrycie) Then Return ""
         Return String.Join(";", _warstwy.Select(Function(w) w.Krycie.ToString(CultureInfo.InvariantCulture)))
+    End Function
+
+    ''' <summary>Tryby mieszania warstw w polu conf.txt, np. "0;1;0"; same zwykłe - pusty tekst.</summary>
+    Public Function TekstTrybowMieszania() As String
+        If Not _warstwy.Any(Function(w) w.TrybMieszania <> TrybMieszania.Zwykly) Then Return ""
+        Return String.Join(";", _warstwy.Select(Function(w) CInt(w.TrybMieszania).ToString(CultureInfo.InvariantCulture)))
     End Function
 
     ''' <summary>Krycie kolejnych warstw z pola conf.txt; brakujące lub nieczytelne wartości - pełne krycie.</summary>
@@ -314,6 +337,26 @@ Public Class ZestawWarstw
                 If Integer.TryParse(czesci(i).Trim(), NumberStyles.Integer, CultureInfo.InvariantCulture, v) Then k = PoprawneKrycie(v)
             End If
             wynik.Add(k)
+        Next
+        Return wynik
+    End Function
+
+    ''' <summary>Tryby mieszania kolejnych warstw z pola conf.txt; brakujące lub nieczytelne - tryb zwykły.</summary>
+    Public Shared Function TrybyMieszaniaZTekstu(tekst As String, liczba As Integer) As List(Of TrybMieszania)
+        Dim wynik As New List(Of TrybMieszania)
+        Dim czesci = If(tekst, "").Split(";"c)
+        For i = 0 To liczba - 1
+            Dim t As TrybMieszania = TrybMieszania.Zwykly
+            If i < czesci.Length AndAlso Not String.IsNullOrWhiteSpace(czesci(i)) Then
+                Dim v As Integer
+                If Integer.TryParse(czesci(i).Trim(), NumberStyles.Integer, CultureInfo.InvariantCulture, v) AndAlso
+                   [Enum].IsDefined(GetType(TrybMieszania), v) Then
+                    t = CType(v, TrybMieszania)
+                Else
+                    t = TrybMieszaniaRozszerzenia.ZTekstu(czesci(i))
+                End If
+            End If
+            wynik.Add(t)
         Next
         Return wynik
     End Function
@@ -336,48 +379,114 @@ Public Class ZestawWarstw
         Return wynik
     End Function
 
-    ''' <summary>Zestaw z nazw warstw i pól conf.txt (krycie, adresy i zbiory warstw).</summary>
+    ''' <summary>Zestaw z nazw warstw i pól conf.txt (krycie, adresy, zbiory i tryby mieszania warstw).</summary>
     Public Shared Function ZNazw(nazwy As IEnumerable(Of String), Optional tekstKrycia As String = "",
-                                 Optional adresy As IList(Of String) = Nothing, Optional zbiory As IList(Of String) = Nothing) As ZestawWarstw
+                                 Optional adresy As IList(Of String) = Nothing, Optional zbiory As IList(Of String) = Nothing,
+                                 Optional tekstTrybow As String = "") As ZestawWarstw
         Dim z As New ZestawWarstw()
         Dim lista = nazwy.Where(Function(n) Not String.IsNullOrEmpty(n)).ToList()
         Dim krycia = KryciaZTekstu(tekstKrycia, lista.Count)
+        Dim tryby = TrybyMieszaniaZTekstu(tekstTrybow, lista.Count)
         For i = 0 To lista.Count - 1
             z.Dodaj(lista(i), krycia(i),
                     If(adresy IsNot Nothing AndAlso i < adresy.Count, adresy(i), ""),
-                    If(zbiory IsNot Nothing AndAlso i < zbiory.Count, zbiory(i), ""))
+                    If(zbiory IsNot Nothing AndAlso i < zbiory.Count, zbiory(i), ""),
+                    trybMieszania:=tryby(i))
         Next
         Return z
     End Function
 
 End Class
 
-''' <summary>Nakładanie warstw rastrowych z kryciem (piksele ARGB 32-bit, jak w Bitmap.LockBits Format32bppArgb).</summary>
+''' <summary>Nakładanie warstw rastrowych z kryciem i trybami mieszania (piksele ARGB 32-bit, Format32bppArgb).</summary>
 Public NotInheritable Class NakladanieWarstw
 
     Private Sub New()
     End Sub
 
     ''' <summary>
-    ''' Nakłada <paramref name="warstwa"/> na <paramref name="cel"/> (operacja „source over”) z kryciem w procentach.
+    ''' Nakłada <paramref name="warstwa"/> na <paramref name="cel"/> z kryciem w procentach i wybranym trybem mieszania.
     ''' Przezroczystość pikseli warstwy (np. tło PNG) jest uwzględniana razem z kryciem.
     ''' </summary>
-    Public Shared Sub Naloz(cel() As Integer, warstwa() As Integer, krycie As Integer)
+    Public Shared Sub Naloz(cel() As Integer, warstwa() As Integer, krycie As Integer, Optional tryb As TrybMieszania = TrybMieszania.Zwykly)
         If cel Is Nothing OrElse warstwa Is Nothing Then Exit Sub
         Dim k As Double = Math.Max(0, Math.Min(100, krycie)) / 100.0
         Dim n As Integer = Math.Min(cel.Length, warstwa.Length)
-        For i = 0 To n - 1
-            Dim s As Integer = warstwa(i)
-            Dim sa As Double = ((s >> 24) And &HFF) / 255.0 * k
-            If sa <= 0 Then Continue For
-            Dim d As Integer = cel(i)
-            Dim da As Double = ((d >> 24) And &HFF) / 255.0
-            Dim oa As Double = sa + da * (1 - sa)
-            Dim r As Double = (((s >> 16) And &HFF) * sa + ((d >> 16) And &HFF) * da * (1 - sa)) / oa
-            Dim g As Double = (((s >> 8) And &HFF) * sa + ((d >> 8) And &HFF) * da * (1 - sa)) / oa
-            Dim b As Double = ((s And &HFF) * sa + (d And &HFF) * da * (1 - sa)) / oa
-            cel(i) = (Bajt(oa * 255) << 24) Or (Bajt(r) << 16) Or (Bajt(g) << 8) Or Bajt(b)
-        Next
+        If tryb = TrybMieszania.Zwykly Then
+            For i = 0 To n - 1
+                Dim s As Integer = warstwa(i)
+                Dim sa As Double = ((s >> 24) And &HFF) / 255.0 * k
+                If sa <= 0 Then Continue For
+                Dim d As Integer = cel(i)
+                Dim da As Double = ((d >> 24) And &HFF) / 255.0
+                Dim oa As Double = sa + da * (1 - sa)
+                Dim r As Double = (((s >> 16) And &HFF) * sa + ((d >> 16) And &HFF) * da * (1 - sa)) / oa
+                Dim g As Double = (((s >> 8) And &HFF) * sa + ((d >> 8) And &HFF) * da * (1 - sa)) / oa
+                Dim b As Double = ((s And &HFF) * sa + (d And &HFF) * da * (1 - sa)) / oa
+                cel(i) = (Bajt(oa * 255) << 24) Or (Bajt(r) << 16) Or (Bajt(g) << 8) Or Bajt(b)
+            Next
+        Else
+            For i = 0 To n - 1
+                Dim s As Integer = warstwa(i)
+                Dim sa As Double = ((s >> 24) And &HFF) / 255.0 * k
+                If sa <= 0 Then Continue For
+                Dim d As Integer = cel(i)
+                Dim da As Double = ((d >> 24) And &HFF) / 255.0
+                If da <= 0 Then
+                    cel(i) = (Bajt(sa * 255) << 24) Or (s And &HFFFFFF)
+                    Continue For
+                End If
+
+                Dim br As Double = ((d >> 16) And &HFF) / 255.0
+                Dim bg As Double = ((d >> 8) And &HFF) / 255.0
+                Dim bb As Double = (d And &HFF) / 255.0
+                Dim lr As Double = ((s >> 16) And &HFF) / 255.0
+                Dim lg As Double = ((s >> 8) And &HFF) / 255.0
+                Dim lb As Double = (s And &HFF) / 255.0
+
+                Dim mr As Double, mg As Double, mb As Double
+                Select Case tryb
+                    Case TrybMieszania.Mnozenie
+                        ' 2 Mnożenie: Cb * Cs
+                        mr = br * lr
+                        mg = bg * lg
+                        mb = bb * lb
+                    Case TrybMieszania.Ciemniej
+                        ' 3 Ciemniej: min(Cb, Cs)
+                        mr = Math.Min(br, lr)
+                        mg = Math.Min(bg, lg)
+                        mb = Math.Min(bb, lb)
+                    Case TrybMieszania.Jasniej
+                        ' 4 Jaśniej: max(Cb, Cs)
+                        mr = Math.Max(br, lr)
+                        mg = Math.Max(bg, lg)
+                        mb = Math.Max(bb, lb)
+                    Case TrybMieszania.Ekran
+                        ' 5 Ekran: 1 - (1-Cb)*(1-Cs)
+                        mr = 1.0 - (1.0 - br) * (1.0 - lr)
+                        mg = 1.0 - (1.0 - bg) * (1.0 - lg)
+                        mb = 1.0 - (1.0 - bb) * (1.0 - lb)
+                    Case TrybMieszania.Nakladka
+                        ' 6 Nakładka: mnożenie dla ciemnych, ekran dla jasnych
+                        mr = If(br < 0.5, 2.0 * br * lr, 1.0 - 2.0 * (1.0 - br) * (1.0 - lr))
+                        mg = If(bg < 0.5, 2.0 * bg * lg, 1.0 - 2.0 * (1.0 - bg) * (1.0 - lg))
+                        mb = If(bb < 0.5, 2.0 * bb * lb, 1.0 - 2.0 * (1.0 - bb) * (1.0 - lb))
+                    Case Else
+                        mr = lr
+                        mg = lg
+                        mb = lb
+                End Select
+
+                Dim oa As Double = sa + da * (1.0 - sa)
+                Dim wr As Double = mr * sa + br * da * (1.0 - sa)
+                Dim wg As Double = mg * sa + bg * da * (1.0 - sa)
+                Dim wb As Double = mb * sa + bb * da * (1.0 - sa)
+                Dim r As Double = wr / oa * 255.0
+                Dim g As Double = wg / oa * 255.0
+                Dim b As Double = wb / oa * 255.0
+                cel(i) = (Bajt(oa * 255) << 24) Or (Bajt(r) << 16) Or (Bajt(g) << 8) Or Bajt(b)
+            Next
+        End If
     End Sub
 
     Private Shared Function Bajt(v As Double) As Integer

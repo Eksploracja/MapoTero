@@ -2,6 +2,10 @@
 'This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License
 'as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
+Imports System.Linq
+Imports System.Threading.Tasks
+Imports System.Windows.Forms
+Imports MapoTero
 Imports MapoTero.Core
 Imports Xunit
 
@@ -252,5 +256,123 @@ Public Class ZestawWarstwTesty
         Assert.False(g.CzyWmts)
         Assert.True(g.IgnorujSsl)
     End Sub
+
+    <Fact>
+    Public Sub TrybyMieszania_ZapisIOdczytWKonfiguracjiSesji()
+        Dim z As New ZestawWarstw()
+        z.Dodaj("orto", 100, "https://wms.example/orto", "orto", trybMieszania:=TrybMieszania.Zwykly)
+        z.Dodaj("cieniowanie", 80, "https://wms.example/cienie", "cienie", trybMieszania:=TrybMieszania.Mnozenie)
+        z.Dodaj("szlaki", 100, "https://wms.example/szlaki", "szlaki", trybMieszania:=TrybMieszania.Nakladka)
+
+        Assert.Equal("0;1;5", z.TekstTrybowMieszania())
+
+        Dim c As New KonfiguracjaSesji With {
+            .LiczbaWarstw = 3,
+            .TrybyMieszaniaWarstw = z.TekstTrybowMieszania(),
+            .KrycieWarstw = z.TekstKrycia(),
+            .AdresyWarstw = ZestawWarstw.Polacz(z.Adresy()),
+            .ZbioryWarstw = ZestawWarstw.Polacz(z.Zbiory())
+        }
+        For i = 0 To z.Liczba - 1
+            c.Warstwy(i) = z(i).Nazwa
+        Next
+
+        Dim odczytany = c.WybranyZestaw()
+        Assert.Equal(3, odczytany.Liczba)
+        Assert.Equal(TrybMieszania.Zwykly, odczytany(0).TrybMieszania)
+        Assert.Equal(TrybMieszania.Mnozenie, odczytany(1).TrybMieszania)
+        Assert.Equal(TrybMieszania.Nakladka, odczytany(2).TrybMieszania)
+        Assert.Equal(80, odczytany(1).Krycie)
+    End Sub
+
+    <Fact>
+    Public Sub TrybyMieszania_GrupyZapytanRozdzielajaNiezwykleTryby()
+        Dim z As New ZestawWarstw()
+        ' Dwie warstwy z tego samego serwera o pełnym kryciu: zwykła i mnożenie
+        z.Dodaj("w1", 100, "https://wms.example/serwer", trybMieszania:=TrybMieszania.Zwykly)
+        z.Dodaj("w2", 100, "https://wms.example/serwer", trybMieszania:=TrybMieszania.Mnozenie)
+        z.Dodaj("w3", 100, "https://wms.example/serwer", trybMieszania:=TrybMieszania.Zwykly)
+
+        Dim grupy = z.GrupyZapytan()
+        ' Mimo tego samego serwera, warstwa w2 (mnożenie) musi być osobną grupą,
+        ' a w3 nie może być połączona z w2.
+        Assert.Equal(3, grupy.Count)
+        Assert.Equal(TrybMieszania.Zwykly, grupy(0).TrybMieszania)
+        Assert.Equal(TrybMieszania.Mnozenie, grupy(1).TrybMieszania)
+        Assert.Equal(TrybMieszania.Zwykly, grupy(2).TrybMieszania)
+    End Sub
+
+    <Fact>
+    Public Sub NakladanieWarstw_TrybMieszaniaMnozenie()
+        Dim bialy As Integer = &HFFFFFFFF
+        Dim czerwony As Integer = &HFFFF0000
+        Dim zielony As Integer = &HFF00FF00
+        Dim zolty As Integer = &HFFFFFF00
+
+        ' Cel: biały i czerwony
+        Dim cel() As Integer = {bialy, czerwony}
+        ' Warstwa: zielony i żółty
+        Dim warstwa() As Integer = {zielony, zolty}
+
+        NakladanieWarstw.Naloz(cel, warstwa, 100, TrybMieszania.Mnozenie)
+
+        ' Piksel 0: biały * zielony = zielony
+        Assert.Equal(zielony, cel(0))
+        ' Piksel 1: czerwony (1,0,0) * żółty (1,1,0) = czerwony (1,0,0)
+        Assert.Equal(czerwony, cel(1))
+    End Sub
+
+    <Fact>
+    Public Sub NakladanieWarstw_TrybMieszaniaCiemniejIJasniej()
+        Dim szary As Integer = &HFF808080
+        Dim ciemny As Integer = &HFF404040
+        Dim jasny As Integer = &HFFC0C0C0
+
+        Dim celCiemniej() As Integer = {szary, szary}
+        Dim warstwa() As Integer = {ciemny, jasny}
+
+        NakladanieWarstw.Naloz(celCiemniej, warstwa, 100, TrybMieszania.Ciemniej)
+        ' Ciemniej: min(128, 64) = 64; min(128, 192) = 128
+        Assert.Equal(ciemny, celCiemniej(0))
+        Assert.Equal(szary, celCiemniej(1))
+
+        Dim celJasniej() As Integer = {szary, szary}
+        NakladanieWarstw.Naloz(celJasniej, warstwa, 100, TrybMieszania.Jasniej)
+        ' Jaśniej: max(128, 64) = 128; max(128, 192) = 192
+        Assert.Equal(szary, celJasniej(0))
+        Assert.Equal(jasny, celJasniej(1))
+    End Sub
+
+    <Fact>
+    Public Sub NakladanieWarstw_TrybMieszaniaEkranINakladka()
+        Dim czarny As Integer = &HFF000000
+        Dim czerwony As Integer = &HFFFF0000
+        Dim bialy As Integer = &HFFFFFFFF
+        Dim zielony As Integer = &HFF00FF00
+        Dim zolty As Integer = &HFFFFFF00
+
+        ' Cel: czarny i czerwony
+        Dim cel() As Integer = {czarny, czerwony}
+        ' Warstwa: biały i zielony
+        Dim warstwa() As Integer = {bialy, zielony}
+
+        NakladanieWarstw.Naloz(cel, warstwa, 100, TrybMieszania.Ekran)
+        ' Piksel 0: czarny screen biały = biały
+        Assert.Equal(bialy, cel(0))
+        ' Piksel 1: czerwony screen zielony = żółty
+        Assert.Equal(zolty, cel(1))
+    End Sub
+
+    <Fact>
+    Public Async Function Podglad_PobierzObrazBezRegulatoraAsync() As Task
+        Dim wmsAdres = "https://mapy.geoportal.gov.pl/wss/service/PZGIK/ORTO/WMS/HighResolution?request=GetMap&version=1.3.0&CRS=EPSG:2180&layers="
+        Dim zasieg As New Zasieg(682850, 569850, 683150, 570150)
+        Dim adres = Wms.ZapytanieGetMap(wmsAdres, {"Raster"}, UkladWspolrzednych.PL1992, zasieg, "png", 300, 300, False, True)
+        Dim wynik = Await PobieranieSegmentow.PobierzObrazBezRegulatoraAsync(adres, 30, Threading.CancellationToken.None, False)
+        Assert.Equal("", wynik.Item2)
+        Assert.NotNull(wynik.Item1)
+        Dim piksele = NakladanieObrazow.Piksele(wynik.Item1, 300, 300)
+        Assert.Equal(300 * 300, piksele.Length)
+    End Function
 
 End Class

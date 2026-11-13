@@ -52,6 +52,15 @@ Public Class DrzewoWarstw
     Private Const SB_LEFT As Integer = 6
     Private Const TVIF_STATE As Integer = &H8
     Private Const TVIS_STATEIMAGEMASK As Integer = &HF000
+    Private Const TV_FIRST As Integer = &H1100
+    Private Const TVM_GETTOOLTIPS As Integer = TV_FIRST + 25
+    Private Const WM_USER As Integer = &H400
+    Private Const TTM_SETDELAYTIME As Integer = WM_USER + 3
+    Private Const TTM_SETMAXTIPWIDTH As Integer = WM_USER + 24
+    Private Const TTDT_AUTOMATIC As Integer = 0
+    Private Const TTDT_RESHOW As Integer = 1
+    Private Const TTDT_AUTOPOP As Integer = 2
+    Private Const TTDT_INITIAL As Integer = 3
 
     <StructLayout(LayoutKind.Sequential, CharSet:=CharSet.Unicode)>
     Private Structure TVITEM
@@ -125,6 +134,26 @@ Public Class DrzewoWarstw
     Protected Overrides Sub OnHandleCreated(e As EventArgs)
         MyBase.OnHandleCreated(e)
         UkryjPolaGrup()
+        UstawCzasyPodpowiedzi()
+    End Sub
+
+    ''' <summary>
+    ''' Ustawia opóźnienie wyświetlania dymków węzłów na 500 ms (pół sekundy) od zatrzymania kursora
+    ''' oraz wydłuża czas wyświetlania dymka, aby nie migał chaotycznie przy przesuwaniu myszy po drzewie.
+    ''' </summary>
+    Public Sub UstawCzasyPodpowiedzi()
+        If Not IsHandleCreated Then Exit Sub
+        Dim hwndTT As IntPtr = SendMessageProsty(Handle, TVM_GETTOOLTIPS, IntPtr.Zero, IntPtr.Zero)
+        If hwndTT <> IntPtr.Zero Then
+            'Opóźnienie początkowe (po zatrzymaniu kursora): 500 ms
+            SendMessageProsty(hwndTT, TTM_SETDELAYTIME, New IntPtr(TTDT_INITIAL), New IntPtr(500))
+            'Opóźnienie ponownego pokazania przy przejściu na inny węzeł: również 500 ms (domyślnie w systemie to 100 ms)
+            SendMessageProsty(hwndTT, TTM_SETDELAYTIME, New IntPtr(TTDT_RESHOW), New IntPtr(500))
+            'Czas wyświetlania dymka: 15 sekund
+            SendMessageProsty(hwndTT, TTM_SETDELAYTIME, New IntPtr(TTDT_AUTOPOP), New IntPtr(15000))
+            'Maksymalna szerokość dymka (umożliwia łamanie wierszy tekstu wieloliniowego)
+            SendMessageProsty(hwndTT, TTM_SETMAXTIPWIDTH, IntPtr.Zero, New IntPtr(500))
+        End If
     End Sub
 
     Protected Overrides Sub OnBeforeCheck(e As TreeViewCancelEventArgs)

@@ -255,6 +255,19 @@ Public Class FormEksportCad
         Dim trasa As Boolean = chkTrasa.Checked AndAlso _maTrase
         Dim opis As String = If(chkOpis.Checked, OpisRysunku(UkladWspolrzednych.ZKodu(konfiguracja.UkladEpsg)), "")
 
+        If segmenty Then
+            Dim istniejace As Integer = konfiguracja.LiczbaPlikowSegmentow(folder)
+            If istniejace > EksportCad.ZalecanaLiczbaRastrow Then
+                Dim komunikatRastrow As String = "Wybrana sesja zawiera " & istniejace & " pojedynczych segmentów rastrowych." & vbCrLf & vbCrLf &
+                                                 "Wstawienie ponad 1 000 rastrów do rysunku może drastycznie spowolnić lub zawiesić program CAD." & vbCrLf &
+                                                 "Zalecane jest wcześniejsze scalenie segmentów w jeden arkusz (przycisk 'Scal teraz…')." & vbCrLf & vbCrLf &
+                                                 "Czy na pewno chcesz kontynuować eksport pojedynczych segmentów?"
+                If MessageBox.Show(komunikatRastrow, "Duża liczba rastrów w CAD", MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2) <> DialogResult.Yes Then
+                    Exit Sub
+                End If
+            End If
+        End If
+
         Komunikat("Tworzenie plików...", Color.Black)
         Enabled = False
         Cursor = Cursors.WaitCursor

@@ -238,9 +238,9 @@ Public NotInheritable Class PobieranieSegmentow
             UsunPlikiTymczasowe(pierwsza.FolderKafli, "*.tmp")
         End If
 
-        'jedna grupa WMS o pełnym kryciu - jedno zapytanie i zapis tego, co przysłał serwer (jak w starszych wersjach);
+        'jedna grupa WMS o pełnym kryciu i zwykłym trybie mieszania - jedno zapytanie i zapis tego, co przysłał serwer (jak w starszych wersjach);
         'w pozostałych przypadkach segment składany jest z grup w programie
-        Dim skladanie As Boolean = grupy.Count > 1 OrElse grupy(0).CzyKafelkowa OrElse grupy(0).Krycie < ZestawWarstw.PelneKrycie
+        Dim skladanie As Boolean = grupy.Count > 1 OrElse grupy(0).CzyKafelkowa OrElse grupy(0).Krycie < ZestawWarstw.PelneKrycie OrElse grupy(0).TrybMieszania <> TrybMieszania.Zwykly
 
         Dim nazwa As Func(Of OpisSegmentu, String) =
             Function(sg) If(z.TrekBuddy, s.NazwaSegmentuTrekBuddy(z.Prefiks, sg.Wiersz, sg.Kolumna), s.NazwaSegmentu(z.Prefiks, z.Numeracja, sg.Wiersz, sg.Kolumna))
@@ -492,6 +492,11 @@ Public NotInheritable Class PobieranieSegmentow
                     If Not odpowiedz.IsSuccessStatusCode Then
                         Return Blad("HTTP " & CInt(odpowiedz.StatusCode) & " " & odpowiedz.ReasonPhrase & ": " & tekst)
                     End If
+                    If tekst.IndexOf("InvalidCRS", StringComparison.OrdinalIgnoreCase) >= 0 OrElse
+                       tekst.IndexOf("CRS not supported", StringComparison.OrdinalIgnoreCase) >= 0 OrElse
+                       tekst.IndexOf("SRS not supported", StringComparison.OrdinalIgnoreCase) >= 0 Then
+                        Return Blad("brak obsługi układu współrzędnych przez serwer WMS: " & tekst)
+                    End If
                     Return Blad("serwer nie zwrócił obrazka (" & typ & "): " & tekst)
                 End If
                 Return Tuple.Create(dane, "")
@@ -508,6 +513,42 @@ Public NotInheritable Class PobieranieSegmentow
             Return Blad(opis.Replace(vbCr, " ").Replace(vbLf, " "))
         Finally
             przepustka?.Dispose()
+        End Try
+    End Function
+
+    ''' <summary>
+    ''' Pobiera obraz z serwera WMS bezpośrednio (bez kolejki regulatora pobierania). Używane dla interaktywnego podglądu.
+    ''' </summary>
+    Friend Shared Async Function PobierzObrazBezRegulatoraAsync(adres As String, limitCzasuSekundy As Integer,
+                                                               token As CancellationToken, Optional ignorujSsl As Boolean = False) As Task(Of Tuple(Of Byte(), String))
+        Try
+            Using limit = LimitCzasu(limitCzasuSekundy, token),
+                  odpowiedz = Await WybierzKlienta(ignorujSsl).GetAsync(adres, HttpCompletionOption.ResponseContentRead, limit.Token).ConfigureAwait(False)
+                Dim dane() As Byte = Await odpowiedz.Content.ReadAsByteArrayAsync(limit.Token).ConfigureAwait(False)
+                Dim typ As String = If(odpowiedz.Content.Headers.ContentType?.MediaType, "")
+
+                If Not CzyObraz(dane) Then
+                    Dim tekst As String = Text.Encoding.UTF8.GetString(dane, 0, Math.Min(dane.Length, 500)).Replace(vbCr, " ").Replace(vbLf, " ")
+                    If Not odpowiedz.IsSuccessStatusCode Then
+                        Return Blad("HTTP " & CInt(odpowiedz.StatusCode) & " " & odpowiedz.ReasonPhrase & ": " & tekst)
+                    End If
+                    If tekst.IndexOf("InvalidCRS", StringComparison.OrdinalIgnoreCase) >= 0 OrElse
+                       tekst.IndexOf("CRS not supported", StringComparison.OrdinalIgnoreCase) >= 0 OrElse
+                       tekst.IndexOf("SRS not supported", StringComparison.OrdinalIgnoreCase) >= 0 Then
+                        Return Blad("brak obsługi układu współrzędnych przez serwer WMS: " & tekst)
+                    End If
+                    Return Blad("serwer nie zwrócił obrazka (" & typ & "): " & tekst)
+                End If
+                Return Tuple.Create(dane, "")
+            End Using
+        Catch ex As OperationCanceledException When token.IsCancellationRequested
+            Throw
+        Catch ex As OperationCanceledException
+            Return Blad(OpisLimituCzasu(limitCzasuSekundy))
+        Catch ex As Exception
+            Dim opis As String = ex.Message
+            If ex.InnerException IsNot Nothing Then opis &= " (" & ex.InnerException.Message & ")"
+            Return Blad(opis.Replace(vbCr, " ").Replace(vbLf, " "))
         End Try
     End Function
 
@@ -550,16 +591,16 @@ Public NotInheritable Class PobieranieSegmentow
                 'kafle WMTS/XYZ/TMS mają już przezroczystość pikseli - nakładane jak warstwy WMS
                 Dim kafle = Await uslugiWmts(g.Adres).PikseleAsync(g.Warstwy, zasieg, bok, token).ConfigureAwait(False)
                 If kafle.Item2 <> "" Then Return Tuple.Create(CType(Nothing, Integer()), "warstwa " & String.Join(",", g.Warstwy) & ": " & kafle.Item2)
-                NakladanieWarstw.Naloz(piksele, kafle.Item1, g.Krycie)
+                NakladanieWarstw.Naloz(piksele, kafle.Item1, g.Krycie, g.TrybMieszania)
                 Continue For
             End If
-            'warstwy nad podkładem i warstwa częściowo przezroczysta - PNG z przezroczystym tłem (JPEG przykryłby niższe warstwy bielą)
-            Dim przezroczyste As Boolean = i > 0 OrElse g.Krycie < ZestawWarstw.PelneKrycie OrElse z.Przezroczystosc
+            'warstwy nad podkładem, z innym trybem mieszania i warstwa częściowo przezroczysta - PNG z przezroczystym tłem (JPEG przykryłby niższe warstwy bielą)
+            Dim przezroczyste As Boolean = i > 0 OrElse g.Krycie < ZestawWarstw.PelneKrycie OrElse g.TrybMieszania <> TrybMieszania.Zwykly OrElse z.Przezroczystosc
             Dim format As String = If(przezroczyste, "png", z.Format)
             Dim adres As String = Wms.ZapytanieGetMap(g.Adres, g.Warstwy, z.Uklad, zasieg, format, szerokosc, wysokosc, z.ZamienOsie, przezroczyste)
             Dim obraz = Await PobierzObrazAsync(adres, z.LimitCzasuSekundy, token, z.IgnorujSsl OrElse g.IgnorujSsl).ConfigureAwait(False)
             If obraz.Item2 <> "" Then Return Tuple.Create(CType(Nothing, Integer()), "warstwa " & String.Join(",", g.Warstwy) & ": " & obraz.Item2)
-            NakladanieWarstw.Naloz(piksele, NakladanieObrazow.Piksele(obraz.Item1, szerokosc, wysokosc), g.Krycie)
+            NakladanieWarstw.Naloz(piksele, NakladanieObrazow.Piksele(obraz.Item1, szerokosc, wysokosc), g.Krycie, g.TrybMieszania)
         Next
         Return Tuple.Create(piksele, "")
     End Function
