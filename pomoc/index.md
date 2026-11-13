@@ -19,8 +19,9 @@ na stronie głównej oraz w samym programie (menu *Pomoc > Podstawowa instrukcja
 
 ## Od czego zacząć
 
-Jeśli używasz MapoTero pierwszy raz, zacznij od rozdziału [Pierwsze kroki](pierwsze-kroki/). Prowadzi od instalacji do pierwszej gotowej mapy.
-Warto też przejrzeć [Pojęcia podstawowe](pojecia/): rozmiar piksela, segment i kanapka warstw decydują o czytelności oraz wielkości plików.
+Zanim przejdziesz do instalacji i pobierania, zobacz rozdział [Do czego służy MapoTero](do-czego-sluzy/). Opisuje cztery główne zastosowania programu: od poszukiwań terenowych i turystyki po przygotowanie podkładów w CAD i GIS.
+
+Instrukcję od instalacji do pierwszej gotowej mapy znajdziesz w rozdziale [Pierwsze kroki](pierwsze-kroki/). Warto też przejrzeć [Pojęcia podstawowe](pojecia/): rozmiar piksela, segment i kanapka warstw decydują o czytelności oraz wielkości plików.
 
 ---
 
@@ -53,4 +54,4 @@ a pytania można zadać na [forum](https://forum.eksploracja.pl/viewforum.php?f=
 
 ---
 
-➡️ **Kolejny krok:** [Pierwsze kroki w MapoTero →](pierwsze-kroki/)
+➡️ **Kolejny krok:** [Do czego służy MapoTero →](do-czego-sluzy/)
