@@ -20,7 +20,8 @@ Public Class WmtsTesty
 
     ''' <summary>Dokument Capabilities: zestaw EPSG:2180 (narożnik "północ wschód", kafle 512 px) i GoogleMapsCompatible.</summary>
     Private Shared Function Capabilities(Optional narozPl As String = "850000.0 100000.0", Optional kvp As Boolean = True,
-                                         Optional rest As Boolean = False, Optional limity As Boolean = False) As String
+                                         Optional rest As Boolean = False, Optional limity As Boolean = False,
+                                         Optional warstwaId As String = "ORTOFOTOMAPA", Optional warstwaTytul As String = "Ortofotomapa") As String
         Dim sb As New StringBuilder()
         sb.Append("<?xml version=""1.0"" encoding=""UTF-8""?>")
         sb.Append("<Capabilities xmlns=""http://www.opengis.net/wmts/1.0"" xmlns:ows=""http://www.opengis.net/ows/1.1"" xmlns:xlink=""http://www.w3.org/1999/xlink"" version=""1.0.0"">")
@@ -31,7 +32,7 @@ Public Class WmtsTesty
             sb.Append("</ows:Get></ows:HTTP></ows:DCP></ows:Operation></ows:OperationsMetadata>")
         End If
         sb.Append("<Contents>")
-        sb.Append("<Layer><ows:Title>Ortofotomapa</ows:Title><ows:Identifier>ORTOFOTOMAPA</ows:Identifier>")
+        sb.Append("<Layer><ows:Title>" & warstwaTytul & "</ows:Title><ows:Identifier>" & warstwaId & "</ows:Identifier>")
         sb.Append("<Style isDefault=""true""><ows:Identifier>default</ows:Identifier></Style>")
         sb.Append("<Format>image/jpeg</Format><Format>image/png</Format>")
         sb.Append("<TileMatrixSetLink><TileMatrixSet>EPSG:2180</TileMatrixSet>")
@@ -238,6 +239,41 @@ Public Class WmtsTesty
         Dim g = u.DoWgs84(p)
         Assert.Equal(52.2297, g.Szerokosc, 9)
         Assert.Equal(21.0122, g.Dlugosc, 9)
+    End Sub
+
+    <Fact>
+    Public Sub Warstwa_DopasowanieAliasu_ISOK_Cien_Do_Cieniowanie()
+        Dim u = UslugaWmts.Wczytaj(Capabilities(warstwaId:="Cieniowanie", warstwaTytul:="Cieniowanie"), "")
+        'Szukanie po aliasie ISOK_Cien powinno znaleźć warstwę Cieniowanie
+        Dim w = u.Warstwa("ISOK_Cien")
+        Assert.NotNull(w)
+        Assert.Equal("Cieniowanie", w.Identyfikator)
+
+        'PlanWmts również powinien się poprawnie utworzyć bez wyjątku
+        Dim plan As New PlanWmts(u, "ISOK_Cien", UkladWspolrzednych.PL1992, Obszar, 1.0, "jpeg")
+        Assert.Equal("Cieniowanie", plan.Warstwa.Identyfikator)
+        Assert.Contains("&LAYER=Cieniowanie", plan.AdresKafla(0, 0))
+    End Sub
+
+    <Fact>
+    Public Sub Warstwa_DopasowanieAliasu_Cieniowanie_Do_ISOK_Cien()
+        Dim u = UslugaWmts.Wczytaj(Capabilities(warstwaId:="ISOK_Cien", warstwaTytul:="ISOK_Cien"), "")
+        'Szukanie po aliasie Cieniowanie powinno znaleźć warstwę ISOK_Cien
+        Dim w = u.Warstwa("Cieniowanie")
+        Assert.NotNull(w)
+        Assert.Equal("ISOK_Cien", w.Identyfikator)
+
+        Dim plan As New PlanWmts(u, "Cieniowanie", UkladWspolrzednych.PL1992, Obszar, 1.0, "jpeg")
+        Assert.Equal("ISOK_Cien", plan.Warstwa.Identyfikator)
+        Assert.Contains("&LAYER=ISOK_Cien", plan.AdresKafla(0, 0))
+    End Sub
+
+    <Fact>
+    Public Sub Warstwa_TolerancjaWielkosciLiterITytulu()
+        Dim u = UslugaWmts.Wczytaj(Capabilities(warstwaId:="ORTOFOTOMAPA", warstwaTytul:="Ortofotomapa Polski"), "")
+        Assert.NotNull(u.Warstwa("ortofotomapa"))
+        Assert.NotNull(u.Warstwa("Ortofotomapa Polski"))
+        Assert.Null(u.Warstwa("InnaWarstwa"))
     End Sub
 
 End Class

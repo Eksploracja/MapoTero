@@ -144,6 +144,9 @@ Public Class ZrodloWmts
             Dim plan As New PlanWmts(usluga, nazwa, z.Uklad, z.Siatka.ZasiegSiatki, z.Siatka.RozmiarPiksela, z.Format)
             zrodlo.Plany.Add(plan)
             zrodlo._planyWgNazwy(nazwa) = plan
+            If Not String.IsNullOrEmpty(plan.Warstwa?.Identyfikator) AndAlso Not zrodlo._planyWgNazwy.ContainsKey(plan.Warstwa.Identyfikator) Then
+                zrodlo._planyWgNazwy(plan.Warstwa.Identyfikator) = plan
+            End If
         Next
         If zrodlo.Plany.Count = 0 Then Throw New InvalidOperationException("nie wybrano warstwy WMTS")
         Directory.CreateDirectory(zrodlo.FolderKafli)
@@ -169,6 +172,9 @@ Public Class ZrodloWmts
             Dim plan As New PlanWmts(usluga, nazwa, z.Uklad, z.Siatka.ZasiegSiatki, z.Siatka.RozmiarPiksela, z.Format)
             zrodlo.Plany.Add(plan)
             zrodlo._planyWgNazwy(nazwa) = plan
+            If Not String.IsNullOrEmpty(plan.Warstwa?.Identyfikator) AndAlso Not zrodlo._planyWgNazwy.ContainsKey(plan.Warstwa.Identyfikator) Then
+                zrodlo._planyWgNazwy(plan.Warstwa.Identyfikator) = plan
+            End If
             zrodlo._opcjeWarstw(nazwa) = opcjeWarstw(nazwa)
         Next
         Directory.CreateDirectory(zrodlo.FolderKafli)

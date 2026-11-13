@@ -187,8 +187,49 @@ Public Class UslugaWmts
     ''' <summary>Adres operacji GetTile w trybie KVP; pusty, gdy usługa udostępnia kafle tylko w trybie REST.</summary>
     Public Property AdresKvp As String = ""
 
+    ''' <summary>
+    ''' Wyszukuje warstwę według identyfikatora, z tolerancją na wielkość liter, tytuł
+    ''' oraz znane aliasy serwerów (np. Geoportal ShadedRelief: ISOK_Cien vs Cieniowanie między węzłami klastra).
+    ''' </summary>
     Public Function Warstwa(identyfikator As String) As WarstwaWmts
-        Return Warstwy.FirstOrDefault(Function(w) String.Equals(w.Identyfikator, identyfikator, StringComparison.Ordinal))
+        If Warstwy.Count = 0 OrElse String.IsNullOrEmpty(identyfikator) Then Return Nothing
+
+        '1. Dokładny identyfikator
+        Dim w = Warstwy.FirstOrDefault(Function(x) String.Equals(x.Identyfikator, identyfikator, StringComparison.Ordinal))
+        If w IsNot Nothing Then Return w
+
+        '2. Identyfikator bez uwzględniania wielkości liter
+        w = Warstwy.FirstOrDefault(Function(x) String.Equals(x.Identyfikator, identyfikator, StringComparison.OrdinalIgnoreCase))
+        If w IsNot Nothing Then Return w
+
+        '3. Dopasowanie po tytule warstwy
+        w = Warstwy.FirstOrDefault(Function(x) String.Equals(x.Tytul, identyfikator, StringComparison.OrdinalIgnoreCase))
+        If w IsNot Nothing Then Return w
+
+        '4. Znane aliasy serwerów (np. ISOK_Cien <-> Cieniowanie w usłudze ShadedRelief Geoportalu)
+        For Each aliasNazwy In ZnaneAliasy(identyfikator)
+            w = Warstwy.FirstOrDefault(Function(x) String.Equals(x.Identyfikator, aliasNazwy, StringComparison.OrdinalIgnoreCase) OrElse
+                                                   String.Equals(x.Tytul, aliasNazwy, StringComparison.OrdinalIgnoreCase))
+            If w IsNot Nothing Then Return w
+        Next
+
+        Return Nothing
+    End Function
+
+    Private Shared Function ZnaneAliasy(identyfikator As String) As IEnumerable(Of String)
+        Dim lista As New List(Of String)
+        If String.IsNullOrEmpty(identyfikator) Then Return lista
+
+        'Geoportal NMT GRID1 ShadedRelief: różne węzły klastra zwracają ISOK_Cien albo Cieniowanie
+        If identyfikator.Equals("ISOK_Cien", StringComparison.OrdinalIgnoreCase) OrElse
+           identyfikator.Equals("ISOK-Cien", StringComparison.OrdinalIgnoreCase) OrElse
+           identyfikator.Equals("ISOK_Cieniowanie", StringComparison.OrdinalIgnoreCase) Then
+            lista.Add("Cieniowanie")
+        ElseIf identyfikator.Equals("Cieniowanie", StringComparison.OrdinalIgnoreCase) Then
+            lista.Add("ISOK_Cien")
+        End If
+
+        Return lista
     End Function
 
     Public Function Zestaw(identyfikator As String) As ZestawMacierzyWmts
