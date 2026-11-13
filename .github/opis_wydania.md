@@ -31,9 +31,15 @@ Ustawienia i zbiory map z poprzednich wersji (plik `lastsettings.txt`, folder `w
   * Nowe okno *Warstwy – zaawansowane* z suwakami krycia (0–100%), zmianą kolejności warstw, licznikiem zapytań i podglądem na żywo.
   * Automatyczne dobieranie rozmiaru piksela według najdokładniejszej z wybranych warstw.
   * Możliwość przeciągania myszą paska bocznego w celu poszerzenia panelu danych i wygodnego czytania długich nazw warstw.
+  * **Bezpieczeństwo danych i ułatwienia sesji:**
+    * Przycisk *Usuń pobrane* przenosi pliki do systemowego Kosza (zamiast bezpowrotnego kasowania) i dotyczy wyłącznie aktywnej sesji.
+    * Żółta ikona folderu otwiera bezpośrednio folder bieżącej sesji.
+    * Program ostrzega przed utratą przezroczystości w formacie JPEG przy warstwach o kryciu < 100% lub nakładkach i proponuje automatyczne przełączenie na format PNG.
+    * Ochrona programów CAD przed zawieszeniem – ostrzeżenie i potwierdzenie przy próbie wygenerowania skryptu z ponad 1000 pojedynczych rastrów.
+    * Diagnostyka WMS – czytelne wychwytywanie i raportowanie błędów serwera dotyczących nieobsługiwanego układu współrzędnych (CRS/SRS).
 * **Pełna dokumentacja i pomoc online:**
   * 39 rozdziałów instrukcji obsługi w serwisie GitHub Pages z nowoczesnym motywem Just the Docs, ilustracjami, tabelami parametrów i wyszukiwarką pod adresem [eksploracja.github.io/MapoTero/pomoc/](https://eksploracja.github.io/MapoTero/pomoc/).
-* **Testy jednostkowe:** 722 testy zakończone sukcesem.
+* **Testy jednostkowe:** 731 testów zakończonych sukcesem.
 
 ## Zmiany w wersji 3.16
 
