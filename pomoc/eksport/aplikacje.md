@@ -70,6 +70,44 @@ Po skopiowaniu odśwież listę map w aplikacji.
 
 ---
 
+## Guru Maps (iPhone, iPad, Android)
+
+Dla użytkowników urządzeń Apple (iPhone, iPad) to najwygodniejszy sposób na korzystanie z map Geoportalu w terenie. Aplikacja ma szybki silnik kafelkowy, a import własnych map jest bezpłatny.
+
+| Format | Jak wgrać |
+|---|---|
+| **MBTiles** | na iPhonie prześlij plik przez AirDrop, aplikację Pliki lub chmurę i wybierz *Otwórz w Guru Maps*; na Androidzie użyj opcji importu w menu map |
+| **SQLiteDB** | otwórz plik w aplikacji lub zaimportuj przez menu map |
+
+W aplikacji mapa pojawia się w sekcji map własnych. Może działać jako mapa główna lub jako nakładka nad inną mapą, z regulacją przezroczystości.
+
+---
+
+## QField (Android, iOS)
+
+Mobilny program terenowy połączony z QGIS-em, używany w leśnictwie, ochronie przyrody, geodezji i pracach badawczych.
+
+| Format | Jak wgrać |
+|---|---|
+| **MBTiles** | dodaj plik `.mbtiles` do projektu QGIS na komputerze jako warstwę rastrową, a następnie przenieś folder projektu do telefonu lub zsynchronizuj przez QFieldCloud |
+
+Podkład kafelkowy MBTiles w QFieldzie nie obciąża pamięci telefonu i pozwala płynnie zbierać punkty, linie oraz wypełniać formularze terenowe bez dostępu do sieci.
+
+---
+
+## AlpineQuest Off-Road Explorer (Android)
+
+Popularna aplikacja do nawigacji terenowej dla wypraw 4x4, quadów, motocykli enduro i turystyki kwalifikowanej.
+
+| Format | Jak wgrać |
+|---|---|
+| **MBTiles** | skopiuj plik do folderu `alpinequest/maps` w telefonie, a w aplikacji wybierz *Mapy > Dostępne mapy > Dodaj mapę z pliku* |
+| **SQLiteDB** | wskaż plik w menu dodawania mapy |
+
+AlpineQuest umożliwia łączenie kilku warstw rastrowych jednocześnie i płynne sterowanie ich kryciem nad cieniowaniem terenu.
+
+---
+
 ## Garmin
 
 Plik **KMZ dla Garmin** (`…_garmin.kmz`):

@@ -23,7 +23,7 @@ powiększeń albo mieszać się z warstwami leżącymi pod nią.
 ## Do czego służy
 
 Zamiast wozić w telefonie osobne pliki map dla różnych skal, tworzysz **jedną bazę `.mbtiles`**, która automatycznie
-przełącza mapę wraz z przybliżaniem (np. w Locus Map, OruxMaps lub OsmAnd):
+przełącza mapę wraz z przybliżaniem (np. w Locus Map, OruxMaps, OsmAnd, Guru Maps na iPhone czy QFieldzie):
 
 * z daleka (zoom `11–13`): mapa przeglądowa lub topograficzna `1:100 000`,
 * przy zbliżeniu (zoom `14–16`): szczegółowa mapa topograficzna `1:25 000` lub `1:10 000`,
