@@ -7,18 +7,21 @@ has_children: true
 # Pierwsze kroki
 {: .no_toc }
 
-Instalacja programu, miejsca zapisu danych i samouczek, który prowadzi od pustego okna do gotowej mapy.
-{: .fs-5 .fw-300 }
+Instalacja programu, miejsca zapisu danych i samouczek, który prowadzi od pustego okna do gotowej mapy w 5 minut.
+{: .fs-5 }
 
 **Dotyczy wersji:** {{ site.wersja_programu }}
 
-Jeśli dopiero zaczynasz:
+| Rozdział | Czego dotyczy |
+|---|---|
+| [Instalacja i uruchomienie](instalacja/) | Wypakowanie programu, uruchomienie pojedynczego pliku `MapoTero.exe`, komunikat SmartScreen i weryfikacja sumy kontrolnej |
+| [Gdzie program zapisuje dane](dane-programu/) | Katalog programu, folder `%LocalAppData%\MapoTero`, pliki ustawień, pobrane mapy i tworzenie kopii zapasowej |
+| [Pierwsza mapa krok po kroku](pierwsza-mapa/) | Praktyczny samouczek: od zaznaczenia wycinka terenu po gotowy plik w telefonie oraz arkusz GeoTIFF do QGIS |
 
-1. [Zainstaluj i uruchom program](instalacja/) (zajmuje to dwie minuty).
-2. Przejdź [samouczek „Pierwsza mapa krok po kroku”](pierwsza-mapa/). Pokaże, jak pobrać fragment mapy topograficznej i zapisać go do telefonu oraz jako arkusz GeoTIFF.
-3. Przed zmianą parametrów siatki przejrzyj [Pojęcia podstawowe](../pojecia/).
+{: .wskazowka }
+Chcesz od razu zobaczyć, jak działa pobieranie? Przejdź bezpośrednio do samouczka [Pierwsza mapa krok po kroku](pierwsza-mapa/). Prowadzi za rękę przez cały proces.
 
-Strona [Gdzie program zapisuje dane](dane-programu/) przyda się przy szukaniu plików sesji, przenoszeniu programu na inny komputer albo robieniu kopii zapasowej.
+Przed ręczną zmianą parametrów zaawansowanych warto rzucić okiem na [Pojęcia podstawowe](../pojecia/), gdzie wyjaśniono dobór rozmiaru piksela i kanapkę warstw.
 
 ---
 

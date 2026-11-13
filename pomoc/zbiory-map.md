@@ -21,7 +21,7 @@ Opis 43 zbiorów map dostarczanych z programem: skąd pochodzą, w jakich grupac
 
 ## Jak czytać katalog
 
-W drzewie *Wybierz mapy* warstwy nie są ułożone według surowych nazw plików, lecz pogrupowane tematycznie przez plik `warstwy\katalog.txt` (UTF-8) i opatrzone czytelnymi nazwami. Wiersz `> Grupa` otwiera grupę, `>> Podgrupa` tworzy podgrupę, a wiersz `zbiór | warstwa | nazwa` dodaje do niej warstwę ze zbioru map, np.:
+W drzewie *Wybierz mapy* warstwy są pogrupowane tematycznie przez plik katalogu `warstwy\katalog.txt` (UTF-8) i opatrzone czytelnymi nazwami zamiast surowych nazw plików. Wiersz `> Grupa` otwiera grupę, `>> Podgrupa` tworzy podgrupę, a wiersz `zbiór | warstwa | nazwa` dodaje do niej warstwę ze zbioru map, np.:
 
 ```text
 > Przyroda i środowisko

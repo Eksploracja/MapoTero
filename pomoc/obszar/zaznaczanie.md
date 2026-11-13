@@ -52,7 +52,7 @@ Siatka zaczyna się w lewym dolnym narożniku zaznaczenia i obejmuje pełne segm
 krawędź wychodzą zwykle poza zaznaczenie. Najechanie kursorem na uchwyt narożnika pokazuje współrzędne tego
 narożnika z uwzględnieniem pełnych segmentów (rzeczywisty zasięg pobieranej mapy).
 
-* Przy więcej niż **3000 segmentów** program nie rysuje pojedynczych kwadratów, lecz zewnętrzny obrys, informując o tym pomarańczowym komunikatem.
+* Przy więcej niż **3000 segmentów** program rysuje wyłącznie zewnętrzny obrys siatki i wyświetla pomarańczowy komunikat. Przyspiesza to przesuwanie mapy.
 * Siatkę można wyłączyć w oknie *Ustawienia* (*siatka segmentów na mapie*). Na mapie pozostają wtedy same znaczniki narożników.
 * Zmiana boku segmentu, piksela lub układu natychmiast odświeża siatkę.
 * Po przesunięciu mapy przycisk z pinezką (*wyświetl rzeczywisty zasięg…*) wraca widokiem do siatki.

@@ -159,6 +159,11 @@ Programy GIS i CAD stosują najczęściej konwencję matematyczną: **X = wschó
 
 *Rysunek 3. Konwencja geodezyjna w MapoTero (X na północ, Y na wschód) w zestawieniu z konwencją matematyczną w CAD i GIS.*
 
+| Oś | W MapoTero (geodezja) | W AutoCAD, QGIS, ArcGIS (matematyka) |
+|---|---|---|
+| **X** | Północ (kierunek góra / dół) | Wschód (kierunek lewo / prawo) |
+| **Y** | Wschód (kierunek lewo / prawo) | Północ (kierunek góra / dół) |
+
 ---
 
 ## Georeferencja

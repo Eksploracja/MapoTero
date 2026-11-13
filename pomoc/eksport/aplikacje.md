@@ -76,7 +76,7 @@ Dla użytkowników urządzeń Apple (iPhone, iPad) to najwygodniejszy sposób na
 
 | Format | Jak wgrać |
 |---|---|
-| **MBTiles** | na iPhonie prześlij plik przez AirDrop, aplikację Pliki lub chmurę i wybierz *Otwórz w Guru Maps*; na Androidzie użyj opcji importu w menu map |
+| **MBTiles** | na iPhonie prześlij plik przez AirDrop, aplikację Pliki lub chmurę i wybierz *Otwórz w Guru Maps*. Na Androidzie użyj opcji importu w menu map |
 | **SQLiteDB** | otwórz plik w aplikacji lub zaimportuj przez menu map |
 
 W aplikacji mapa pojawia się w sekcji map własnych. Może działać jako mapa główna lub jako nakładka nad inną mapą, z regulacją przezroczystości.

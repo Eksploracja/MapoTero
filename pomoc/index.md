@@ -29,11 +29,14 @@ Instrukcję od instalacji do pierwszej gotowej mapy znajdziesz w rozdziale [Pier
 
 | Chcę… | Przeczytaj |
 |---|---|
-| mapę offline w telefonie (Locus Map, OsmAnd, OruxMaps) | [Wybór obszaru](obszar/) → [Pobieranie](pobieranie/) → [Eksport mapy](eksport/) → [Mapa w telefonie](eksport/aplikacje/) |
+| dowiedzieć się, do czego służy program i co potrafi | [Do czego służy MapoTero](do-czego-sluzy/) |
+| mapę offline w telefonie z Androidem (Locus Map, OsmAnd, OruxMaps, AlpineQuest) | [Wybór obszaru](obszar/) → [Pobieranie](pobieranie/) → [Eksport mapy](eksport/) → [Mapa w telefonie](eksport/aplikacje/) |
+| mapę offline na iPhone lub iPada (Guru Maps) | [Mapa w telefonie i odbiorniku GPS: Guru Maps](eksport/aplikacje/#guru-maps-iphone-ipad-android) |
 | mapę w odbiorniku Garmin | [Eksport mapy](eksport/) → [KMZ dla Garmin](eksport/formaty/) |
 | mapę tylko wzdłuż trasy wycieczki | [Obszar wzdłuż trasy](obszar/korytarz/) |
 | nałożyć mapę historyczną lub cieniowanie na ortofotomapę | [Okno główne: kanapka warstw](okno-glowne/#zbiory-map-i-warstwy) · [Katalog zbiorów map](zbiory-map/) · [Nakładki i łączenie warstw](eksport/nakladki/) |
 | mapę, która zmienia się z powiększeniem | [Wielowarstwowy MBTiles](mbtiles-wielowarstwowy/) |
+| podkład pod pomiary w terenie w QField (leśnictwo, ochrona przyrody, geodezja) | [Mapa w telefonie: QField](eksport/aplikacje/#qfield-android-ios) · [Współpraca z QGIS](inne-programy/#qgis) |
 | jeden arkusz GeoTIFF do QGIS lub ArcGIS | [Scalanie segmentów](scalanie/) → [Współpraca z innymi programami](inne-programy/) |
 | podkład do rysunku w AutoCAD, BricsCAD, ZWCAD | [Eksport do CAD](cad/) |
 | mapy z serwera, którego nie ma na liście (albo z wykazu powiatów) | [Dodawanie serwerów map](serwery/) |
