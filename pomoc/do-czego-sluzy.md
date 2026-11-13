@@ -52,4 +52,4 @@ W programie jest gotowy katalog ponad 30 polskich serwisów mapowych, a kreator 
 
 ---
 
-➡️ **Kolejny krok:** [Pierwsze kroki w MapoTero →](pierwsze-kroki/)
+➡️ **Kolejny krok:** [Pierwsze kroki w MapoTero →](../pierwsze-kroki/)
