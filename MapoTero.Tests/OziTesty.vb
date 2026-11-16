@@ -1,4 +1,4 @@
-'Copyright (C) <2026>  pajakt
+﻿'Copyright (C) <2026>  pajakt
 '
 'This program is free software: you can redistribute it and/or modify
 'it under the terms of the GNU General Public License as published by
@@ -187,7 +187,11 @@ Public Class OziTesty
         Dim sciezkaZJnx = "C:\Users\KN\.gemini\antigravity\brain\6226a50c-ad35-435f-a04d-74ae97526ccf\ozi_wynik_z_jnx.jpg"
         Using fs As New FileStream(plikJnx, FileMode.Open, FileAccess.Read), br As New BinaryReader(fs)
             Assert.Equal(4, br.ReadInt32()) ' Wersja JNX = 4
-            fs.Seek(52, SeekOrigin.Begin) ' Pozycja Level Info
+            fs.Seek(24, SeekOrigin.Begin)
+            Dim liczbaPoziomow = br.ReadInt32()
+            Assert.True(liczbaPoziomow >= 2, "piramida poziomów JNX")
+            ' ostatni poziom - najbardziej szczegółowy (poziomy zapisane od przeglądowego)
+            fs.Seek(52 + 17L * (liczbaPoziomow - 1), SeekOrigin.Begin)
             Dim ileKafli = br.ReadInt32()
             Dim offsetOpisu = br.ReadUInt32()
             Assert.True(ileKafli > 0)
@@ -214,7 +218,9 @@ Public Class OziTesty
 
             Assert.NotNull(maxKafelBytes)
             Assert.True(maxLen > 10000, $"Największy kafel w JNX ma {maxLen} bajtów (oczekiwano > 10000)")
-            File.WriteAllBytes(sciezkaZJnx, maxKafelBytes)
+            ' JNX przechowuje JPEG bez znacznika SOI (FF D8) - czytnik dopisuje go przed dekodowaniem
+            Assert.False(maxKafelBytes(0) = &HFF AndAlso maxKafelBytes(1) = &HD8)
+            File.WriteAllBytes(sciezkaZJnx, {CByte(&HFF), CByte(&HD8)}.Concat(maxKafelBytes).ToArray())
         End Using
         Assert.True(File.Exists(sciezkaZJnx))
 
@@ -341,6 +347,196 @@ Public Class OziTesty
         Finally
             If Directory.Exists(folderZrodlowy) Then Directory.Delete(folderZrodlowy, True)
             If Directory.Exists(folderDocelowy) Then Directory.Delete(folderDocelowy, True)
+        End Try
+    End Sub
+
+    Private Shared Function NowyFolderOzi() As String
+        Dim f = Path.Combine(Path.GetTempPath(), "MapoTero_Ozi_" & Guid.NewGuid().ToString("N"))
+        Directory.CreateDirectory(f)
+        Return f
+    End Function
+
+    Private Shared Function NaglowekMap(tytul As String, obraz As String, projekcja As String) As List(Of String)
+        Return New List(Of String) From {
+            "OziExplorer Map Data File Version 2.2", tytul, obraz, "1 ,Map Code,", "WGS 84,, 0, 0,WGS 84",
+            "Reserved 1", "Reserved 2", "Magnetic Variation,,,E",
+            "Map Projection," & projekcja & ",PolyCal,No,AutoCalOnly,No,BSBUseWPX,No"}
+    End Function
+
+    <Fact>
+    Public Sub PunktySiatkiUtmPrzeliczaneNaStopnie()
+        'punkty kalibracyjne w siatce UTM strefy 34 (wartości z pyproj dla 50,0/49,9 N i 20,0/20,1 E)
+        Dim folder = NowyFolderOzi()
+        Try
+            Dim linie = NaglowekMap("UTM", "utm.jpg", "(UTM) Universal Transverse Mercator")
+            linie.AddRange({
+                "Point01,xy, 0, 0,in, deg, , ,N, , ,E, grid, 34, 428333.55, 5539109.82,N",
+                "Point02,xy, 1000, 0,in, deg, , ,N, , ,E, grid, 34, 435500.09, 5539018.78,N",
+                "Point03,xy, 1000, 1000,in, deg, , ,N, , ,E, grid, 34, 435366.39, 5527900.65,N",
+                "Point04,xy, 0, 1000,in, deg, , ,N, , ,E, grid, 34, 428185.00, 5527991.74,N"})
+            Dim plik = Path.Combine(folder, "utm.map")
+            File.WriteAllLines(plik, linie)
+            Dim ozi = PlikKalibracjiOzi.Wczytaj(plik)
+            Assert.Equal(4, ozi.Punkty.Count)
+            Assert.Equal(4, ozi.PunktyWSiatce)
+            Assert.InRange(ozi.Punkty(0).Wgs84.Szerokosc, 49.99999, 50.00001)
+            Assert.InRange(ozi.Punkty(0).Wgs84.Dlugosc, 19.99999, 20.00001)
+            Assert.InRange(ozi.Punkty(2).Wgs84.Szerokosc, 49.89999, 49.90001)
+            Assert.InRange(ozi.Punkty(2).Wgs84.Dlugosc, 20.09999, 20.10001)
+        Finally
+            Directory.Delete(folder, True)
+        End Try
+    End Sub
+
+    <Fact>
+    Public Sub PunktyBezStopniNieSaPrzyjmowaneJakoZero()
+        'wcześniej puste pola stopni dawały punkt 0°/0° i "poprawną" kalibrację na Atlantyku
+        Dim folder = NowyFolderOzi()
+        Try
+            Dim linie = NaglowekMap("Lambert", "l.jpg", "Lambert Conformal Conic")
+            linie.AddRange({
+                "Point01,xy, 0, 0,in, deg, , ,N, , ,E, grid, , 140000, 1250000,N",
+                "Point02,xy, 1171, 1171,in, deg, , ,N, , ,E, grid, , 150000, 1240000,N"})
+            Dim plik = Path.Combine(folder, "lambert.map")
+            File.WriteAllLines(plik, linie)
+            Dim ex = Assert.Throws(Of InvalidDataException)(Function() PlikKalibracjiOzi.Wczytaj(plik))
+            Assert.Contains("siatce", ex.Message)
+            Assert.Null(PlikKalibracjiOzi.SparsujPunkt("Point01,xy, 0, 0,in, deg, , ,N, , ,E, grid, , 140000, 1250000,N", "WGS 84"))
+        Finally
+            Directory.Delete(folder, True)
+        End Try
+    End Sub
+
+    <Fact>
+    Public Sub ArkuszDuzegoZasieguKalibrowanyWielomianem()
+        'arkusz M-34 1:1 000 000 (punkty z prawdziwego pliku .map): afinicznie RMS ok. 6,3 km, wielomian ok. 200 m
+        Dim dane = {
+            (354, 192, 51.999611, 17.998189), (5211, 215, 51.999703, 23.998222), (5403, 5460, 47.999646, 23.998363),
+            (120, 5438, 47.99956, 17.998333), (2770, 2876, 49.99963, 20.998278), (2781, 254, 51.999657, 20.998203),
+            (237, 2814, 49.999585, 17.998265), (5308, 2838, 49.999674, 23.998297), (2760, 5502, 47.999603, 20.998346)}
+        Dim punkty = dane.Select(Function(d) New PunktKalibracjiOzi With {.Px = d.Item1, .Py = d.Item2, .Wgs84 = New PunktGeo(d.Item3, d.Item4)}).ToList()
+        Dim t = TransformacjaAfiniczna2D.Dopasuj(punkty)
+        Assert.Equal(ModelKalibracji.Wielomian2, t.Model)
+        Assert.True(t.BladRmsAfinicznyMetry > 5000)
+        Assert.True(t.BladRmsMetry < 400, "RMS " & t.BladRmsMetry)
+        'odwrotność modelu nieliniowego (metoda Newtona)
+        Dim g = t.PikselDoGeo(1234, 4321)
+        Dim px = t.GeoDoPiksel(g.Szerokosc, g.Dlugosc)
+        Assert.InRange(px.Item1, 1233.99, 1234.01)
+        Assert.InRange(px.Item2, 4320.99, 4321.01)
+
+        'cztery narożniki arkusza: model rzutowy (trapez zbiegających się południków)
+        Dim t4 = TransformacjaAfiniczna2D.Dopasuj(punkty.Take(4).ToList())
+        Assert.Equal(ModelKalibracji.Rzutowy, t4.Model)
+        Assert.True(t4.BladRmsMetry < 10)
+    End Sub
+
+    <Fact>
+    Public Sub ZwyklaMapaZostajeAfiniczna()
+        Dim punkty As New List(Of PunktKalibracjiOzi) From {
+            New PunktKalibracjiOzi With {.Px = 0, .Py = 0, .Wgs84 = New PunktGeo(50.0, 20.0)},
+            New PunktKalibracjiOzi With {.Px = 1000, .Py = 0, .Wgs84 = New PunktGeo(50.0, 20.1)},
+            New PunktKalibracjiOzi With {.Px = 1000, .Py = 1000, .Wgs84 = New PunktGeo(49.9, 20.1)},
+            New PunktKalibracjiOzi With {.Px = 0, .Py = 1000, .Wgs84 = New PunktGeo(49.9, 20.0)}}
+        Assert.Equal(ModelKalibracji.Afiniczny, TransformacjaAfiniczna2D.Dopasuj(punkty).Model)
+    End Sub
+
+    <Fact>
+    Public Sub WymiaryObrazuBmp()
+        Dim folder = NowyFolderOzi()
+        Try
+            Dim plik = Path.Combine(folder, "skan.bmp")
+            Using bmp As New System.Drawing.Bitmap(321, 123)
+                bmp.Save(plik, System.Drawing.Imaging.ImageFormat.Bmp)
+            End Using
+            Dim n = NaglowekObrazu.Odczytaj(plik)
+            Assert.Equal(321L, n.SzerokoscPx)
+            Assert.Equal(123L, n.WysokoscPx)
+        Finally
+            Directory.Delete(folder, True)
+        End Try
+    End Sub
+
+    <Fact>
+    Public Sub UnikalneNazwyWynikowWsadu()
+        Dim uzyte As New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
+        Assert.Equal("arkusz", FormImportOzi.UnikalnaNazwaWyniku("C:\mapy\a\arkusz.map", uzyte))
+        Assert.Equal("b_arkusz", FormImportOzi.UnikalnaNazwaWyniku("C:\mapy\b\arkusz.map", uzyte))
+        Assert.Equal("b_ARKUSZ_2", FormImportOzi.UnikalnaNazwaWyniku("C:\mapy\b\ARKUSZ.map", uzyte))
+    End Sub
+
+    <Fact>
+    Public Sub ObroconaMapaTrafiaWeWlasciwePolozenieWMbtiles()
+        'skan obrócony o 10 stopni: czerwony znacznik w pikselu (300, 200) musi wypaść w kaflu tam, gdzie wskazuje kalibracja
+        Dim folder = NowyFolderOzi()
+        Try
+            Dim obraz = Path.Combine(folder, "obrocona.png")
+            Using bmp As New System.Drawing.Bitmap(800, 600)
+                Using g = System.Drawing.Graphics.FromImage(bmp)
+                    g.Clear(System.Drawing.Color.LightGray)
+                    g.FillEllipse(System.Drawing.Brushes.Red, 300 - 6, 200 - 6, 12, 12)
+                End Using
+                bmp.Save(obraz, System.Drawing.Imaging.ImageFormat.Png)
+            End Using
+            Dim kat = 10.0 * Math.PI / 180
+            Dim stopienNaPx = 0.00003
+            Dim geo = Function(px As Double, py As Double) As PunktGeo
+                          Dim e = (px * Math.Cos(kat) + py * Math.Sin(kat)) * stopienNaPx
+                          Dim n = (-px * Math.Sin(kat) + py * Math.Cos(kat)) * stopienNaPx
+                          Return New PunktGeo(50.0 - n, 20.0 + e / Math.Cos(50.0 * Math.PI / 180))
+                      End Function
+            Dim linie = NaglowekMap("Obrocona", "obrocona.png", "Latitude/Longitude")
+            Dim nr = 1
+            For Each p In {(0, 0), (800, 0), (800, 600), (0, 600)}
+                Dim g = geo(p.Item1, p.Item2)
+                linie.Add(String.Format(Globalization.CultureInfo.InvariantCulture, "Point{0:00},xy, {1}, {2},in, deg, {3:0.0000000}, 0,N, {4:0.0000000}, 0,E, grid,,,,N",
+                                        nr, p.Item1, p.Item2, g.Szerokosc, g.Dlugosc))
+                nr += 1
+            Next
+            Dim plikMap = Path.Combine(folder, "obrocona.map")
+            File.WriteAllLines(plikMap, linie)
+            Dim ozi = PlikKalibracjiOzi.Wczytaj(plikMap)
+            Dim plikMb = Path.Combine(folder, "obrocona.mbtiles")
+            FormImportOzi.KonwertujDoMbtiles(ozi, plikMb, 95, Nothing, CancellationToken.None)
+
+            Dim cel = geo(300, 200)
+            Dim z = FormImportOzi.PoziomSzczegolowy(ozi)
+            Dim swiat = 256.0 * Math.Pow(2, z)
+            Dim gx = (cel.Dlugosc + 180) / 360 * swiat
+            Dim fi = cel.Szerokosc * Math.PI / 180
+            Dim gy = (1 - Math.Log(Math.Tan(fi) + 1 / Math.Cos(fi)) / Math.PI) / 2 * swiat
+            Dim kx = CInt(Math.Floor(gx / 256)), ky = CInt(Math.Floor(gy / 256))
+            Dim dane As Byte()
+            Using pol As New System.Data.SQLite.SQLiteConnection("Data Source=" & plikMb & ";Pooling=False")
+                pol.Open()
+                Using cmd As New System.Data.SQLite.SQLiteCommand("SELECT tile_data FROM tiles WHERE zoom_level=@z AND tile_column=@x AND tile_row=@y", pol)
+                    cmd.Parameters.AddWithValue("@z", z)
+                    cmd.Parameters.AddWithValue("@x", kx)
+                    cmd.Parameters.AddWithValue("@y", New KafelXYZ(kx, ky, z).WierszTms)
+                    dane = DirectCast(cmd.ExecuteScalar(), Byte())
+                End Using
+                Using cmd As New System.Data.SQLite.SQLiteCommand("SELECT COUNT(DISTINCT zoom_level) FROM tiles", pol)
+                    Assert.True(CLng(cmd.ExecuteScalar()) >= 2, "piramida poziomów")
+                End Using
+            End Using
+            Using ms As New MemoryStream(dane), kafel As New System.Drawing.Bitmap(ms)
+                Dim u = gx - kx * 256, v = gy - ky * 256
+                Dim sx = 0.0, sy = 0.0, licz = 0
+                For yy = 0 To 255
+                    For xx = 0 To 255
+                        Dim c = kafel.GetPixel(xx, yy)
+                        If c.R > 180 AndAlso c.G < 90 AndAlso c.B < 90 Then sx += xx + 0.5 : sy += yy + 0.5 : licz += 1
+                    Next
+                Next
+                Assert.True(licz > 10, "brak znacznika w kaflu")
+                Assert.InRange(sx / licz, u - 2.0, u + 2.0)
+                Assert.InRange(sy / licz, v - 2.0, v + 2.0)
+            End Using
+        Finally
+            System.Data.SQLite.SQLiteConnection.ClearAllPools()
+            GC.Collect()
+            GC.WaitForPendingFinalizers()
+            Directory.Delete(folder, True)
         End Try
     End Sub
 

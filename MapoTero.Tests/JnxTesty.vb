@@ -1,4 +1,4 @@
-'Copyright (C) <2026>  pajakt
+﻿'Copyright (C) <2026>  pajakt
 'This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License
 'as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
@@ -97,6 +97,40 @@ Public Class JnxTesty
             Assert.Equal(75, zOrder)
             Assert.Equal("MojaMapaJnx", tytul)
             Assert.True(productId > 0)
+        Finally
+            If File.Exists(plik) Then File.Delete(plik)
+        End Try
+    End Sub
+
+    <Fact>
+    Public Sub KafelJnxZapisanyBezZnacznikaSoi()
+        'JNX przechowuje JPEG bez FF D8 - czytniki (Garmin, ImageMagick) dopisują znacznik same
+        Dim plik = Path.Combine(Path.GetTempPath(), "test_soi_" & Guid.NewGuid().ToString("N") & ".jnx")
+        Try
+            Dim jpegBytes As Byte()
+            Using bmp As New Bitmap(256, 256, PixelFormat.Format24bppRgb), ms As New MemoryStream()
+                Using g = Graphics.FromImage(bmp)
+                    g.Clear(Color.Coral)
+                End Using
+                bmp.Save(ms, ImageFormat.Jpeg)
+                jpegBytes = ms.ToArray()
+            End Using
+            Dim p1 As New PoziomJnx(1000)
+            p1.Kafle.Add(New KafelJnx(New ProstokatGeo(52.2, 52.1, 21.1, 21.0), jpegBytes))
+            ZapisJnx.Zapisz(plik, "Soi", 30, New List(Of PoziomJnx) From {p1})
+
+            Dim dane = File.ReadAllBytes(plik)
+            Dim offsetOpisow = BitConverter.ToUInt32(dane, ZapisJnx.RozmiarNaglowka + 4)
+            Dim rozmiar = BitConverter.ToInt32(dane, CInt(offsetOpisow) + 20)
+            Dim offset = BitConverter.ToUInt32(dane, CInt(offsetOpisow) + 24)
+            Assert.Equal(jpegBytes.Length - 2, rozmiar)
+            Assert.False(dane(CInt(offset)) = &HFF AndAlso dane(CInt(offset) + 1) = &HD8)
+
+            Dim odczytany = ZapisJnx.OdczytajKafel(plik, 0, 0)
+            Assert.Equal(jpegBytes, odczytany)
+            Using ms As New MemoryStream(odczytany), obraz = Image.FromStream(ms)
+                Assert.Equal(256, obraz.Width)
+            End Using
         Finally
             If File.Exists(plik) Then File.Delete(plik)
         End Try

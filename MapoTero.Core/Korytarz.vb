@@ -523,7 +523,7 @@ Public Class Korytarz
                 Dim h = If(hList IsNot Nothing AndAlso j < hList.Count, hList(j), 0.0)
                 sb.Append("      <trkpt lat=""").Append(p.Szerokosc.ToString("0.000000", ci)).
                    Append(""" lon=""").Append(p.Dlugosc.ToString("0.000000", ci)).Append(""">")
-                If h <> 0.0 Then
+                If Not Double.IsNaN(h) AndAlso h <> 0.0 Then
                     sb.Append("<ele>").Append(h.ToString("0.0", ci)).Append("</ele>")
                 End If
                 sb.AppendLine("</trkpt>")

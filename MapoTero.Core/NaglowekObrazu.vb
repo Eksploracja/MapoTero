@@ -1,4 +1,4 @@
-'Copyright (C) <2015>  pajakt
+﻿'Copyright (C) <2015>  pajakt
 
 'This program is free software: you can redistribute it and/or modify
 'it under the terms of the GNU General Public License as published by
@@ -90,7 +90,18 @@ Public Class NaglowekObrazu
         If n >= 4 AndAlso ((sygnatura(0) = AscW("I"c) AndAlso sygnatura(1) = AscW("I"c)) OrElse (sygnatura(0) = AscW("M"c) AndAlso sygnatura(1) = AscW("M"c))) Then
             Return Tiff(s)
         End If
-        Throw New InvalidDataException("Nieobsługiwany format obrazu (oczekiwano TIFF, JPEG, PNG lub GIF)")
+        If n >= 2 AndAlso sygnatura(0) = AscW("B"c) AndAlso sygnatura(1) = AscW("M"c) Then
+            'BMP (np. skany map OziExplorera): nagłówek BITMAPINFOHEADER - szerokość i wysokość od bajtu 18,
+            'wysokość ujemna oznacza obraz zapisany od góry
+            s.Position = 18
+            Dim b(7) As Byte
+            If CzytajPelne(s, b, 0, 8) < 8 Then Throw New InvalidDataException("Uszkodzony plik BMP")
+            Dim szer = BitConverter.ToInt32(b, 0)
+            Dim wys = BitConverter.ToInt32(b, 4)
+            If szer <= 0 OrElse wys = 0 Then Throw New InvalidDataException("Uszkodzony plik BMP")
+            Return New NaglowekObrazu With {.SzerokoscPx = szer, .WysokoscPx = Math.Abs(wys)}
+        End If
+        Throw New InvalidDataException("Nieobsługiwany format obrazu (oczekiwano TIFF, JPEG, PNG, GIF lub BMP)")
     End Function
 
     Private Shared Function Png(s As Stream) As NaglowekObrazu

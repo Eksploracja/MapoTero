@@ -1,4 +1,4 @@
-'Copyright (C) <2026>  pajakt
+﻿'Copyright (C) <2026>  pajakt
 '
 'This program is free software: you can redistribute it and/or modify
 'it under the terms of the GNU General Public License as published by
@@ -32,6 +32,47 @@ Public Class ProfilNmtTesty
         Assert.Equal(20.0, stat.Zejscia)     ' -20 = 20
         Assert.True(stat.DlugoscKm > 0)
         Assert.Equal(4, stat.Punkty.Count)
+    End Sub
+
+    <Fact>
+    Public Sub PodejsciaGestegoSladuZHisteraza()
+        'ślad co ok. 10 m, teren wznosi się o 1 m na punkt: porównanie sąsiadów z progiem 1,5 m dawało 0 m podejść
+        Dim punkty As New List(Of PunktGeo)
+        Dim wys As New List(Of Double)
+        For i = 0 To 200
+            punkty.Add(New PunktGeo(49.2 + i * 0.00009, 20.0))
+            wys.Add(1000.0 + i * 1.0 + If(i Mod 2 = 0, 0.4, -0.4))
+        Next
+        For i = 1 To 50
+            punkty.Add(New PunktGeo(49.2 + (200 + i) * 0.00009, 20.0))
+            wys.Add(1200.0 - i * 1.0)
+        Next
+        Dim stat = ProfilNmt.ObliczStatystyki(punkty, wys)
+        Assert.InRange(stat.Podejscia, 196.0, 201.0)
+        Assert.InRange(stat.Zejscia, 47.0, 51.0)
+    End Sub
+
+    <Fact>
+    Public Sub PunktyBezDanychNmtSaPomijane()
+        Dim punkty = New List(Of PunktGeo) From {
+            New PunktGeo(49.2, 20.0), New PunktGeo(49.21, 20.0), New PunktGeo(49.22, 20.0), New PunktGeo(49.23, 20.0)}
+        Dim wys = New List(Of Double) From {800.0, Double.NaN, Double.NaN, 900.0}
+        Dim stat = ProfilNmt.ObliczStatystyki(punkty, wys)
+        Assert.Equal(800.0, stat.MinWysokosc)
+        Assert.Equal(900.0, stat.MaxWysokosc)
+        Assert.Equal(100.0, stat.Podejscia)
+        Assert.Equal(0.0, stat.Zejscia)
+        Assert.Equal(2, stat.PunktyBezDanych)
+    End Sub
+
+    <Fact>
+    Public Sub OdpowiedzNmtZBrakiemDanychINiezgodnaLiczba()
+        Dim h = ProfilNmt.SparsujOdpowiedz("270085.9 540284.9 414.9,506660 150000 0.0", 2)
+        Assert.Equal(414.9, h(0), 3)
+        Assert.True(Double.IsNaN(h(1)))
+        Assert.Null(ProfilNmt.SparsujOdpowiedz("270085.9 540284.9 414.9", 2))
+        Assert.Null(ProfilNmt.SparsujOdpowiedz("<html>błąd</html>", 1))
+        Assert.Null(ProfilNmt.SparsujOdpowiedz("", 1))
     End Sub
 
     <Fact>

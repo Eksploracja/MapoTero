@@ -25,6 +25,8 @@ Ustawienia i zbiory map z poprzednich wersji (plik `lastsettings.txt`, folder `w
   * Narzędzie w menu *Narzędzia -> Konwertuj mapę OziExplorer (.map)...* oraz obsługa przeciągania plików `.map` i całych folderów metodą Drag & Drop na okno programu.
   * Tryb pojedynczy oraz wsadowy (hurtowy) umożliwiający konwersję całych katalogów map za jednym razem ze zbiorczym raportem postępu i automatycznym dopasowaniem obrazów.
   * Przeliczanie kalibracji wielopunktowej i automatyczna transformacja historycznych układów współrzędnych i Datum (Borowa Góra, Potsdam, Pulkovo 1942 do WGS84) z eliminacją przesunięcia 100–200 m w odbiornikach turystycznych.
+  * Arkusze o dużym zasięgu (np. 1:200 000, 1:1 000 000) kalibrowane modelem rzutowym albo wielomianem 2. stopnia, punkty kalibracyjne także w siatce UTM i poprzecznego Merkatora, ostrzeżenie o dużym błędzie kalibracji i nieznanym datum.
+  * JNX i MBTiles z piramidą 5 poziomów powiększenia, KMZ przerysowany do siatki geograficznej (poprawne położenie map obróconych względem południków).
 * **Post-processing MIP dla odbiorników Garmin (podgląd na żywo):**
   * Filtr optymalizujący kontrast, nasycenie barw, korekcję gamma ($\gamma = 0{,}75$) oraz wyostrzanie splotowe krawędzi (Laplacian 3×3) pod kątem transflektywnych wyświetlaczy Memory-In-Pixel w pełnym słońcu.
   * Nowe interaktywne okno strojenia parametrów z podglądem na żywo przed eksportem.
@@ -37,14 +39,14 @@ Ustawienia i zbiory map z poprzednich wersji (plik `lastsettings.txt`, folder `w
   * Poprawka układu kontrolek w panelu warstw okna głównego eliminująca obcinanie wartości `100%` w polu wprowadzania krycia warstwy.
 * **Adaptacyjny bufor korytarza wzdłuż trasy GPX/KML:**
   * Skalowanie szerokości bufora korytarza w zależności od poziomu powiększenia (szerszy pas na przeglądowych poziomach zoomu, wąski na zbliżeniach detalicznych).
-* **Inteligentna detekcja fałszywych sukcesów WMS i monitor kafli XYZ:**
-  * Wychwytywanie pustych białych segmentów zwracanych z kodem HTTP 200 OK przez przeciążone węzły WMS oraz monitor wielokrotnych plansz blokad na serwerach kafelkowych.
+* **Inteligentna detekcja fałszywych sukcesów WMS:**
+  * Wychwytywanie pustych białych segmentów zwracanych z kodem HTTP 200 OK przez przeciążone węzły WMS i ponawianie ich pobrania.
 * **Automatyczne dzielenie dużych map KMZ na tomy:**
   * Dzielenie map przekraczających limit 100 kafli odbiorników Garmin na paczki tomów (`_tom1.kmz`, `_tom2.kmz` itd.) z zachowaniem pełnej rozdzielczości.
 * **Odporność klastrów WMTS:**
   * Obsługa aliasów `ISOK_Cien` <-> `Cieniowanie` za load balancerem Geoportalu.
 * **Stabilność i testy regresyjne:**
-  * Kompletny pakiet **774 testów automatycznych** (.NET 10 x64) weryfikujący obliczenia matematyczne, georeferencję i interfejs użytkownika.
+  * Kompletny pakiet **805 testów automatycznych** (.NET 10 x64) weryfikujący obliczenia matematyczne, georeferencję i interfejs użytkownika.
 
 ## Zmiany w wersji 3.17
 

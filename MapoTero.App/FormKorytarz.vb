@@ -1,4 +1,4 @@
-'Copyright (C) <2015>  pajakt
+﻿'Copyright (C) <2015>  pajakt
 
 'This program is free software: you can redistribute it and/or modify
 'it under the terms of the GNU General Public License as published by
@@ -204,18 +204,19 @@ Public Class FormKorytarz
             g.DrawLine(pSiatka, padLeft, padTop + h, padLeft + w, padTop + h)
         End Using
 
-        ' Budowanie punktów wielokąta
+        ' Budowanie punktów wielokąta (punkty bez danych NMT - NaN, np. za granicą - są pomijane)
         Dim punktyPoly As New List(Of PointF)()
-        punktyPoly.Add(New PointF(padLeft, padTop + h))
-
         Dim pts = _statystyki.Punkty
         For i = 0 To pts.Count - 1
+            If Double.IsNaN(pts(i).Wysokosc) Then Continue For
             Dim x = CSng(padLeft + (pts(i).DystansMetry / totalDist) * w)
             Dim y = CSng(padTop + h - ((pts(i).Wysokosc - minH) / diffH) * h)
             y = Math.Max(padTop, Math.Min(padTop + h, y))
             punktyPoly.Add(New PointF(x, y))
         Next
-        punktyPoly.Add(New PointF(padLeft + w, padTop + h))
+        If punktyPoly.Count < 2 Then Return
+        punktyPoly.Insert(0, New PointF(punktyPoly(0).X, padTop + h))
+        punktyPoly.Add(New PointF(punktyPoly(punktyPoly.Count - 1).X, padTop + h))
 
         ' Wypełnienie gradientem i obrys
         Using bFill As New SolidBrush(Color.FromArgb(40, 0, 102, 204))
@@ -235,6 +236,9 @@ Public Class FormKorytarz
             End Using
             ' Podsumowanie na górze
             Dim tytul = String.Format("Min: {0:0} m  Max: {1:0} m  Podejścia: +{2:0} m  Zejścia: -{3:0} m", minH, maxH, _statystyki.Podejscia, _statystyki.Zejscia)
+            If _statystyki.PunktyBezDanych > 0 Then
+                tytul &= String.Format("  (bez danych NMT: {0} pkt)", _statystyki.PunktyBezDanych)
+            End If
             Using bTytul As New SolidBrush(Color.Navy)
                 g.DrawString(tytul, fSmall, bTytul, padLeft, 2)
             End Using

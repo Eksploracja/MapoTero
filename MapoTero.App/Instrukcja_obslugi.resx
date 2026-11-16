@@ -142,7 +142,7 @@
 5. Pobrane segmenty połączysz w jeden arkusz (menu Narzędzia - Łączenie segmentów) albo wyeksportujesz do map dla urządzeń Garmin (JNX BirdsEye bez limitu kafli z piramidą powiększeń oraz Garmin Custom Maps KMZ z opcją podziału na tomy, regulacją kolejności z-order i przezroczystymi nakładkami PNG), formatów mobilnych MBTiles, SQLiteDB (dla Locus Map, OsmAnd) lub OruxMaps. Do dyspozycji masz również:
 - Wyszukiwarkę działek katastralnych ULDK (Ctrl+D lub przycisk Dz): wyszukuje działkę po kodzie TERYT lub nazwie i numerze oraz centruje siatkę z buforem,
 - Uzupełnianie wysokości NMT / LIDAR w śladach GPX: okno korytarza pobiera wysokości z lotniczego skaningu laserowego GUGiK, rysuje profil i zapisuje wzbogacony plik GPX,
-- Konwerter map OziExplorer (.map): w menu Narzędzia konwertuje skalibrowany skan do JNX, KMZ i MBTiles z automatyczną korektą Datum (Borowa Góra, Potsdam, Pulkovo 1942 do WGS84).
+- Konwerter map OziExplorer (.map): w menu Narzędzia konwertuje skalibrowany skan do JNX, KMZ i MBTiles z automatyczną korektą Datum (Borowa Góra, Potsdam, Pulkovo 1942 do WGS84). Punkty kalibracyjne mogą być w stopniach albo w siatce UTM; arkusze o dużym zasięgu program kalibruje modelem rzutowym lub wielomianem. Czerwony opis w oknie oznacza nieznany datum albo duży błąd kalibracji - mapa może być wtedy przesunięta. JNX i MBTiles mają 5 poziomów powiększenia.
 Do programów CAD (AutoCAD, BricsCAD, ZWCAD) mapę przeniesiesz poleceniem Narzędzia - Eksport do CAD: rysunek DXF otwórz w programie CAD, a skrypt SCR uruchom poleceniem SCRIPT w otwartym rysunku.
 ----------------------------------------------------------------------
 

@@ -1,4 +1,4 @@
-'Copyright (C) <2026>  pajakt
+﻿'Copyright (C) <2026>  pajakt
 '
 'This program is free software: you can redistribute it and/or modify
 'it under the terms of the GNU General Public License as published by
@@ -115,17 +115,21 @@ Public NotInheritable Class KorekcjaMip
         End If
     End Sub
 
-    ''' <summary>Splot wyostrzający 3x3 w oparciu o operator Laplace'a z buforem tymczasowym wierszy.</summary>
+    ''' <summary>
+    ''' Splot wyostrzający 3x3 (operator Laplace'a). Obejmuje także skrajne wiersze i kolumny - brakującego sąsiada
+    ''' zastępuje piksel brzegowy. Pomijanie brzegów zostawiało na stykach pasów segmentów (GeoTIFF) i kafli linie
+    ''' o połowę mniejszej ostrości. Sąsiad przezroczysty jest zastępowany pikselem środkowym (bez jasnej obwódki nakładki).
+    ''' </summary>
     Private Shared Sub WyostrzLaplacian(piksele As Integer(), szer As Integer, wys As Integer, sila As Double)
         Dim kopia(piksele.Length - 1) As Integer
         Array.Copy(piksele, kopia, piksele.Length)
 
-        For y = 1 To wys - 2
-            Dim wierszGora = (y - 1) * szer
+        For y = 0 To wys - 1
+            Dim wierszGora = Math.Max(0, y - 1) * szer
             Dim wierszSrodek = y * szer
-            Dim wierszDol = (y + 1) * szer
+            Dim wierszDol = Math.Min(wys - 1, y + 1) * szer
 
-            For x = 1 To szer - 2
+            For x = 0 To szer - 1
                 Dim idx = wierszSrodek + x
                 Dim c = kopia(idx)
                 Dim a = (c >> 24) And &HFF
@@ -135,10 +139,10 @@ Public NotInheritable Class KorekcjaMip
                 Dim gCenter = (c >> 8) And &HFF
                 Dim bCenter = c And &HFF
 
-                Dim up = kopia(wierszGora + x)
-                Dim down = kopia(wierszDol + x)
-                Dim left = kopia(wierszSrodek + (x - 1))
-                Dim right = kopia(wierszSrodek + (x + 1))
+                Dim up = Sasiad(kopia(wierszGora + x), c)
+                Dim down = Sasiad(kopia(wierszDol + x), c)
+                Dim left = Sasiad(kopia(wierszSrodek + Math.Max(0, x - 1)), c)
+                Dim right = Sasiad(kopia(wierszSrodek + Math.Min(szer - 1, x + 1)), c)
 
                 Dim rLap = 4 * rCenter - (((up >> 16) And &HFF) + ((down >> 16) And &HFF) + ((left >> 16) And &HFF) + ((right >> 16) And &HFF))
                 Dim gLap = 4 * gCenter - (((up >> 8) And &HFF) + ((down >> 8) And &HFF) + ((left >> 8) And &HFF) + ((right >> 8) And &HFF))
@@ -152,5 +156,9 @@ Public NotInheritable Class KorekcjaMip
             Next
         Next
     End Sub
+
+    Private Shared Function Sasiad(p As Integer, srodek As Integer) As Integer
+        Return If(((p >> 24) And &HFF) = 0, srodek, p)
+    End Function
 
 End Class

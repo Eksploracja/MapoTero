@@ -1,4 +1,4 @@
-'Copyright (C) <2015>  pajakt
+﻿'Copyright (C) <2015>  pajakt
 
 'This program is free software: you can redistribute it and/or modify
 'it under the terms of the GNU General Public License as published by
@@ -501,7 +501,7 @@ Public NotInheritable Class PobieranieSegmentow
                     'serwer WMS w razie błędu zwraca zwykle dokument XML (ServiceException) zamiast obrazka
                     Dim tekst As String = Text.Encoding.UTF8.GetString(dane, 0, Math.Min(dane.Length, 500)).Replace(vbCr, " ").Replace(vbLf, " ")
                     If Not odpowiedz.IsSuccessStatusCode Then
-                        Return Blad("HTTP " & CInt(odpowiedz.StatusCode) & " " & odpowiedz.ReasonPhrase & ": " & tekst)
+                        Return Blad("HTTP " & CInt(odpowiedz.StatusCode) & " " & odpowiedz.ReasonPhrase & PodpowiedzUkladu(adres, CInt(odpowiedz.StatusCode)) & ": " & tekst)
                     End If
                     If tekst.IndexOf("InvalidCRS", StringComparison.OrdinalIgnoreCase) >= 0 OrElse
                        tekst.IndexOf("CRS not supported", StringComparison.OrdinalIgnoreCase) >= 0 OrElse
@@ -528,6 +528,17 @@ Public NotInheritable Class PobieranieSegmentow
     End Function
 
     ''' <summary>
+    ''' Podpowiedź do błędu 5xx zapytania GetMap: część serwerów (np. MapProxy Brandenburgii) na nieobsługiwany układ
+    ''' odpowiada błędem HTTP 500 zamiast komunikatu InvalidCRS, więc sam kod błędu nie mówił użytkownikowi, co zmienić.
+    ''' </summary>
+    Friend Shared Function PodpowiedzUkladu(adres As String, kod As Integer) As String
+        If kod < 500 OrElse adres Is Nothing OrElse adres.IndexOf("GetMap", StringComparison.OrdinalIgnoreCase) < 0 Then Return ""
+        Dim m = Text.RegularExpressions.Regex.Match(adres, "[?&](CRS|SRS)=([^&]+)", Text.RegularExpressions.RegexOptions.IgnoreCase)
+        If Not m.Success Then Return ""
+        Return " (serwer mógł odrzucić układ " & Uri.UnescapeDataString(m.Groups(2).Value) & " - spróbuj innego układu, np. WGS84)"
+    End Function
+
+    ''' <summary>
     ''' Pobiera obraz z serwera WMS bezpośrednio (bez kolejki regulatora pobierania). Używane dla interaktywnego podglądu.
     ''' </summary>
     Friend Shared Async Function PobierzObrazBezRegulatoraAsync(adres As String, limitCzasuSekundy As Integer,
@@ -541,7 +552,7 @@ Public NotInheritable Class PobieranieSegmentow
                 If Not CzyObraz(dane) Then
                     Dim tekst As String = Text.Encoding.UTF8.GetString(dane, 0, Math.Min(dane.Length, 500)).Replace(vbCr, " ").Replace(vbLf, " ")
                     If Not odpowiedz.IsSuccessStatusCode Then
-                        Return Blad("HTTP " & CInt(odpowiedz.StatusCode) & " " & odpowiedz.ReasonPhrase & ": " & tekst)
+                        Return Blad("HTTP " & CInt(odpowiedz.StatusCode) & " " & odpowiedz.ReasonPhrase & PodpowiedzUkladu(adres, CInt(odpowiedz.StatusCode)) & ": " & tekst)
                     End If
                     If tekst.IndexOf("InvalidCRS", StringComparison.OrdinalIgnoreCase) >= 0 OrElse
                        tekst.IndexOf("CRS not supported", StringComparison.OrdinalIgnoreCase) >= 0 OrElse

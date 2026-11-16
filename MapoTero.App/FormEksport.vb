@@ -1,4 +1,4 @@
-'Copyright (C) <2015>  pajakt
+﻿'Copyright (C) <2015>  pajakt
 
 'This program is free software: you can redistribute it and/or modify
 'it under the terms of the GNU General Public License as published by
@@ -526,7 +526,7 @@ Public Class FormEksport
                         Dim rozmiar As Long = If(File.Exists(z.Plik), New FileInfo(z.Plik).Length, 0)
                         Komunikat("Zapisano mapę BirdsEye: " & z.Plik & " (" & SzacunekRozmiaru.Tekst(rozmiar) & "). Skopiuj plik .jnx do folderu Garmin/BirdsEye w urządzeniu lub na karcie SD.", Color.Green)
                     Case RodzajEksportu.KmzGarmin
-                        If z.PodzialNaTomy Then
+                        If z.PodzialNaTomy AndAlso Not File.Exists(z.Plik) Then
                             Komunikat("Zapisano tomy mapy Garmin Custom Maps w folderze " & Path.GetDirectoryName(z.Plik) & ". W menu odbiornika włączaj pojedyncze tomy w zależności od rejonu wędrówki.", Color.Green)
                         Else
                             Dim rozmiar As Long = If(File.Exists(z.Plik), New FileInfo(z.Plik).Length, 0)

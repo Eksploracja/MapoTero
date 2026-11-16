@@ -1,4 +1,4 @@
-'Copyright (C) <2026>  pajakt
+﻿'Copyright (C) <2026>  pajakt
 '
 'This program is free software: you can redistribute it and/or modify
 'it under the terms of the GNU General Public License as published by
@@ -194,20 +194,59 @@ Imports System.Text
                         bw.Write(StopnieDoSemicircles(k.Zasieg.Zachod))
                         bw.Write(k.Szerokosc)
                         bw.Write(k.Wysokosc)
-                        bw.Write(k.ObrazJpeg.Length)
+                        Dim dlugosc = DlugoscDanychKafla(k.ObrazJpeg)
+                        bw.Write(dlugosc)
                         bw.Write(CUInt(biezacyOffsetDanychJpeg))
-                        biezacyOffsetDanychJpeg += k.ObrazJpeg.Length
+                        biezacyOffsetDanychJpeg += dlugosc
                     Next
                 Next
 
                 ' 6. Zapis surowych danych JPEG kafli
                 For Each p In poziomy
                     For Each k In p.Kafle
-                        bw.Write(k.ObrazJpeg)
+                        Dim pominiete = k.ObrazJpeg.Length - DlugoscDanychKafla(k.ObrazJpeg)
+                        bw.Write(k.ObrazJpeg, pominiete, k.ObrazJpeg.Length - pominiete)
                     Next
                 Next
             End Using
         End Sub
+
+        ''' <summary>
+        ''' Liczba bajtów kafla zapisywana w pliku: JNX przechowuje JPEG bez początkowego znacznika SOI (FF D8) -
+        ''' czytniki (odbiorniki Garmin, BaseCamp, ImageMagick, QLandkarte) dopisują go same, a podwójny SOI
+        ''' powoduje błąd dekodowania ("two SOI markers").
+        ''' </summary>
+        Public Shared Function DlugoscDanychKafla(jpeg As Byte()) As Integer
+            If jpeg Is Nothing Then Return 0
+            If jpeg.Length >= 2 AndAlso jpeg(0) = &HFF AndAlso jpeg(1) = &HD8 Then Return jpeg.Length - 2
+            Return jpeg.Length
+        End Function
+
+        ''' <summary>Odczytuje kafel z pliku JNX i przywraca znacznik SOI - tak jak czytniki JNX.</summary>
+        Public Shared Function OdczytajKafel(sciezka As String, indeksPoziomu As Integer, indeksKafla As Integer) As Byte()
+            Using fs As New FileStream(sciezka, FileMode.Open, FileAccess.Read, FileShare.Read), br As New BinaryReader(fs)
+                fs.Seek(24, SeekOrigin.Begin)
+                Dim liczbaPoziomow = br.ReadInt32()
+                If indeksPoziomu < 0 OrElse indeksPoziomu >= liczbaPoziomow Then Throw New ArgumentOutOfRangeException(NameOf(indeksPoziomu))
+                fs.Seek(RozmiarNaglowka + CLng(RozmiarOpisuPoziomu) * indeksPoziomu, SeekOrigin.Begin)
+                Dim liczbaKafli = br.ReadInt32()
+                Dim offsetOpisow = br.ReadUInt32()
+                If indeksKafla < 0 OrElse indeksKafla >= liczbaKafli Then Throw New ArgumentOutOfRangeException(NameOf(indeksKafla))
+                fs.Seek(offsetOpisow + CLng(RozmiarOpisuKafla) * indeksKafla + 20, SeekOrigin.Begin)
+                Dim rozmiar = br.ReadInt32()
+                Dim offset = br.ReadUInt32()
+                fs.Seek(offset, SeekOrigin.Begin)
+                Dim wynik(rozmiar + 1) As Byte
+                wynik(0) = &HFF : wynik(1) = &HD8
+                Dim odczytano = 0
+                While odczytano < rozmiar
+                    Dim n = br.Read(wynik, 2 + odczytano, rozmiar - odczytano)
+                    If n <= 0 Then Exit While
+                    odczytano += n
+                End While
+                Return wynik
+            End Using
+        End Function
 
         Private Shared Sub ZapiszNapisZZerem(bw As BinaryWriter, tekst As String)
             Dim b = Encoding.UTF8.GetBytes(tekst)

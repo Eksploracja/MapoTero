@@ -1,4 +1,4 @@
-'Copyright (C) <2026>  pajakt
+﻿'Copyright (C) <2026>  pajakt
 '
 'This program is free software: you can redistribute it and/or modify
 'it under the terms of the GNU General Public License as published by
@@ -100,5 +100,23 @@ Public Class UldkTesty
         Assert.True(IO.File.Exists(sciezkaWyniku))
         Assert.True(New IO.FileInfo(sciezkaWyniku).Length > 10000)
     End Function
+
+    <Fact>
+    Public Sub SparsujDzialkeWieloczesciowaIZOtworem()
+        Dim multi = KlientUldk.SparsujWiersz("id|t|1|O|G|P|SRID=2180;MULTIPOLYGON(((500000 300000,500100 300000,500100 300100,500000 300000)),((600000 400000,600100 400000,600100 400100,600000 400000)))")
+        Assert.Equal(2, multi.ObrysyWgs84.Count)
+        Assert.Equal(4, multi.ObrysyWgs84(0).Count)
+        Assert.Equal(4, multi.ObrysyWgs84(1).Count)
+        Assert.Equal(4, multi.ObrysWgs84.Count)
+        Assert.Equal(300000.0, multi.Zasieg1992.XDol, 3)
+        Assert.Equal(400100.0, multi.Zasieg1992.XGora, 3)
+        Assert.Equal(500000.0, multi.Zasieg1992.YLewy, 3)
+        Assert.Equal(600100.0, multi.Zasieg1992.YPrawy, 3)
+
+        Dim zOtworem = KlientUldk.SparsujWiersz("id|t|1|O|G|P|SRID=2180;POLYGON((500000 300000,500100 300000,500100 300100,500000 300000),(500010 300010,500020 300010,500020 300020,500010 300010))")
+        Assert.Single(zOtworem.ObrysyWgs84)
+        Assert.Equal(4, zOtworem.ObrysWgs84.Count)
+        Assert.Equal(300100.0, zOtworem.Zasieg1992.XGora, 3)
+    End Sub
 
 End Class

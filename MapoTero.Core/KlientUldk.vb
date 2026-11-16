@@ -22,6 +22,8 @@ Public Class DzialkaKatastralna
     Public Property Wkt As String = ""
     Public Property Zasieg1992 As Zasieg
     Public ReadOnly Property ObrysWgs84 As New List(Of PunktGeo)
+    ''' <summary>Pierścienie zewnętrzne wszystkich części działki (MULTIPOLYGON może mieć ich kilka).</summary>
+    Public ReadOnly Property ObrysyWgs84 As New List(Of List(Of PunktGeo))
 
     Public ReadOnly Property Opis As String
         Get
@@ -123,33 +125,51 @@ Public NotInheritable Class KlientUldk
         Return d
     End Function
 
+    ''' <summary>
+    ''' Odczytuje POLYGON i MULTIPOLYGON: pierścienie zewnętrzne trafiają do ObrysyWgs84 (pierwszy także do ObrysWgs84),
+    ''' otwory są pomijane. Zasięg obejmuje wszystkie części działki. Wcześniej tekst między pierwszym "((" a ostatnim
+    ''' "))" był dzielony tylko przecinkami, więc wierzchołki przy nawiasach ginęły, a części działki łączyły się w jeden obrys.
+    ''' </summary>
     Private Shared Sub SparsujGeometrieWkt(wkt As String, d As DzialkaKatastralna)
-        Dim startIdx = wkt.IndexOf("((")
-        Dim endIdx = wkt.LastIndexOf("))")
-        If startIdx < 0 OrElse endIdx <= startIdx Then Exit Sub
-
-        Dim coordText = wkt.Substring(startIdx + 2, endIdx - startIdx - 2)
         Dim ci = CultureInfo.InvariantCulture
         Dim minX = Double.MaxValue, maxX = Double.MinValue
         Dim minY = Double.MaxValue, maxY = Double.MinValue
+        Dim multi = wkt.TrimStart().StartsWith("MULTIPOLYGON", StringComparison.OrdinalIgnoreCase)
+        Dim poziomPierscienia = If(multi, 3, 2)
 
-        Dim punktyTxt = coordText.Split(","c)
-        For Each pt In punktyTxt
-            Dim xy = pt.Trim().Split(New Char() {" "c, ChrW(9)}, StringSplitOptions.RemoveEmptyEntries)
-            If xy.Length >= 2 Then
-                ' WKT dla EPSG:2180 podaje współrzędne jako Easting (Wschód) Northing (Północ).
-                ' W konwencji geodezyjnej programu MapoTero:
-                ' X = Northing (Północna), Y = Easting (Wschodnia).
-                Dim yEasting As Double, xNorthing As Double
-                If Double.TryParse(xy(0), NumberStyles.Float, ci, yEasting) AndAlso
-                   Double.TryParse(xy(1), NumberStyles.Float, ci, xNorthing) Then
-                    minX = Math.Min(minX, xNorthing)
-                    maxX = Math.Max(maxX, xNorthing)
-                    minY = Math.Min(minY, yEasting)
-                    maxY = Math.Max(maxY, yEasting)
-                    Dim geo = UkladWspolrzednych.PL1992.DoWgs84(New PunktXY(xNorthing, yEasting))
-                    d.ObrysWgs84.Add(geo)
+        Dim glebokosc = 0
+        Dim pierwszyWWielokacie = True
+        Dim tekstPierscienia As New System.Text.StringBuilder()
+        For Each znak In wkt
+            If znak = "("c Then
+                glebokosc += 1
+                If glebokosc = poziomPierscienia Then tekstPierscienia.Clear()
+                If glebokosc = poziomPierscienia - 1 Then pierwszyWWielokacie = True
+            ElseIf znak = ")"c Then
+                If glebokosc = poziomPierscienia Then
+                    If pierwszyWWielokacie Then
+                        ' WKT dla EPSG:2180: "wschodnia północna"; w MapoTero X - północ, Y - wschód
+                        Dim pierscien As New List(Of PunktGeo)
+                        For Each pt In tekstPierscienia.ToString().Split(","c)
+                            Dim xy = pt.Trim().Split(New Char() {" "c, ChrW(9)}, StringSplitOptions.RemoveEmptyEntries)
+                            Dim yEasting As Double, xNorthing As Double
+                            If xy.Length >= 2 AndAlso Double.TryParse(xy(0), NumberStyles.Float, ci, yEasting) AndAlso
+                               Double.TryParse(xy(1), NumberStyles.Float, ci, xNorthing) Then
+                                minX = Math.Min(minX, xNorthing) : maxX = Math.Max(maxX, xNorthing)
+                                minY = Math.Min(minY, yEasting) : maxY = Math.Max(maxY, yEasting)
+                                pierscien.Add(UkladWspolrzednych.PL1992.DoWgs84(New PunktXY(xNorthing, yEasting)))
+                            End If
+                        Next
+                        If pierscien.Count > 0 Then
+                            d.ObrysyWgs84.Add(pierscien)
+                            If d.ObrysWgs84.Count = 0 Then d.ObrysWgs84.AddRange(pierscien)
+                        End If
+                    End If
+                    pierwszyWWielokacie = False
                 End If
+                glebokosc -= 1
+            ElseIf glebokosc = poziomPierscienia Then
+                tekstPierscienia.Append(znak)
             End If
         Next
 

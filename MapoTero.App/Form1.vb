@@ -1,4 +1,4 @@
-'Copyright (C) <2015>  pajakt
+﻿'Copyright (C) <2015>  pajakt
 
 'This program is free software: you can redistribute it and/or modify
 'it under the terms of the GNU General Public License as published by
@@ -3029,11 +3029,12 @@ Public Class Form1
         WyczyscZnaczniki()
         PokazZnaczniki()
 
-        If d.ObrysWgs84.Count > 0 Then
-            Dim minLat = d.ObrysWgs84.Min(Function(p) p.Szerokosc)
-            Dim maxLat = d.ObrysWgs84.Max(Function(p) p.Szerokosc)
-            Dim minLon = d.ObrysWgs84.Min(Function(p) p.Dlugosc)
-            Dim maxLon = d.ObrysWgs84.Max(Function(p) p.Dlugosc)
+        Dim wszystkie = If(d.ObrysyWgs84.Count > 0, d.ObrysyWgs84.SelectMany(Function(o) o).ToList(), d.ObrysWgs84)
+        If wszystkie.Count > 0 Then
+            Dim minLat = wszystkie.Min(Function(p) p.Szerokosc)
+            Dim maxLat = wszystkie.Max(Function(p) p.Szerokosc)
+            Dim minLon = wszystkie.Min(Function(p) p.Dlugosc)
+            Dim maxLon = wszystkie.Max(Function(p) p.Dlugosc)
             Dim dLat = Math.Max(0.0005, maxLat - minLat)
             Dim dLon = Math.Max(0.0005, maxLon - minLon)
             mapa.SetZoomToFitRect(New RectLatLng(maxLat + dLat * 0.3, minLon - dLon * 0.3, dLon * 1.6, dLat * 1.6))
@@ -3046,19 +3047,28 @@ Public Class Form1
         Komunikat("Ustawiono obszar pobierania dla: " & d.ToString(), Color.Green)
     End Sub
 
+    ''' <summary>
+    ''' Podkład dla działki: jedna ortofotomapa (standardowa WMTS, a gdy jej brak - pierwsza polska ortofotomapa)
+    ''' oraz granice i numery działek EGiB. Wcześniej warunek „nazwa zawiera ortofoto/dzialki” zaznaczał 11 warstw,
+    ''' w tym czeskie ortofoto, cztery polskie ortofotomapy, użytki i kontury klasyfikacyjne.
+    ''' </summary>
     Private Sub WlaczWarstwyDzialek()
-        For Each w In tvWarstwy.WszystkieWezly()
-            Dim item = TryCast(w.Tag, WarstwaWDrzewie)
-            If item IsNot Nothing AndAlso item.Zbior IsNot Nothing Then
-                Dim nZbioru = item.Zbior.Nazwa.ToLowerInvariant()
-                Dim nWarstwy = item.Warstwa.ToLowerInvariant()
-                If (nZbioru.Contains("ortofoto") OrElse nWarstwy.Contains("ortofoto")) AndAlso Not w.Checked Then
-                    w.Checked = True
-                End If
-                If (nZbioru.Contains("dzialki") OrElse nWarstwy.Contains("dzialki") OrElse nWarstwy.Contains("egib")) AndAlso Not w.Checked Then
-                    w.Checked = True
-                End If
-            End If
+        Dim wezly = tvWarstwy.WszystkieWezly().
+            Select(Function(w) New With {.Wezel = w, .Item = TryCast(w.Tag, WarstwaWDrzewie)}).
+            Where(Function(x) x.Item IsNot Nothing AndAlso x.Item.Zbior IsNot Nothing).ToList()
+        Dim orto = wezly.FirstOrDefault(Function(x) String.Equals(x.Item.Zbior.Nazwa, "ortofotomapa_WMTS", StringComparison.OrdinalIgnoreCase))
+        If orto Is Nothing Then
+            orto = wezly.FirstOrDefault(Function(x) x.Item.Zbior.Nazwa.StartsWith("ortofotomapa", StringComparison.OrdinalIgnoreCase))
+        End If
+        Dim doWlaczenia As New List(Of TreeNode)
+        If orto IsNot Nothing Then doWlaczenia.Add(orto.Wezel)
+        For Each warstwaEgib In {"dzialki", "numery_dzialek"}
+            Dim egib = wezly.FirstOrDefault(Function(x) String.Equals(x.Item.Zbior.Nazwa, "dzialki_ewid_EGIB", StringComparison.OrdinalIgnoreCase) AndAlso
+                                                        String.Equals(x.Item.Warstwa, warstwaEgib, StringComparison.OrdinalIgnoreCase))
+            If egib IsNot Nothing Then doWlaczenia.Add(egib.Wezel)
+        Next
+        For Each w In doWlaczenia
+            If Not w.Checked Then w.Checked = True
         Next
     End Sub
 
@@ -3066,14 +3076,19 @@ Public Class Form1
         If _dzialkaKatastralna Is Nothing OrElse _dzialkaKatastralna.ObrysWgs84.Count = 0 Then Exit Sub
         Dim warstwa As New GMapOverlay("dzialka")
         mapa.Overlays.Add(warstwa)
-        Dim punkty As New List(Of PointLatLng)()
-        For Each p In _dzialkaKatastralna.ObrysWgs84
-            punkty.Add(New PointLatLng(p.Szerokosc, p.Dlugosc))
+        'działka wieloczęściowa (MULTIPOLYGON) - każda część osobnym wielokątem
+        Dim obrysy = If(_dzialkaKatastralna.ObrysyWgs84.Count > 0, _dzialkaKatastralna.ObrysyWgs84,
+                        New List(Of List(Of PunktGeo)) From {_dzialkaKatastralna.ObrysWgs84})
+        For Each obrys In obrysy
+            Dim punkty As New List(Of PointLatLng)()
+            For Each p In obrys
+                punkty.Add(New PointLatLng(p.Szerokosc, p.Dlugosc))
+            Next
+            warstwa.Polygons.Add(New GMapPolygon(punkty, "obrys_dzialki") With {
+                .Fill = New SolidBrush(Color.FromArgb(45, Color.OrangeRed)),
+                .Stroke = New Pen(Color.FromArgb(200, Color.DarkRed), 2)
+            })
         Next
-        warstwa.Polygons.Add(New GMapPolygon(punkty, "obrys_dzialki") With {
-            .Fill = New SolidBrush(Color.FromArgb(45, Color.OrangeRed)),
-            .Stroke = New Pen(Color.FromArgb(200, Color.DarkRed), 2)
-        })
     End Sub
 
 #End Region

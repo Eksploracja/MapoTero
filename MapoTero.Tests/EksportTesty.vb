@@ -1,4 +1,4 @@
-'Copyright (C) <2015>  pajakt
+﻿'Copyright (C) <2015>  pajakt
 'This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License
 'as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
@@ -399,6 +399,51 @@ Public Class EksportTesty
             Assert.True(File.Exists(plikTif))
             Dim fi As New FileInfo(plikTif)
             Assert.True(fi.Length > 500)
+        Finally
+            Usun(folder)
+        End Try
+    End Sub
+
+    <Fact>
+    Public Sub KmzGarminPodzialNaTomyWPelnejRozdzielczosci()
+        'z podziałem na tomy limit kafli dotyczy jednego tomu - mapa nie może tracić rozdzielczości
+        Dim folder = NowyFolder()
+        Try
+            For w = 1 To 3
+                For k = 1 To 3
+                    Using bmp As New Bitmap(1000, 1000, PixelFormat.Format24bppRgb)
+                        Using g = Graphics.FromImage(bmp)
+                            g.Clear(Color.FromArgb(40 * w, 60 * k, 90))
+                        End Using
+                        bmp.Save(folder & "_" & w.ToString("D2") & "_" & k.ToString("D2") & ".jpg", ImageFormat.Jpeg)
+                    End Using
+                Next
+            Next
+            Dim siatka As New Siatka(New Zasieg(270000, 539800, 273000, 542800), 1.0, 1000)
+            Dim zrodlo As New ZrodloSegmentow(folder, "_", StylNumeracji.WierszKolumna, "jpg", siatka)
+            Dim plik = folder & "mapa.kmz"
+            Dim z = Zadanie(RodzajEksportu.KmzGarmin, zrodlo, plik)
+            z.MaksKafli = 4
+            z.PodzialNaTomy = True
+
+            Dim plan = EksportMapy.PlanKmz(z)
+            Assert.True(plan.Pomniejszenie <= 1.001)
+            Assert.True(plan.LiczbaKafli > 4)
+
+            EksportMapy.Eksportuj(z, Nothing, CancellationToken.None)
+
+            Assert.False(File.Exists(plik))
+            Dim tomy = Directory.GetFiles(folder, "mapa_tom*.kmz")
+            Assert.True(tomy.Length >= 2, "liczba tomów: " & tomy.Length)
+            Dim lacznie = 0
+            For Each t In tomy
+                Using zip = ZipFile.OpenRead(t)
+                    Dim kafle = zip.Entries.Where(Function(e) e.FullName.StartsWith("files/")).Count()
+                    Assert.InRange(kafle, 1, 4)
+                    lacznie += kafle
+                End Using
+            Next
+            Assert.Equal(plan.LiczbaKafli, lacznie)
         Finally
             Usun(folder)
         End Try

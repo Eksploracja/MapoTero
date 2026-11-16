@@ -24,11 +24,22 @@ Public Class PunktKalibracjiOzi
     End Function
 End Class
 
+''' <summary>Model przekształcenia pikseli obrazu na współrzędne geograficzne.</summary>
+Public Enum ModelKalibracji
+    ''' <summary>Afiniczny (6 parametrów): przesunięcie, obrót, skala, skos.</summary>
+    Afiniczny
+    ''' <summary>Rzutowy (8 parametrów): odwzorowuje trapez arkusza (zbiegające się południki).</summary>
+    Rzutowy
+    ''' <summary>Wielomian 2. stopnia (12 parametrów): także łuki równoleżników arkuszy o dużym zasięgu.</summary>
+    Wielomian2
+End Enum
+
 ''' <summary>
-''' Dwuwymiarowa transformacja afiniczna (6 parametrów) łącząca współrzędne pikselowe obrazu (px, py)
-''' ze współrzędnymi geograficznymi WGS84 (lon, lat).
-''' lon = A*px + B*py + C
-''' lat = D*px + E*py + F
+''' Przekształcenie współrzędnych pikselowych obrazu (px, py) na WGS84 (lon, lat).
+''' Współczynniki A..F to zawsze dopasowanie afiniczne (lon = A*px + B*py + C, lat = D*px + E*py + F).
+''' Dla co najmniej 4 punktów program sprawdza też model rzutowy (4-6 punktów) albo wielomian 2. stopnia (7 i więcej)
+''' i wybiera go, gdy wyraźnie zmniejsza błąd - jedno przekształcenie afiniczne dla arkusza 1:1 000 000
+''' (stożkowe odwzorowanie, trapez) dawało błędy do 9 km, wielomian - ok. 200 m (2 piksele).
 ''' </summary>
 Public Class TransformacjaAfiniczna2D
     Public Property A As Double
@@ -40,26 +51,67 @@ Public Class TransformacjaAfiniczna2D
 
     Public Property BladRmsMetry As Double
     Public Property LiczbaPunktow As Integer
+    ''' <summary>Model użyty w <see cref="PikselDoGeo"/>.</summary>
+    Public Property Model As ModelKalibracji = ModelKalibracji.Afiniczny
+    ''' <summary>Błąd RMS samego dopasowania afinicznego (dla porównania z wybranym modelem).</summary>
+    Public Property BladRmsAfinicznyMetry As Double
+
+    'normalizacja pikseli (lepsze uwarunkowanie układów równań) i współczynniki modelu nieliniowego
+    Private _sx, _sy, _skala As Double
+    Private _wLon(), _wLat() As Double
 
     Public Function PikselDoGeo(px As Double, py As Double) As PunktGeo
-        Dim lon = A * px + B * py + C
-        Dim lat = D * px + E * py + F
-        Return New PunktGeo(lat, lon)
+        Select Case Model
+            Case ModelKalibracji.Rzutowy
+                Dim u = (px - _sx) / _skala, v = (py - _sy) / _skala
+                Dim m = _wLon(6) * u + _wLon(7) * v + 1.0
+                Return New PunktGeo((_wLon(3) * u + _wLon(4) * v + _wLon(5)) / m, (_wLon(0) * u + _wLon(1) * v + _wLon(2)) / m)
+            Case ModelKalibracji.Wielomian2
+                Dim u = (px - _sx) / _skala, v = (py - _sy) / _skala
+                Dim t = {1.0, u, v, u * u, u * v, v * v}
+                Dim lon = 0.0, lat = 0.0
+                For i = 0 To 5
+                    lon += _wLon(i) * t(i)
+                    lat += _wLat(i) * t(i)
+                Next
+                Return New PunktGeo(lat, lon)
+            Case Else
+                Return New PunktGeo(D * px + E * py + F, A * px + B * py + C)
+        End Select
     End Function
 
+    ''' <summary>Piksel dla współrzędnych WGS84; dla modeli nieliniowych - metodą Newtona od rozwiązania afinicznego.</summary>
     Public Function GeoDoPiksel(lat As Double, lon As Double) As Tuple(Of Double, Double)
         Dim det = A * E - B * D
-        If Math.Abs(det) < 1.0E-15 Then Return Tuple.Create(0.0, 0.0)
+        If Math.Abs(det) < 1.0E-30 Then Return Tuple.Create(0.0, 0.0)
         Dim dLon = lon - C
         Dim dLat = lat - F
         Dim px = (E * dLon - B * dLat) / det
         Dim py = (-D * dLon + A * dLat) / det
+        If Model = ModelKalibracji.Afiniczny Then Return Tuple.Create(px, py)
+
+        For iteracja = 1 To 8
+            Dim g = PikselDoGeo(px, py)
+            Dim gx = PikselDoGeo(px + 1, py)
+            Dim gy = PikselDoGeo(px, py + 1)
+            Dim j11 = gx.Dlugosc - g.Dlugosc, j12 = gy.Dlugosc - g.Dlugosc
+            Dim j21 = gx.Szerokosc - g.Szerokosc, j22 = gy.Szerokosc - g.Szerokosc
+            Dim dj = j11 * j22 - j12 * j21
+            If Math.Abs(dj) < 1.0E-30 Then Exit For
+            Dim rLon = lon - g.Dlugosc, rLat = lat - g.Szerokosc
+            Dim krokX = (j22 * rLon - j12 * rLat) / dj
+            Dim krokY = (-j21 * rLon + j11 * rLat) / dj
+            px += krokX
+            py += krokY
+            If Math.Abs(krokX) < 0.001 AndAlso Math.Abs(krokY) < 0.001 Then Exit For
+        Next
         Return Tuple.Create(px, py)
     End Function
 
     ''' <summary>
-    ''' Wyznacza optymalne współczynniki transformacji afinicznej metodą najmniejszych kwadratów (LSM)
-    ''' na podstawie listy punktów kalibracyjnych.
+    ''' Wyznacza przekształcenie metodą najmniejszych kwadratów. 2 punkty - skala bez obrotu, 3 - afiniczne,
+    ''' 4-6 - afiniczne albo rzutowe, 7 i więcej - afiniczne albo wielomian 2. stopnia (model nieliniowy tylko,
+    ''' gdy zmniejsza błąd RMS co najmniej o połowę i o więcej niż 1 m).
     ''' </summary>
     Public Shared Function Dopasuj(punkty As IList(Of PunktKalibracjiOzi)) As TransformacjaAfiniczna2D
         If punkty Is Nothing OrElse punkty.Count < 2 Then
@@ -74,8 +126,9 @@ Public Class TransformacjaAfiniczna2D
             Dim p2 = punkty(1)
             Dim dpx = p2.Px - p1.Px
             Dim dpy = p2.Py - p1.Py
-            If Math.Abs(dpx) < 0.001 Then dpx = 0.001
-            If Math.Abs(dpy) < 0.001 Then dpy = 0.001
+            If Math.Abs(dpx) < 0.001 OrElse Math.Abs(dpy) < 0.001 Then
+                Throw New InvalidDataException("Dwa punkty kalibracyjne leżą w jednej linii obrazu - potrzebne są co najmniej 3 punkty.")
+            End If
 
             t.A = (p2.Wgs84.Dlugosc - p1.Wgs84.Dlugosc) / dpx
             t.B = 0
@@ -88,76 +141,142 @@ Public Class TransformacjaAfiniczna2D
             Return t
         End If
 
-        ' Regresja afiniczna LSM dla N >= 3 punktów
-        Dim n As Double = punkty.Count
-        Dim sX As Double = 0, sY As Double = 0, sX2 As Double = 0, sY2 As Double = 0, sXY As Double = 0
-        Dim sLon As Double = 0, sXLon As Double = 0, sYLon As Double = 0
-        Dim sLat As Double = 0, sXLat As Double = 0, sYLat As Double = 0
-
+        ' Dopasowanie afiniczne (zawsze - także jako przybliżenie startowe odwrotności)
+        Dim wiersze As New List(Of Double())
         For Each pt In punkty
-            Dim x = pt.Px
-            Dim y = pt.Py
-            Dim lon = pt.Wgs84.Dlugosc
-            Dim lat = pt.Wgs84.Szerokosc
-
-            sX += x
-            sY += y
-            sX2 += x * x
-            sY2 += y * y
-            sXY += x * y
-
-            sLon += lon
-            sXLon += x * lon
-            sYLon += y * lon
-
-            sLat += lat
-            sXLat += x * lat
-            sYLat += y * lat
+            wiersze.Add({pt.Px, pt.Py, 1.0})
         Next
-
-        ' Macierz 3x3 normalna
-        ' [ sX2  sXY  sX  ] [ A ]   [ sXLon ]
-        ' [ sXY  sY2  sY  ] [ B ] = [ sYLon ]
-        ' [ sX   sY   n   ] [ C ]   [ sLon  ]
-
-        Dim c00 = sY2 * n - sY * sY
-        Dim c01 = -(sXY * n - sY * sX)
-        Dim c02 = sXY * sY - sY2 * sX
-        Dim c11 = sX2 * n - sX * sX
-        Dim c12 = -(sX2 * sY - sXY * sX)
-        Dim c22 = sX2 * sY2 - sXY * sXY
-
-        Dim det = sX2 * c00 + sXY * c01 + sX * c02
-
-        If Math.Abs(det) < 1.0E-12 Then
-            ' Punkty współliniowe - fallback do 2 pierwszych punktów
-            Return Dopasuj(New List(Of PunktKalibracjiOzi) From {punkty(0), punkty(1)})
+        Dim wLon = NajmniejszeKwadraty(wiersze, punkty, Function(p) p.Wgs84.Dlugosc)
+        Dim wLat = NajmniejszeKwadraty(wiersze, punkty, Function(p) p.Wgs84.Szerokosc)
+        If wLon Is Nothing OrElse wLat Is Nothing Then
+            Throw New InvalidDataException("Punkty kalibracyjne leżą na jednej linii - nie da się wyznaczyć kalibracji mapy.")
         End If
+        t.A = wLon(0) : t.B = wLon(1) : t.C = wLon(2)
+        t.D = wLat(0) : t.E = wLat(1) : t.F = wLat(2)
+        t.BladRmsMetry = Rms(t, punkty)
+        t.BladRmsAfinicznyMetry = t.BladRmsMetry
 
-        t.A = (c00 * sXLon + c01 * sYLon + c02 * sLon) / det
-        t.B = (c01 * sXLon + c11 * sYLon + c12 * sLon) / det
-        t.C = (c02 * sXLon + c12 * sYLon + c22 * sLon) / det
+        If punkty.Count >= 4 AndAlso t.BladRmsMetry > 1.0 Then
+            Dim kandydat = DopasujNieliniowy(t, punkty)
+            If kandydat IsNot Nothing Then
+                Dim rmsKandydata = Rms(kandydat, punkty)
+                If rmsKandydata < t.BladRmsMetry * 0.5 Then
+                    kandydat.BladRmsMetry = rmsKandydata
+                    Return kandydat
+                End If
+            End If
+        End If
+        Return t
+    End Function
 
-        t.D = (c00 * sXLat + c01 * sYLat + c02 * sLat) / det
-        t.E = (c01 * sXLat + c11 * sYLat + c12 * sLat) / det
-        t.F = (c02 * sXLat + c12 * sYLat + c22 * sLat) / det
+    Private Shared Function DopasujNieliniowy(afin As TransformacjaAfiniczna2D, punkty As IList(Of PunktKalibracjiOzi)) As TransformacjaAfiniczna2D
+        Dim t As New TransformacjaAfiniczna2D With {
+            .A = afin.A, .B = afin.B, .C = afin.C, .D = afin.D, .E = afin.E, .F = afin.F,
+            .LiczbaPunktow = afin.LiczbaPunktow, .BladRmsAfinicznyMetry = afin.BladRmsMetry}
+        Dim minX = Double.MaxValue, maxX = Double.MinValue, minY = Double.MaxValue, maxY = Double.MinValue
+        For Each p In punkty
+            minX = Math.Min(minX, p.Px) : maxX = Math.Max(maxX, p.Px)
+            minY = Math.Min(minY, p.Py) : maxY = Math.Max(maxY, p.Py)
+        Next
+        t._sx = (minX + maxX) / 2 : t._sy = (minY + maxY) / 2
+        t._skala = Math.Max(1.0, Math.Max(maxX - minX, maxY - minY) / 2)
 
-        ' Obliczenie błędu średniokwadratowego RMS w metrach
-        Dim sumaKwadratow As Double = 0
-        Dim srSzer As Double = sLat / n
-        Dim cosFi = Math.Cos(srSzer * Math.PI / 180.0)
-        Dim mLat = 111132.95
-        Dim mLon = 111412.84 * cosFi
+        If punkty.Count >= 7 Then
+            Dim wiersze As New List(Of Double())
+            For Each p In punkty
+                Dim u = (p.Px - t._sx) / t._skala, v = (p.Py - t._sy) / t._skala
+                wiersze.Add({1.0, u, v, u * u, u * v, v * v})
+            Next
+            t._wLon = NajmniejszeKwadraty(wiersze, punkty, Function(p) p.Wgs84.Dlugosc)
+            t._wLat = NajmniejszeKwadraty(wiersze, punkty, Function(p) p.Wgs84.Szerokosc)
+            If t._wLon Is Nothing OrElse t._wLat Is Nothing Then Return Nothing
+            t.Model = ModelKalibracji.Wielomian2
+        Else
+            'rzutowy: lon = (a u + b v + c) / (g u + h v + 1), lat = (d u + e v + f) / (g u + h v + 1),
+            'liniowo: a u + b v + c - lon g u - lon h v = lon (i analogicznie lat) - 2 równania na punkt, 8 niewiadomych
+            Dim m As New List(Of Double())
+            Dim prawa As New List(Of Double)
+            For Each p In punkty
+                Dim u = (p.Px - t._sx) / t._skala, v = (p.Py - t._sy) / t._skala
+                Dim lon = p.Wgs84.Dlugosc, lat = p.Wgs84.Szerokosc
+                m.Add({u, v, 1, 0, 0, 0, -lon * u, -lon * v}) : prawa.Add(lon)
+                m.Add({0, 0, 0, u, v, 1, -lat * u, -lat * v}) : prawa.Add(lat)
+            Next
+            Dim w = Rozwiaz(m, prawa)
+            If w Is Nothing Then Return Nothing
+            t._wLon = w
+            t.Model = ModelKalibracji.Rzutowy
+        End If
+        Return t
+    End Function
 
+    Private Shared Function NajmniejszeKwadraty(wiersze As List(Of Double()), punkty As IList(Of PunktKalibracjiOzi),
+                                                wartosc As Func(Of PunktKalibracjiOzi, Double)) As Double()
+        Dim prawa As New List(Of Double)
+        For Each p In punkty
+            prawa.Add(wartosc(p))
+        Next
+        Return Rozwiaz(wiersze, prawa)
+    End Function
+
+    ''' <summary>Rozwiązanie układu nadokreślonego równaniami normalnymi (eliminacja Gaussa z wyborem elementu); Nothing - układ osobliwy.</summary>
+    Private Shared Function Rozwiaz(wiersze As IList(Of Double()), prawa As IList(Of Double)) As Double()
+        Dim n = wiersze(0).Length
+        If wiersze.Count < n Then Return Nothing
+        Dim m(n - 1, n) As Double
+        For k = 0 To wiersze.Count - 1
+            Dim r = wiersze(k)
+            For i = 0 To n - 1
+                For j = 0 To n - 1
+                    m(i, j) += r(i) * r(j)
+                Next
+                m(i, n) += r(i) * prawa(k)
+            Next
+        Next
+        Dim skalaMacierzy = 0.0
+        For i = 0 To n - 1
+            skalaMacierzy = Math.Max(skalaMacierzy, Math.Abs(m(i, i)))
+        Next
+        For kol = 0 To n - 1
+            Dim piv = kol
+            For i = kol + 1 To n - 1
+                If Math.Abs(m(i, kol)) > Math.Abs(m(piv, kol)) Then piv = i
+            Next
+            If Math.Abs(m(piv, kol)) <= skalaMacierzy * 1.0E-13 Then Return Nothing
+            If piv <> kol Then
+                For j = 0 To n
+                    Dim tmp = m(kol, j) : m(kol, j) = m(piv, j) : m(piv, j) = tmp
+                Next
+            End If
+            For i = 0 To n - 1
+                If i = kol Then Continue For
+                Dim f = m(i, kol) / m(kol, kol)
+                If f = 0 Then Continue For
+                For j = kol To n
+                    m(i, j) -= f * m(kol, j)
+                Next
+            Next
+        Next
+        Dim w(n - 1) As Double
+        For i = 0 To n - 1
+            w(i) = m(i, n) / m(i, i)
+        Next
+        Return w
+    End Function
+
+    Private Shared Function Rms(t As TransformacjaAfiniczna2D, punkty As IList(Of PunktKalibracjiOzi)) As Double
+        Dim suma As Double = 0, sumaSz As Double = 0
+        For Each pt In punkty
+            sumaSz += pt.Wgs84.Szerokosc
+        Next
+        Dim cosFi = Math.Cos(sumaSz / punkty.Count * Math.PI / 180.0)
         For Each pt In punkty
             Dim geo = t.PikselDoGeo(pt.Px, pt.Py)
-            Dim dLatM = (geo.Szerokosc - pt.Wgs84.Szerokosc) * mLat
-            Dim dLonM = (geo.Dlugosc - pt.Wgs84.Dlugosc) * mLon
-            sumaKwadratow += dLatM * dLatM + dLonM * dLonM
+            Dim dLatM = (geo.Szerokosc - pt.Wgs84.Szerokosc) * 111132.95
+            Dim dLonM = (geo.Dlugosc - pt.Wgs84.Dlugosc) * 111412.84 * cosFi
+            suma += dLatM * dLatM + dLonM * dLonM
         Next
-
-        t.BladRmsMetry = Math.Round(Math.Sqrt(sumaKwadratow / n), 2)
-        Return t
+        Return Math.Round(Math.Sqrt(suma / punkty.Count), 2)
     End Function
 End Class
 
@@ -168,12 +287,32 @@ Public Class PlikKalibracjiOzi
     Public Property PlikObrazu As String = ""
     Public Property PlikObrazuIstnieje As Boolean
     Public Property Datum As String = "WGS 84"
+    ''' <summary>False, gdy program nie zna parametrów datum - współrzędne użyte bez korekty (możliwe przesunięcie do kilkuset metrów).</summary>
+    Public Property DatumObslugiwane As Boolean = True
+    ''' <summary>Liczba punktów podanych w siatce kilometrowej (UTM / odwzorowanie poprzeczne Merkatora) zamiast w stopniach.</summary>
+    Public Property PunktyWSiatce As Integer
     Public Property Punkty As New List(Of PunktKalibracjiOzi)
     Public Property Transformacja As TransformacjaAfiniczna2D
     Public Property ZasiegWgs84 As ProstokatGeo
     Public Property SzerokoscPx As Integer
     Public Property WysokoscPx As Integer
     Public Property RozdzielczoscMetrowNaPiksel As Double
+
+    ''' <summary>Próg błędu RMS kalibracji (w pikselach), powyżej którego okno konwertera ostrzega użytkownika.</summary>
+    Public Const ProgOstrzezeniaRmsPx As Double = 3.0
+
+    ''' <summary>Czy błąd dopasowania punktów jest duży w stosunku do rozmiaru piksela (mapa będzie przesunięta).</summary>
+    Public ReadOnly Property DuzyBladKalibracji As Boolean
+        Get
+            If Transformacja Is Nothing Then Return False
+            Dim piksel = If(RozdzielczoscMetrowNaPiksel > 0, RozdzielczoscMetrowNaPiksel, 1.0)
+            Return Transformacja.BladRmsMetry > Math.Max(5.0, ProgOstrzezeniaRmsPx * piksel)
+        End Get
+    End Property
+
+    'parametry odwzorowania z pliku (dla punktów w siatce)
+    Private _projekcja As String = ""
+    Private _ustawieniaProjekcji As Double() = Nothing
 
     ''' <summary>
     ''' Wczytuje plik .map OziExplorera, wyznacza punkty kalibracyjne i przelicza datum do WGS84.
@@ -184,8 +323,9 @@ Public Class PlikKalibracjiOzi
         End If
 
         Dim ozi As New PlikKalibracjiOzi With {.SciezkaMap = sciezkaPlikuMap}
-        Dim linie = File.ReadAllLines(sciezkaPlikuMap, System.Text.Encoding.Default)
-        If linie.Length < 5 Then
+        'pliki .map z OziExplorera zapisywane są w kodowaniu Windows (polskie nazwy - cp1250); poprawny UTF-8 też jest czytany
+        Dim linie = WczytajLinie(sciezkaPlikuMap)
+        If linie.Length < 5 OrElse Not linie(0).TrimStart().StartsWith("OziExplorer Map Data File", StringComparison.OrdinalIgnoreCase) Then
             Throw New InvalidDataException("Plik nie jest poprawnym plikiem kalibracyjnym OziExplorer (.map).")
         End If
 
@@ -198,21 +338,25 @@ Public Class PlikKalibracjiOzi
 
         If Not String.IsNullOrEmpty(sciezkaObrazu) AndAlso File.Exists(sciezkaObrazu) Then
             kandydat = sciezkaObrazu
-        ElseIf File.Exists(obrazWPliku) Then
+        ElseIf obrazWPliku <> "" AndAlso File.Exists(obrazWPliku) Then
             kandydat = obrazWPliku
         Else
-            Dim nazwa = Path.GetFileName(obrazWPliku)
-            Dim sciezkaFolder = Path.Combine(folder, nazwa)
-            If File.Exists(sciezkaFolder) Then
+            Dim nazwa = Path.GetFileName(obrazWPliku.Replace("\"c, Path.DirectorySeparatorChar))
+            Dim sciezkaFolder = If(nazwa = "", "", Path.Combine(folder, nazwa))
+            If sciezkaFolder <> "" AndAlso File.Exists(sciezkaFolder) Then
                 kandydat = sciezkaFolder
             Else
-                Dim rdzen = Path.GetFileNameWithoutExtension(sciezkaPlikuMap)
-                For Each rozszerzenie In New String() {".jpg", ".png", ".tif", ".tiff", ".bmp", ".jpeg", ".gif"}
-                    Dim p = Path.Combine(folder, rdzen & rozszerzenie)
-                    If File.Exists(p) Then
-                        kandydat = p
-                        Exit For
-                    End If
+                Dim rdzenie = New List(Of String) From {Path.GetFileNameWithoutExtension(sciezkaPlikuMap)}
+                If nazwa <> "" Then rdzenie.Add(Path.GetFileNameWithoutExtension(nazwa))
+                For Each rdzen In rdzenie
+                    For Each rozszerzenie In New String() {".jpg", ".png", ".tif", ".tiff", ".bmp", ".jpeg", ".gif"}
+                        Dim p = Path.Combine(folder, rdzen & rozszerzenie)
+                        If File.Exists(p) Then
+                            kandydat = p
+                            Exit For
+                        End If
+                    Next
+                    If kandydat IsNot Nothing Then Exit For
                 Next
             End If
         End If
@@ -234,48 +378,81 @@ Public Class PlikKalibracjiOzi
         End If
 
         ' Odczyt Datum (linia 5)
-        Dim liniaDatum = linie(4).Trim()
-        Dim czesciDatum = liniaDatum.Split(","c)
+        Dim czesciDatum = linie(4).Trim().Split(","c)
         ozi.Datum = If(czesciDatum.Length > 0 AndAlso Not String.IsNullOrWhiteSpace(czesciDatum(0)), czesciDatum(0).Trim(), "WGS 84")
+        ozi.DatumObslugiwane = ParametryDatum(ozi.Datum) IsNot Nothing
+
+        ' Odwzorowanie i jego parametry (dla punktów podanych w siatce kilometrowej)
+        Dim ci = CultureInfo.InvariantCulture
+        For Each l In linie
+            Dim t = l.Trim()
+            If t.StartsWith("Map Projection", StringComparison.OrdinalIgnoreCase) Then
+                Dim c = t.Split(","c)
+                If c.Length > 1 Then ozi._projekcja = c(1).Trim()
+            ElseIf t.StartsWith("Projection Setup", StringComparison.OrdinalIgnoreCase) Then
+                Dim c = t.Split(","c)
+                Dim w As New List(Of Double)
+                For i = 1 To Math.Min(5, c.Length - 1)
+                    Dim v As Double
+                    w.Add(If(Double.TryParse(c(i).Trim(), NumberStyles.Float, ci, v), v, Double.NaN))
+                Next
+                If w.Count = 5 Then ozi._ustawieniaProjekcji = w.ToArray()
+            ElseIf (ozi.SzerokoscPx <= 0 OrElse ozi.WysokoscPx <= 0) AndAlso t.StartsWith("IWH", StringComparison.OrdinalIgnoreCase) Then
+                'IWH,Map Image Width/Height,szer,wys - wymiary obrazu zapisane przez OziExplorer
+                Dim c = t.Split(","c)
+                Dim szer, wys As Integer
+                If c.Length >= 4 AndAlso Integer.TryParse(c(2).Trim(), szer) AndAlso Integer.TryParse(c(3).Trim(), wys) Then
+                    ozi.SzerokoscPx = szer : ozi.WysokoscPx = wys
+                End If
+            End If
+        Next
 
         ' Odczyt punktów kalibracyjnych
         For i = 0 To linie.Length - 1
             Dim l = linie(i).Trim()
             If l.StartsWith("Point", StringComparison.OrdinalIgnoreCase) Then
                 Dim pt = SparsujPunkt(l, ozi.Datum)
-                If pt IsNot Nothing Then
-                    ozi.Punkty.Add(pt)
+                If pt Is Nothing Then
+                    pt = ozi.SparsujPunktSiatki(l)
+                    If pt IsNot Nothing Then ozi.PunktyWSiatce += 1
                 End If
+                If pt IsNot Nothing Then ozi.Punkty.Add(pt)
             End If
         Next
 
         If ozi.Punkty.Count < 2 Then
+            If ozi._siatkaNieobslugiwana Then
+                Throw New InvalidDataException("Punkty kalibracyjne pliku .map są podane w siatce kilometrowej odwzorowania """ & ozi._projekcja &
+                                               """, którego program nie obsługuje (obsługiwane: UTM i poprzeczne Merkatora). " &
+                                               "Skalibruj mapę w OziExplorerze punktami w stopniach (Lat/Lon).")
+            End If
             Throw New InvalidDataException("Plik .map zawiera mniej niż 2 aktywne punkty kalibracyjne.")
         End If
 
-        ' Wyznaczenie transformacji afinicznej
         ozi.Transformacja = TransformacjaAfiniczna2D.Dopasuj(ozi.Punkty)
 
-        ' Wyznaczenie zasięgu WGS84 i rozdzielczości
+        ' Zasięg WGS84 (próbkowanie krawędzi obrazu - modele nieliniowe wyginają krawędzie) i rozdzielczość
         If ozi.SzerokoscPx > 0 AndAlso ozi.WysokoscPx > 0 Then
             Dim w = CDbl(ozi.SzerokoscPx)
             Dim h = CDbl(ozi.WysokoscPx)
-            Dim pLG = ozi.Transformacja.PikselDoGeo(0, 0)
-            Dim pPG = ozi.Transformacja.PikselDoGeo(w, 0)
-            Dim pPD = ozi.Transformacja.PikselDoGeo(w, h)
-            Dim pLD = ozi.Transformacja.PikselDoGeo(0, h)
-
-            Dim minLat = Math.Min(Math.Min(pLG.Szerokosc, pPG.Szerokosc), Math.Min(pPD.Szerokosc, pLD.Szerokosc))
-            Dim maxLat = Math.Max(Math.Max(pLG.Szerokosc, pPG.Szerokosc), Math.Max(pPD.Szerokosc, pLD.Szerokosc))
-            Dim minLon = Math.Min(Math.Min(pLG.Dlugosc, pPG.Dlugosc), Math.Min(pPD.Dlugosc, pLD.Dlugosc))
-            Dim maxLon = Math.Max(Math.Max(pLG.Dlugosc, pPG.Dlugosc), Math.Max(pPD.Dlugosc, pLD.Dlugosc))
-
+            Dim minLat = Double.MaxValue, maxLat = Double.MinValue, minLon = Double.MaxValue, maxLon = Double.MinValue
+            For k = 0 To 16
+                Dim f = k / 16.0
+                For Each p In {ozi.Transformacja.PikselDoGeo(f * w, 0), ozi.Transformacja.PikselDoGeo(f * w, h),
+                               ozi.Transformacja.PikselDoGeo(0, f * h), ozi.Transformacja.PikselDoGeo(w, f * h)}
+                    minLat = Math.Min(minLat, p.Szerokosc) : maxLat = Math.Max(maxLat, p.Szerokosc)
+                    minLon = Math.Min(minLon, p.Dlugosc) : maxLon = Math.Max(maxLon, p.Dlugosc)
+                Next
+            Next
             ozi.ZasiegWgs84 = New ProstokatGeo(maxLat, minLat, maxLon, minLon)
 
-            Dim cosFi = Math.Cos((maxLat + minLat) / 2.0 * Math.PI / 180.0)
-            Dim szerM = (maxLon - minLon) * 111412.84 * cosFi
-            Dim wysM = (maxLat - minLat) * 111132.95
-            ozi.RozdzielczoscMetrowNaPiksel = Math.Round((szerM / w + wysM / h) / 2.0, 2)
+            'rozdzielczość w środku obrazu (przekątna obróconej mapy zawyżała wynik liczony z prostokąta zasięgu)
+            Dim s0 = ozi.Transformacja.PikselDoGeo(w / 2, h / 2)
+            Dim sx = ozi.Transformacja.PikselDoGeo(w / 2 + 100, h / 2)
+            Dim sy = ozi.Transformacja.PikselDoGeo(w / 2, h / 2 + 100)
+            Dim mx = Georeferencja.OdlegloscMetry(s0, sx) / 100.0
+            Dim my = Georeferencja.OdlegloscMetry(s0, sy) / 100.0
+            ozi.RozdzielczoscMetrowNaPiksel = Math.Round((mx + my) / 2.0, 2)
         Else
             ' Przy braku obrazu bazujemy na punktach
             Dim minLat = Double.MaxValue, maxLat = Double.MinValue
@@ -292,19 +469,34 @@ Public Class PlikKalibracjiOzi
         Return ozi
     End Function
 
-    ''' <summary>Parsuje pojedynczy wiersz punktu kalibracyjnego PointXX z pliku .map.</summary>
+    Private Shared Function WczytajLinie(sciezka As String) As String()
+        Dim bajty = File.ReadAllBytes(sciezka)
+        Dim tekst As String
+        Try
+            tekst = New System.Text.UTF8Encoding(False, True).GetString(bajty)
+        Catch ex As System.Text.DecoderFallbackException
+            Try
+                System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance)
+                tekst = System.Text.Encoding.GetEncoding(1250).GetString(bajty)
+            Catch
+                tekst = System.Text.Encoding.GetEncoding(28591).GetString(bajty)
+            End Try
+        End Try
+        If tekst.Length > 0 AndAlso tekst(0) = ChrW(&HFEFF) Then tekst = tekst.Substring(1)
+        Return tekst.Split(New String() {vbCrLf, vbLf, vbCr}, StringSplitOptions.None)
+    End Function
+
+    ''' <summary>Parsuje pojedynczy wiersz punktu kalibracyjnego PointXX z pliku .map (współrzędne w stopniach).</summary>
+    ''' <returns>Nothing, gdy punkt jest pusty albo nie ma współrzędnych w stopniach (np. tylko w siatce).</returns>
     Public Shared Function SparsujPunkt(wiersz As String, datum As String) As PunktKalibracjiOzi
         Dim ci = CultureInfo.InvariantCulture
         Dim czesci = wiersz.Split(","c)
         If czesci.Length < 11 Then Return Nothing
 
         Dim nazwa = czesci(0).Trim()
-        Dim pxStr = czesci(2).Trim()
-        Dim pyStr = czesci(3).Trim()
-
         Dim px As Double, py As Double
-        If Not Double.TryParse(pxStr, NumberStyles.Float, ci, px) OrElse
-           Not Double.TryParse(pyStr, NumberStyles.Float, ci, py) Then
+        If Not Double.TryParse(czesci(2).Trim(), NumberStyles.Float, ci, px) OrElse
+           Not Double.TryParse(czesci(3).Trim(), NumberStyles.Float, ci, py) Then
             Return Nothing
         End If
 
@@ -315,15 +507,17 @@ Public Class PlikKalibracjiOzi
             Dim t = czesci(i).Trim().ToUpperInvariant()
             If (t = "N" OrElse t = "S") AndAlso idxNS < 0 Then
                 idxNS = i
-            ElseIf (t = "E" OrElse t = "W") AndAlso idxEW < 0 Then
+            ElseIf (t = "E" OrElse t = "W") AndAlso idxEW < 0 AndAlso idxNS >= 0 Then
                 idxEW = i
             End If
         Next
 
         If idxNS < 0 OrElse idxEW < 0 Then Return Nothing
 
+        'punkt bez stopni (pola puste - kalibracja w siatce) nie może trafić do kalibracji jako 0°/0°
         Dim lat = WyznaczWspolrzedna(czesci, 4, idxNS - 1, czesci(idxNS).Trim().ToUpperInvariant() = "S")
         Dim lon = WyznaczWspolrzedna(czesci, idxNS + 1, idxEW - 1, czesci(idxEW).Trim().ToUpperInvariant() = "W")
+        If Double.IsNaN(lat) OrElse Double.IsNaN(lon) Then Return Nothing
 
         Dim wgs = PrzeliczDatumDoWgs84(lat, lon, datum)
 
@@ -337,6 +531,93 @@ Public Class PlikKalibracjiOzi
         }
     End Function
 
+    Private _siatkaNieobslugiwana As Boolean
+
+    ''' <summary>
+    ''' Punkt podany w siatce kilometrowej: "..., grid, strefa, wschodnia, północna, N/S". Obsługiwane odwzorowania:
+    ''' UTM (strefa z pola punktu) i poprzeczne Merkatora z wiersza "Projection Setup" (szerokość i długość początku,
+    ''' skala, przesunięcia). Współrzędne liczone na elipsoidzie datum mapy, potem przeliczane do WGS84.
+    ''' </summary>
+    Private Function SparsujPunktSiatki(wiersz As String) As PunktKalibracjiOzi
+        Dim ci = CultureInfo.InvariantCulture
+        Dim czesci = wiersz.Split(","c)
+        Dim idxGrid = -1
+        For i = 4 To czesci.Length - 1
+            If czesci(i).Trim().Equals("grid", StringComparison.OrdinalIgnoreCase) Then idxGrid = i : Exit For
+        Next
+        If idxGrid < 0 OrElse czesci.Length < idxGrid + 4 Then Return Nothing
+        Dim px, py, wsch, poln As Double
+        If Not Double.TryParse(czesci(2).Trim(), NumberStyles.Float, ci, px) OrElse
+           Not Double.TryParse(czesci(3).Trim(), NumberStyles.Float, ci, py) OrElse
+           Not Double.TryParse(czesci(idxGrid + 2).Trim(), NumberStyles.Float, ci, wsch) OrElse
+           Not Double.TryParse(czesci(idxGrid + 3).Trim(), NumberStyles.Float, ci, poln) Then
+            Return Nothing
+        End If
+        Dim strefaTekst = czesci(idxGrid + 1).Trim()
+        Dim poludniowa = czesci.Length > idxGrid + 4 AndAlso czesci(idxGrid + 4).Trim().ToUpperInvariant() = "S"
+
+        Dim lat0, lon0, k0, fe, fn As Double
+        Dim proj = _projekcja.ToUpperInvariant()
+        Dim strefa As Integer
+        If proj.Contains("UTM") OrElse proj.Contains("UNIVERSAL TRANSVERSE") Then
+            If Not Integer.TryParse(New String(strefaTekst.TakeWhile(Function(c) Char.IsDigit(c)).ToArray()), strefa) OrElse strefa < 1 OrElse strefa > 60 Then
+                _siatkaNieobslugiwana = True
+                Return Nothing
+            End If
+            lat0 = 0 : lon0 = strefa * 6 - 183 : k0 = 0.9996 : fe = 500000 : fn = If(poludniowa, 10000000, 0)
+        ElseIf proj.Contains("TRANSVERSE MERCATOR") AndAlso _ustawieniaProjekcji IsNot Nothing AndAlso
+               Not Double.IsNaN(_ustawieniaProjekcji(0)) AndAlso Not Double.IsNaN(_ustawieniaProjekcji(1)) Then
+            lat0 = _ustawieniaProjekcji(0) : lon0 = _ustawieniaProjekcji(1)
+            k0 = If(Double.IsNaN(_ustawieniaProjekcji(2)) OrElse _ustawieniaProjekcji(2) <= 0, 1.0, _ustawieniaProjekcji(2))
+            fe = If(Double.IsNaN(_ustawieniaProjekcji(3)), 0, _ustawieniaProjekcji(3))
+            fn = If(Double.IsNaN(_ustawieniaProjekcji(4)), 0, _ustawieniaProjekcji(4))
+        Else
+            _siatkaNieobslugiwana = True
+            Return Nothing
+        End If
+
+        Dim elipsoida = ParametryDatum(Datum)
+        Dim a = If(elipsoida Is Nothing, 6378137.0, elipsoida(0))
+        Dim invF = If(elipsoida Is Nothing, 298.257223563, elipsoida(1))
+        Dim geo = OdwrotnyMerkatorPoprzeczny(wsch, poln, a, invF, lat0, lon0, k0, fe, fn)
+        Return New PunktKalibracjiOzi With {
+            .Nazwa = czesci(0).Trim(), .Px = px, .Py = py,
+            .ZrodloweLat = geo.Szerokosc, .ZrodloweLon = geo.Dlugosc,
+            .Wgs84 = PrzeliczDatumDoWgs84(geo.Szerokosc, geo.Dlugosc, Datum)
+        }
+    End Function
+
+    ''' <summary>Odwrotne odwzorowanie poprzeczne Merkatora na dowolnej elipsoidzie (wzory Snydera, dokładność poniżej 1 m w strefie).</summary>
+    Public Shared Function OdwrotnyMerkatorPoprzeczny(wschodnia As Double, polnocna As Double, a As Double, invF As Double,
+                                                      lat0 As Double, lon0 As Double, k0 As Double, fe As Double, fn As Double) As PunktGeo
+        Dim f = 1.0 / invF
+        Dim e2 = 2 * f - f * f
+        Dim ep2 = e2 / (1 - e2)
+        Dim fi0 = lat0 * Math.PI / 180.0
+        Dim m0 = LukPoludnika(fi0, a, e2)
+        Dim m = m0 + (polnocna - fn) / k0
+        Dim mu = m / (a * (1 - e2 / 4 - 3 * e2 * e2 / 64 - 5 * e2 * e2 * e2 / 256))
+        Dim e1 = (1 - Math.Sqrt(1 - e2)) / (1 + Math.Sqrt(1 - e2))
+        Dim fi1 = mu + (3 * e1 / 2 - 27 * e1 ^ 3 / 32) * Math.Sin(2 * mu) + (21 * e1 * e1 / 16 - 55 * e1 ^ 4 / 32) * Math.Sin(4 * mu) +
+                  (151 * e1 ^ 3 / 96) * Math.Sin(6 * mu) + (1097 * e1 ^ 4 / 512) * Math.Sin(8 * mu)
+        Dim sin1 = Math.Sin(fi1), cos1 = Math.Cos(fi1), tan1 = Math.Tan(fi1)
+        Dim c1 = ep2 * cos1 * cos1
+        Dim t1 = tan1 * tan1
+        Dim n1 = a / Math.Sqrt(1 - e2 * sin1 * sin1)
+        Dim r1 = a * (1 - e2) / Math.Pow(1 - e2 * sin1 * sin1, 1.5)
+        Dim d = (wschodnia - fe) / (n1 * k0)
+        Dim fi = fi1 - (n1 * tan1 / r1) * (d * d / 2 - (5 + 3 * t1 + 10 * c1 - 4 * c1 * c1 - 9 * ep2) * d ^ 4 / 24 +
+                                            (61 + 90 * t1 + 298 * c1 + 45 * t1 * t1 - 252 * ep2 - 3 * c1 * c1) * d ^ 6 / 720)
+        Dim lam = (d - (1 + 2 * t1 + c1) * d ^ 3 / 6 + (5 - 2 * c1 + 28 * t1 - 3 * c1 * c1 + 8 * ep2 + 24 * t1 * t1) * d ^ 5 / 120) / cos1
+        Return New PunktGeo(fi * 180.0 / Math.PI, lon0 + lam * 180.0 / Math.PI)
+    End Function
+
+    Private Shared Function LukPoludnika(fi As Double, a As Double, e2 As Double) As Double
+        Return a * ((1 - e2 / 4 - 3 * e2 * e2 / 64 - 5 * e2 ^ 3 / 256) * fi - (3 * e2 / 8 + 3 * e2 * e2 / 32 + 45 * e2 ^ 3 / 1024) * Math.Sin(2 * fi) +
+                    (15 * e2 * e2 / 256 + 45 * e2 ^ 3 / 1024) * Math.Sin(4 * fi) - (35 * e2 ^ 3 / 3072) * Math.Sin(6 * fi))
+    End Function
+
+    ''' <summary>Stopnie (i ewentualnie minuty, sekundy) z kolejnych pól; NaN, gdy pola są puste.</summary>
     Private Shared Function WyznaczWspolrzedna(czesci As String(), startIdx As Integer, endIdx As Integer, ujemna As Boolean) As Double
         Dim ci = CultureInfo.InvariantCulture
         Dim liczby As New List(Of Double)
@@ -354,56 +635,47 @@ Public Class PlikKalibracjiOzi
             End If
         Next
 
-        Dim wynik As Double = 0
-        If liczby.Count = 1 Then
-            wynik = liczby(0)
-        ElseIf liczby.Count >= 2 Then
-            ' Stopnie i minuty
-            wynik = liczby(0) + liczby(1) / 60.0
-            If liczby.Count >= 3 Then
-                ' Stopnie, minuty i sekundy
-                wynik += liczby(2) / 3600.0
-            End If
-        End If
-
+        If liczby.Count = 0 Then Return Double.NaN
+        Dim wynik As Double = liczby(0)
+        If liczby.Count >= 2 Then wynik += liczby(1) / 60.0
+        If liczby.Count >= 3 Then wynik += liczby(2) / 3600.0
         Return If(ujemna, -wynik, wynik)
     End Function
 
     ''' <summary>
-    ''' Przelicza współrzędne geograficzne z zadanego Datum (np. Borowa Góra, Potsdam, Pulkovo 1942) do WGS84
-    ''' przy użyciu standardowej 3-parametrowej transformacji geocentrycznej.
+    ''' Parametry datum: półoś wielka, odwrotność spłaszczenia i przesunięcia dX, dY, dZ do WGS84;
+    ''' Nothing - datum nieznane programowi.
     ''' </summary>
-    Public Shared Function PrzeliczDatumDoWgs84(lat As Double, lon As Double, datum As String) As PunktGeo
-        If String.IsNullOrWhiteSpace(datum) Then Return New PunktGeo(lat, lon)
-
+    Public Shared Function ParametryDatum(datum As String) As Double()
+        If String.IsNullOrWhiteSpace(datum) Then Return {6378137.0, 298.257223563, 0, 0, 0}
         Dim dNorm = datum.Trim().ToUpperInvariant()
         If dNorm.Contains("WGS 84") OrElse dNorm.Contains("WGS84") OrElse dNorm.Contains("ETRF") OrElse dNorm.Contains("ETRS") Then
-            Return New PunktGeo(lat, lon)
+            Return {6378137.0, 298.257223563, 0, 0, 0}
         End If
-
-        Dim a As Double = 6378137.0
-        Dim invF As Double = 298.257223563
-        Dim dX As Double = 0, dY As Double = 0, dZ As Double = 0
-
         If dNorm.Contains("BOROWA") Then
-            ' Układ Borowa Góra (elipsoida Bessela 1841) -> WGS84 (parametry GUGiK)
-            a = 6377397.155
-            invF = 299.1528128
-            dX = 580.0 : dY = 37.0 : dZ = 476.0
-        ElseIf dNorm.Contains("POTSDAM") OrElse dNorm.Contains("DHDN") Then
-            ' Potsdam / DHDN (elipsoida Bessela 1841) -> WGS84
-            a = 6377397.155
-            invF = 299.1528128
-            dX = 598.1 : dY = 73.7 : dZ = 418.2
-        ElseIf dNorm.Contains("PULKOVO") OrElse dNorm.Contains("S-42") OrElse dNorm.Contains("42") Then
-            ' Pulkovo 1942 / Układ 1942 (elipsoida Krassowskiego 1940) -> WGS84
-            a = 6378245.0
-            invF = 298.3
-            dX = 24.0 : dY = -123.0 : dZ = -94.0
-        Else
-            ' Nieznany datum - brak transformacji
-            Return New PunktGeo(lat, lon)
+            ' Układ Borowa Góra (elipsoida Bessela 1841) -> WGS84
+            Return {6377397.155, 299.1528128, 580.0, 37.0, 476.0}
         End If
+        If dNorm.Contains("POTSDAM") OrElse dNorm.Contains("DHDN") Then
+            ' Potsdam / DHDN (elipsoida Bessela 1841) -> WGS84 (EPSG:1777)
+            Return {6377397.155, 299.1528128, 598.1, 73.7, 418.2}
+        End If
+        If dNorm.Contains("PULKOVO") OrElse dNorm.Contains("S-42") OrElse dNorm.Contains("1942") Then
+            ' Pulkovo 1942 / Układ 1942 (elipsoida Krassowskiego 1940) -> WGS84
+            Return {6378245.0, 298.3, 24.0, -123.0, -94.0}
+        End If
+        Return Nothing
+    End Function
+
+    ''' <summary>
+    ''' Przelicza współrzędne geograficzne z zadanego Datum (np. Borowa Góra, Potsdam, Pulkovo 1942) do WGS84
+    ''' przy użyciu standardowej 3-parametrowej transformacji geocentrycznej. Datum nieznane - bez zmian.
+    ''' </summary>
+    Public Shared Function PrzeliczDatumDoWgs84(lat As Double, lon As Double, datum As String) As PunktGeo
+        Dim p = ParametryDatum(datum)
+        If p Is Nothing OrElse (p(2) = 0 AndAlso p(3) = 0 AndAlso p(4) = 0) Then Return New PunktGeo(lat, lon)
+
+        Dim a = p(0), invF = p(1), dX = p(2), dY = p(3), dZ = p(4)
 
         ' Konwersja geodezyjna na elipsoidzie źródłowej do geocentrycznych X, Y, Z
         Dim f = 1.0 / invF
@@ -412,12 +684,10 @@ Public Class PlikKalibracjiOzi
         Dim lam = lon * Math.PI / 180.0
         Dim sinPhi = Math.Sin(phi)
         Dim cosPhi = Math.Cos(phi)
-        Dim sinLam = Math.Sin(lam)
-        Dim cosLam = Math.Cos(lam)
 
         Dim nVal = a / Math.Sqrt(1.0 - e2 * sinPhi * sinPhi)
-        Dim x = nVal * cosPhi * cosLam + dX
-        Dim y = nVal * cosPhi * sinLam + dY
+        Dim x = nVal * cosPhi * Math.Cos(lam) + dX
+        Dim y = nVal * cosPhi * Math.Sin(lam) + dY
         Dim z = nVal * (1.0 - e2) * sinPhi + dZ
 
         ' Konwersja geocentrycznych X, Y, Z do geodezyjnych na elipsoidzie WGS84
@@ -426,17 +696,15 @@ Public Class PlikKalibracjiOzi
         Dim e2Wgs = 2 * fWgs - fWgs * fWgs
 
         Dim lamOut = Math.Atan2(y, x) * 180.0 / Math.PI
-        Dim p = Math.Sqrt(x * x + y * y)
-        Dim phiOutRad = Math.Atan2(z, p * (1.0 - e2Wgs))
-
-        For iter = 1 To 4
+        Dim pp = Math.Sqrt(x * x + y * y)
+        Dim phiOutRad = Math.Atan2(z, pp * (1.0 - e2Wgs))
+        For iter = 1 To 5
             Dim sP = Math.Sin(phiOutRad)
             Dim nW = aWgs / Math.Sqrt(1.0 - e2Wgs * sP * sP)
-            phiOutRad = Math.Atan2(z + e2Wgs * nW * sP, p)
+            phiOutRad = Math.Atan2(z + e2Wgs * nW * sP, pp)
         Next
 
-        Dim latOut = phiOutRad * 180.0 / Math.PI
-        Return New PunktGeo(latOut, lamOut)
+        Return New PunktGeo(phiOutRad * 180.0 / Math.PI, lamOut)
     End Function
 
 End Class

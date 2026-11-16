@@ -1,4 +1,4 @@
-'Copyright (C) <2026>  pajakt
+﻿'Copyright (C) <2026>  pajakt
 '
 'This program is free software: you can redistribute it and/or modify
 'it under the terms of the GNU General Public License as published by
@@ -229,17 +229,22 @@ Public Class FormImportOzi
         lblInfoTytul.Text = "Tytuł: " & If(String.IsNullOrEmpty(_ozi.Tytul), Path.GetFileNameWithoutExtension(_ozi.SciezkaMap), _ozi.Tytul)
 
         Dim korektaTekst = ""
-        If Not _ozi.Datum.ToUpperInvariant().Contains("WGS") Then
+        If Not _ozi.DatumObslugiwane Then
+            korektaTekst = " - NIEZNANY: brak korekty, mapa może być przesunięta nawet o kilkaset metrów"
+        ElseIf Not _ozi.Datum.ToUpperInvariant().Contains("WGS") Then
             korektaTekst = " (automatyczna korekta Datum do WGS84)"
         End If
         lblInfoDatum.Text = "Układ / Datum: " & _ozi.Datum & korektaTekst
+        lblInfoDatum.ForeColor = If(_ozi.DatumObslugiwane, SystemColors.ControlText, Color.DarkRed)
 
         If _ozi.PlikObrazuIstnieje Then
             txtPlikObrazu.ForeColor = SystemColors.WindowText
             lblInfoWymiary.Text = String.Format(ci, "Wymiary rastra: {0} x {1} px (~{2:0.0} m/pix)",
                                                 _ozi.SzerokoscPx, _ozi.WysokoscPx, _ozi.RozdzielczoscMetrowNaPiksel)
             btnKonwertuj.Enabled = True
-            lblStatus.Text = "Kalibracja poprawna. Gotowy do konwersji."
+            lblStatus.Text = If(_ozi.DuzyBladKalibracji,
+                                "Uwaga: punkty kalibracyjne nie pasują do siebie - mapa może być przesunięta (duży błąd RMS).",
+                                "Kalibracja poprawna. Gotowy do konwersji.")
         Else
             txtPlikObrazu.ForeColor = Color.Red
             lblInfoWymiary.Text = "Wymiary: brak pliku obrazu na dysku (wskaż plik ręcznie przyciskiem Przeglądaj)"
@@ -247,13 +252,23 @@ Public Class FormImportOzi
             lblStatus.Text = "Ostrzeżenie: wskaż plik obrazu mapy na dysku."
         End If
 
-        lblInfoPunkty.Text = String.Format(ci, "Punkty kalibracyjne: {0} pkt, błąd RMS: {1:0.0} m",
-                                           _ozi.Punkty.Count, _ozi.Transformacja.BladRmsMetry)
+        lblInfoPunkty.Text = String.Format(ci, "Punkty kalibracyjne: {0} pkt{1}, błąd RMS: {2:0.0} m ({3})",
+                                           _ozi.Punkty.Count, If(_ozi.PunktyWSiatce > 0, " (w siatce: " & _ozi.PunktyWSiatce & ")", ""),
+                                           _ozi.Transformacja.BladRmsMetry, OpisModelu(_ozi.Transformacja.Model))
+        lblInfoPunkty.ForeColor = If(_ozi.DuzyBladKalibracji, Color.DarkRed, SystemColors.ControlText)
 
         lblInfoZasieg.Text = String.Format(ci, "Zasięg WGS84: N {0:0.0000}° .. {1:0.0000}°, E {2:0.0000}° .. {3:0.0000}°",
                                            _ozi.ZasiegWgs84.Poludnie, _ozi.ZasiegWgs84.Polnoc,
                                            _ozi.ZasiegWgs84.Zachod, _ozi.ZasiegWgs84.Wschod)
     End Sub
+
+    Private Shared Function OpisModelu(m As ModelKalibracji) As String
+        Select Case m
+            Case ModelKalibracji.Rzutowy : Return "model rzutowy"
+            Case ModelKalibracji.Wielomian2 : Return "wielomian 2. stopnia"
+            Case Else : Return "model afiniczny"
+        End Select
+    End Function
 
     Private Sub rbFormat_CheckedChanged(sender As Object, e As EventArgs) Handles rbKmz.CheckedChanged, rbJnx.CheckedChanged, rbMbtiles.CheckedChanged
         chkPodzialKmz.Enabled = rbKmz.Checked
@@ -433,13 +448,131 @@ Public Class FormImportOzi
         End Try
     End Function
 
+    ''' <summary>Liczba poziomów przeglądowych piramidy JNX/MBTiles poniżej poziomu szczegółowego.</summary>
+    Friend Const PoziomyPrzegladowe As Integer = 4
+    ''' <summary>Limit kafli pliku JNX w odbiornikach Garmin.</summary>
+    Friend Const MaksKafliJnx As Integer = 50000
+
+    ''' <summary>Poziom Web Mercator odpowiadający rozdzielczości skanu (10-18).</summary>
+    Friend Shared Function PoziomSzczegolowy(ozi As PlikKalibracjiOzi) As Integer
+        Dim mPerPx = ozi.RozdzielczoscMetrowNaPiksel
+        If mPerPx <= 0 Then mPerPx = 2.5
+        Dim srodekSz = (ozi.ZasiegWgs84.Polnoc + ozi.ZasiegWgs84.Poludnie) / 2.0
+        Dim z = CInt(Math.Round(Math.Log(156543.03392 * Math.Cos(srodekSz * Math.PI / 180.0) / mPerPx) / Math.Log(2)))
+        Return Math.Max(10, Math.Min(18, z))
+    End Function
+
+    ''' <summary>
+    ''' Rysuje na kaflu fragment skanu. Kafel opisuje funkcja geoDoUv (WGS84 -> piksel kafla). Fragment skanu pod kaflem
+    ''' jest wycinany i rysowany przekształceniem afinicznym wyznaczonym lokalnie z kalibracji - kafel uwzględnia obrót
+    ''' mapy i nieliniowe modele kalibracji, a GDI+ nie przetwarza całego skanu przy każdym kaflu (wcześniej
+    ''' ok. 1 s na kafel dla obróconych map). Duże wycinki (poziomy przeglądowe) są dzielone na ćwiartki.
+    ''' </summary>
+    ''' <returns>False, gdy kafel nie zachodzi na skan.</returns>
+    Friend Shared Function RysujFragment(g As Graphics, src As Bitmap, ozi As PlikKalibracjiOzi,
+                                         polnoc As Double, poludnie As Double, wschod As Double, zachod As Double,
+                                         geoDoUv As Func(Of Double, Double, PointF), Optional glebokosc As Integer = 0) As Boolean
+        Dim t = ozi.Transformacja
+        Dim minX = Double.MaxValue, maxX = Double.MinValue, minY = Double.MaxValue, maxY = Double.MinValue
+        For i = 0 To 4
+            Dim f = i / 4.0
+            Dim szer = poludnie + (polnoc - poludnie) * f
+            Dim dl = zachod + (wschod - zachod) * f
+            For Each p In {t.GeoDoPiksel(polnoc, dl), t.GeoDoPiksel(poludnie, dl), t.GeoDoPiksel(szer, zachod), t.GeoDoPiksel(szer, wschod)}
+                minX = Math.Min(minX, p.Item1) : maxX = Math.Max(maxX, p.Item1)
+                minY = Math.Min(minY, p.Item2) : maxY = Math.Max(maxY, p.Item2)
+            Next
+        Next
+        Dim w = src.Width, h = src.Height
+        If maxX < 0 OrElse maxY < 0 OrElse minX > w OrElse minY > h Then Return False
+
+        If glebokosc < 3 AndAlso (maxX - minX > 1500 OrElse maxY - minY > 1500) Then
+            Dim srSz = (polnoc + poludnie) / 2, srDl = (wschod + zachod) / 2
+            Dim cwiartki = {
+                New Double() {polnoc, srSz, srDl, zachod}, New Double() {polnoc, srSz, wschod, srDl},
+                New Double() {srSz, poludnie, srDl, zachod}, New Double() {srSz, poludnie, wschod, srDl}}
+            Dim narysowano = False
+            For Each c In cwiartki
+                Dim lg = geoDoUv(c(0), c(3)), pd = geoDoUv(c(1), c(2))
+                Dim stan = g.Save()
+                g.SetClip(RectangleF.FromLTRB(Math.Min(lg.X, pd.X), Math.Min(lg.Y, pd.Y), Math.Max(lg.X, pd.X), Math.Max(lg.Y, pd.Y)))
+                If RysujFragment(g, src, ozi, c(0), c(1), c(2), c(3), geoDoUv, glebokosc + 1) Then narysowano = True
+                g.Restore(stan)
+            Next
+            Return narysowano
+        End If
+
+        Dim x0 = Math.Max(0, CInt(Math.Floor(minX)) - 2)
+        Dim y0 = Math.Max(0, CInt(Math.Floor(minY)) - 2)
+        Dim x1 = Math.Min(w, CInt(Math.Ceiling(maxX)) + 2)
+        Dim y1 = Math.Min(h, CInt(Math.Ceiling(maxY)) + 2)
+        If x1 <= x0 OrElse y1 <= y0 Then Return False
+
+        Dim gLG = t.PikselDoGeo(x0, y0), gPG = t.PikselDoGeo(x1, y0), gLD = t.PikselDoGeo(x0, y1)
+        Dim punkty = {geoDoUv(gLG.Szerokosc, gLG.Dlugosc), geoDoUv(gPG.Szerokosc, gPG.Dlugosc), geoDoUv(gLD.Szerokosc, gLD.Dlugosc)}
+        Using atr As New ImageAttributes()
+            'odbicie krawędzi zamiast półprzezroczystej obwódki interpolacji na brzegu wycinka
+            atr.SetWrapMode(Drawing2D.WrapMode.TileFlipXY)
+            g.DrawImage(src, punkty, New RectangleF(x0, y0, x1 - x0, y1 - y0), GraphicsUnit.Pixel, atr)
+        End Using
+        Return True
+    End Function
+
+    ''' <summary>Kafel Web Mercator 256 x 256 ze skanu; Nothing - kafel poza mapą.</summary>
+    Friend Shared Function KafelMercatora(src As Bitmap, ozi As PlikKalibracjiOzi, x As Integer, y As Integer, z As Integer,
+                                          jakosc As Integer) As Byte()
+        Dim polnoc = WebMercator.Szerokosc(y * 256.0, z)
+        Dim poludnie = WebMercator.Szerokosc((y + 1) * 256.0, z)
+        Dim zachod = WebMercator.Dlugosc(x * 256.0, z)
+        Dim wschod = WebMercator.Dlugosc((x + 1) * 256.0, z)
+        Dim n = 256.0 * (1L << z)
+        Dim geoDoUv = Function(lat As Double, lon As Double) As PointF
+                          Dim fi = lat * Math.PI / 180.0
+                          Dim u = (lon + 180.0) / 360.0 * n - x * 256.0
+                          Dim v = (1.0 - Math.Log(Math.Tan(fi) + 1.0 / Math.Cos(fi)) / Math.PI) / 2.0 * n - y * 256.0
+                          Return New PointF(CSng(u), CSng(v))
+                      End Function
+        Using kafelBmp As New Bitmap(256, 256, PixelFormat.Format24bppRgb)
+            Using g = Graphics.FromImage(kafelBmp)
+                g.Clear(Color.White)
+                g.InterpolationMode = Drawing2D.InterpolationMode.HighQualityBicubic
+                g.PixelOffsetMode = Drawing2D.PixelOffsetMode.HighQuality
+                If Not RysujFragment(g, src, ozi, polnoc, poludnie, wschod, zachod, geoDoUv) Then Return Nothing
+            End Using
+            Return EksportMapy.Koduj(kafelBmp, False, jakosc)
+        End Using
+    End Function
+
+    ''' <summary>Kafle piramidy (od poziomu przeglądowego do szczegółowego) pokrywające zasięg mapy.</summary>
+    Friend Shared Function KafleDoWygenerowania(ozi As PlikKalibracjiOzi) As List(Of KafelXYZ)
+        Dim zMax = PoziomSzczegolowy(ozi)
+        Dim zMin = Math.Max(8, zMax - PoziomyPrzegladowe)
+        Dim lista As New List(Of KafelXYZ)
+        For z = zMin To zMax
+            Dim zakres = WebMercator.ZakresKafli(ozi.ZasiegWgs84, z)
+            For y = zakres.Item2 To zakres.Item4
+                For x = zakres.Item1 To zakres.Item3
+                    lista.Add(New KafelXYZ(x, y, z))
+                Next
+            Next
+        Next
+        Return lista
+    End Function
+
     Friend Shared Sub KonwertujDoKmz(ozi As PlikKalibracjiOzi, plikWyjsciowy As String,
                                       kolejnosc As Integer, jakosc As Integer, podzial As Boolean,
                                       postep As IProgress(Of Integer), token As CancellationToken)
+        'KMZ: kafle w siatce szerokości i długości geograficznej (Garmin nie obraca obrazu w LatLonBox) - skan jest
+        'przerysowywany do tej siatki; wcześniej prostokąty zasięgu kafli skanu przesuwały obrócone mapy
         Using srcBmp As New Bitmap(ozi.PlikObrazu)
-            Dim w = srcBmp.Width
-            Dim h = srcBmp.Height
+            Dim zasieg = ozi.ZasiegWgs84
+            Dim mPerPx = If(ozi.RozdzielczoscMetrowNaPiksel > 0, ozi.RozdzielczoscMetrowNaPiksel, 2.5)
+            Dim srodekSz = (zasieg.Polnoc + zasieg.Poludnie) / 2.0
+            Dim stopnieSzer = mPerPx / 111132.95
+            Dim stopnieDl = mPerPx / (111412.84 * Math.Cos(srodekSz * Math.PI / 180.0))
             Const kRozmiar As Integer = 1024
+            Dim w = CInt(Math.Ceiling((zasieg.Wschod - zasieg.Zachod) / stopnieDl))
+            Dim h = CInt(Math.Ceiling((zasieg.Polnoc - zasieg.Poludnie) / stopnieSzer))
             Dim cols = CInt(Math.Ceiling(w / CDbl(kRozmiar)))
             Dim rows = CInt(Math.Ceiling(h / CDbl(kRozmiar)))
             Dim lacznieKafli = cols * rows
@@ -452,52 +585,51 @@ Public Class FormImportOzi
             Dim sciezkaTomu = If(liczbaTomow > 1, EksportMapy.NazwaPlikuTomu(plikWyjsciowy, biezacyTom, liczbaTomow), plikWyjsciowy)
             Dim tytul = If(String.IsNullOrEmpty(ozi.Tytul), Path.GetFileNameWithoutExtension(plikWyjsciowy), ozi.Tytul)
             Dim zapisKmz As New ZapisKmz(sciezkaTomu, tytul, kolejnosc)
+            Dim zapisane = 0
 
             Try
                 Dim licznik = 0
                 For r = 0 To rows - 1
                     For c = 0 To cols - 1
                         token.ThrowIfCancellationRequested()
-                        Dim pxX = c * kRozmiar
-                        Dim pxY = r * kRozmiar
-                        Dim kSzer = Math.Min(kRozmiar, w - pxX)
-                        Dim kWys = Math.Min(kRozmiar, h - pxY)
-
-                        Dim pLG = ozi.Transformacja.PikselDoGeo(pxX, pxY)
-                        Dim pPG = ozi.Transformacja.PikselDoGeo(pxX + kSzer, pxY)
-                        Dim pPD = ozi.Transformacja.PikselDoGeo(pxX + kSzer, pxY + kWys)
-                        Dim pLD = ozi.Transformacja.PikselDoGeo(pxX, pxY + kWys)
-
-                        Dim n = Math.Max(pLG.Szerokosc, pPG.Szerokosc)
-                        Dim s = Math.Min(pLD.Szerokosc, pPD.Szerokosc)
-                        Dim we = Math.Min(pLG.Dlugosc, pLD.Dlugosc)
-                        Dim ea = Math.Max(pPG.Dlugosc, pPD.Dlugosc)
-                        Dim zasiegKafla = New ProstokatGeo(n, s, ea, we)
+                        Dim kSzer = Math.Min(kRozmiar, w - c * kRozmiar)
+                        Dim kWys = Math.Min(kRozmiar, h - r * kRozmiar)
+                        Dim n = zasieg.Polnoc - r * kRozmiar * stopnieSzer
+                        Dim s = n - kWys * stopnieSzer
+                        Dim we = zasieg.Zachod + c * kRozmiar * stopnieDl
+                        Dim ea = we + kSzer * stopnieDl
+                        Dim geoDoUv = Function(lat As Double, lon As Double) New PointF(CSng((lon - we) / stopnieDl), CSng((n - lat) / stopnieSzer))
 
                         Using kafelBmp As New Bitmap(kSzer, kWys, PixelFormat.Format24bppRgb)
+                            Dim jestTresc As Boolean
                             Using g = Graphics.FromImage(kafelBmp)
-                                g.DrawImage(srcBmp, New Rectangle(0, 0, kSzer, kWys), New Rectangle(pxX, pxY, kSzer, kWys), GraphicsUnit.Pixel)
+                                g.Clear(Color.White)
+                                g.InterpolationMode = Drawing2D.InterpolationMode.HighQualityBicubic
+                                g.PixelOffsetMode = Drawing2D.PixelOffsetMode.HighQuality
+                                jestTresc = RysujFragment(g, srcBmp, ozi, n, s, ea, we, geoDoUv)
                             End Using
-                            Dim jpeg = EksportMapy.Koduj(kafelBmp, False, jakosc)
-
-                            If kafliWTomie >= maxKafliNaTom Then
-                                zapisKmz.Zakoncz()
-                                zapisKmz.Dispose()
-                                biezacyTom += 1
-                                kafliWTomie = 0
-                                sciezkaTomu = EksportMapy.NazwaPlikuTomu(plikWyjsciowy, biezacyTom, liczbaTomow)
-                                zapisKmz = New ZapisKmz(sciezkaTomu, tytul, kolejnosc)
+                            If jestTresc Then
+                                Dim jpeg = EksportMapy.Koduj(kafelBmp, False, jakosc)
+                                If kafliWTomie >= maxKafliNaTom Then
+                                    zapisKmz.Zakoncz()
+                                    zapisKmz.Dispose()
+                                    biezacyTom += 1
+                                    kafliWTomie = 0
+                                    sciezkaTomu = EksportMapy.NazwaPlikuTomu(plikWyjsciowy, biezacyTom, liczbaTomow)
+                                    zapisKmz = New ZapisKmz(sciezkaTomu, tytul, kolejnosc)
+                                End If
+                                Dim nazwaKafla = String.Format(CultureInfo.InvariantCulture, "tile_{0:00}_{1:00}.jpg", r, c)
+                                zapisKmz.DodajKafel(nazwaKafla, jpeg, New ProstokatGeo(n, s, ea, we))
+                                kafliWTomie += 1
+                                zapisane += 1
                             End If
-
-                            Dim nazwaKafla = String.Format(CultureInfo.InvariantCulture, "tile_{0:00}_{1:00}.jpg", r, c)
-                            zapisKmz.DodajKafel(nazwaKafla, jpeg, zasiegKafla)
-                            kafliWTomie += 1
                         End Using
 
                         licznik += 1
-                        postep?.Report(CInt(licznik * 100 / lacznieKafli))
+                        postep?.Report(CInt(licznik * 100L / lacznieKafli))
                     Next
                 Next
+                If zapisane = 0 Then Throw New InvalidOperationException("Nie wygenerowano żadnych kafli - kalibracja nie pokrywa obrazu mapy.")
                 zapisKmz.Zakoncz()
             Finally
                 zapisKmz.Dispose()
@@ -509,91 +641,46 @@ Public Class FormImportOzi
                                       kolejnosc As Integer, jakosc As Integer,
                                       postep As IProgress(Of Integer), token As CancellationToken)
         Using srcBmp As New Bitmap(ozi.PlikObrazu)
-            Dim w = srcBmp.Width
-            Dim h = srcBmp.Height
-
-            Dim mPerPx = ozi.RozdzielczoscMetrowNaPiksel
-            If mPerPx <= 0 Then mPerPx = 2.5
+            Dim kafle = KafleDoWygenerowania(ozi)
+            If kafle.Count > MaksKafliJnx Then
+                Throw New InvalidOperationException($"Mapa wymaga {kafle.Count} kafli, a plik JNX może mieć najwyżej {MaksKafliJnx}. Podziel skan na mniejsze arkusze.")
+            End If
             Dim srodekSz = (ozi.ZasiegWgs84.Polnoc + ozi.ZasiegWgs84.Poludnie) / 2.0
-            Dim z = CInt(Math.Round(Math.Log(156543.03392 * Math.Cos(srodekSz * Math.PI / 180.0) / mPerPx) / Math.Log(2)))
-            z = Math.Max(10, Math.Min(18, z))
-
-            Dim skala = ZapisJnx.SkalaDlaPoziomu(z, srodekSz)
-            Dim poziom As New PoziomJnx(skala)
-
-            Dim zakres = WebMercator.ZakresKafli(ozi.ZasiegWgs84, z)
-            Dim lacznie = CLng(zakres.Item3 - zakres.Item1 + 1) * (zakres.Item4 - zakres.Item2 + 1)
-            Dim licznik = 0L
-
-            Dim gLG = ozi.Transformacja.PikselDoGeo(0, 0)
-            Dim gPG = ozi.Transformacja.PikselDoGeo(w, 0)
-            Dim gLD = ozi.Transformacja.PikselDoGeo(0, h)
-
-            For y = zakres.Item2 To zakres.Item4
-                For x = zakres.Item1 To zakres.Item3
-                    token.ThrowIfCancellationRequested()
-                    Dim polnoc = WebMercator.Szerokosc(y * 256.0, z)
-                    Dim poludnie = WebMercator.Szerokosc((y + 1) * 256.0, z)
-                    Dim zachod = WebMercator.Dlugosc(x * 256.0, z)
-                    Dim wschod = WebMercator.Dlugosc((x + 1) * 256.0, z)
-
-                    Dim dLon = wschod - zachod
-                    Dim dLat = polnoc - poludnie
-                    If dLon > 0 AndAlso dLat > 0 Then
-                        Dim u0 = (gLG.Dlugosc - zachod) / dLon * 256.0
-                        Dim v0 = (polnoc - gLG.Szerokosc) / dLat * 256.0
-                        Dim u1 = (gPG.Dlugosc - zachod) / dLon * 256.0
-                        Dim v1 = (polnoc - gPG.Szerokosc) / dLat * 256.0
-                        Dim u2 = (gLD.Dlugosc - zachod) / dLon * 256.0
-                        Dim v2 = (polnoc - gLD.Szerokosc) / dLat * 256.0
-                        Dim u3 = u1 + u2 - u0
-                        Dim v3 = v1 + v2 - v0
-
-                        Dim minU = Math.Min(Math.Min(u0, u1), Math.Min(u2, u3))
-                        Dim maxU = Math.Max(Math.Max(u0, u1), Math.Max(u2, u3))
-                        Dim minV = Math.Min(Math.Min(v0, v1), Math.Min(v2, v3))
-                        Dim maxV = Math.Max(Math.Max(v0, v1), Math.Max(v2, v3))
-
-                        If maxU >= 0 AndAlso minU <= 256.0 AndAlso maxV >= 0 AndAlso minV <= 256.0 Then
-                            Using kafelBmp As New Bitmap(256, 256, PixelFormat.Format24bppRgb)
-                                Using g = Graphics.FromImage(kafelBmp)
-                                    g.Clear(Color.White)
-                                    g.InterpolationMode = Drawing2D.InterpolationMode.HighQualityBilinear
-                                    g.PixelOffsetMode = Drawing2D.PixelOffsetMode.HighQuality
-                                    Dim destPoints = {New PointF(CSng(u0), CSng(v0)), New PointF(CSng(u1), CSng(v1)), New PointF(CSng(u2), CSng(v2))}
-                                    g.DrawImage(srcBmp, destPoints, New RectangleF(0, 0, w, h), GraphicsUnit.Pixel)
-                                End Using
-                                Dim dane = EksportMapy.Koduj(kafelBmp, False, jakosc)
-                                poziom.Kafle.Add(New KafelJnx(New ProstokatGeo(polnoc, poludnie, wschod, zachod), dane))
-                            End Using
-                        End If
+            'poziomy od przeglądowego do szczegółowego - jak w eksporcie JNX z okna eksportu
+            Dim poziomy As New SortedDictionary(Of Integer, PoziomJnx)
+            Dim licznik = 0
+            For Each k In kafle
+                token.ThrowIfCancellationRequested()
+                Dim dane = KafelMercatora(srcBmp, ozi, k.X, k.Y, k.Z, jakosc)
+                If dane IsNot Nothing Then
+                    Dim poziom As PoziomJnx = Nothing
+                    If Not poziomy.TryGetValue(k.Z, poziom) Then
+                        poziom = New PoziomJnx(ZapisJnx.SkalaDlaPoziomu(k.Z, srodekSz))
+                        poziomy(k.Z) = poziom
                     End If
-
-                    licznik += 1
-                    If lacznie > 0 Then postep?.Report(CInt(licznik * 100 / lacznie))
-                Next
+                    poziom.Kafle.Add(New KafelJnx(New ProstokatGeo(WebMercator.Szerokosc(k.Y * 256.0, k.Z), WebMercator.Szerokosc((k.Y + 1) * 256.0, k.Z),
+                                                                   WebMercator.Dlugosc((k.X + 1) * 256.0, k.Z), WebMercator.Dlugosc(k.X * 256.0, k.Z)), dane))
+                End If
+                licznik += 1
+                postep?.Report(CInt(licznik * 100L / kafle.Count))
             Next
 
-            If poziom.Kafle.Count = 0 Then
-                Throw New InvalidOperationException("Nie wygenerowano żadnych kafli w wybranym obszarze.")
+            If poziomy.Count = 0 Then
+                Throw New InvalidOperationException("Nie wygenerowano żadnych kafli - kalibracja nie pokrywa obrazu mapy.")
             End If
 
             Dim tytul = If(String.IsNullOrEmpty(ozi.Tytul), Path.GetFileNameWithoutExtension(plikWyjsciowy), ozi.Tytul)
-            ZapisJnx.Zapisz(plikWyjsciowy, tytul, kolejnosc, New List(Of PoziomJnx) From {poziom})
+            ZapisJnx.Zapisz(plikWyjsciowy, tytul, kolejnosc, poziomy.Values.ToList())
         End Using
     End Sub
 
     Friend Shared Sub KonwertujDoMbtiles(ozi As PlikKalibracjiOzi, plikWyjsciowy As String,
                                           jakosc As Integer, postep As IProgress(Of Integer), token As CancellationToken)
         Using srcBmp As New Bitmap(ozi.PlikObrazu)
-            Dim w = srcBmp.Width
-            Dim h = srcBmp.Height
-
-            Dim mPerPx = ozi.RozdzielczoscMetrowNaPiksel
-            If mPerPx <= 0 Then mPerPx = 2.5
+            Dim kafle = KafleDoWygenerowania(ozi)
+            Dim zMax = kafle.Max(Function(k) k.Z)
+            Dim zMin = kafle.Min(Function(k) k.Z)
             Dim srodekSz = (ozi.ZasiegWgs84.Polnoc + ozi.ZasiegWgs84.Poludnie) / 2.0
-            Dim z = CInt(Math.Round(Math.Log(156543.03392 * Math.Cos(srodekSz * Math.PI / 180.0) / mPerPx) / Math.Log(2)))
-            z = Math.Max(10, Math.Min(18, z))
 
             EksportMapy.UsunPlikBazy(plikWyjsciowy)
             Using polaczenie As New SQLiteConnection(EksportMapy.ParametryPolaczenia(plikWyjsciowy, "Wal"))
@@ -610,10 +697,10 @@ Public Class FormImportOzi
                     {"version", "1.1"},
                     {"description", "Konwersja z mapy OziExplorer (.map)"},
                     {"format", "jpg"},
-                    {"minzoom", z.ToString(ci)},
-                    {"maxzoom", z.ToString(ci)},
+                    {"minzoom", zMin.ToString(ci)},
+                    {"maxzoom", zMax.ToString(ci)},
                     {"bounds", String.Format(ci, "{0},{1},{2},{3}", ozi.ZasiegWgs84.Zachod, ozi.ZasiegWgs84.Poludnie, ozi.ZasiegWgs84.Wschod, ozi.ZasiegWgs84.Polnoc)},
-                    {"center", String.Format(ci, "{0},{1},{2}", (ozi.ZasiegWgs84.Zachod + ozi.ZasiegWgs84.Wschod) / 2.0, srodekSz, z)}
+                    {"center", String.Format(ci, "{0},{1},{2}", (ozi.ZasiegWgs84.Zachod + ozi.ZasiegWgs84.Wschod) / 2.0, srodekSz, zMax)}
                 }
 
                 Using cmdMeta As New SQLiteCommand("INSERT INTO metadata (name, value) VALUES (@n, @v);", polaczenie)
@@ -626,75 +713,33 @@ Public Class FormImportOzi
                     Next
                 End Using
 
-                Dim zakres = WebMercator.ZakresKafli(ozi.ZasiegWgs84, z)
-                Dim lacznie = CLng(zakres.Item3 - zakres.Item1 + 1) * (zakres.Item4 - zakres.Item2 + 1)
-                Dim licznik = 0L
-
-                Dim gLG = ozi.Transformacja.PikselDoGeo(0, 0)
-                Dim gPG = ozi.Transformacja.PikselDoGeo(w, 0)
-                Dim gLD = ozi.Transformacja.PikselDoGeo(0, h)
-
+                Dim licznik = 0
+                Dim zapisane = 0
                 Using trans = polaczenie.BeginTransaction()
                     Using cmdTile As New SQLiteCommand("INSERT OR REPLACE INTO tiles (zoom_level, tile_column, tile_row, tile_data) VALUES (@z, @x, @y, @d);", polaczenie, trans)
                         Dim pZ = cmdTile.Parameters.Add("@z", DbType.Int32)
                         Dim pX = cmdTile.Parameters.Add("@x", DbType.Int32)
                         Dim pY = cmdTile.Parameters.Add("@y", DbType.Int32)
                         Dim pD = cmdTile.Parameters.Add("@d", DbType.Binary)
-
-                        For y = zakres.Item2 To zakres.Item4
-                            For x = zakres.Item1 To zakres.Item3
-                                token.ThrowIfCancellationRequested()
-                                Dim polnoc = WebMercator.Szerokosc(y * 256.0, z)
-                                Dim poludnie = WebMercator.Szerokosc((y + 1) * 256.0, z)
-                                Dim zachod = WebMercator.Dlugosc(x * 256.0, z)
-                                Dim wschod = WebMercator.Dlugosc((x + 1) * 256.0, z)
-
-                                Dim dLon = wschod - zachod
-                                Dim dLat = polnoc - poludnie
-                                If dLon > 0 AndAlso dLat > 0 Then
-                                    Dim u0 = (gLG.Dlugosc - zachod) / dLon * 256.0
-                                    Dim v0 = (polnoc - gLG.Szerokosc) / dLat * 256.0
-                                    Dim u1 = (gPG.Dlugosc - zachod) / dLon * 256.0
-                                    Dim v1 = (polnoc - gPG.Szerokosc) / dLat * 256.0
-                                    Dim u2 = (gLD.Dlugosc - zachod) / dLon * 256.0
-                                    Dim v2 = (polnoc - gLD.Szerokosc) / dLat * 256.0
-                                    Dim u3 = u1 + u2 - u0
-                                    Dim v3 = v1 + v2 - v0
-
-                                    Dim minU = Math.Min(Math.Min(u0, u1), Math.Min(u2, u3))
-                                    Dim maxU = Math.Max(Math.Max(u0, u1), Math.Max(u2, u3))
-                                    Dim minV = Math.Min(Math.Min(v0, v1), Math.Min(v2, v3))
-                                    Dim maxV = Math.Max(Math.Max(v0, v1), Math.Max(v2, v3))
-
-                                    If maxU >= 0 AndAlso minU <= 256.0 AndAlso maxV >= 0 AndAlso minV <= 256.0 Then
-                                        Using kafelBmp As New Bitmap(256, 256, PixelFormat.Format24bppRgb)
-                                            Using g = Graphics.FromImage(kafelBmp)
-                                                g.Clear(Color.White)
-                                                g.InterpolationMode = Drawing2D.InterpolationMode.HighQualityBilinear
-                                                g.PixelOffsetMode = Drawing2D.PixelOffsetMode.HighQuality
-                                                Dim destPoints = {New PointF(CSng(u0), CSng(v0)), New PointF(CSng(u1), CSng(v1)), New PointF(CSng(u2), CSng(v2))}
-                                                g.DrawImage(srcBmp, destPoints, New RectangleF(0, 0, w, h), GraphicsUnit.Pixel)
-                                            End Using
-                                            Dim dane = EksportMapy.Koduj(kafelBmp, False, jakosc)
-
-                                            ' W MBTiles wiersze liczone są od dołu (TMS)
-                                            Dim wierszTms = (1 << z) - 1 - y
-                                            pZ.Value = z
-                                            pX.Value = x
-                                            pY.Value = wierszTms
-                                            pD.Value = dane
-                                            cmdTile.ExecuteNonQuery()
-                                        End Using
-                                    End If
-                                End If
-
-                                licznik += 1
-                                If lacznie > 0 Then postep?.Report(CInt(licznik * 100 / lacznie))
-                            Next
+                        For Each k In kafle
+                            token.ThrowIfCancellationRequested()
+                            Dim dane = KafelMercatora(srcBmp, ozi, k.X, k.Y, k.Z, jakosc)
+                            If dane IsNot Nothing Then
+                                ' W MBTiles wiersze liczone są od dołu (TMS)
+                                pZ.Value = k.Z
+                                pX.Value = k.X
+                                pY.Value = k.WierszTms
+                                pD.Value = dane
+                                cmdTile.ExecuteNonQuery()
+                                zapisane += 1
+                            End If
+                            licznik += 1
+                            postep?.Report(CInt(licznik * 100L / kafle.Count))
                         Next
                         trans.Commit()
                     End Using
                 End Using
+                If zapisane = 0 Then Throw New InvalidOperationException("Nie wygenerowano żadnych kafli - kalibracja nie pokrywa obrazu mapy.")
 
                 Using cmdDel As New SQLiteCommand("PRAGMA journal_mode = DELETE;", polaczenie)
                     cmdDel.ExecuteNonQuery()
@@ -702,6 +747,24 @@ Public Class FormImportOzi
             End Using
         End Using
     End Sub
+
+    ''' <summary>Nazwa pliku wynikowego: nazwa pliku .map, przy powtórce poprzedzona nazwą folderu, a w ostateczności numerem.</summary>
+    Friend Shared Function UnikalnaNazwaWyniku(plikMap As String, uzyte As HashSet(Of String)) As String
+        Dim rdzen = Path.GetFileNameWithoutExtension(plikMap)
+        Dim nazwa = rdzen
+        If uzyte.Contains(nazwa) Then
+            Dim folder = Path.GetFileName(Path.GetDirectoryName(Path.GetFullPath(plikMap)))
+            If Not String.IsNullOrEmpty(folder) Then nazwa = folder & "_" & rdzen
+        End If
+        Dim numer = 2
+        Dim kandydat = nazwa
+        While uzyte.Contains(kandydat)
+            kandydat = nazwa & "_" & numer.ToString(CultureInfo.InvariantCulture)
+            numer += 1
+        End While
+        uzyte.Add(kandydat)
+        Return kandydat
+    End Function
 
     Friend Shared Function KonwertujWsadowo(plikiMap As IEnumerable(Of String),
                                             folderWyjsciowy As String,
@@ -718,6 +781,8 @@ Public Class FormImportOzi
         Dim lista = plikiMap.Where(Function(p) Not String.IsNullOrWhiteSpace(p)).ToList()
         Dim wynik As New WynikKonwersjiWsadowej With {.LaczniePlikow = lista.Count}
         Dim lacznie = lista.Count
+        'mapy o tej samej nazwie z różnych podfolderów nie mogą nadpisać jednego pliku wynikowego
+        Dim uzyteNazwy As New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
 
         For i = 0 To lacznie - 1
             token.ThrowIfCancellationRequested()
@@ -744,7 +809,14 @@ Public Class FormImportOzi
                 End If
 
                 Dim rozszerzenie = If(format = FormatKonwersjiOzi.Jnx, ".jnx", If(format = FormatKonwersjiOzi.Kmz, ".kmz", ".mbtiles"))
-                Dim sciezkaDocelowa = Path.Combine(folderWyjsciowy, rdzen & rozszerzenie)
+                Dim nazwaWyniku = UnikalnaNazwaWyniku(plikMap, uzyteNazwy)
+                Dim sciezkaDocelowa = Path.Combine(folderWyjsciowy, nazwaWyniku & rozszerzenie)
+                If ozi.DuzyBladKalibracji Then
+                    wynik.Bledy.Add($"{nazwaPliku}: uwaga - duży błąd kalibracji (RMS {ozi.Transformacja.BladRmsMetry:0} m), mapa może być przesunięta.")
+                End If
+                If Not ozi.DatumObslugiwane Then
+                    wynik.Bledy.Add($"{nazwaPliku}: uwaga - nieznany datum ({ozi.Datum}), współrzędne użyte bez korekty.")
+                End If
                 Dim biezacyIndeks = i
 
                 Dim postepPliku = New Progress(Of Integer)(Sub(pct)

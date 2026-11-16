@@ -1,4 +1,4 @@
-'Copyright (C) <2015>  pajakt
+﻿'Copyright (C) <2015>  pajakt
 
 'This program is free software: you can redistribute it and/or modify
 'it under the terms of the GNU General Public License as published by
@@ -461,7 +461,10 @@ Public NotInheritable Class EksportMapy
     ''' <summary>Plan kafli KMZ dla zadania.</summary>
     Public Shared Function PlanKmz(z As ZadanieEksportu) As PlanKmz
         Dim obszar = ProstokatGeo.Wpisany(z.Uklad, z.Zrodlo.Siatka.ZasiegSiatki)
-        Return New PlanKmz(obszar, PikselWMetrach(z), 1024, If(z.Rodzaj = RodzajEksportu.KmzGarmin, z.MaksKafli, 0))
+        'podział na tomy: plan w pełnej rozdzielczości (limit kafli dotyczy pojedynczego tomu, nie całej mapy) -
+        'z limitem w planie rozdzielczość malała do MaksKafli i zawsze powstawał jeden tom
+        Dim limit As Integer = If(z.Rodzaj = RodzajEksportu.KmzGarmin AndAlso Not z.PodzialNaTomy, z.MaksKafli, 0)
+        Return New PlanKmz(obszar, PikselWMetrach(z), 1024, limit)
     End Function
 
     ''' <summary>Liczba kafli Web Mercator we wszystkich poziomach (z pustymi - przed pominięciem kafli bez danych).</summary>
@@ -874,6 +877,28 @@ Friend Shared Function NazwaPlikuTomu(sciezkaBazowa As String, numerTomu As Inte
 
 #Region "GeoTIFF"
 
+    ''' <summary>
+    ''' Nakłada piksel (kolor, krycie efA 0..1) na piksel ARGB operatorem „over” dla alfy niepowiązanej (taką zapisuje
+    ''' GeoTIFF RGBA, ExtraSamples = 2). Wcześniej kolor mieszano z tłem bez uwzględnienia jego przezroczystości,
+    ''' więc na przezroczystym tle nakładki półprzezroczyste piksele (wygładzone linie) wychodziły ok. 40% ciemniejsze.
+    ''' </summary>
+    Friend Shared Function NalozPiksel(stary As Integer, r As Double, g As Double, b As Double, efA As Double) As Integer
+        If efA <= 0 Then Return stary
+        efA = Math.Min(1.0, efA)
+        Dim staryA = ((stary >> 24) And &HFF) / 255.0
+        Dim staryR = (stary >> 16) And &HFF
+        Dim staryG = (stary >> 8) And &HFF
+        Dim staryB = stary And &HFF
+        Dim wagaTla = staryA * (1.0 - efA)
+        Dim nowyA = efA + wagaTla
+        If nowyA <= 0 Then Return stary
+        Dim nowyR = CInt(Math.Min(255, Math.Max(0, Math.Round((r * efA + staryR * wagaTla) / nowyA))))
+        Dim nowyG = CInt(Math.Min(255, Math.Max(0, Math.Round((g * efA + staryG * wagaTla) / nowyA))))
+        Dim nowyB = CInt(Math.Min(255, Math.Max(0, Math.Round((b * efA + staryB * wagaTla) / nowyA))))
+        Dim a = CInt(Math.Min(255, Math.Round(nowyA * 255.0)))
+        Return (a << 24) Or (nowyR << 16) Or (nowyG << 8) Or nowyB
+    End Function
+
     Private Shared Sub EksportGeoTiff(z As ZadanieEksportu, postep As IProgress(Of Integer), token As CancellationToken)
         Dim s = z.Zrodlo.Siatka
         If s Is Nothing OrElse Not s.Poprawna OrElse s.LiczbaKolumn = 0 OrElse s.LiczbaWierszy = 0 Then
@@ -924,17 +949,7 @@ Friend Shared Function NazwaPlikuTomu(sciezkaBazowa As String, numerTomu As Inte
                                     If warstwa Is warstwy(0) AndAlso efA >= 0.999 Then
                                         pikseleArgb(idxCel + x) = (CInt(a) << 24) Or (CInt(r) << 16) Or (CInt(g) << 8) Or b
                                     Else
-                                        Dim stary = pikseleArgb(idxCel + x)
-                                        Dim staryA = (stary >> 24) And &HFF
-                                        Dim staryR = (stary >> 16) And &HFF
-                                        Dim staryG = (stary >> 8) And &HFF
-                                        Dim staryB = stary And &HFF
-
-                                        Dim nowyR = CInt(staryR * (1.0 - efA) + r * efA)
-                                        Dim nowyG = CInt(staryG * (1.0 - efA) + g * efA)
-                                        Dim nowyB = CInt(staryB * (1.0 - efA) + b * efA)
-                                        Dim nowyA = CInt(Math.Min(255, staryA + a * krycie))
-                                        pikseleArgb(idxCel + x) = (nowyA << 24) Or (nowyR << 16) Or (nowyG << 8) Or nowyB
+                                        pikseleArgb(idxCel + x) = NalozPiksel(pikseleArgb(idxCel + x), r, g, b, efA)
                                     End If
                                 Next
                             Next
@@ -958,17 +973,7 @@ Friend Shared Function NazwaPlikuTomu(sciezkaBazowa As String, numerTomu As Inte
                                 Dim r, g, b, a As Double
                                 If zr.Probka(pWarstwy.X, pWarstwy.Y, r, g, b, a) AndAlso a > 0 Then
                                     Dim efA As Double = (a / 255.0) * krycie
-                                    Dim stary = pikseleArgb(idxCel + x)
-                                    Dim staryA = (stary >> 24) And &HFF
-                                    Dim staryR = (stary >> 16) And &HFF
-                                    Dim staryG = (stary >> 8) And &HFF
-                                    Dim staryB = stary And &HFF
-
-                                    Dim nowyR = CInt(Math.Min(255, Math.Max(0, staryR * (1.0 - efA) + r * efA)))
-                                    Dim nowyG = CInt(Math.Min(255, Math.Max(0, staryG * (1.0 - efA) + g * efA)))
-                                    Dim nowyB = CInt(Math.Min(255, Math.Max(0, staryB * (1.0 - efA) + b * efA)))
-                                    Dim nowyA = CInt(Math.Min(255, staryA + a * krycie))
-                                    pikseleArgb(idxCel + x) = (nowyA << 24) Or (nowyR << 16) Or (nowyG << 8) Or nowyB
+                                    pikseleArgb(idxCel + x) = NalozPiksel(pikseleArgb(idxCel + x), r, g, b, efA)
                                 End If
                             Next
                         Next
