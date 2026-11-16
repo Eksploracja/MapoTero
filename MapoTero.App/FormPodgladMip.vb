@@ -1,4 +1,4 @@
-'Copyright (C) <2026>  pajakt
+﻿'Copyright (C) <2026>  pajakt
 '
 'This program is free software: you can redistribute it and/or modify
 'it under the terms of the GNU General Public License as published by
@@ -51,10 +51,16 @@ Public Class FormPodgladMip
     Private Sub WczytajObrazProbki(sciezka As String)
         Try
             If Not String.IsNullOrEmpty(sciezka) AndAlso File.Exists(sciezka) Then
+                'środkowy wycinek 240 x 240 w skali 1:1 - wyostrzanie działa na pikselach, więc podgląd zmniejszonego
+                'segmentu (np. 2000 px do 240 px) pokazywał kilkukrotnie mocniejszy efekt niż w wyeksportowanej mapie
                 Using tmp As New Bitmap(sciezka)
                     _oryginalBmp = New Bitmap(240, 240, Imaging.PixelFormat.Format32bppArgb)
                     Using g = Graphics.FromImage(_oryginalBmp)
-                        g.DrawImage(tmp, New Rectangle(0, 0, 240, 240))
+                        g.Clear(Color.White)
+                        Dim x0 = Math.Max(0, (tmp.Width - 240) \ 2)
+                        Dim y0 = Math.Max(0, (tmp.Height - 240) \ 2)
+                        Dim w = Math.Min(240, tmp.Width), h = Math.Min(240, tmp.Height)
+                        g.DrawImage(tmp, New Rectangle((240 - w) \ 2, (240 - h) \ 2, w, h), New Rectangle(x0, y0, w, h), GraphicsUnit.Pixel)
                     End Using
                 End Using
                 Return
@@ -121,6 +127,7 @@ Public Class FormPodgladMip
     Private Sub OdswiezPodglad()
         If _oryginalBmp Is Nothing Then Exit Sub
 
+        Dim stary = picPodglad.Image
         If rbOryginal.Checked Then
             picPodglad.Image = _oryginalBmp
         Else
@@ -128,6 +135,8 @@ Public Class FormPodgladMip
             NakladanieObrazow.ZastosujKorekcjeMip(przetworzony, _opcje)
             picPodglad.Image = przetworzony
         End If
+        'poprzedni obraz przetworzony (nie oryginał) zwalniany od razu - przy przesuwaniu suwaków powstają setki bitmap
+        If stary IsNot Nothing AndAlso stary IsNot _oryginalBmp AndAlso stary IsNot picPodglad.Image Then stary.Dispose()
     End Sub
 
     Private Sub Suwaki_Scroll(sender As Object, e As EventArgs) Handles tbGamma.Scroll, tbKontrast.Scroll, tbNasycenie.Scroll, tbOstrz.Scroll

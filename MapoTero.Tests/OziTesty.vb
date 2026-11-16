@@ -62,6 +62,19 @@ Public Class OziTesty
         Assert.InRange(pt.Wgs84.Dlugosc, 19.9741, 19.9743)
     End Sub
 
+    <Theory>
+    <InlineData(52.0004827, 21.0024869, 52.0, 21.0)>
+    <InlineData(49.3001834, 19.9022046, 49.3, 19.9)>
+    <InlineData(54.3008069, 18.6022721, 54.3, 18.6)>
+    <InlineData(50.8004434, 15.0016048, 50.8, 15.0)>
+    Public Sub BorowaGoraZgodnaZPrzesunieciamiIgik(latBg As Double, lonBg As Double, latWgs As Double, lonWgs As Double)
+        'punkty kontrolne: WGS84 -> BG wg parametrów wyznaczonych z przesunięć BG -> "1942" (Cisak, Sas 2004) w PROJ
+        Dim wgs = PlikKalibracjiOzi.PrzeliczDatumDoWgs84(latBg, lonBg, "Borowa Gora")
+        Dim dN = (wgs.Szerokosc - latWgs) * 111133.0
+        Dim dE = (wgs.Dlugosc - lonWgs) * 111413.0 * Math.Cos(latWgs * Math.PI / 180)
+        Assert.True(Math.Sqrt(dN * dN + dE * dE) < 1.0)
+    End Sub
+
     <Fact>
     Public Sub PrzeliczDatumBorowaGoraDoWgs84()
         ' Punkt w Tatrach: 49.2, 19.9
@@ -249,14 +262,16 @@ Public Class OziTesty
             Assert.Empty(brak)
 
             ' 2. Pliki w podfolderze (brak w głównym) -> powinno znaleźć w podfolderze
-            File.WriteAllText(Path.Combine(podfolder, "mapa1.map"), "test")
-            File.WriteAllText(Path.Combine(podfolder, "mapa2.map"), "test")
+            File.WriteAllText(Path.Combine(podfolder, "mapa1.map"), "OziExplorer Map Data File Version 2.2")
+            File.WriteAllText(Path.Combine(podfolder, "mapa2.map"), "OziExplorer Map Data File Version 2.2")
+            'mapa źródeł JavaScript z tym samym rozszerzeniem nie jest kalibracją mapy
+            File.WriteAllText(Path.Combine(podfolder, "skrypt.js.map"), "{""version"":3,""file"":""skrypt.js""}")
             File.WriteAllText(Path.Combine(podfolder, "obraz.jpg"), "test")
             Dim wPodfolderze = FormImportOzi.ZnajdzPlikiMapWFolderze(folderTestu)
             Assert.Equal(2, wPodfolderze.Count)
 
             ' 3. Pliki w folderze głównym -> powinno preferować folder główny
-            File.WriteAllText(Path.Combine(folderTestu, "glowna.map"), "test")
+            File.WriteAllText(Path.Combine(folderTestu, "glowna.map"), "OziExplorer Map Data File Version 2.2")
             Dim wGlownym = FormImportOzi.ZnajdzPlikiMapWFolderze(folderTestu)
             Assert.Single(wGlownym)
             Assert.EndsWith("glowna.map", wGlownym(0))
@@ -532,6 +547,61 @@ Public Class OziTesty
                 Assert.InRange(sx / licz, u - 2.0, u + 2.0)
                 Assert.InRange(sy / licz, v - 2.0, v + 2.0)
             End Using
+        Finally
+            System.Data.SQLite.SQLiteConnection.ClearAllPools()
+            GC.Collect()
+            GC.WaitForPendingFinalizers()
+            Directory.Delete(folder, True)
+        End Try
+    End Sub
+
+    Private Class PostepZAnulowaniem
+        Implements IProgress(Of Integer)
+        Private ReadOnly _cts As CancellationTokenSource
+        Public Sub New(cts As CancellationTokenSource)
+            _cts = cts
+        End Sub
+        Public Sub Report(value As Integer) Implements IProgress(Of Integer).Report
+            If value >= 30 Then _cts.Cancel()
+        End Sub
+    End Class
+
+    <Theory>
+    <InlineData("kmz")>
+    <InlineData("jnx")>
+    <InlineData("mbtiles")>
+    Public Sub AnulowanaKonwersjaNieZostawiaPlikow(format As String)
+        'anulowany KMZ zostawiał niekompletny plik (5,9 MB), MBTiles - pustą bazę; użytkownik mógł je wziąć za gotową mapę
+        Dim folder = NowyFolderOzi()
+        Try
+            Dim obraz = Path.Combine(folder, "skan.png")
+            Using bmp As New System.Drawing.Bitmap(3000, 3000)
+                Using g = System.Drawing.Graphics.FromImage(bmp)
+                    g.Clear(System.Drawing.Color.Olive)
+                End Using
+                bmp.Save(obraz, System.Drawing.Imaging.ImageFormat.Png)
+            End Using
+            Dim linie = NaglowekMap("Skan", "skan.png", "Latitude/Longitude")
+            linie.AddRange({
+                "Point01,xy, 0, 0,in, deg, 50, 6.0,N, 20, 0.0,E, grid,,,,N",
+                "Point02,xy, 3000, 0,in, deg, 50, 6.0,N, 20, 6.0,E, grid,,,,N",
+                "Point03,xy, 3000, 3000,in, deg, 50, 0.0,N, 20, 6.0,E, grid,,,,N",
+                "Point04,xy, 0, 3000,in, deg, 50, 0.0,N, 20, 0.0,E, grid,,,,N"})
+            Dim plikMap = Path.Combine(folder, "skan.map")
+            File.WriteAllLines(plikMap, linie)
+            Dim ozi = PlikKalibracjiOzi.Wczytaj(plikMap)
+            Dim cts As New CancellationTokenSource()
+            Dim wynik = Path.Combine(folder, "wynik." & format)
+            Assert.ThrowsAny(Of OperationCanceledException)(
+                Sub()
+                    Select Case format
+                        Case "kmz" : FormImportOzi.KonwertujDoKmz(ozi, wynik, 30, 85, True, New PostepZAnulowaniem(cts), cts.Token)
+                        Case "jnx" : FormImportOzi.KonwertujDoJnx(ozi, wynik, 30, 85, New PostepZAnulowaniem(cts), cts.Token)
+                        Case Else : FormImportOzi.KonwertujDoMbtiles(ozi, wynik, 85, New PostepZAnulowaniem(cts), cts.Token)
+                    End Select
+                End Sub)
+            System.Data.SQLite.SQLiteConnection.ClearAllPools()
+            Assert.Empty(Directory.GetFiles(folder, "wynik*"))
         Finally
             System.Data.SQLite.SQLiteConnection.ClearAllPools()
             GC.Collect()

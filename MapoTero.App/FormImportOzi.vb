@@ -67,11 +67,33 @@ Public Class FormImportOzi
         If String.IsNullOrWhiteSpace(sciezkaFolderu) OrElse Not Directory.Exists(sciezkaFolderu) Then
             Return New List(Of String)()
         End If
-        Dim pliki = Directory.GetFiles(sciezkaFolderu, "*.map", SearchOption.TopDirectoryOnly).OrderBy(Function(f) f).ToList()
+        'podfoldery bez dostępu (np. skróty "Moja muzyka" w Dokumentach, "Dane aplikacji") są pomijane -
+        'wcześniej wyjątek UnauthorizedAccessException przerywał wyszukiwanie po upuszczeniu takiego folderu na okno
+        Dim opcje As New EnumerationOptions With {.IgnoreInaccessible = True, .RecurseSubdirectories = False, .MatchCasing = MatchCasing.CaseInsensitive}
+        Dim pliki = Directory.GetFiles(sciezkaFolderu, "*.map", opcje).Where(AddressOf CzyPlikKalibracjiOzi).OrderBy(Function(f) f).ToList()
         If pliki.Count = 0 Then
-            pliki = Directory.GetFiles(sciezkaFolderu, "*.map", SearchOption.AllDirectories).OrderBy(Function(f) f).ToList()
+            opcje.RecurseSubdirectories = True
+            pliki = Directory.GetFiles(sciezkaFolderu, "*.map", opcje).Where(AddressOf CzyPlikKalibracjiOzi).OrderBy(Function(f) f).ToList()
         End If
         Return pliki
+    End Function
+
+    ''' <summary>
+    ''' Czy plik .map jest kalibracją OziExplorera (pierwszy wiersz "OziExplorer Map Data File"). Rozszerzenie .map mają też
+    ''' mapy źródeł JavaScript (*.js.map), pliki MapServera i MapInfo - w folderze Dokumenty było ich kilkaset.
+    ''' </summary>
+    Public Shared Function CzyPlikKalibracjiOzi(sciezka As String) As Boolean
+        Try
+            Dim bufor(63) As Byte
+            Dim n As Integer
+            Using fs As New FileStream(sciezka, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)
+                n = fs.Read(bufor, 0, bufor.Length)
+            End Using
+            Dim poczatek = System.Text.Encoding.UTF8.GetString(bufor, 0, n).TrimStart(ChrW(&HFEFF), " "c)
+            Return poczatek.StartsWith("OziExplorer Map Data File", StringComparison.OrdinalIgnoreCase)
+        Catch
+            Return False
+        End Try
     End Function
 
     Protected Overrides Sub OnDragEnter(drgevent As DragEventArgs)
@@ -585,6 +607,7 @@ Public Class FormImportOzi
             Dim sciezkaTomu = If(liczbaTomow > 1, EksportMapy.NazwaPlikuTomu(plikWyjsciowy, biezacyTom, liczbaTomow), plikWyjsciowy)
             Dim tytul = If(String.IsNullOrEmpty(ozi.Tytul), Path.GetFileNameWithoutExtension(plikWyjsciowy), ozi.Tytul)
             Dim zapisKmz As New ZapisKmz(sciezkaTomu, tytul, kolejnosc)
+            Dim utworzone As New List(Of String) From {sciezkaTomu}
             Dim zapisane = 0
 
             Try
@@ -617,6 +640,7 @@ Public Class FormImportOzi
                                     kafliWTomie = 0
                                     sciezkaTomu = EksportMapy.NazwaPlikuTomu(plikWyjsciowy, biezacyTom, liczbaTomow)
                                     zapisKmz = New ZapisKmz(sciezkaTomu, tytul, kolejnosc)
+                                    utworzone.Add(sciezkaTomu)
                                 End If
                                 Dim nazwaKafla = String.Format(CultureInfo.InvariantCulture, "tile_{0:00}_{1:00}.jpg", r, c)
                                 zapisKmz.DodajKafel(nazwaKafla, jpeg, New ProstokatGeo(n, s, ea, we))
@@ -631,8 +655,14 @@ Public Class FormImportOzi
                 Next
                 If zapisane = 0 Then Throw New InvalidOperationException("Nie wygenerowano żadnych kafli - kalibracja nie pokrywa obrazu mapy.")
                 zapisKmz.Zakoncz()
-            Finally
                 zapisKmz.Dispose()
+            Catch
+                'anulowanie lub błąd: niedokończone tomy KMZ nie mogą zostać na dysku (wyglądałyby na gotową mapę)
+                zapisKmz.Dispose()
+                For Each plik In utworzone
+                    UsunPlikBezpiecznie(plik)
+                Next
+                Throw
             End Try
         End Using
     End Sub
@@ -670,7 +700,12 @@ Public Class FormImportOzi
             End If
 
             Dim tytul = If(String.IsNullOrEmpty(ozi.Tytul), Path.GetFileNameWithoutExtension(plikWyjsciowy), ozi.Tytul)
-            ZapisJnx.Zapisz(plikWyjsciowy, tytul, kolejnosc, poziomy.Values.ToList())
+            Try
+                ZapisJnx.Zapisz(plikWyjsciowy, tytul, kolejnosc, poziomy.Values.ToList())
+            Catch
+                UsunPlikBezpiecznie(plikWyjsciowy)
+                Throw
+            End Try
         End Using
     End Sub
 
@@ -683,6 +718,7 @@ Public Class FormImportOzi
             Dim srodekSz = (ozi.ZasiegWgs84.Polnoc + ozi.ZasiegWgs84.Poludnie) / 2.0
 
             EksportMapy.UsunPlikBazy(plikWyjsciowy)
+            Try
             Using polaczenie As New SQLiteConnection(EksportMapy.ParametryPolaczenia(plikWyjsciowy, "Wal"))
                 polaczenie.Open()
                 Using cmdInit As New SQLiteCommand("PRAGMA synchronous = OFF; PRAGMA journal_mode = WAL; CREATE TABLE metadata (name text, value text); CREATE TABLE tiles (zoom_level integer, tile_column integer, tile_row integer, tile_data blob); CREATE UNIQUE INDEX tile_index ON tiles (zoom_level, tile_column, tile_row);", polaczenie)
@@ -745,7 +781,23 @@ Public Class FormImportOzi
                     cmdDel.ExecuteNonQuery()
                 End Using
             End Using
+            Catch
+                'anulowanie lub błąd: niedokończona baza MBTiles (z plikami -wal, -shm) usuwana z dysku
+                SQLiteConnection.ClearAllPools()
+                Try
+                    EksportMapy.UsunPlikBazy(plikWyjsciowy)
+                Catch
+                End Try
+                Throw
+            End Try
         End Using
+    End Sub
+
+    Private Shared Sub UsunPlikBezpiecznie(plik As String)
+        Try
+            If File.Exists(plik) Then File.Delete(plik)
+        Catch
+        End Try
     End Sub
 
     ''' <summary>Nazwa pliku wynikowego: nazwa pliku .map, przy powtórce poprzedzona nazwą folderu, a w ostateczności numerem.</summary>

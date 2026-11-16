@@ -579,7 +579,8 @@ Public Class FormEksport
             Dim k = _sesja.Konfiguracja
             Dim wzorzec = If(String.IsNullOrEmpty(k.Prefiks), "*", k.Prefiks & "*") & "." & Wms.RozszerzeniePliku(k.Format)
             Dim pliki = Directory.GetFiles(_folder, wzorzec)
-            If pliki.Length > 0 Then probka = pliki(0)
+            'segment ze środka listy - pierwszy (narożny) bywa pusty lub częściowo poza mapą
+            If pliki.Length > 0 Then probka = pliki.OrderBy(Function(p) p, StringComparer.OrdinalIgnoreCase).ElementAt(pliki.Length \ 2)
         End If
         Using dlg As New FormPodgladMip(_opcjeMip, probka)
             If dlg.ShowDialog(Me) = DialogResult.OK Then

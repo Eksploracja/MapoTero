@@ -1,4 +1,4 @@
-'Copyright (C) <2015>  pajakt
+﻿'Copyright (C) <2015>  pajakt
 '
 'This program is free software: you can redistribute it and/or modify
 'it under the terms of the GNU General Public License as published by
@@ -35,6 +35,9 @@ Public Class PodgladWarstwSilnik
 
     ' Usługi WMTS podglądu (wg adresu)
     Private ReadOnly _uslugiWmts As New Dictionary(Of String, ZrodloWmts)(StringComparer.OrdinalIgnoreCase)
+
+    ' Usługi WMTS z poprzednich parametrów podglądu (ich kafle usuwane przy zamknięciu)
+    Private ReadOnly _uslugiDoUsuniecia As New List(Of ZrodloWmts)
 
     Private _punktProbki As PunktXY? = Nothing
     Private _ostatniPiksel As Double = 0
@@ -77,10 +80,11 @@ Public Class PodgladWarstwSilnik
 
     ''' <summary>Usuwa pliki tymczasowe pobrane przez usługi WMTS.</summary>
     Public Sub UsunKafleTymczasowe()
-        For Each u In _uslugiWmts.Values
+        For Each u In _uslugiWmts.Values.Concat(_uslugiDoUsuniecia)
             u.UsunKafle()
         Next
         _uslugiWmts.Clear()
+        _uslugiDoUsuniecia.Clear()
     End Sub
 
     ''' <summary>
@@ -101,6 +105,11 @@ Public Class PodgladWarstwSilnik
 
         If zmieniono Then
             _buforWarstw.Clear()
+            'usługa WMTS przygotowana dla poprzedniego układu lub piksela (plan kafli) dawała pusty podgląd
+            'po zmianie układu - np. ortofotomapa znikała z podglądu w WGS84 bez komunikatu o błędzie.
+            'Pliki kafli usuwane są dopiero przy zamknięciu - poprzednie pobieranie podglądu może jeszcze z nich korzystać.
+            _uslugiDoUsuniecia.AddRange(_uslugiWmts.Values)
+            _uslugiWmts.Clear()
             _punktProbki = punkt
             _ostatniPiksel = piksel
             _ostatniEpsg = uklad.Epsg

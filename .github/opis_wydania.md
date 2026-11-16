@@ -37,8 +37,6 @@ Ustawienia i zbiory map z poprzednich wersji (plik `lastsettings.txt`, folder `w
   * Lupa rastrowa z powiększeniami 50%, 100% (piksel w piksel), 200% i 400% do weryfikacji czytelności etykiet i nakładek.
 * **Optymalizacje interfejsu użytkownika:**
   * Poprawka układu kontrolek w panelu warstw okna głównego eliminująca obcinanie wartości `100%` w polu wprowadzania krycia warstwy.
-* **Adaptacyjny bufor korytarza wzdłuż trasy GPX/KML:**
-  * Skalowanie szerokości bufora korytarza w zależności od poziomu powiększenia (szerszy pas na przeglądowych poziomach zoomu, wąski na zbliżeniach detalicznych).
 * **Inteligentna detekcja fałszywych sukcesów WMS:**
   * Wychwytywanie pustych białych segmentów zwracanych z kodem HTTP 200 OK przez przeciążone węzły WMS i ponawianie ich pobrania.
 * **Automatyczne dzielenie dużych map KMZ na tomy:**
@@ -46,7 +44,7 @@ Ustawienia i zbiory map z poprzednich wersji (plik `lastsettings.txt`, folder `w
 * **Odporność klastrów WMTS:**
   * Obsługa aliasów `ISOK_Cien` <-> `Cieniowanie` za load balancerem Geoportalu.
 * **Stabilność i testy regresyjne:**
-  * Kompletny pakiet **805 testów automatycznych** (.NET 10 x64) weryfikujący obliczenia matematyczne, georeferencję i interfejs użytkownika.
+  * Kompletny pakiet **812 testów automatycznych** (.NET 10 x64) weryfikujący obliczenia matematyczne, georeferencję i interfejs użytkownika.
 
 ## Zmiany w wersji 3.17
 

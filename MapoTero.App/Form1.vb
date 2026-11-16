@@ -1464,6 +1464,20 @@ Public Class Form1
         AktualizujStanPrzyciskowZoomu()
     End Sub
 
+    ''' <summary>
+    ''' Piksel podglądu bez poprawnej siatki: wpisany w polu (w jednostkach układu) albo zalecany piksel najdokładniejszej
+    ''' warstwy. Zalecany piksel jest w metrach - w układzie WGS84 przeliczany na stopnie; wcześniej 0,25 m traktowano
+    ''' jako 0,25°, więc podgląd obejmował obszar ok. 29° x 29° i był pusty.
+    ''' </summary>
+    Private Function PikselPodgladuBezSiatki() As Double
+        Dim wpisany = Wartosc(txtRozmiarPiksela.Text)
+        If wpisany > 0 Then Return wpisany
+        Dim zalecany = If(_zestaw.NajdokladniejszaWarstwa() IsNot Nothing, _zestaw.NajdokladniejszaWarstwa().ZalecanyPiksel, 0)
+        If zalecany <= 0 Then zalecany = 1.0
+        If Not Ustawienia.Uklad.Geograficzny Then Return zalecany
+        Return UkladWspolrzednych.PL1992.PrzeliczRozmiarPiksela(Ustawienia.Uklad, zalecany, New PunktGeo(mapa.Position.Lat, mapa.Position.Lng))
+    End Function
+
     ''' <summary>Aktualizuje etykietę rozdzielczości pobierania i powiększenia lupy, np. "1 m/px (100%)".</summary>
     Private Sub AktualizujEtykieteSkali()
         If _zestaw.Liczba = 0 Then
@@ -1475,12 +1489,10 @@ Public Class Form1
         If s.Poprawna Then
             bazowyPiksel = If(s.RozmiarPiksela > 0, s.RozmiarPiksela, 1.0)
         Else
-            Dim wpisany = Wartosc(txtRozmiarPiksela.Text)
-            Dim zalecany = If(_zestaw.NajdokladniejszaWarstwa() IsNot Nothing, _zestaw.NajdokladniejszaWarstwa().ZalecanyPiksel, 0)
-            bazowyPiksel = If(wpisany > 0, wpisany, If(zalecany > 0, zalecany, 1.0))
+            bazowyPiksel = PikselPodgladuBezSiatki()
         End If
         Dim zoomProcent = CInt(Math.Round(_poziomyZoomu(_indeksZoomu) * 100))
-        lblPodgladSkala.Text = Liczba(bazowyPiksel) & " m/px (" & zoomProcent & "%)"
+        lblPodgladSkala.Text = Liczba(bazowyPiksel) & If(Ustawienia.Uklad.Geograficzny, " °/px (", " m/px (") & zoomProcent & "%)"
     End Sub
 
     ''' <summary>Aktualizuje dostępność przycisków lupy rastrowej.</summary>
@@ -1550,9 +1562,7 @@ Public Class Form1
             ' Przy zmianie warstw bez siatki bierzemy bieżący środek mapy
             _punktProbkiBezSiatki = Ustawienia.Uklad.ZWgs84(mapa.Position.Lat, mapa.Position.Lng)
             punkt = _punktProbkiBezSiatki.Value
-            Dim wpisany = Wartosc(txtRozmiarPiksela.Text)
-            Dim zalecany = If(_zestaw.NajdokladniejszaWarstwa() IsNot Nothing, _zestaw.NajdokladniejszaWarstwa().ZalecanyPiksel, 0)
-            bazowyPiksel = If(wpisany > 0, wpisany, If(zalecany > 0, zalecany, 1.0))
+            bazowyPiksel = PikselPodgladuBezSiatki()
         End If
 
         AktualizujEtykieteSkali()
@@ -1603,9 +1613,7 @@ Public Class Form1
                 _punktProbkiBezSiatki = Ustawienia.Uklad.ZWgs84(mapa.Position.Lat, mapa.Position.Lng)
             End If
             punkt = _punktProbkiBezSiatki.Value
-            Dim wpisany = Wartosc(txtRozmiarPiksela.Text)
-            Dim zalecany = If(_zestaw.NajdokladniejszaWarstwa() IsNot Nothing, _zestaw.NajdokladniejszaWarstwa().ZalecanyPiksel, 0)
-            bazowyPiksel = If(wpisany > 0, wpisany, If(zalecany > 0, zalecany, 1.0))
+            bazowyPiksel = PikselPodgladuBezSiatki()
         End If
 
         _silnikPodgladu.SprawdzIZaktualizujParametry(punkt, bazowyPiksel, Ustawienia.Uklad)
@@ -1942,9 +1950,7 @@ Public Class Form1
         Dim siatka = BiezacaSiatka()
         If Not siatka.Poprawna Then
             Dim srodek = If(_punktProbkiBezSiatki.HasValue, _punktProbkiBezSiatki.Value, Ustawienia.Uklad.ZWgs84(mapa.Position.Lat, mapa.Position.Lng))
-            Dim wpisany = Wartosc(txtRozmiarPiksela.Text)
-            Dim zalecany = If(_zestaw.NajdokladniejszaWarstwa() IsNot Nothing, _zestaw.NajdokladniejszaWarstwa().ZalecanyPiksel, 0)
-            Dim piksel = If(wpisany > 0, wpisany, If(zalecany > 0, zalecany, 1.0))
+            Dim piksel = PikselPodgladuBezSiatki()
             Dim bok = 2000
             Dim zasieg As New Zasieg(srodek.X - bok * piksel / 2, srodek.Y - bok * piksel / 2, srodek.X + bok * piksel / 2, srodek.Y + bok * piksel / 2)
             siatka = New Siatka(zasieg, piksel, bok)

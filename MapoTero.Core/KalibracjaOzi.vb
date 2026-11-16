@@ -1,4 +1,4 @@
-'Copyright (C) <2026>  pajakt
+﻿'Copyright (C) <2026>  pajakt
 '
 'This program is free software: you can redistribute it and/or modify
 'it under the terms of the GNU General Public License as published by
@@ -653,8 +653,15 @@ Public Class PlikKalibracjiOzi
             Return {6378137.0, 298.257223563, 0, 0, 0}
         End If
         If dNorm.Contains("BOROWA") Then
-            ' Układ Borowa Góra (elipsoida Bessela 1841) -> WGS84
-            Return {6377397.155, 299.1528128, 580.0, 37.0, 476.0}
+            ' Układ Borowa Góra (elipsoida Bessela 1841) -> WGS84. Brak urzędowych parametrów; wartości wyznaczone
+            ' z przesunięć współrzędnych BG -> "1942" dla stref 3 i 4 (Cisak, Sas 2004, Prace IGiK t. L z. 108:
+            ' X42 = XBG + 669,2 / 670,5 m, Y42 = YBG + 12,2 / -46,8 m) i transformacji EPSG:4179 -> WGS84.
+            ' Obie strefy dają ten sam wynik z dokładnością ok. 2 m, a wartości zgadzają się z obliczonymi
+            ' z astronomicznych współrzędnych punktu Borowa Góra (569, 34, 502 - T. Syryjczyk). Dotyczą map
+            ' powojennych w odwzorowaniu Gaussa-Krügera; dla przedwojennych map WIG szacunki z odczytów map
+            ' różnią się o ok. 100 m (np. 655, 22, 444 - W. Kozakiewicz), więc tam lepsza jest kalibracja na punktach.
+            ' Wcześniej program używał 580, 37, 476 (ok. 26 m różnicy).
+            Return {6377397.155, 299.1528128, 567.7, 35.0, 502.3}
         End If
         If dNorm.Contains("POTSDAM") OrElse dNorm.Contains("DHDN") Then
             ' Potsdam / DHDN (elipsoida Bessela 1841) -> WGS84 (EPSG:1777)
