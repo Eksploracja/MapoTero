@@ -655,7 +655,7 @@ Partial Class Form1
         Me.btnWarstwaWyzej.Location = New System.Drawing.Point(4, 142)
         Me.btnWarstwaWyzej.Margin = New System.Windows.Forms.Padding(0)
         Me.btnWarstwaWyzej.Name = "btnWarstwaWyzej"
-        Me.btnWarstwaWyzej.Size = New System.Drawing.Size(23, 23)
+        Me.btnWarstwaWyzej.Size = New System.Drawing.Size(20, 23)
         Me.btnWarstwaWyzej.TabIndex = 301
         Me.btnWarstwaWyzej.Text = "▲"
         Me.ToolTip1.SetToolTip(Me.btnWarstwaWyzej, "Przesuń zaznaczoną warstwę wyżej w kanapce (Ctrl+↑)")
@@ -664,10 +664,10 @@ Partial Class Form1
         'btnWarstwaNizej
         '
         Me.btnWarstwaNizej.Font = New System.Drawing.Font("Segoe UI Symbol", 8.25!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
-        Me.btnWarstwaNizej.Location = New System.Drawing.Point(28, 142)
+        Me.btnWarstwaNizej.Location = New System.Drawing.Point(25, 142)
         Me.btnWarstwaNizej.Margin = New System.Windows.Forms.Padding(0)
         Me.btnWarstwaNizej.Name = "btnWarstwaNizej"
-        Me.btnWarstwaNizej.Size = New System.Drawing.Size(23, 23)
+        Me.btnWarstwaNizej.Size = New System.Drawing.Size(20, 23)
         Me.btnWarstwaNizej.TabIndex = 302
         Me.btnWarstwaNizej.Text = "▼"
         Me.ToolTip1.SetToolTip(Me.btnWarstwaNizej, "Przesuń zaznaczoną warstwę niżej w kanapce (Ctrl+↓)")
@@ -676,10 +676,10 @@ Partial Class Form1
         'btnUsunWarstwe
         '
         Me.btnUsunWarstwe.Font = New System.Drawing.Font("Segoe UI Symbol", 8.25!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
-        Me.btnUsunWarstwe.Location = New System.Drawing.Point(52, 142)
+        Me.btnUsunWarstwe.Location = New System.Drawing.Point(46, 142)
         Me.btnUsunWarstwe.Margin = New System.Windows.Forms.Padding(0)
         Me.btnUsunWarstwe.Name = "btnUsunWarstwe"
-        Me.btnUsunWarstwe.Size = New System.Drawing.Size(23, 23)
+        Me.btnUsunWarstwe.Size = New System.Drawing.Size(20, 23)
         Me.btnUsunWarstwe.TabIndex = 303
         Me.btnUsunWarstwe.Text = "✕"
         Me.ToolTip1.SetToolTip(Me.btnUsunWarstwe, "Usuń zaznaczoną warstwę (Delete)")
@@ -688,10 +688,10 @@ Partial Class Form1
         'btnResetujWarstwy
         '
         Me.btnResetujWarstwy.Image = Global.MapoTero.My.Resources.Resources.kosz
-        Me.btnResetujWarstwy.Location = New System.Drawing.Point(76, 142)
+        Me.btnResetujWarstwy.Location = New System.Drawing.Point(67, 142)
         Me.btnResetujWarstwy.Margin = New System.Windows.Forms.Padding(0)
         Me.btnResetujWarstwy.Name = "btnResetujWarstwy"
-        Me.btnResetujWarstwy.Size = New System.Drawing.Size(24, 23)
+        Me.btnResetujWarstwy.Size = New System.Drawing.Size(22, 23)
         Me.btnResetujWarstwy.TabIndex = 304
         Me.ToolTip1.SetToolTip(Me.btnResetujWarstwy, "Usuń zaznaczoną warstwę (Delete)")
         Me.btnResetujWarstwy.UseVisualStyleBackColor = True
@@ -700,9 +700,9 @@ Partial Class Form1
         '
         Me.lblKrycie.AutoSize = True
         Me.lblKrycie.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.lblKrycie.Location = New System.Drawing.Point(102, 147)
+        Me.lblKrycie.Location = New System.Drawing.Point(88, 147)
         Me.lblKrycie.Name = "lblKrycie"
-        Me.lblKrycie.Size = New System.Drawing.Size(47, 13)
+        Me.lblKrycie.Size = New System.Drawing.Size(42, 13)
         Me.lblKrycie.TabIndex = 305
         Me.lblKrycie.Text = "Krycie %"
         Me.ToolTip1.SetToolTip(Me.lblKrycie, "Krycie zaznaczonej warstwy: 100% - warstwa nieprzezroczysta, mniej - prześwituje przez nią niższa warstwa.")
@@ -711,10 +711,10 @@ Partial Class Form1
         '
         Me.numKrycie.Increment = New Decimal(New Integer() {5, 0, 0, 0})
         Me.numKrycie.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.numKrycie.Location = New System.Drawing.Point(148, 144)
+        Me.numKrycie.Location = New System.Drawing.Point(132, 144)
         Me.numKrycie.Minimum = New Decimal(New Integer() {5, 0, 0, 0})
         Me.numKrycie.Name = "numKrycie"
-        Me.numKrycie.Size = New System.Drawing.Size(36, 20)
+        Me.numKrycie.Size = New System.Drawing.Size(50, 20)
         Me.numKrycie.TabIndex = 306
         Me.numKrycie.Value = New Decimal(New Integer() {100, 0, 0, 0})
         Me.ToolTip1.SetToolTip(Me.numKrycie, "Krycie zaznaczonej warstwy: 100% - warstwa nieprzezroczysta, mniej - prześwituje przez nią niższa warstwa.")
@@ -722,10 +722,10 @@ Partial Class Form1
         'btnWarstwyZaawansowane
         '
         Me.btnWarstwyZaawansowane.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.btnWarstwyZaawansowane.Location = New System.Drawing.Point(185, 142)
+        Me.btnWarstwyZaawansowane.Location = New System.Drawing.Point(184, 142)
         Me.btnWarstwyZaawansowane.Margin = New System.Windows.Forms.Padding(0)
         Me.btnWarstwyZaawansowane.Name = "btnWarstwyZaawansowane"
-        Me.btnWarstwyZaawansowane.Size = New System.Drawing.Size(21, 23)
+        Me.btnWarstwyZaawansowane.Size = New System.Drawing.Size(22, 23)
         Me.btnWarstwyZaawansowane.TabIndex = 307
         Me.btnWarstwyZaawansowane.Text = "…"
         Me.ToolTip1.SetToolTip(Me.btnWarstwyZaawansowane, "Warstwy - zaawansowane: suwaki krycia i podgląd kanapki")

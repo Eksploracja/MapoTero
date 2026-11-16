@@ -17,10 +17,35 @@ Imports System.Threading.Tasks
 Imports System.Windows.Forms
 Imports MapoTero.Core
 
+Public Enum FormatKonwersjiOzi
+    Jnx
+    Kmz
+    Mbtiles
+End Enum
+
+Public Class RaportPostepuWsadowego
+    Public Property IndeksPliku As Integer
+    Public Property LaczniePlikow As Integer
+    Public Property NazwaPliku As String = ""
+    Public Property ProcentPliku As Integer
+    Public Property ProcentCalkowity As Integer
+    Public Property StatusTekst As String = ""
+End Class
+
+Public Class WynikKonwersjiWsadowej
+    Public Property LaczniePlikow As Integer
+    Public Property Sukcesy As Integer
+    Public Property Pominiete As Integer
+    Public Property Bledy As New List(Of String)()
+    Public Property WygenerowanePliki As New List(Of String)()
+End Class
+
 Public Class FormImportOzi
 
     Private _ozi As PlikKalibracjiOzi
     Private _anulowanie As CancellationTokenSource
+    Private _plikiWsadowe As New List(Of String)()
+    Private _czyTrybWsadowy As Boolean = False
 
     Public Sub New()
         InitializeComponent()
@@ -32,16 +57,30 @@ Public Class FormImportOzi
         ZaladujPlikMap(sciezkaPlikuMap)
     End Sub
 
+    ''' <summary>Otwiera formularz w trybie wsadowym (hurtowym) z podaną listą plików .map.</summary>
+    Public Sub OtworzWsadowo(plikiMap As IEnumerable(Of String))
+        ZaladujWsadowo(plikiMap)
+    End Sub
+
+    ''' <summary>Wyszukuje wszystkie pliki kalibracji .map w podanym folderze (w bieżącym lub podfolderach).</summary>
+    Public Shared Function ZnajdzPlikiMapWFolderze(sciezkaFolderu As String) As List(Of String)
+        If String.IsNullOrWhiteSpace(sciezkaFolderu) OrElse Not Directory.Exists(sciezkaFolderu) Then
+            Return New List(Of String)()
+        End If
+        Dim pliki = Directory.GetFiles(sciezkaFolderu, "*.map", SearchOption.TopDirectoryOnly).OrderBy(Function(f) f).ToList()
+        If pliki.Count = 0 Then
+            pliki = Directory.GetFiles(sciezkaFolderu, "*.map", SearchOption.AllDirectories).OrderBy(Function(f) f).ToList()
+        End If
+        Return pliki
+    End Function
+
     Protected Overrides Sub OnDragEnter(drgevent As DragEventArgs)
         MyBase.OnDragEnter(drgevent)
         If drgevent.Data.GetDataPresent(DataFormats.FileDrop) Then
             Dim pliki = DirectCast(drgevent.Data.GetData(DataFormats.FileDrop), String())
             If pliki IsNot Nothing AndAlso pliki.Length > 0 Then
-                Dim ext = Path.GetExtension(pliki(0)).ToLowerInvariant()
-                If ext = ".map" OrElse ext = ".jpg" OrElse ext = ".png" OrElse ext = ".tif" OrElse ext = ".bmp" Then
-                    drgevent.Effect = DragDropEffects.Copy
-                    Exit Sub
-                End If
+                drgevent.Effect = DragDropEffects.Copy
+                Exit Sub
             End If
         End If
         drgevent.Effect = DragDropEffects.None
@@ -51,11 +90,24 @@ Public Class FormImportOzi
         MyBase.OnDragDrop(drgevent)
         If drgevent.Data.GetDataPresent(DataFormats.FileDrop) Then
             Dim pliki = DirectCast(drgevent.Data.GetData(DataFormats.FileDrop), String())
-            If pliki IsNot Nothing AndAlso pliki.Length > 0 Then
+            If pliki Is Nothing OrElse pliki.Length = 0 Then Exit Sub
+
+            Dim znalezioneMapy As New List(Of String)()
+            For Each p In pliki
+                If Directory.Exists(p) Then
+                    znalezioneMapy.AddRange(ZnajdzPlikiMapWFolderze(p))
+                ElseIf String.Equals(Path.GetExtension(p), ".map", StringComparison.OrdinalIgnoreCase) Then
+                    znalezioneMapy.Add(p)
+                End If
+            Next
+
+            If znalezioneMapy.Count > 1 Then
+                ZaladujWsadowo(znalezioneMapy)
+            ElseIf znalezioneMapy.Count = 1 Then
+                ZaladujPlikMap(znalezioneMapy(0))
+            ElseIf _ozi IsNot Nothing AndAlso Not _czyTrybWsadowy Then
                 Dim ext = Path.GetExtension(pliki(0)).ToLowerInvariant()
-                If ext = ".map" Then
-                    ZaladujPlikMap(pliki(0))
-                ElseIf _ozi IsNot Nothing Then
+                If ext = ".jpg" OrElse ext = ".png" OrElse ext = ".tif" OrElse ext = ".bmp" OrElse ext = ".jpeg" Then
                     UstawPlikObrazu(pliki(0))
                 End If
             End If
@@ -64,7 +116,25 @@ Public Class FormImportOzi
 
     Private Sub btnWybierzMap_Click(sender As Object, e As EventArgs) Handles btnWybierzMap.Click
         If dlgWybierzMap.ShowDialog(Me) = DialogResult.OK Then
-            ZaladujPlikMap(dlgWybierzMap.FileName)
+            If dlgWybierzMap.FileNames.Length > 1 Then
+                ZaladujWsadowo(dlgWybierzMap.FileNames)
+            ElseIf dlgWybierzMap.FileNames.Length = 1 Then
+                ZaladujPlikMap(dlgWybierzMap.FileNames(0))
+            End If
+        End If
+    End Sub
+
+    Private Sub btnWybierzFolder_Click(sender As Object, e As EventArgs) Handles btnWybierzFolder.Click
+        If dlgFolder.ShowDialog(Me) = DialogResult.OK Then
+            Dim pliki = ZnajdzPlikiMapWFolderze(dlgFolder.SelectedPath)
+            If pliki.Count = 0 Then
+                MessageBox.Show("W wybranym folderze nie znaleziono żadnych plików kalibracji OziExplorer (*.map).",
+                                "Brak plików kalibracji", MessageBoxButtons.OK, MessageBoxIcon.Information)
+            ElseIf pliki.Count = 1 Then
+                ZaladujPlikMap(pliki(0))
+            Else
+                ZaladujWsadowo(pliki)
+            End If
         End If
     End Sub
 
@@ -74,7 +144,53 @@ Public Class FormImportOzi
         End If
     End Sub
 
-    Private Sub ZaladujPlikMap(sciezka As String)
+    Public Sub ZaladujWsadowo(pliki As IEnumerable(Of String))
+        _plikiWsadowe = pliki.Where(Function(p) Not String.IsNullOrWhiteSpace(p)).Distinct().ToList()
+        If _plikiWsadowe.Count = 0 Then Exit Sub
+        If _plikiWsadowe.Count = 1 Then
+            ZaladujPlikMap(_plikiWsadowe(0))
+            Exit Sub
+        End If
+
+        _czyTrybWsadowy = True
+        _ozi = Nothing
+
+        Dim zObrazem = 0
+        Dim datums As New HashSet(Of String)()
+        For Each p In _plikiWsadowe
+            Try
+                Dim o = PlikKalibracjiOzi.Wczytaj(p)
+                If o.PlikObrazuIstnieje Then zObrazem += 1
+                If Not String.IsNullOrEmpty(o.Datum) Then datums.Add(o.Datum)
+            Catch
+            End Try
+        Next
+
+        Dim folderGlowny = Path.GetDirectoryName(_plikiWsadowe(0))
+        txtPlikMap.Text = $"Kolejka wsadowa: {_plikiWsadowe.Count} plików .map ({folderGlowny})"
+        lblPlikObrazu.Text = "Dopasowanie skanów rastrowych:"
+        txtPlikObrazu.Text = $"{zObrazem} z {_plikiWsadowe.Count} plików posiada dopasowany obraz w folderze"
+        txtPlikObrazu.ForeColor = If(zObrazem = _plikiWsadowe.Count, SystemColors.WindowText, Color.DarkOrange)
+        btnWybierzObraz.Enabled = False
+
+        lblInfoTytul.Text = $"Tryb hurtowy: wybrano {_plikiWsadowe.Count} plików kalibracji .map"
+        lblInfoDatum.Text = $"Wykryte układy / datum: {If(datums.Count > 0, String.Join(", ", datums), "WGS 84")}"
+        lblInfoWymiary.Text = $"Mapy gotowe do przetworzenia: {zObrazem} (brakujące obrazy: {_plikiWsadowe.Count - zObrazem})"
+        lblInfoPunkty.Text = "Każda mapa zostanie automatycznie przekonwertowana z georeferencją"
+        lblInfoZasieg.Text = "Folder zapisu zostanie wskazany przed rozpoczęciem konwersji"
+
+        btnKonwertuj.Text = $"Konwertuj hurtowo ({zObrazem})..."
+        btnKonwertuj.Enabled = (zObrazem > 0)
+        lblStatus.Text = $"Gotowy do konwersji hurtowej {zObrazem} map."
+    End Sub
+
+    Public Sub ZaladujPlikMap(sciezka As String)
+        _czyTrybWsadowy = False
+        _plikiWsadowe.Clear()
+        _plikiWsadowe.Add(sciezka)
+        lblPlikObrazu.Text = "Plik obrazu (skan mapy JPG, PNG):"
+        btnWybierzObraz.Enabled = True
+        btnKonwertuj.Text = "Konwertuj i zapisz..."
         Try
             _ozi = PlikKalibracjiOzi.Wczytaj(sciezka)
             txtPlikMap.Text = sciezka
@@ -144,7 +260,24 @@ Public Class FormImportOzi
     End Sub
 
     Private Async Sub btnKonwertuj_Click(sender As Object, e As EventArgs) Handles btnKonwertuj.Click
-        If _ozi Is Nothing OrElse Not _ozi.PlikObrazuIstnieje Then Exit Sub
+        If _czyTrybWsadowy Then
+            Await WykonajKonwersjeWsadowaAsync()
+        Else
+            Await WykonajKonwersjePojedynczaAsync()
+        End If
+    End Sub
+
+    Private Sub btnZamknij_Click(sender As Object, e As EventArgs) Handles btnZamknij.Click
+        If _anulowanie IsNot Nothing Then
+            _anulowanie.Cancel()
+            lblStatus.Text = "Trwa przerywanie operacji..."
+        Else
+            Me.Close()
+        End If
+    End Sub
+
+    Private Async Function WykonajKonwersjePojedynczaAsync() As Task
+        If _ozi Is Nothing OrElse Not _ozi.PlikObrazuIstnieje Then Exit Function
 
         Dim domyslnaNazwa = Path.GetFileNameWithoutExtension(_ozi.SciezkaMap)
         If rbJnx.Checked Then
@@ -161,7 +294,7 @@ Public Class FormImportOzi
             dlgZapisz.FileName = domyslnaNazwa & ".mbtiles"
         End If
 
-        If dlgZapisz.ShowDialog(Me) <> DialogResult.OK Then Exit Sub
+        If dlgZapisz.ShowDialog(Me) <> DialogResult.OK Then Exit Function
 
         Dim sciezkaWyjsciowa = dlgZapisz.FileName
         Dim formatJnx = rbJnx.Checked
@@ -172,7 +305,11 @@ Public Class FormImportOzi
 
         btnKonwertuj.Enabled = False
         btnWybierzMap.Enabled = False
+        btnWybierzFolder.Enabled = False
         btnWybierzObraz.Enabled = False
+        grpFormat.Enabled = False
+        grpOpcje.Enabled = False
+        btnZamknij.Text = "Anuluj"
         prgPostep.Value = 0
 
         _anulowanie = New CancellationTokenSource()
@@ -199,6 +336,8 @@ Public Class FormImportOzi
         Catch ex As OperationCanceledException
             lblStatus.Text = "Konwersja została anulowana."
             prgPostep.Value = 0
+            MessageBox.Show("Konwersja została przerwana przez użytkownika.",
+                            "Anulowano", MessageBoxButtons.OK, MessageBoxIcon.Information)
         Catch ex As Exception
             lblStatus.Text = "Błąd: " & ex.Message
             MessageBox.Show("Wystąpił błąd podczas konwersji:" & vbCrLf & ex.Message,
@@ -206,13 +345,93 @@ Public Class FormImportOzi
         Finally
             btnKonwertuj.Enabled = True
             btnWybierzMap.Enabled = True
+            btnWybierzFolder.Enabled = True
             btnWybierzObraz.Enabled = True
+            grpFormat.Enabled = True
+            grpOpcje.Enabled = True
+            btnZamknij.Text = "Zamknij"
             If _anulowanie IsNot Nothing Then
                 _anulowanie.Dispose()
                 _anulowanie = Nothing
             End If
         End Try
-    End Sub
+    End Function
+
+    Private Async Function WykonajKonwersjeWsadowaAsync() As Task
+        If _plikiWsadowe Is Nothing OrElse _plikiWsadowe.Count = 0 Then Exit Function
+
+        If _plikiWsadowe.Count > 0 Then
+            dlgFolderWyjsciowy.SelectedPath = Path.GetDirectoryName(_plikiWsadowe(0))
+        End If
+        If dlgFolderWyjsciowy.ShowDialog(Me) <> DialogResult.OK Then Exit Function
+
+        Dim folderWyjsciowy = dlgFolderWyjsciowy.SelectedPath
+        Dim format = If(rbJnx.Checked, FormatKonwersjiOzi.Jnx, If(rbKmz.Checked, FormatKonwersjiOzi.Kmz, FormatKonwersjiOzi.Mbtiles))
+        Dim kolejnosc = CInt(nudKolejnosc.Value)
+        Dim jakosc = CInt(nudJakosc.Value)
+        Dim podzial = chkPodzialKmz.Checked
+
+        btnKonwertuj.Enabled = False
+        btnWybierzMap.Enabled = False
+        btnWybierzFolder.Enabled = False
+        btnWybierzObraz.Enabled = False
+        grpFormat.Enabled = False
+        grpOpcje.Enabled = False
+        btnZamknij.Text = "Anuluj"
+        prgPostep.Value = 0
+
+        _anulowanie = New CancellationTokenSource()
+        Dim postep = New Progress(Of RaportPostepuWsadowego)(Sub(r)
+                                                                 prgPostep.Value = Math.Max(0, Math.Min(100, r.ProcentCalkowity))
+                                                                 lblStatus.Text = r.StatusTekst
+                                                             End Sub)
+
+        Try
+            Dim wynik As WynikKonwersjiWsadowej = Nothing
+            Await Task.Run(Function()
+                               wynik = KonwertujWsadowo(_plikiWsadowe, folderWyjsciowy, format, kolejnosc, jakosc, podzial, postep, _anulowanie.Token)
+                               Return wynik
+                           End Function, _anulowanie.Token)
+
+            prgPostep.Value = 100
+            lblStatus.Text = $"Konwersja wsadowa zakończona! Pomyślnie: {wynik.Sukcesy}/{wynik.LaczniePlikow}."
+
+            Dim msg = $"Konwersja wsadowa zakończona!" & vbCrLf & vbCrLf &
+                      $"Przetworzono pomyślnie: {wynik.Sukcesy} z {wynik.LaczniePlikow} map." & vbCrLf &
+                      $"Folder docelowy:" & vbCrLf & folderWyjsciowy
+            If wynik.Bledy.Count > 0 Then
+                msg &= vbCrLf & vbCrLf & $"Uwagi i pominięte pliki ({wynik.Bledy.Count}):" & vbCrLf &
+                       String.Join(vbCrLf, wynik.Bledy.Take(10))
+                If wynik.Bledy.Count > 10 Then
+                    msg &= vbCrLf & $"...oraz {wynik.Bledy.Count - 10} kolejnych."
+                End If
+            End If
+
+            MessageBox.Show(msg, "Konwersja wsadowa zakończona", MessageBoxButtons.OK,
+                            If(wynik.Bledy.Count > 0, MessageBoxIcon.Warning, MessageBoxIcon.Information))
+        Catch ex As OperationCanceledException
+            lblStatus.Text = "Konwersja wsadowa została anulowana."
+            prgPostep.Value = 0
+            MessageBox.Show("Konwersja wsadowa została przerwana przez użytkownika.",
+                            "Anulowano", MessageBoxButtons.OK, MessageBoxIcon.Information)
+        Catch ex As Exception
+            lblStatus.Text = "Błąd: " & ex.Message
+            MessageBox.Show("Wystąpił błąd podczas konwersji wsadowej:" & vbCrLf & ex.Message,
+                            "Błąd konwersji", MessageBoxButtons.OK, MessageBoxIcon.Error)
+        Finally
+            btnKonwertuj.Enabled = True
+            btnWybierzMap.Enabled = True
+            btnWybierzFolder.Enabled = True
+            btnWybierzObraz.Enabled = Not _czyTrybWsadowy
+            grpFormat.Enabled = True
+            grpOpcje.Enabled = True
+            btnZamknij.Text = "Zamknij"
+            If _anulowanie IsNot Nothing Then
+                _anulowanie.Dispose()
+                _anulowanie = Nothing
+            End If
+        End Try
+    End Function
 
     Friend Shared Sub KonwertujDoKmz(ozi As PlikKalibracjiOzi, plikWyjsciowy As String,
                                       kolejnosc As Integer, jakosc As Integer, podzial As Boolean,
@@ -483,5 +702,91 @@ Public Class FormImportOzi
             End Using
         End Using
     End Sub
+
+    Friend Shared Function KonwertujWsadowo(plikiMap As IEnumerable(Of String),
+                                            folderWyjsciowy As String,
+                                            format As FormatKonwersjiOzi,
+                                            kolejnosc As Integer,
+                                            jakosc As Integer,
+                                            podzialKmz As Boolean,
+                                            postep As IProgress(Of RaportPostepuWsadowego),
+                                            token As CancellationToken) As WynikKonwersjiWsadowej
+        If Not Directory.Exists(folderWyjsciowy) Then
+            Directory.CreateDirectory(folderWyjsciowy)
+        End If
+
+        Dim lista = plikiMap.Where(Function(p) Not String.IsNullOrWhiteSpace(p)).ToList()
+        Dim wynik As New WynikKonwersjiWsadowej With {.LaczniePlikow = lista.Count}
+        Dim lacznie = lista.Count
+
+        For i = 0 To lacznie - 1
+            token.ThrowIfCancellationRequested()
+            Dim plikMap = lista(i)
+            Dim nazwaPliku = Path.GetFileName(plikMap)
+            Dim rdzen = Path.GetFileNameWithoutExtension(plikMap)
+            Dim nrPliku = i + 1
+
+            postep?.Report(New RaportPostepuWsadowego With {
+                .IndeksPliku = nrPliku,
+                .LaczniePlikow = lacznie,
+                .NazwaPliku = nazwaPliku,
+                .ProcentPliku = 0,
+                .ProcentCalkowity = CInt(Math.Round((i / CDbl(Math.Max(1, lacznie))) * 100.0)),
+                .StatusTekst = $"Wczytywanie [{nrPliku}/{lacznie}]: {nazwaPliku}..."
+            })
+
+            Try
+                Dim ozi = PlikKalibracjiOzi.Wczytaj(plikMap)
+                If Not ozi.PlikObrazuIstnieje Then
+                    wynik.Pominiete += 1
+                    wynik.Bledy.Add($"{nazwaPliku}: brak pliku obrazu rastrowego na dysku.")
+                    Continue For
+                End If
+
+                Dim rozszerzenie = If(format = FormatKonwersjiOzi.Jnx, ".jnx", If(format = FormatKonwersjiOzi.Kmz, ".kmz", ".mbtiles"))
+                Dim sciezkaDocelowa = Path.Combine(folderWyjsciowy, rdzen & rozszerzenie)
+                Dim biezacyIndeks = i
+
+                Dim postepPliku = New Progress(Of Integer)(Sub(pct)
+                                                              Dim calkowity = CInt(Math.Round(((biezacyIndeks + (pct / 100.0)) / CDbl(Math.Max(1, lacznie))) * 100.0))
+                                                              postep?.Report(New RaportPostepuWsadowego With {
+                                                                  .IndeksPliku = nrPliku,
+                                                                  .LaczniePlikow = lacznie,
+                                                                  .NazwaPliku = nazwaPliku,
+                                                                  .ProcentPliku = pct,
+                                                                  .ProcentCalkowity = Math.Min(99, calkowity),
+                                                                  .StatusTekst = $"Konwersja [{nrPliku}/{lacznie}]: {nazwaPliku} ({pct}%)"
+                                                              })
+                                                          End Sub)
+
+                If format = FormatKonwersjiOzi.Kmz Then
+                    KonwertujDoKmz(ozi, sciezkaDocelowa, kolejnosc, jakosc, podzialKmz, postepPliku, token)
+                ElseIf format = FormatKonwersjiOzi.Jnx Then
+                    KonwertujDoJnx(ozi, sciezkaDocelowa, kolejnosc, jakosc, postepPliku, token)
+                Else
+                    KonwertujDoMbtiles(ozi, sciezkaDocelowa, jakosc, postepPliku, token)
+                End If
+
+                wynik.Sukcesy += 1
+                wynik.WygenerowanePliki.Add(sciezkaDocelowa)
+            Catch ex As OperationCanceledException
+                Throw
+            Catch ex As Exception
+                wynik.Pominiete += 1
+                wynik.Bledy.Add($"{nazwaPliku}: {ex.Message}")
+            End Try
+        Next
+
+        postep?.Report(New RaportPostepuWsadowego With {
+            .IndeksPliku = lacznie,
+            .LaczniePlikow = lacznie,
+            .NazwaPliku = "",
+            .ProcentPliku = 100,
+            .ProcentCalkowity = 100,
+            .StatusTekst = $"Zakończono. Pomyślnie przetworzono {wynik.Sukcesy} z {lacznie} map."
+        })
+
+        Return wynik
+    End Function
 
 End Class

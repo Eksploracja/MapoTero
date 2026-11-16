@@ -20,6 +20,7 @@ Partial Class FormImportOzi
         Me.lblPlikMap = New System.Windows.Forms.Label()
         Me.txtPlikMap = New System.Windows.Forms.TextBox()
         Me.btnWybierzMap = New System.Windows.Forms.Button()
+        Me.btnWybierzFolder = New System.Windows.Forms.Button()
         Me.lblPlikObrazu = New System.Windows.Forms.Label()
         Me.txtPlikObrazu = New System.Windows.Forms.TextBox()
         Me.btnWybierzObraz = New System.Windows.Forms.Button()
@@ -44,6 +45,8 @@ Partial Class FormImportOzi
         Me.btnKonwertuj = New System.Windows.Forms.Button()
         Me.btnZamknij = New System.Windows.Forms.Button()
         Me.dlgWybierzMap = New System.Windows.Forms.OpenFileDialog()
+        Me.dlgFolder = New System.Windows.Forms.FolderBrowserDialog()
+        Me.dlgFolderWyjsciowy = New System.Windows.Forms.FolderBrowserDialog()
         Me.dlgWybierzObraz = New System.Windows.Forms.OpenFileDialog()
         Me.dlgZapisz = New System.Windows.Forms.SaveFileDialog()
         Me.grpInfo.SuspendLayout()
@@ -58,7 +61,7 @@ Partial Class FormImportOzi
         Me.lblPlikMap.AutoSize = True
         Me.lblPlikMap.Location = New System.Drawing.Point(12, 12)
         Me.lblPlikMap.Name = "lblPlikMap"
-        Me.lblPlikMap.Size = New System.Drawing.Size(155, 13)
+        Me.lblPlikMap.Size = New System.Drawing.Size(200, 13)
         Me.lblPlikMap.TabIndex = 0
         Me.lblPlikMap.Text = "Plik kalibracji OziExplorer (.map):"
         '
@@ -67,17 +70,26 @@ Partial Class FormImportOzi
         Me.txtPlikMap.Location = New System.Drawing.Point(15, 28)
         Me.txtPlikMap.Name = "txtPlikMap"
         Me.txtPlikMap.ReadOnly = True
-        Me.txtPlikMap.Size = New System.Drawing.Size(430, 20)
+        Me.txtPlikMap.Size = New System.Drawing.Size(356, 20)
         Me.txtPlikMap.TabIndex = 1
         '
         'btnWybierzMap
         '
-        Me.btnWybierzMap.Location = New System.Drawing.Point(451, 26)
+        Me.btnWybierzMap.Location = New System.Drawing.Point(377, 26)
         Me.btnWybierzMap.Name = "btnWybierzMap"
-        Me.btnWybierzMap.Size = New System.Drawing.Size(85, 24)
+        Me.btnWybierzMap.Size = New System.Drawing.Size(76, 24)
         Me.btnWybierzMap.TabIndex = 2
-        Me.btnWybierzMap.Text = "Przeglądaj..."
+        Me.btnWybierzMap.Text = "Plik(i)..."
         Me.btnWybierzMap.UseVisualStyleBackColor = True
+        '
+        'btnWybierzFolder
+        '
+        Me.btnWybierzFolder.Location = New System.Drawing.Point(457, 26)
+        Me.btnWybierzFolder.Name = "btnWybierzFolder"
+        Me.btnWybierzFolder.Size = New System.Drawing.Size(79, 24)
+        Me.btnWybierzFolder.TabIndex = 3
+        Me.btnWybierzFolder.Text = "Folder..."
+        Me.btnWybierzFolder.UseVisualStyleBackColor = True
         '
         'lblPlikObrazu
         '
@@ -293,10 +305,10 @@ Partial Class FormImportOzi
         'btnKonwertuj
         '
         Me.btnKonwertuj.Enabled = False
-        Me.btnKonwertuj.Location = New System.Drawing.Point(315, 435)
+        Me.btnKonwertuj.Location = New System.Drawing.Point(265, 435)
         Me.btnKonwertuj.Name = "btnKonwertuj"
-        Me.btnKonwertuj.Size = New System.Drawing.Size(130, 28)
-        Me.btnKonwertuj.TabIndex = 11
+        Me.btnKonwertuj.Size = New System.Drawing.Size(180, 28)
+        Me.btnKonwertuj.TabIndex = 12
         Me.btnKonwertuj.Text = "Konwertuj i zapisz..."
         Me.btnKonwertuj.UseVisualStyleBackColor = True
         '
@@ -306,14 +318,23 @@ Partial Class FormImportOzi
         Me.btnZamknij.Location = New System.Drawing.Point(451, 435)
         Me.btnZamknij.Name = "btnZamknij"
         Me.btnZamknij.Size = New System.Drawing.Size(85, 28)
-        Me.btnZamknij.TabIndex = 12
+        Me.btnZamknij.TabIndex = 13
         Me.btnZamknij.Text = "Zamknij"
         Me.btnZamknij.UseVisualStyleBackColor = True
         '
         'dlgWybierzMap
         '
         Me.dlgWybierzMap.Filter = "Pliki kalibracji OziExplorer (*.map)|*.map|Wszystkie pliki (*.*)|*.*"
-        Me.dlgWybierzMap.Title = "Wybierz plik kalibracji OziExplorer (.map)"
+        Me.dlgWybierzMap.Multiselect = True
+        Me.dlgWybierzMap.Title = "Wybierz plik(i) kalibracji OziExplorer (.map)"
+        '
+        'dlgFolder
+        '
+        Me.dlgFolder.Description = "Wybierz folder zawierający pliki kalibracji OziExplorer (*.map)"
+        '
+        'dlgFolderWyjsciowy
+        '
+        Me.dlgFolderWyjsciowy.Description = "Wybierz folder docelowy dla przekonwertowanych map"
         '
         'dlgWybierzObraz
         '
@@ -336,6 +357,7 @@ Partial Class FormImportOzi
         Me.Controls.Add(Me.btnWybierzObraz)
         Me.Controls.Add(Me.txtPlikObrazu)
         Me.Controls.Add(Me.lblPlikObrazu)
+        Me.Controls.Add(Me.btnWybierzFolder)
         Me.Controls.Add(Me.btnWybierzMap)
         Me.Controls.Add(Me.txtPlikMap)
         Me.Controls.Add(Me.lblPlikMap)
@@ -363,6 +385,7 @@ Partial Class FormImportOzi
     Friend WithEvents lblPlikMap As System.Windows.Forms.Label
     Friend WithEvents txtPlikMap As System.Windows.Forms.TextBox
     Friend WithEvents btnWybierzMap As System.Windows.Forms.Button
+    Friend WithEvents btnWybierzFolder As System.Windows.Forms.Button
     Friend WithEvents lblPlikObrazu As System.Windows.Forms.Label
     Friend WithEvents txtPlikObrazu As System.Windows.Forms.TextBox
     Friend WithEvents btnWybierzObraz As System.Windows.Forms.Button
@@ -387,6 +410,8 @@ Partial Class FormImportOzi
     Friend WithEvents btnKonwertuj As System.Windows.Forms.Button
     Friend WithEvents btnZamknij As System.Windows.Forms.Button
     Friend WithEvents dlgWybierzMap As System.Windows.Forms.OpenFileDialog
+    Friend WithEvents dlgFolder As System.Windows.Forms.FolderBrowserDialog
+    Friend WithEvents dlgFolderWyjsciowy As System.Windows.Forms.FolderBrowserDialog
     Friend WithEvents dlgWybierzObraz As System.Windows.Forms.OpenFileDialog
     Friend WithEvents dlgZapisz As System.Windows.Forms.SaveFileDialog
 End Class

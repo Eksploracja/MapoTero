@@ -2700,7 +2700,7 @@ Public Class Form1
             Dim pliki = TryCast(e.Data.GetData(DataFormats.FileDrop), String())
             If pliki IsNot Nothing AndAlso pliki.Length > 0 Then
                 Dim ext = Path.GetExtension(pliki(0)).ToLowerInvariant()
-                If ext = ".gpx" OrElse ext = ".kml" OrElse ext = ".kmz" OrElse ext = ".map" Then
+                If ext = ".gpx" OrElse ext = ".kml" OrElse ext = ".kmz" OrElse ext = ".map" OrElse Directory.Exists(pliki(0)) Then
                     e.Effect = DragDropEffects.Copy
                     Return
                 End If
@@ -2714,15 +2714,30 @@ Public Class Form1
         If e.Data Is Nothing OrElse Not e.Data.GetDataPresent(DataFormats.FileDrop) Then Exit Sub
         Dim pliki = TryCast(e.Data.GetData(DataFormats.FileDrop), String())
         If pliki Is Nothing OrElse pliki.Length = 0 Then Exit Sub
-        Dim plik = pliki(0)
-        Dim ext = Path.GetExtension(plik).ToLowerInvariant()
-        If ext = ".map" Then
+
+        ' Sprawdzenie czy upuszczono pliki kalibracji OziExplorer (.map) lub folder z takimi plikami
+        Dim plikiMap As New List(Of String)()
+        For Each p In pliki
+            If Directory.Exists(p) Then
+                plikiMap.AddRange(FormImportOzi.ZnajdzPlikiMapWFolderze(p))
+            ElseIf String.Equals(Path.GetExtension(p), ".map", StringComparison.OrdinalIgnoreCase) Then
+                plikiMap.Add(p)
+            End If
+        Next
+        If plikiMap.Count > 0 Then
             Using okno As New FormImportOzi()
-                okno.OtworzZPlikiem(plik)
+                If plikiMap.Count = 1 Then
+                    okno.OtworzZPlikiem(plikiMap(0))
+                Else
+                    okno.OtworzWsadowo(plikiMap)
+                End If
                 okno.ShowDialog(Me)
             End Using
             Exit Sub
         End If
+
+        Dim plik = pliki(0)
+        Dim ext = Path.GetExtension(plik).ToLowerInvariant()
         If ext = ".gpx" OrElse ext = ".kml" OrElse ext = ".kmz" Then
             Try
                 Dim k = Korytarz.WczytajTrase(plik)

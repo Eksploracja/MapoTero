@@ -628,4 +628,96 @@ Public Class UzytkownikInterakcjaTesty
             End Sub)
     End Sub
 
+    <Fact>
+    Public Sub TestUzytkownik_Form1_UkladPolaKryciaWarstwy()
+        UruchomWWatkuSta(
+            Sub()
+                Using f As New Global.MapoTero.Form1()
+                    f.Show()
+                    Application.DoEvents()
+
+                    Dim grp = DirectCast(f.Controls.Find("grpWybraneWarstwy", True)(0), GroupBox)
+                    Dim numKrycie = DirectCast(f.Controls.Find("numKrycie", True)(0), NumericUpDown)
+                    Dim lblKrycie = DirectCast(f.Controls.Find("lblKrycie", True)(0), Label)
+                    Dim btnZaaw = DirectCast(f.Controls.Find("btnWarstwyZaawansowane", True)(0), Button)
+                    Dim btnKosz = DirectCast(f.Controls.Find("btnResetujWarstwy", True)(0), Button)
+
+                    ' Pole krycia musi mieć wystarczającą szerokość na liczbę 100 i strzałki (min 48 px)
+                    Assert.True(numKrycie.Width >= 48, $"Szerokość numKrycie ({numKrycie.Width}) powinna wynosić co najmniej 48 px, aby nie przycinać liczby 100.")
+                    ' Elementy nie mogą się nakładać
+                    Assert.True(numKrycie.Left >= lblKrycie.Right - 2, $"Etykieta lblKrycie (Right={lblKrycie.Right}) nakłada się na numKrycie (Left={numKrycie.Left}).")
+                    Assert.True(btnZaaw.Left >= numKrycie.Right - 1, $"numKrycie (Right={numKrycie.Right}) nakłada się na btnWarstwyZaawansowane (Left={btnZaaw.Left}).")
+
+                    ' Wyrenderuj grpWybraneWarstwy do bitmapy i zapisz do artefaktów
+                    Using bmp As New Bitmap(grp.Width, grp.Height)
+                        grp.DrawToBitmap(bmp, New Rectangle(0, 0, grp.Width, grp.Height))
+                        Dim sciezkaBmp = "C:\Users\KN\.gemini\antigravity\brain\6226a50c-ad35-435f-a04d-74ae97526ccf\podglad_krycie_warstwy.png"
+                        bmp.Save(sciezkaBmp, System.Drawing.Imaging.ImageFormat.Png)
+                    End Using
+
+                    f.Close()
+                End Using
+            End Sub)
+    End Sub
+
+    <Fact>
+    Public Sub TestUzytkownik_FormImportOzi_TrybWsadowyUI()
+        UruchomWWatkuSta(
+            Sub()
+                Dim folderTestu = Path.Combine(Path.GetTempPath(), "MapoTero_OziUiBatch_" & Guid.NewGuid().ToString("N"))
+                Directory.CreateDirectory(folderTestu)
+                Try
+                    ' Przygotuj 2 testowe pliki map
+                    Dim p1 = Path.Combine(folderTestu, "mapa1.map")
+                    Dim p2 = Path.Combine(folderTestu, "mapa2.map")
+                    Dim img1 = Path.Combine(folderTestu, "mapa1.jpg")
+                    Dim img2 = Path.Combine(folderTestu, "mapa2.jpg")
+                    Using bmp As New Bitmap(32, 32)
+                        bmp.Save(img1, System.Drawing.Imaging.ImageFormat.Jpeg)
+                        bmp.Save(img2, System.Drawing.Imaging.ImageFormat.Jpeg)
+                    End Using
+                    Dim linie = {
+                        "OziExplorer Map Data File Version 2.2", "Mapa", "mapa1.jpg", "1 ,Map Code,", "WGS 84,, 0, 0,WGS 84",
+                        "Reserved 1", "Reserved 2", "Magnetic Variation,,,E", "Map Projection,Latitude/Longitude,PolyCal,No,AutoCalOnly,No,BSBUseWPX,No",
+                        "Point01,xy, 0, 0,in, deg, 50, 00,N, 20, 00,E, grid,,,,N",
+                        "Point02,xy, 32, 32,in, deg, 49, 59,N, 20, 01,E, grid,,,,N"
+                    }
+                    File.WriteAllLines(p1, linie)
+                    linie(1) = "Mapa 2"
+                    linie(2) = "mapa2.jpg"
+                    File.WriteAllLines(p2, linie)
+
+                    Using f As New Global.MapoTero.FormImportOzi()
+                        f.Show()
+                        Application.DoEvents()
+
+                        f.OtworzWsadowo({p1, p2})
+                        Application.DoEvents()
+
+                        Dim txtPlikMap = DirectCast(f.Controls.Find("txtPlikMap", True)(0), TextBox)
+                        Dim btnKonwertuj = DirectCast(f.Controls.Find("btnKonwertuj", True)(0), Button)
+                        Dim btnWybierzObraz = DirectCast(f.Controls.Find("btnWybierzObraz", True)(0), Button)
+                        Dim btnWybierzFolder = DirectCast(f.Controls.Find("btnWybierzFolder", True)(0), Button)
+
+                        Assert.Contains("2", txtPlikMap.Text)
+                        Assert.Contains("hurtowo", btnKonwertuj.Text, StringComparison.OrdinalIgnoreCase)
+                        Assert.False(btnWybierzObraz.Enabled)
+                        Assert.True(btnKonwertuj.Enabled)
+                        Assert.True(btnWybierzFolder.Enabled)
+
+                        ' Renderowanie do bitmapy i zapis do podglądu
+                        Using bmp As New Bitmap(f.Width, f.Height)
+                            f.DrawToBitmap(bmp, New Rectangle(0, 0, f.Width, f.Height))
+                            Dim sciezkaBmp = "C:\Users\KN\.gemini\antigravity\brain\6226a50c-ad35-435f-a04d-74ae97526ccf\podglad_ozi_tryb_wsadowy.png"
+                            bmp.Save(sciezkaBmp, System.Drawing.Imaging.ImageFormat.Png)
+                        End Using
+
+                        f.Close()
+                    End Using
+                Finally
+                    If Directory.Exists(folderTestu) Then Directory.Delete(folderTestu, True)
+                End Try
+            End Sub)
+    End Sub
+
 End Class

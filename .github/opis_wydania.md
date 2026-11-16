@@ -22,7 +22,8 @@ Ustawienia i zbiory map z poprzednich wersji (plik `lastsettings.txt`, folder `w
   * Wykres profilu podłużnego trasy w oknie definiowania korytarza z obliczeniem przewyższeń (min, max, suma podejść, suma zejść, dystans).
   * Opcja natychmiastowego zapisu wzbogaconego pliku GPX z rzędnymi `<ele>` do urządzeń i zegarków turystycznych.
 * **Konwerter kalibrowanych map OziExplorer (.map -> Garmin JNX / KMZ / MBTiles):**
-  * Narzędzie w menu *Narzędzia -> Konwertuj mapę OziExplorer (.map)...* oraz obsługa przeciągania plików `.map` metodą Drag & Drop na okno programu.
+  * Narzędzie w menu *Narzędzia -> Konwertuj mapę OziExplorer (.map)...* oraz obsługa przeciągania plików `.map` i całych folderów metodą Drag & Drop na okno programu.
+  * Tryb pojedynczy oraz wsadowy (hurtowy) umożliwiający konwersję całych katalogów map za jednym razem ze zbiorczym raportem postępu i automatycznym dopasowaniem obrazów.
   * Przeliczanie kalibracji wielopunktowej i automatyczna transformacja historycznych układów współrzędnych i Datum (Borowa Góra, Potsdam, Pulkovo 1942 do WGS84) z eliminacją przesunięcia 100–200 m w odbiornikach turystycznych.
 * **Post-processing MIP dla odbiorników Garmin (podgląd na żywo):**
   * Filtr optymalizujący kontrast, nasycenie barw, korekcję gamma ($\gamma = 0{,}75$) oraz wyostrzanie splotowe krawędzi (Laplacian 3×3) pod kątem transflektywnych wyświetlaczy Memory-In-Pixel w pełnym słońcu.
@@ -32,6 +33,8 @@ Ustawienia i zbiory map z poprzednich wersji (plik `lastsettings.txt`, folder `w
 * **Bieżący podgląd zestawu warstw z lupą rastrową w oknie głównym:**
   * Podgląd kompozycji warstw w prawym dolnym rogu okna głównego, odświeżany asynchronicznie w tle z buforem próbek i debouncingiem.
   * Lupa rastrowa z powiększeniami 50%, 100% (piksel w piksel), 200% i 400% do weryfikacji czytelności etykiet i nakładek.
+* **Optymalizacje interfejsu użytkownika:**
+  * Poprawka układu kontrolek w panelu warstw okna głównego eliminująca obcinanie wartości `100%` w polu wprowadzania krycia warstwy.
 * **Adaptacyjny bufor korytarza wzdłuż trasy GPX/KML:**
   * Skalowanie szerokości bufora korytarza w zależności od poziomu powiększenia (szerszy pas na przeglądowych poziomach zoomu, wąski na zbliżeniach detalicznych).
 * **Inteligentna detekcja fałszywych sukcesów WMS i monitor kafli XYZ:**
@@ -41,7 +44,7 @@ Ustawienia i zbiory map z poprzednich wersji (plik `lastsettings.txt`, folder `w
 * **Odporność klastrów WMTS:**
   * Obsługa aliasów `ISOK_Cien` <-> `Cieniowanie` za load balancerem Geoportalu.
 * **Stabilność i testy regresyjne:**
-  * Kompletny pakiet **771 testów automatycznych** (.NET 10 x64) weryfikujący obliczenia matematyczne, georeferencję i interfejs użytkownika.
+  * Kompletny pakiet **774 testów automatycznych** (.NET 10 x64) weryfikujący obliczenia matematyczne, georeferencję i interfejs użytkownika.
 
 ## Zmiany w wersji 3.17
 

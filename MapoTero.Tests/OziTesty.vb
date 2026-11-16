@@ -230,4 +230,118 @@ Public Class OziTesty
         End Try
     End Function
 
+    <Fact>
+    Public Sub TestWyszukiwaniaPlikowMapWFolderze()
+        Dim folderTestu = Path.Combine(Path.GetTempPath(), "MapoTero_OziFind_" & Guid.NewGuid().ToString("N"))
+        Directory.CreateDirectory(folderTestu)
+        Dim podfolder = Path.Combine(folderTestu, "Podfolder")
+        Directory.CreateDirectory(podfolder)
+
+        Try
+            ' 1. Pusty folder -> pusta lista
+            Dim brak = FormImportOzi.ZnajdzPlikiMapWFolderze(folderTestu)
+            Assert.Empty(brak)
+
+            ' 2. Pliki w podfolderze (brak w głównym) -> powinno znaleźć w podfolderze
+            File.WriteAllText(Path.Combine(podfolder, "mapa1.map"), "test")
+            File.WriteAllText(Path.Combine(podfolder, "mapa2.map"), "test")
+            File.WriteAllText(Path.Combine(podfolder, "obraz.jpg"), "test")
+            Dim wPodfolderze = FormImportOzi.ZnajdzPlikiMapWFolderze(folderTestu)
+            Assert.Equal(2, wPodfolderze.Count)
+
+            ' 3. Pliki w folderze głównym -> powinno preferować folder główny
+            File.WriteAllText(Path.Combine(folderTestu, "glowna.map"), "test")
+            Dim wGlownym = FormImportOzi.ZnajdzPlikiMapWFolderze(folderTestu)
+            Assert.Single(wGlownym)
+            Assert.EndsWith("glowna.map", wGlownym(0))
+        Finally
+            If Directory.Exists(folderTestu) Then Directory.Delete(folderTestu, True)
+        End Try
+    End Sub
+
+    <Fact>
+    Public Sub TestKonwersjiWsadowejOzi()
+        Dim folderZrodlowy = Path.Combine(Path.GetTempPath(), "MapoTero_BatchSrc_" & Guid.NewGuid().ToString("N"))
+        Dim folderDocelowy = Path.Combine(Path.GetTempPath(), "MapoTero_BatchDst_" & Guid.NewGuid().ToString("N"))
+        Directory.CreateDirectory(folderZrodlowy)
+        Directory.CreateDirectory(folderDocelowy)
+
+        Try
+            ' Utwórz małą bitmapę testową (64x64)
+            Dim sciezkaBmp1 = Path.Combine(folderZrodlowy, "arkusz_a.jpg")
+            Dim sciezkaBmp2 = Path.Combine(folderZrodlowy, "arkusz_b.jpg")
+            Using bmp As New System.Drawing.Bitmap(64, 64)
+                Using g = System.Drawing.Graphics.FromImage(bmp)
+                    g.Clear(System.Drawing.Color.Green)
+                End Using
+                bmp.Save(sciezkaBmp1, System.Drawing.Imaging.ImageFormat.Jpeg)
+                bmp.Save(sciezkaBmp2, System.Drawing.Imaging.ImageFormat.Jpeg)
+            End Using
+
+            ' Utwórz 2 poprawne pliki .map i 1 plik z brakującym obrazem
+            Dim linie1 = {
+                "OziExplorer Map Data File Version 2.2", "Arkusz A", "arkusz_a.jpg", "1 ,Map Code,", "WGS 84,, 0, 0,WGS 84",
+                "Reserved 1", "Reserved 2", "Magnetic Variation,,,E", "Map Projection,Latitude/Longitude,PolyCal,No,AutoCalOnly,No,BSBUseWPX,No",
+                "Point01,xy, 0, 0,in, deg, 50, 00.00,N, 20, 00.00,E, grid,,,,N",
+                "Point02,xy, 64, 0,in, deg, 50, 00.00,N, 20, 01.00,E, grid,,,,N",
+                "Point03,xy, 64, 64,in, deg, 49, 59.00,N, 20, 01.00,E, grid,,,,N",
+                "Point04,xy, 0, 64,in, deg, 49, 59.00,N, 20, 00.00,E, grid,,,,N"
+            }
+            Dim linie2 = {
+                "OziExplorer Map Data File Version 2.2", "Arkusz B", "arkusz_b.jpg", "1 ,Map Code,", "WGS 84,, 0, 0,WGS 84",
+                "Reserved 1", "Reserved 2", "Magnetic Variation,,,E", "Map Projection,Latitude/Longitude,PolyCal,No,AutoCalOnly,No,BSBUseWPX,No",
+                "Point01,xy, 0, 0,in, deg, 50, 01.00,N, 20, 00.00,E, grid,,,,N",
+                "Point02,xy, 64, 0,in, deg, 50, 01.00,N, 20, 01.00,E, grid,,,,N",
+                "Point03,xy, 64, 64,in, deg, 50, 00.00,N, 20, 01.00,E, grid,,,,N",
+                "Point04,xy, 0, 64,in, deg, 50, 00.00,N, 20, 00.00,E, grid,,,,N"
+            }
+            Dim linie3Brak = {
+                "OziExplorer Map Data File Version 2.2", "Brakujacy", "nieistniejacy.jpg", "1 ,Map Code,", "WGS 84,, 0, 0,WGS 84",
+                "Reserved 1", "Reserved 2", "Magnetic Variation,,,E", "Map Projection,Latitude/Longitude,PolyCal,No,AutoCalOnly,No,BSBUseWPX,No",
+                "Point01,xy, 0, 0,in, deg, 50, 00,N, 20, 00,E, grid,,,,N",
+                "Point02,xy, 64, 64,in, deg, 49, 59,N, 20, 01,E, grid,,,,N"
+            }
+
+            Dim plikMap1 = Path.Combine(folderZrodlowy, "arkusz_a.map")
+            Dim plikMap2 = Path.Combine(folderZrodlowy, "arkusz_b.map")
+            Dim plikMap3 = Path.Combine(folderZrodlowy, "brakujacy.map")
+            File.WriteAllLines(plikMap1, linie1)
+            File.WriteAllLines(plikMap2, linie2)
+            File.WriteAllLines(plikMap3, linie3Brak)
+
+            Dim listaPlikow = {plikMap1, plikMap2, plikMap3}
+            Dim raporty As New List(Of RaportPostepuWsadowego)()
+            Dim postep = New Progress(Of RaportPostepuWsadowego)(Sub(r) raporty.Add(r))
+
+            ' Wykonaj konwersję wsadową do KMZ
+            Dim wynik = FormImportOzi.KonwertujWsadowo(listaPlikow, folderDocelowy,
+                                                       FormatKonwersjiOzi.Kmz, 50, 80, False, postep, CancellationToken.None)
+
+            Assert.Equal(3, wynik.LaczniePlikow)
+            Assert.Equal(2, wynik.Sukcesy)
+            Assert.Equal(1, wynik.Pominiete)
+            Assert.Single(wynik.Bledy)
+            Assert.Contains("brakujacy.map", wynik.Bledy(0))
+
+            ' Sprawdź czy pliki KMZ zostały fizycznie wygenerowane
+            Dim docelowyKmz1 = Path.Combine(folderDocelowy, "arkusz_a.kmz")
+            Dim docelowyKmz2 = Path.Combine(folderDocelowy, "arkusz_b.kmz")
+            Assert.True(File.Exists(docelowyKmz1))
+            Assert.True(File.Exists(docelowyKmz2))
+            Assert.True(New FileInfo(docelowyKmz1).Length > 500)
+            Assert.True(New FileInfo(docelowyKmz2).Length > 500)
+
+            ' Wykonaj konwersję wsadową do MBTiles dla pierwszego pliku
+            Dim wynikMbtiles = FormImportOzi.KonwertujWsadowo({plikMap1}, folderDocelowy,
+                                                              FormatKonwersjiOzi.Mbtiles, 50, 80, False, Nothing, CancellationToken.None)
+            Assert.Equal(1, wynikMbtiles.Sukcesy)
+            Dim docelowyMbtiles = Path.Combine(folderDocelowy, "arkusz_a.mbtiles")
+            Assert.True(File.Exists(docelowyMbtiles))
+            Assert.True(New FileInfo(docelowyMbtiles).Length > 1000)
+        Finally
+            If Directory.Exists(folderZrodlowy) Then Directory.Delete(folderZrodlowy, True)
+            If Directory.Exists(folderDocelowy) Then Directory.Delete(folderDocelowy, True)
+        End Try
+    End Sub
+
 End Class

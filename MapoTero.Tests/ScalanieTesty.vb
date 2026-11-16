@@ -54,7 +54,7 @@ Public Class ScalanieTesty
             UtworzKafel(tempFolder & "_02_02.png", bok, bok, Color.FromArgb(255, 255, 0), ImageFormat.Png)
 
             Dim postepy As New List(Of Integer)()
-            Dim postep As New Progress(Of Integer)(Sub(p) postepy.Add(p))
+            Dim postep As New PostepSynchroniczny(Of Integer)(Sub(p) postepy.Add(p))
 
             Dim zadanie As New ZadanieScalania With {
                 .Folder = tempFolder,
@@ -772,5 +772,19 @@ Public Class ScalanieTesty
             End Try
         End Try
     End Sub
+
+    Private Class PostepSynchroniczny(Of T)
+        Implements IProgress(Of T)
+
+        Private ReadOnly _akcja As Action(Of T)
+
+        Public Sub New(akcja As Action(Of T))
+            _akcja = akcja
+        End Sub
+
+        Public Sub Report(value As T) Implements IProgress(Of T).Report
+            _akcja?.Invoke(value)
+        End Sub
+    End Class
 
 End Class
