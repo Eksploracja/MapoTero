@@ -1,0 +1,5 @@
+https://sgx.geodatenzentrum.de/wmts_basemapde/1.0.0/WMTSCapabilities.xml
+de_basemapde_web_raster_farbe
+2
+de_basemapde_web_raster_grau
+2

@@ -12,7 +12,7 @@ body:
     attributes:
       label: Wersja MapoTero
       description: Podaj wersję programu widoczną na pasku tytułu lub w menu Pomoc -> O programie.
-      placeholder: np. 3.17
+      placeholder: np. 3.18
     validations:
       required: true
   - type: input

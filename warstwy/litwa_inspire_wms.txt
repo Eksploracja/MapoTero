@@ -1,0 +1,9 @@
+https://www.inspire-geoportal.lt/geoserver/ows?request=GetMap&version=1.3.0&CRS=CRS:84&layers=
+cp:CP.CadastralParcel
+1
+el:EL.ContourLine
+2
+bu:BU.Building_polygon
+1
+tn:TN.RoadTransportNetwork.RoadLink
+2

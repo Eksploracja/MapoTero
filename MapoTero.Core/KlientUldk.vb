@@ -1,0 +1,161 @@
+'Copyright (C) <2026>  pajakt
+'
+'This program is free software: you can redistribute it and/or modify
+'it under the terms of the GNU General Public License as published by
+'the Free Software Foundation, either version 3 of the License, or
+'(at your option) any later version.
+
+Imports System.Collections.Generic
+Imports System.Globalization
+Imports System.Net.Http
+Imports System.Threading
+Imports System.Threading.Tasks
+
+''' <summary>Informacje o działce ewidencyjnej pobranej z usługi ULDK GUGiK.</summary>
+Public Class DzialkaKatastralna
+    Public Property Identyfikator As String = ""
+    Public Property Numer As String = ""
+    Public Property Obreb As String = ""
+    Public Property Gmina As String = ""
+    Public Property Powiat As String = ""
+    Public Property Wojewodztwo As String = ""
+    Public Property Wkt As String = ""
+    Public Property Zasieg1992 As Zasieg
+    Public ReadOnly Property ObrysWgs84 As New List(Of PunktGeo)
+
+    Public ReadOnly Property Opis As String
+        Get
+            Dim sb As New System.Text.StringBuilder()
+            If Not String.IsNullOrEmpty(Numer) Then sb.Append("Działka nr ").Append(Numer)
+            If Not String.IsNullOrEmpty(Obreb) Then sb.Append(", obręb: ").Append(Obreb)
+            If Not String.IsNullOrEmpty(Gmina) Then sb.Append(", gm. ").Append(Gmina)
+            If Not String.IsNullOrEmpty(Powiat) Then sb.Append(", pow. ").Append(Powiat)
+            Return sb.ToString()
+        End Get
+    End Property
+
+    Public Overrides Function ToString() As String
+        Return If(Not String.IsNullOrEmpty(Identyfikator), Identyfikator & " (" & Opis & ")", Opis)
+    End Function
+End Class
+
+''' <summary>
+''' Klient Usługi Lokalizacji Działek Katastralnych (ULDK) Głównego Urzędu Geodezji i Kartografii.
+''' Umożliwia wyszukiwanie działek po identyfikatorze TERYT lub nazwie obrębu i numerze działki.
+''' </summary>
+Public NotInheritable Class KlientUldk
+
+    Private Shared ReadOnly _klient As New HttpClient() With {.Timeout = TimeSpan.FromSeconds(30)}
+
+    Private Sub New()
+    End Sub
+
+    ''' <summary>
+    ''' Wyszukuje działki na podstawie zadanego zapytania (pełny kod TERYT np. '022602_1.0003.59'
+    ''' albo nazwa obrębu/miejscowości i numer np. 'Krzewina 134').
+    ''' </summary>
+    Public Shared Async Function SzukajDzialekAsync(zapytanie As String,
+                                                    Optional token As CancellationToken = Nothing) As Task(Of List(Of DzialkaKatastralna))
+        Dim wynik As New List(Of DzialkaKatastralna)()
+        If String.IsNullOrWhiteSpace(zapytanie) Then Return wynik
+
+        Dim czyste = zapytanie.Trim()
+        Dim jestTeryt = czyste.Contains("_") OrElse (czyste.Contains(".") AndAlso Char.IsDigit(czyste(0)))
+        Dim url As String
+
+        If jestTeryt Then
+            url = "https://uldk.gugik.gov.pl/?request=GetParcelById&id=" & Uri.EscapeDataString(czyste) &
+                  "&result=id,teryt,parcel,region,commune,county,geom_wkt"
+        Else
+            url = "https://uldk.gugik.gov.pl/?request=GetParcelByIdOrNr&id=" & Uri.EscapeDataString(czyste) &
+                  "&result=id,teryt,parcel,region,commune,county,geom_wkt"
+        End If
+
+        Try
+            Using odp = Await _klient.GetAsync(url, token).ConfigureAwait(False)
+                odp.EnsureSuccessStatusCode()
+                Dim tekst = Await odp.Content.ReadAsStringAsync().ConfigureAwait(False)
+                Dim linie = tekst.Split(New String() {vbCrLf, vbLf, vbCr}, StringSplitOptions.RemoveEmptyEntries)
+                If linie.Length < 2 Then Return wynik
+
+                Dim status = linie(0).Trim()
+                If status.StartsWith("-") Then Return wynik ' błąd lub brak wyników
+
+                For i = 1 To linie.Length - 1
+                    Dim d = SparsujWiersz(linie(i))
+                    If d IsNot Nothing AndAlso d.Zasieg1992.Poprawny Then
+                        wynik.Add(d)
+                    End If
+                Next
+            End Using
+        Catch ex As Exception When Not (TypeOf ex Is OperationCanceledException)
+            ' Błąd sieciowy lub timeout
+        End Try
+
+        Return wynik
+    End Function
+
+    ''' <summary>Parsuje pojedynczy wiersz odpowiedzi z ULDK rozdzielany pionową kreską '|'.</summary>
+    Public Shared Function SparsujWiersz(wiersz As String) As DzialkaKatastralna
+        If String.IsNullOrWhiteSpace(wiersz) Then Return Nothing
+        Dim czesci = wiersz.Split("|"c)
+        If czesci.Length < 6 Then Return Nothing
+
+        Dim d As New DzialkaKatastralna With {
+            .Identyfikator = czesci(0).Trim(),
+            .Numer = czesci(2).Trim(),
+            .Obreb = czesci(3).Trim(),
+            .Gmina = czesci(4).Trim(),
+            .Powiat = czesci(5).Trim()
+        }
+
+        Dim wkt = If(czesci.Length > 6, czesci(6).Trim(), "")
+        If wkt.StartsWith("SRID=", StringComparison.OrdinalIgnoreCase) Then
+            Dim idx = wkt.IndexOf(";"c)
+            If idx >= 0 Then wkt = wkt.Substring(idx + 1).Trim()
+        End If
+        d.Wkt = wkt
+
+        If Not String.IsNullOrEmpty(wkt) Then
+            SparsujGeometrieWkt(wkt, d)
+        End If
+
+        Return d
+    End Function
+
+    Private Shared Sub SparsujGeometrieWkt(wkt As String, d As DzialkaKatastralna)
+        Dim startIdx = wkt.IndexOf("((")
+        Dim endIdx = wkt.LastIndexOf("))")
+        If startIdx < 0 OrElse endIdx <= startIdx Then Exit Sub
+
+        Dim coordText = wkt.Substring(startIdx + 2, endIdx - startIdx - 2)
+        Dim ci = CultureInfo.InvariantCulture
+        Dim minX = Double.MaxValue, maxX = Double.MinValue
+        Dim minY = Double.MaxValue, maxY = Double.MinValue
+
+        Dim punktyTxt = coordText.Split(","c)
+        For Each pt In punktyTxt
+            Dim xy = pt.Trim().Split(New Char() {" "c, ChrW(9)}, StringSplitOptions.RemoveEmptyEntries)
+            If xy.Length >= 2 Then
+                ' WKT dla EPSG:2180 podaje współrzędne jako Easting (Wschód) Northing (Północ).
+                ' W konwencji geodezyjnej programu MapoTero:
+                ' X = Northing (Północna), Y = Easting (Wschodnia).
+                Dim yEasting As Double, xNorthing As Double
+                If Double.TryParse(xy(0), NumberStyles.Float, ci, yEasting) AndAlso
+                   Double.TryParse(xy(1), NumberStyles.Float, ci, xNorthing) Then
+                    minX = Math.Min(minX, xNorthing)
+                    maxX = Math.Max(maxX, xNorthing)
+                    minY = Math.Min(minY, yEasting)
+                    maxY = Math.Max(maxY, yEasting)
+                    Dim geo = UkladWspolrzednych.PL1992.DoWgs84(New PunktXY(xNorthing, yEasting))
+                    d.ObrysWgs84.Add(geo)
+                End If
+            End If
+        Next
+
+        If minX < Double.MaxValue AndAlso maxX > Double.MinValue Then
+            d.Zasieg1992 = New Zasieg(minX, minY, maxX, maxY)
+        End If
+    End Sub
+
+End Class

@@ -214,7 +214,7 @@ Public Class ZrodloSegmentow
     ''' Zdekodowany segment (BGRA) albo Nothing, gdy brak pliku. Dekodowanie odbywa się poza blokadą - dawniej trwało
     ''' pod nią, więc wielowątkowe renderowanie kafli (kompilator MBTiles) czekało na jeden wątek dekodujący.
     ''' </summary>
-    Private Function Segment(wiersz As Integer, kolumna As Integer) As Byte()
+    Friend Function Segment(wiersz As Integer, kolumna As Integer) As Byte()
         Dim klucz As Long = wiersz * 100000L + kolumna
         Dim pokolenie As Integer, biale As Boolean, szare As Boolean
         SyncLock _blokada
@@ -299,6 +299,8 @@ End Class
 
 ''' <summary>Rodzaj eksportu.</summary>
 Public Enum RodzajEksportu
+    ''' <summary>JNX dla odbiorników Garmin (BirdsEye): wielopoziomowy raster bez limitu 100 kafli.</summary>
+    Jnx
     ''' <summary>KMZ dla odbiorników Garmin (Custom Maps): kafle JPEG do 1024 px, limit liczby kafli.</summary>
     KmzGarmin
     ''' <summary>KMZ bez limitu liczby kafli (Locus Map, OruxMaps, Google Earth).</summary>
@@ -309,6 +311,8 @@ Public Enum RodzajEksportu
     SQLiteDB
     ''' <summary>Mapa offline OruxMaps: folder z bazą OruxMapsImages.db i kalibracją .otrk2.xml.</summary>
     OruxMaps
+    ''' <summary>GeoTIFF z georeferencją (Avenza Maps, QField, GIS, CAD).</summary>
+    GeoTiff
 End Enum
 
 ''' <summary>Warstwa mapy nakładana podczas eksportu na mapę podstawową (np. granice działek na ortofotomapie).</summary>
@@ -338,6 +342,10 @@ Public Class ZadanieEksportu
     Public Property JakoscJpeg As Integer = 85
     ''' <summary>KMZ: maksymalna liczba kafli (Garmin: 100).</summary>
     Public Property MaksKafli As Integer = 100
+    ''' <summary>KMZ Garmin: automatyczny podział na tomy (paczki do MaksKafli) bez utraty rozdzielczości.</summary>
+    Public Property PodzialNaTomy As Boolean
+    ''' <summary>Kolejność rysowania w odbiornikach Garmin (drawOrder / zOrder: 25 - pod wektorem, 50 - standard, 75 - nad drogami).</summary>
+    Public Property KolejnoscRysowania As Integer = 50
     ''' <summary>Kafle Web Mercator: zakres poziomów powiększenia.</summary>
     Public Property PoziomMin As Integer = 10
     Public Property PoziomMax As Integer = 16
@@ -348,6 +356,14 @@ Public Class ZadanieEksportu
     ''' (kafle PNG, w MBTiles typ "overlay"). Nie dotyczy KMZ dla odbiorników Garmin (tylko JPEG).
     ''' </summary>
     Public Property Nakladka As Boolean
+    ''' <summary>GeoTIFF: kompresja JPEG (mniejszy plik, zalecany dla Avenza Maps).</summary>
+    Public Property GeoTiffJpeg As Boolean = True
+    ''' <summary>GeoTIFF: generuj dodatkowo pliki georeferencji .tfw i .prj dla CAD.</summary>
+    Public Property GeoTiffPlikiCad As Boolean = True
+    ''' <summary>GeoTIFF: generuj plik kalibracji .map dla OziExplorer.</summary>
+    Public Property GeoTiffPlikMap As Boolean = False
+    ''' <summary>Opcje korekcji obrazu pod ekrany transflektywne (Garmin MIP / pełne słońce).</summary>
+    Public Property KorekcjaMip As New OpcjeKorekcjiMip()
     ''' <summary>Warstwy nakładane na mapę podstawową (od dołu do góry).</summary>
     Public ReadOnly Property Nakladki As New List(Of WarstwaEksportu)
     ''' <summary>Opis mapy: źródła danych, data pobrania, warstwy.</summary>
@@ -357,17 +373,18 @@ Public Class ZadanieEksportu
     Public ReadOnly Property Png As Boolean
         Get
             Select Case Rodzaj
-                Case RodzajEksportu.KmzGarmin : Return False
+                Case RodzajEksportu.KmzGarmin : Return Nakladka
+                Case RodzajEksportu.Jnx : Return False
                 Case RodzajEksportu.Kmz : Return Nakladka
                 Case Else : Return KaflePng OrElse Nakladka
             End Select
         End Get
     End Property
 
-    ''' <summary>Czy eksport tworzy kafle Web Mercator w piramidzie poziomów (MBTiles, SQLiteDB, OruxMaps).</summary>
+    ''' <summary>Czy eksport tworzy kafle Web Mercator w piramidzie poziomów (MBTiles, SQLiteDB, OruxMaps, JNX).</summary>
     Public ReadOnly Property Piramida As Boolean
         Get
-            Return Rodzaj = RodzajEksportu.MBTiles OrElse Rodzaj = RodzajEksportu.SQLiteDB OrElse Rodzaj = RodzajEksportu.OruxMaps
+            Return Rodzaj = RodzajEksportu.MBTiles OrElse Rodzaj = RodzajEksportu.SQLiteDB OrElse Rodzaj = RodzajEksportu.OruxMaps OrElse Rodzaj = RodzajEksportu.Jnx
         End Get
     End Property
 
@@ -459,7 +476,9 @@ Public NotInheritable Class EksportMapy
 
     Public Shared Sub Eksportuj(z As ZadanieEksportu, postep As IProgress(Of Integer), token As CancellationToken)
         Try
-            If z.Piramida Then
+            If z.Rodzaj = RodzajEksportu.GeoTiff Then
+                EksportGeoTiff(z, postep, token)
+            ElseIf z.Piramida Then
                 EksportPiramidy(z, postep, token)
             Else
                 EksportKmz(z, postep, token)
@@ -477,7 +496,26 @@ Public NotInheritable Class EksportMapy
 
     ''' <summary>Usuwa plik wynikowy (OruxMaps - pliki mapy w jej folderze i pusty folder).</summary>
     Private Shared Sub UsunWynik(z As ZadanieEksportu)
-        If z.Rodzaj = RodzajEksportu.OruxMaps Then
+        If z.Rodzaj = RodzajEksportu.GeoTiff Then
+            If File.Exists(z.Plik) Then File.Delete(z.Plik)
+            Dim tfw = Path.ChangeExtension(z.Plik, ".tfw")
+            If File.Exists(tfw) Then File.Delete(tfw)
+            Dim tifw = Path.ChangeExtension(z.Plik, ".tifw")
+            If File.Exists(tifw) Then File.Delete(tifw)
+            Dim prj = Path.ChangeExtension(z.Plik, ".prj")
+            If File.Exists(prj) Then File.Delete(prj)
+            Dim map = Path.ChangeExtension(z.Plik, ".map")
+            If File.Exists(map) Then File.Delete(map)
+        ElseIf z.Rodzaj = RodzajEksportu.OruxMaps Then
+            If Not Directory.Exists(z.Plik) Then Exit Sub
+            UsunPlikBazy(Path.Combine(z.Plik, MapaOruxMaps.NazwaBazy))
+            For Each plik In Directory.GetFiles(z.Plik, "*" & MapaOruxMaps.RozszerzenieKalibracji)
+                File.Delete(plik)
+            Next
+            If Directory.GetFileSystemEntries(z.Plik).Length = 0 Then Directory.Delete(z.Plik)
+        ElseIf z.Rodzaj = RodzajEksportu.Jnx Then
+            If File.Exists(z.Plik) Then File.Delete(z.Plik)
+            UsunPlikBazy(z.Plik & ".tmp_tiles")
             If Not Directory.Exists(z.Plik) Then Exit Sub
             UsunPlikBazy(Path.Combine(z.Plik, MapaOruxMaps.NazwaBazy))
             For Each plik In Directory.GetFiles(z.Plik, "*" & MapaOruxMaps.RozszerzenieKalibracji)
@@ -744,13 +782,69 @@ Public NotInheritable Class EksportMapy
 
 #Region "KMZ"
 
+Friend Shared Function NazwaPlikuTomu(sciezkaBazowa As String, numerTomu As Integer, liczbaTomow As Integer) As String
+        Dim dir = Path.GetDirectoryName(sciezkaBazowa)
+        Dim nazwa = Path.GetFileNameWithoutExtension(sciezkaBazowa)
+        Dim ext = Path.GetExtension(sciezkaBazowa)
+        Dim sufiks = "_tom" & numerTomu.ToString("D2") & "_z_" & liczbaTomow.ToString("D2")
+        Return Path.Combine(If(String.IsNullOrEmpty(dir), ".", dir), nazwa & sufiks & ext)
+    End Function
+
     Private Shared Sub EksportKmz(z As ZadanieEksportu, postep As IProgress(Of Integer), token As CancellationToken)
         Dim plan = PlanKmz(z)
         Dim warstwy = z.WarstwyRenderowania()
         Dim nadprobkowanie As Integer = LiczbaProbek(z, PikselWMetrach(z) * plan.Pomniejszenie)
         Dim png As Boolean = z.Png
         Dim gotowe As Integer = 0
-        Using kmz As New ZapisKmz(z.Plik, z.Nazwa, 50)
+
+        Dim filtr As Func(Of ProstokatGeo, Boolean) = Function(zasiegKafla)
+                                                          Dim narozniki() As PunktGeo = {
+                                                              New PunktGeo(zasiegKafla.Polnoc, zasiegKafla.Zachod),
+                                                              New PunktGeo(zasiegKafla.Polnoc, zasiegKafla.Wschod),
+                                                              New PunktGeo(zasiegKafla.Poludnie, zasiegKafla.Zachod),
+                                                              New PunktGeo(zasiegKafla.Poludnie, zasiegKafla.Wschod)
+                                                          }
+                                                          For Each w In warstwy
+                                                              If w.Zrodlo.MaDane(ObszarPunktow(w.Uklad, narozniki)) Then Return True
+                                                          Next
+                                                          Return False
+                                                      End Function
+
+        Dim tomy = If(z.PodzialNaTomy, plan.WyznaczTomy(If(z.MaksKafli > 0, z.MaksKafli, 100), filtr), Nothing)
+        If tomy IsNot Nothing AndAlso tomy.Count > 1 Then
+            Dim lacznie = Math.Max(1, tomy.Sum(Function(t) t.LiczbaKafli))
+            For Each tom In tomy
+                Dim plikTomu = NazwaPlikuTomu(z.Plik, tom.Numer, tomy.Count)
+                Dim nazwaTomu = z.Nazwa & " (Tom " & tom.Numer & " z " & tomy.Count & ")"
+                Using kmz As New ZapisKmz(plikTomu, nazwaTomu, z.KolejnoscRysowania)
+                    kmz.Opis = z.Metadane.Opis & vbCrLf & "Tom " & tom.Numer & " z " & tomy.Count & " (" & tom.LiczbaKafli & " kafli)"
+                    For Each kfl In tom.Kafle
+                        token.ThrowIfCancellationRequested()
+                        Dim w = kfl.Item1, k = kfl.Item2
+                        Dim px = plan.PikseleKafla(w, k)
+                        Dim x0 As Integer = px.Item1, y0 As Integer = px.Item2
+                        Dim f = Function(x As Double, y As Double) New PunktGeo(plan.Obszar.Polnoc - (y0 + y) * plan.PikselSzerokosc,
+                                                                                plan.Obszar.Zachod + (x0 + x) * plan.PikselDlugosc)
+                        Using bmp = RenderujKafel(warstwy, px.Item3, px.Item4, nadprobkowanie, f)
+                            If bmp IsNot Nothing Then
+                                If z.KorekcjaMip IsNot Nothing AndAlso z.KorekcjaMip.Wlaczona Then
+                                    NakladanieObrazow.ZastosujKorekcjeMip(bmp, z.KorekcjaMip)
+                                End If
+                                kmz.DodajKafel("kafel_" & (w + 1).ToString("D2") & "_" & (k + 1).ToString("D2") & If(png, ".png", ".jpg"),
+                                               Koduj(bmp, png, z.JakoscJpeg), plan.ZasiegKafla(w, k))
+                            End If
+                        End Using
+                        gotowe += 1
+                        postep?.Report(Math.Min(100, gotowe * 100 \ lacznie))
+                    Next
+                    kmz.Zakoncz()
+                End Using
+            Next
+            Return
+        End If
+
+        Dim lacznieStandard As Integer = Math.Max(1, plan.Wiersze * plan.Kolumny)
+        Using kmz As New ZapisKmz(z.Plik, z.Nazwa, z.KolejnoscRysowania)
             kmz.Opis = z.Metadane.Opis
             For w = 0 To plan.Wiersze - 1
                 For k = 0 To plan.Kolumny - 1
@@ -761,16 +855,169 @@ Public NotInheritable Class EksportMapy
                                                                             plan.Obszar.Zachod + (x0 + x) * plan.PikselDlugosc)
                     Using bmp = RenderujKafel(warstwy, px.Item3, px.Item4, nadprobkowanie, f)
                         If bmp IsNot Nothing Then
+                            If z.KorekcjaMip IsNot Nothing AndAlso z.KorekcjaMip.Wlaczona Then
+                                NakladanieObrazow.ZastosujKorekcjeMip(bmp, z.KorekcjaMip)
+                            End If
                             kmz.DodajKafel("kafel_" & (w + 1).ToString("D2") & "_" & (k + 1).ToString("D2") & If(png, ".png", ".jpg"),
                                            Koduj(bmp, png, z.JakoscJpeg), plan.ZasiegKafla(w, k))
                         End If
                     End Using
                     gotowe += 1
-                    postep?.Report(gotowe * 100 \ plan.LiczbaKafli)
+                    postep?.Report(Math.Min(100, gotowe * 100 \ lacznieStandard))
                 Next
             Next
             kmz.Zakoncz()
         End Using
+    End Sub
+
+#End Region
+
+#Region "GeoTIFF"
+
+    Private Shared Sub EksportGeoTiff(z As ZadanieEksportu, postep As IProgress(Of Integer), token As CancellationToken)
+        Dim s = z.Zrodlo.Siatka
+        If s Is Nothing OrElse Not s.Poprawna OrElse s.LiczbaKolumn = 0 OrElse s.LiczbaWierszy = 0 Then
+            Throw New ArgumentException("Niepoprawne parametry siatki segmentów")
+        End If
+        Dim bok As Integer = s.BokSegmentuPx
+        Dim kolumny As Integer = s.LiczbaKolumn
+        Dim wiersze As Integer = s.LiczbaWierszy
+        Dim szer As Integer = CInt(s.SzerokoscPx)
+        Dim wys As Integer = CInt(s.WysokoscPx)
+        Dim format As FormatArkusza = If(z.GeoTiffJpeg, FormatArkusza.GeoTiffJpeg, FormatArkusza.GeoTiff)
+        Dim kanaly As Integer = If(z.GeoTiffJpeg, 3, If(z.Nakladka OrElse z.KaflePng, 4, 3))
+
+        Dim warstwy = z.WarstwyRenderowania()
+        Dim buforRgb(szer * bok * kanaly - 1) As Byte
+        Dim pikseleArgb(szer * bok - 1) As Integer
+
+        Using zapis = ZapisRastra.Utworz(format, z.Plik, szer, wys, z.JakoscJpeg, z.Uklad, s.ZasiegSiatki, kanaly = 4)
+            For w = 1 To wiersze
+                token.ThrowIfCancellationRequested()
+                'Domyślne tło: białe dla RGB (-1 = 0xFFFFFFFF), przezroczyste dla RGBA (0)
+                Dim domyslnyKolor As Integer = If(kanaly = 4, 0, -1)
+                Array.Fill(pikseleArgb, domyslnyKolor)
+
+                For Each warstwa In warstwy
+                    Dim zr = warstwa.Zrodlo
+                    Dim krycie = warstwa.Krycie
+                    Dim taSamaSiatka = (zr.Siatka.BokSegmentuPx = bok AndAlso zr.Siatka.LiczbaKolumn = kolumny AndAlso zr.Siatka.LiczbaWierszy = wiersze AndAlso warstwa.Uklad.Epsg = z.Uklad.Epsg)
+
+                    If taSamaSiatka Then
+                        For k = 1 To kolumny
+                            Dim dane = zr.Segment(w, k)
+                            If dane Is Nothing Then Continue For
+                            Dim x0 As Integer = (k - 1) * bok
+                            For y = 0 To bok - 1
+                                Dim idxCel = y * szer + x0
+                                Dim idxZr = y * bok * 4
+                                For x = 0 To bok - 1
+                                    Dim b = dane(idxZr)
+                                    Dim g = dane(idxZr + 1)
+                                    Dim r = dane(idxZr + 2)
+                                    Dim a = dane(idxZr + 3)
+                                    idxZr += 4
+                                    If a = 0 Then Continue For
+                                    Dim efA As Double = (a / 255.0) * krycie
+                                    If efA <= 0 Then Continue For
+
+                                    If warstwa Is warstwy(0) AndAlso efA >= 0.999 Then
+                                        pikseleArgb(idxCel + x) = (CInt(a) << 24) Or (CInt(r) << 16) Or (CInt(g) << 8) Or b
+                                    Else
+                                        Dim stary = pikseleArgb(idxCel + x)
+                                        Dim staryA = (stary >> 24) And &HFF
+                                        Dim staryR = (stary >> 16) And &HFF
+                                        Dim staryG = (stary >> 8) And &HFF
+                                        Dim staryB = stary And &HFF
+
+                                        Dim nowyR = CInt(staryR * (1.0 - efA) + r * efA)
+                                        Dim nowyG = CInt(staryG * (1.0 - efA) + g * efA)
+                                        Dim nowyB = CInt(staryB * (1.0 - efA) + b * efA)
+                                        Dim nowyA = CInt(Math.Min(255, staryA + a * krycie))
+                                        pikseleArgb(idxCel + x) = (nowyA << 24) Or (nowyR << 16) Or (nowyG << 8) Or nowyB
+                                    End If
+                                Next
+                            Next
+                        Next
+                    Else
+                        Dim pikselX = s.RozmiarPiksela
+                        Dim pikselY = s.RozmiarPiksela
+                        For y = 0 To bok - 1
+                            Dim pyWiersz = (w - 1) * bok + y
+                            Dim pX = s.ZasiegSiatki.XGora - (pyWiersz + 0.5) * pikselX
+                            Dim idxCel = y * szer
+                            For x = 0 To szer - 1
+                                Dim pY = s.ZasiegSiatki.YLewy + (x + 0.5) * pikselY
+                                Dim pWarstwy As PunktXY
+                                If warstwa.Uklad.Epsg = z.Uklad.Epsg Then
+                                    pWarstwy = New PunktXY(pX, pY)
+                                Else
+                                    Dim geo = z.Uklad.DoWgs84(New PunktXY(pX, pY))
+                                    pWarstwy = warstwa.Uklad.ZWgs84(geo)
+                                End If
+                                Dim r, g, b, a As Double
+                                If zr.Probka(pWarstwy.X, pWarstwy.Y, r, g, b, a) AndAlso a > 0 Then
+                                    Dim efA As Double = (a / 255.0) * krycie
+                                    Dim stary = pikseleArgb(idxCel + x)
+                                    Dim staryA = (stary >> 24) And &HFF
+                                    Dim staryR = (stary >> 16) And &HFF
+                                    Dim staryG = (stary >> 8) And &HFF
+                                    Dim staryB = stary And &HFF
+
+                                    Dim nowyR = CInt(Math.Min(255, Math.Max(0, staryR * (1.0 - efA) + r * efA)))
+                                    Dim nowyG = CInt(Math.Min(255, Math.Max(0, staryG * (1.0 - efA) + g * efA)))
+                                    Dim nowyB = CInt(Math.Min(255, Math.Max(0, staryB * (1.0 - efA) + b * efA)))
+                                    Dim nowyA = CInt(Math.Min(255, staryA + a * krycie))
+                                    pikseleArgb(idxCel + x) = (nowyA << 24) Or (nowyR << 16) Or (nowyG << 8) Or nowyB
+                                End If
+                            Next
+                        Next
+                    End If
+                Next
+
+                If z.KorekcjaMip IsNot Nothing AndAlso z.KorekcjaMip.Wlaczona Then
+                    KorekcjaMip.Zastosuj(pikseleArgb, szer, bok, z.KorekcjaMip)
+                End If
+
+                Dim iRgb As Integer = 0
+                For iPx = 0 To szer * bok - 1
+                    Dim c = pikseleArgb(iPx)
+                    buforRgb(iRgb) = CByte((c >> 16) And &HFF)
+                    buforRgb(iRgb + 1) = CByte((c >> 8) And &HFF)
+                    buforRgb(iRgb + 2) = CByte(c And &HFF)
+                    If kanaly = 4 Then
+                        buforRgb(iRgb + 3) = CByte((c >> 24) And &HFF)
+                        iRgb += 4
+                    Else
+                        iRgb += 3
+                    End If
+                Next
+
+                zapis.ZapiszWiersze(buforRgb, bok)
+                postep?.Report(CInt(w * 100 \ wiersze))
+            Next
+            zapis.Zakoncz()
+        End Using
+
+        Dim folderZapisu = Path.GetDirectoryName(z.Plik)
+        If Not String.IsNullOrEmpty(folderZapisu) AndAlso Not folderZapisu.EndsWith(Path.DirectorySeparatorChar.ToString()) Then
+            folderZapisu &= Path.DirectorySeparatorChar
+        End If
+        Dim nazwaBezRozszerzenia = Path.GetFileNameWithoutExtension(z.Plik)
+        Dim obrazGeoref = ZapisGeoreferencji.Obraz(z.Uklad, s.ZasiegSiatki, szer, wys, folderZapisu, Path.GetFileName(z.Plik))
+
+        If z.GeoTiffPlikiCad Then
+            Dim opcjeCad As New OpcjeGeoreferencji With {.WorldFile = True}
+            ZapisGeoreferencji.ZapiszPliki(obrazGeoref, folderZapisu, nazwaBezRozszerzenia, "tif", opcjeCad)
+            Dim sciezkaTfw = Path.Combine(folderZapisu, nazwaBezRozszerzenia & ".tfw")
+            If Not File.Exists(sciezkaTfw) Then
+                Georeferencja.Zapisz(sciezkaTfw, Georeferencja.WorldFile(obrazGeoref), Program.KodowanieSystemowe())
+            End If
+        End If
+        If z.GeoTiffPlikMap Then
+            Dim opcjeMap As New OpcjeGeoreferencji With {.Map = True}
+            ZapisGeoreferencji.ZapiszPliki(obrazGeoref, folderZapisu, nazwaBezRozszerzenia, "tif", opcjeMap)
+        End If
     End Sub
 
 #End Region
@@ -781,6 +1028,7 @@ Public NotInheritable Class EksportMapy
         Select Case z.Rodzaj
             Case RodzajEksportu.SQLiteDB : Return New MagazynSQLiteDB(z)
             Case RodzajEksportu.OruxMaps : Return New MagazynOruxMaps(z, obszar)
+            Case RodzajEksportu.Jnx : Return New MagazynJnx(z, obszar)
             Case Else : Return New MagazynMBTiles(z, obszar)
         End Select
     End Function
@@ -803,7 +1051,12 @@ Public NotInheritable Class EksportMapy
                 For tx = r.Item1 To r.Item3
                     token.ThrowIfCancellationRequested()
                     Using bmp = RenderujKafel(warstwy, 256, 256, nadprobkowanie, PrzeliczenieKafla(tx * 256.0, ty * 256.0, zmax))
-                        If bmp IsNot Nothing Then m.Zapisz(New KafelXYZ(tx, ty, zmax), Koduj(bmp, z.Png, z.JakoscJpeg))
+                        If bmp IsNot Nothing Then
+                            If z.KorekcjaMip IsNot Nothing AndAlso z.KorekcjaMip.Wlaczona Then
+                                NakladanieObrazow.ZastosujKorekcjeMip(bmp, z.KorekcjaMip)
+                            End If
+                            m.Zapisz(New KafelXYZ(tx, ty, zmax), Koduj(bmp, z.Png, z.JakoscJpeg))
+                        End If
                     End Using
                     gotowe += 1
                     postep?.Report(CInt(gotowe * 100 \ wszystkie))
@@ -1094,7 +1347,7 @@ Friend MustInherit Class MagazynKafli
         Wykonaj("PRAGMA journal_mode = DELETE;")
     End Sub
 
-    Public Sub Dispose() Implements IDisposable.Dispose
+    Public Overridable Sub Dispose() Implements IDisposable.Dispose
         Try
             _transakcja?.Dispose()
             _zapis?.Dispose()
@@ -1214,4 +1467,76 @@ Friend Class MagazynOruxMaps
                           MapaOruxMaps.Kalibracja(Zadanie.Nazwa, poziomy), Georeferencja.Utf8BezBom)
     End Sub
 
+End Class
+
+Friend Class MagazynJnx
+    Inherits MagazynKafli
+
+    Private ReadOnly _plikTmp As String
+    Private ReadOnly _obszar As ProstokatGeo
+
+    Public Sub New(z As ZadanieEksportu, obszar As ProstokatGeo)
+        MyBase.New(z.Plik & ".tmp_tiles", z)
+        _plikTmp = z.Plik & ".tmp_tiles"
+        _obszar = obszar
+        Wykonaj("CREATE TABLE tiles (zoom_level integer, tile_column integer, tile_row integer, tile_data blob, PRIMARY KEY (zoom_level, tile_column, tile_row));")
+        Przygotuj("INSERT OR REPLACE INTO tiles (zoom_level, tile_column, tile_row, tile_data) VALUES (@z, @x, @y, @d);",
+                  "SELECT tile_data FROM tiles WHERE zoom_level = @z AND tile_column = @x AND tile_row = @y;")
+    End Sub
+
+    Protected Overrides Function Indeks(k As KafelXYZ) As Tuple(Of Integer, Integer, Integer)
+        Return Tuple.Create(k.Z, k.X, k.Y)
+    End Function
+
+    Protected Overrides Sub Zakoncz()
+        Dim poziomy As New List(Of PoziomJnx)
+        Dim srodekSz As Double = (_obszar.Polnoc + _obszar.Poludnie) / 2.0
+
+        Using cmd As New SQLiteCommand("SELECT zoom_level, tile_column, tile_row, tile_data FROM tiles ORDER BY zoom_level ASC, tile_row ASC, tile_column ASC;", Polaczenie),
+              r = cmd.ExecuteReader()
+
+            Dim biezacyPoziom As PoziomJnx = Nothing
+            Dim biezacyZ As Integer = -1
+
+            While r.Read()
+                Dim z = r.GetInt32(0)
+                Dim x = r.GetInt32(1)
+                Dim y = r.GetInt32(2)
+                Dim dane = DirectCast(r(3), Byte())
+
+                If biezacyPoziom Is Nothing OrElse biezacyZ <> z Then
+                    biezacyZ = z
+                    Dim skala = ZapisJnx.SkalaDlaPoziomu(z, srodekSz)
+                    biezacyPoziom = New PoziomJnx(skala)
+                    poziomy.Add(biezacyPoziom)
+                End If
+
+                Dim polnoc As Double = WebMercator.Szerokosc(y * CDbl(WebMercator.RozmiarKafla), z)
+                Dim poludnie As Double = WebMercator.Szerokosc((y + 1) * CDbl(WebMercator.RozmiarKafla), z)
+                Dim zachod As Double = WebMercator.Dlugosc(x * CDbl(WebMercator.RozmiarKafla), z)
+                Dim wschod As Double = WebMercator.Dlugosc((x + 1) * CDbl(WebMercator.RozmiarKafla), z)
+
+                Dim kafel As New KafelJnx(New ProstokatGeo(polnoc, poludnie, wschod, zachod), dane)
+                biezacyPoziom.Kafle.Add(kafel)
+            End While
+        End Using
+
+        If poziomy.Count = 0 Then
+            Throw New InvalidOperationException("Brak kafli do zapisania w formacie JNX.")
+        End If
+
+        ZapisJnx.Zapisz(Zadanie.Plik, Zadanie.Nazwa, Zadanie.KolejnoscRysowania, poziomy)
+    End Sub
+
+    Public Overrides Sub Dispose()
+        Try
+            MyBase.Dispose()
+        Finally
+            Try
+                SQLiteConnection.ClearAllPools()
+                EksportMapy.UsunPlikBazy(_plikTmp)
+            Catch
+            End Try
+        End Try
+    End Sub
 End Class

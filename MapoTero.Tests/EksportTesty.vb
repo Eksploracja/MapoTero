@@ -347,4 +347,61 @@ Public Class EksportTesty
         End Try
     End Sub
 
+    <Fact>
+    Public Sub EksportGeoTiffPodstawowyIPlikiCad()
+        Dim folder = NowyFolder()
+        Try
+            UtworzSegmenty(folder, "png", Sub(g, w, k) g.Clear(Color.FromArgb(255, 30 * w, 40 * k, 100)))
+            Dim plikTif = folder & "mapa.tif"
+            Dim z = Zadanie(RodzajEksportu.GeoTiff, Zrodlo(folder, "png"), plikTif)
+            z.GeoTiffPlikiCad = True
+            z.GeoTiffPlikMap = True
+
+            EksportMapy.Eksportuj(z, Nothing, CancellationToken.None)
+
+            Assert.True(File.Exists(plikTif))
+            Dim fi As New FileInfo(plikTif)
+            Assert.True(fi.Length > 1000)
+
+            ' Weryfikacja plików georeferencji CAD / OziExplorer
+            Dim plikTfw = folder & "mapa.tfw"
+            Dim plikPrj = folder & "mapa.prj"
+            Dim plikMap = folder & "mapa.map"
+
+            Assert.True(File.Exists(plikTfw))
+            Assert.True(File.Exists(plikPrj))
+            Assert.True(File.Exists(plikMap))
+
+            Dim prjTekst = File.ReadAllText(plikPrj)
+            Assert.Contains("CS92", prjTekst)
+        Finally
+            Usun(folder)
+        End Try
+    End Sub
+
+    <Fact>
+    Public Sub EksportGeoTiffZKorekcjaMip()
+        Dim folder = NowyFolder()
+        Try
+            UtworzSegmenty(folder, "jpg", Sub(g, w, k) g.Clear(Color.DarkGreen))
+            Dim plikTif = folder & "mapa_mip.tif"
+            Dim z = Zadanie(RodzajEksportu.GeoTiff, Zrodlo(folder, "jpg"), plikTif)
+            z.GeoTiffJpeg = True
+            z.KorekcjaMip = New OpcjeKorekcjiMip With {
+                .Wlaczona = True,
+                .Kontrast = 1.3F,
+                .Nasycenie = 1.2F,
+                .Wyostrzanie = 0.5F
+            }
+
+            EksportMapy.Eksportuj(z, Nothing, CancellationToken.None)
+
+            Assert.True(File.Exists(plikTif))
+            Dim fi As New FileInfo(plikTif)
+            Assert.True(fi.Length > 500)
+        Finally
+            Usun(folder)
+        End Try
+    End Sub
+
 End Class

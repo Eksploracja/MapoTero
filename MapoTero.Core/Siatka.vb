@@ -74,6 +74,12 @@ Public Structure Zasieg
         End Get
     End Property
 
+    Public ReadOnly Property Poprawny As Boolean
+        Get
+            Return Wysokosc > 0 AndAlso Szerokosc > 0
+        End Get
+    End Property
+
     Public Overrides Function ToString() As String
         Return String.Format(CultureInfo.InvariantCulture, "X {0}..{1}, Y {2}..{3}", XDol, XGora, YLewy, YPrawy)
     End Function

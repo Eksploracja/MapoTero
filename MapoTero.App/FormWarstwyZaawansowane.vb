@@ -38,11 +38,19 @@ Public Class FormWarstwyZaawansowane
     Private ReadOnly _uslugiWmts As New Dictionary(Of String, ZrodloWmts)(StringComparer.OrdinalIgnoreCase)
     Private _przerwanie As CancellationTokenSource
 
+    Private ReadOnly _poziomyZoomu As Double() = {0.5, 1.0, 2.0, 4.0}
+    Private _indeksZoomu As Integer = 1 ' Domyślnie 1.0 (100% - skala 1:1)
+    Private _bazaPodgladu As Bitmap
+
     Private ReadOnly _wiersze As New TableLayoutPanel()
     Private ReadOnly _podglad As New PictureBox()
     Private ReadOnly _btnPodglad As New Button()
     Private ReadOnly _lblStan As New Label()
     Private ReadOnly _lblZapytania As New Label()
+    Private ReadOnly _btnZoomMinus As New Button()
+    Private ReadOnly _btnZoomReset As New Button()
+    Private ReadOnly _btnZoomPlus As New Button()
+    Private ReadOnly _lblZoom As New Label()
     Private ReadOnly _podpowiedz As New ToolTip() With {.InitialDelay = 500, .ReshowDelay = 500, .AutoPopDelay = 15000}
 
     Public Sub New(zestaw As ZestawWarstw, zadanie As ZadaniePobierania, zaznaczona As Integer)
@@ -89,7 +97,11 @@ Public Class FormWarstwyZaawansowane
         _podglad.Size = New Size(BokPodgladu, BokPodgladu)
         _podglad.BorderStyle = BorderStyle.FixedSingle
         _podglad.BackColor = Color.White
-        _podglad.SizeMode = PictureBoxSizeMode.Zoom
+        _podglad.SizeMode = PictureBoxSizeMode.CenterImage
+        _podglad.Cursor = Cursors.Hand
+        AddHandler _podglad.MouseEnter, Sub(s, e) _podglad.Focus()
+        AddHandler _podglad.MouseWheel, AddressOf Podglad_MouseWheel
+        _podpowiedz.SetToolTip(_podglad, "Podgląd kanapki. Kółko myszy: przybliż/oddal.")
         Controls.Add(_podglad)
 
         _btnPodglad.Location = New Point(560, 332)
@@ -100,6 +112,39 @@ Public Class FormWarstwyZaawansowane
         _lblStan.Location = New Point(676, 330)
         _lblStan.Size = New Size(190, 44)
         Controls.Add(_lblStan)
+
+        _btnZoomMinus.Location = New Point(560, 360)
+        _btnZoomMinus.Size = New Size(24, 23)
+        _btnZoomMinus.Text = "-"
+        _btnZoomMinus.Font = New Font(Font.FontFamily, 8.25!, FontStyle.Bold)
+        _btnZoomMinus.Enabled = False
+        _podpowiedz.SetToolTip(_btnZoomMinus, "Oddal podgląd (lupa rastrowa)")
+        AddHandler _btnZoomMinus.Click, AddressOf ZoomMinus_Click
+        Controls.Add(_btnZoomMinus)
+
+        _btnZoomReset.Location = New Point(586, 360)
+        _btnZoomReset.Size = New Size(32, 23)
+        _btnZoomReset.Text = "1:1"
+        _btnZoomReset.Font = New Font(Font.FontFamily, 7.5!, FontStyle.Regular)
+        _btnZoomReset.Enabled = False
+        _podpowiedz.SetToolTip(_btnZoomReset, "Przywróć skalę 1:1 (100%)")
+        AddHandler _btnZoomReset.Click, AddressOf ZoomReset_Click
+        Controls.Add(_btnZoomReset)
+
+        _btnZoomPlus.Location = New Point(620, 360)
+        _btnZoomPlus.Size = New Size(24, 23)
+        _btnZoomPlus.Text = "+"
+        _btnZoomPlus.Font = New Font(Font.FontFamily, 8.25!, FontStyle.Bold)
+        _btnZoomPlus.Enabled = False
+        _podpowiedz.SetToolTip(_btnZoomPlus, "Przybliż podgląd (lupa rastrowa)")
+        AddHandler _btnZoomPlus.Click, AddressOf ZoomPlus_Click
+        Controls.Add(_btnZoomPlus)
+
+        _lblZoom.Location = New Point(646, 364)
+        _lblZoom.AutoSize = True
+        _lblZoom.Text = "100%"
+        _lblZoom.ForeColor = SystemColors.ControlDarkDark
+        Controls.Add(_lblZoom)
 
         Dim btnOk As New Button With {.Text = "OK", .DialogResult = DialogResult.OK, .Location = New Point(710, 386), .Size = New Size(75, 24)}
         Dim btnAnuluj As New Button With {.Text = "Anuluj", .DialogResult = DialogResult.Cancel, .Location = New Point(795, 386), .Size = New Size(75, 24)}
@@ -372,13 +417,23 @@ Public Class FormWarstwyZaawansowane
         End Try
     End Sub
 
+    Protected Overrides Sub OnShown(e As EventArgs)
+        MyBase.OnShown(e)
+        If _zadanie.Siatka IsNot Nothing AndAlso _obrazy.Count = 0 Then
+            PobierzPodglad(Nothing, Nothing)
+        End If
+    End Sub
+
     ''' <summary>Nakłada pobrane obrazy warstw wg bieżącego krycia, trybu i kolejności (warstwy jeszcze niepobrane są pomijane).</summary>
     Private Sub OdswiezPodglad()
         OdswiezLiczbeZapytan()
         If _obrazy.Count = 0 Then Exit Sub
         Dim piksele(BokPodgladu * BokPodgladu - 1) As Integer
-        For i = 0 To piksele.Length - 1
-            piksele(i) = &HFFFFFFFF
+        For y = 0 To BokPodgladu - 1
+            For x = 0 To BokPodgladu - 1
+                Dim jasny = ((x \ 8) + (y \ 8)) Mod 2 = 0
+                piksele(y * BokPodgladu + x) = If(jasny, &HFFFFFFFF, &HFFF2F2F2)
+            Next
         Next
         For Each w In _zestaw.Warstwy
             Dim obraz() As Integer = Nothing
@@ -386,9 +441,71 @@ Public Class FormWarstwyZaawansowane
                 NakladanieWarstw.Naloz(piksele, obraz, w.Krycie, w.TrybMieszania)
             End If
         Next
-        Dim stary = _podglad.Image
-        _podglad.Image = NakladanieObrazow.DoBitmapy(piksele, BokPodgladu, BokPodgladu)
-        stary?.Dispose()
+        Dim staraBaza = _bazaPodgladu
+        _bazaPodgladu = NakladanieObrazow.DoBitmapy(piksele, BokPodgladu, BokPodgladu)
+        staraBaza?.Dispose()
+        ZastosujZoomDoPodgladu()
+    End Sub
+
+    Private Sub ZoomPlus_Click(sender As Object, e As EventArgs)
+        If _indeksZoomu < _poziomyZoomu.Length - 1 Then
+            _indeksZoomu += 1
+            ZastosujZoomDoPodgladu()
+        End If
+    End Sub
+
+    Private Sub ZoomMinus_Click(sender As Object, e As EventArgs)
+        If _indeksZoomu > 0 Then
+            _indeksZoomu -= 1
+            ZastosujZoomDoPodgladu()
+        End If
+    End Sub
+
+    Private Sub ZoomReset_Click(sender As Object, e As EventArgs)
+        Const domyslnyIndeks As Integer = 1
+        If _indeksZoomu <> domyslnyIndeks Then
+            _indeksZoomu = domyslnyIndeks
+            ZastosujZoomDoPodgladu()
+        End If
+    End Sub
+
+    Private Sub Podglad_MouseWheel(sender As Object, e As MouseEventArgs)
+        If _bazaPodgladu Is Nothing Then Exit Sub
+        If e.Delta > 0 Then
+            If _indeksZoomu < _poziomyZoomu.Length - 1 Then
+                _indeksZoomu += 1
+                ZastosujZoomDoPodgladu()
+            End If
+        ElseIf e.Delta < 0 Then
+            If _indeksZoomu > 0 Then
+                _indeksZoomu -= 1
+                ZastosujZoomDoPodgladu()
+            End If
+        End If
+    End Sub
+
+    Private Sub ZastosujZoomDoPodgladu()
+        If _bazaPodgladu Is Nothing Then
+            Dim stary = _podglad.Image
+            _podglad.Image = Nothing
+            stary?.Dispose()
+            AktualizujStanPrzyciskowZoomu()
+            Exit Sub
+        End If
+        Dim zoom = _poziomyZoomu(_indeksZoomu)
+        Dim powiekszony = PodgladWarstwSilnik.ZastosujZoom(_bazaPodgladu, zoom, BokPodgladu, BokPodgladu)
+        Dim staryImg = _podglad.Image
+        _podglad.Image = powiekszony
+        staryImg?.Dispose()
+        _lblZoom.Text = CInt(Math.Round(zoom * 100)) & "%"
+        AktualizujStanPrzyciskowZoomu()
+    End Sub
+
+    Private Sub AktualizujStanPrzyciskowZoomu()
+        Dim maObraz As Boolean = _bazaPodgladu IsNot Nothing
+        _btnZoomMinus.Enabled = maObraz AndAlso _indeksZoomu > 0
+        _btnZoomPlus.Enabled = maObraz AndAlso _indeksZoomu < _poziomyZoomu.Length - 1
+        _btnZoomReset.Enabled = maObraz AndAlso _indeksZoomu <> 1
     End Sub
 
     Protected Overrides Sub OnFormClosed(e As FormClosedEventArgs)
@@ -402,6 +519,8 @@ Public Class FormWarstwyZaawansowane
 
     Protected Overrides Sub Dispose(disposing As Boolean)
         If disposing Then
+            _bazaPodgladu?.Dispose()
+            _bazaPodgladu = Nothing
             _podglad.Image?.Dispose()
             _podpowiedz.Dispose()
         End If

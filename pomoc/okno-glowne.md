@@ -131,6 +131,8 @@ Okno otwierane przyciskiem **…** ułatwia zestrojenie wielowarstwowej kompozyc
 
 Kliknięcie **OK** przenosi ustawienia do okna głównego. Przycisk **Anuluj** odrzuca zmiany.
 
+*Szczegółowy poradnik doboru podkładów, krycia i trybów mieszania znajdziesz na stronie [Kompozycje warstw i plastyczna rzeźba](../pobieranie/kompozycje/).*
+
 ## Układ współrzędnych pobierania
 
 Lista układów: PL-1992, PL-2000 (strefy 5–8), UTM (strefy 33N–35N), WGS84. Zmiana układu:

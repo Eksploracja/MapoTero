@@ -16,6 +16,7 @@
 Imports System.Drawing.Imaging
 Imports System.IO
 Imports System.Runtime.InteropServices
+Imports MapoTero.Core
 
 ''' <summary>
 ''' Zamiana obrazów na tablice pikseli ARGB i z powrotem - do nakładania warstw z kryciem
@@ -71,5 +72,24 @@ Friend NotInheritable Class NakladanieObrazow
         End Try
         Return bmp
     End Function
+
+    ''' <summary>Stosuje optymalizację czytelności obrazu pod kątem ekranów MIP / pełnego słońca.</summary>
+    Public Shared Sub ZastosujKorekcjeMip(bmp As Bitmap, opcje As OpcjeKorekcjiMip)
+        If bmp Is Nothing OrElse opcje Is Nothing OrElse Not opcje.Wlaczona Then Exit Sub
+        Dim szer = bmp.Width, wys = bmp.Height
+        Dim d = bmp.LockBits(New Rectangle(0, 0, szer, wys), ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb)
+        Try
+            Dim piksele(szer * wys - 1) As Integer
+            For y = 0 To wys - 1
+                Marshal.Copy(IntPtr.Add(d.Scan0, y * d.Stride), piksele, y * szer, szer)
+            Next
+            KorekcjaMip.Zastosuj(piksele, szer, wys, opcje)
+            For y = 0 To wys - 1
+                Marshal.Copy(piksele, y * szer, IntPtr.Add(d.Scan0, y * d.Stride), szer)
+            Next
+        Finally
+            bmp.UnlockBits(d)
+        End Try
+    End Sub
 
 End Class

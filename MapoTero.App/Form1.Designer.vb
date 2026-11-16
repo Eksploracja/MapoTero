@@ -69,6 +69,9 @@ Partial Class Form1
         Me.OdswiezToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.NarzedziaToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.DodajSerwerToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.ZnajdzDzialkeToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.KonwertujOziToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.btnSzukajDzialki = New System.Windows.Forms.Button()
         Me.NarzedziaSeparator1 = New System.Windows.Forms.ToolStripSeparator()
         Me.btnDodajSerwer = New System.Windows.Forms.Button()
         Me.ScalanieToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
@@ -105,6 +108,16 @@ Partial Class Form1
         Me.btnPowieksz = New System.Windows.Forms.Button()
         Me.btnPomniejsz = New System.Windows.Forms.Button()
         Me.grpRozmiarSiatki = New System.Windows.Forms.GroupBox()
+        Me.grpPodglad = New System.Windows.Forms.GroupBox()
+        Me.picPodglad = New System.Windows.Forms.PictureBox()
+        Me.btnPodgladZaawansowane = New System.Windows.Forms.Button()
+        Me.btnZoomPlus = New System.Windows.Forms.Button()
+        Me.btnZoomMinus = New System.Windows.Forms.Button()
+        Me.btnZoomReset = New System.Windows.Forms.Button()
+        Me.btnPodgladOdswiez = New System.Windows.Forms.Button()
+        Me.lblPodgladLiczbaWarstw = New System.Windows.Forms.Label()
+        Me.lblPodgladSkala = New System.Windows.Forms.Label()
+        Me.lblPodgladStan = New System.Windows.Forms.Label()
         Me.Label22 = New System.Windows.Forms.Label()
         Me.Label19 = New System.Windows.Forms.Label()
         Me.Label18 = New System.Windows.Forms.Label()
@@ -165,6 +178,8 @@ Partial Class Form1
         Me.grpWybraneWarstwy.SuspendLayout()
         CType(Me.numKrycie, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.grpRozmiarSiatki.SuspendLayout()
+        Me.grpPodglad.SuspendLayout()
+        CType(Me.picPodglad, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.grpSchemat.SuspendLayout()
         CType(Me.PictureBox2, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.Panel2.SuspendLayout()
@@ -395,7 +410,7 @@ Partial Class Form1
         '
         'NarzedziaToolStripMenuItem
         '
-        Me.NarzedziaToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.DodajSerwerToolStripMenuItem, Me.NarzedziaSeparator1, Me.ScalanieToolStripMenuItem, Me.EksportToolStripMenuItem, Me.EksportCadToolStripMenuItem, Me.ZaawansowanyMbtilesToolStripMenuItem, Me.NakładanieWarstwNaSiebieToolStripMenuItem, Me.UsuwaniePustychSegmentówToolStripMenuItem})
+        Me.NarzedziaToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.DodajSerwerToolStripMenuItem, Me.ZnajdzDzialkeToolStripMenuItem, Me.KonwertujOziToolStripMenuItem, Me.NarzedziaSeparator1, Me.ScalanieToolStripMenuItem, Me.EksportToolStripMenuItem, Me.EksportCadToolStripMenuItem, Me.ZaawansowanyMbtilesToolStripMenuItem, Me.NakładanieWarstwNaSiebieToolStripMenuItem, Me.UsuwaniePustychSegmentówToolStripMenuItem})
         Me.NarzedziaToolStripMenuItem.Name = "NarzedziaToolStripMenuItem"
         Me.NarzedziaToolStripMenuItem.Size = New System.Drawing.Size(70, 20)
         Me.NarzedziaToolStripMenuItem.Text = "Narzędzia"
@@ -408,6 +423,21 @@ Partial Class Form1
         Me.DodajSerwerToolStripMenuItem.Size = New System.Drawing.Size(315, 22)
         Me.DodajSerwerToolStripMenuItem.Text = "Dodaj nowy serwer WMS / WMTS..."
         Me.DodajSerwerToolStripMenuItem.ToolTipText = "Kreator dodawania serwera WMS lub WMTS (analiza GetCapabilities i wybór warstw)"
+        '
+        'ZnajdzDzialkeToolStripMenuItem
+        '
+        Me.ZnajdzDzialkeToolStripMenuItem.Name = "ZnajdzDzialkeToolStripMenuItem"
+        Me.ZnajdzDzialkeToolStripMenuItem.ShortcutKeys = CType((System.Windows.Forms.Keys.Control Or System.Windows.Forms.Keys.D), System.Windows.Forms.Keys)
+        Me.ZnajdzDzialkeToolStripMenuItem.Size = New System.Drawing.Size(315, 22)
+        Me.ZnajdzDzialkeToolStripMenuItem.Text = "Wyszukaj działkę katastralną (ULDK GUGiK)..."
+        Me.ZnajdzDzialkeToolStripMenuItem.ToolTipText = "Wyszukuje działkę po numerze TERYT lub nazwie i numerze oraz centruje siatkę pobierania"
+        '
+        'KonwertujOziToolStripMenuItem
+        '
+        Me.KonwertujOziToolStripMenuItem.Name = "KonwertujOziToolStripMenuItem"
+        Me.KonwertujOziToolStripMenuItem.Size = New System.Drawing.Size(315, 22)
+        Me.KonwertujOziToolStripMenuItem.Text = "Konwertuj mapę OziExplorer (.map)..."
+        Me.KonwertujOziToolStripMenuItem.ToolTipText = "Konwertuje kalibrowany skan mapy Ozi (.map) do formatu JNX, KMZ lub MBTiles"
         '
         'NarzedziaSeparator1
         '
@@ -724,6 +754,18 @@ Partial Class Form1
         Me.btnPomniejsz.Text = "-"
         Me.ToolTip1.SetToolTip(Me.btnPomniejsz, "Powiększ")
         Me.btnPomniejsz.UseVisualStyleBackColor = True
+        '
+        'btnSzukajDzialki
+        '
+        Me.btnSzukajDzialki.Font = New System.Drawing.Font("Segoe UI", 7.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
+        Me.btnSzukajDzialki.Location = New System.Drawing.Point(6, 108)
+        Me.btnSzukajDzialki.Margin = New System.Windows.Forms.Padding(0)
+        Me.btnSzukajDzialki.Name = "btnSzukajDzialki"
+        Me.btnSzukajDzialki.Size = New System.Drawing.Size(23, 26)
+        Me.btnSzukajDzialki.TabIndex = 297
+        Me.btnSzukajDzialki.Text = "Dz"
+        Me.ToolTip1.SetToolTip(Me.btnSzukajDzialki, "Wyszukaj działkę katastralną ULDK (Ctrl+D)")
+        Me.btnSzukajDzialki.UseVisualStyleBackColor = True
         '
         'grpRozmiarSiatki
         '
@@ -1160,6 +1202,129 @@ Partial Class Form1
         Me.lblKursorWgs.TabIndex = 260
         Me.lblKursorWgs.Text = ""
         '
+        'grpPodglad
+        '
+        Me.grpPodglad.Controls.Add(Me.picPodglad)
+        Me.grpPodglad.Controls.Add(Me.btnPodgladZaawansowane)
+        Me.grpPodglad.Controls.Add(Me.btnZoomMinus)
+        Me.grpPodglad.Controls.Add(Me.btnZoomReset)
+        Me.grpPodglad.Controls.Add(Me.btnZoomPlus)
+        Me.grpPodglad.Controls.Add(Me.btnPodgladOdswiez)
+        Me.grpPodglad.Controls.Add(Me.lblPodgladLiczbaWarstw)
+        Me.grpPodglad.Controls.Add(Me.lblPodgladSkala)
+        Me.grpPodglad.Controls.Add(Me.lblPodgladStan)
+        Me.grpPodglad.Location = New System.Drawing.Point(660, 3)
+        Me.grpPodglad.Name = "grpPodglad"
+        Me.grpPodglad.Size = New System.Drawing.Size(221, 141)
+        Me.grpPodglad.TabIndex = 301
+        Me.grpPodglad.TabStop = False
+        Me.grpPodglad.Text = "Podgląd zestawu warstw"
+        '
+        'picPodglad
+        '
+        Me.picPodglad.BackColor = System.Drawing.Color.White
+        Me.picPodglad.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
+        Me.picPodglad.Cursor = System.Windows.Forms.Cursors.Hand
+        Me.picPodglad.Location = New System.Drawing.Point(8, 18)
+        Me.picPodglad.Name = "picPodglad"
+        Me.picPodglad.Size = New System.Drawing.Size(116, 116)
+        Me.picPodglad.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage
+        Me.picPodglad.TabIndex = 0
+        Me.picPodglad.TabStop = False
+        Me.ToolTip1.SetToolTip(Me.picPodglad, "Bieżący podgląd zestawu warstw. Kółko myszy: przybliż/oddal. Kliknij, aby otworzyć okno Warstwy - zaawansowane.")
+        '
+        'btnPodgladZaawansowane
+        '
+        Me.btnPodgladZaawansowane.Font = New System.Drawing.Font("Microsoft Sans Serif", 7.5!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
+        Me.btnPodgladZaawansowane.Location = New System.Drawing.Point(126, 18)
+        Me.btnPodgladZaawansowane.Margin = New System.Windows.Forms.Padding(0)
+        Me.btnPodgladZaawansowane.Name = "btnPodgladZaawansowane"
+        Me.btnPodgladZaawansowane.Padding = New System.Windows.Forms.Padding(0)
+        Me.btnPodgladZaawansowane.Size = New System.Drawing.Size(91, 23)
+        Me.btnPodgladZaawansowane.TabIndex = 1
+        Me.btnPodgladZaawansowane.Text = "Zaawansowane"
+        Me.ToolTip1.SetToolTip(Me.btnPodgladZaawansowane, "Otwórz okno zaawansowanego ustawiania krycia i trybów mieszania warstw.")
+        Me.btnPodgladZaawansowane.UseVisualStyleBackColor = True
+        '
+        'btnZoomMinus
+        '
+        Me.btnZoomMinus.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
+        Me.btnZoomMinus.Location = New System.Drawing.Point(126, 43)
+        Me.btnZoomMinus.Margin = New System.Windows.Forms.Padding(0)
+        Me.btnZoomMinus.Name = "btnZoomMinus"
+        Me.btnZoomMinus.Size = New System.Drawing.Size(26, 23)
+        Me.btnZoomMinus.TabIndex = 2
+        Me.btnZoomMinus.Text = "-"
+        Me.ToolTip1.SetToolTip(Me.btnZoomMinus, "Oddal kadr podglądu (lupa rastrowa)")
+        Me.btnZoomMinus.UseVisualStyleBackColor = True
+        '
+        'btnZoomReset
+        '
+        Me.btnZoomReset.Font = New System.Drawing.Font("Microsoft Sans Serif", 7.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
+        Me.btnZoomReset.Location = New System.Drawing.Point(154, 43)
+        Me.btnZoomReset.Margin = New System.Windows.Forms.Padding(0)
+        Me.btnZoomReset.Name = "btnZoomReset"
+        Me.btnZoomReset.Size = New System.Drawing.Size(35, 23)
+        Me.btnZoomReset.TabIndex = 3
+        Me.btnZoomReset.Text = "1:1"
+        Me.ToolTip1.SetToolTip(Me.btnZoomReset, "Przywróć skalę 1:1 podglądu (100%)")
+        Me.btnZoomReset.UseVisualStyleBackColor = True
+        '
+        'btnZoomPlus
+        '
+        Me.btnZoomPlus.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
+        Me.btnZoomPlus.Location = New System.Drawing.Point(191, 43)
+        Me.btnZoomPlus.Margin = New System.Windows.Forms.Padding(0)
+        Me.btnZoomPlus.Name = "btnZoomPlus"
+        Me.btnZoomPlus.Size = New System.Drawing.Size(26, 23)
+        Me.btnZoomPlus.TabIndex = 4
+        Me.btnZoomPlus.Text = "+"
+        Me.ToolTip1.SetToolTip(Me.btnZoomPlus, "Przybliż kadr podglądu (lupa rastrowa)")
+        Me.btnZoomPlus.UseVisualStyleBackColor = True
+        '
+        'btnPodgladOdswiez
+        '
+        Me.btnPodgladOdswiez.Font = New System.Drawing.Font("Microsoft Sans Serif", 7.5!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
+        Me.btnPodgladOdswiez.Location = New System.Drawing.Point(126, 68)
+        Me.btnPodgladOdswiez.Margin = New System.Windows.Forms.Padding(0)
+        Me.btnPodgladOdswiez.Name = "btnPodgladOdswiez"
+        Me.btnPodgladOdswiez.Padding = New System.Windows.Forms.Padding(0)
+        Me.btnPodgladOdswiez.Size = New System.Drawing.Size(91, 23)
+        Me.btnPodgladOdswiez.TabIndex = 5
+        Me.btnPodgladOdswiez.Text = "Odśwież"
+        Me.ToolTip1.SetToolTip(Me.btnPodgladOdswiez, "Wymuś ponowne pobranie próbki podglądu z serwerów.")
+        Me.btnPodgladOdswiez.UseVisualStyleBackColor = True
+        '
+        'lblPodgladLiczbaWarstw
+        '
+        Me.lblPodgladLiczbaWarstw.Font = New System.Drawing.Font("Microsoft Sans Serif", 7.5!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
+        Me.lblPodgladLiczbaWarstw.ForeColor = System.Drawing.SystemColors.ControlDarkDark
+        Me.lblPodgladLiczbaWarstw.Location = New System.Drawing.Point(126, 93)
+        Me.lblPodgladLiczbaWarstw.Name = "lblPodgladLiczbaWarstw"
+        Me.lblPodgladLiczbaWarstw.Size = New System.Drawing.Size(91, 13)
+        Me.lblPodgladLiczbaWarstw.TabIndex = 6
+        Me.lblPodgladLiczbaWarstw.Text = "Warstw: 0"
+        '
+        'lblPodgladSkala
+        '
+        Me.lblPodgladSkala.Font = New System.Drawing.Font("Microsoft Sans Serif", 7.5!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
+        Me.lblPodgladSkala.ForeColor = System.Drawing.SystemColors.ControlDarkDark
+        Me.lblPodgladSkala.Location = New System.Drawing.Point(126, 107)
+        Me.lblPodgladSkala.Name = "lblPodgladSkala"
+        Me.lblPodgladSkala.Size = New System.Drawing.Size(91, 13)
+        Me.lblPodgladSkala.TabIndex = 7
+        Me.lblPodgladSkala.Text = "-"
+        '
+        'lblPodgladStan
+        '
+        Me.lblPodgladStan.AutoEllipsis = True
+        Me.lblPodgladStan.Font = New System.Drawing.Font("Microsoft Sans Serif", 7.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
+        Me.lblPodgladStan.ForeColor = System.Drawing.Color.DimGray
+        Me.lblPodgladStan.Location = New System.Drawing.Point(126, 121)
+        Me.lblPodgladStan.Name = "lblPodgladStan"
+        Me.lblPodgladStan.Size = New System.Drawing.Size(91, 16)
+        Me.lblPodgladStan.TabIndex = 8
+        '
         'grpSchemat
         '
         Me.grpSchemat.Controls.Add(Me.Label8)
@@ -1352,6 +1517,7 @@ Partial Class Form1
         '
         Me.Panel3.Controls.Add(Me.grpSchemat)
         Me.Panel3.Controls.Add(Me.grpRozmiarSiatki)
+        Me.Panel3.Controls.Add(Me.grpPodglad)
         Me.Panel3.Dock = System.Windows.Forms.DockStyle.Bottom
         Me.Panel3.Location = New System.Drawing.Point(0, 515)
         Me.Panel3.Name = "Panel3"
@@ -1368,6 +1534,7 @@ Partial Class Form1
         Me.Controls.Add(Me.lblKursorUklad)
         Me.Controls.Add(Me.lblKursorUkladOpis)
         Me.Controls.Add(Me.lblKursorTytul)
+        Me.Controls.Add(Me.btnSzukajDzialki)
         Me.Controls.Add(Me.btnPomniejsz)
         Me.Controls.Add(Me.btnPowieksz)
         Me.Controls.Add(Me.lblSrodekOpisDlug)
@@ -1402,6 +1569,8 @@ Partial Class Form1
         CType(Me.numKrycie, System.ComponentModel.ISupportInitialize).EndInit()
         Me.grpRozmiarSiatki.ResumeLayout(False)
         Me.grpRozmiarSiatki.PerformLayout()
+        CType(Me.picPodglad, System.ComponentModel.ISupportInitialize).EndInit()
+        Me.grpPodglad.ResumeLayout(False)
         Me.grpSchemat.ResumeLayout(False)
         Me.grpSchemat.PerformLayout()
         CType(Me.PictureBox2, System.ComponentModel.ISupportInitialize).EndInit()
@@ -1528,4 +1697,17 @@ Partial Class Form1
     Friend WithEvents Panel3 As System.Windows.Forms.Panel
     Friend WithEvents Label8 As Label
     Friend WithEvents btnUsunPobrane As Button
+    Friend WithEvents grpPodglad As System.Windows.Forms.GroupBox
+    Friend WithEvents picPodglad As System.Windows.Forms.PictureBox
+    Friend WithEvents btnPodgladZaawansowane As System.Windows.Forms.Button
+    Friend WithEvents btnZoomPlus As System.Windows.Forms.Button
+    Friend WithEvents btnZoomMinus As System.Windows.Forms.Button
+    Friend WithEvents btnZoomReset As System.Windows.Forms.Button
+    Friend WithEvents btnPodgladOdswiez As System.Windows.Forms.Button
+    Friend WithEvents lblPodgladLiczbaWarstw As System.Windows.Forms.Label
+    Friend WithEvents lblPodgladSkala As System.Windows.Forms.Label
+    Friend WithEvents lblPodgladStan As System.Windows.Forms.Label
+    Friend WithEvents ZnajdzDzialkeToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
+    Friend WithEvents KonwertujOziToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
+    Friend WithEvents btnSzukajDzialki As System.Windows.Forms.Button
 End Class

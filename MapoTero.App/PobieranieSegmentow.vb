@@ -57,6 +57,8 @@ Public Class ZadaniePobierania
     Public Property NazwaTrekBuddy As String = ""
     ''' <summary>Przezroczyste tło segmentów PNG / GIF (parametr TRANSPARENT=TRUE zapytań WMS).</summary>
     Public Property Przezroczystosc As Boolean
+    ''' <summary>Ponawia próbę pobrania segmentu, jeśli serwer zwrócił czysto biały kadr (zalecane dla ortofotomapy i cieniowania NMT).</summary>
+    Public Property PonawiajBialeSegmenty As Boolean = True
     ''' <summary>Obszar wzdłuż trasy: pobierane są tylko segmenty przecinające korytarz; Nothing - cały prostokąt.</summary>
     Public Property Korytarz As Korytarz
     ''' <summary>
@@ -322,6 +324,15 @@ Public NotInheritable Class PobieranieSegmentow
                                     blad = Await ZlozSegmentAsync(z, grupy, uslugiWmts, zasieg, s.BokSegmentuPx, plik, token).ConfigureAwait(False)
                                 Else
                                     blad = Await PobierzSegmentAsync(adres(sg), plik, z.LimitCzasuSekundy, token, z.IgnorujSsl OrElse grupy(0).IgnorujSsl).ConfigureAwait(False)
+                                End If
+                            End If
+                            If pobierz AndAlso blad = "" AndAlso z.PonawiajBialeSegmenty AndAlso Not z.Przezroczystosc AndAlso biezacaProba < z.IloscProb Then
+                                If CzyPustyBialyPlik(plik) Then
+                                    Try
+                                        File.Delete(plik)
+                                    Catch
+                                    End Try
+                                    blad = "serwer zwrócił pusty (biały) segment zamiast mapy (ponawianie próby)"
                                 End If
                             End If
                             If pobierz AndAlso blad = "" Then odswiezone(sg.Indeks) = True
@@ -613,6 +624,19 @@ Public NotInheritable Class PobieranieSegmentow
                 Using obraz As Image = Image.FromStream(ms)
                     Return obraz.Width > 0 AndAlso obraz.Height > 0
                 End Using
+            End Using
+        Catch
+            Return False
+        End Try
+    End Function
+
+    ''' <summary>Czy plik segmentu zawiera wyłącznie pusty, czysto biały obraz (błąd generowania kafelka).</summary>
+    Private Shared Function CzyPustyBialyPlik(sciezka As String) As Boolean
+        Try
+            If Not File.Exists(sciezka) Then Return False
+            Using bmp As New Bitmap(sciezka)
+                Dim piksele = NakladanieObrazow.Piksele(bmp, bmp.Width, bmp.Height)
+                Return DetektorSegmentow.CzyPustyBialy(piksele)
             End Using
         Catch
             Return False

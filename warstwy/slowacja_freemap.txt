@@ -1,0 +1,14 @@
+{
+  "typ": "xyz",
+  "adres": "https://outdoor.tiles.freemap.sk/{z}/{x}/{y}",
+  "zMin": 0,
+  "zMax": 18,
+  "rozmiarKafla": 256,
+  "nakladka": false,
+  "odstepMs": 50,
+  "maksWatkow": 4,
+  "atrybucja": "© Freemap Slovakia / autorzy OpenStreetMap",
+  "warstwy": [
+    { "nazwa": "outdoor", "piksel": 2 }
+  ]
+}

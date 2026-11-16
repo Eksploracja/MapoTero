@@ -43,6 +43,16 @@ Public Class KafleTesty
         Dim garmin As New PlanKmz(p, 1, 1024, 100)
         Assert.True(garmin.LiczbaKafli <= 100)
         Assert.True(garmin.Pomniejszenie > 1)
+        'podział na tomy bez pomniejszania rozdzielczości
+        Dim tomy = bez.WyznaczTomy(50)
+        Assert.True(tomy.Count > 1)
+        Dim lacznieWKafli = 0
+        For Each t In tomy
+            Assert.True(t.LiczbaKafli <= 50)
+            Assert.True(t.Obszar.Poprawny)
+            lacznieWKafli += t.LiczbaKafli
+        Next
+        Assert.Equal(bez.LiczbaKafli, lacznieWKafli)
         'kafle pokrywają cały obszar bez przerw
         Dim pierwszy = garmin.ZasiegKafla(0, 0)
         Dim ostatni = garmin.ZasiegKafla(garmin.Wiersze - 1, garmin.Kolumny - 1)

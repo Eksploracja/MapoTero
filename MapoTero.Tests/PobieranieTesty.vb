@@ -404,6 +404,8 @@ Public Class PobieranieTesty
                 z.Zbiory = New List(Of String) From {"test_cache"}
                 z.ZrodlaMap("test_cache") = plikWarstw
                 z.ZachowajKafleWmts = True
+                z.IloscProb = 3
+                z.PrzerwaSekundy = 0
                 z.Siatka = New Siatka(New Zasieg(500000, 600000, 500512, 600512), 1.0, 256)
 
                 Dim w1 = Await PobieranieSegmentow.PobierzAsync(z, Nothing, CancellationToken.None)

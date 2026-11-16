@@ -34,7 +34,7 @@ W oknie głównym możesz wybrać **kilka warstw naraz** (do 12 pozycji) i uło�
 
 *Rysunek 1. Zasada działania kanapki warstw: warstwa 1 tworzy podkład na samym spodzie, wyższe warstwy leżą nad nią.*
 
-Gdy wszystkie warstwy pochodzą z jednego serwera WMS i mają krycie 100%, łączy je bezpośrednio serwer. Jeśli łączysz różne serwery, usługi kafelkowe lub ustawisz krycie poniżej 100%, program pobiera warstwy osobno i nakłada je w gotowy segment. Pobrane wcześniej osobne sesje można też połączyć później przy eksporcie (zob. [Nakładki i łączenie warstw](../eksport/nakladki/)).
+Gdy wszystkie warstwy pochodzą z jednego serwera WMS i mają krycie 100%, łączy je bezpośrednio serwer. Jeśli łączysz różne serwery, usługi kafelkowe lub ustawisz krycie poniżej 100%, program pobiera warstwy osobno i nakłada je w gotowy segment. Pobrane wcześniej osobne sesje można też połączyć później przy eksporcie (zob. [Nakładki i łączenie warstw](../eksport/nakladki/)). Praktyczne przykłady kompozycji z cieniowaniem NMT, hipsometrią i katastrem opisuje poradnik [Kompozycje warstw i plastyczna rzeźba](../pobieranie/kompozycje/).
 
 Zbiory map dostarczane z programem opisuje [Katalog zbiorów map](../zbiory-map/). Własne dodasz za pomocą [kreatora serwerów](../serwery/kreator/).
 

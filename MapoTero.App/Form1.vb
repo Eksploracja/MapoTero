@@ -94,8 +94,28 @@ Public Class Form1
     ''' <summary>Liczba wierszy drzewa warstw widocznych w najmniejszym oknie.</summary>
     Private Const MinWierszyListyWarstw As Integer = 8
 
+    ''' <summary>Silnik bieżącego podglądu zestawu warstw w dolnym panelu.</summary>
+    Private ReadOnly _silnikPodgladu As New PodgladWarstwSilnik()
+
+    ''' <summary>Timer opóźniający pobieranie podglądu (debouncing 350 ms).</summary>
+    Private ReadOnly _timerPodgladu As New System.Windows.Forms.Timer With {.Interval = 350}
+
+    ''' <summary>Żeton anulowania trwającego pobierania podglądu.</summary>
+    Private _ctsPodglad As CancellationTokenSource
+
+    ''' <summary>Zapamiętany punkt próbki ze środka mapy, gdy nie ma jeszcze poprawnej siatki.</summary>
+    Private _punktProbkiBezSiatki As PunktXY?
+
+    ''' <summary>Poziomy powiększenia lupy rastrowej podglądu (1.0 = skala 1:1, piksel w piksel).</summary>
+    Private ReadOnly _poziomyZoomu As Double() = {0.5, 1.0, 2.0, 4.0}
+    Private _indeksZoomu As Integer = 1 ' Domyślnie 1.0 (100% - skala 1:1)
+
+    ''' <summary>Bazowa złożona bitmapa próbki w skali 1:1 o wymiarach BokPodgladu x BokPodgladu.</summary>
+    Private _bazaPodgladu As Bitmap
+
     ''' <summary>Obszar pobierania wzdłuż trasy (zapisywany w folderze sesji w korytarz.txt); Nothing - cały prostokąt.</summary>
     Private _korytarz As Korytarz
+    Private _dzialkaKatastralna As DzialkaKatastralna
 
     ''' <summary>Numeracja segmentów z conf.txt wczytanej sesji (pusta - brak conf.txt lub plik z bardzo starej wersji).</summary>
     Private _numeracjaSesji As String = ""
@@ -284,10 +304,13 @@ Public Class Form1
         mapa.MapScaleInfoEnabled = False
         mapa.DisableAltForSelection = True
         mapa.Zoom = Wartosc(lblZoom.Text, 6)
+        Me.AllowDrop = True
+        mapa.AllowDrop = True
 
         UstawEdycjeXY(False)
         UstawWidokZaznaczeniaWgs(False)
         PrzygotujListeWarstw()
+        AddHandler _timerPodgladu.Tick, AddressOf TimerPodgladu_Tick
 
         _ustawianieUkladu = True
         For Each u In UkladWspolrzednych.Wszystkie
@@ -334,6 +357,10 @@ Public Class Form1
 
     Private Sub Form1_FormClosing(sender As Object, e As FormClosingEventArgs) Handles MyBase.FormClosing
         _przerwanie?.Cancel()
+        _ctsPodglad?.Cancel()
+        _bazaPodgladu?.Dispose()
+        _bazaPodgladu = Nothing
+        _silnikPodgladu.Dispose()
         WyczyscZnaczniki()
         ZapamietajPolozenieMapy()
         Try
@@ -1164,6 +1191,7 @@ Public Class Form1
         If lstWybraneWarstwy.Zestaw IsNot _zestaw Then lstWybraneWarstwy.Zestaw = _zestaw Else lstWybraneWarstwy.Odswiez()
         OdswiezZaznaczeniaDrzewa()
         OdswiezPrzyciskiWarstw()
+        ZglosOdswiezeniePodgladu()
     End Sub
 
     ''' <summary>Przyciski i pole krycia wg zaznaczonej warstwy.</summary>
@@ -1177,6 +1205,9 @@ Public Class Form1
         numKrycie.Enabled = i >= 0 AndAlso Not pobieranie
         lblKrycie.Enabled = numKrycie.Enabled
         btnWarstwyZaawansowane.Enabled = _zestaw.Liczba > 0 AndAlso Not pobieranie
+        btnPodgladZaawansowane.Enabled = _zestaw.Liczba > 0 AndAlso Not pobieranie
+        btnPodgladOdswiez.Enabled = _zestaw.Liczba > 0 AndAlso Not pobieranie
+        AktualizujStanPrzyciskowZoomu()
         _ustawianieKrycia = True
         numKrycie.Value = If(i >= 0, _zestaw(i).Krycie, ZestawWarstw.PelneKrycie)
         _ustawianieKrycia = False
@@ -1361,6 +1392,266 @@ Public Class Form1
 
 #End Region
 
+#Region "Bieżący podgląd zestawu warstw"
+
+    Private Sub btnPodgladZaawansowane_Click(sender As Object, e As EventArgs) Handles btnPodgladZaawansowane.Click, picPodglad.Click
+        OtworzWarstwyZaawansowane()
+    End Sub
+
+    Private Sub btnPodgladOdswiez_Click(sender As Object, e As EventArgs) Handles btnPodgladOdswiez.Click
+        WymusOdswiezeniePodgladu()
+    End Sub
+
+    Private Sub btnZoomPlus_Click(sender As Object, e As EventArgs) Handles btnZoomPlus.Click
+        If _indeksZoomu < _poziomyZoomu.Length - 1 Then
+            _indeksZoomu += 1
+            ZastosujZoomPodgladu()
+        End If
+    End Sub
+
+    Private Sub btnZoomMinus_Click(sender As Object, e As EventArgs) Handles btnZoomMinus.Click
+        If _indeksZoomu > 0 Then
+            _indeksZoomu -= 1
+            ZastosujZoomPodgladu()
+        End If
+    End Sub
+
+    Private Sub btnZoomReset_Click(sender As Object, e As EventArgs) Handles btnZoomReset.Click
+        Const domyslnyIndeks As Integer = 1
+        If _indeksZoomu <> domyslnyIndeks Then
+            _indeksZoomu = domyslnyIndeks
+            ZastosujZoomPodgladu()
+        End If
+    End Sub
+
+    Private Sub picPodglad_MouseEnter(sender As Object, e As EventArgs) Handles picPodglad.MouseEnter
+        If _zestaw.Liczba > 0 Then picPodglad.Focus()
+    End Sub
+
+    Private Sub picPodglad_MouseWheel(sender As Object, e As MouseEventArgs) Handles picPodglad.MouseWheel
+        If _zestaw.Liczba = 0 OrElse _bazaPodgladu Is Nothing Then Exit Sub
+        If e.Delta > 0 Then
+            If _indeksZoomu < _poziomyZoomu.Length - 1 Then
+                _indeksZoomu += 1
+                ZastosujZoomPodgladu()
+            End If
+        ElseIf e.Delta < 0 Then
+            If _indeksZoomu > 0 Then
+                _indeksZoomu -= 1
+                ZastosujZoomPodgladu()
+            End If
+        End If
+    End Sub
+
+    ''' <summary>
+    ''' Skaluje w pamięci bazową bitmapę próbki do bieżącego powiększenia (lupy rastrowej) i wyświetla w picPodglad.
+    ''' </summary>
+    Private Sub ZastosujZoomPodgladu()
+        If _bazaPodgladu Is Nothing Then
+            Dim stary = picPodglad.Image
+            picPodglad.Image = Nothing
+            stary?.Dispose()
+            AktualizujStanPrzyciskowZoomu()
+            AktualizujEtykieteSkali()
+            Exit Sub
+        End If
+        Dim zoom = _poziomyZoomu(_indeksZoomu)
+        Dim powiekszony = PodgladWarstwSilnik.ZastosujZoom(_bazaPodgladu, zoom, PodgladWarstwSilnik.BokPodgladu, PodgladWarstwSilnik.BokPodgladu)
+        Dim staryImg = picPodglad.Image
+        picPodglad.Image = powiekszony
+        staryImg?.Dispose()
+        AktualizujEtykieteSkali()
+        AktualizujStanPrzyciskowZoomu()
+    End Sub
+
+    ''' <summary>Aktualizuje etykietę rozdzielczości pobierania i powiększenia lupy, np. "1 m/px (100%)".</summary>
+    Private Sub AktualizujEtykieteSkali()
+        If _zestaw.Liczba = 0 Then
+            lblPodgladSkala.Text = "-"
+            Exit Sub
+        End If
+        Dim s = BiezacaSiatka()
+        Dim bazowyPiksel As Double
+        If s.Poprawna Then
+            bazowyPiksel = If(s.RozmiarPiksela > 0, s.RozmiarPiksela, 1.0)
+        Else
+            Dim wpisany = Wartosc(txtRozmiarPiksela.Text)
+            Dim zalecany = If(_zestaw.NajdokladniejszaWarstwa() IsNot Nothing, _zestaw.NajdokladniejszaWarstwa().ZalecanyPiksel, 0)
+            bazowyPiksel = If(wpisany > 0, wpisany, If(zalecany > 0, zalecany, 1.0))
+        End If
+        Dim zoomProcent = CInt(Math.Round(_poziomyZoomu(_indeksZoomu) * 100))
+        lblPodgladSkala.Text = Liczba(bazowyPiksel) & " m/px (" & zoomProcent & "%)"
+    End Sub
+
+    ''' <summary>Aktualizuje dostępność przycisków lupy rastrowej.</summary>
+    Private Sub AktualizujStanPrzyciskowZoomu()
+        Dim pobieranie As Boolean = _przerwanie IsNot Nothing
+        Dim maObraz As Boolean = _zestaw.Liczba > 0 AndAlso _bazaPodgladu IsNot Nothing
+        btnZoomMinus.Enabled = maObraz AndAlso _indeksZoomu > 0 AndAlso Not pobieranie
+        btnZoomPlus.Enabled = maObraz AndAlso _indeksZoomu < _poziomyZoomu.Length - 1 AndAlso Not pobieranie
+        btnZoomReset.Enabled = maObraz AndAlso _indeksZoomu <> 1 AndAlso Not pobieranie
+    End Sub
+
+    ''' <summary>Wymusza wyczyszczenie pamięci podręcznej i ponowne pobranie podglądu z serwerów.</summary>
+    Private Sub WymusOdswiezeniePodgladu()
+        If _przerwanie IsNot Nothing Then Exit Sub
+        _silnikPodgladu.WyczyscBufor()
+        _punktProbkiBezSiatki = Nothing
+        Dim staraBaza = _bazaPodgladu
+        _bazaPodgladu = Nothing
+        staraBaza?.Dispose()
+        ZglosOdswiezeniePodgladu(natychmiast:=True)
+    End Sub
+
+    ''' <summary>
+    ''' Zgłasza potrzebę odświeżenia podglądu.
+    ''' Gdy natychmiast=False, uruchamia timer opóźniający (debouncing 350 ms).
+    ''' </summary>
+    Private Sub ZglosOdswiezeniePodgladu(Optional natychmiast As Boolean = False)
+        Dim pobieranie As Boolean = _przerwanie IsNot Nothing
+        btnPodgladZaawansowane.Enabled = _zestaw.Liczba > 0 AndAlso Not pobieranie
+        btnPodgladOdswiez.Enabled = _zestaw.Liczba > 0 AndAlso Not pobieranie
+        AktualizujStanPrzyciskowZoomu()
+
+        If _zestaw.Liczba = 0 Then
+            _timerPodgladu.Stop()
+            _ctsPodglad?.Cancel()
+            _punktProbkiBezSiatki = Nothing
+            Dim staraBaza = _bazaPodgladu
+            _bazaPodgladu = Nothing
+            staraBaza?.Dispose()
+            Dim stary = picPodglad.Image
+            picPodglad.Image = Nothing
+            stary?.Dispose()
+            lblPodgladLiczbaWarstw.Text = "Warstw: 0"
+            lblPodgladSkala.Text = "-"
+            lblPodgladStan.Text = "Brak warstw"
+            ToolTip1.SetToolTip(picPodglad, "Brak wybranych warstw do pobrania.")
+            ToolTip1.SetToolTip(lblPodgladStan, "")
+            Exit Sub
+        End If
+
+        lblPodgladLiczbaWarstw.Text = "Warstw: " & _zestaw.Liczba
+
+        If pobieranie Then
+            lblPodgladStan.Text = "Pobieranie w toku"
+            Exit Sub
+        End If
+
+        Dim s = BiezacaSiatka()
+        Dim punkt As PunktXY
+        Dim bazowyPiksel As Double
+
+        If s.Poprawna Then
+            punkt = s.ZasiegSiatki.Srodek
+            bazowyPiksel = If(s.RozmiarPiksela > 0, s.RozmiarPiksela, 1.0)
+            _punktProbkiBezSiatki = Nothing
+        Else
+            ' Przy zmianie warstw bez siatki bierzemy bieżący środek mapy
+            _punktProbkiBezSiatki = Ustawienia.Uklad.ZWgs84(mapa.Position.Lat, mapa.Position.Lng)
+            punkt = _punktProbkiBezSiatki.Value
+            Dim wpisany = Wartosc(txtRozmiarPiksela.Text)
+            Dim zalecany = If(_zestaw.NajdokladniejszaWarstwa() IsNot Nothing, _zestaw.NajdokladniejszaWarstwa().ZalecanyPiksel, 0)
+            bazowyPiksel = If(wpisany > 0, wpisany, If(zalecany > 0, zalecany, 1.0))
+        End If
+
+        AktualizujEtykieteSkali()
+
+        Dim zmieniono = _silnikPodgladu.SprawdzIZaktualizujParametry(punkt, bazowyPiksel, Ustawienia.Uklad)
+
+        ' Jeśli parametry próbki się nie zmieniły i wszystkie warstwy są już w buforze, składamy obraz natychmiast w RAM
+        If Not zmieniono AndAlso _zestaw.Warstwy.All(Function(w) _silnikPodgladu.CzyWarstwaWBuforze(w)) Then
+            _timerPodgladu.Stop()
+            Dim bmp = _silnikPodgladu.ZlozObraz(_zestaw)
+            Dim staraBaza = _bazaPodgladu
+            _bazaPodgladu = bmp
+            staraBaza?.Dispose()
+            ZastosujZoomPodgladu()
+            lblPodgladStan.Text = ""
+            ToolTip1.SetToolTip(picPodglad, "Bieżący podgląd zestawu warstw (" & OpisWarstw() & "). Kółko myszy: przybliż/oddal. Kliknij, aby otworzyć okno Zaawansowane.")
+            ToolTip1.SetToolTip(lblPodgladStan, "")
+            Exit Sub
+        End If
+
+        _timerPodgladu.Stop()
+        If natychmiast Then
+            UruchomPobieraniePodgladuAsync()
+        Else
+            _timerPodgladu.Start()
+        End If
+    End Sub
+
+    Private Sub TimerPodgladu_Tick(sender As Object, e As EventArgs)
+        _timerPodgladu.Stop()
+        UruchomPobieraniePodgladuAsync()
+    End Sub
+
+    ''' <summary>Pobiera asynchronicznie brakujące warstwy podglądu z serwerów WMS/WMTS.</summary>
+    Private Async Sub UruchomPobieraniePodgladuAsync()
+        If _zestaw.Liczba = 0 OrElse _przerwanie IsNot Nothing Then Exit Sub
+
+        Dim s = BiezacaSiatka()
+        Dim punkt As PunktXY
+        Dim bazowyPiksel As Double
+
+        If s.Poprawna Then
+            punkt = s.ZasiegSiatki.Srodek
+            bazowyPiksel = If(s.RozmiarPiksela > 0, s.RozmiarPiksela, 1.0)
+            _punktProbkiBezSiatki = Nothing
+        Else
+            If Not _punktProbkiBezSiatki.HasValue Then
+                _punktProbkiBezSiatki = Ustawienia.Uklad.ZWgs84(mapa.Position.Lat, mapa.Position.Lng)
+            End If
+            punkt = _punktProbkiBezSiatki.Value
+            Dim wpisany = Wartosc(txtRozmiarPiksela.Text)
+            Dim zalecany = If(_zestaw.NajdokladniejszaWarstwa() IsNot Nothing, _zestaw.NajdokladniejszaWarstwa().ZalecanyPiksel, 0)
+            bazowyPiksel = If(wpisany > 0, wpisany, If(zalecany > 0, zalecany, 1.0))
+        End If
+
+        _silnikPodgladu.SprawdzIZaktualizujParametry(punkt, bazowyPiksel, Ustawienia.Uklad)
+        Dim pol = (PodgladWarstwSilnik.BokPodgladu * bazowyPiksel) / 2
+        Dim zasieg As New Zasieg(punkt.X - pol, punkt.Y - pol, punkt.X + pol, punkt.Y + pol)
+
+        _ctsPodglad?.Cancel()
+        Dim cts As New CancellationTokenSource()
+        _ctsPodglad = cts
+
+        lblPodgladStan.Text = "Pobieranie…"
+        Dim postep As New Progress(Of String)(Sub(kom) lblPodgladStan.Text = kom)
+
+        Try
+            Dim zadanie = ZadanieDoPodgladu()
+            Dim wynik = Await _silnikPodgladu.PobierzPodgladAsync(zadanie, _zestaw, zasieg, cts.Token, postep)
+
+            If cts.IsCancellationRequested Then Exit Sub
+
+            If wynik.Item1 IsNot Nothing Then
+                Dim staraBaza = _bazaPodgladu
+                _bazaPodgladu = wynik.Item1
+                staraBaza?.Dispose()
+                ZastosujZoomPodgladu()
+            End If
+
+            If wynik.Item2.Count > 0 Then
+                lblPodgladStan.Text = If(wynik.Item1 IsNot Nothing, "Pobrano z uwagami", "Błąd pobierania")
+                ToolTip1.SetToolTip(lblPodgladStan, String.Join(vbCrLf, wynik.Item2))
+            Else
+                lblPodgladStan.Text = ""
+                ToolTip1.SetToolTip(lblPodgladStan, "")
+            End If
+            ToolTip1.SetToolTip(picPodglad, "Bieżący podgląd zestawu warstw (" & OpisWarstw() & "). Kółko myszy: przybliż/oddal. Kliknij, aby otworzyć okno Zaawansowane.")
+        Catch ex As OperationCanceledException
+        Catch ex As Exception
+            lblPodgladStan.Text = "Błąd podglądu"
+            ToolTip1.SetToolTip(lblPodgladStan, ex.Message)
+        Finally
+            If _ctsPodglad Is cts Then _ctsPodglad = Nothing
+            cts.Dispose()
+        End Try
+    End Sub
+
+#End Region
+
 #Region "Siatka segmentów"
 
     ''' <summary>Siatka segmentów wg pól formularza.</summary>
@@ -1412,6 +1703,7 @@ Public Class Form1
     Private Sub PolaZasieguZmienione(sender As Object, e As EventArgs) Handles txtXDol.TextChanged, txtYLewy.TextChanged, txtXGora.TextChanged, txtYPrawy.TextChanged
         btnZnaczniki.Enabled = True
         PrzeliczSiatke()
+        If _zaladowany Then ZglosOdswiezeniePodgladu()
     End Sub
 
     Private Sub ParametrySegmentuZmienione(sender As Object, e As EventArgs) Handles txtBokSegmentu.TextChanged, txtRozmiarPiksela.TextChanged
@@ -1424,6 +1716,7 @@ Public Class Form1
                 PokazZnaczniki(centruj:=False)
             End If
         End If
+        If _zaladowany Then ZglosOdswiezeniePodgladu()
     End Sub
 
     'zamiana przecinka na kropkę w polu rozmiaru piksela
@@ -1481,6 +1774,9 @@ Public Class Form1
             txtXGora.Text = Liczba(z.XGora)
             txtYPrawy.Text = Liczba(z.YPrawy)
             If piksel > 0 Then txtRozmiarPiksela.Text = Liczba(stary.PrzeliczRozmiarPiksela(nowy, piksel, srodek))
+        Else
+            _punktProbkiBezSiatki = Nothing
+            If _zaladowany Then ZglosOdswiezeniePodgladu()
         End If
         OdswiezOpisUkladu()
         If pokazKomunikat Then
@@ -1644,6 +1940,15 @@ Public Class Form1
     ''' </summary>
     Private Function ZadanieDoPodgladu() As ZadaniePobierania
         Dim siatka = BiezacaSiatka()
+        If Not siatka.Poprawna Then
+            Dim srodek = If(_punktProbkiBezSiatki.HasValue, _punktProbkiBezSiatki.Value, Ustawienia.Uklad.ZWgs84(mapa.Position.Lat, mapa.Position.Lng))
+            Dim wpisany = Wartosc(txtRozmiarPiksela.Text)
+            Dim zalecany = If(_zestaw.NajdokladniejszaWarstwa() IsNot Nothing, _zestaw.NajdokladniejszaWarstwa().ZalecanyPiksel, 0)
+            Dim piksel = If(wpisany > 0, wpisany, If(zalecany > 0, zalecany, 1.0))
+            Dim bok = 2000
+            Dim zasieg As New Zasieg(srodek.X - bok * piksel / 2, srodek.Y - bok * piksel / 2, srodek.X + bok * piksel / 2, srodek.Y + bok * piksel / 2)
+            siatka = New Siatka(zasieg, piksel, bok)
+        End If
         Return New ZadaniePobierania With {
             .Uklad = Ustawienia.Uklad, .Siatka = If(siatka.Poprawna, siatka, Nothing),
             .Zbiory = _zestaw.Zbiory(), .ZrodlaMap = ZrodlaMapSesji(),
@@ -2237,6 +2542,9 @@ Public Class Form1
         ElseIf Ustawienia.SiatkaSegmentowNaMapie Then
             PokazSiatkeSegmentow()
         End If
+        If _dzialkaKatastralna IsNot Nothing Then
+            PokazDzialke()
+        End If
 
         'warstwa dodawana do mapy przed znacznikami - GMap.NET wylicza położenie na ekranie tylko obiektom
         'dodawanym do warstwy już podpiętej pod mapę (inaczej dopiero po przesunięciu lub zmianie skali mapy)
@@ -2386,6 +2694,52 @@ Public Class Form1
         End If
         Return New Zasieg(Math.Floor(z.XDol), Math.Floor(z.YLewy), Math.Ceiling(z.XGora), Math.Ceiling(z.YPrawy))
     End Function
+
+    Private Sub Form1_DragEnter(sender As Object, e As DragEventArgs) Handles Me.DragEnter, mapa.DragEnter
+        If e.Data IsNot Nothing AndAlso e.Data.GetDataPresent(DataFormats.FileDrop) Then
+            Dim pliki = TryCast(e.Data.GetData(DataFormats.FileDrop), String())
+            If pliki IsNot Nothing AndAlso pliki.Length > 0 Then
+                Dim ext = Path.GetExtension(pliki(0)).ToLowerInvariant()
+                If ext = ".gpx" OrElse ext = ".kml" OrElse ext = ".kmz" OrElse ext = ".map" Then
+                    e.Effect = DragDropEffects.Copy
+                    Return
+                End If
+            End If
+        End If
+        e.Effect = DragDropEffects.None
+    End Sub
+
+    Private Sub Form1_DragDrop(sender As Object, e As DragEventArgs) Handles Me.DragDrop, mapa.DragDrop
+        If PobieranieTrwa("Wczytanie pliku") Then Exit Sub
+        If e.Data Is Nothing OrElse Not e.Data.GetDataPresent(DataFormats.FileDrop) Then Exit Sub
+        Dim pliki = TryCast(e.Data.GetData(DataFormats.FileDrop), String())
+        If pliki Is Nothing OrElse pliki.Length = 0 Then Exit Sub
+        Dim plik = pliki(0)
+        Dim ext = Path.GetExtension(plik).ToLowerInvariant()
+        If ext = ".map" Then
+            Using okno As New FormImportOzi()
+                okno.OtworzZPlikiem(plik)
+                okno.ShowDialog(Me)
+            End Using
+            Exit Sub
+        End If
+        If ext = ".gpx" OrElse ext = ".kml" OrElse ext = ".kmz" Then
+            Try
+                Dim k = Korytarz.WczytajTrase(plik)
+                If Not k.Poprawny Then
+                    MsgBox("Plik " & Path.GetFileName(plik) & " nie zawiera śladu, trasy ani linii (GPX: trk, rte, wpt; KML/KMZ: LineString, gx:Track).", MsgBoxStyle.Exclamation)
+                    Exit Sub
+                End If
+                Using okno As New FormKorytarz(k)
+                    If okno.ShowDialog(Me) = DialogResult.OK AndAlso okno.Wynik IsNot Nothing Then
+                        UstawKorytarz(okno.Wynik)
+                    End If
+                End Using
+            Catch ex As Exception
+                MsgBox("Nie udało się odczytać pliku trasy: " & ex.Message, MsgBoxStyle.Critical)
+            End Try
+        End If
+    End Sub
 
     Private Sub KorytarzToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles KorytarzToolStripMenuItem.Click
         If _przerwanie IsNot Nothing Then Exit Sub
@@ -2620,6 +2974,91 @@ Public Class Form1
         'okno nakładania zmienia folder sesji pobierania
         If PobieranieTrwa("Nakładanie map") Then Exit Sub
         Nakladanie_Map.ShowDialog()
+    End Sub
+
+    Private Sub ZnajdzDzialkeToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles ZnajdzDzialkeToolStripMenuItem.Click
+        OtworzWyszukiwarkeDzialek()
+    End Sub
+
+    Private Sub btnSzukajDzialki_Click(sender As Object, e As EventArgs) Handles btnSzukajDzialki.Click
+        OtworzWyszukiwarkeDzialek()
+    End Sub
+
+    Private Sub KonwertujOziToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles KonwertujOziToolStripMenuItem.Click
+        Using frm As New FormImportOzi()
+            frm.ShowDialog(Me)
+        End Using
+    End Sub
+
+    Private Sub OtworzWyszukiwarkeDzialek()
+        If PobieranieTrwa("Wyszukiwanie działki") Then Exit Sub
+        Using frm As New FormSzukajDzialki()
+            If frm.ShowDialog(Me) = DialogResult.OK AndAlso frm.WybranaDzialka IsNot Nothing Then
+                UstawDzialke(frm.WybranaDzialka, frm.MarginesMetry, frm.WlaczWarstwy)
+            End If
+        End Using
+    End Sub
+
+    Private Sub UstawDzialke(d As DzialkaKatastralna, margines As Double, wlaczWarstwy As Boolean)
+        _dzialkaKatastralna = d
+        Dim z1992 = d.Zasieg1992
+        Dim zRozszerzony = New Zasieg(z1992.XDol - margines, z1992.YLewy - margines, z1992.XGora + margines, z1992.YPrawy + margines)
+        Dim zDocelowy = UkladWspolrzednych.PL1992.PrzeliczZasieg(Ustawienia.Uklad, zRozszerzony)
+        Dim z = ZaokraglonyZasieg(zDocelowy)
+
+        txtXDol.Text = Liczba(z.XDol)
+        txtYLewy.Text = Liczba(z.YLewy)
+        txtXGora.Text = Liczba(z.XGora)
+        txtYPrawy.Text = Liczba(z.YPrawy)
+
+        WyczyscZnaczniki()
+        PokazZnaczniki()
+
+        If d.ObrysWgs84.Count > 0 Then
+            Dim minLat = d.ObrysWgs84.Min(Function(p) p.Szerokosc)
+            Dim maxLat = d.ObrysWgs84.Max(Function(p) p.Szerokosc)
+            Dim minLon = d.ObrysWgs84.Min(Function(p) p.Dlugosc)
+            Dim maxLon = d.ObrysWgs84.Max(Function(p) p.Dlugosc)
+            Dim dLat = Math.Max(0.0005, maxLat - minLat)
+            Dim dLon = Math.Max(0.0005, maxLon - minLon)
+            mapa.SetZoomToFitRect(New RectLatLng(maxLat + dLat * 0.3, minLon - dLon * 0.3, dLon * 1.6, dLat * 1.6))
+        End If
+
+        If wlaczWarstwy Then
+            WlaczWarstwyDzialek()
+        End If
+
+        Komunikat("Ustawiono obszar pobierania dla: " & d.ToString(), Color.Green)
+    End Sub
+
+    Private Sub WlaczWarstwyDzialek()
+        For Each w In tvWarstwy.WszystkieWezly()
+            Dim item = TryCast(w.Tag, WarstwaWDrzewie)
+            If item IsNot Nothing AndAlso item.Zbior IsNot Nothing Then
+                Dim nZbioru = item.Zbior.Nazwa.ToLowerInvariant()
+                Dim nWarstwy = item.Warstwa.ToLowerInvariant()
+                If (nZbioru.Contains("ortofoto") OrElse nWarstwy.Contains("ortofoto")) AndAlso Not w.Checked Then
+                    w.Checked = True
+                End If
+                If (nZbioru.Contains("dzialki") OrElse nWarstwy.Contains("dzialki") OrElse nWarstwy.Contains("egib")) AndAlso Not w.Checked Then
+                    w.Checked = True
+                End If
+            End If
+        Next
+    End Sub
+
+    Private Sub PokazDzialke()
+        If _dzialkaKatastralna Is Nothing OrElse _dzialkaKatastralna.ObrysWgs84.Count = 0 Then Exit Sub
+        Dim warstwa As New GMapOverlay("dzialka")
+        mapa.Overlays.Add(warstwa)
+        Dim punkty As New List(Of PointLatLng)()
+        For Each p In _dzialkaKatastralna.ObrysWgs84
+            punkty.Add(New PointLatLng(p.Szerokosc, p.Dlugosc))
+        Next
+        warstwa.Polygons.Add(New GMapPolygon(punkty, "obrys_dzialki") With {
+            .Fill = New SolidBrush(Color.FromArgb(45, Color.OrangeRed)),
+            .Stroke = New Pen(Color.FromArgb(200, Color.DarkRed), 2)
+        })
     End Sub
 
 #End Region

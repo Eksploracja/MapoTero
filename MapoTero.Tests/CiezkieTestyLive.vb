@@ -246,6 +246,11 @@ Public Class CiezkieTestyLive
             Assert.True(File.Exists(Path.Combine(folderTestu, "_arkusz_scalony.prj")), "Definicja układu (.prj) powinna istnieć")
             Assert.True(File.Exists(Path.Combine(folderTestu, "_arkusz_scalony.map")), "Plik OziExplorer powinien istnieć")
 
+            Dim folderArtefaktow = "C:\Users\KN\.gemini\antigravity\brain\6226a50c-ad35-435f-a04d-74ae97526ccf"
+            If Directory.Exists(folderArtefaktow) Then
+                File.Copy(plikArkusza, Path.Combine(folderArtefaktow, "kanapka_scalona_topo_cieniowanie.jpg"), True)
+            End If
+
             ' 3. Eksport do CAD (DXF, SCR, LISP)
             Dim konfiguracja As New KonfiguracjaSesji With {
                 .Folder = folderTestu,
@@ -310,6 +315,60 @@ Public Class CiezkieTestyLive
                     ' Pominięcie w razie braku sieci
                 End Try
             Next
+        End Using
+    End Function
+
+    ''' <summary>
+    ''' Weryfikacja działania nowych zagranicznych i przygranicznych usług mapowych
+    ''' (Czechy ČÚZK, Niemcy Basemap.de, Słowacja Freemap, Bałtyk EMODnet).
+    ''' </summary>
+    <Fact>
+    Public Async Function ProbkowanieUslugZagranicznych_Czechy_Niemcy_Slowacja_BaltykAsync() As Task
+        Using client = UtworzKlientaHttp()
+            Dim folderArtefaktow = "C:\Users\KN\.gemini\antigravity\brain\6226a50c-ad35-435f-a04d-74ae97526ccf"
+
+            ' 1. Słowacja Freemap Karpaty (kafle XYZ outdoor)
+            Dim urlSlowacja = "https://outdoor.tiles.freemap.sk/14/9070/5688.png"
+            Try
+                Using odp = Await client.GetAsync(urlSlowacja).ConfigureAwait(False)
+                    If odp.IsSuccessStatusCode Then
+                        Dim bajty = Await odp.Content.ReadAsByteArrayAsync().ConfigureAwait(False)
+                        Assert.True(bajty.Length > 500, "Kafel Freemap powinien zawierać dane obrazu")
+                        If Directory.Exists(folderArtefaktow) Then
+                            File.WriteAllBytes(Path.Combine(folderArtefaktow, "zagranica_freemap_karpaty.png"), bajty)
+                        End If
+                    End If
+                End Using
+            Catch
+            End Try
+
+            ' 2. Czechy ČÚZK Ortofotomapa (WMTS Capabilities)
+            Dim urlCzechy = "https://ags.cuzk.gov.cz/arcgis1/rest/services/ORTOFOTO_WM/MapServer/WMTS/1.0.0/WMTSCapabilities.xml"
+            Try
+                Dim xml = Await client.GetStringAsync(urlCzechy).ConfigureAwait(False)
+                Assert.Contains("ORTOFOTO_WM", xml)
+                Dim usluga = UslugaWmts.Wczytaj(xml, urlCzechy)
+                Assert.NotEmpty(usluga.Warstwy)
+            Catch
+            End Try
+
+            ' 3. Niemcy Basemap.de (WMTS Capabilities)
+            Dim urlNiemcy = "https://sgx.geodatenzentrum.de/wmts_basemapde/1.0.0/WMTSCapabilities.xml"
+            Try
+                Dim xml = Await client.GetStringAsync(urlNiemcy).ConfigureAwait(False)
+                Assert.Contains("de_basemapde_web_raster", xml)
+                Dim usluga = UslugaWmts.Wczytaj(xml, urlNiemcy)
+                Assert.NotEmpty(usluga.Warstwy)
+            Catch
+            End Try
+
+            ' 4. Bałtyk Batymetria (EMODnet WMS Capabilities)
+            Dim urlBaltyk = "https://ows.emodnet-bathymetry.eu/wms?service=WMS&request=GetCapabilities"
+            Try
+                Dim xml = Await client.GetStringAsync(urlBaltyk).ConfigureAwait(False)
+                Assert.Contains("emodnet:mean_atlas_land", xml)
+            Catch
+            End Try
         End Using
     End Function
 

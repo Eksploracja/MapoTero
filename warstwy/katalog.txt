@@ -33,6 +33,7 @@ skany_map_topograficznych | Raster_50tys_VMap | 1:50 000, VMap L2
 >> Mapy społecznościowe i turystyczne (kafle XYZ)
 OSMapa_PL | osmapa | OSMapa.pl – mapa topograficzno-turystyczna (OpenStreetMap)
 UMP_pcPL | ump_pcPL | UMP-pcPL – Uzupełniająca Mapa Polski
+OpenTopoMap | opentopomap | OpenTopoMap – mapa topograficzna Europy (poziomice i cieniowanie)
 Waymarked_Trails | hiking | Szlaki piesze – nakładka (Waymarked Trails)
 Waymarked_Trails | cycling | Szlaki rowerowe – nakładka (Waymarked Trails)
 Waymarked_Trails | mtb | Szlaki MTB – nakładka (Waymarked Trails)
@@ -241,3 +242,53 @@ regiony_fizycznogeograficzne | 0 | Mezoregiony fizycznogeograficzne
 geologiczna_50_SMGP | 0 | Szczegółowa mapa geologiczna Polski 1:50 000
 geologiczna_50_litogenetyczna | 1 | Mapa litogenetyczna Polski 1:50 000
 geologiczna_500 | 0 | Mapa geologiczna Polski 1:500 000
+
+> Kraje sąsiednie i strefa przygraniczna
+>> Czechy (ČÚZK)
+czechy_topo_WMTS | ZTM_WM | Mapa topograficzna wieloskalowa (ČÚZK, kafle WMTS – każdy układ)
+czechy_ztm10_wms | 0 | Skan mapy topograficznej 1:10 000 (ZTM 10, WMS – zalecany układ WGS84/UTM)
+czechy_ztm25_wms | 0 | Skan mapy topograficznej 1:25 000 (ZTM 25, WMS – zalecany układ WGS84/UTM)
+czechy_ztm50_wms | 0 | Skan mapy topograficznej 1:50 000 (ZTM 50, WMS – zalecany układ WGS84/UTM)
+czechy_orto_WMTS | ORTOFOTO_WM | Ortofotomapa lotnicza (Ortofoto ČR, kafle WMTS – każdy układ)
+
+>> Słowacja (ZBGIS i Freemap)
+slowacja_freemap | outdoor | Mapa turystyczna Karpat – szlaki i rzeźba (Freemap Slovakia, kafle XYZ – każdy układ)
+slowacja_zmsr_wms | 1 | Skan mapy topograficznej 1:10 000 (ZM10, WMS – zalecany układ WGS84/UTM)
+slowacja_zmsr_wms | 5 | Skan mapy topograficznej 1:25 000 (ZM25, WMS – zalecany układ WGS84/UTM)
+slowacja_zmsr_wms | 9 | Skan mapy topograficznej 1:50 000 (ZM50, WMS – zalecany układ WGS84/UTM)
+slowacja_zmsr_wms | 13 | Skan mapy topograficznej 1:100 000 (ZM100, WMS – zalecany układ WGS84/UTM)
+slowacja_orto_wms | 1 | Ortofotomozaika SR (ZBGIS, WMS – zalecany układ WGS84/UTM)
+slowacja_dmr_wms | 0 | Cieniowanie rzeźby terenu (DMR 5.0, WMS – zalecany układ WGS84/UTM)
+
+>> Niemcy – mapa ogólnokrajowa (BKG)
+niemcy_basemapde_WMTS | de_basemapde_web_raster_farbe | Mapa urzędowa basemap.de – kolorowa (BKG, kafle WMTS – każdy układ)
+niemcy_basemapde_WMTS | de_basemapde_web_raster_grau | Mapa urzędowa basemap.de – szara (BKG, kafle WMTS – każdy układ)
+
+>> Niemcy – Brandenburgia (strefa Odry, LGB)
+niemcy_brandenburgia_dtk10_wms | bb_dtk10_farbe | Skan mapy topograficznej 1:10 000 (DTK10, WMS – zalecany układ WGS84/UTM)
+niemcy_brandenburgia_dtk25_wms | bb_dtk25_farbe | Skan mapy topograficznej 1:25 000 (DTK25, WMS – zalecany układ WGS84/UTM)
+niemcy_brandenburgia_dtk50_wms | bb_dtk50_farbe | Skan mapy topograficznej 1:50 000 (DTK50, WMS – zalecany układ WGS84/UTM)
+niemcy_brandenburgia_sdop_wms | bb_sdop | Ortofotomapa lotnicza 20 cm (SDOP, WMS – zalecany układ WGS84/UTM)
+niemcy_brandenburgia_dgm_wms | dgmshade | Cieniowanie reliefu NMT 1 m (DGMSHADE, WMS – zalecany układ WGS84/UTM)
+
+>> Niemcy – Saksonia (strefa Nysy Łużyckiej, GeoSN)
+niemcy_saksonia_dtk_wms | sn_dtk25_p_color | Skan mapy topograficznej 1:25 000 (DTK25, WMS – układ PL-1992, WGS84, UTM)
+niemcy_saksonia_dtk_wms | sn_dtk50_p_color | Skan mapy topograficznej 1:50 000 (DTK50, WMS – układ PL-1992, WGS84, UTM)
+niemcy_saksonia_dop_wms | sn_dop_020 | Ortofotomapa lotnicza 20 cm (DOP, WMS – układ PL-1992, WGS84, UTM)
+niemcy_saksonia_hoehe_wms | relief_standard | Cieniowanie rzeźby terenu (DGM, WMS – układ PL-1992, WGS84, UTM)
+niemcy_saksonia_hoehe_wms | hangneigung | Nachylenie stoków (GeoSN, WMS – układ PL-1992, WGS84, UTM)
+
+>> Litwa (INSPIRE)
+litwa_inspire_wms | cp:CP.CadastralParcel | Ewidencja gruntów – granice działek (INSPIRE, WMS – zalecany układ WGS84/UTM)
+litwa_inspire_wms | el:EL.ContourLine | Warstwice poziomicowe terenu (INSPIRE, WMS – zalecany układ WGS84/UTM)
+litwa_inspire_wms | bu:BU.Building_polygon | Budynki i zabudowa (INSPIRE, WMS – zalecany układ WGS84/UTM)
+litwa_inspire_wms | tn:TN.RoadTransportNetwork.RoadLink | Sieć dróg i szlaków komunikacyjnych (INSPIRE, WMS – zalecany układ WGS84/UTM)
+
+>> Morze Bałtyckie (EMODnet Bathymetry)
+baltyk_batymetria_wms | emodnet:mean_atlas_land | Rzeźba i głębokości dna Bałtyku – pełne pokrycie (WMS – zalecany układ WGS84/UTM)
+baltyk_batymetria_wms | emodnet:mean_rainbowcolour | Głębokość dna morskiego – paleta barwna (WMS – zalecany układ WGS84/UTM)
+baltyk_batymetria_wms | emodnet:contours | Izobaty – poziomice głębokości morskiej (WMS – zalecany układ WGS84/UTM)
+baltyk_batymetria_wms | coastlines | Linia brzegowa Morza Bałtyckiego (WMS – zalecany układ WGS84/UTM)
+
+>> Europa Środkowa i Wschodnia (OpenTopoMap)
+OpenTopoMap | opentopomap | OpenTopoMap – mapa topograficzna z poziomicami i cieniowaniem (Litwa, Ukraina, Białoruś, kafle XYZ – każdy układ)

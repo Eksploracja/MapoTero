@@ -1,0 +1,3 @@
+https://ags.cuzk.gov.cz/arcgis1/rest/services/ZTM_WM/MapServer/WMTS/1.0.0/WMTSCapabilities.xml
+ZTM_WM
+2

@@ -1,0 +1,3 @@
+https://ags.cuzk.gov.cz/arcgis1/rest/services/ORTOFOTO_WM/MapServer/WMTS/1.0.0/WMTSCapabilities.xml
+ORTOFOTO_WM
+0.5

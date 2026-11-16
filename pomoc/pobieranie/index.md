@@ -16,6 +16,7 @@ Jak przebiega pobieranie segmentów, jak je przerwać i wznowić oraz co zrobić
 | Temat | Strona |
 |---|---|
 | co się dzieje po kliknięciu *Pobierz*, przerywanie i wznawianie | [Przebieg pobierania](przebieg/) |
+| łączenie wielu map, rzeźba terenu 3D i dobór krycia w kanapce | [Kompozycje warstw i plastyczna rzeźba](kompozycje/) |
 | ponowne pobranie całej mapy (np. nowszej ortofotomapy) | [Odświeżanie mapy](odswiezanie/) |
 | mapy z usług kafelkowych | [Usługi kafelkowe (WMTS, XYZ, TMS)](wmts/) |
 | ograniczanie obciążenia serwerów, dobre obyczaje | [Ochrona serwerów map](serwery/) |

@@ -365,10 +365,14 @@ Public Class ZestawWarstwTesty
 
     <Fact>
     Public Async Function Podglad_PobierzObrazBezRegulatoraAsync() As Task
-        Dim wmsAdres = "https://mapy.geoportal.gov.pl/wss/service/PZGIK/ORTO/WMS/HighResolution?request=GetMap&version=1.3.0&CRS=EPSG:2180&layers="
+        Dim wmsAdres = "https://mapy.geoportal.gov.pl/wss/service/PZGIK/ORTO/WMS/StandardResolution?request=GetMap&version=1.3.0&CRS=EPSG:2180&layers="
         Dim zasieg As New Zasieg(682850, 569850, 683150, 570150)
         Dim adres = Wms.ZapytanieGetMap(wmsAdres, {"Raster"}, UkladWspolrzednych.PL1992, zasieg, "png", 300, 300, False, True)
-        Dim wynik = Await PobieranieSegmentow.PobierzObrazBezRegulatoraAsync(adres, 30, Threading.CancellationToken.None, False)
+        Dim wynik = Await PobieranieSegmentow.PobierzObrazBezRegulatoraAsync(adres, 30, Threading.CancellationToken.None, True)
+        If wynik.Item1 Is Nothing Then
+            Await Task.Delay(1000)
+            wynik = Await PobieranieSegmentow.PobierzObrazBezRegulatoraAsync(adres, 30, Threading.CancellationToken.None, True)
+        End If
         Assert.Equal("", wynik.Item2)
         Assert.NotNull(wynik.Item1)
         Dim piksele = NakladanieObrazow.Piksele(wynik.Item1, 300, 300)

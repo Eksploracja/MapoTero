@@ -71,10 +71,15 @@ Public Class FormEksport
     Private _folder As String = ""
     Private _sesja As Sesja
     Private _przerwanie As CancellationTokenSource
+    Private _ostatniPlikEksportu As String = ""
+    Private _opcjeMip As New OpcjeKorekcjiMip()
     ''' <summary>Programowe ustawianie kontrolek warstwy (bez reakcji na zdarzenia).</summary>
     Private _ustawianie As Boolean
 
     Private Sub FormEksport_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+        If cboKolejnoscGarmin.Items.Count > 0 AndAlso cboKolejnoscGarmin.SelectedIndex < 0 Then
+            cboKolejnoscGarmin.SelectedIndex = 0
+        End If
         _folder = Form1.FolderSesji
         If _folder = "" OrElse File.Exists(_folder & "conf.txt") = False Then _folder = FolderDownload
         WczytajSesje()
@@ -189,10 +194,12 @@ Public Class FormEksport
 
     Private ReadOnly Property WybranyRodzaj As RodzajEksportu
         Get
+            If rbJnx.Checked Then Return RodzajEksportu.Jnx
             If rbMBTiles.Checked Then Return RodzajEksportu.MBTiles
             If rbSQLiteDB.Checked Then Return RodzajEksportu.SQLiteDB
             If rbOruxMaps.Checked Then Return RodzajEksportu.OruxMaps
             If rbKmz.Checked Then Return RodzajEksportu.Kmz
+            If rbGeoTiff.Checked Then Return RodzajEksportu.GeoTiff
             Return RodzajEksportu.KmzGarmin
         End Get
     End Property
@@ -217,18 +224,27 @@ Public Class FormEksport
         Dim nazwa As String = "_eksport_" & _sesja.Siatka.LiczbaKolumn & "x" & _sesja.Siatka.LiczbaWierszy
         Dim rozszerzenie As String
         Select Case rodzaj
+            Case RodzajEksportu.Jnx : rozszerzenie = ".jnx"
             Case RodzajEksportu.MBTiles : rozszerzenie = ".mbtiles"
             Case RodzajEksportu.SQLiteDB : rozszerzenie = ".sqlitedb"
             Case RodzajEksportu.OruxMaps : rozszerzenie = "_oruxmaps"
+            Case RodzajEksportu.GeoTiff : rozszerzenie = ".tif"
             Case RodzajEksportu.KmzGarmin : rozszerzenie = "_garmin.kmz"
             Case Else : rozszerzenie = ".kmz"
         End Select
         _sesja.Zrodlo.BialePrzezroczyste = chkBialePodstawa.Checked
+        Dim kOrder As Integer = 50
+        If cboKolejnoscGarmin.SelectedIndex = 1 Then
+            kOrder = 25
+        ElseIf cboKolejnoscGarmin.SelectedIndex = 2 Then
+            kOrder = 75
+        End If
         Dim z As New ZadanieEksportu With {
             .Rodzaj = rodzaj, .Zrodlo = _sesja.Zrodlo, .Uklad = _sesja.Uklad, .Plik = _folder & nazwa & rozszerzenie,
-            .JakoscJpeg = CInt(nudJakosc.Value), .MaksKafli = CInt(nudMaksKafli.Value),
+            .JakoscJpeg = CInt(nudJakosc.Value), .MaksKafli = CInt(nudMaksKafli.Value), .PodzialNaTomy = chkPodzialNaTomy.Checked AndAlso rodzaj = RodzajEksportu.KmzGarmin,
+            .KolejnoscRysowania = kOrder,
             .PoziomMin = CInt(Math.Min(nudPoziomMin.Value, nudPoziomMax.Value)), .PoziomMax = CInt(nudPoziomMax.Value), .KaflePng = chkPng.Checked,
-            .Nakladka = chkNakladka.Checked AndAlso rodzaj <> RodzajEksportu.KmzGarmin, .Metadane = UtworzMetadane()}
+            .Nakladka = chkNakladka.Checked AndAlso rodzaj <> RodzajEksportu.Jnx, .Metadane = UtworzMetadane()}
         z.Nazwa = z.Metadane.Nazwa
         For Each p In lstNakladki.Items.Cast(Of PozycjaNakladki)()
             z.Nakladki.Add(p.Warstwa)
@@ -240,16 +256,28 @@ Public Class FormEksport
     Private Sub UstawWidok()
         Dim wolny As Boolean = _przerwanie Is Nothing
         Dim rodzaj = WybranyRodzaj
-        Dim piramida As Boolean = rodzaj = RodzajEksportu.MBTiles OrElse rodzaj = RodzajEksportu.SQLiteDB OrElse rodzaj = RodzajEksportu.OruxMaps
+        Dim piramida As Boolean = rodzaj = RodzajEksportu.MBTiles OrElse rodzaj = RodzajEksportu.SQLiteDB OrElse rodzaj = RodzajEksportu.OruxMaps OrElse rodzaj = RodzajEksportu.Jnx
+        Dim garmin As Boolean = rodzaj = RodzajEksportu.KmzGarmin OrElse rodzaj = RodzajEksportu.Jnx
+        Dim geotiff As Boolean = rodzaj = RodzajEksportu.GeoTiff
+        chkGeoTiffJpeg.Enabled = wolny AndAlso geotiff
+        chkGeoTiffCad.Enabled = wolny AndAlso geotiff
+        chkGeoTiffJpeg.Visible = geotiff
+        chkGeoTiffCad.Visible = geotiff
+        chkKorekcjaMip.Enabled = wolny
+        btnPodgladMip.Enabled = wolny
         grpFormat.Enabled = wolny
         grpWarstwy.Enabled = wolny
         grpRozmiar.Enabled = wolny AndAlso _sesja IsNot Nothing
         nudJakosc.Enabled = wolny
         btnFolder.Enabled = wolny
         nudMaksKafli.Enabled = rbKmzGarmin.Checked
+        chkPodzialNaTomy.Enabled = wolny AndAlso rbKmzGarmin.Checked
+        chkPodzialNaTomy.Visible = rbKmzGarmin.Checked
+        lblKolejnoscGarmin.Enabled = garmin
+        cboKolejnoscGarmin.Enabled = garmin AndAlso wolny
         grpMBTiles.Enabled = wolny AndAlso piramida
-        chkNakladka.Enabled = rodzaj <> RodzajEksportu.KmzGarmin
-        chkPng.Enabled = Not (chkNakladka.Checked AndAlso chkNakladka.Enabled)
+        chkPng.Enabled = piramida AndAlso rodzaj <> RodzajEksportu.Jnx AndAlso Not (chkNakladka.Checked AndAlso chkNakladka.Enabled)
+        chkNakladka.Enabled = rodzaj <> RodzajEksportu.Jnx
         btnDopasuj.Enabled = piramida
         nudLimit.Enabled = piramida
         Dim zaznaczona = TryCast(lstNakladki.SelectedItem, PozycjaNakladki)
@@ -265,13 +293,21 @@ Public Class FormEksport
                            "), kafle " & If(z.Png, "PNG", "JPEG")
         Else
             Dim plan = EksportMapy.PlanKmz(z)
-            lblPlan.Text = "Kafle: " & plan.Kolumny & " x " & plan.Wiersze & " = " & plan.LiczbaKafli &
-                           If(plan.Pomniejszenie > 1.001, ", rozdzielczość zmniejszona " & plan.Pomniejszenie.ToString("0.0") & "x (limit kafli)", ", pełna rozdzielczość")
+            If z.PodzialNaTomy Then
+                Dim tomy = plan.WyznaczTomy(z.MaksKafli)
+                lblPlan.Text = "Kafle: " & plan.LiczbaKafli & " (podział na " & tomy.Count & " tomów po maks. " & z.MaksKafli & " kafli, pełna rozdzielczość)" &
+                               If(z.Png, ", kafle PNG", ", kafle JPEG")
+            Else
+                lblPlan.Text = "Kafle: " & plan.Kolumny & " x " & plan.Wiersze & " = " & plan.LiczbaKafli &
+                               If(plan.Pomniejszenie > 1.001, ", rozdzielczość zmniejszona " & plan.Pomniejszenie.ToString("0.0") & "x (limit kafli)", ", pełna rozdzielczość") &
+                               If(z.Png, ", kafle PNG", ", kafle JPEG")
+            End If
         End If
     End Sub
 
     Private Sub OpcjeZmienione(sender As Object, e As EventArgs) Handles rbKmzGarmin.CheckedChanged, rbKmz.CheckedChanged, rbMBTiles.CheckedChanged,
-                                                                    rbSQLiteDB.CheckedChanged, rbOruxMaps.CheckedChanged, nudMaksKafli.ValueChanged,
+                                                                    rbSQLiteDB.CheckedChanged, rbOruxMaps.CheckedChanged, rbJnx.CheckedChanged, rbGeoTiff.CheckedChanged, chkGeoTiffJpeg.CheckedChanged, chkGeoTiffCad.CheckedChanged, chkKorekcjaMip.CheckedChanged,
+                                                                    cboKolejnoscGarmin.SelectedIndexChanged, chkPodzialNaTomy.CheckedChanged, nudMaksKafli.ValueChanged,
                                                                     nudPoziomMin.ValueChanged, nudPoziomMax.ValueChanged, chkPng.CheckedChanged,
                                                                     chkNakladka.CheckedChanged, chkBialePodstawa.CheckedChanged, nudJakosc.ValueChanged
         lblRozmiar.Text = ""
@@ -480,12 +516,34 @@ Public Class FormEksport
             Await Task.Run(Sub() EksportMapy.Eksportuj(z, postep, token))
             If Not Me.IsDisposed AndAlso Not Me.Disposing Then
                 prgEksport.Value = 100
-                If z.Rodzaj = RodzajEksportu.OruxMaps Then
-                    Komunikat("Zapisano mapę OruxMaps w folderze " & z.Plik & ". Skopiuj cały ten folder do folderu oruxmaps/mapfiles w telefonie.", Color.Green)
-                Else
-                    Dim rozmiar As Long = If(File.Exists(z.Plik), New FileInfo(z.Plik).Length, 0)
-                    Komunikat("Zapisano plik " & z.Plik & " (" & SzacunekRozmiaru.Tekst(rozmiar) & ")", Color.Green)
-                End If
+                _ostatniPlikEksportu = z.Plik
+                btnPokazPlik.Enabled = True
+                Select Case z.Rodzaj
+                    Case RodzajEksportu.GeoTiff
+                        Dim rozmiar As Long = If(File.Exists(z.Plik), New FileInfo(z.Plik).Length, 0)
+                        Komunikat("Zapisano plik GeoTIFF: " & z.Plik & " (" & SzacunekRozmiaru.Tekst(rozmiar) & "). Plik z georeferencją gotowy do użycia w Avenza Maps, QField, QGIS lub programach CAD.", Color.Green)
+                    Case RodzajEksportu.Jnx
+                        Dim rozmiar As Long = If(File.Exists(z.Plik), New FileInfo(z.Plik).Length, 0)
+                        Komunikat("Zapisano mapę BirdsEye: " & z.Plik & " (" & SzacunekRozmiaru.Tekst(rozmiar) & "). Skopiuj plik .jnx do folderu Garmin/BirdsEye w urządzeniu lub na karcie SD.", Color.Green)
+                    Case RodzajEksportu.KmzGarmin
+                        If z.PodzialNaTomy Then
+                            Komunikat("Zapisano tomy mapy Garmin Custom Maps w folderze " & Path.GetDirectoryName(z.Plik) & ". W menu odbiornika włączaj pojedyncze tomy w zależności od rejonu wędrówki.", Color.Green)
+                        Else
+                            Dim rozmiar As Long = If(File.Exists(z.Plik), New FileInfo(z.Plik).Length, 0)
+                            Komunikat("Zapisano mapę Garmin Custom Maps: " & z.Plik & " (" & SzacunekRozmiaru.Tekst(rozmiar) & "). Skopiuj plik .kmz do folderu Garmin/CustomMaps w urządzeniu lub na karcie SD.", Color.Green)
+                        End If
+                    Case RodzajEksportu.MBTiles
+                        Dim rozmiar As Long = If(File.Exists(z.Plik), New FileInfo(z.Plik).Length, 0)
+                        Komunikat("Zapisano plik MBTiles: " & z.Plik & " (" & SzacunekRozmiaru.Tekst(rozmiar) & "). Locus Map: skopiuj do Locus/maps; OsmAnd/Orux: wskaż plik w menedżerze map.", Color.Green)
+                    Case RodzajEksportu.SQLiteDB
+                        Dim rozmiar As Long = If(File.Exists(z.Plik), New FileInfo(z.Plik).Length, 0)
+                        Komunikat("Zapisano plik SQLiteDB: " & z.Plik & " (" & SzacunekRozmiaru.Tekst(rozmiar) & "). OsmAnd: skopiuj do osmand/tiles; Locus Map: do Locus/maps.", Color.Green)
+                    Case RodzajEksportu.OruxMaps
+                        Komunikat("Zapisano mapę OruxMaps w folderze " & z.Plik & ". Skopiuj cały ten folder do folderu oruxmaps/mapfiles w telefonie.", Color.Green)
+                    Case Else
+                        Dim rozmiar As Long = If(File.Exists(z.Plik), New FileInfo(z.Plik).Length, 0)
+                        Komunikat("Zapisano plik " & z.Plik & " (" & SzacunekRozmiaru.Tekst(rozmiar) & ")", Color.Green)
+                End Select
             End If
             Form1.Komunikat("Wyeksportowano mapę do " & Path.GetFileName(z.Plik), Color.Green)
         Catch ex As OperationCanceledException
@@ -499,6 +557,36 @@ Public Class FormEksport
         Finally
             ZakonczPrace()
         End Try
+    End Sub
+
+    Private Sub btnPokazPlik_Click(sender As Object, e As EventArgs) Handles btnPokazPlik.Click
+        If Not String.IsNullOrEmpty(_ostatniPlikEksportu) Then
+            Try
+                If Directory.Exists(_ostatniPlikEksportu) Then
+                    Process.Start(New ProcessStartInfo("explorer.exe", """" & _ostatniPlikEksportu & """") With {.UseShellExecute = True})
+                ElseIf File.Exists(_ostatniPlikEksportu) Then
+                    Process.Start(New ProcessStartInfo("explorer.exe", "/select,""" & _ostatniPlikEksportu & """") With {.UseShellExecute = True})
+                End If
+            Catch ex As Exception
+                MsgBox("Nie udało się otworzyć folderu: " & ex.Message, MsgBoxStyle.Exclamation)
+            End Try
+        End If
+    End Sub
+
+    Private Sub btnPodgladMip_Click(sender As Object, e As EventArgs) Handles btnPodgladMip.Click
+        Dim probka As String = ""
+        If _sesja IsNot Nothing AndAlso Directory.Exists(_folder) Then
+            Dim k = _sesja.Konfiguracja
+            Dim wzorzec = If(String.IsNullOrEmpty(k.Prefiks), "*", k.Prefiks & "*") & "." & Wms.RozszerzeniePliku(k.Format)
+            Dim pliki = Directory.GetFiles(_folder, wzorzec)
+            If pliki.Length > 0 Then probka = pliki(0)
+        End If
+        Using dlg As New FormPodgladMip(_opcjeMip, probka)
+            If dlg.ShowDialog(Me) = DialogResult.OK Then
+                _opcjeMip = dlg.Opcje
+                chkKorekcjaMip.Checked = _opcjeMip.Wlaczona
+            End If
+        End Using
     End Sub
 
     Private Sub btnWielowarstwowyMbtiles_Click(sender As Object, e As EventArgs) Handles btnWielowarstwowyMbtiles.Click

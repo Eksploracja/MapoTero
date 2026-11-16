@@ -22,6 +22,9 @@ Public Class SzerokoscPaneluTesty
         Dim t As New Thread(
             Sub()
                 Try
+                    Dim plikSettings = IO.Path.Combine(AppContext.BaseDirectory, "lastsettings.txt")
+                    If IO.File.Exists(plikSettings) Then IO.File.Delete(plikSettings)
+                    MapoTero.Ustawienia.SzerokoscPanelu = 0
                     Using f As New MapoTero.Form1()
                         f.Show()
                         Application.DoEvents()
@@ -43,6 +46,7 @@ Public Class SzerokoscPaneluTesty
                         zdarzenie("OnMouseUp", -98)
                         Application.DoEvents()
                         Dim poszerzona As Integer = panel.Width
+                        Assert.InRange(poszerzona, najmniejsza + 90, najmniejsza + 110)
                         Assert.InRange(poszerzona, najmniejsza + 90, najmniejsza + 110)
                         Assert.True(MapoTero.Ustawienia.SzerokoscPanelu >= najmniejsza + 90)
                         'małe przyciski pod panelem trzymają się lewej krawędzi (były zakotwiczone do prawej i zostawały na środku)

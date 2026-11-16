@@ -1,0 +1,15 @@
+{
+  "typ": "xyz",
+  "adres": "https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png",
+  "subdomeny": ["a", "b", "c"],
+  "zMin": 0,
+  "zMax": 17,
+  "rozmiarKafla": 256,
+  "nakladka": false,
+  "odstepMs": 50,
+  "maksWatkow": 2,
+  "atrybucja": "© OpenTopoMap / autorzy OpenStreetMap",
+  "warstwy": [
+    { "nazwa": "opentopomap", "piksel": 2 }
+  ]
+}

@@ -305,12 +305,15 @@ Public Class PlanKmz
     Public ReadOnly Property BokKafla As Integer
     ''' <summary>Ile razy zmniejszono rozdzielczość, aby zmieścić się w limicie liczby kafli (1 - bez zmniejszenia).</summary>
     Public ReadOnly Property Pomniejszenie As Double
+    Private ReadOnly _liczbaKafliAktywnych As Integer = -1
 
     ''' <param name="obszar">Obszar mapy w WGS84.</param>
     ''' <param name="pikselMetry">Rozmiar piksela źródła w metrach.</param>
     ''' <param name="bokKafla">Maksymalny bok kafla (Garmin: 1024).</param>
     ''' <param name="maksKafli">Maksymalna liczba kafli (Garmin: 100); 0 - bez limitu.</param>
-    Public Sub New(obszar As ProstokatGeo, pikselMetry As Double, bokKafla As Integer, maksKafli As Integer)
+    ''' <param name="filtrKafli">Opcjonalny filtr sprawdzający, czy kafel o podanym zasięgu zawiera dane (dla korytarza lub rzadkich segmentów).</param>
+    Public Sub New(obszar As ProstokatGeo, pikselMetry As Double, bokKafla As Integer, maksKafli As Integer,
+                   Optional filtrKafli As Func(Of ProstokatGeo, Boolean) = Nothing)
         Me.Obszar = obszar
         Me.BokKafla = bokKafla
         Dim mSz As Double, mDl As Double
@@ -324,21 +327,42 @@ Public Class PlanKmz
             Dim h As Integer = Math.Max(1, CInt(Math.Ceiling((obszar.Polnoc - obszar.Poludnie) / pSz - 0.000001)))
             Dim k As Integer = CInt(Math.Ceiling(w / CDbl(bokKafla)))
             Dim r As Integer = CInt(Math.Ceiling(h / CDbl(bokKafla)))
-            If maksKafli <= 0 OrElse CLng(k) * r <= maksKafli Then
+
+            Dim liczbaKafli As Integer = k * r
+            If filtrKafli IsNot Nothing AndAlso maksKafli > 0 AndAlso liczbaKafli > maksKafli Then
+                liczbaKafli = 0
+                Dim pDlugosc = (obszar.Wschod - obszar.Zachod) / w
+                Dim pSzerokosc = (obszar.Polnoc - obszar.Poludnie) / h
+                For ir = 0 To r - 1
+                    For ik = 0 To k - 1
+                        Dim y0 = CInt(CLng(h) * ir \ r)
+                        Dim y1 = CInt(CLng(h) * (ir + 1) \ r)
+                        Dim x0 = CInt(CLng(w) * ik \ k)
+                        Dim x1 = CInt(CLng(w) * (ik + 1) \ k)
+                        Dim zasieg = New ProstokatGeo(obszar.Polnoc - y0 * pSzerokosc, obszar.Polnoc - y1 * pSzerokosc,
+                                                      obszar.Zachod + x1 * pDlugosc, obszar.Zachod + x0 * pDlugosc)
+                        If filtrKafli(zasieg) Then liczbaKafli += 1
+                    Next
+                Next
+            End If
+
+            If maksKafli <= 0 OrElse liczbaKafli <= maksKafli Then
                 'piksel dopasowany tak, by obraz dokładnie wypełniał obszar
                 _SzerokoscPx = w : _WysokoscPx = h : _Kolumny = k : _Wiersze = r
                 _PikselDlugosc = (obszar.Wschod - obszar.Zachod) / w
                 _PikselSzerokosc = (obszar.Polnoc - obszar.Poludnie) / h
                 _Pomniejszenie = skala
+                _liczbaKafliAktywnych = liczbaKafli
                 Exit Do
             End If
             skala *= 1.05
         Loop
     End Sub
 
-    ''' <summary>Liczba kafli.</summary>
+    ''' <summary>Liczba kafli (jeśli stosowano filtr kafli z danymi - liczba faktycznych kafli, inaczej Kolumny * Wiersze).</summary>
     Public ReadOnly Property LiczbaKafli As Integer
         Get
+            If _liczbaKafliAktywnych >= 0 Then Return _liczbaKafliAktywnych
             Return Kolumny * Wiersze
         End Get
     End Property
@@ -360,6 +384,110 @@ Public Class PlanKmz
                                 Obszar.Zachod + (p.Item1 + p.Item3) * PikselDlugosc, Obszar.Zachod + p.Item1 * PikselDlugosc)
     End Function
 
+    ''' <summary>
+    ''' Dzieli kafle mapy na tomy (spójne geograficznie bloki), z których żaden nie przekracza podanej liczby kafli (np. 100).
+    ''' </summary>
+    Public Function WyznaczTomy(maksKafliNaTom As Integer, Optional filtrKafli As Func(Of ProstokatGeo, Boolean) = Nothing) As IList(Of TomKmz)
+        Dim aktywne As New List(Of Tuple(Of Integer, Integer))()
+        For w = 0 To Wiersze - 1
+            For k = 0 To Kolumny - 1
+                If filtrKafli Is Nothing OrElse filtrKafli(ZasiegKafla(w, k)) Then
+                    aktywne.Add(Tuple.Create(w, k))
+                End If
+            Next
+        Next
+
+        If maksKafliNaTom <= 0 OrElse aktywne.Count <= maksKafliNaTom Then
+            Dim calyObszar = If(aktywne.Count > 0, ObszarKafli(aktywne), Obszar)
+            Return New List(Of TomKmz) From {New TomKmz(1, 1, calyObszar, aktywne)}
+        End If
+
+        Dim minTomow As Integer = CInt(Math.Ceiling(aktywne.Count / CDbl(maksKafliNaTom)))
+        Dim blokWiersze As Integer = 1
+        Dim blokKolumny As Integer = 1
+
+        While True
+            Dim pasuje As Boolean = True
+            Dim kandydaci As New List(Of List(Of Tuple(Of Integer, Integer)))()
+
+            For bw = 0 To blokWiersze - 1
+                Dim w0 = CInt(CLng(Wiersze) * bw \ blokWiersze)
+                Dim w1 = CInt(CLng(Wiersze) * (bw + 1) \ blokWiersze)
+                For bk = 0 To blokKolumny - 1
+                    Dim k0 = CInt(CLng(Kolumny) * bk \ blokKolumny)
+                    Dim k1 = CInt(CLng(Kolumny) * (bk + 1) \ blokKolumny)
+
+                    Dim kafleBloku As New List(Of Tuple(Of Integer, Integer))()
+                    For Each kfl In aktywne
+                        If kfl.Item1 >= w0 AndAlso kfl.Item1 < w1 AndAlso kfl.Item2 >= k0 AndAlso kfl.Item2 < k1 Then
+                            kafleBloku.Add(kfl)
+                        End If
+                    Next
+
+                    If kafleBloku.Count > maksKafliNaTom Then
+                        pasuje = False
+                        Exit For
+                    End If
+                    If kafleBloku.Count > 0 Then
+                        kandydaci.Add(kafleBloku)
+                    End If
+                Next
+                If Not pasuje Then Exit For
+            Next
+
+            If pasuje AndAlso kandydaci.Count >= minTomow Then
+                Dim wynik As New List(Of TomKmz)()
+                For i = 0 To kandydaci.Count - 1
+                    Dim obszarTomu = ObszarKafli(kandydaci(i))
+                    wynik.Add(New TomKmz(i + 1, kandydaci.Count, obszarTomu, kandydaci(i)))
+                Next
+                Return wynik
+            End If
+
+            If (Wiersze / CDbl(blokWiersze)) >= (Kolumny / CDbl(blokKolumny)) Then
+                blokWiersze += 1
+            Else
+                blokKolumny += 1
+            End If
+        End While
+        Return New List(Of TomKmz)()
+    End Function
+
+    Private Function ObszarKafli(kafle As IList(Of Tuple(Of Integer, Integer))) As ProstokatGeo
+        If kafle.Count = 0 Then Return Obszar
+        Dim pMin = ZasiegKafla(kafle(0).Item1, kafle(0).Item2)
+        Dim n = pMin.Polnoc, s = pMin.Poludnie, w = pMin.Zachod, e = pMin.Wschod
+        For i = 1 To kafle.Count - 1
+            Dim z = ZasiegKafla(kafle(i).Item1, kafle(i).Item2)
+            n = Math.Max(n, z.Polnoc)
+            s = Math.Min(s, z.Poludnie)
+            w = Math.Min(w, z.Zachod)
+            e = Math.Max(e, z.Wschod)
+        Next
+        Return New ProstokatGeo(n, s, e, w)
+    End Function
+
+End Class
+
+''' <summary>Tom mapy KMZ (część całości mieszcząca się w zadanym limicie kafli, np. 100).</summary>
+Public Class TomKmz
+    Public ReadOnly Property Numer As Integer
+    Public ReadOnly Property LiczbaTomow As Integer
+    Public ReadOnly Property Obszar As ProstokatGeo
+    Public ReadOnly Property Kafle As IReadOnlyList(Of Tuple(Of Integer, Integer))
+
+    Public Sub New(numer As Integer, liczbaTomow As Integer, obszar As ProstokatGeo, kafle As IList(Of Tuple(Of Integer, Integer)))
+        Me.Numer = numer
+        Me.LiczbaTomow = liczbaTomow
+        Me.Obszar = obszar
+        Me.Kafle = New List(Of Tuple(Of Integer, Integer))(kafle).AsReadOnly()
+    End Sub
+
+    Public ReadOnly Property LiczbaKafli As Integer
+        Get
+            Return Kafle.Count
+        End Get
+    End Property
 End Class
 
 ''' <summary>Zapis pliku KMZ: archiwum ZIP z dokumentem doc.kml i kaflami w folderze "files".</summary>

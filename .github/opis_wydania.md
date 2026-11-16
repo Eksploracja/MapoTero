@@ -1,15 +1,47 @@
-MapoTero 3.17 - drzewo warstw w grupach tematycznych, obsługa kafelków XYZ/TMS, wbudowany katalog publicznych usług mapowych i pełna pomoc online.
+MapoTero 3.18 - wyszukiwarka działek ULDK, profil wysokościowy NMT LIDAR, konwerter OziExplorer do JNX/KMZ/MBTiles, eksport GeoTIFF, post-processing MIP dla Garmina i bieżący podgląd warstw.
 
 ## Instalacja
 
-1. Pobierz plik **[MapoTero_v3.17.zip](https://github.com/Eksploracja/MapoTero/releases/download/v3.17/MapoTero_v3.17.zip)** (bezpośrednie pobranie lub poniżej w sekcji *Assets*).
+1. Pobierz plik **[MapoTero_v3.18.zip](https://github.com/Eksploracja/MapoTero/releases/download/v3.18/MapoTero_v3.18.zip)** (bezpośrednie pobranie lub poniżej w sekcji *Assets*).
 2. Przed rozpakowaniem kliknij plik prawym przyciskiem myszy, wybierz *Właściwości*, zaznacz **Odblokuj** i kliknij *OK* - wtedy Windows nie będzie blokował uruchomienia programu (program nie ma podpisu cyfrowego, więc filtr SmartScreen traktuje go jako nierozpoznaną aplikację; można też w oknie SmartScreen kliknąć *Więcej informacji* > *Uruchom mimo to*). Sumy kontrolne plików i wynik skanu antywirusowego - niżej, w sekcji *Sumy kontrolne SHA-256*.
 
    ![Okno SmartScreen: najpierw „Więcej informacji”, potem „Uruchom mimo to”](https://raw.githubusercontent.com/Eksploracja/MapoTero/master/obrazy/smartscreen.png)
 3. Rozpakuj archiwum do dowolnego folderu i uruchom **MapoTero.exe** - program to jeden plik, obok którego musi leżeć folder `warstwy` (zbiory map).
 4. Program wymaga środowiska [.NET Desktop Runtime 10 (x64)](https://dotnet.microsoft.com/download/dotnet/10.0) - jeśli nie jest zainstalowane, Windows zaproponuje jego pobranie przy pierwszym uruchomieniu.
 
-Ustawienia i zbiory map z poprzednich wersji (plik `lastsettings.txt`, folder `warstwy`) są w pełni zgodne z wersją 3.17.
+Ustawienia i zbiory map z poprzednich wersji (plik `lastsettings.txt`, folder `warstwy`) są w pełni zgodne z wersją 3.18.
+
+## Zmiany w wersji 3.18
+
+* **Wyszukiwarka działek katastralnych ULDK GUGiK (skrót Ctrl+D):**
+  * Bezpośrednia integracja z krajową usługą ULDK Głównego Urzędu Geodezji i Kartografii.
+  * Wyszukiwanie po pełnym identyfikatorze TERYT (np. `022503_5.0003.134`) lub nazwie miejscowości/obrębu i numerze działki (np. `Krzewina 134`).
+  * Automatyczne pobranie geometrii poligonowej WKT, wycentrowanie mapy na działce z rysowaniem jej konturu, ustawienie siatki pobierania z konfigurowalnym buforem w metrach oraz opcja natychmiastowego aktywowania ortofotomapy i warstwy ewidencji gruntów EGiB.
+* **Profil wysokościowy i uzupełnianie rzędnych NMT LIDAR wzdłuż śladu GPX:**
+  * Pobieranie rzeczywistych rzędnych terenu z lotniczego skaningu laserowego NMT GUGiK dla wszystkich punktów korytarza.
+  * Wykres profilu podłużnego trasy w oknie definiowania korytarza z obliczeniem przewyższeń (min, max, suma podejść, suma zejść, dystans).
+  * Opcja natychmiastowego zapisu wzbogaconego pliku GPX z rzędnymi `<ele>` do urządzeń i zegarków turystycznych.
+* **Konwerter kalibrowanych map OziExplorer (.map -> Garmin JNX / KMZ / MBTiles):**
+  * Narzędzie w menu *Narzędzia -> Konwertuj mapę OziExplorer (.map)...* oraz obsługa przeciągania plików `.map` metodą Drag & Drop na okno programu.
+  * Przeliczanie kalibracji wielopunktowej i automatyczna transformacja historycznych układów współrzędnych i Datum (Borowa Góra, Potsdam, Pulkovo 1942 do WGS84) z eliminacją przesunięcia 100–200 m w odbiornikach turystycznych.
+* **Post-processing MIP dla odbiorników Garmin (podgląd na żywo):**
+  * Filtr optymalizujący kontrast, nasycenie barw, korekcję gamma ($\gamma = 0{,}75$) oraz wyostrzanie splotowe krawędzi (Laplacian 3×3) pod kątem transflektywnych wyświetlaczy Memory-In-Pixel w pełnym słońcu.
+  * Nowe interaktywne okno strojenia parametrów z podglądem na żywo przed eksportem.
+* **Bezpośredni eksport do GeoTIFF (Avenza Maps, QField, GIS, CAD):**
+  * Eksport wielowarstwowej mapy bezpośrednio do formatu GeoTIFF z kompresją LZW lub JPEG, z georeferencją w nagłówkach TIFF oraz opcjonalnymi plikami `.tfw`, `.prj` i `.map`.
+* **Bieżący podgląd zestawu warstw z lupą rastrową w oknie głównym:**
+  * Podgląd kompozycji warstw w prawym dolnym rogu okna głównego, odświeżany asynchronicznie w tle z buforem próbek i debouncingiem.
+  * Lupa rastrowa z powiększeniami 50%, 100% (piksel w piksel), 200% i 400% do weryfikacji czytelności etykiet i nakładek.
+* **Adaptacyjny bufor korytarza wzdłuż trasy GPX/KML:**
+  * Skalowanie szerokości bufora korytarza w zależności od poziomu powiększenia (szerszy pas na przeglądowych poziomach zoomu, wąski na zbliżeniach detalicznych).
+* **Inteligentna detekcja fałszywych sukcesów WMS i monitor kafli XYZ:**
+  * Wychwytywanie pustych białych segmentów zwracanych z kodem HTTP 200 OK przez przeciążone węzły WMS oraz monitor wielokrotnych plansz blokad na serwerach kafelkowych.
+* **Automatyczne dzielenie dużych map KMZ na tomy:**
+  * Dzielenie map przekraczających limit 100 kafli odbiorników Garmin na paczki tomów (`_tom1.kmz`, `_tom2.kmz` itd.) z zachowaniem pełnej rozdzielczości.
+* **Odporność klastrów WMTS:**
+  * Obsługa aliasów `ISOK_Cien` <-> `Cieniowanie` za load balancerem Geoportalu.
+* **Stabilność i testy regresyjne:**
+  * Kompletny pakiet **771 testów automatycznych** (.NET 10 x64) weryfikujący obliczenia matematyczne, georeferencję i interfejs użytkownika.
 
 ## Zmiany w wersji 3.17
 

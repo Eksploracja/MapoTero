@@ -34,7 +34,7 @@ Instrukcję od instalacji do pierwszej gotowej mapy znajdziesz w rozdziale [Pier
 | mapę offline na iPhone lub iPada (Guru Maps) | [Mapa w telefonie i odbiorniku GPS: Guru Maps](eksport/aplikacje/#guru-maps-iphone-ipad-android) |
 | mapę w odbiorniku Garmin | [Eksport mapy](eksport/) → [KMZ dla Garmin](eksport/formaty/) |
 | mapę tylko wzdłuż trasy wycieczki | [Obszar wzdłuż trasy](obszar/korytarz/) |
-| nałożyć mapę historyczną lub cieniowanie na ortofotomapę | [Okno główne: kanapka warstw](okno-glowne/#zbiory-map-i-warstwy) · [Katalog zbiorów map](zbiory-map/) · [Nakładki i łączenie warstw](eksport/nakladki/) |
+| nałożyć mapę historyczną lub cieniowanie na ortofotomapę | [Kompozycje warstw i plastyczna rzeźba](pobieranie/kompozycje/) · [Okno główne: kanapka warstw](okno-glowne/#zbiory-map-i-warstwy) · [Nakładki i łączenie warstw](eksport/nakladki/) |
 | mapę, która zmienia się z powiększeniem | [Wielowarstwowy MBTiles](mbtiles-wielowarstwowy/) |
 | podkład pod pomiary w terenie w QField (leśnictwo, ochrona przyrody, geodezja) | [Mapa w telefonie: QField](eksport/aplikacje/#qfield-android-ios) · [Współpraca z QGIS](inne-programy/#qgis) |
 | jeden arkusz GeoTIFF do QGIS lub ArcGIS | [Scalanie segmentów](scalanie/) → [Współpraca z innymi programami](inne-programy/) |

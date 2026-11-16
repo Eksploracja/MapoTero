@@ -1,0 +1,3 @@
+https://isk.geobasis-bb.de/mapproxy/sdop/service/wms?request=GetMap&version=1.3.0&CRS=EPSG:4326&layers=
+bb_sdop
+0.5

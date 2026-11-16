@@ -38,6 +38,23 @@ Public Class Korytarz
     ''' <summary>Odległość granicy pasa od osi trasy w metrach (po każdej stronie trasy).</summary>
     Public Property SzerokoscMetry As Double = 1000
 
+    ''' <summary>Czy szerokość korytarza dostosowuje się automatycznie do poziomu powiększenia piramidy kafelków.</summary>
+    Public Property BuforAdaptacyjny As Boolean
+
+    ''' <summary>Wyznacza efektywny bufor korytarza w metrach dla zadanego poziomu powiększenia Web Mercator.</summary>
+    Public Function SzerokoscDlaPoziomu(poziomZoom As Integer) As Double
+        If Not BuforAdaptacyjny Then Return SzerokoscMetry
+        If poziomZoom <= 10 Then
+            Return Math.Max(SzerokoscMetry * 4.0, 10000.0)
+        ElseIf poziomZoom <= 12 Then
+            Return Math.Max(SzerokoscMetry * 2.0, 5000.0)
+        ElseIf poziomZoom <= 14 Then
+            Return SzerokoscMetry
+        Else
+            Return Math.Max(300.0, SzerokoscMetry * 0.5)
+        End If
+    End Function
+
     ''' <summary>Nazwa trasy (z pliku lub nazwa pliku).</summary>
     Public Property Nazwa As String = ""
 
@@ -231,6 +248,7 @@ Public Class Korytarz
         Dim sb As New StringBuilder()
         sb.Append(Naglowek).Append(ChrW(13)).Append(ChrW(10))
         sb.Append("szerokosc_m=").Append(SzerokoscMetry.ToString("0.###", ci)).Append(ChrW(13)).Append(ChrW(10))
+        If BuforAdaptacyjny Then sb.Append("bufor_adaptacyjny=1").Append(ChrW(13)).Append(ChrW(10))
         sb.Append("nazwa=").Append(Nazwa.Replace(ChrW(13), " "c).Replace(ChrW(10), " "c)).Append(ChrW(13)).Append(ChrW(10))
         For Each l In Linie
             sb.Append("linia").Append(ChrW(13)).Append(ChrW(10))
@@ -252,6 +270,8 @@ Public Class Korytarz
             If t.StartsWith("szerokosc_m=", StringComparison.Ordinal) Then
                 Dim w As Double
                 If Liczba(t.Substring(12), w) AndAlso w > 0 Then k.SzerokoscMetry = w
+            ElseIf t = "bufor_adaptacyjny=1" Then
+                k.BuforAdaptacyjny = True
             ElseIf t.StartsWith("nazwa=", StringComparison.Ordinal) Then
                 k.Nazwa = t.Substring(6)
             ElseIf t = "linia" Then
@@ -343,12 +363,12 @@ Public Class Korytarz
     ''' Segmenty siatki przecinające korytarz: zbiór kluczy (wiersz - 1) * LiczbaKolumn + (kolumna - 1),
     ''' czyli numer kolejny segmentu pomniejszony o 1 (Siatka.NumerKolejny - 1).
     ''' </summary>
-    Public Function Segmenty(siatka As Siatka, uklad As UkladWspolrzednych) As HashSet(Of Integer)
+    Public Function Segmenty(siatka As Siatka, uklad As UkladWspolrzednych, Optional szerokoscM As Double = -1) As HashSet(Of Integer)
         Dim wynik As New HashSet(Of Integer)
         If siatka Is Nothing OrElse Not siatka.Poprawna OrElse siatka.ZbytDuza OrElse Not Poprawny Then Return wynik
         Dim r = UtworzRzutowanie(uklad)
         Dim kolumny As Integer = siatka.LiczbaKolumn, wiersze As Integer = siatka.LiczbaWierszy
-        Dim d As Double = Math.Max(0, SzerokoscMetry)
+        Dim d As Double = Math.Max(0, If(szerokoscM >= 0, szerokoscM, SzerokoscMetry))
 
         'siatka w metrach: lewy dolny narożnik i boki segmentu
         Dim x0 As Double = siatka.Obszar.XDol * r.SkalaX, y0 As Double = siatka.Obszar.YLewy * r.SkalaY
@@ -481,6 +501,41 @@ Public Class Korytarz
         Next
         Return True
     End Function
+
+    ''' <summary>Zapisuje trasę w formacie GPX 1.1 z przypisanymi wysokościami n.p.m.</summary>
+    Public Shared Sub ZapiszGpxZWysokosciami(sciezka As String, nazwa As String, linie As IList(Of List(Of PunktGeo)), linieWysokosci As IList(Of IList(Of Double)))
+        Dim ci = CultureInfo.InvariantCulture
+        Dim sb As New StringBuilder()
+        sb.AppendLine("<?xml version=""1.0"" encoding=""UTF-8""?>")
+        sb.AppendLine("<gpx version=""1.1"" creator=""MapoTero"" xmlns=""http://www.topografix.com/GPX/1/1"">")
+        sb.AppendLine("  <metadata>")
+        sb.AppendLine("    <name>" & Security.SecurityElement.Escape(nazwa) & "</name>")
+        sb.AppendLine("  </metadata>")
+        sb.AppendLine("  <trk>")
+        sb.AppendLine("    <name>" & Security.SecurityElement.Escape(nazwa) & "</name>")
+
+        For i = 0 To linie.Count - 1
+            Dim l = linie(i)
+            Dim hList = If(linieWysokosci IsNot Nothing AndAlso i < linieWysokosci.Count, linieWysokosci(i), Nothing)
+            sb.AppendLine("    <trkseg>")
+            For j = 0 To l.Count - 1
+                Dim p = l(j)
+                Dim h = If(hList IsNot Nothing AndAlso j < hList.Count, hList(j), 0.0)
+                sb.Append("      <trkpt lat=""").Append(p.Szerokosc.ToString("0.000000", ci)).
+                   Append(""" lon=""").Append(p.Dlugosc.ToString("0.000000", ci)).Append(""">")
+                If h <> 0.0 Then
+                    sb.Append("<ele>").Append(h.ToString("0.0", ci)).Append("</ele>")
+                End If
+                sb.AppendLine("</trkpt>")
+            Next
+            sb.AppendLine("    </trkseg>")
+        Next
+
+        sb.AppendLine("  </trk>")
+        sb.AppendLine("</gpx>")
+
+        File.WriteAllText(sciezka, sb.ToString(), New UTF8Encoding(False))
+    End Sub
 
 #End Region
 
