@@ -380,6 +380,56 @@ Public Class EksportTesty
     End Sub
 
     <Fact>
+    Public Sub TaSamaSiatkaPikseli_PorownujeZasiegIPiksel()
+        Dim u = UkladWspolrzednych.PL1992
+        Assert.True(EksportMapy.TaSamaSiatkaPikseli(Siatka2x2(), u, Siatka2x2(), u))
+        'te same wymiary (2 x 2 segmenty po 256 px), ale siatka przesunięta o 128 m na wschód
+        Dim przesunieta As New Siatka(New Zasieg(487000, 637128, 487512, 637640), 1.0, 256)
+        Assert.False(EksportMapy.TaSamaSiatkaPikseli(przesunieta, u, Siatka2x2(), u))
+        'te same wymiary w pikselach, ale inny rozmiar piksela
+        Dim innyPiksel As New Siatka(New Zasieg(487000, 637000, 488024, 638024), 2.0, 256)
+        Assert.False(EksportMapy.TaSamaSiatkaPikseli(innyPiksel, u, Siatka2x2(), u))
+    End Sub
+
+    <Fact>
+    Public Sub EksportGeoTiffNakladkaPrzesunietaIZapisPasami()
+        'nakładka o tych samych wymiarach siatki, przesunięta o 128 m na wschód, musi trafić we właściwe miejsce;
+        'mały budżet pamięci wymusza zapis pasami po kilkadziesiąt wierszy
+        Dim folder = NowyFolder()
+        Dim folderNakl = NowyFolder()
+        Dim budzet = EksportMapy.BudzetPamieciGeoTiff
+        Try
+            UtworzSegmenty(folder, "png", Sub(g, w, k) g.Clear(Color.Red))
+            UtworzSegmenty(folderNakl, "png", Sub(g, w, k) g.Clear(Color.Blue))
+            Dim plikTif = folder & "mapa.tif"
+            Dim z = Zadanie(RodzajEksportu.GeoTiff, Zrodlo(folder, "png"), plikTif)
+            z.GeoTiffJpeg = False
+            z.GeoTiffPlikiCad = False
+            Dim siatkaNakl As New Siatka(New Zasieg(487000, 637128, 487512, 637640), 1.0, 256)
+            z.Nakladki.Add(New WarstwaEksportu With {
+                .Zrodlo = New ZrodloSegmentow(folderNakl, "_", StylNumeracji.WierszKolumna, "png", siatkaNakl),
+                .Uklad = UkladWspolrzednych.PL1992, .Krycie = 1})
+            EksportMapy.BudzetPamieciGeoTiff = 512L * 7 * 50
+
+            EksportMapy.Eksportuj(z, Nothing, CancellationToken.None)
+
+            Using bmp As New Bitmap(plikTif)
+                Assert.Equal(512, bmp.Width)
+                Assert.Equal(512, bmp.Height)
+                For Each y In {10, 49, 50, 300, 511}
+                    Assert.Equal(Color.Red.ToArgb(), bmp.GetPixel(60, y).ToArgb())
+                    Assert.Equal(Color.Blue.ToArgb(), bmp.GetPixel(200, y).ToArgb())
+                    Assert.Equal(Color.Blue.ToArgb(), bmp.GetPixel(500, y).ToArgb())
+                Next
+            End Using
+        Finally
+            EksportMapy.BudzetPamieciGeoTiff = budzet
+            Usun(folder)
+            Usun(folderNakl)
+        End Try
+    End Sub
+
+    <Fact>
     Public Sub EksportGeoTiffZKorekcjaMip()
         Dim folder = NowyFolder()
         Try

@@ -25,6 +25,7 @@ Public Class Nakladanie_Map
 
     Private Sub Nakladanie_Map_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         Me.Location = New Point(200, 150)
+        PomocProgramu.DodajPrzyciskPomocy(Me, TematPomocy.NakladanieMap, 15, 455)
 
         'foldery zapamiętane w lastsettings.txt, a gdy ich brak - domyślne podkatalogi folderu download
         txtFolderDolna.Text = If(Ustawienia.FolderWarstwy1 <> "", Ustawienia.FolderWarstwy1, FolderDownload & "dolna\")

@@ -2,6 +2,7 @@
 'This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License
 'as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
+Imports System.Drawing
 Imports System.Reflection
 Imports System.Threading
 Imports System.Windows.Forms
@@ -86,6 +87,108 @@ Public Class PodpowiedziTesty
                             onMouseMove.Invoke(lst, {New MouseEventArgs(MouseButtons.None, 0, 50, 50, 0)})
                             onMouseLeave.Invoke(lst, {EventArgs.Empty})
                         End Using
+                    End Using
+                Catch ex As Exception
+                    blad = ex
+                End Try
+            End Sub)
+        t.SetApartmentState(ApartmentState.STA)
+        t.Start()
+        t.Join()
+        If blad IsNot Nothing Then Throw blad
+    End Sub
+
+    <Fact>
+    Public Sub TestBtnSzukajDzialkiWForm1()
+        Dim blad As Exception = Nothing
+        Dim t As New Thread(
+            Sub()
+                Try
+                    Application.EnableVisualStyles()
+                    Using f As New MapoTero.Form1()
+                        f.Show()
+                        Application.DoEvents()
+                        Dim btn = DirectCast(f.Controls("btnSzukajDzialki"), Button)
+                        Assert.NotNull(btn)
+                        Assert.Equal("", btn.Text)
+                        Assert.NotNull(btn.Image)
+                        Assert.Equal(16, btn.Image.Width)
+                        Assert.Equal(16, btn.Image.Height)
+
+                        Dim wlasnosc = GetType(MapoTero.Form1).GetProperty("ToolTip1", BindingFlags.Instance Or BindingFlags.NonPublic Or BindingFlags.Public)
+                        Dim tt = DirectCast(wlasnosc.GetValue(f), ToolTip)
+                        Dim tip = tt.GetToolTip(btn)
+                        Assert.Contains("Wyszukaj miejscowość", tip)
+                    End Using
+                Catch ex As Exception
+                    blad = ex
+                End Try
+            End Sub)
+        t.SetApartmentState(ApartmentState.STA)
+        t.Start()
+        t.Join()
+        If blad IsNot Nothing Then Throw blad
+    End Sub
+
+    <Fact>
+    Public Sub FormEksport_RozmiarBazowyObejmujeKontrolkiPoSkalowaniu()
+        'okno jest skalowane do bieżącej czcionki już w konstruktorze; rozmiar bazowy, do którego DopasujDoWysokosciEkranu
+        'ustawia okno, musi obejmować wszystkie kontrolki (dawniej 510 x 788 z projektu obcinało prawą i dolną część)
+        Dim blad As Exception = Nothing
+        Dim t As New Thread(
+            Sub()
+                Try
+                    Using frm As New MapoTero.FormEksport()
+                        Dim typ = GetType(MapoTero.FormEksport)
+                        Dim flagi = Reflection.BindingFlags.Instance Or Reflection.BindingFlags.NonPublic
+                        Dim szer = CInt(typ.GetProperty("BazowaSzerokoscKlienta", flagi).GetValue(frm))
+                        Dim wys = CInt(typ.GetProperty("BazowaWysokoscKlienta", flagi).GetValue(frm))
+                        Dim skala = PomocProgramu.SkalaProjektanta(frm)
+                        Assert.Equal(CInt(Math.Round(510 * skala.Width)), szer)
+                        For Each c As Control In frm.Controls
+                            Assert.True(c.Right <= szer + 1, c.Name & " wychodzi poza szerokość " & szer & ": " & c.Right)
+                        Next
+                        Assert.True(wys >= 788)
+                    End Using
+                Catch ex As Exception
+                    blad = ex
+                End Try
+            End Sub)
+        t.SetApartmentState(ApartmentState.STA)
+        t.Start()
+        t.Join()
+        If blad IsNot Nothing Then Throw blad
+    End Sub
+
+    <Fact>
+    Public Sub TestFormSzukajDzialkiZakladkiIPomoc()
+        Dim blad As Exception = Nothing
+        Dim t As New Thread(
+            Sub()
+                Try
+                    Using frm As New MapoTero.FormSzukajDzialki()
+                        frm.Show()
+                        Application.DoEvents()
+
+                        Dim tab = DirectCast(frm.Controls("tabSzukaj"), TabControl)
+                        Assert.NotNull(tab)
+                        Assert.Equal(2, tab.TabCount)
+                        Assert.Equal("Miejscowość / Adres", tab.TabPages(0).Text)
+                        Assert.Equal("Działka katastralna (ULDK)", tab.TabPages(1).Text)
+
+                        Dim btnPomoc = frm.Controls("btnPomoc")
+                        Assert.NotNull(btnPomoc)
+                        Assert.Equal("Pomoc", btnPomoc.Text)
+                        'położenie z projektu skalowane razem z oknem - przycisk w oknie i nie zasłania innych kontrolek
+                        Assert.True(frm.ClientRectangle.Contains(btnPomoc.Bounds), "przycisk Pomoc poza oknem: " & btnPomoc.Bounds.ToString())
+                        For Each c As Control In frm.Controls
+                            If c Is btnPomoc OrElse Not c.Visible Then Continue For
+                            Assert.False(c.Bounds.IntersectsWith(btnPomoc.Bounds), "przycisk Pomoc zasłania " & c.Name)
+                        Next
+
+                        Dim btnWybierz = frm.Controls("btnWybierz")
+                        Assert.NotNull(btnWybierz)
+                        Assert.Equal("Pokaż na mapie", btnWybierz.Text)
                     End Using
                 Catch ex As Exception
                     blad = ex

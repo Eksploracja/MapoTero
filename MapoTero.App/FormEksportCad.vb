@@ -35,6 +35,7 @@ Public Class FormEksportCad
     Private _folderWyniku As String = ""
 
     Private Sub FormEksportCad_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+        PomocProgramu.DodajPrzyciskPomocy(Me, TematPomocy.EksportCad)
         'opcje zapamiętane z poprzedniego eksportu (lastsettings.txt)
         chkObrys.Checked = Ustawienia.CadObrys
         chkSiatka.Checked = Ustawienia.CadSiatka
@@ -46,7 +47,10 @@ Public Class FormEksportCad
         chkScr.Checked = Ustawienia.CadScr
         chkLsp.Checked = Ustawienia.CadLsp
         _folder = Form1.FolderSesji
-        If _folder = "" OrElse File.Exists(_folder & "conf.txt") = False Then _folder = FolderDownload
+        If _folder = "" OrElse File.Exists(_folder & "conf.txt") = False Then
+            Dim najnowszy = KonfiguracjaSesji.NajnowszyFolderSesji(FolderDownload)
+            _folder = If(Not String.IsNullOrEmpty(najnowszy), najnowszy, FolderDownload)
+        End If
         WczytajSesje()
     End Sub
 

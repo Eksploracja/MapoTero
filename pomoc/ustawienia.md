@@ -41,6 +41,7 @@ Okienko grupuje zarówno parametry zapisywane dla konkretnej sesji pobierania (`
 * **OK**: zatwierdza przedrostek nazw segmentów, stosuje zmiany od razu i zapisuje je w `lastsettings.txt`.
 * **Anuluj** (lub zamknięcie okna krzyżykiem): odrzuca wszystkie zmiany wprowadzone od otwarcia okna.
 * **Przywróć domyślne...**: po potwierdzeniu przywraca ustawienia fabryczne (widok mapy w oknie głównym, domyślny zbiór *skany_map_topograficznych*, bok `2000 px`, piksel `2` oraz układ `PL-1992`). Tej operacji nie można cofnąć przyciskiem **Anuluj**.
+* **Pomoc** (oraz klawisz <kbd>F1</kbd>): otwiera okno podręcznej pomocy ze zwięzłym opisem wszystkich sekcji i bezpośrednim odnośnikiem do tego rozdziału.
 
 {: .informacja }
 W trakcie pobierania okno *Ustawienia* jest zablokowane, aby nie zmienić formatu ani numeracji w trakcie trwania sesji.

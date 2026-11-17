@@ -519,4 +519,36 @@ Public Class PobieranieTesty
         End Using
     End Function
 
+    <Fact>
+    Public Async Function WznowieniePobierania_DociagaTylkoBrakujaceSegmenty() As Task
+        Dim folder = NowyFolder()
+        Dim png = ObrazPng(64)
+        Dim zapytania As Integer = 0
+        Using serwer As New SerwerTestowy(
+            Function(wiersz)
+                Interlocked.Increment(zapytania)
+                Return Tuple.Create(200, "image/png", png)
+            End Function)
+            Try
+                ' Utwórz 5 z 6 segmentów w folderze sesji (np. _01_01, _01_02, _01_03, _02_01, _02_02)
+                File.WriteAllBytes(Path.Combine(folder, "_01_01.png"), png)
+                File.WriteAllBytes(Path.Combine(folder, "_01_02.png"), png)
+                File.WriteAllBytes(Path.Combine(folder, "_01_03.png"), png)
+                File.WriteAllBytes(Path.Combine(folder, "_02_01.png"), png)
+                File.WriteAllBytes(Path.Combine(folder, "_02_02.png"), png)
+
+                Dim z = Zadanie(serwer.Adres, folder)
+                z.Odswiez = False
+                Dim wynik = Await PobieranieSegmentow.PobierzAsync(z, Nothing, CancellationToken.None)
+
+                Assert.Equal(6, wynik.Wszystkie)
+                Assert.Equal(0, wynik.Nieudane)
+                Assert.False(wynik.Przerwano)
+                Assert.Equal(1, zapytania)
+            Finally
+                Usun(folder)
+            End Try
+        End Using
+    End Function
+
 End Class

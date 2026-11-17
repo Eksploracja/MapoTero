@@ -29,6 +29,10 @@ Public Class Form2
     ''' <summary>Blokuje reakcję na zdarzenia kontrolek podczas ich wypełniania.</summary>
     Private _wypelnianie As Boolean
 
+    Private Sub Form2_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+        PomocProgramu.DodajPrzyciskPomocy(Me, TematPomocy.Ustawienia, 202, 433)
+    End Sub
+
     Private Sub Form2_VisibleChanged(sender As Object, e As EventArgs) Handles MyBase.VisibleChanged
         If Me.Visible Then WypelnijKontrolki()
     End Sub

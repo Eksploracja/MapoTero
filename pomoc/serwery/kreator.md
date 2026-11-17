@@ -106,6 +106,8 @@ Dla usług **XYZ / TMS** pojawiają się dodatkowe pola:
 Przycisk **Sprawdź warstwę...** pobiera na próbę pojedynczy kafelek `256 × 256 px` (z okolicy aktualnego środka mapy
 w oknie głównym) i wyświetla go w ramce *Podgląd próbki*. To najszybszy sposób, aby upewnić się przed zapisem, że serwer działa i rysuje treść.
 
+Przycisk **Pomoc** w prawym dolnym rogu okna (oraz klawisz <kbd>F1</kbd>) otwiera podręczną pomoc ze skrótem informacji o dodawaniu serwerów i odnośnikiem do tego rozdziału.
+
 ---
 
 ## Zapis zbioru map

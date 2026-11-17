@@ -36,6 +36,7 @@ Public Class FormKorytarz
     ''' <param name="biezacy">Korytarz bieżącej sesji (zmiana szerokości pasa bez ponownego wskazywania pliku) albo Nothing.</param>
     Public Sub New(biezacy As Korytarz)
         InitializeComponent()
+        PomocProgramu.DodajPrzyciskPomocy(Me, TematPomocy.Korytarz)
         'bufor adaptacyjny ukryty: stan pola nie był nigdzie odczytywany, a eksport piramidy nie zna korytarza -
         'szerszy pas na małych powiększeniach wymagałby segmentów, których program nie pobrał (decyzje.md, 2026-11-16)
         chkBuforAdaptacyjny.Visible = False

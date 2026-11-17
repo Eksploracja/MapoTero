@@ -119,7 +119,9 @@ Public NotInheritable Class Georeferencja
 
     ''' <summary>Stopnie i minuty dziesiętne w formacie OziExplorera, np. "52, 21.123456".</summary>
     Public Shared Function StopnieMinuty(wartosc As Double) As String
-        Dim w As Double = Math.Round(wartosc, 8)
+        'wartość bezwzględna - półkulę (N/S, E/W) zapisuje osobne pole pliku .map; dla liczb ujemnych Math.Floor dawał
+        'np. "-1, 30" zamiast "0, 30" z literą W
+        Dim w As Double = Math.Round(Math.Abs(wartosc), 8)
         Dim st As Double = Math.Floor(w)
         Dim min As Double = Math.Round((w - st) * 60, 6)
         If min >= 60.0 Then
@@ -154,7 +156,9 @@ Public NotInheritable Class Georeferencja
             Dim nr As String = "Point" & i.ToString("00", Ci)
             If i <= 4 Then
                 sb.Append(nr).Append(",xy,").Append(px(i - 1)).Append(",in, deg,  ").Append(StopnieMinuty(n(i - 1).Szerokosc)).
-                   Append(",N,  ").Append(StopnieMinuty(n(i - 1).Dlugosc)).Append(",E, grid,   ,           ,           ,N").Append(Nl)
+                   Append(If(n(i - 1).Szerokosc < 0, ",S,  ", ",N,  ")).Append(StopnieMinuty(n(i - 1).Dlugosc)).
+                   Append(If(n(i - 1).Dlugosc < 0, ",W", ",E")).Append(", grid,   ,           ,           ,").
+                   Append(If(n(i - 1).Szerokosc < 0, "S", "N")).Append(Nl)
             Else
                 sb.Append(nr).Append(",xy,     ,     ,in, deg,    ,        ,N,    ,        ,E, grid,   ,           ,           ,N").Append(Nl)
             End If

@@ -285,8 +285,34 @@ Public Class Form1
         FolderProgramu = FolderProgramu.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
         FolderDanych = UstalFolderDanych(FolderProgramu)
         Directory.CreateDirectory(FolderDownload)
-        Ustawienia.FolderSegmentow = FolderDownload
-        FolderSesji = FolderDownload
+
+        'wyszukanie folderu sesji: zapamiętany w lastsettings.txt, najnowszy podkatalog w download/ albo fallback na download/
+        Dim folderDoWczytania As String = ""
+        If File.Exists(PlikLastsettings) Then
+            Try
+                Dim u = PlikUstawien.Wczytaj(PlikLastsettings, KodowanieSystemowe())
+                Dim zapamietany = u.Tekst("folder segmentow", "")
+                If Not String.IsNullOrWhiteSpace(zapamietany) AndAlso Directory.Exists(zapamietany) AndAlso File.Exists(Path.Combine(zapamietany, "conf.txt")) Then
+                    folderDoWczytania = FolderZUkosnikiem(zapamietany)
+                End If
+            Catch
+            End Try
+        End If
+
+        If String.IsNullOrEmpty(folderDoWczytania) Then
+            folderDoWczytania = KonfiguracjaSesji.NajnowszyFolderSesji(FolderDownload)
+        End If
+
+        Dim nowaSesja As Boolean = String.IsNullOrEmpty(folderDoWczytania) OrElse File.Exists(Path.Combine(folderDoWczytania, "conf.txt")) = False
+        If nowaSesja Then
+            FolderSesji = FolderDownload
+            btnScalanie.Enabled = False
+            mapa.Position = New PointLatLng(52.3, 19.2)
+            mapa.Zoom = 6
+        Else
+            FolderSesji = folderDoWczytania
+            btnScalanie.Enabled = True
+        End If
 
         'serwery WMS (np. Geoportal) wymagają TLS 1.2 - na starszych wersjach Windows nie jest on domyślnie włączony;
         'domyślnie .NET Framework ogranicza też liczbę jednoczesnych połączeń z serwerem do 2
@@ -309,6 +335,7 @@ Public Class Form1
 
         UstawEdycjeXY(False)
         UstawWidokZaznaczeniaWgs(False)
+        InicjalizujPrzyciskSzukaj()
         PrzygotujListeWarstw()
         AddHandler _timerPodgladu.Tick, AddressOf TimerPodgladu_Tick
 
@@ -318,14 +345,7 @@ Public Class Form1
         Next
         _ustawianieUkladu = False
 
-        'wczytywanie ustawień: najpierw conf.txt z folderu domyślnego, potem lastsettings.txt
-        Dim nowaSesja As Boolean = File.Exists(FolderDownload & "conf.txt") = False
-        If nowaSesja Then
-            btnScalanie.Enabled = False
-            mapa.Position = New PointLatLng(52.3, 19.2)
-            mapa.Zoom = 6
-        End If
-
+        'wczytywanie parametrów aktywnej sesji z conf.txt, potem ustawień programu z lastsettings.txt
         WczytajConf(False)
         WczytajLastsettings(nowaSesja)
 
@@ -375,9 +395,11 @@ Public Class Form1
 #Region "Rozmiar okna"
 
     ''' <summary>
-    ''' Najmniejszy rozmiar okna i rozmiar startowy dopasowany do ekranu. Lista warstw WMS rozciąga się razem z oknem
-    ''' (kotwice w projekcie formularza), więc okno można zmniejszyć o tyle, o ile da się skrócić tę listę; na ekranie
-    ''' niższym nawet od tego prawy panel jest przewijany.
+    ''' Najmniejszy rozmiar okna i rozmiar startowy dopasowany do ekranu. Okno domyślnie otwiera się jako
+    ''' zmaksymalizowane (Me.WindowState = FormWindowState.Maximized), a po przywróceniu zachowuje dopasowany
+    ''' rozmiar bazowy. Lista warstw WMS rozciąga się razem z oknem (kotwice w projekcie formularza),
+    ''' więc okno można zmniejszyć o tyle, o ile da się skrócić tę listę; na ekranie niższym nawet od tego
+    ''' prawy panel jest przewijany.
     ''' </summary>
     Private Sub UstawRozmiarOkna()
         Dim minWysokoscListy As Integer = tvWarstwy.ItemHeight * MinWierszyListyWarstw + (tvWarstwy.Height - tvWarstwy.ClientSize.Height)
@@ -395,6 +417,7 @@ Public Class Form1
         Dim ekran As Rectangle = Screen.FromControl(Me).WorkingArea
         Me.MinimumSize = New Size(Math.Min(Me.Width, ekran.Width), Math.Min(Me.Height - zapasListy, ekran.Height))
         Me.Size = New Size(Math.Min(Me.Width, ekran.Width), Math.Min(Me.Height, ekran.Height))
+        Me.WindowState = FormWindowState.Maximized
     End Sub
 
     ''' <summary>Szerokość prawego panelu zapamiętana w lastsettings.txt (0 - domyślna).</summary>
@@ -542,7 +565,7 @@ Public Class Form1
         Dim folder As String = FolderSesji
         If pytajOFolder Then
             'Anuluj - bez zmian (dawniej ponownie wczytywany był conf.txt bieżącej sesji, co kasowało niezapisane zmiany)
-            dlgFolder.SelectedPath = FolderDownload
+            dlgFolder.SelectedPath = If(Directory.Exists(FolderSesji), FolderSesji, FolderDownload)
             If dlgFolder.ShowDialog <> DialogResult.OK Then Exit Sub
             folder = FolderZUkosnikiem(dlgFolder.SelectedPath)
             If File.Exists(folder & "conf.txt") = False Then
@@ -716,19 +739,44 @@ Public Class Form1
     End Function
 
     ''' <summary>
-    ''' Przed pobieraniem: folder z segmentami innej sesji. Segmenty o tych samych nazwach zostałyby uznane za pobrane
-    ''' i trafiły do scalonej mapy, choć przedstawiają inny teren - nowa sesja zapisywana jest wtedy w nowym podfolderze.
+    ''' Przed pobieraniem: przygotowanie dedykowanego podfolderu sesji w katalogu download.
+    ''' Każda nowa sesja pobierania otrzymuje od początku własny podkatalog sesji (np. download\sesja_ortofotomapa_...),
+    ''' dzięki czemu pliki nie zaśmiecają głównego folderu download, a warstwy nie kolidują ze sobą.
+    ''' Wznowienie tej samej sesji (identyczna siatka i parametry) kontynuuje zapis w jej podfolderze.
+    ''' Gdy w bieżącym podfolderze znajdują się segmenty innej sesji, tworzony jest nowy podfolder.
     ''' False - pobieranie anulowane.
     ''' </summary>
     Private Function PrzygotujFolderSesji() As Boolean
+        Dim czyGlownyDownload As Boolean = String.IsNullOrWhiteSpace(FolderSesji) OrElse
+            String.Equals(Path.GetFullPath(FolderSesji).TrimEnd("\"c, "/"c),
+                          Path.GetFullPath(FolderDownload).TrimEnd("\"c, "/"c),
+                          StringComparison.OrdinalIgnoreCase)
+
+        If czyGlownyDownload Then
+            ' Nowa sesja startująca z folderu download - od początku tworzymy dedykowany podkatalog sesji
+            Return UtworzPodfolderSesji()
+        End If
+
+        ' FolderSesji wskazuje podkatalog: sprawdzamy, czy wznawiamy tę samą sesję, czy parametry się zmieniły
         Dim opis As String = ""
         Dim liczba As Integer = SegmentyInnejSesji(FolderSesji, opis)
-        If liczba = 0 Then Return True
-        Dim nowy As String = FolderDownload & "sesja_" & Date.Now.ToString("yyyy-MM-dd_HHmmss", Globalization.CultureInfo.InvariantCulture) & "\"
-        Dim odp = MessageBox.Show("Folder " & FolderSesji & " zawiera segmenty innej sesji pobierania (" & opis & ")." & vbCrLf &
+        If liczba = 0 Then
+            'conf.txt innej mapy bez pobranych segmentów (np. pobieranie przerwane na starcie): nowa mapa dostaje własny
+            'podfolder - dawniej trafiała do folderu nazwanego od poprzedniej mapy i nadpisywała jego conf.txt
+            If opis <> "" AndAlso File.Exists(FolderSesji & "conf.txt") Then
+                Return UtworzPodfolderSesji()
+            End If
+            ' Ta sama siatka / parametry (lub pusty podkatalog) - wznowienie pobierania w tym samym folderze
+            Return True
+        End If
+
+        ' Inna siatka / warstwy - przygotowanie nowego podfolderu dla nowej sesji
+        Dim nowaNazwa = KonfiguracjaSesji.ProponowanaNazwaFolderuSesji(ZbiorMap, Date.Now)
+        Dim nowy As String = Path.Combine(FolderDownload, nowaNazwa) & "\"
+        Dim odp = MessageBox.Show("Folder bieżącej sesji " & FolderSesji & " zawiera segmenty innej mapy (" & opis & ")." & vbCrLf &
                                   "Segmenty o tych samych nazwach zostałyby uznane za już pobrane i trafiłyby do scalonej mapy." & vbCrLf & vbCrLf &
-                                  "Tak - pobierz nową sesję do folderu:" & vbCrLf & nowy & vbCrLf & vbCrLf &
-                                  "Nie - anuluj pobieranie (aby wznowić poprzednią sesję, wczytaj jej ustawienia z menu Sesja pobierania).",
+                                  "Tak - pobierz nową mapę do osobnego podfolderu sesji:" & vbCrLf & nowy & vbCrLf & vbCrLf &
+                                  "Nie - anuluj pobieranie (aby powrócić do poprzedniej sesji, wczytaj jej ustawienia z menu Sesja pobierania).",
                                   "Folder innej sesji", MessageBoxButtons.YesNo, MessageBoxIcon.Warning)
         If odp <> DialogResult.Yes Then
             Komunikat("Anulowano pobieranie - folder " & FolderSesji & " zawiera segmenty innej sesji.", Color.Red)
@@ -736,13 +784,27 @@ Public Class Form1
         End If
         Try
             Directory.CreateDirectory(nowy)
+            FolderSesji = nowy
+            Return True
         Catch ex As Exception
             Komunikat("Nie udało się utworzyć folderu " & nowy & ": " & ex.Message, Color.Red)
             Return False
         End Try
-        FolderSesji = nowy
-        Return True
     End Function
+    ''' <summary>Tworzy nowy podfolder sesji w download i ustawia go jako folder sesji. False - nie udało się.</summary>
+    Private Function UtworzPodfolderSesji() As Boolean
+        Dim nazwaFolderu = KonfiguracjaSesji.ProponowanaNazwaFolderuSesji(ZbiorMap, Date.Now)
+        Dim nowyFolder As String = Path.Combine(FolderDownload, nazwaFolderu) & "\"
+        Try
+            Directory.CreateDirectory(nowyFolder)
+            FolderSesji = nowyFolder
+            Return True
+        Catch ex As Exception
+            Komunikat("Nie udało się utworzyć folderu sesji " & nowyFolder & ": " & ex.Message, Color.Red)
+            Return False
+        End Try
+    End Function
+
     Private Sub ZapiszToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles ZapiszToolStripMenuItem.Click
         If PobieranieTrwa("Zapisanie ustawień sesji w innym folderze") Then Exit Sub
         ZapiszConf(True)
@@ -2387,10 +2449,18 @@ Public Class Form1
         If _przeciaganyUchwyt IsNot Nothing AndAlso e.Button = MouseButtons.Left Then ZakonczPrzeciaganie(anuluj:=False)
     End Sub
 
-    ''' <summary>Esc podczas przeciągania uchwytu przywraca zasięg sprzed przeciągania.</summary>
+    ''' <summary>Skróty klawiaturowe okna głównego (Esc dla uchwytu, Ctrl+F wyszukiwanie, Ctrl+D działki).</summary>
     Protected Overrides Function ProcessCmdKey(ByRef msg As Message, keyData As Keys) As Boolean
         If keyData = Keys.Escape AndAlso _przeciaganyUchwyt IsNot Nothing Then
             ZakonczPrzeciaganie(anuluj:=True)
+            Return True
+        End If
+        If keyData = (Keys.Control Or Keys.F) Then
+            OtworzWyszukiwarke(0)
+            Return True
+        End If
+        If keyData = (Keys.Control Or Keys.D) Then
+            OtworzWyszukiwarke(1)
             Return True
         End If
         Return MyBase.ProcessCmdKey(msg, keyData)
@@ -2875,14 +2945,24 @@ Public Class Form1
             Exit Sub
         End If
 
-        Dim czyGlownyDownload As Boolean = String.Equals(Path.GetFullPath(folder).TrimEnd("\"c, "/"c),
-                                                         Path.GetFullPath(FolderDownload).TrimEnd("\"c, "/"c),
-                                                         StringComparison.OrdinalIgnoreCase)
+        Dim pelnyFolder As String = Path.GetFullPath(folder).TrimEnd("\"c, "/"c)
+        Dim pelnyDownload As String = Path.GetFullPath(FolderDownload).TrimEnd("\"c, "/"c)
+        Dim czyGlownyDownload As Boolean = String.Equals(pelnyFolder, pelnyDownload, StringComparison.OrdinalIgnoreCase)
+        'cały folder tylko wtedy, gdy jest podfolderem download (folder utworzony przez program); folder sesji wskazany
+        'przez użytkownika (np. D:\GIS\Projekt) mógł zawierać jego inne pliki i podfoldery - usuwane są tylko pliki
+        Dim czyPodfolderDownload As Boolean = Not czyGlownyDownload AndAlso
+            pelnyFolder.StartsWith(pelnyDownload & Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase)
+        Dim tylkoPliki As Boolean = Not czyPodfolderDownload
 
         Dim komunikatPytania As String
         If czyGlownyDownload Then
             komunikatPytania = "Czy na pewno przenieść do Kosza pliki bieżącej sesji z folderu download?" & vbCrLf & vbCrLf &
                                "Pliki segmentów i konfiguracji zostaną przeniesione do Kosza (podkatalogi innych sesji pozostaną nienaruszone)."
+        ElseIf tylkoPliki Then
+            komunikatPytania = "Czy na pewno przenieść do Kosza pliki bieżącej sesji z folderu" & vbCrLf & vbCrLf &
+                               folder & "?" & vbCrLf & vbCrLf &
+                               "Folder leży poza folderem download, więc zostaną usunięte tylko pliki leżące bezpośrednio w nim; " &
+                               "podfoldery i sam folder pozostaną."
         Else
             komunikatPytania = "Czy na pewno przenieść do Kosza folder bieżącej sesji?" & vbCrLf & vbCrLf &
                                folder & vbCrLf & vbCrLf &
@@ -2893,16 +2973,18 @@ Public Class Form1
                                                  MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2)
         If odp = DialogResult.Yes Then
             Try
-                If czyGlownyDownload Then
+                If tylkoPliki Then
                     Dim usuniete As Integer = 0
                     For Each plik In Directory.GetFiles(folder)
                         FileIO.FileSystem.DeleteFile(plik, FileIO.UIOption.OnlyErrorDialogs, FileIO.RecycleOption.SendToRecycleBin)
                         usuniete += 1
                     Next
-                    Komunikat("Przeniesiono do Kosza pliki bieżącej sesji (" & usuniete & " plików) z folderu download", Color.Green)
+                    btnScalanie.Enabled = False
+                    Komunikat("Przeniesiono do Kosza pliki bieżącej sesji (" & usuniete & " plików) z folderu " & folder, Color.Green)
                 Else
                     FileIO.FileSystem.DeleteDirectory(folder, FileIO.UIOption.OnlyErrorDialogs, FileIO.RecycleOption.SendToRecycleBin)
                     FolderSesji = FolderDownload
+                    btnScalanie.Enabled = False
                     Komunikat("Przeniesiono do Kosza folder sesji: " & folder, Color.Green)
                 End If
             Catch ex As Exception
@@ -2998,11 +3080,11 @@ Public Class Form1
     End Sub
 
     Private Sub ZnajdzDzialkeToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles ZnajdzDzialkeToolStripMenuItem.Click
-        OtworzWyszukiwarkeDzialek()
+        OtworzWyszukiwarke()
     End Sub
 
     Private Sub btnSzukajDzialki_Click(sender As Object, e As EventArgs) Handles btnSzukajDzialki.Click
-        OtworzWyszukiwarkeDzialek()
+        OtworzWyszukiwarke()
     End Sub
 
     Private Sub KonwertujOziToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles KonwertujOziToolStripMenuItem.Click
@@ -3011,13 +3093,77 @@ Public Class Form1
         End Using
     End Sub
 
-    Private Sub OtworzWyszukiwarkeDzialek()
-        If PobieranieTrwa("Wyszukiwanie działki") Then Exit Sub
-        Using frm As New FormSzukajDzialki()
-            If frm.ShowDialog(Me) = DialogResult.OK AndAlso frm.WybranaDzialka IsNot Nothing Then
-                UstawDzialke(frm.WybranaDzialka, frm.MarginesMetry, frm.WlaczWarstwy)
+    Private Sub InicjalizujPrzyciskSzukaj()
+        Try
+            btnSzukajDzialki.Text = ""
+            btnSzukajDzialki.Image = UtworzIkoneLupy()
+            btnSzukajDzialki.ImageAlign = ContentAlignment.MiddleCenter
+            ToolTip1.SetToolTip(btnSzukajDzialki, "Wyszukaj miejscowość, adres lub działkę katastralną (Ctrl+F, Ctrl+D)")
+        Catch
+        End Try
+    End Sub
+
+    ''' <summary>Rysuje ostrą, wektorową ikonę lupy dla przycisku wyszukiwarki na pasku mapy.</summary>
+    Public Shared Function UtworzIkoneLupy(Optional rozmiar As Integer = 16) As Bitmap
+        Dim bmp As New Bitmap(rozmiar, rozmiar, Imaging.PixelFormat.Format32bppArgb)
+        Using g = Graphics.FromImage(bmp)
+            g.SmoothingMode = Drawing2D.SmoothingMode.AntiAlias
+            g.InterpolationMode = Drawing2D.InterpolationMode.HighQualityBicubic
+            g.PixelOffsetMode = Drawing2D.PixelOffsetMode.HighQuality
+            g.Clear(Color.Transparent)
+
+            ' Lekki błękit wewnątrz soczewki
+            Using pedzelSzkla As New SolidBrush(Color.FromArgb(40, 0, 120, 215))
+                g.FillEllipse(pedzelSzkla, 2.0!, 2.0!, 8.0!, 8.0!)
+            End Using
+
+            ' Metalowa obręcz soczewki
+            Using pioroRamy As New Pen(Color.FromArgb(50, 50, 50), 1.6!)
+                g.DrawEllipse(pioroRamy, 2.0!, 2.0!, 8.0!, 8.0!)
+            End Using
+
+            ' Błysk światła na szkle
+            Using pioroBlysk As New Pen(Color.FromArgb(200, 255, 255, 255), 1.0!)
+                g.DrawArc(pioroBlysk, 3.5!, 3.5!, 5.0!, 5.0!, 190.0!, 80.0!)
+            End Using
+
+            ' Rączka lupy
+            Using pioroRaczki As New Pen(Color.FromArgb(50, 50, 50), 2.2!)
+                pioroRaczki.StartCap = Drawing2D.LineCap.Round
+                pioroRaczki.EndCap = Drawing2D.LineCap.Round
+                g.DrawLine(pioroRaczki, 9.0!, 9.0!, 13.5!, 13.5!)
+            End Using
+        End Using
+        Return bmp
+    End Function
+
+    Private Sub OtworzWyszukiwarke(Optional tryb As Integer = -1)
+        If PobieranieTrwa("Wyszukiwanie") Then Exit Sub
+        Using frm As New FormSzukajDzialki(tryb)
+            If frm.ShowDialog(Me) = DialogResult.OK Then
+                If frm.WybranaDzialka IsNot Nothing Then
+                    UstawDzialke(frm.WybranaDzialka, frm.MarginesMetry, frm.WlaczWarstwy)
+                ElseIf frm.WybraneMiejsce IsNot Nothing Then
+                    UstawMiejsce(frm.WybraneMiejsce)
+                End If
             End If
         End Using
+    End Sub
+
+    Private Sub UstawMiejsce(m As WynikGeokodowania)
+        If m Is Nothing Then Exit Sub
+        If m.MaObszar Then
+            Dim dLat = Math.Max(0.001, m.MaxSzerokosc - m.MinSzerokosc)
+            Dim dLon = Math.Max(0.001, m.MaxDlugosc - m.MinDlugosc)
+            mapa.SetZoomToFitRect(RectLatLng.FromLTRB(m.MinDlugosc - dLon * 0.1, m.MaxSzerokosc + dLat * 0.1,
+                                                     m.MaxDlugosc + dLon * 0.1, m.MinSzerokosc - dLat * 0.1))
+        Else
+            mapa.Position = New PointLatLng(m.Szerokosc, m.Dlugosc)
+            If mapa.Zoom < 14 Then
+                mapa.Zoom = 15
+            End If
+        End If
+        Komunikat("Przejście do: " & m.KrotkaNazwa & " (" & m.WspolrzedneTekst & ")", Color.Green)
     End Sub
 
     Private Sub UstawDzialke(d As DzialkaKatastralna, margines As Double, wlaczWarstwy As Boolean)

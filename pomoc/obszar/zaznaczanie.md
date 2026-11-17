@@ -41,6 +41,38 @@ Zaznaczony prostokąt jest prostokątem na mapie podglądu (w stopniach geografi
 
 ---
 
+## Wyszukiwarka miejscowości, adresów i działek katastralnych
+
+Oprócz ręcznego zaznaczania myszą możesz szybko zlokalizować interesujący punkt w Polsce i wyznaczyć obszar pobierania za pomocą wbudowanej wyszukiwarki:
+
+* **Jak uruchomić:** kliknij przycisk z ikoną lupy 🔍 na pasku pod powiększeniem mapy (pod przyciskiem `-`), wybierz polecenie *Narzędzia > Wyszukaj miejscowość lub działkę...* albo użyj skrótów klawiaturowych:
+  * <kbd>Ctrl</kbd>+<kbd>F</kbd> – otwiera wyszukiwarkę na zakładce *Miejscowość / Adres*,
+  * <kbd>Ctrl</kbd>+<kbd>D</kbd> – otwiera wyszukiwarkę na zakładce *Działka katastralna (ULDK)*.
+
+### Zakładka 1: Miejscowość / Adres
+
+Korzysta z geokodera OpenStreetMap Nominatim. Pozwala znaleźć dowolne miasto, wieś, osadę, ulicę, szczyt górski lub konkretny adres:
+
+1. Wpisz poszukiwaną nazwę (np. `Kraków`, `Zakopane Krupówki`, `Gdańsk Długa 1`, `Babia Góra`) i kliknij **Szukaj** (lub naciśnij <kbd>Enter</kbd>).
+2. Wybierz odpowiedni wpis z listy wyników (lista podaje pełną nazwę, typ obiektu oraz współrzędne geograficzne).
+3. Kliknij **Pokaż na mapie** (lub dwukrotnie kliknij wynik na liście).
+
+Program automatycznie przesunie mapę podglądu i ustawi optymalny poziom powiększenia (dla miast i gmin dopasuje widok do całego ich obszaru).
+
+### Zakładka 2: Działka katastralna (ULDK GUGiK)
+
+Łączy się bezpośrednio z urzędową Usługą Lokalizacji Działek Katastralnych (ULDK) Głównego Urzędu Geodezji i Kartografii:
+
+1. Wpisz pełny identyfikator TERYT działki (np. `022503_5.0003.134`) albo nazwę obrębu/miejscowości i numer (np. `Krzewina 134`) i kliknij **Szukaj**.
+2. Wybierz działkę z listy wyników (zostanie podany numer działki, obręb, gmina i kod TERYT).
+3. Ustaw **Margines wokół działki na mapie [m]** (domyślnie `50 m`) – bufor terenu wokół granic parceli, by na pobranej mapie widoczne było również najbliższe otoczenie i dojazd.
+4. Opcja **Włącz warstwy: Ortofotomapa i Działki ewidencyjne (EGiB GUGiK)** automatycznie zaznacza w drzewie map fotomapę lotniczą oraz urzędowe granice i numery działek.
+5. Kliknij **Zaznacz na mapie**.
+
+Program pobierze geometrię granic działki z państwowego rejestru, wycentruje widok, narysuje żółto-czerwony kontur działki z wierzchołkami oraz automatycznie wyznaczy siatkę segmentów pobierania obejmującą działkę wraz z zadanym marginesem.
+
+---
+
 ## Siatka segmentów na mapie
 
 Po zaznaczeniu mapa pokazuje:

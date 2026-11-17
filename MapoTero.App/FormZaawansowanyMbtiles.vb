@@ -122,25 +122,23 @@ Public Class FormZaawansowanyMbtiles
 
     ''' <summary>Dodaje sesję z podanego folderu i oblicza sugerowane poziomy zoom.</summary>
     Private Sub DodajFolderSesji(folder As String)
-        If Not File.Exists(Path.Combine(folder, "conf.txt")) Then
-            Dim podkatalogi As New List(Of String)
-            Try
-                For Each pod In Directory.GetDirectories(folder)
-                    If File.Exists(Path.Combine(pod, "conf.txt")) Then podkatalogi.Add(pod)
+        Dim podkatalogi As New List(Of String)
+        Try
+            For Each pod In Directory.GetDirectories(folder)
+                If File.Exists(Path.Combine(pod, "conf.txt")) Then podkatalogi.Add(pod)
+            Next
+        Catch
+        End Try
+        If podkatalogi.Count > 0 Then
+            Dim odp = MessageBox.Show("W wybranym folderze znaleziono " & podkatalogi.Count & " warstw mapowych:" & vbCrLf &
+                                      String.Join(vbCrLf, podkatalogi.Select(Function(p) "• " & Path.GetFileName(p))) & vbCrLf & vbCrLf &
+                                      "Czy chcesz dodać je wszystkie do projektu wielowarstwowego?",
+                                      "Wykryto sesje w podfolderach", MessageBoxButtons.YesNo, MessageBoxIcon.Question)
+            If odp = DialogResult.Yes Then
+                For Each pod In podkatalogi
+                    DodajFolderSesji(pod)
                 Next
-            Catch
-            End Try
-            If podkatalogi.Count > 0 Then
-                Dim odp = MessageBox.Show("W wybranym folderze znaleziono " & podkatalogi.Count & " warstw mapowych:" & vbCrLf &
-                                          String.Join(vbCrLf, podkatalogi.Select(Function(p) "• " & Path.GetFileName(p))) & vbCrLf & vbCrLf &
-                                          "Czy chcesz dodać je wszystkie do projektu wielowarstwowego?",
-                                          "Wykryto sesje w podfolderach", MessageBoxButtons.YesNo, MessageBoxIcon.Question)
-                If odp = DialogResult.Yes Then
-                    For Each pod In podkatalogi
-                        DodajFolderSesji(pod)
-                    Next
-                    Return
-                End If
+                Return
             End If
         End If
 

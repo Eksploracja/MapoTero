@@ -49,6 +49,7 @@ Public Class FormImportOzi
 
     Public Sub New()
         InitializeComponent()
+        PomocProgramu.DodajPrzyciskPomocy(Me, TematPomocy.ImportOzi)
         Me.AllowDrop = True
     End Sub
 

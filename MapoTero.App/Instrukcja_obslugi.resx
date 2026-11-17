@@ -133,20 +133,23 @@
 
    Rozmiar piksela program dobiera sam: najmniejszy zalecany spośród wybranych warstw, żeby żadna nie traciła szczegółów (np. ortofotomapa 0,25 m i mapa topograficzna 2 m - piksel 0,25 m, a mapa topograficzna zostanie przeskalowana). Po usunięciu warstwy rozmiar jest przeliczany. Jeśli wpiszesz rozmiar piksela ręcznie, program go nie zmieni - poda tylko w komunikacie wartość zalecaną. Zalecany piksel każdej warstwy widać w podpowiedzi w drzewie warstw i na liście wybranych warstw.
 
+   W prawym dolnym narożniku okna głównego znajduje się panel podglądu zestawu warstw na żywo: renderuje on w tle próbkę dobranych warstw ze środka siatki pobierania z uwzględnieniem krycia i trybów mieszania. Wbudowana lupa rastrowa pozwala sprawdzić czytelność napisów i detali w powiększeniu 50%, 100% (piksel w piksel), 200% i 400%.
+
 2. Zaznacz na mapie prawym przyciskiem myszy obszar do pobrania. Na mapie pojawi się siatka segmentów. Możesz także wyznaczyć obszar wzdłuż trasy (menu Sesja pobierania - Zasięg wzdłuż trasy...) albo po prostu przeciągnąć plik GPX, KML lub KMZ z Eksploratora Windows na okno programu lub mapę (Drag &amp; Drop).
 
 3. Zasięg siatki możesz poprawić, przeciągając lewym przyciskiem myszy kwadratowe uchwyty w narożnikach i na bokach (dodawanie i odejmowanie segmentów) albo kółko w środku siatki (przesunięcie całej siatki). Klawisz Esc anuluje przeciąganie.
 
-4. Kliknij przycisk "Pobierz". Segmenty mapy zapisują się w folderze sesji (domyślnie "download"); jego ścieżka widoczna jest na pasku stanu. Jeśli folder zawiera segmenty innej sesji, program zaproponuje nowy podfolder.
+4. Kliknij przycisk "Pobierz". Każda nowa sesja pobierania zapisuje się w dedykowanym podfolderze w katalogu "download" (np. "download\sesja_ortofotomapa_2026-11-16_..."), dzięki czemu foldery sesji nie kolidują ze sobą i nie zaśmiecają katalogu głównego; ścieżka aktywnej sesji widoczna jest na pasku stanu. Ponowne kliknięcie "Pobierz" wznawia pobieranie w tym samym folderze, dociągając brakujące kafle.
 
-5. Pobrane segmenty połączysz w jeden arkusz (menu Narzędzia - Łączenie segmentów) albo wyeksportujesz do map dla urządzeń Garmin (JNX BirdsEye bez limitu kafli z piramidą powiększeń oraz Garmin Custom Maps KMZ z opcją podziału na tomy, regulacją kolejności z-order i przezroczystymi nakładkami PNG), formatów mobilnych MBTiles, SQLiteDB (dla Locus Map, OsmAnd) lub OruxMaps. Do dyspozycji masz również:
-- Wyszukiwarkę działek katastralnych ULDK (Ctrl+D lub przycisk Dz): wyszukuje działkę po kodzie TERYT lub nazwie i numerze oraz centruje siatkę z buforem,
+5. Pobrane segmenty połączysz w jeden arkusz (menu Narzędzia - Łączenie segmentów) albo wyeksportujesz do map dla urządzeń Garmin (JNX BirdsEye bez limitu kafli z piramidą powiększeń, Garmin Custom Maps KMZ z opcją automatycznego podziału na tomy przy ponad 100 kaflach, filtrem MIP podbijającym kontrast w słońcu, regulacją kolejności z-order i przezroczystymi nakładkami PNG), bezpośredniego formatu GeoTIFF z kompresją LZW/JPEG, formatów mobilnych MBTiles, SQLiteDB (dla Locus Map, OsmAnd) lub OruxMaps. Do dyspozycji masz również:
+- Wyszukiwarkę miejscowości, adresów i działek katastralnych ULDK (Ctrl+F, Ctrl+D lub przycisk lupy pod powiększeniem mapy): wyszukuje miejscowości i adresy (geokoder OpenStreetMap Nominatim) lub działki ewidencyjne (ULDK GUGiK) i centruje mapę oraz siatkę pobierania,
 - Uzupełnianie wysokości NMT / LIDAR w śladach GPX: okno korytarza pobiera wysokości z lotniczego skaningu laserowego GUGiK, rysuje profil i zapisuje wzbogacony plik GPX,
-- Konwerter map OziExplorer (.map): w menu Narzędzia konwertuje skalibrowany skan do JNX, KMZ i MBTiles z automatyczną korektą Datum (Borowa Góra, Potsdam, Pulkovo 1942 do WGS84). Punkty kalibracyjne mogą być w stopniach albo w siatce UTM; arkusze o dużym zasięgu program kalibruje modelem rzutowym lub wielomianem. Czerwony opis w oknie oznacza nieznany datum albo duży błąd kalibracji - mapa może być wtedy przesunięta. JNX i MBTiles mają 5 poziomów powiększenia.
+- Konwerter map OziExplorer (.map): w menu Narzędzia konwertuje skalibrowany skan do JNX, KMZ i MBTiles z automatyczną korektą Datum (Borowa Góra, Potsdam, Pulkovo 1942 do WGS84). Punkty kalibracyjne mogą być w stopniach albo w siatce UTM; arkusze o dużym zasięgu program kalibruje modelem rzutowym lub wielomianem. Czerwony opis w oknie oznacza nieznany datum albo duży błąd kalibracji - mapa może być wtedy przesunięta. JNX i MBTiles mają 5 poziomów powiększenia,
+- Dedykowany przycisk „Pomoc” w każdym oknie narzędzia: każde odrębne okno posiada przycisk Pomoc otwierający podręczną instrukcję wraz z bezpośrednim odnośnikiem do odpowiedniego rozdziału pomocy online.
 Do programów CAD (AutoCAD, BricsCAD, ZWCAD) mapę przeniesiesz poleceniem Narzędzia - Eksport do CAD: rysunek DXF otwórz w programie CAD, a skrypt SCR uruchom poleceniem SCRIPT w otwartym rysunku.
 ----------------------------------------------------------------------
 
-Pełny podręcznik użytkownika online (39 rozdziałów, opisy narzędzi, formatów i zrzuty ekranu):
+Pełny podręcznik użytkownika online (41 rozdziałów, opisy narzędzi, formatów i zrzuty ekranu):
 https://eksploracja.github.io/MapoTero/pomoc/
 
 Forum dyskusyjne MapoTero: www.forum.eksploracja.pl/viewforum.php?f=205

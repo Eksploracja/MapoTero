@@ -36,13 +36,12 @@ a czerwony komunikat mówi, co poprawić:
 | *Trasa nie przecina obszaru pobierania…* | wybierz trasę ponownie albo usuń obszar wzdłuż trasy |
 | błąd przedrostka nazw segmentów | popraw przedrostek w oknie *Ustawienia* (bez znaków niedozwolonych w nazwach plików) |
 
-Potem program sprawdza folder sesji. Jeśli są w nim segmenty **innej** sesji (inny zasięg, segment, układ, serwer
-lub warstwy albo pliki bez `conf.txt`), pyta, co zrobić:
+Potem program sprawdza folder sesji. Każda nowa sesja tworzy automatycznie dedykowany podfolder `download\sesja_<nazwa_zbioru>_<RRRR-MM-DD_GGMMSS>\` (lub korzysta z bieżącego podfolderu sesji). Jeśli w wybranym folderze znajdują się segmenty **innej** sesji (inny zasięg, segment, układ, serwer lub warstwy albo pliki bez `conf.txt`), program pyta, co zrobić:
 
-* **Tak**: nowa sesja zostanie pobrana do nowego folderu `download\sesja_RRRR-MM-DD_GGMMSS\`.
-* **Nie**: pobieranie zostaje anulowane. Aby wznowić poprzednią sesję, wczytaj ją z menu *Sesja pobierania*.
+* **Tak**: nowa sesja zostanie pobrana do nowego folderu `download\sesja_<nazwa_zbioru>_RRRR-MM-DD_GGMMSS\`.
+* **Nie**: pobieranie zostaje anulowane. Aby wznowić wybraną sesję, wczytaj ją z menu *Sesja pobierania*.
 
-Zapobiega to przypadkowemu uznaniu starych segmentów o tych samych nazwach za pobrane części nowej mapy.
+Zapobiega to przypadkowemu uznaniu starych segmentów o tych samych nazwach za pobrane części nowej mapy, a główny katalog `download\` pozostaje uporządkowany.
 
 Na koniec program zapisuje w folderze sesji `conf.txt` (z bieżącą datą) oraz ewentualny plik `korytarz.txt`, po czym rozpoczyna pobieranie.
 
@@ -87,7 +86,7 @@ Pobieranie przerywa też zamknięcie programu. Brakujące segmenty można dopobr
 
 Aby dokończyć przerwane lub niepełne pobieranie:
 
-1. Jeśli program był zamknięty, uruchom go. Sesja z folderu `download` wczyta się sama. Sesję z innego folderu
+1. Jeśli program był zamknięty, uruchom go. Ostatnia sesja (z podfolderu `download\sesja_...`) wczyta się automatycznie. Sesję z innego folderu
    wczytaj z menu *Sesja pobierania > wczytaj ustawienia sesji (conf.txt)*.
 2. Nie zmieniaj zasięgu, segmentu, piksela, układu ani warstw.
 3. Kliknij **Pobierz**.

@@ -6,7 +6,7 @@ nav_order: 16
 # Narzędzia dodatkowe
 {: .no_toc }
 
-Nakładanie dwóch pobranych map PNG, usuwanie pustych segmentów oraz tworzenie paczek TrekBuddy (.tar).
+Konwerter map OziExplorer, nakładanie dwóch pobranych map PNG, usuwanie pustych segmentów oraz tworzenie paczek TrekBuddy (.tar).
 {: .fs-5 .fw-300 }
 
 **Gdzie w programie:** menu *Narzędzia* oraz menu *Ustawienia*  
@@ -18,6 +18,23 @@ Nakładanie dwóch pobranych map PNG, usuwanie pustych segmentów oraz tworzenie
 - TOC
 {:toc}
 </details>
+
+## Konwerter map OziExplorer (.map)
+
+**Gdzie:** menu *Narzędzia > Konwertuj mapę OziExplorer (.map)...* albo przeciągnięcie pliku `.map` lub całego folderu na okno programu (Drag &amp; Drop).
+
+Narzędzie przetwarza kalibrowane skany papierowych map turystycznych i archiwalnych (pliki `.map` wraz ze skanem w formatach JPG, PNG, TIF lub BMP) do nowoczesnych formatów mobilnych: **Garmin BirdsEye (JNX v4)**, **Garmin Custom Maps (KMZ)** oraz **MBTiles**:
+
+* **Automatyczna transformacja Datum (elipsoid historycznych):** program automatycznie wykrywa i przelicza historyczne polskie i europejskie układy odniesienia do współczesnej elipsoidy WGS84:
+  * **Borowa Góra** (mapy Wojskowego Instytutu Geograficznego WIG 1:100 000 i 1:25 000),
+  * **Potsdam / Rauenberg** (niemieckie mapy Messtischblatt 1:25 000 i Grossblatt),
+  * **Pulkovo 1942 / Układ 1965 / Układ 1942** (mapy topograficzne z okresu PRL).
+  Dzięki precyzyjnemu przeliczaniu współrzędnych arkusz nie wykazuje typowego przesunięcia o 100–200 metrów względem śladów GPS w odbiornikach.
+* **Modele kalibracji nieliniowej:** dla dużych arkuszy program stosuje model rzutowy (4–6 punktów) lub wielomian 2. stopnia (7+ punktów), redukując zniekształcenia skanera papieru. Punkty kalibracji mogą być podane w stopniach lub w siatce UTM.
+* **Piramida powiększeń:** formaty JNX i MBTiles generowane są automatycznie z kompletną piramidą 5 poziomów skali.
+* **Praca pojedyncza lub wsadowa (Batch):** możesz wskazać pojedynczy plik `.map` albo cały katalog zawierający dziesiątki arkuszy – program przetworzy je kolejno w tle.
+
+---
 
 ## Nakładanie dwóch map PNG
 

@@ -224,6 +224,65 @@ Public Class PlikiSesjiTesty
         End Function
     End Class
 
+    <Fact>
+    Public Sub ProponowanaNazwaFolderuSesji_GenerujeBezpiecznaNazwe()
+        Dim d As New DateTime(2026, 11, 16, 22, 15, 30)
+        Assert.Equal("sesja_ortofotomapa_2026-11-16_221530", KonfiguracjaSesji.ProponowanaNazwaFolderuSesji("ortofotomapa", d))
+        Assert.Equal("sesja_2026-11-16_221530", KonfiguracjaSesji.ProponowanaNazwaFolderuSesji("", d))
+        Assert.Equal("sesja_2026-11-16_221530", KonfiguracjaSesji.ProponowanaNazwaFolderuSesji(Nothing, d))
+        Assert.Equal("sesja_geologiczna_50_SMGP_2026-11-16_221530", KonfiguracjaSesji.ProponowanaNazwaFolderuSesji("geologiczna_50_SMGP", d))
+        'znaki specjalne i polskie
+        Assert.Equal("sesja_mapa_terenowa_1_2026-11-16_221530", KonfiguracjaSesji.ProponowanaNazwaFolderuSesji("mapa/terenowa:1", d))
+    End Sub
+
+    <Fact>
+    Public Sub NajnowszyFolderSesji_WyszukujePodfolderLubFallback()
+        Dim tempDir = Path.Combine(Path.GetTempPath(), "MapoTero_TestSesji_" & Guid.NewGuid().ToString("N"))
+        Directory.CreateDirectory(tempDir)
+        Try
+            ' Początkowo brak jakichkolwiek sesji
+            Assert.Equal("", KonfiguracjaSesji.NajnowszyFolderSesji(tempDir))
+
+            ' Stary plik conf.txt w samym folderze głównym (fallback)
+            Dim staryConf = Path.Combine(tempDir, "conf.txt")
+            File.WriteAllText(staryConf, "test")
+            File.SetLastWriteTimeUtc(staryConf, DateTime.UtcNow.AddMinutes(-5))
+            Assert.Equal(tempDir.TrimEnd("\"c) & "\", KonfiguracjaSesji.NajnowszyFolderSesji(tempDir))
+
+            ' Podkatalog ze starszą sesją
+            Dim pod1 = Path.Combine(tempDir, "sesja_1")
+            Directory.CreateDirectory(pod1)
+            Dim conf1 = Path.Combine(pod1, "conf.txt")
+            File.WriteAllText(conf1, "sesja 1")
+            File.SetLastWriteTimeUtc(conf1, DateTime.UtcNow.AddMinutes(-10))
+
+            ' Podkatalog z nowszą sesją
+            Dim pod2 = Path.Combine(tempDir, "sesja_2")
+            Directory.CreateDirectory(pod2)
+            Dim conf2 = Path.Combine(pod2, "conf.txt")
+            File.WriteAllText(conf2, "sesja 2")
+            File.SetLastWriteTimeUtc(conf2, DateTime.UtcNow)
+
+            ' Powinien wybrać pod2 jako najnowszy podfolder sesji
+            Dim najnowszy = KonfiguracjaSesji.NajnowszyFolderSesji(tempDir)
+            Assert.Equal(pod2.TrimEnd("\"c) & "\", najnowszy)
+
+            ' Sesja w folderze głównym nowsza od podfolderów - wygrywa mimo istnienia podfolderów
+            File.SetLastWriteTimeUtc(staryConf, DateTime.UtcNow.AddMinutes(5))
+            Assert.Equal(tempDir.TrimEnd("\"c) & "\", KonfiguracjaSesji.NajnowszyFolderSesji(tempDir))
+        Finally
+            If Directory.Exists(tempDir) Then Directory.Delete(tempDir, True)
+        End Try
+    End Sub
+
+    <Fact>
+    Public Sub MapOzi_PolkulaZachodniaIPoludniowa_LiteryWS()
+        Dim o As New ObrazGeoreferencyjny With {.Uklad = UkladWspolrzednych.Wgs84, .Zasieg = New Zasieg(-34.5, -58.5, -34.0, -58.0),
+                                               .SzerokoscPx = 100, .WysokoscPx = 100, .NazwaPliku = "a.jpg", .SciezkaPliku = "C:\a.jpg"}
+        Dim tresc = Georeferencja.MapOzi(o)
+        Assert.Contains("Point01,xy,    0,    0,in, deg,  34, 0,S,  58, 30,W, grid,   ,           ,           ,S", tresc)
+    End Sub
+
 End Class
 
 Public Class GeoreferencjaTesty
@@ -281,6 +340,9 @@ Public Class GeoreferencjaTesty
     Public Sub StopnieIMinuty()
         Assert.Equal("52, 30", Georeferencja.StopnieMinuty(52.5))
         Assert.Equal("21, 7.5", Georeferencja.StopnieMinuty(21.125))
+        'półkula zachodnia / południowa - wartość bezwzględna (litera W/S w osobnym polu pliku .map)
+        Assert.Equal("0, 30", Georeferencja.StopnieMinuty(-0.5))
+        Assert.Equal("3, 7.5", Georeferencja.StopnieMinuty(-3.125))
     End Sub
 
     <Fact>

@@ -376,6 +376,62 @@ Public Class KonfiguracjaSesji
         Return Math.Abs(a - b) <= 0.000000001 * Math.Max(1, Math.Max(Math.Abs(a), Math.Abs(b)))
     End Function
 
+    ''' <summary>
+    ''' Bezpieczna i czytelna nazwa podfolderu nowej sesji w katalogu download, np. "sesja_orto_2026-11-16_221530"
+    ''' lub "sesja_2026-11-16_221530".
+    ''' </summary>
+    Public Shared Function ProponowanaNazwaFolderuSesji(zbior As String, Optional moment As Nullable(Of DateTime) = Nothing) As String
+        Dim data = If(moment.HasValue, moment.Value, DateTime.Now)
+        Dim znacznikCzasu = data.ToString("yyyy-MM-dd_HHmmss", CultureInfo.InvariantCulture)
+        Dim czystyZbior As String = ""
+        If Not String.IsNullOrWhiteSpace(zbior) Then
+            Dim bezZnakow = System.Text.RegularExpressions.Regex.Replace(zbior.Trim(), "[^a-zA-Z0-9_\-]", "_")
+            bezZnakow = System.Text.RegularExpressions.Regex.Replace(bezZnakow, "_+", "_").Trim("_"c)
+            If bezZnakow.Length > 25 Then bezZnakow = bezZnakow.Substring(0, 25).TrimEnd("_"c)
+            czystyZbior = bezZnakow
+        End If
+        If czystyZbior <> "" Then
+            Return "sesja_" & czystyZbior & "_" & znacznikCzasu
+        Else
+            Return "sesja_" & znacznikCzasu
+        End If
+    End Function
+
+    ''' <summary>
+    ''' Wyszukuje najnowszy folder sesji (zawierający conf.txt) w podanym katalogu nadrzędnym (np. download).
+    ''' Sprawdza podkatalogi wg daty modyfikacji conf.txt/folderu, a jeśli brak podkatalogów z conf.txt,
+    ''' sprawdza czy w samym katalogu nadrzędnym znajduje się conf.txt (zgodność ze starszymi wersjami).
+    ''' Zwraca pusty ciąg, jeśli nie znaleziono żadnej sesji.
+    ''' </summary>
+    Public Shared Function NajnowszyFolderSesji(katalogNadrzedny As String) As String
+        If String.IsNullOrWhiteSpace(katalogNadrzedny) OrElse Not Directory.Exists(katalogNadrzedny) Then Return ""
+
+        Dim kandydaci As New List(Of KeyValuePair(Of String, DateTime))()
+        Try
+            For Each pod In Directory.GetDirectories(katalogNadrzedny)
+                Dim plikConf = Path.Combine(pod, "conf.txt")
+                If File.Exists(plikConf) Then
+                    Dim czas = File.GetLastWriteTimeUtc(plikConf)
+                    kandydaci.Add(New KeyValuePair(Of String, DateTime)(pod.TrimEnd("\"c, "/"c) & "\", czas))
+                End If
+            Next
+        Catch
+        End Try
+
+        'sesja starszej wersji w samym katalogu nadrzędnym też jest kandydatem - dawniej pomijano ją, gdy istniał
+        'jakikolwiek podfolder sesji, nawet starszy od niej
+        Dim glownyConf = Path.Combine(katalogNadrzedny, "conf.txt")
+        If File.Exists(glownyConf) Then
+            kandydaci.Add(New KeyValuePair(Of String, DateTime)(katalogNadrzedny.TrimEnd("\"c, "/"c) & "\", File.GetLastWriteTimeUtc(glownyConf)))
+        End If
+
+        If kandydaci.Count > 0 Then
+            Return kandydaci.OrderByDescending(Function(k) k.Value).First().Key
+        End If
+
+        Return ""
+    End Function
+
 End Class
 
 ''' <summary>

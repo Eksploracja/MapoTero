@@ -37,11 +37,11 @@ albo z kilkoma mapami nałożonymi na siebie.
 | Nr | Sekcja okna | Opis |
 |---|---|---|
 | **1** | *Folder segmentów* | folder sesji (`conf.txt`) oraz podsumowanie: liczba segmentów, piksel, układ, opis mapy i data |
-| **2** | *Format* | wybór formatu wynikowego (KMZ dla Garmin, KMZ, MBTiles, SQLiteDB, OruxMaps) lub kreatora *Wielowarstwowy...* |
+| **2** | *Format* | wybór formatu: Garmin BirdsEye (JNX), KMZ dla Garmin (z opcją podziału na tomy), GeoTIFF bezpośredni, KMZ, MBTiles, SQLiteDB, OruxMaps lub *Wielowarstwowy...* |
 | **3** | *Kafle Web Mercator* | zakres poziomów powiększenia i opcja przezroczystych kafli PNG |
-| **4** | *Warstwy i przezroczystość* | nakładka, przezroczyste białe tło oraz nakładanie warstw z innych folderów sesji |
+| **4** | *Warstwy, przezroczystość i filtr MIP* | nakładka, przezroczyste białe tło, nakładanie warstw z innych sesji oraz korekcja MIP dla ekranów Garmin |
 | **5** | *Rozmiar pliku* i *Jakość JPEG* | szacowanie wagi pliku, dopasowanie do limitu MB oraz stopień kompresji JPEG |
-| **6** | Plan eksportu i przyciski | podgląd liczby kafli i poziomów oraz przyciski **Eksportuj** / **Przerwij** |
+| **6** | Plan eksportu i przyciski | podgląd liczby kafli i poziomów, przycisk **Pomoc** oraz przyciski **Eksportuj** / **Przerwij** |
 
 ---
 
@@ -50,12 +50,15 @@ albo z kilkoma mapami nałożonymi na siebie.
 | Grupa | Zawartość |
 |---|---|
 | *Folder segmentów (z plikiem conf.txt)* | folder eksportowanej sesji. Opcja **zmień folder** wskazuje inną sesję. Pod spodem: liczba segmentów (i ile z nich istnieje), piksel, układ, opis mapy, źródło danych i data pobrania |
-| *Format* | KMZ dla Garmin (z limitem kafli), KMZ, MBTiles, SQLiteDB, OruxMaps. Przycisk **Wielowarstwowy...** otwiera [kreator wielowarstwowego MBTiles](../mbtiles-wielowarstwowy/) |
-| *Kafle Web Mercator (MBTiles, SQLiteDB, OruxMaps)* | zakres poziomów powiększenia, kafle PNG. Zobacz: [Poziomy powiększenia i rozmiar pliku](powiekszenia/) |
-| *Warstwy i przezroczystość* | nakładka, białe tło przezroczyste, warstwy z innych folderów z kryciem. Zobacz: [Nakładki i łączenie warstw](nakladki/) |
+| *Format* | Garmin BirdsEye (JNX), KMZ dla Garmin (z podziałem na tomy), GeoTIFF, KMZ, MBTiles, SQLiteDB, OruxMaps. Przycisk **Wielowarstwowy...** otwiera [kreator wielowarstwowego MBTiles](../mbtiles-wielowarstwowy/) |
+| *Kafle Web Mercator (MBTiles, SQLiteDB, OruxMaps, JNX)* | zakres poziomów powiększenia, kafle PNG. Zobacz: [Poziomy powiększenia i rozmiar pliku](powiekszenia/) |
+| *Warstwy i przezroczystość* | nakładka, białe tło przezroczyste, warstwy z innych folderów z kryciem oraz filtr MIP dla Garmina. Zobacz: [Nakładki i łączenie warstw](nakladki/) |
 | *Rozmiar pliku* | szacowanie rozmiaru, limit MB i dopasowanie poziomu |
 | *Jakość JPEG* | 10-100, domyślnie 85 |
-| przyciski | **Eksportuj**, **Przerwij** |
+| przyciski | **Eksportuj**, **Przerwij**, **Pomoc** (podręczna pomoc dedykowana) |
+
+{: .wskazowka }
+**Dostosowanie do wysokości ekranu:** Okno eksportu automatycznie dopasowuje swoją wysokość do rozdzielczości roboczej ekranu. Na mniejszych wyświetlaczach laptopów pojawia się pionowy pasek przewijania, dzięki czemu żaden przycisk ani opcja nie zostają ucięte.
 
 Pod opcjami program na bieżąco pokazuje **plan eksportu**: liczbę kafli i poziomy powiększenia, a dla formatu KMZ siatkę
 kafli i informację, czy rozdzielczość trzeba zmniejszyć ze względu na limit kafli.

@@ -421,6 +421,29 @@ Public Class UzytkownikInterakcjaTesty
     End Sub
 
     <Fact>
+    Public Sub TestUzytkownik_FormEksport_DopasowanieWysokosciIAutoScroll()
+        UruchomWWatkuSta(
+            Sub()
+                Using f As New Global.MapoTero.FormEksport()
+                    f.Show()
+                    Application.DoEvents()
+
+                    ' Wysokość okna nie może przekraczać wysokości obszaru roboczego ekranu
+                    Dim ekran = Screen.FromControl(f).WorkingArea
+                    Assert.True(f.Height <= ekran.Height)
+
+                    ' Jeśli okno zostało zmniejszone w pionie, AutoScroll musi być aktywny z bazową wysokością 788
+                    If f.ClientSize.Height < 788 Then
+                        Assert.True(f.AutoScroll)
+                        Assert.Equal(788, f.AutoScrollMinSize.Height)
+                    End If
+
+                    f.Close()
+                End Using
+            End Sub)
+    End Sub
+
+    <Fact>
     Public Sub TestUzytkownik_FormEksportCad_OpcjeIWarstwy()
         UruchomWWatkuSta(
             Sub()

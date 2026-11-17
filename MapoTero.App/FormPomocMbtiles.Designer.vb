@@ -34,6 +34,7 @@ Partial Class FormPomocMbtiles
     Private Sub InitializeComponent()
         Me.rtbTresc = New System.Windows.Forms.RichTextBox()
         Me.btnZamknij = New System.Windows.Forms.Button()
+        Me.btnOnline = New System.Windows.Forms.Button()
         Me.pnlDol = New System.Windows.Forms.Panel()
         Me.pnlDol.SuspendLayout()
         Me.SuspendLayout()
@@ -64,8 +65,20 @@ Partial Class FormPomocMbtiles
         Me.btnZamknij.Text = "Zamknij"
         Me.btnZamknij.UseVisualStyleBackColor = True
         '
+        'btnOnline
+        '
+        Me.btnOnline.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
+        Me.btnOnline.Font = New System.Drawing.Font("Segoe UI", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point)
+        Me.btnOnline.Location = New System.Drawing.Point(0, 8)
+        Me.btnOnline.Name = "btnOnline"
+        Me.btnOnline.Size = New System.Drawing.Size(200, 28)
+        Me.btnOnline.TabIndex = 2
+        Me.btnOnline.Text = "Pomoc online (rozdział) ↗"
+        Me.btnOnline.UseVisualStyleBackColor = True
+        '
         'pnlDol
         '
+        Me.pnlDol.Controls.Add(Me.btnOnline)
         Me.pnlDol.Controls.Add(Me.btnZamknij)
         Me.pnlDol.Dock = System.Windows.Forms.DockStyle.Bottom
         Me.pnlDol.Location = New System.Drawing.Point(12, 518)
@@ -99,5 +112,6 @@ Partial Class FormPomocMbtiles
 
     Friend WithEvents rtbTresc As RichTextBox
     Friend WithEvents btnZamknij As Button
+    Friend WithEvents btnOnline As Button
     Friend WithEvents pnlDol As Panel
 End Class

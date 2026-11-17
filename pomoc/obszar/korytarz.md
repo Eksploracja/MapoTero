@@ -24,8 +24,8 @@ krętej to wielokrotnie mniej danych.
 ## Najkrótsza droga
 
 1. Ustaw zbiór map, warstwę, segment i piksel.
-2. Wybierz *Sesja pobierania > obszar pobierania wzdłuż trasy (GPX, KML, KMZ)...*.
-3. Kliknij **wybierz...** i wskaż plik trasy.
+2. Wybierz *Sesja pobierania > obszar pobierania wzdłuż trasy (GPX, KML, KMZ)...* albo po prostu przeciągnij plik trasy z Eksploratora Windows na okno programu lub mapę (Drag &amp; Drop).
+3. Kliknij **wybierz...** i wskaż plik trasy (jeśli nie przeciągnięto go myszą).
 4. Ustaw *Szerokość pasa po każdej stronie trasy [m]* i kliknij **OK**.
 5. Sprawdź na mapie przebieg trasy (czerwona linia) oraz siatkę segmentów (kolor niebieski). W komunikacie u dołu zobaczysz liczbę wyznaczonych segmentów.
 6. Kliknij **Pobierz**.
@@ -96,6 +96,17 @@ Narzędzia korzystające z sesji uwzględniają korytarz:
 
 * Menu *Sesja pobierania > usuń obszar wzdłuż trasy (pobieranie całego prostokąta)*: przywraca standardowy prostokąt z siatką i uchwytami.
 * Zaznaczenie nowego obszaru prawym przyciskiem myszy również usuwa korytarz trasy.
+
+---
+
+## Profil wysokościowy i rzędne NMT / LIDAR
+
+W oknie obszaru wzdłuż trasy dostępna jest funkcja analizy ukształtowania terenu i uzupełniania rzędnych wysokościowych:
+
+* **Pobierz profil NMT:** program łączy się z państwową usługą NMT GUGiK (lotniczy skaning laserowy LIDAR) i pobiera rzeczywiste wysokości terenu dla wszystkich punktów śladu w Polsce.
+* **Wykres profilu:** w oknie generowany jest interaktywny wykres profilu podłużnego trasy z czytelnym podsumowaniem przewyższeń: suma podejść (przewyższenie dodatnie liczone z bezpieczną histerezą 1,5 m zapobiegającą szumowi gęstego zapisu GPS), suma zejść, wysokość minimalna, maksymalna oraz całkowity dystans trasy.
+* **Zapisz GPX z wysokościami:** pozwala zapisać wzbogacony plik GPX z uzupełnionymi znacznikami `<ele>`. Taki plik można wgrać do zegarków Garmin, Suunto, Polar lub aplikacji na smartfony (Locus Map, Komoot), uzyskując dokładny profil trasy przed wyruszeniem w góry.
+* **Przycisk Pomoc:** w lewym dolnym rogu okna korytarza otwiera podręczną instrukcję z aktywnym odnośnikiem do tego rozdziału pomocy.
 
 ---
 

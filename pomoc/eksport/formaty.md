@@ -23,30 +23,48 @@ Który format wybrać dla której aplikacji lub urządzenia.
 
 | Format | Dla | Budowa | Uwagi |
 |---|---|---|---|
-| **KMZ: Garmin Custom Maps** | odbiorniki Garmin | kafle JPEG do 1024 × 1024 px w WGS84 | limit liczby kafli, brak przezroczystości |
+| **KMZ: Garmin Custom Maps** | odbiorniki Garmin | kafle JPEG do 1024 × 1024 px w WGS84 | opcjonalny automatyczny podział na tomy przy ponad 100 kaflach |
+| **Garmin BirdsEye (JNX)** | odbiorniki Garmin (firmware z obsługą JNX) | wielopoziomowy raster z piramidą powiększeń | brak limitu 100 kafli, kopiowany do folderu `Garmin/BirdsEye` |
+| **GeoTIFF bezpośredni** | Avenza Maps, QField, ArcGIS, CAD, QGIS | pojedynczy georeferencjonowany plik TIF | kompresja LZW lub JPEG, z plikami `.tfw`, `.prj`, `.map` |
 | **KMZ** | Locus Map, OruxMaps, Google Earth | kafle do 1024 × 1024 px w WGS84 | brak limitu kafli, może być nakładką (PNG) |
 | **MBTiles** | Locus Map, OsmAnd, OruxMaps i wiele innych | baza SQLite z piramidą kafli Web Mercator 256 px | najbardziej uniwersalny, z poziomami powiększenia |
 | **SQLiteDB** | OsmAnd, Locus Map | baza w formacie RMaps, kafle Web Mercator | natywny format map rastrowych OsmAnd |
 | **OruxMaps** | OruxMaps | folder z bazą `OruxMapsImages.db` i kalibracją `.otrk2.xml` | natywny format map offline OruxMaps |
 
 {: .wskazowka }
-Nie wiesz, co wybrać? Do aplikacji w telefonie wybierz **MBTiles**, do Garmina **KMZ dla Garmin**, a do obejrzenia w Google Earth zwykły **KMZ**.
+Nie wiesz, co wybrać? Do aplikacji w telefonie wybierz **MBTiles**, do Garmina z odblokowanym firmware **Garmin BirdsEye (JNX)** lub **KMZ dla Garmin**, do aplikacji Avenza Maps **GeoTIFF bezpośredni**, a do obejrzenia w Google Earth zwykły **KMZ**.
 
 ---
 
 ## KMZ dla Garmin Custom Maps
 
 Odbiorniki Garmin z funkcją *Custom Maps* (mapy niestandardowe) wyświetlają obrazy z pliku KMZ, ale mają ograniczenia:
-kafle JPEG o boku najwyżej 1024 px i ograniczoną liczbę kafli.
+kafle JPEG o boku najwyżej 1024 px i ograniczoną liczbę kafli (zazwyczaj do 100 kafli na urządzenie).
 
-* *Maksymalna liczba kafli*: od 1 do 1000, domyślnie **100**. Większość odbiorników wyświetla najwyżej 100 kafli
-  (wszystkich map niestandardowych razem), a nowsze modele do 500. Sprawdź w instrukcji swojego urządzenia.
-* Gdy mapa w pełnej rozdzielczości wymagałaby więcej kafli, program **zmniejsza rozdzielczość** tak, by zmieścić się
-  w limicie. Plan eksportu pokazuje wtedy *rozdzielczość zmniejszona n x (limit kafli)*.
-* Opcje nakładki i kafli PNG są niedostępne, bo Garmin przyjmuje tylko JPEG.
+* *Maksymalna liczba kafli*: od 1 do 1000, domyślnie **100**.
+* **Automatyczny podział na tomy:** jeśli mapa w pełnej rozdzielczości wymaga więcej niż 100 kafli, włącz opcję podziału na tomy. Program utworzy spójne części (`_tom1.kmz`, `_tom2.kmz` itd.) bez konieczności sztucznego obniżania rozdzielczości czy obcinania terenu.
+* **Kolejność rysowania (z-order):** możesz określić warstwę wyświetlania mapy w odbiorniku (np. pod wektorową siatką dróg lub na wierzchu).
+* **Filtr MIP dla Garmina:** opcja korekcji kontrastu, nasycenia i ostrości splotowej Laplaciana 3×3, specjalnie zoptymalizowana pod kątem ekranów Memory-In-Pixel, dzięki czemu mapa zachowuje maksymalną czytelność w ostrym słońcu.
 
-Przy dużym obszarze lepiej podzielić mapę na kilka sesji albo zwiększyć piksel przy pobieraniu, niż godzić się
-na silne zmniejszenie rozdzielczości.
+---
+
+## Garmin BirdsEye (JNX)
+
+Format dedykowany dla odbiorników turystycznych Garmin (np. GPSMAP, eTrex, Montana, Oregon) z odblokowaną obsługą BirdsEye (tzw. patchowany firmware):
+
+* **Brak limitu 100 kafli:** pozwala wyeksportować mapę obejmującą całe pasma górskie lub województwa w jednym pliku.
+* **Wielopoziomowa piramida:** zawiera automatycznie wyliczone poziomy powiększenia od przeglądowego do szczegółowego.
+* Gotowy plik `.jnx` wystarczy skopiować bezpośrednio do katalogu `Garmin/BirdsEye` w pamięci urządzenia lub na karcie microSD.
+
+---
+
+## GeoTIFF bezpośredni
+
+Pojedynczy plik TIF z georeferencją zaszytą bezpośrednio w nagłówkach:
+
+* **Zastosowanie:** idealny do aplikacji mobilnych Avenza Maps i QField oraz oprogramowania GIS (QGIS, ArcGIS) i CAD bez konieczności uprzedniego scalania segmentów.
+* **Kompresja:** bezstratna LZW/Deflate lub kompresja JPEG z regulacją jakości.
+* **Pliki towarzyszące:** program może utworzyć plik kalibracji World File (`.tfw`), rzut w formacie ESRI WKT (`.prj`) oraz kalibrację punktową OziExplorer (`.map`).
 
 ---
 

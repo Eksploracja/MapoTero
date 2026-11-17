@@ -63,8 +63,8 @@ Wszystkie elementy trafiają na osobne warstwy o nazwach zaczynających się od 
 
 ## Pliki wynikowe
 
-Domyślnie pliki zapisują się w folderze sesji pod nazwą `_cad_<kol>x<wier>` (możesz ją zmienić przyciskiem **zmień...**).
-Ustawienia pól wyboru są zapamiętywane między uruchomieniami w `lastsettings.txt`.
+Domyślnie pliki zapisują się w folderze aktywnej sesji (`download\sesja_<zbior>_<timestamp>\`) pod nazwą `_cad_<kol>x<wier>` (możesz ją zmienić przyciskiem **zmień...**).
+Ustawienia pól wyboru są zapamiętywane między uruchomieniami w `lastsettings.txt`. Przycisk **Pomoc** (lub klawisz <kbd>F1</kbd>) otwiera okno podręcznej pomocy dla eksportu CAD.
 
 * **Rysunek DXF (DXF R2000)**: otwiera się w AutoCAD 2000+, AutoCAD LT, BricsCAD, ZWCAD, GstarCAD, progeCAD i innych.
   Opcja *ścieżki rastrów względem pliku DXF* zapisuje odnośniki w postaci `.\nazwa_pliku`, co pozwala przenieść cały folder na inny komputer.

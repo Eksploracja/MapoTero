@@ -427,10 +427,10 @@ Partial Class Form1
         'ZnajdzDzialkeToolStripMenuItem
         '
         Me.ZnajdzDzialkeToolStripMenuItem.Name = "ZnajdzDzialkeToolStripMenuItem"
-        Me.ZnajdzDzialkeToolStripMenuItem.ShortcutKeys = CType((System.Windows.Forms.Keys.Control Or System.Windows.Forms.Keys.D), System.Windows.Forms.Keys)
+        Me.ZnajdzDzialkeToolStripMenuItem.ShortcutKeys = CType((System.Windows.Forms.Keys.Control Or System.Windows.Forms.Keys.F), System.Windows.Forms.Keys)
         Me.ZnajdzDzialkeToolStripMenuItem.Size = New System.Drawing.Size(315, 22)
-        Me.ZnajdzDzialkeToolStripMenuItem.Text = "Wyszukaj działkę katastralną (ULDK GUGiK)..."
-        Me.ZnajdzDzialkeToolStripMenuItem.ToolTipText = "Wyszukuje działkę po numerze TERYT lub nazwie i numerze oraz centruje siatkę pobierania"
+        Me.ZnajdzDzialkeToolStripMenuItem.Text = "Wyszukaj miejscowość lub działkę..."
+        Me.ZnajdzDzialkeToolStripMenuItem.ToolTipText = "Wyszukuje miejscowość, adres lub działkę katastralną (Ctrl+F, Ctrl+D)"
         '
         'KonwertujOziToolStripMenuItem
         '
@@ -757,14 +757,16 @@ Partial Class Form1
         '
         'btnSzukajDzialki
         '
-        Me.btnSzukajDzialki.Font = New System.Drawing.Font("Segoe UI", 7.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
+        Me.btnSzukajDzialki.Font = New System.Drawing.Font("Segoe UI", 6.5!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
         Me.btnSzukajDzialki.Location = New System.Drawing.Point(6, 108)
         Me.btnSzukajDzialki.Margin = New System.Windows.Forms.Padding(0)
         Me.btnSzukajDzialki.Name = "btnSzukajDzialki"
+        Me.btnSzukajDzialki.Padding = New System.Windows.Forms.Padding(0)
         Me.btnSzukajDzialki.Size = New System.Drawing.Size(23, 26)
         Me.btnSzukajDzialki.TabIndex = 297
-        Me.btnSzukajDzialki.Text = "Dz"
-        Me.ToolTip1.SetToolTip(Me.btnSzukajDzialki, "Wyszukaj działkę katastralną ULDK (Ctrl+D)")
+        Me.btnSzukajDzialki.Text = ""
+        Me.ToolTip1.SetToolTip(Me.btnSzukajDzialki, "Wyszukaj miejscowość, adres lub działkę katastralną (Ctrl+F, Ctrl+D)")
+        Me.btnSzukajDzialki.UseCompatibleTextRendering = True
         Me.btnSzukajDzialki.UseVisualStyleBackColor = True
         '
         'grpRozmiarSiatki
@@ -968,7 +970,7 @@ Partial Class Form1
         Me.btnUsunPobrane.Name = "btnUsunPobrane"
         Me.btnUsunPobrane.Size = New System.Drawing.Size(30, 30)
         Me.btnUsunPobrane.TabIndex = 307
-        Me.ToolTip1.SetToolTip(Me.btnUsunPobrane, "usuń wszystkie pobrane mapy")
+        Me.ToolTip1.SetToolTip(Me.btnUsunPobrane, "usuń pobrane mapy bieżącej sesji (do Kosza)")
         Me.btnUsunPobrane.UseVisualStyleBackColor = True
         '
         'btnZnaczniki

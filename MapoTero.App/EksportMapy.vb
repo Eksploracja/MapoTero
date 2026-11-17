@@ -899,6 +899,24 @@ Friend Shared Function NazwaPlikuTomu(sciezkaBazowa As String, numerTomu As Inte
         Return (a << 24) Or (nowyR << 16) Or (nowyG << 8) Or nowyB
     End Function
 
+    ''' <summary>
+    ''' Czy piksele warstwy można kopiować 1:1 do arkusza: ten sam układ, bok segmentu, liczba wierszy i kolumn, a także
+    ''' ten sam narożnik siatki i rozmiar piksela. Dawniej porównywano tylko wymiary, więc nakładka o tych samych wymiarach,
+    ''' ale z siatką przesuniętą (np. uchwytem) trafiała do GeoTIFF w położenie mapy podstawowej.
+    ''' </summary>
+    Friend Shared Function TaSamaSiatkaPikseli(a As Siatka, ukladA As UkladWspolrzednych, b As Siatka, ukladB As UkladWspolrzednych) As Boolean
+        If ukladA.Epsg <> ukladB.Epsg OrElse a.BokSegmentuPx <> b.BokSegmentuPx OrElse
+           a.LiczbaKolumn <> b.LiczbaKolumn OrElse a.LiczbaWierszy <> b.LiczbaWierszy Then Return False
+        'tolerancja: setna część piksela
+        Dim tol As Double = b.RozmiarPiksela * 0.01
+        Dim za = a.ZasiegSiatki, zb = b.ZasiegSiatki
+        Return Math.Abs(a.RozmiarPiksela - b.RozmiarPiksela) <= tol / Math.Max(1, b.SzerokoscPx) AndAlso
+               Math.Abs(za.XGora - zb.XGora) <= tol AndAlso Math.Abs(za.YLewy - zb.YLewy) <= tol
+    End Function
+
+    ''' <summary>Największy rozmiar pasa wierszy eksportu GeoTIFF w pamięci (bajty; testy zmniejszają go, by sprawdzić zapis pasami).</summary>
+    Friend Shared Property BudzetPamieciGeoTiff As Long = 256L * 1024 * 1024
+
     Private Shared Sub EksportGeoTiff(z As ZadanieEksportu, postep As IProgress(Of Integer), token As CancellationToken)
         Dim s = z.Zrodlo.Siatka
         If s Is Nothing OrElse Not s.Poprawna OrElse s.LiczbaKolumn = 0 OrElse s.LiczbaWierszy = 0 Then
@@ -907,35 +925,52 @@ Friend Shared Function NazwaPlikuTomu(sciezkaBazowa As String, numerTomu As Inte
         Dim bok As Integer = s.BokSegmentuPx
         Dim kolumny As Integer = s.LiczbaKolumn
         Dim wiersze As Integer = s.LiczbaWierszy
-        Dim szer As Integer = CInt(s.SzerokoscPx)
-        Dim wys As Integer = CInt(s.WysokoscPx)
         Dim format As FormatArkusza = If(z.GeoTiffJpeg, FormatArkusza.GeoTiffJpeg, FormatArkusza.GeoTiff)
         Dim kanaly As Integer = If(z.GeoTiffJpeg, 3, If(z.Nakladka OrElse z.KaflePng, 4, 3))
+        'rozmiar sprawdzany przed alokacją buforów (dawniej bardzo szeroka mapa kończyła się OverflowException)
+        If s.SzerokoscPx > Integer.MaxValue \ 4 OrElse s.WysokoscPx > Integer.MaxValue Then
+            Throw New ArgumentException("Arkusz " & s.SzerokoscPx & " x " & s.WysokoscPx & " pikseli jest zbyt duży do zapisu w jednym pliku GeoTIFF")
+        End If
+        Dim szer As Integer = CInt(s.SzerokoscPx)
+        Dim wys As Integer = CInt(s.WysokoscPx)
+        Dim maks As Integer = ZapisRastra.MaksymalnyBok(format)
+        If szer > maks OrElse wys > maks Then
+            Throw New ArgumentException("Arkusz " & szer & " x " & wys & " pikseli przekracza możliwości formatu (maks. " & maks & " pikseli)")
+        End If
 
         Dim warstwy = z.WarstwyRenderowania()
-        Dim buforRgb(szer * bok * kanaly - 1) As Byte
-        Dim pikseleArgb(szer * bok - 1) As Integer
+        'pas wierszy mieszczący się w budżecie pamięci - dawniej cały wiersz segmentów naraz (przy szerokości
+        '100 000 px i boku 2000 px ok. 1,4 GB)
+        Dim pas As Integer = CInt(Math.Max(1L, Math.Min(bok, BudzetPamieciGeoTiff \ (CLng(szer) * (4 + kanaly)))))
+        Dim buforRgb(pas * szer * kanaly - 1) As Byte
+        Dim pikseleArgb(pas * szer - 1) As Integer
+        Dim taSamaSiatka As New List(Of Boolean)
+        For Each warstwa In warstwy
+            taSamaSiatka.Add(TaSamaSiatkaPikseli(warstwa.Zrodlo.Siatka, warstwa.Uklad, s, z.Uklad))
+        Next
 
         Using zapis = ZapisRastra.Utworz(format, z.Plik, szer, wys, z.JakoscJpeg, z.Uklad, s.ZasiegSiatki, kanaly = 4)
             For w = 1 To wiersze
+              For y0 = 0 To bok - 1 Step pas
                 token.ThrowIfCancellationRequested()
+                Dim n As Integer = Math.Min(pas, bok - y0)
                 'Domyślne tło: białe dla RGB (-1 = 0xFFFFFFFF), przezroczyste dla RGBA (0)
                 Dim domyslnyKolor As Integer = If(kanaly = 4, 0, -1)
-                Array.Fill(pikseleArgb, domyslnyKolor)
+                Array.Fill(pikseleArgb, domyslnyKolor, 0, n * szer)
 
-                For Each warstwa In warstwy
+                For iw = 0 To warstwy.Count - 1
+                    Dim warstwa = warstwy(iw)
                     Dim zr = warstwa.Zrodlo
                     Dim krycie = warstwa.Krycie
-                    Dim taSamaSiatka = (zr.Siatka.BokSegmentuPx = bok AndAlso zr.Siatka.LiczbaKolumn = kolumny AndAlso zr.Siatka.LiczbaWierszy = wiersze AndAlso warstwa.Uklad.Epsg = z.Uklad.Epsg)
 
-                    If taSamaSiatka Then
+                    If taSamaSiatka(iw) Then
                         For k = 1 To kolumny
                             Dim dane = zr.Segment(w, k)
                             If dane Is Nothing Then Continue For
                             Dim x0 As Integer = (k - 1) * bok
-                            For y = 0 To bok - 1
+                            For y = 0 To n - 1
                                 Dim idxCel = y * szer + x0
-                                Dim idxZr = y * bok * 4
+                                Dim idxZr = (y0 + y) * bok * 4
                                 For x = 0 To bok - 1
                                     Dim b = dane(idxZr)
                                     Dim g = dane(idxZr + 1)
@@ -946,7 +981,7 @@ Friend Shared Function NazwaPlikuTomu(sciezkaBazowa As String, numerTomu As Inte
                                     Dim efA As Double = (a / 255.0) * krycie
                                     If efA <= 0 Then Continue For
 
-                                    If warstwa Is warstwy(0) AndAlso efA >= 0.999 Then
+                                    If iw = 0 AndAlso efA >= 0.999 Then
                                         pikseleArgb(idxCel + x) = (CInt(a) << 24) Or (CInt(r) << 16) Or (CInt(g) << 8) Or b
                                     Else
                                         pikseleArgb(idxCel + x) = NalozPiksel(pikseleArgb(idxCel + x), r, g, b, efA)
@@ -957,8 +992,8 @@ Friend Shared Function NazwaPlikuTomu(sciezkaBazowa As String, numerTomu As Inte
                     Else
                         Dim pikselX = s.RozmiarPiksela
                         Dim pikselY = s.RozmiarPiksela
-                        For y = 0 To bok - 1
-                            Dim pyWiersz = (w - 1) * bok + y
+                        For y = 0 To n - 1
+                            Dim pyWiersz = (w - 1) * bok + y0 + y
                             Dim pX = s.ZasiegSiatki.XGora - (pyWiersz + 0.5) * pikselX
                             Dim idxCel = y * szer
                             For x = 0 To szer - 1
@@ -981,11 +1016,11 @@ Friend Shared Function NazwaPlikuTomu(sciezkaBazowa As String, numerTomu As Inte
                 Next
 
                 If z.KorekcjaMip IsNot Nothing AndAlso z.KorekcjaMip.Wlaczona Then
-                    KorekcjaMip.Zastosuj(pikseleArgb, szer, bok, z.KorekcjaMip)
+                    KorekcjaMip.Zastosuj(pikseleArgb, szer, n, z.KorekcjaMip)
                 End If
 
                 Dim iRgb As Integer = 0
-                For iPx = 0 To szer * bok - 1
+                For iPx = 0 To szer * n - 1
                     Dim c = pikseleArgb(iPx)
                     buforRgb(iRgb) = CByte((c >> 16) And &HFF)
                     buforRgb(iRgb + 1) = CByte((c >> 8) And &HFF)
@@ -998,7 +1033,8 @@ Friend Shared Function NazwaPlikuTomu(sciezkaBazowa As String, numerTomu As Inte
                     End If
                 Next
 
-                zapis.ZapiszWiersze(buforRgb, bok)
+                zapis.ZapiszWiersze(buforRgb, n)
+              Next
                 postep?.Report(CInt(w * 100 \ wiersze))
             Next
             zapis.Zakoncz()

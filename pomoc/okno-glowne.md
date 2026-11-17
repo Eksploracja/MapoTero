@@ -27,24 +27,25 @@ Opis każdego elementu okna głównego: mapy podglądu, list zbiorów map i wars
 
 | Nr | Element okna | Do czego służy |
 |---|---|---|
-| **1** | Pasek menu | sesja pobierania (zapis/wczytanie `conf.txt`, korytarz GPX/KML, odświeżanie), narzędzia (kreator serwerów, scalanie, eksport, CAD, wielowarstwowy MBTiles, nakładanie, usuwanie pustych), ustawienia i pomoc |
-| **2** | Mapa podglądu | podkład orientacyjny (OSM / Google / Bing), zaznaczanie obszaru prawym przyciskiem myszy oraz siatka segmentów z uchwytami |
+| **1** | Pasek menu | sesja pobierania (zapis/wczytanie `conf.txt`, korytarz GPX/KML, odświeżanie), narzędzia (wyszukiwarka miejscowości i działek, konwerter Ozi, kreator serwerów, scalanie, eksport, CAD, wielowarstwowy MBTiles, nakładanie, usuwanie pustych), ustawienia i pomoc |
+| **2** | Mapa podglądu | podkład orientacyjny (OSM / Google / Bing), zaznaczanie obszaru prawym przyciskiem myszy, siatka segmentów z uchwytami oraz przycisk lupy 🔍 (wyszukiwarka) |
 | **3** | Drzewo *Wybierz mapy* | wszystkie zbiory i warstwy pogrupowane tematycznie, wyszukiwarka *szukaj warstwy…*, rozwijanie/zwijanie (`⊞`/`⊟`) oraz przycisk `[+]` (kreator serwerów) |
 | **4** | *Wybrane warstwy oraz ich kolejność* | „kanapka” do 12 warstw (1 = podkład), zmiana kolejności (`▲`/`▼` lub przeciąganie), usuwanie (`✕`), ustawienie `Krycie %`, przycisk `…` (*Warstwy - zaawansowane*) oraz ikona kosza |
 | **5** | Układ, segment i piksel | wybór układu współrzędnych pobierania, bok segmentu `[pix]` i rozmiar piksela `[m/pix]` (lub `[°/pix]` w WGS84) |
 | **6** | *Wynikowy rozmiar siatki* | liczba kolumn × wierszy segmentów, całkowite wymiary w pikselach i kilometrach |
 | **7** | Zasięg XY i pinezka | współrzędne granic zasięgu na schemacie (pola edycji po włączeniu wpisywania XY w *Ustawieniach*) oraz przycisk centrowania mapy na rzeczywistym zasięgu siatki |
-| **8** | Przyciski akcji | **Pobierz**, **Przerwij pobieranie**, scalanie (ikona szachownicy), otwarcie folderu sesji (żółty folder) i *usuń wszystkie pobrane mapy* |
-| **9** | *Komunikaty* | komunikaty o postępie, powierzchni zaznaczenia i ewentualnych błędach (kolor oznacza wagę komunikatu) |
-| **10** | Pasek stanu | postęp w procentach, format segmentów, bieżący folder sesji i nazwa ostatniego segmentu |
+| **8** | Podgląd na żywo i lupa | miniatura miksowania warstw ze środka siatki z lupą 50%, 100%, 200%, 400% i przyciskiem *Podgląd MIP...* |
+| **9** | Przyciski akcji | **Pobierz**, **Przerwij pobieranie**, scalanie (ikona szachownicy), otwarcie folderu sesji (żółty folder) i *usuń wszystkie pobrane mapy* |
+| **10** | *Komunikaty* | komunikaty o postępie, powierzchni zaznaczenia i ewentualnych błędach (kolor oznacza wagę komunikatu) |
+| **11** | Pasek stanu | postęp w procentach, format segmentów, bieżący podfolder sesji i nazwa ostatniego segmentu |
 
 Okno dzieli się na trzy części:
 
-* **po lewej**: mapa podglądu do zaznaczania obszaru i podglądu siatki segmentów,
-* **po prawej**: panel *Dane źródłowe* z drzewem map, listą wybranych warstw, ustawieniami układu, segmentu i piksela oraz współrzędnymi zasięgu,
+* **po lewej**: mapa podglądu do zaznaczania obszaru i podglądu siatki segmentów, wraz z przyciskami powiększenia i lupą wyszukiwania,
+* **po prawej**: panel *Dane źródłowe* z drzewem map, listą wybranych warstw, ustawieniami układu, segmentu i piksela, współrzędnymi zasięgu oraz panelem podglądu warstw z lupą powiększającą,
 * **na dole**: komunikaty oraz pasek stanu.
 
-Tytuł okna podaje nazwę i numer wersji programu (np. `MapoTero {{ site.wersja_programu }}`). Pasek oddzielający mapę od panelu *Dane źródłowe* można przeciągać myszą, żeby poszerzyć listę warstw.
+Tytuł okna podaje nazwę i numer wersji programu (np. `MapoTero {{ site.wersja_programu }}`). Program uruchamia się domyślnie w pełnym oknie zmaksymalizowanym, zapewniając optymalny obszar roboczy. Pasek oddzielający mapę od panelu *Dane źródłowe* można przeciągać myszą, żeby poszerzyć listę warstw.
 
 ---
 
@@ -58,18 +59,20 @@ Tytuł okna podaje nazwę i numer wersji programu (np. `MapoTero {{ site.wersja_
 | | usuń obszar wzdłuż trasy | | wraca do pobierania pełnego prostokąta |
 | | odśwież mapę (pobierz ponownie wszystkie segmenty) | | [Odświeżanie mapy](../pobieranie/odswiezanie/) |
 | **Narzędzia** | Dodaj nowy serwer WMS / WMTS... | | [Kreator serwerów](../serwery/kreator/) |
+| | Wyszukaj miejscowość lub działkę... | <kbd>Ctrl</kbd>+<kbd>F</kbd> | [Wyszukiwarka miejscowości i działek](../obszar/zaznaczanie/#wyszukiwarka-miejscowości-adresów-i-działek-katastralnych) (<kbd>Ctrl</kbd>+<kbd>D</kbd> dla działek) |
+| | Konwertuj mapę OziExplorer (.map)... | | [Konwerter map OziExplorer](../narzedzia/#konwerter-map-oziexplorer-map) |
 | | Łączenie segmentów | <kbd>Ctrl</kbd>+<kbd>L</kbd> | [Scalanie segmentów](../scalanie/) |
 | | Eksport do KMZ, MBTiles, SQLiteDB, OruxMaps | <kbd>Ctrl</kbd>+<kbd>E</kbd> | [Eksport mapy](../eksport/) |
 | | Eksport do CAD (DXF, skrypt SCR, LISP)... | | [Eksport do CAD](../cad/) |
 | | Zaawansowany wielowarstwowy MBTiles... | | [Wielowarstwowy MBTiles](../mbtiles-wielowarstwowy/) |
-| | Nakładanie dwóch map png na siebie | <kbd>Ctrl</kbd>+<kbd>N</kbd> | [Narzędzia dodatkowe](../narzedzia/) |
-| | Usuwanie pustych segmentów | <kbd>Ctrl</kbd>+<kbd>U</kbd> | [Narzędzia dodatkowe](../narzedzia/) |
+| | Nakładanie dwóch map png na siebie | <kbd>Ctrl</kbd>+<kbd>N</kbd> | [Narzędzia dodatkowe](../narzedzia/#nakładanie-dwóch-map-png) |
+| | Usuwanie pustych segmentów | <kbd>Ctrl</kbd>+<kbd>U</kbd> | [Narzędzia dodatkowe](../narzedzia/#usuwanie-pustych-segmentów) |
 | **Ustawienia** | | | okno [Ustawienia](../ustawienia/) |
 | **Pomoc** | O programie | <kbd>F1</kbd> | wersja i autorzy |
 | | Podstawowa instrukcja obsługi | <kbd>F2</kbd> | skrócona instrukcja wbudowana w program |
 | | Pomoc na Pomorskim Forum Eksploracyjnym | <kbd>F3</kbd> | otwiera forum w przeglądarce |
 
-Menu *Sesja pobierania* otwiera też <kbd>Alt</kbd>+<kbd>S</kbd>.
+Menu *Sesja pobierania* otwiera też <kbd>Alt</kbd>+<kbd>S</kbd>. Każde samodzielne okno narzędziowe posiada ponadto w lewym dolnym rogu przycisk **Pomoc**, otwierający dedykowane okno instrukcji z bezpośrednim odnośnikiem do odpowiedniego rozdziału podręcznika online.
 
 ---
 
@@ -82,6 +85,7 @@ do orientacji w terenie.
 |---|---|
 | przesuwanie mapy | przeciągnij lewym przyciskiem myszy |
 | przybliżanie i oddalanie | kółko myszy, przyciski **+** i **-** na mapie, dwuklik lewym (przybliża) lub prawym (oddala) przyciskiem |
+| wyszukiwanie miejscowości / działki | przycisk z ikoną lupy 🔍 pod przyciskiem `-` (lub skróty <kbd>Ctrl</kbd>+<kbd>F</kbd> / <kbd>Ctrl</kbd>+<kbd>D</kbd>) |
 | zaznaczanie obszaru | przeciągnij **prawym** przyciskiem myszy - [Zaznaczanie na mapie](../obszar/zaznaczanie/) |
 | zmiana zasięgu siatki | przeciągnij uchwyt lewym przyciskiem myszy |
 
@@ -172,6 +176,14 @@ Pola wypełniają się automatycznie przy zaznaczaniu myszą na mapie. Ręczna e
 
 Przycisk z pinezką (*pokaż na mapie siatkę segmentów…*) centruje mapę na zasięgu wpisanym w polach XY i rysuje narożniki siatki.
 
+## Podgląd zestawu warstw i lupa powiększająca
+
+W prawym dolnym narożniku okna głównego (pod schematem siatki i polami współrzędnych) znajduje się **panel podglądu zestawu warstw na żywo**:
+
+* **Próbka w czasie rzeczywistym:** silnik podglądu pobiera w tle wycinek wybranych warstw ze środka zaznaczonej siatki i nakłada je dokładnie według zadanego krycia oraz trybów mieszania (np. mnożenie, nakładka).
+* **Lupa powiększająca:** przyciski **50%**, **100%** (skala 1:1, piksel w piksel), **200%** i **400%** pozwalają na bieżąco powiększyć podgląd i ocenić czytelność napisów, rzędnych wysokościowych, poziomic i symboli przed rozpoczęciem czasochłonnego pobierania.
+* **Przycisk *Podgląd MIP...*:** otwiera interaktywne okno symulacji filtrów podbijających kontrast, nasycenie i ostrość krawędzi (filtr splotowy Laplaciana 3×3) dla ekranów Memory-In-Pixel urządzeń Garmin.
+
 ## Przyciski
 
 | Przycisk | Działanie |
@@ -179,11 +191,11 @@ Przycisk z pinezką (*pokaż na mapie siatkę segmentów…*) centruje mapę na 
 | **Pobierz** | rozpoczyna pobieranie segmentów (zob. [Przebieg pobierania](../pobieranie/przebieg/)) |
 | **Przerwij pobieranie** | zatrzymuje pobieranie. Już pobrane pliki pozostają w folderze |
 | szachownica (*złącz pobrane segmenty w jeden arkusz*) | otwiera okno [scalania segmentów](../scalanie/). Przycisk jest nieaktywny przed pierwszym pobraniem oraz gdy w sesji wystąpiły błędy i istnieje plik `error.txt` |
-| żółty folder (*wyświetl folder z segmentami pobranej mapy*) | otwiera w Eksploratorze Windows bieżący katalog sesji (domyślnie `download`) |
-| *usuń wszystkie pobrane mapy* | usuwa **cały folder `download`** po potwierdzeniu |
+| żółty folder (*wyświetl folder z segmentami pobranej mapy*) | otwiera w Eksploratorze Windows katalog bieżącej sesji (dedykowany podfolder sesji w `download\`, np. `download\sesja_ortofotomapa_...`) |
+| *usuń pobrane mapy bieżącej sesji* | po potwierdzeniu przenosi do Kosza systemowego mapę bieżącej sesji |
 
 {: .uwaga }
-Polecenie *Usuń wszystkie pobrane mapy* kasuje cały katalog `download` wraz z podfolderami `sesja_…`. Pliki nie trafiają do Kosza systemowego. Używaj go tylko przy chęci całkowitego wyczyszczenia dysku.
+Polecenie *Usuń pobrane mapy bieżącej sesji* przenosi do Kosza cały podfolder sesji w `download\` (np. `download\sesja_ortofotomapa_...`). Gdy sesja leży w folderze wskazanym przez Ciebie poza `download\`, do Kosza trafiają tylko pliki leżące bezpośrednio w tym folderze, a jego podfoldery i sam folder zostają. Inne sesje nie są usuwane. Na dysku sieciowym lub pendrivie bez Kosza Windows może usunąć pliki trwale.
 
 ## Komunikaty i pasek stanu
 

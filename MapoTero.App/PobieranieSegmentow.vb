@@ -326,13 +326,16 @@ Public NotInheritable Class PobieranieSegmentow
                                     blad = Await PobierzSegmentAsync(adres(sg), plik, z.LimitCzasuSekundy, token, z.IgnorujSsl OrElse grupy(0).IgnorujSsl).ConfigureAwait(False)
                                 End If
                             End If
-                            If pobierz AndAlso blad = "" AndAlso z.PonawiajBialeSegmenty AndAlso Not z.Przezroczystosc AndAlso biezacaProba < z.IloscProb Then
-                                If CzyPustyBialyPlik(plik) Then
-                                    Try
-                                        File.Delete(plik)
-                                    Catch
-                                    End Try
-                                    blad = "serwer zwrócił pusty (biały) segment zamiast mapy (ponawianie próby)"
+                            'biały kadr: jedno natychmiastowe ponowienie zapytania; drugi biały wynik to obszar naprawdę biały
+                            '(np. poza zasięgiem danych) i zostaje przyjęty. Dawniej biały segment liczył się jako błąd, więc każdy
+                            'taki segment pobierano tyle razy, ile prób w ustawieniach, z przerwą i komunikatem o niepobranych.
+                            'Segmenty składane z kafli WMTS/XYZ nie są ponawiane - kafle są już w folderze i wynik byłby ten sam.
+                            If pobierz AndAlso blad = "" AndAlso z.PonawiajBialeSegmenty AndAlso Not z.Przezroczystosc AndAlso Not maKafelkowe AndAlso
+                               CzyPustyBialyPlik(plik) Then
+                                If skladanie Then
+                                    blad = Await ZlozSegmentAsync(z, grupy, uslugiWmts, zasieg, s.BokSegmentuPx, plik, token).ConfigureAwait(False)
+                                Else
+                                    blad = Await PobierzSegmentAsync(adres(sg), plik, z.LimitCzasuSekundy, token, z.IgnorujSsl OrElse grupy(0).IgnorujSsl).ConfigureAwait(False)
                                 End If
                             End If
                             If pobierz AndAlso blad = "" Then odswiezone(sg.Indeks) = True

@@ -76,15 +76,70 @@ Public Class FormEksport
     ''' <summary>Programowe ustawianie kontrolek warstwy (bez reakcji na zdarzenia).</summary>
     Private _ustawianie As Boolean
 
+    ''' <summary>Rozmiar obszaru roboczego formularza w projekcie (jednostki projektanta, przed skalowaniem czcionki).</summary>
+    Private Const ProjektSzerokoscKlienta As Integer = 510
+    Private Const ProjektWysokoscKlienta As Integer = 788
+
+    ''' <summary>
+    ''' Rozmiar obszaru roboczego po skalowaniu okna do bieżącej czcionki. Dawniej używano wprost wartości z projektu,
+    ''' a okno było już powiększone (Segoe UI 9: ok. 595 x 909 px przy 100% DPI) - ustawienie 510 x 788 obcinało
+    ''' prawą i dolną część okna razem z przyciskami.
+    ''' </summary>
+    Private ReadOnly Property BazowaSzerokoscKlienta As Integer
+        Get
+            Return CInt(Math.Round(ProjektSzerokoscKlienta * PomocProgramu.SkalaProjektanta(Me).Width))
+        End Get
+    End Property
+
+    Private ReadOnly Property BazowaWysokoscKlienta As Integer
+        Get
+            Return CInt(Math.Round(ProjektWysokoscKlienta * PomocProgramu.SkalaProjektanta(Me).Height))
+        End Get
+    End Property
+
     Private Sub FormEksport_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+        PomocProgramu.DodajPrzyciskPomocy(Me, TematPomocy.Eksport, 12, 748)
+        DopasujDoWysokosciEkranu()
         If cboKolejnoscGarmin.Items.Count > 0 AndAlso cboKolejnoscGarmin.SelectedIndex < 0 Then
             cboKolejnoscGarmin.SelectedIndex = 0
         End If
         _folder = Form1.FolderSesji
-        If _folder = "" OrElse File.Exists(_folder & "conf.txt") = False Then _folder = FolderDownload
+        If _folder = "" OrElse File.Exists(_folder & "conf.txt") = False Then
+            Dim najnowszy = KonfiguracjaSesji.NajnowszyFolderSesji(FolderDownload)
+            _folder = If(Not String.IsNullOrEmpty(najnowszy), najnowszy, FolderDownload)
+        End If
         WczytajSesje()
         UsunNiepasujaceNakladki()
         UstawWidok()
+    End Sub
+
+    ''' <summary>
+    ''' Dopasowuje wysokość okna eksportu do wysokości ekranu roboczego (ekrany o niskiej rozdzielczości lub
+    ''' przy skalowaniu DPI 125-150%). Gdy ekran jest za niski, włącza pionowy pasek przewijania (AutoScroll)
+    ''' i poszerza okno o szerokość paska, aby zawartość i przyciski były w pełni dostępne.
+    ''' </summary>
+    Public Sub DopasujDoWysokosciEkranu()
+        Dim ekran As Rectangle = Screen.FromControl(Me).WorkingArea
+        Dim ramkaPionowa As Integer = Math.Max(0, Me.Height - Me.ClientSize.Height)
+        Dim wymaganaWysokoscOkna As Integer = BazowaWysokoscKlienta + ramkaPionowa
+        Dim maksDozwolonaWysokoscOkna As Integer = Math.Max(320, ekran.Height - 30)
+
+        If wymaganaWysokoscOkna > maksDozwolonaWysokoscOkna Then
+            Me.AutoScroll = True
+            Me.AutoScrollMinSize = New Size(0, BazowaWysokoscKlienta)
+            Dim nowaWysokoscKlienta As Integer = Math.Max(260, maksDozwolonaWysokoscOkna - ramkaPionowa)
+            Dim pasek As Integer = SystemInformation.VerticalScrollBarWidth
+            Me.ClientSize = New Size(BazowaSzerokoscKlienta + pasek, nowaWysokoscKlienta)
+        Else
+            Me.AutoScroll = False
+            Me.AutoScrollMinSize = Size.Empty
+            Me.ClientSize = New Size(BazowaSzerokoscKlienta, BazowaWysokoscKlienta)
+        End If
+
+        Me.StartPosition = FormStartPosition.Manual
+        Me.Top = Math.Max(ekran.Top + 5, ekran.Top + (ekran.Height - Me.Height) \ 2)
+        Me.Left = Math.Max(ekran.Left + 5, ekran.Left + (ekran.Width - Me.Width) \ 2)
+        Me.AutoScrollPosition = New Point(0, 0)
     End Sub
 
     ''' <summary>

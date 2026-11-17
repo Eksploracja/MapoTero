@@ -38,8 +38,12 @@ Public Class Form3
     Public ReadOnly Property PlikArkusza As String = ""
 
     Private Sub Form3_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+        PomocProgramu.DodajPrzyciskPomocy(Me, TematPomocy.Scalanie)
         _folderScalania = If(FolderPoczatkowy <> "", FolderPoczatkowy, Form1.FolderSesji)
-        If _folderScalania = "" OrElse File.Exists(_folderScalania & "conf.txt") = False Then _folderScalania = FolderDownload
+        If _folderScalania = "" OrElse File.Exists(_folderScalania & "conf.txt") = False Then
+            Dim najnowszy = KonfiguracjaSesji.NajnowszyFolderSesji(FolderDownload)
+            _folderScalania = If(Not String.IsNullOrEmpty(najnowszy), najnowszy, FolderDownload)
+        End If
         txtFolder.Text = _folderScalania
         txtFolder.Enabled = False
         grpParametry.Enabled = False
@@ -114,7 +118,7 @@ Public Class Form3
     End Sub
 
     Private Sub btnZmienFolder_Click(sender As Object, e As EventArgs) Handles btnZmienFolder.Click
-        dlgFolder.SelectedPath = FolderDownload
+        dlgFolder.SelectedPath = If(Directory.Exists(_folderScalania), _folderScalania, FolderDownload)
         If dlgFolder.ShowDialog = DialogResult.OK Then
             _folderScalania = dlgFolder.SelectedPath & "\"
             txtFolder.Text = _folderScalania

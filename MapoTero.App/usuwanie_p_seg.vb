@@ -14,6 +14,7 @@
 'along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 Imports System.IO
+Imports MapoTero.Core
 
 ''' <summary>Usuwanie pustych (małych) segmentów wraz z ich plikami georeferencyjnymi.</summary>
 Public Class Usuwanie_p_seg
@@ -21,13 +22,18 @@ Public Class Usuwanie_p_seg
     Private ReadOnly _plikiBiezace As New List(Of FileInfo)()
 
     Private Sub Usuwanie_p_seg_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+        PomocProgramu.DodajPrzyciskPomocy(Me, TematPomocy.UsuwaniePustych, 20, 287)
         cmbRozszerzenie_SelectedIndexChanged(Nothing, Nothing)
     End Sub
 
     ''' <summary>Folder segmentów bieżącej sesji.</summary>
     Private ReadOnly Property Folder As String
         Get
-            Return Form1.FolderSesji
+            If Not String.IsNullOrWhiteSpace(Form1.FolderSesji) AndAlso Directory.Exists(Form1.FolderSesji) AndAlso File.Exists(Path.Combine(Form1.FolderSesji, "conf.txt")) Then
+                Return Form1.FolderSesji
+            End If
+            Dim najnowszy = KonfiguracjaSesji.NajnowszyFolderSesji(FolderDownload)
+            Return If(Not String.IsNullOrEmpty(najnowszy), najnowszy, If(Not String.IsNullOrWhiteSpace(Form1.FolderSesji), Form1.FolderSesji, FolderDownload))
         End Get
     End Property
 

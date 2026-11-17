@@ -72,4 +72,26 @@ Public Class SzerokoscPaneluTesty
         If blad IsNot Nothing Then Throw New Exception(blad.Message, blad)
     End Sub
 
+    ''' <summary>Okno główne przy uruchomieniu domyślnie wyświetla się jako zmaksymalizowane.</summary>
+    <Fact>
+    Public Sub OknoGlowneStartujeZmaksymalizowane()
+        Dim blad As Exception = Nothing
+        Dim t As New Thread(
+            Sub()
+                Try
+                    Using f As New MapoTero.Form1()
+                        f.Show()
+                        Application.DoEvents()
+                        Assert.Equal(FormWindowState.Maximized, f.WindowState)
+                    End Using
+                Catch ex As Exception
+                    blad = ex
+                End Try
+            End Sub)
+        t.SetApartmentState(ApartmentState.STA)
+        t.Start()
+        t.Join()
+        If blad IsNot Nothing Then Throw New Exception(blad.Message, blad)
+    End Sub
+
 End Class

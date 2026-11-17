@@ -468,8 +468,11 @@ Public NotInheritable Class KompilatorMbtiles
                 cmd.ExecuteNonQuery()
 
                 ' Tworzenie tabel
+                'indeks od początku: szybka piramida odczytuje kafle poziomu wyżej zapytaniem SELECT - bez indeksu każde
+                'przeglądało całą tabelę i czas kompilacji rósł z kwadratem liczby kafli
                 cmd.CommandText = "CREATE TABLE metadata (name text, value text);" &
                                   "CREATE TABLE tiles (zoom_level integer, tile_column integer, tile_row integer, tile_data blob);" &
+                                  "CREATE UNIQUE INDEX tile_index ON tiles (zoom_level, tile_column, tile_row);" &
                                   "CREATE TABLE IF NOT EXISTS android_metadata (locale text);" &
                                   "INSERT INTO android_metadata VALUES ('pl_PL');"
                 cmd.ExecuteNonQuery()
@@ -652,18 +655,12 @@ Public NotInheritable Class KompilatorMbtiles
                 Next
             End Using
 
-            ' Tworzenie unikalnego indeksu PO wstawieniu danych (szybki zapis masowy)
             If postep IsNot Nothing Then
                 postep.Report(New RaportPostepuKompilacji With {
                     .Procent = 98,
-                    .Komunikat = "Tworzenie indeksu kafli i optymalizacja bazy..."
+                    .Komunikat = "Optymalizacja bazy..."
                 })
             End If
-
-            Using cmdIndex = conn.CreateCommand()
-                cmdIndex.CommandText = "CREATE UNIQUE INDEX tile_index ON tiles (zoom_level, tile_column, tile_row);"
-                cmdIndex.ExecuteNonQuery()
-            End Using
 
             ' Zamknięcie w trybie DELETE (zgodność z Androidem i kartami microSD)
             Using cmdFinal = conn.CreateCommand()

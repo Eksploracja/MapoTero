@@ -21,9 +21,11 @@ Każde pobieranie tworzy sesję: folder z segmentami, plikami kalibracji i pliki
 
 ## Folder sesji i jego zawartość
 
-Domyślnym folderem sesji jest `download\` w folderze danych programu. Kiedy zapiszesz sesję w wybranym przez siebie
-miejscu lub pobierzesz kolejną mapę do osobnego podfolderu (`download\sesja_RRRR-MM-DD_GGMMSS\`), ten folder staje się
-bieżącym folderem sesji (jego ścieżkę widać na pasku stanu u dołu okna).
+Każda nowa sesja pobierania zapisuje się automatycznie do dedykowanego podfolderu w katalogu `download\`:
+`download\sesja_<nazwa_zbioru>_<RRRR-MM-DD_GGMMSS>\` (ścieżkę aktywnego folderu widać na pasku stanu u dołu okna).
+Dzięki temu główny katalog `download\` pozostaje czysty, a różne sesje i pobrane mapy nie mieszają się ze sobą.
+Kiedy wznawiasz pobieranie tej samej mapy, program kontynuuje zapis w tym samym podfolderze i dociąga brakujące kafle.
+Możesz także zapisać sesję w wybranym przez siebie miejscu na dysku (*Sesja pobierania > zapisz ustawienia sesji*).
 
 | Plik lub podfolder | Kiedy powstaje | Zawartość |
 |---|---|---|
@@ -54,8 +56,7 @@ Pliki `conf.txt` zapisane w starszych wersjach MapoTero wczytują się poprawnie
 
 ## Zapisywanie i wczytywanie sesji
 
-* **Automatycznie przy starcie:** jeśli w domyślnym folderze `download\` istnieje `conf.txt`, program wczytuje tę sesję
-  samoczynnie po uruchomieniu.
+* **Automatycznie przy starcie:** program przywraca ostatnio używany folder sesji z pliku `lastsettings.txt` (lub najnowszy podfolder w `download\`, jeśli zawiera `conf.txt`), dzięki czemu możesz od razu kontynuować pracę, scalić arkusz lub wyeksportować mapę.
 * **Zapisz ustawienia sesji (`Alt`+`Z`):** *Sesja pobierania > zapisz ustawienia sesji (conf.txt)* pozwala wskazać dowolny
   folder (np. `D:\Mapy\Okolica_topo\`), zapisać tam `conf.txt` (i ewentualnie `korytarz.txt`) i od razu przestawić
   program na zapis kolejnych segmentów do tego folderu. Jeśli w wybranym folderze leżą segmenty innej sesji, program
