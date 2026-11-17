@@ -286,22 +286,15 @@ Public Class Form1
         FolderDanych = UstalFolderDanych(FolderProgramu)
         Directory.CreateDirectory(FolderDownload)
 
-        'wyszukanie folderu sesji: zapamiętany w lastsettings.txt, najnowszy podkatalog w download/ albo fallback na download/
-        Dim folderDoWczytania As String = ""
+        'wyszukanie folderu sesji: zapamiętany w lastsettings.txt (sam download - po Nowej sesji), najnowszy podkatalog w download/
+        Dim zapamietany As String = ""
         If File.Exists(PlikLastsettings) Then
             Try
-                Dim u = PlikUstawien.Wczytaj(PlikLastsettings, KodowanieSystemowe())
-                Dim zapamietany = u.Tekst("folder segmentow", "")
-                If Not String.IsNullOrWhiteSpace(zapamietany) AndAlso Directory.Exists(zapamietany) AndAlso File.Exists(Path.Combine(zapamietany, "conf.txt")) Then
-                    folderDoWczytania = FolderZUkosnikiem(zapamietany)
-                End If
+                zapamietany = PlikUstawien.Wczytaj(PlikLastsettings, KodowanieSystemowe()).Tekst("folder segmentow", "")
             Catch
             End Try
         End If
-
-        If String.IsNullOrEmpty(folderDoWczytania) Then
-            folderDoWczytania = KonfiguracjaSesji.NajnowszyFolderSesji(FolderDownload)
-        End If
+        Dim folderDoWczytania As String = KonfiguracjaSesji.FolderSesjiDoWczytania(zapamietany, FolderDownload)
 
         Dim nowaSesja As Boolean = String.IsNullOrEmpty(folderDoWczytania) OrElse File.Exists(Path.Combine(folderDoWczytania, "conf.txt")) = False
         If nowaSesja Then

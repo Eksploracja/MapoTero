@@ -1,4 +1,4 @@
-'Copyright (C) <2015>  pajakt
+﻿'Copyright (C) <2015>  pajakt
 
 'This program is free software: you can redistribute it and/or modify
 'it under the terms of the GNU General Public License as published by
@@ -430,6 +430,34 @@ Public Class KonfiguracjaSesji
         End If
 
         Return ""
+    End Function
+
+    ''' <summary>
+    ''' Folder sesji do wczytania przy starcie programu wg folderu zapamiętanego w lastsettings.txt: zapamiętany folder
+    ''' z conf.txt; pusty ciąg (nowa sesja), gdy zapamiętany jest sam katalog download bez conf.txt - tak zapisuje go
+    ''' Nowa sesja. Dawniej taki zapis traktowano jak brak zapisu i wczytywano najnowszą sesję z download, więc po
+    ''' Nowej sesji i ponownym uruchomieniu wracała poprzednia sesja. W pozostałych przypadkach (brak zapisu, folder
+    ''' usunięty) - najnowsza sesja z katalogu download.
+    ''' </summary>
+    Public Shared Function FolderSesjiDoWczytania(zapamietany As String, katalogDownload As String) As String
+        If Not String.IsNullOrWhiteSpace(zapamietany) Then
+            If Directory.Exists(zapamietany) AndAlso File.Exists(Path.Combine(zapamietany, "conf.txt")) Then
+                Return zapamietany.TrimEnd("\"c, "/"c) & "\"
+            End If
+            If Not String.IsNullOrWhiteSpace(katalogDownload) AndAlso
+               String.Equals(PelnaSciezka(zapamietany), PelnaSciezka(katalogDownload), StringComparison.OrdinalIgnoreCase) Then
+                Return ""
+            End If
+        End If
+        Return NajnowszyFolderSesji(katalogDownload)
+    End Function
+
+    Private Shared Function PelnaSciezka(sciezka As String) As String
+        Try
+            Return Path.GetFullPath(sciezka).TrimEnd("\"c, "/"c)
+        Catch
+            Return sciezka.TrimEnd("\"c, "/"c)
+        End Try
     End Function
 
 End Class

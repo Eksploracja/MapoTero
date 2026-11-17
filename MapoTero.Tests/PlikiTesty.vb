@@ -276,6 +276,30 @@ Public Class PlikiSesjiTesty
     End Sub
 
     <Fact>
+    Public Sub FolderSesjiDoWczytania_PoNowejSesjiNieWracaDoPoprzedniej()
+        Dim download = Path.Combine(Path.GetTempPath(), "MapoTero_TestStartu_" & Guid.NewGuid().ToString("N"))
+        Dim sesja = Path.Combine(download, "sesja_1")
+        Directory.CreateDirectory(sesja)
+        File.WriteAllText(Path.Combine(sesja, "conf.txt"), "sesja 1")
+        Try
+            Dim oczekiwana = sesja & "\"
+            'zapamiętana sesja z conf.txt
+            Assert.Equal(oczekiwana, KonfiguracjaSesji.FolderSesjiDoWczytania(sesja, download))
+            'Nowa sesja zapamiętuje sam download (z ukośnikiem lub bez) - start bez sesji, a nie poprzednia sesja
+            Assert.Equal("", KonfiguracjaSesji.FolderSesjiDoWczytania(download & "\", download))
+            Assert.Equal("", KonfiguracjaSesji.FolderSesjiDoWczytania(download, download & "\"))
+            'brak zapisu albo usunięty folder - najnowsza sesja z download
+            Assert.Equal(oczekiwana, KonfiguracjaSesji.FolderSesjiDoWczytania("", download))
+            Assert.Equal(oczekiwana, KonfiguracjaSesji.FolderSesjiDoWczytania(Path.Combine(download, "usunieta"), download))
+            'sesja starszej wersji w samym download - wczytywana
+            File.WriteAllText(Path.Combine(download, "conf.txt"), "stara")
+            Assert.Equal(download & "\", KonfiguracjaSesji.FolderSesjiDoWczytania(download, download))
+        Finally
+            If Directory.Exists(download) Then Directory.Delete(download, True)
+        End Try
+    End Sub
+
+    <Fact>
     Public Sub MapOzi_PolkulaZachodniaIPoludniowa_LiteryWS()
         Dim o As New ObrazGeoreferencyjny With {.Uklad = UkladWspolrzednych.Wgs84, .Zasieg = New Zasieg(-34.5, -58.5, -34.0, -58.0),
                                                .SzerokoscPx = 100, .WysokoscPx = 100, .NazwaPliku = "a.jpg", .SciezkaPliku = "C:\a.jpg"}
