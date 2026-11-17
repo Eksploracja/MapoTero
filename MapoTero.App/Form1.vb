@@ -336,6 +336,7 @@ Public Class Form1
         UstawEdycjeXY(False)
         UstawWidokZaznaczeniaWgs(False)
         InicjalizujPrzyciskSzukaj()
+        InicjalizujNowaSesje()
         PrzygotujListeWarstw()
         AddHandler _timerPodgladu.Tick, AddressOf TimerPodgladu_Tick
 
@@ -2160,6 +2161,7 @@ Public Class Form1
         UstawDostepnoscDrzewa(False)
         btnScalanie.Enabled = False
         btnUsunPobrane.Enabled = False
+        _btnNowaSesja.Enabled = False
         OdswiezToolStripMenuItem.Enabled = False
         KorytarzToolStripMenuItem.Enabled = False
         Komunikat(If(odswiez, "Trwa odświeżanie segmentów (", "Trwa pobieranie segmentów (") & liczbaSegmentow & ")", Color.Black)
@@ -2181,6 +2183,7 @@ Public Class Form1
             btnPrzerwij.Enabled = False
             UstawDostepnoscDrzewa(True)
             btnUsunPobrane.Enabled = True
+            _btnNowaSesja.Enabled = True
             OdswiezToolStripMenuItem.Enabled = True
             KorytarzToolStripMenuItem.Enabled = True
             stPostep.Value = 0
@@ -3092,6 +3095,138 @@ Public Class Form1
             frm.ShowDialog(Me)
         End Using
     End Sub
+
+#Region "Nowa sesja"
+
+    ''' <summary>Przycisk „nowa sesja” obok przycisków folderu, siatki, scalania i usuwania (tworzony w kodzie).</summary>
+    Private _btnNowaSesja As Button
+
+    ''' <summary>Pozycja „Nowa sesja” w menu Sesja pobierania (tworzona w kodzie).</summary>
+    Private _menuNowaSesja As ToolStripMenuItem
+
+    ''' <summary>
+    ''' Przycisk i pozycja menu „Nowa sesja”. Przycisk stoi w trzeciej kolumnie górnego rzędu siatki przycisków
+    ''' (obok przycisku siatki, a nie obok „Usuń pobrane” - oba „czyszczą”, więc sąsiedztwo sprzyjałoby pomyłce);
+    ''' położenie liczone jest z przeskalowanych już przycisków, więc zgadza się przy każdej czcionce i skalowaniu.
+    ''' </summary>
+    Private Sub InicjalizujNowaSesje()
+        Dim krok As Integer = btnZnaczniki.Left - btnOtworzFolder.Left
+        _btnNowaSesja = New Button With {
+            .Name = "btnNowaSesja", .Size = btnZnaczniki.Size, .Location = New Point(btnZnaczniki.Left + krok, btnZnaczniki.Top),
+            .Anchor = btnZnaczniki.Anchor, .Image = UtworzIkoneNowejSesji(), .ImageAlign = ContentAlignment.MiddleCenter,
+            .UseVisualStyleBackColor = True, .TabIndex = btnZnaczniki.TabIndex}
+        btnZnaczniki.Parent.Controls.Add(_btnNowaSesja)
+        _btnNowaSesja.BringToFront()
+        ToolTip1.SetToolTip(_btnNowaSesja, "nowa sesja - wyczyść warstwy, zasięg i widok mapy (pobrane pliki zostają)")
+        AddHandler _btnNowaSesja.Click, Sub() NowaSesja(pytaj:=True)
+
+        _menuNowaSesja = New ToolStripMenuItem("Nowa sesja") With {.Name = "NowaSesjaToolStripMenuItem", .Image = UtworzIkoneNowejSesji()}
+        AddHandler _menuNowaSesja.Click, Sub() NowaSesja(pytaj:=True)
+        SesjaToolStripMenuItem.DropDownItems.Insert(0, _menuNowaSesja)
+        SesjaToolStripMenuItem.DropDownItems.Insert(1, New ToolStripSeparator())
+    End Sub
+
+    ''' <summary>Ikona nowej sesji: pusta kartka z zagiętym rogiem i zielonym plusem (rysowana jak lupa wyszukiwarki).</summary>
+    Public Shared Function UtworzIkoneNowejSesji(Optional rozmiar As Integer = 16) As Bitmap
+        Dim bmp As New Bitmap(rozmiar, rozmiar, Imaging.PixelFormat.Format32bppArgb)
+        Using g = Graphics.FromImage(bmp)
+            g.SmoothingMode = Drawing2D.SmoothingMode.AntiAlias
+            g.PixelOffsetMode = Drawing2D.PixelOffsetMode.HighQuality
+            g.Clear(Color.Transparent)
+            Dim kartka() As PointF = {New PointF(2.5!, 1.5!), New PointF(9.5!, 1.5!), New PointF(12.5!, 4.5!),
+                                      New PointF(12.5!, 14.5!), New PointF(2.5!, 14.5!)}
+            Using pedzel As New SolidBrush(Color.White)
+                g.FillPolygon(pedzel, kartka)
+            End Using
+            Using pioro As New Pen(Color.FromArgb(70, 70, 70), 1.0!)
+                g.DrawPolygon(pioro, kartka)
+                g.DrawLines(pioro, {New PointF(9.5!, 1.5!), New PointF(9.5!, 4.5!), New PointF(12.5!, 4.5!)})
+            End Using
+            Using pedzel As New SolidBrush(Color.FromArgb(0, 150, 60))
+                g.FillEllipse(pedzel, 8.0!, 8.0!, 8.0!, 8.0!)
+            End Using
+            Using pioro As New Pen(Color.White, 1.6!)
+                g.DrawLine(pioro, 12.0!, 9.8!, 12.0!, 14.2!)
+                g.DrawLine(pioro, 9.8!, 12.0!, 14.2!, 12.0!)
+            End Using
+        End Using
+        Return bmp
+    End Function
+
+    ''' <summary>
+    ''' Nowa sesja: czyści wybrane warstwy, zasięg, zaznaczenie i siatkę na mapie, obszar wzdłuż trasy i kontur działki,
+    ''' przywraca domyślny bok segmentu i rozmiar piksela (dobierany ponownie wg pierwszej wybranej warstwy), układ
+    ''' domyślny z ustawień, przedrostek, format i numerację nowej sesji z lastsettings.txt, zwija drzewo warstw
+    ''' z rozwiniętymi skanami map topograficznych GUGiK i pokazuje całą Polskę. Ustawienia programu zostają, pliki
+    ''' na dysku też - folder sesji wraca do download, więc następne pobieranie utworzy nowy podfolder.
+    ''' </summary>
+    ''' <param name="pytaj">Pytanie o potwierdzenie, gdy są wybrane warstwy lub zasięg (testy wywołują bez pytania).</param>
+    Friend Sub NowaSesja(pytaj As Boolean)
+        If PobieranieTrwa("Rozpoczęcie nowej sesji") Then Exit Sub
+        If pytaj AndAlso (_zestaw.Liczba > 0 OrElse BiezacaSiatka().Poprawna OrElse _korytarz IsNot Nothing) Then
+            If MessageBox.Show("Rozpocząć nową sesję?" & vbCrLf & vbCrLf &
+                               "Wybrane warstwy, zasięg pobierania, obszar wzdłuż trasy i widok mapy zostaną wyczyszczone. " &
+                               "Pobrane pliki zostają na dysku - do pobranej lub zapisanej sesji wrócisz poleceniem Sesja pobierania > Wczytaj.",
+                               "Nowa sesja", MessageBoxButtons.YesNo, MessageBoxIcon.Question) <> DialogResult.Yes Then Exit Sub
+        End If
+
+        _ctsPodglad?.Cancel()
+        If _przeciaganyUchwyt IsNot Nothing Then ZakonczPrzeciaganie(anuluj:=True)
+
+        'parametry sesji z lastsettings.txt (jak przy starcie bez sesji) - przedrostek, format, przezroczystość, numeracja
+        If File.Exists(PlikLastsettings) Then
+            Try
+                Ustawienia.Wczytaj(PlikLastsettings, parametryNowejSesji:=True)
+            Catch
+            End Try
+        End If
+        If Ustawienia.Format = "" Then Ustawienia.Format = "jpeg"
+        Ustawienia.PobierajPowyzejOstatniego = False
+        stFormat.Text = "." & Ustawienia.Format
+        FolderSesji = FolderDownload
+        _numeracjaSesji = ""
+        _dataPobrania = ""
+        btnScalanie.Enabled = False
+
+        'obszar: trasa, działka, zaznaczenie i siatka na mapie, pola zasięgu
+        _korytarz = Nothing
+        UsunKorytarzToolStripMenuItem.Enabled = False
+        _dzialkaKatastralna = Nothing
+        WyczyscZnaczniki()
+        mapa.SelectedArea = RectLatLng.Empty
+        _punktProbkiBezSiatki = Nothing
+        For Each t In New TextBox() {txtXDol, txtYLewy, txtXGora, txtYPrawy}
+            t.Text = ""
+        Next
+        For Each l In New Label() {lblZaznSzerGora, lblZaznSzerDol, lblZaznDlugLewa, lblZaznDlugPrawa}
+            l.Text = "."
+        Next
+        PrzelaczUklad(Ustawienia.UkladDomyslny, False)
+        txtBokSegmentu.Text = "2000"
+        'piksel wpisany „przez program” - po wybraniu warstwy zastąpi go zalecany rozmiar piksela tej warstwy
+        txtRozmiarPiksela.Text = "1"
+        _automatycznyPikselTekst = "1"
+        _automatycznyPikselMetry = 1
+
+        'warstwy i drzewo: puste kanapka i wyszukiwanie, zwinięte grupy, rozwinięte skany map topograficznych GUGiK
+        _zestaw.Wyczysc()
+        _biezacyZbior = If(ZnajdzZbior(DomyslnyZbiorMap) IsNot Nothing, DomyslnyZbiorMap, _biezacyZbior)
+        _rozwinieteZbiory.Clear()
+        txtSzukajWarstwy.Clear()
+        BudujDrzewo()
+        RozwinZbioryWybranych(_biezacyZbior)
+        PoZmianieWarstw(-1)
+
+        'widok całej Polski
+        mapa.Position = New PointLatLng(52.3, 19.2)
+        mapa.Zoom = 6
+        ZapamietajPolozenieMapy()
+        PrzeliczSiatke()
+        Komunikat("Rozpoczęto nową sesję. Wybierz mapę w drzewie warstw i zaznacz obszar prawym przyciskiem myszy; " &
+                  "pobieranie utworzy nowy podfolder sesji w folderze download.", Color.Green)
+    End Sub
+
+#End Region
 
     Private Sub InicjalizujPrzyciskSzukaj()
         Try

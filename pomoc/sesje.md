@@ -61,6 +61,12 @@ Pliki `conf.txt` zapisane w starszych wersjach MapoTero wczytują się poprawnie
   folder (np. `D:\Mapy\Okolica_topo\`), zapisać tam `conf.txt` (i ewentualnie `korytarz.txt`) i od razu przestawić
   program na zapis kolejnych segmentów do tego folderu. Jeśli w wybranym folderze leżą segmenty innej sesji, program
   wyświetli ostrzeżenie.
+* **Nowa sesja:** *Sesja pobierania > Nowa sesja* albo przycisk z ikoną kartki z zielonym plusem (w prawym dolnym
+  narożniku okna, obok przycisku siatki) zaczyna nową mapę od zera: czyści wybrane warstwy, zasięg, zaznaczenie i siatkę
+  na mapie, obszar wzdłuż trasy i kontur działki, przywraca domyślny bok segmentu i rozmiar piksela (po wybraniu warstwy
+  program dobierze zalecany), zwija drzewo warstw z rozwiniętymi skanami map topograficznych GUGiK i pokazuje całą Polskę.
+  Ustawienia programu i pobrane pliki zostają, a następne pobieranie trafi do nowego podfolderu sesji w `download\`.
+  Gdy są wybrane warstwy lub zasięg, program prosi o potwierdzenie.
 * **Wczytaj ustawienia sesji (`Alt`+`W`):** *Sesja pobierania > wczytaj ustawienia sesji (conf.txt)* odtwarza cały stan
   z wybranego folderu (musi zawierać `conf.txt`): warstwy, krycia, zasięg, piksel, korytarz oraz rysuje siatkę na mapie.
   Przydaje się do dopobrania braków lub odświeżenia starej mapy.

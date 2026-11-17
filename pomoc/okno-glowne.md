@@ -35,7 +35,7 @@ Opis każdego elementu okna głównego: mapy podglądu, list zbiorów map i wars
 | **6** | *Wynikowy rozmiar siatki* | liczba kolumn × wierszy segmentów, całkowite wymiary w pikselach i kilometrach |
 | **7** | Zasięg XY i pinezka | współrzędne granic zasięgu na schemacie (pola edycji po włączeniu wpisywania XY w *Ustawieniach*) oraz przycisk centrowania mapy na rzeczywistym zasięgu siatki |
 | **8** | Podgląd na żywo i lupa | miniatura miksowania warstw ze środka siatki z lupą 50%, 100%, 200%, 400% i przyciskiem *Podgląd MIP...* |
-| **9** | Przyciski akcji | **Pobierz**, **Przerwij pobieranie**, scalanie (ikona szachownicy), otwarcie folderu sesji (żółty folder) i *usuń wszystkie pobrane mapy* |
+| **9** | Przyciski akcji | **Pobierz**, **Przerwij pobieranie**, scalanie (ikona szachownicy), otwarcie folderu sesji (żółty folder), *nowa sesja* (kartka z zielonym plusem) i *usuń pobrane mapy bieżącej sesji* |
 | **10** | *Komunikaty* | komunikaty o postępie, powierzchni zaznaczenia i ewentualnych błędach (kolor oznacza wagę komunikatu) |
 | **11** | Pasek stanu | postęp w procentach, format segmentów, bieżący podfolder sesji i nazwa ostatniego segmentu |
 
@@ -53,7 +53,8 @@ Tytuł okna podaje nazwę i numer wersji programu (np. `MapoTero {{ site.wersja_
 
 | Menu | Polecenie | Skrót | Opis |
 |---|---|---|---|
-| **Sesja pobierania** | zapisz ustawienia sesji (conf.txt) | <kbd>Alt</kbd>+<kbd>Z</kbd> | zapisuje parametry bieżącej sesji we wskazanym folderze. Wybrany folder staje się folderem sesji (zob. [Sesje pobierania](../sesje/)) |
+| **Sesja pobierania** | Nowa sesja | | czyści warstwy, zasięg, obszar wzdłuż trasy i widok mapy, a następne pobieranie trafi do nowego podfolderu (zob. [Sesje pobierania](../sesje/)) |
+| | zapisz ustawienia sesji (conf.txt) | <kbd>Alt</kbd>+<kbd>Z</kbd> | zapisuje parametry bieżącej sesji we wskazanym folderze. Wybrany folder staje się folderem sesji (zob. [Sesje pobierania](../sesje/)) |
 | | wczytaj ustawienia sesji (conf.txt) | <kbd>Alt</kbd>+<kbd>W</kbd> | wczytuje sesję ze wskazanego folderu (wymaga pliku `conf.txt`) |
 | | obszar pobierania wzdłuż trasy (GPX, KML, KMZ)... | | [Obszar wzdłuż trasy](../obszar/korytarz/) |
 | | usuń obszar wzdłuż trasy | | wraca do pobierania pełnego prostokąta |
@@ -192,6 +193,7 @@ W prawym dolnym narożniku okna głównego (pod schematem siatki i polami wspó�
 | **Przerwij pobieranie** | zatrzymuje pobieranie. Już pobrane pliki pozostają w folderze |
 | szachownica (*złącz pobrane segmenty w jeden arkusz*) | otwiera okno [scalania segmentów](../scalanie/). Przycisk jest nieaktywny przed pierwszym pobraniem oraz gdy w sesji wystąpiły błędy i istnieje plik `error.txt` |
 | żółty folder (*wyświetl folder z segmentami pobranej mapy*) | otwiera w Eksploratorze Windows katalog bieżącej sesji (dedykowany podfolder sesji w `download\`, np. `download\sesja_ortofotomapa_...`) |
+| *nowa sesja* (kartka z zielonym plusem) | to samo co *Sesja pobierania > Nowa sesja*: czyści wybrane warstwy, zasięg, zaznaczenie i siatkę, obszar wzdłuż trasy i kontur działki, przywraca domyślny bok segmentu i piksel, zwija drzewo warstw i pokazuje całą Polskę. Pliki na dysku zostają |
 | *usuń pobrane mapy bieżącej sesji* | po potwierdzeniu przenosi do Kosza systemowego mapę bieżącej sesji |
 
 {: .uwaga }

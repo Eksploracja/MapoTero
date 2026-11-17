@@ -26,23 +26,42 @@ Public Class Usuwanie_p_seg
 
     Private Sub Usuwanie_p_seg_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         PomocProgramu.DodajPrzyciskPomocy(Me, TematPomocy.UsuwaniePustych, 20, 287)
+        DodajPrzyciskFolderu()
         If _tytul = "" Then _tytul = Me.Text
-        _folder = FolderBiezacejSesji(Form1.FolderSesji)
-        If _folder = "" Then
-            'bez bieżącej sesji okno nie przechodzi na inną (np. najnowszą) - kasuje pliki, więc folder wskazuje użytkownik
-            MessageBox.Show("Nie ma bieżącej sesji pobierania (np. po usunięciu pobranych map albo przed pierwszym pobraniem)." & vbCrLf & vbCrLf &
-                            "Wskaż folder z segmentami, z którego chcesz usunąć puste segmenty.", "Usuwanie pustych segmentów",
-                            MessageBoxButtons.OK, MessageBoxIcon.Information)
-            dlgFolder.Description = "Folder z segmentami do sprawdzenia"
-            dlgFolder.SelectedPath = FolderDownload
-            If dlgFolder.ShowDialog(Me) <> DialogResult.OK Then
-                BeginInvoke(New Action(AddressOf Close))
-                Exit Sub
-            End If
-            _folder = dlgFolder.SelectedPath.TrimEnd("\"c, "/"c) & "\"
-        End If
-        Me.Text = _tytul & " - " & _folder
+        'bez bieżącej sesji okno nie przechodzi na inną (np. najnowszą) - kasuje pliki, więc folder wskazuje użytkownik
+        'przyciskiem „Folder…” (dawniej okno działało bez ostrzeżenia na najnowszej sesji w download)
+        UstawFolder(FolderBiezacejSesji(Form1.FolderSesji))
+    End Sub
+
+    ''' <summary>Ustawia folder segmentów (pusty - brak bieżącej sesji: przycisk Usuń nieaktywny) i odświeża statystykę.</summary>
+    Private Sub UstawFolder(folder As String)
+        _folder = folder
+        btnUsun.Enabled = _folder <> ""
+        Me.Text = _tytul & " - " & If(_folder <> "", _folder, "brak bieżącej sesji, wskaż folder przyciskiem Folder…")
+        ToolTip1.SetToolTip(_btnFolder, If(_folder <> "", "folder segmentów: " & _folder & " - kliknij, aby wskazać inny",
+                                           "Nie ma bieżącej sesji pobierania - wskaż folder z segmentami"))
         cmbRozszerzenie_SelectedIndexChanged(Nothing, Nothing)
+    End Sub
+
+    ''' <summary>Przycisk wyboru folderu segmentów (obok listy rozszerzeń, położenie z projektu skalowane jak okno).</summary>
+    Private _btnFolder As Button
+
+    Private Sub DodajPrzyciskFolderu()
+        If _btnFolder IsNot Nothing Then Exit Sub
+        Dim skala = PomocProgramu.SkalaProjektanta(Me)
+        _btnFolder = New Button With {
+            .Name = "btnFolder", .Text = "Folder…", .UseVisualStyleBackColor = True,
+            .Location = New Point(CInt(229 * skala.Width), cmbRozszerzenie.Top - 1),
+            .Size = New Size(CInt(84 * skala.Width), cmbRozszerzenie.Height + 2)}
+        Controls.Add(_btnFolder)
+        AddHandler _btnFolder.Click, AddressOf btnFolder_Click
+    End Sub
+
+    Private Sub btnFolder_Click(sender As Object, e As EventArgs)
+        dlgFolder.Description = "Folder z segmentami do sprawdzenia"
+        dlgFolder.SelectedPath = If(_folder <> "" AndAlso Directory.Exists(_folder), _folder, FolderDownload)
+        If dlgFolder.ShowDialog(Me) <> DialogResult.OK Then Exit Sub
+        UstawFolder(dlgFolder.SelectedPath.TrimEnd("\"c, "/"c) & "\")
     End Sub
 
     ''' <summary>Folder segmentów wybrany przy otwarciu okna (bieżąca sesja albo folder wskazany przez użytkownika).</summary>

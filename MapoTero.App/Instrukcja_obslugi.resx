@@ -135,6 +135,8 @@
 
    W prawym dolnym narożniku okna głównego znajduje się panel podglądu zestawu warstw na żywo: renderuje on w tle próbkę dobranych warstw ze środka siatki pobierania z uwzględnieniem krycia i trybów mieszania. Wbudowana lupa rastrowa pozwala sprawdzić czytelność napisów i detali w powiększeniu 50%, 100% (piksel w piksel), 200% i 400%.
 
+   Nowa sesja: przycisk z ikoną kartki z zielonym plusem (w prawym dolnym narożniku okna, obok przycisku siatki) albo menu Sesja pobierania - Nowa sesja czyści wybrane warstwy, zasięg pobierania, zaznaczenie i siatkę na mapie, obszar wzdłuż trasy i kontur działki, przywraca domyślny bok segmentu i rozmiar piksela, zwija drzewo warstw (z rozwiniętymi skanami map topograficznych GUGiK) i pokazuje całą Polskę. Pobrane pliki zostają na dysku, a do pobranej lub zapisanej sesji wrócisz poleceniem Sesja pobierania - Wczytaj. Następne pobieranie trafi do nowego podfolderu sesji w folderze download.
+
 2. Zaznacz na mapie prawym przyciskiem myszy obszar do pobrania. Na mapie pojawi się siatka segmentów. Możesz także wyznaczyć obszar wzdłuż trasy (menu Sesja pobierania - Zasięg wzdłuż trasy...) albo po prostu przeciągnąć plik GPX, KML lub KMZ z Eksploratora Windows na okno programu lub mapę (Drag &amp; Drop).
 
 3. Zasięg siatki możesz poprawić, przeciągając lewym przyciskiem myszy kwadratowe uchwyty w narożnikach i na bokach (dodawanie i odejmowanie segmentów) albo kółko w środku siatki (przesunięcie całej siatki). Klawisz Esc anuluje przeciąganie.
