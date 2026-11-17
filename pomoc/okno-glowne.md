@@ -34,7 +34,7 @@ Opis każdego elementu okna głównego: mapy podglądu, list zbiorów map i wars
 | **5** | Układ, segment i piksel | wybór układu współrzędnych pobierania, bok segmentu `[pix]` i rozmiar piksela `[m/pix]` (lub `[°/pix]` w WGS84) |
 | **6** | *Wynikowy rozmiar siatki* | liczba kolumn × wierszy segmentów, całkowite wymiary w pikselach i kilometrach |
 | **7** | Zasięg XY i pinezka | współrzędne granic zasięgu na schemacie (pola edycji po włączeniu wpisywania XY w *Ustawieniach*) oraz przycisk centrowania mapy na rzeczywistym zasięgu siatki |
-| **8** | Podgląd na żywo i lupa | miniatura miksowania warstw ze środka siatki z lupą 50%, 100%, 200%, 400% i przyciskiem *Podgląd MIP...* |
+| **8** | Podgląd na żywo i lupa | miniatura miksowania warstw ze środka siatki: skala 1:1, lupa ×2 i większy obszar ×½, przycisk *Podgląd MIP...* |
 | **9** | Przyciski akcji | **Pobierz**, **Przerwij pobieranie**, scalanie (ikona szachownicy), otwarcie folderu sesji (żółty folder), *nowa sesja* (kartka z zielonym plusem) i *usuń pobrane mapy bieżącej sesji* |
 | **10** | *Komunikaty* | komunikaty o postępie, powierzchni zaznaczenia i ewentualnych błędach (kolor oznacza wagę komunikatu) |
 | **11** | Pasek stanu | postęp w procentach, format segmentów, bieżący podfolder sesji i nazwa ostatniego segmentu |
@@ -181,8 +181,10 @@ Przycisk z pinezką (*pokaż na mapie siatkę segmentów…*) centruje mapę na 
 
 W prawym dolnym narożniku okna głównego (pod schematem siatki i polami współrzędnych) znajduje się **panel podglądu zestawu warstw na żywo**:
 
-* **Próbka w czasie rzeczywistym:** silnik podglądu pobiera w tle wycinek wybranych warstw ze środka zaznaczonej siatki i nakłada je dokładnie według zadanego krycia oraz trybów mieszania (np. mnożenie, nakładka).
-* **Lupa powiększająca:** przyciski **50%**, **100%** (skala 1:1, piksel w piksel), **200%** i **400%** pozwalają na bieżąco powiększyć podgląd i ocenić czytelność napisów, rzędnych wysokościowych, poziomic i symboli przed rozpoczęciem czasochłonnego pobierania.
+* **Próbka w czasie rzeczywistym:** silnik podglądu pobiera w tle wycinek wybranych warstw w rozmiarze piksela pobierania i nakłada je dokładnie według zadanego krycia oraz trybów mieszania (np. mnożenie, nakładka). Wycinek pochodzi ze środka siatki; przy obszarze wzdłuż trasy - z pobieranego segmentu najbliższego środkowi siatki, a bez siatki - ze środka widoku mapy (podgląd podąża za mapą).
+* **Powiększenie:** przyciski `-`, `1:1` i `+` (albo kółko myszy) przełączają skalę **1:1** (piksel w piksel), **lupę ×2** i **widok ×½**. Lupa powiększa piksele pobierania, a widok ×½ pokazuje większy obszar pobrany z serwera - rozdzielczość pobierania się nie zmienia. Podpowiedź etykiety rozmiaru piksela podaje widoczny obszar w terenie.
+* **Brakujące warstwy:** gdy serwer nie zwróci którejś warstwy, podgląd dostaje czerwoną ramkę, a napis stanu obok podglądu (np. *Brak 1 z 3 warstw*) wymienia je w podpowiedzi.
+* **Okno *Warstwy - zaawansowane*:** pokazuje tę samą próbkę w oknie 300 px z lupą 1:1, ×2 i ×4; warstwy pobrane już przez panel nie są pobierane ponownie.
 * **Przycisk *Podgląd MIP...*:** otwiera interaktywne okno symulacji filtrów podbijających kontrast, nasycenie i ostrość krawędzi (filtr splotowy Laplaciana 3×3) dla ekranów Memory-In-Pixel urządzeń Garmin.
 
 ## Przyciski

@@ -34,7 +34,8 @@ Ustawienia i zbiory map z poprzednich wersji (plik `lastsettings.txt`, folder `w
   * Eksport wielowarstwowej mapy bezpośrednio do formatu GeoTIFF z kompresją LZW lub JPEG, z georeferencją w nagłówkach TIFF oraz opcjonalnymi plikami `.tfw`, `.prj` i `.map`.
 * **Bieżący podgląd zestawu warstw z lupą rastrową w oknie głównym:**
   * Podgląd kompozycji warstw w prawym dolnym rogu okna głównego, odświeżany asynchronicznie w tle z buforem próbek i debouncingiem.
-  * Lupa rastrowa z powiększeniami 50%, 100% (piksel w piksel), 200% i 400% do weryfikacji czytelności etykiet i nakładek.
+  * Skala 1:1 (piksel w piksel), lupa ×2 i widok ×½ z większym obszarem pobranym z serwera; okno *Warstwy - zaawansowane* korzysta z tej samej próbki (lupa do ×4).
+  * Przy obszarze wzdłuż trasy próbka pochodzi z pobieranego segmentu, a bez siatki podgląd podąża za widokiem mapy; brakujące warstwy oznacza czerwona ramka.
 * **Optymalizacje interfejsu użytkownika:**
   * Poprawka układu kontrolek w panelu warstw okna głównego eliminująca obcinanie wartości `100%` w polu wprowadzania krycia warstwy.
 * **Inteligentna detekcja fałszywych sukcesów WMS:**

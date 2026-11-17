@@ -179,6 +179,28 @@ Public Class KorytarzTesty
     End Sub
 
     <Fact>
+    Public Sub PunktProbkiWSegmencieKorytarza()
+        'siatka 10 x 10 km, trasa wzdłuż lewej krawędzi - środek siatki (485000, 635000) leży poza korytarzem
+        Dim siatka As New Siatka(New Zasieg(480000, 630000, 490000, 640000), 1, 1000)
+        Dim u = UkladWspolrzednych.PL1992
+        Dim k As New Korytarz With {.SzerokoscMetry = 100}
+        k.DodajLinie({u.DoWgs84(480200, 630500), u.DoWgs84(489800, 630500)})
+        Dim p = k.PunktProbki(siatka, u)
+        Assert.True(p.HasValue)
+        'środek segmentu w pierwszej kolumnie, w wierszu najbliższym środkowi siatki
+        Assert.Equal(630500, p.Value.Y, 3)
+        Assert.InRange(p.Value.X, 484500, 485500)
+        Assert.Contains((10 - CInt((p.Value.X - 480000 + 500) / 1000)) * 10, k.Segmenty(siatka, u))
+    End Sub
+
+    <Fact>
+    Public Sub PunktProbkiBezKorytarzaLubPrzyZbytWieluSegmentach()
+        Dim siatka As New Siatka(New Zasieg(480000, 630000, 490000, 640000), 1, 1000)
+        Assert.False(New Korytarz().PunktProbki(siatka, UkladWspolrzednych.PL1992).HasValue)
+        Assert.False(TrasaPoPrzekatnej(siatka, 100).PunktProbki(siatka, UkladWspolrzednych.PL1992, maksSegmentow:=1).HasValue)
+    End Sub
+
+    <Fact>
     Public Sub PustyKorytarzBezSegmentow()
         Dim siatka As New Siatka(New Zasieg(480000, 630000, 490000, 640000), 1, 1000)
         Assert.Empty(New Korytarz().Segmenty(siatka, UkladWspolrzednych.PL1992))

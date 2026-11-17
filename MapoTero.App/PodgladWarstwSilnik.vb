@@ -22,13 +22,20 @@ Imports MapoTero.Core
 
 ''' <summary>
 ''' Silnik bieżącego podglądu zestawu warstw (kanapki): pobiera próbki warstw w tle,
-''' buforuje pobrane obrazy i składa wynikową miniaturę z uwzględnieniem krycia i trybów mieszania.
+''' buforuje pobrane obrazy i składa wynikowy obraz z uwzględnieniem krycia i trybów mieszania.
+''' Jeden silnik obsługuje panel podglądu w oknie głównym i okno „Warstwy - zaawansowane”, więc okno zaawansowane
+''' otwiera się z obrazami już pobranymi przez panel (wcześniej każde okno pobierało własną kopię próbki).
+''' Próbka (BokProbki) jest większa od panelu (BokPanelu): przy oddaleniu panel pokazuje większy obszar
+''' z prawdziwych danych zamiast tego samego wycinka zmniejszonego i otoczonego szachownicą.
 ''' </summary>
 Public Class PodgladWarstwSilnik
     Implements IDisposable
 
-    ''' <summary>Bok miniatury podglądu w pikselach.</summary>
-    Public Const BokPodgladu As Integer = 116
+    ''' <summary>Bok pobieranej próbki w pikselach (rozmiar piksela pobierania, bez skalowania).</summary>
+    Public Const BokProbki As Integer = 300
+
+    ''' <summary>Bok miniatury podglądu w panelu okna głównego.</summary>
+    Public Const BokPanelu As Integer = 116
 
     ' Pobrane obrazy warstw próbki (piksele ARGB) - klucz to AdresSerwera|NazwaWarstwy
     Private ReadOnly _buforWarstw As New Dictionary(Of String, Integer())(StringComparer.Ordinal)
@@ -42,6 +49,11 @@ Public Class PodgladWarstwSilnik
     Private _punktProbki As PunktXY? = Nothing
     Private _ostatniPiksel As Double = 0
     Private _ostatniEpsg As Integer = 0
+
+    ' Zwiększane przy każdej zmianie parametrów próbki. Pobieranie rozpoczęte dla starych parametrów nie zapisuje
+    ' wyników: wcześniej obraz warstwy z poprzedniego miejsca trafiał do bufora nowej próbki, bo zmiana parametrów
+    ' czyściła bufor, zanim przerwano trwające pobieranie.
+    Private _pokolenie As Integer = 0
 
     Public Sub New()
     End Sub
@@ -76,6 +88,30 @@ Public Class PodgladWarstwSilnik
         _punktProbki = Nothing
         _ostatniPiksel = 0
         _ostatniEpsg = 0
+        _pokolenie += 1
+    End Sub
+
+    ''' <summary>Zasięg próbki o boku BokProbki pikseli wokół zapamiętanego punktu; Nothing - brak parametrów.</summary>
+    Public Function ZasiegProbki() As Zasieg?
+        If Not _punktProbki.HasValue OrElse _ostatniPiksel <= 0 Then Return Nothing
+        Dim p = _punktProbki.Value
+        Dim pol As Double = BokProbki * _ostatniPiksel / 2
+        Return New Zasieg(p.X - pol, p.Y - pol, p.X + pol, p.Y + pol)
+    End Function
+
+    ''' <summary>Warstwy zestawu, których obrazu nie ma w buforze (np. serwer zwrócił błąd).</summary>
+    Public Function BrakujaceWarstwy(zestaw As ZestawWarstw) As List(Of WarstwaWybrana)
+        If zestaw Is Nothing Then Return New List(Of WarstwaWybrana)()
+        Return zestaw.Warstwy.Where(Function(w) Not _buforWarstw.ContainsKey(Klucz(w))).ToList()
+    End Function
+
+    ''' <summary>Czerwona ramka obrazu podglądu: kanapka złożona bez części warstw nie wygląda na kompletną.</summary>
+    Public Shared Sub RysujRamkeBraku(obraz As Bitmap)
+        If obraz Is Nothing Then Exit Sub
+        Using g = Graphics.FromImage(obraz), pioro As New Pen(Color.Red, 2)
+            pioro.Alignment = Drawing2D.PenAlignment.Inset
+            g.DrawRectangle(pioro, 0, 0, obraz.Width - 1, obraz.Height - 1)
+        End Using
     End Sub
 
     ''' <summary>Usuwa pliki tymczasowe pobrane przez usługi WMTS.</summary>
@@ -113,6 +149,7 @@ Public Class PodgladWarstwSilnik
             _punktProbki = punkt
             _ostatniPiksel = piksel
             _ostatniEpsg = uklad.Epsg
+            _pokolenie += 1
         End If
         Return zmieniono
     End Function
@@ -134,7 +171,8 @@ Public Class PodgladWarstwSilnik
     End Sub
 
     ''' <summary>
-    ''' Skaluje obraz podglądu jako lupę rastrową (centrowanie w docelowym obszarze).
+    ''' Skaluje obraz podglądu jako lupę rastrową (centrowanie w docelowym obszarze; środek większej próbki
+    ''' wypełnia mniejszy obszar docelowy, a nadmiar jest obcinany).
     ''' Dla powiększenia >= 1.0 stosuje NearestNeighbor i PixelOffsetMode.Half, aby użytkownik widział rzeczywiste piksele pobierania.
     ''' Dla pomniejszenia &lt; 1.0 stosuje wygładzanie HighQualityBicubic.
     ''' </summary>
@@ -173,12 +211,12 @@ Public Class PodgladWarstwSilnik
     Public Function ZlozObraz(zestaw As ZestawWarstw) As Bitmap
         If zestaw Is Nothing OrElse zestaw.Liczba = 0 Then Return Nothing
 
-        Dim piksele(BokPodgladu * BokPodgladu - 1) As Integer
+        Dim piksele(BokProbki * BokProbki - 1) As Integer
         ' Tło szachownicy 8x8 px dla wizualizacji przezroczystości
-        For y = 0 To BokPodgladu - 1
-            For x = 0 To BokPodgladu - 1
+        For y = 0 To BokProbki - 1
+            For x = 0 To BokProbki - 1
                 Dim jasny = ((x \ 8) + (y \ 8)) Mod 2 = 0
-                piksele(y * BokPodgladu + x) = If(jasny, &HFFFFFFFF, &HFFF2F2F2)
+                piksele(y * BokProbki + x) = If(jasny, &HFFFFFFFF, &HFFF2F2F2)
             Next
         Next
 
@@ -189,22 +227,26 @@ Public Class PodgladWarstwSilnik
             End If
         Next
 
-        Return NakladanieObrazow.DoBitmapy(piksele, BokPodgladu, BokPodgladu)
+        Return NakladanieObrazow.DoBitmapy(piksele, BokProbki, BokProbki)
     End Function
 
     ''' <summary>
-    ''' Pobiera asynchronicznie brakujące warstwy zestawu i zwraca złożoną bitmapę oraz listę błędów.
+    ''' Pobiera asynchronicznie brakujące warstwy zestawu w zasięgu próbki (ZasiegProbki) i zwraca złożoną bitmapę
+    ''' oraz listę błędów. Gdy w trakcie zmienią się parametry próbki, pobieranie kończy się bez zapisu wyników.
     ''' </summary>
-    Public Async Function PobierzPodgladAsync(zadanie As ZadaniePobierania, zestaw As ZestawWarstw, zasieg As Zasieg,
+    Public Async Function PobierzPodgladAsync(zadanie As ZadaniePobierania, zestaw As ZestawWarstw,
                                              token As CancellationToken, Optional postep As IProgress(Of String) = Nothing) As Task(Of Tuple(Of Bitmap, List(Of String)))
         Dim bledy As New List(Of String)()
-        If zestaw Is Nothing OrElse zestaw.Liczba = 0 Then
+        Dim zasieg = ZasiegProbki()
+        If zestaw Is Nothing OrElse zestaw.Liczba = 0 OrElse Not zasieg.HasValue Then
             Return Tuple.Create(CType(Nothing, Bitmap), bledy)
         End If
+        Dim pokolenie As Integer = _pokolenie
 
         Dim listaWarstw = zestaw.Warstwy.ToList()
         For i = 0 To listaWarstw.Count - 1
             token.ThrowIfCancellationRequested()
+            If pokolenie <> _pokolenie Then Throw New OperationCanceledException()
             Dim w = listaWarstw(i)
             Dim nazwa = w.Nazwa
             If _buforWarstw.ContainsKey(Klucz(w)) Then Continue For
@@ -226,7 +268,7 @@ Public Class PodgladWarstwSilnik
                                                              typUslugi:=w.EfektywnyTyp, plikWarstw:=zrodloPliku)
                     _uslugiWmts(w.Adres) = usluga
                 End If
-                Dim wynikWmts = Await usluga.PikseleAsync({nazwa}, zasieg, BokPodgladu, token)
+                Dim wynikWmts = Await usluga.PikseleAsync({nazwa}, zasieg.Value, BokProbki, token)
                 piksele = wynikWmts.Item1
                 blad = wynikWmts.Item2
             Else
@@ -234,14 +276,14 @@ Public Class PodgladWarstwSilnik
                 Dim ignorujSsl As Boolean = w.IgnorujSsl OrElse zadanie.IgnorujSsl
                 Dim przezroczysty As Boolean = i > 0 OrElse zadanie.Przezroczystosc
                 Dim formatWms As String = If(przezroczysty, "png", zadanie.Format)
-                Dim adres As String = Wms.ZapytanieGetMap(czystyAdres, {nazwa}, zadanie.Uklad, zasieg, formatWms,
-                                                         BokPodgladu, BokPodgladu, zadanie.ZamienOsie, przezroczysty)
+                Dim adres As String = Wms.ZapytanieGetMap(czystyAdres, {nazwa}, zadanie.Uklad, zasieg.Value, formatWms,
+                                                         BokProbki, BokProbki, zadanie.ZamienOsie, przezroczysty)
                 Dim wynik = Await PobieranieSegmentow.PobierzObrazBezRegulatoraAsync(adres, Math.Max(5, zadanie.LimitCzasuSekundy), token, ignorujSsl)
 
                 ' Jeśli serwer odrzucił przezroczyste png, fallback na jpeg
                 If wynik.Item1 Is Nothing AndAlso przezroczysty Then
-                    Dim adresJpg As String = Wms.ZapytanieGetMap(czystyAdres, {nazwa}, zadanie.Uklad, zasieg, "jpeg",
-                                                                 BokPodgladu, BokPodgladu, zadanie.ZamienOsie, False)
+                    Dim adresJpg As String = Wms.ZapytanieGetMap(czystyAdres, {nazwa}, zadanie.Uklad, zasieg.Value, "jpeg",
+                                                                 BokProbki, BokProbki, zadanie.ZamienOsie, False)
                     Dim wynikJpg = Await PobieranieSegmentow.PobierzObrazBezRegulatoraAsync(adresJpg, Math.Max(5, zadanie.LimitCzasuSekundy), token, ignorujSsl)
                     If wynikJpg.Item1 IsNot Nothing Then
                         wynik = wynikJpg
@@ -249,9 +291,10 @@ Public Class PodgladWarstwSilnik
                 End If
 
                 blad = wynik.Item2
-                piksele = If(blad = "", NakladanieObrazow.Piksele(wynik.Item1, BokPodgladu, BokPodgladu), Nothing)
+                piksele = If(blad = "", NakladanieObrazow.Piksele(wynik.Item1, BokProbki, BokProbki), Nothing)
             End If
 
+            If pokolenie <> _pokolenie Then Throw New OperationCanceledException()
             If blad <> "" Then
                 bledy.Add(nazwa & ": " & blad)
             ElseIf piksele IsNot Nothing Then

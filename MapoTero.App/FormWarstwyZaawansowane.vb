@@ -1,4 +1,4 @@
-'Copyright (C) <2015>  pajakt
+﻿'Copyright (C) <2015>  pajakt
 
 'This program is free software: you can redistribute it and/or modify
 'it under the terms of the GNU General Public License as published by
@@ -18,28 +18,29 @@ Imports System.Threading.Tasks
 Imports MapoTero.Core
 
 ''' <summary>
-''' Okno „Warstwy - zaawansowane”: krycie warstw suwakami, kolejność, usuwanie i podgląd kanapki - próbka ze środka
-''' siatki, w której każda warstwa pobierana jest raz, a zmiana krycia lub kolejności tylko ponownie nakłada pobrane obrazy.
+''' Okno „Warstwy - zaawansowane”: krycie warstw suwakami, kolejność, usuwanie i podgląd kanapki - ta sama próbka
+''' co w panelu podglądu okna głównego (wspólny PodgladWarstwSilnik), więc warstwy pobrane już przez panel nie są
+''' pobierane ponownie, a zmiana krycia lub kolejności tylko ponownie nakłada pobrane obrazy.
 ''' Okno pracuje na kopii zestawu; zmiany przyjmuje okno główne po OK.
 ''' </summary>
 Public Class FormWarstwyZaawansowane
     Inherits Form
 
-    ''' <summary>Bok próbki podglądu [px].</summary>
-    Private Const BokPodgladu As Integer = 300
+    ''' <summary>Bok obrazu podglądu [px] - cała próbka silnika w skali 1:1.</summary>
+    Private Const BokPodgladu As Integer = PodgladWarstwSilnik.BokProbki
 
     Private ReadOnly _zestaw As ZestawWarstw
     Private ReadOnly _zadanie As ZadaniePobierania
     Private _zaznaczona As Integer
 
-    'pobrane obrazy warstw próbki (piksele ARGB) - wspólne dla wszystkich ustawień krycia i kolejności
-    Private ReadOnly _obrazy As New Dictionary(Of String, Integer())(StringComparer.Ordinal)
-    'usługi WMTS podglądu (wg adresu)
-    Private ReadOnly _uslugiWmts As New Dictionary(Of String, ZrodloWmts)(StringComparer.OrdinalIgnoreCase)
+    'silnik podglądu okna głównego: bufor pobranych obrazów warstw próbki i usługi WMTS (pliki kafli usuwa okno główne)
+    Private ReadOnly _silnik As PodgladWarstwSilnik
     Private _przerwanie As CancellationTokenSource
 
-    Private ReadOnly _poziomyZoomu As Double() = {0.5, 1.0, 2.0, 4.0}
-    Private _indeksZoomu As Integer = 1 ' Domyślnie 1.0 (100% - skala 1:1)
+    'obraz 300 px pokazuje całą próbkę w skali 1:1, więc oddalenie (50%) zmniejszałoby ją tylko i otaczało szachownicą
+    Private ReadOnly _poziomyZoomu As Double() = {1.0, 2.0, 4.0}
+    Private Const IndeksZoomu1do1 As Integer = 0
+    Private _indeksZoomu As Integer = IndeksZoomu1do1
     Private _bazaPodgladu As Bitmap
 
     Private ReadOnly _wiersze As New TableLayoutPanel()
@@ -53,9 +54,10 @@ Public Class FormWarstwyZaawansowane
     Private ReadOnly _lblZoom As New Label()
     Private ReadOnly _podpowiedz As New ToolTip() With {.InitialDelay = 500, .ReshowDelay = 500, .AutoPopDelay = 15000}
 
-    Public Sub New(zestaw As ZestawWarstw, zadanie As ZadaniePobierania, zaznaczona As Integer)
+    Public Sub New(zestaw As ZestawWarstw, zadanie As ZadaniePobierania, zaznaczona As Integer, silnik As PodgladWarstwSilnik)
         _zestaw = zestaw
         _zadanie = zadanie
+        _silnik = silnik
         _zaznaczona = zaznaczona
         Text = "Warstwy - zaawansowane"
         FormBorderStyle = FormBorderStyle.FixedDialog
@@ -91,7 +93,7 @@ Public Class FormWarstwyZaawansowane
         Controls.Add(_lblZapytania)
 
         Dim lblPodglad As New Label With {.Location = New Point(560, 8), .AutoSize = True,
-                                          .Text = "Podgląd kanapki - próbka ze środka siatki segmentów:"}
+                                          .Text = "Podgląd kanapki - ta sama próbka co w oknie głównym:"}
         Controls.Add(lblPodglad)
         _podglad.Location = New Point(560, 26)
         _podglad.Size = New Size(BokPodgladu, BokPodgladu)
@@ -142,7 +144,7 @@ Public Class FormWarstwyZaawansowane
 
         _lblZoom.Location = New Point(646, 364)
         _lblZoom.AutoSize = True
-        _lblZoom.Text = "100%"
+        _lblZoom.Text = "1:1"
         _lblZoom.ForeColor = SystemColors.ControlDarkDark
         Controls.Add(_lblZoom)
 
@@ -155,9 +157,9 @@ Public Class FormWarstwyZaawansowane
         'fokus na OK - pierwszy suwak z fokusem zmieniałby krycie strzałkami i zaznaczał najwyższą warstwę
         ActiveControl = btnOk
 
-        If _zadanie.Siatka Is Nothing Then
+        If Not _silnik.ZasiegProbki().HasValue Then
             _btnPodglad.Enabled = False
-            _lblStan.Text = "Podgląd wymaga poprawnego zasięgu siatki w oknie głównym."
+            _lblStan.Text = "Podgląd wymaga poprawnego zasięgu siatki albo widoku mapy w oknie głównym."
         End If
 
         ZbudujWiersze()
@@ -320,96 +322,37 @@ Public Class FormWarstwyZaawansowane
             ostrzezenieNakladki
     End Sub
 
-    Private Shared Function Klucz(w As WarstwaWybrana) As String
-        Return w.Adres.ToLowerInvariant() & "|" & w.Nazwa
-    End Function
-
     ''' <summary>Pobiera brakujące obrazy warstw próbki (każdą warstwę osobno, z przezroczystym tłem) i nakłada je.</summary>
     Private Async Sub PobierzPodglad(sender As Object, e As EventArgs)
-        Dim s = _zadanie.Siatka
-        If s Is Nothing Then Exit Sub
+        If Not _silnik.ZasiegProbki().HasValue Then Exit Sub
         _przerwanie?.Cancel()
         Dim przerwanie As New CancellationTokenSource()
         _przerwanie = przerwanie
         _btnPodglad.Enabled = False
         Try
-            'próbka ze środka siatki z rozmiarem piksela pobierania
-            Dim srodek = s.ZasiegSiatki.Srodek
-            Dim pol As Double = BokPodgladu * s.RozmiarPiksela / 2
-            Dim zasieg As New Zasieg(srodek.X - pol, srodek.Y - pol, srodek.X + pol, srodek.Y + pol)
-            Dim bledy As New List(Of String)()
-            Dim listaWarstw = _zestaw.Warstwy.ToList()
-            For i = 0 To listaWarstw.Count - 1
-                Dim w = listaWarstw(i)
-                Dim nazwa As String = w.Nazwa
-                If _obrazy.ContainsKey(Klucz(w)) Then Continue For
-                _lblStan.Text = "Pobieranie warstwy " & nazwa & "…"
-                Dim piksele() As Integer = Nothing
-                Dim blad As String = ""
-                If w.CzyKafelkowa Then
-                    'kafle WMTS/XYZ/TMS - usługa przygotowana raz dla wszystkich jej warstw w kanapce
-                    Dim usluga As ZrodloWmts = Nothing
-                    If Not _uslugiWmts.TryGetValue(w.Adres, usluga) Then
-                        Dim nazwyUslugi = _zestaw.Warstwy.Where(Function(x) String.Equals(x.Adres, w.Adres, StringComparison.OrdinalIgnoreCase)).Select(Function(x) x.Nazwa).ToList()
-                        Dim zrodloPliku As PlikWarstw = Nothing
-                        If Not String.IsNullOrEmpty(w.Zbior) AndAlso _zadanie.ZrodlaMap IsNot Nothing Then
-                            _zadanie.ZrodlaMap.TryGetValue(w.Zbior, zrodloPliku)
-                        End If
-                        If zrodloPliku Is Nothing Then zrodloPliku = _zadanie.ZnajdzZrodlo(-1, w.Adres)
-                        usluga = Await ZrodloWmts.PrzygotujAsync(_zadanie, w.Adres, nazwyUslugi, przerwanie.Token,
-                                                                 typUslugi:=w.EfektywnyTyp, plikWarstw:=zrodloPliku)
-                        _uslugiWmts(w.Adres) = usluga
-                    End If
-                    Dim wynikWmts = Await usluga.PikseleAsync({nazwa}, zasieg, BokPodgladu, przerwanie.Token)
-                    piksele = wynikWmts.Item1
-                    blad = wynikWmts.Item2
-                Else
-                    Dim czystyAdres As String = w.Adres.Trim(""""c, " "c)
-                    Dim ignorujSsl As Boolean = w.IgnorujSsl OrElse _zadanie.IgnorujSsl
-                    'podkład (i = 0) nie musi mieć przezroczystości, chyba że cała sesja ma przezroczystość
-                    Dim przezroczysty As Boolean = i > 0 OrElse _zadanie.Przezroczystosc
-                    Dim formatWms As String = If(przezroczysty, "png", _zadanie.Format)
-                    Dim adres As String = Wms.ZapytanieGetMap(czystyAdres, {nazwa}, _zadanie.Uklad, zasieg, formatWms,
-                                                              BokPodgladu, BokPodgladu, _zadanie.ZamienOsie, przezroczysty)
-                    Dim wynik = Await PobieranieSegmentow.PobierzObrazBezRegulatoraAsync(adres, Math.Max(5, _zadanie.LimitCzasuSekundy), przerwanie.Token, ignorujSsl)
-                    
-                    ' Jeśli serwer odrzucił transparentne png, spróbuj fallback na jpeg / bez przezroczystości
-                    If wynik.Item1 Is Nothing AndAlso przezroczysty Then
-                        Dim adresJpg As String = Wms.ZapytanieGetMap(czystyAdres, {nazwa}, _zadanie.Uklad, zasieg, "jpeg",
-                                                                     BokPodgladu, BokPodgladu, _zadanie.ZamienOsie, False)
-                        Dim wynikJpg = Await PobieranieSegmentow.PobierzObrazBezRegulatoraAsync(adresJpg, Math.Max(5, _zadanie.LimitCzasuSekundy), przerwanie.Token, ignorujSsl)
-                        If wynikJpg.Item1 IsNot Nothing Then
-                            wynik = wynikJpg
-                        End If
-                    End If
-
-                    blad = wynik.Item2
-                    piksele = If(blad = "", NakladanieObrazow.Piksele(wynik.Item1, BokPodgladu, BokPodgladu), Nothing)
-                End If
-
-                If blad <> "" Then
-                    bledy.Add(nazwa & ": " & blad)
-                ElseIf piksele IsNot Nothing Then
-                    _obrazy(Klucz(w)) = piksele
-                End If
-            Next
-
+            Dim postep As New Progress(Of String)(Sub(kom) If Not IsDisposed AndAlso Not przerwanie.IsCancellationRequested Then _lblStan.Text = kom)
+            Dim wynik = Await _silnik.PobierzPodgladAsync(_zadanie, _zestaw, przerwanie.Token, postep)
+            wynik.Item1?.Dispose()
+            If IsDisposed Then Exit Sub
+            If _przerwanie Is przerwanie Then _przerwanie = Nothing
             OdswiezPodglad()
-
-            If bledy.Count = 0 Then
+            Dim bledy = wynik.Item2
+            Dim brakujace = _silnik.BrakujaceWarstwy(_zestaw)
+            If brakujace.Count = 0 Then
                 _lblStan.Text = "Zmiana krycia, trybu lub kolejności odświeża podgląd od razu."
                 _podpowiedz.SetToolTip(_lblStan, "")
-            ElseIf _obrazy.Count > 0 Then
-                _lblStan.Text = "Pobrano " & _obrazy.Count & " z " & listaWarstw.Count & " warstw. Błędy: " & String.Join("; ", bledy)
-                _podpowiedz.SetToolTip(_lblStan, String.Join(vbCrLf, bledy))
             Else
-                _lblStan.Text = "Błąd pobierania: " & String.Join("; ", bledy)
-                _podpowiedz.SetToolTip(_lblStan, String.Join(vbCrLf, bledy))
+                Dim nazwy = String.Join(", ", brakujace.Select(Function(w) Form1.NazwaWarstwy(w)))
+                _lblStan.Text = If(brakujace.Count = _zestaw.Liczba, "Błąd pobierania: ", "Brak " & brakujace.Count & " z " & _zestaw.Liczba & " warstw: ") & nazwy
+                _podpowiedz.SetToolTip(_lblStan, "Czerwona ramka podglądu: brak warstw " & nazwy & "." &
+                                       If(bledy.Count > 0, vbCrLf & String.Join(vbCrLf, bledy), ""))
             End If
         Catch ex As OperationCanceledException
         Catch ex As Exception
-            _lblStan.Text = "Błąd podglądu: " & ex.Message
-            _podpowiedz.SetToolTip(_lblStan, ex.ToString())
+            If Not IsDisposed Then
+                _lblStan.Text = "Błąd podglądu: " & ex.Message
+                _podpowiedz.SetToolTip(_lblStan, ex.ToString())
+            End If
         Finally
             If _przerwanie Is przerwanie Then _przerwanie = Nothing
             przerwanie.Dispose()
@@ -419,31 +362,18 @@ Public Class FormWarstwyZaawansowane
 
     Protected Overrides Sub OnShown(e As EventArgs)
         MyBase.OnShown(e)
-        If _zadanie.Siatka IsNot Nothing AndAlso _obrazy.Count = 0 Then
-            PobierzPodglad(Nothing, Nothing)
-        End If
+        If Not _silnik.ZasiegProbki().HasValue Then Exit Sub
+        'obrazy pobrane przez panel okna głównego są od razu widoczne; pobierane tylko brakujące warstwy
+        OdswiezPodglad()
+        If _silnik.BrakujaceWarstwy(_zestaw).Count > 0 Then PobierzPodglad(Nothing, Nothing)
     End Sub
 
     ''' <summary>Nakłada pobrane obrazy warstw wg bieżącego krycia, trybu i kolejności (warstwy jeszcze niepobrane są pomijane).</summary>
     Private Sub OdswiezPodglad()
         OdswiezLiczbeZapytan()
-        If _obrazy.Count = 0 Then Exit Sub
-        Dim piksele(BokPodgladu * BokPodgladu - 1) As Integer
-        For y = 0 To BokPodgladu - 1
-            For x = 0 To BokPodgladu - 1
-                Dim jasny = ((x \ 8) + (y \ 8)) Mod 2 = 0
-                piksele(y * BokPodgladu + x) = If(jasny, &HFFFFFFFF, &HFFF2F2F2)
-            Next
-        Next
-        For Each w In _zestaw.Warstwy
-            Dim obraz() As Integer = Nothing
-            If _obrazy.TryGetValue(Klucz(w), obraz) Then
-                NakladanieWarstw.Naloz(piksele, obraz, w.Krycie, w.TrybMieszania)
-            End If
-        Next
-        Dim staraBaza = _bazaPodgladu
-        _bazaPodgladu = NakladanieObrazow.DoBitmapy(piksele, BokPodgladu, BokPodgladu)
-        staraBaza?.Dispose()
+        If _silnik.LiczbaWarstwWBuforze = 0 OrElse Not _silnik.ZasiegProbki().HasValue Then Exit Sub
+        _bazaPodgladu?.Dispose()
+        _bazaPodgladu = _silnik.ZlozObraz(_zestaw)
         ZastosujZoomDoPodgladu()
     End Sub
 
@@ -462,9 +392,8 @@ Public Class FormWarstwyZaawansowane
     End Sub
 
     Private Sub ZoomReset_Click(sender As Object, e As EventArgs)
-        Const domyslnyIndeks As Integer = 1
-        If _indeksZoomu <> domyslnyIndeks Then
-            _indeksZoomu = domyslnyIndeks
+        If _indeksZoomu <> IndeksZoomu1do1 Then
+            _indeksZoomu = IndeksZoomu1do1
             ZastosujZoomDoPodgladu()
         End If
     End Sub
@@ -494,10 +423,12 @@ Public Class FormWarstwyZaawansowane
         End If
         Dim zoom = _poziomyZoomu(_indeksZoomu)
         Dim powiekszony = PodgladWarstwSilnik.ZastosujZoom(_bazaPodgladu, zoom, BokPodgladu, BokPodgladu)
+        'czerwona ramka tylko po próbie pobrania - przed nią brak warstwy oznacza, że pobieranie dopiero trwa
+        If _przerwanie Is Nothing AndAlso _silnik.BrakujaceWarstwy(_zestaw).Count > 0 Then PodgladWarstwSilnik.RysujRamkeBraku(powiekszony)
         Dim staryImg = _podglad.Image
         _podglad.Image = powiekszony
         staryImg?.Dispose()
-        _lblZoom.Text = CInt(Math.Round(zoom * 100)) & "%"
+        _lblZoom.Text = If(zoom > 1.001, "×" & CInt(zoom), "1:1")
         AktualizujStanPrzyciskowZoomu()
     End Sub
 
@@ -505,15 +436,11 @@ Public Class FormWarstwyZaawansowane
         Dim maObraz As Boolean = _bazaPodgladu IsNot Nothing
         _btnZoomMinus.Enabled = maObraz AndAlso _indeksZoomu > 0
         _btnZoomPlus.Enabled = maObraz AndAlso _indeksZoomu < _poziomyZoomu.Length - 1
-        _btnZoomReset.Enabled = maObraz AndAlso _indeksZoomu <> 1
+        _btnZoomReset.Enabled = maObraz AndAlso _indeksZoomu <> IndeksZoomu1do1
     End Sub
 
     Protected Overrides Sub OnFormClosed(e As FormClosedEventArgs)
         _przerwanie?.Cancel()
-        'kafle WMTS podglądu - w folderze tymczasowym
-        For Each u In _uslugiWmts.Values
-            u.UsunKafle()
-        Next
         MyBase.OnFormClosed(e)
     End Sub
 

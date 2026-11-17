@@ -407,6 +407,31 @@ Public Class Korytarz
         Return wynik
     End Function
 
+    ''' <summary>
+    ''' Punkt próbki podglądu warstw: środek pobieranego segmentu korytarza najbliższego środkowi siatki. Środek
+    ''' prostokąta siatki może leżeć daleko od trasy, więc podgląd pokazywałby teren, którego program nie pobierze.
+    ''' Nothing - brak segmentów albo ich liczba przekracza maksSegmentow (wyznaczanie trwałoby zbyt długo).
+    ''' </summary>
+    Public Function PunktProbki(siatka As Siatka, uklad As UkladWspolrzednych, Optional maksSegmentow As Double = 200000) As PunktXY?
+        If siatka Is Nothing OrElse Not siatka.Poprawna OrElse Not Poprawny Then Return Nothing
+        If SzacowanaLiczbaSegmentow(siatka, uklad) > maksSegmentow Then Return Nothing
+        Dim wybrane = Segmenty(siatka, uklad)
+        If wybrane.Count = 0 Then Return Nothing
+        Dim srodek = siatka.ZasiegSiatki.Srodek
+        Dim kolumny As Integer = siatka.LiczbaKolumn
+        Dim najlepszy As PunktXY? = Nothing
+        Dim najmniejsza As Double = Double.MaxValue
+        For Each klucz In wybrane
+            Dim s = siatka.Segment(klucz \ kolumny + 1, klucz Mod kolumny + 1).Srodek
+            Dim odl As Double = (s.X - srodek.X) ^ 2 + (s.Y - srodek.Y) ^ 2
+            If odl < najmniejsza Then
+                najmniejsza = odl
+                najlepszy = s
+            End If
+        Next
+        Return najlepszy
+    End Function
+
     ''' <summary>Numer wiersza lub kolumny (od 1) dla położenia w segmentach, ograniczony do 1..maks (bez przepełnienia CInt).</summary>
     Private Shared Function Indeks(polozenie As Double, maks As Integer) As Integer
         Return CInt(Math.Max(1.0, Math.Min(maks, Math.Floor(polozenie) + 1)))

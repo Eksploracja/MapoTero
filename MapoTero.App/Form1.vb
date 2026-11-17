@@ -106,12 +106,23 @@ Public Class Form1
     ''' <summary>Zapamiętany punkt próbki ze środka mapy, gdy nie ma jeszcze poprawnej siatki.</summary>
     Private _punktProbkiBezSiatki As PunktXY?
 
-    ''' <summary>Poziomy powiększenia lupy rastrowej podglądu (1.0 = skala 1:1, piksel w piksel).</summary>
-    Private ReadOnly _poziomyZoomu As Double() = {0.5, 1.0, 2.0, 4.0}
-    Private _indeksZoomu As Integer = 1 ' Domyślnie 1.0 (100% - skala 1:1)
+    ''' <summary>
+    ''' Poziomy powiększenia podglądu (1.0 = skala 1:1, piksel w piksel). 0,5 pokazuje większy obszar pobranej próbki;
+    ''' 4.0 w panelu 116 px pokazywało tylko 29 x 29 pikseli danych, więc go nie ma.
+    ''' </summary>
+    Private ReadOnly _poziomyZoomu As Double() = {0.5, 1.0, 2.0}
+    Private Const IndeksZoomu1do1 As Integer = 1
+    Private _indeksZoomu As Integer = IndeksZoomu1do1
 
-    ''' <summary>Bazowa złożona bitmapa próbki w skali 1:1 o wymiarach BokPodgladu x BokPodgladu.</summary>
+    ''' <summary>Bazowa złożona bitmapa próbki w skali 1:1 o wymiarach BokProbki x BokProbki.</summary>
     Private _bazaPodgladu As Bitmap
+
+    ''' <summary>Podgląd złożony bez części warstw (błąd serwera) - obraz dostaje czerwoną ramkę.</summary>
+    Private _brakWarstwPodgladu As Boolean
+
+    ''' <summary>Zapamiętany punkt próbki w segmencie korytarza i parametry, dla których go wyznaczono.</summary>
+    Private _punktKorytarza As PunktXY?
+    Private _kluczPunktuKorytarza As String = ""
 
     ''' <summary>Obszar pobierania wzdłuż trasy (zapisywany w folderze sesji w korytarz.txt); Nothing - cały prostokąt.</summary>
     Private _korytarz As Korytarz
@@ -1432,7 +1443,13 @@ Public Class Form1
     ''' <summary>Okno „Warstwy - zaawansowane”: krycie suwakami, kolejność i podgląd kanapki; zmiany przyjmowane po OK.</summary>
     Private Sub OtworzWarstwyZaawansowane()
         If _zestaw.Liczba = 0 OrElse PobieranieTrwa("Zmiana listy warstw") Then Exit Sub
-        Using okno As New FormWarstwyZaawansowane(_zestaw.Kopia(), ZadanieDoPodgladu(), lstWybraneWarstwy.Zaznaczona)
+        'okno korzysta z bufora podglądu panelu - pobieranie panelu przerywane, pobrane już warstwy zostają w buforze
+        _timerPodgladu.Stop()
+        _ctsPodglad?.Cancel()
+        Dim punkt As PunktXY, piksel As Double
+        ParametryProbki(punkt, piksel)
+        _silnikPodgladu.SprawdzIZaktualizujParametry(punkt, piksel, Ustawienia.Uklad)
+        Using okno As New FormWarstwyZaawansowane(_zestaw.Kopia(), ZadanieDoPodgladu(), lstWybraneWarstwy.Zaznaczona, _silnikPodgladu)
             If okno.ShowDialog(Me) <> DialogResult.OK Then Exit Sub
             _zestaw = okno.Zestaw
             PoZmianieWarstw(Math.Min(okno.Zaznaczona, _zestaw.Liczba - 1))
@@ -1459,23 +1476,16 @@ Public Class Form1
     End Sub
 
     Private Sub btnZoomPlus_Click(sender As Object, e As EventArgs) Handles btnZoomPlus.Click
-        If _indeksZoomu < _poziomyZoomu.Length - 1 Then
-            _indeksZoomu += 1
-            ZastosujZoomPodgladu()
-        End If
+        ZmienZoomPodgladu(1)
     End Sub
 
     Private Sub btnZoomMinus_Click(sender As Object, e As EventArgs) Handles btnZoomMinus.Click
-        If _indeksZoomu > 0 Then
-            _indeksZoomu -= 1
-            ZastosujZoomPodgladu()
-        End If
+        ZmienZoomPodgladu(-1)
     End Sub
 
     Private Sub btnZoomReset_Click(sender As Object, e As EventArgs) Handles btnZoomReset.Click
-        Const domyslnyIndeks As Integer = 1
-        If _indeksZoomu <> domyslnyIndeks Then
-            _indeksZoomu = domyslnyIndeks
+        If _indeksZoomu <> IndeksZoomu1do1 Then
+            _indeksZoomu = IndeksZoomu1do1
             ZastosujZoomPodgladu()
         End If
     End Sub
@@ -1486,21 +1496,30 @@ Public Class Form1
 
     Private Sub picPodglad_MouseWheel(sender As Object, e As MouseEventArgs) Handles picPodglad.MouseWheel
         If _zestaw.Liczba = 0 OrElse _bazaPodgladu Is Nothing Then Exit Sub
-        If e.Delta > 0 Then
-            If _indeksZoomu < _poziomyZoomu.Length - 1 Then
-                _indeksZoomu += 1
-                ZastosujZoomPodgladu()
-            End If
-        ElseIf e.Delta < 0 Then
-            If _indeksZoomu > 0 Then
-                _indeksZoomu -= 1
-                ZastosujZoomPodgladu()
-            End If
-        End If
+        ZmienZoomPodgladu(Math.Sign(e.Delta))
+    End Sub
+
+    Private Sub ZmienZoomPodgladu(kierunek As Integer)
+        Dim nowy As Integer = Math.Max(0, Math.Min(_poziomyZoomu.Length - 1, _indeksZoomu + kierunek))
+        If nowy = _indeksZoomu Then Exit Sub
+        _indeksZoomu = nowy
+        ZastosujZoomPodgladu()
     End Sub
 
     ''' <summary>
-    ''' Skaluje w pamięci bazową bitmapę próbki do bieżącego powiększenia (lupy rastrowej) i wyświetla w picPodglad.
+    ''' Bez poprawnej siatki podgląd podąża za mapą: po przesunięciu lub przybliżeniu mapy próbka pochodzi ze środka
+    ''' nowego widoku. Wcześniej punkt próbki zmieniał się tylko przy zmianie listy warstw, więc dodanie warstwy po
+    ''' przesunięciu mapy niespodziewanie przenosiło podgląd i pobierało od nowa wszystkie warstwy.
+    ''' </summary>
+    Private Sub mapa_OnPositionChanged(point As PointLatLng) Handles mapa.OnPositionChanged
+        If Not _zaladowany OrElse _zestaw.Liczba = 0 OrElse _przerwanie IsNot Nothing Then Exit Sub
+        If BiezacaSiatka().Poprawna Then Exit Sub
+        ZglosOdswiezeniePodgladu()
+    End Sub
+
+    ''' <summary>
+    ''' Skaluje w pamięci bazową bitmapę próbki do bieżącego powiększenia i wyświetla w picPodglad. Przy 100% panel
+    ''' pokazuje środek próbki piksel w piksel, przy 50% większy obszar próbki, przy 200% lupę rastrową.
     ''' </summary>
     Private Sub ZastosujZoomPodgladu()
         If _bazaPodgladu Is Nothing Then
@@ -1512,7 +1531,8 @@ Public Class Form1
             Exit Sub
         End If
         Dim zoom = _poziomyZoomu(_indeksZoomu)
-        Dim powiekszony = PodgladWarstwSilnik.ZastosujZoom(_bazaPodgladu, zoom, PodgladWarstwSilnik.BokPodgladu, PodgladWarstwSilnik.BokPodgladu)
+        Dim powiekszony = PodgladWarstwSilnik.ZastosujZoom(_bazaPodgladu, zoom, PodgladWarstwSilnik.BokPanelu, PodgladWarstwSilnik.BokPanelu)
+        If _brakWarstwPodgladu Then PodgladWarstwSilnik.RysujRamkeBraku(powiekszony)
         Dim staryImg = picPodglad.Image
         picPodglad.Image = powiekszony
         staryImg?.Dispose()
@@ -1534,30 +1554,64 @@ Public Class Form1
         Return UkladWspolrzednych.PL1992.PrzeliczRozmiarPiksela(Ustawienia.Uklad, zalecany, New PunktGeo(mapa.Position.Lat, mapa.Position.Lng))
     End Function
 
-    ''' <summary>Aktualizuje etykietę rozdzielczości pobierania i powiększenia lupy, np. "1 m/px (100%)".</summary>
+    ''' <summary>
+    ''' Punkt i rozmiar piksela próbki. Z poprawną siatką: środek siatki, a przy obszarze wzdłuż trasy środek
+    ''' pobieranego segmentu najbliższego środkowi siatki (środek prostokąta może leżeć daleko od trasy i podgląd
+    ''' pokazywałby teren, którego program nie pobierze). Bez siatki: środek bieżącego widoku mapy.
+    ''' </summary>
+    Private Sub ParametryProbki(ByRef punkt As PunktXY, ByRef piksel As Double)
+        Dim s = BiezacaSiatka()
+        If s.Poprawna Then
+            piksel = If(s.RozmiarPiksela > 0, s.RozmiarPiksela, 1.0)
+            punkt = s.ZasiegSiatki.Srodek
+            If _korytarz IsNot Nothing Then
+                Dim klucz As String = String.Join("|", Liczba(s.Obszar.XDol), Liczba(s.Obszar.YLewy), Liczba(s.Obszar.XGora),
+                                                  Liczba(s.Obszar.YPrawy), Liczba(s.RozmiarPiksela), s.BokSegmentuPx,
+                                                  Ustawienia.Uklad.Epsg, _korytarz.GetHashCode(), Liczba(_korytarz.SzerokoscMetry))
+                'wyznaczanie segmentów korytarza trwa przy długiej trasie - pola zasięgu zmieniają się po kolei, więc wynik zapamiętywany
+                If klucz <> _kluczPunktuKorytarza Then
+                    _kluczPunktuKorytarza = klucz
+                    _punktKorytarza = _korytarz.PunktProbki(s, Ustawienia.Uklad, MaksSegmentowKorytarzaNaBiezaco)
+                End If
+                If _punktKorytarza.HasValue Then punkt = _punktKorytarza.Value
+            End If
+            _punktProbkiBezSiatki = Nothing
+        Else
+            _punktProbkiBezSiatki = Ustawienia.Uklad.ZWgs84(mapa.Position.Lat, mapa.Position.Lng)
+            punkt = _punktProbkiBezSiatki.Value
+            piksel = PikselPodgladuBezSiatki()
+        End If
+    End Sub
+
+    ''' <summary>
+    ''' Aktualizuje etykietę rozdzielczości pobierania i powiększenia, np. "1 m/px", "1 m/px ×2" (lupa)
+    ''' albo "1 m/px ×½" (większy obszar). Procenty sugerowały zmianę rozdzielczości pobierania.
+    ''' </summary>
     Private Sub AktualizujEtykieteSkali()
         If _zestaw.Liczba = 0 Then
             lblPodgladSkala.Text = "-"
             Exit Sub
         End If
         Dim s = BiezacaSiatka()
-        Dim bazowyPiksel As Double
-        If s.Poprawna Then
-            bazowyPiksel = If(s.RozmiarPiksela > 0, s.RozmiarPiksela, 1.0)
-        Else
-            bazowyPiksel = PikselPodgladuBezSiatki()
-        End If
-        Dim zoomProcent = CInt(Math.Round(_poziomyZoomu(_indeksZoomu) * 100))
-        lblPodgladSkala.Text = Liczba(bazowyPiksel) & If(Ustawienia.Uklad.Geograficzny, " °/px (", " m/px (") & zoomProcent & "%)"
+        Dim bazowyPiksel As Double = If(s.Poprawna, If(s.RozmiarPiksela > 0, s.RozmiarPiksela, 1.0), PikselPodgladuBezSiatki())
+        Dim zoom = _poziomyZoomu(_indeksZoomu)
+        Dim przyrostek As String = If(zoom > 1.001, " ×" & CInt(zoom), If(zoom < 0.999, " ×½", ""))
+        lblPodgladSkala.Text = Liczba(bazowyPiksel) & If(Ustawienia.Uklad.Geograficzny, " °/px", " m/px") & przyrostek
+        Dim bokTerenu As Double = PodgladWarstwSilnik.BokPanelu * bazowyPiksel / zoom
+        ToolTip1.SetToolTip(lblPodgladSkala, "Rozmiar piksela pobierania: " & Liczba(bazowyPiksel) & If(Ustawienia.Uklad.Geograficzny, " °", " m") & "." & vbCrLf &
+                            If(zoom > 1.001, "Lupa ×" & CInt(zoom) & ": piksele pobierania powiększone, rozdzielczość pobierania bez zmian.",
+                               If(zoom < 0.999, "Widok ×½: większy obszar próbki, pomniejszony.", "Skala 1:1: piksel podglądu = piksel pobierania.")) & vbCrLf &
+                            "Widoczny obszar: ok. " & Liczba(Math.Round(bokTerenu, If(Ustawienia.Uklad.Geograficzny, 6, 0))) & If(Ustawienia.Uklad.Geograficzny, "°", " m") & " x " &
+                            Liczba(Math.Round(bokTerenu, If(Ustawienia.Uklad.Geograficzny, 6, 0))) & If(Ustawienia.Uklad.Geograficzny, "°", " m") & ".")
     End Sub
 
-    ''' <summary>Aktualizuje dostępność przycisków lupy rastrowej.</summary>
+    ''' <summary>Aktualizuje dostępność przycisków powiększenia podglądu.</summary>
     Private Sub AktualizujStanPrzyciskowZoomu()
         Dim pobieranie As Boolean = _przerwanie IsNot Nothing
         Dim maObraz As Boolean = _zestaw.Liczba > 0 AndAlso _bazaPodgladu IsNot Nothing
         btnZoomMinus.Enabled = maObraz AndAlso _indeksZoomu > 0 AndAlso Not pobieranie
         btnZoomPlus.Enabled = maObraz AndAlso _indeksZoomu < _poziomyZoomu.Length - 1 AndAlso Not pobieranie
-        btnZoomReset.Enabled = maObraz AndAlso _indeksZoomu <> 1 AndAlso Not pobieranie
+        btnZoomReset.Enabled = maObraz AndAlso _indeksZoomu <> IndeksZoomu1do1 AndAlso Not pobieranie
     End Sub
 
     ''' <summary>Wymusza wyczyszczenie pamięci podręcznej i ponowne pobranie podglądu z serwerów.</summary>
@@ -1569,6 +1623,30 @@ Public Class Form1
         _bazaPodgladu = Nothing
         staraBaza?.Dispose()
         ZglosOdswiezeniePodgladu(natychmiast:=True)
+    End Sub
+
+    ''' <summary>Wyświetla złożony obraz próbki i stan podglądu (brakujące warstwy: czerwona ramka i ich lista).</summary>
+    Private Sub PokazObrazPodgladu(bmp As Bitmap, bledy As IList(Of String))
+        If bmp IsNot Nothing Then
+            Dim staraBaza = _bazaPodgladu
+            _bazaPodgladu = bmp
+            staraBaza?.Dispose()
+        End If
+        Dim brakujace = _silnikPodgladu.BrakujaceWarstwy(_zestaw)
+        _brakWarstwPodgladu = brakujace.Count > 0
+        ZastosujZoomPodgladu()
+        If brakujace.Count = 0 Then
+            lblPodgladStan.Text = ""
+            ToolTip1.SetToolTip(lblPodgladStan, "")
+        Else
+            lblPodgladStan.Text = If(brakujace.Count = _zestaw.Liczba, "Błąd pobierania", "Brak " & brakujace.Count & " z " & _zestaw.Liczba & " warstw")
+            Dim opis As String = "Podgląd bez warstw: " & String.Join(", ", brakujace.Select(Function(w) NazwaWarstwy(w))) & "."
+            If bledy IsNot Nothing AndAlso bledy.Count > 0 Then opis &= vbCrLf & String.Join(vbCrLf, bledy)
+            ToolTip1.SetToolTip(lblPodgladStan, opis)
+        End If
+        ToolTip1.SetToolTip(picPodglad, "Bieżący podgląd zestawu warstw (" & OpisWarstw() & ")." &
+                            If(_brakWarstwPodgladu, " Czerwona ramka: części warstw nie udało się pobrać.", "") &
+                            " Kółko myszy: przybliż/oddal. Kliknij, aby otworzyć okno Zaawansowane.")
     End Sub
 
     ''' <summary>
@@ -1585,6 +1663,7 @@ Public Class Form1
             _timerPodgladu.Stop()
             _ctsPodglad?.Cancel()
             _punktProbkiBezSiatki = Nothing
+            _brakWarstwPodgladu = False
             Dim staraBaza = _bazaPodgladu
             _bazaPodgladu = Nothing
             staraBaza?.Dispose()
@@ -1606,21 +1685,8 @@ Public Class Form1
             Exit Sub
         End If
 
-        Dim s = BiezacaSiatka()
-        Dim punkt As PunktXY
-        Dim bazowyPiksel As Double
-
-        If s.Poprawna Then
-            punkt = s.ZasiegSiatki.Srodek
-            bazowyPiksel = If(s.RozmiarPiksela > 0, s.RozmiarPiksela, 1.0)
-            _punktProbkiBezSiatki = Nothing
-        Else
-            ' Przy zmianie warstw bez siatki bierzemy bieżący środek mapy
-            _punktProbkiBezSiatki = Ustawienia.Uklad.ZWgs84(mapa.Position.Lat, mapa.Position.Lng)
-            punkt = _punktProbkiBezSiatki.Value
-            bazowyPiksel = PikselPodgladuBezSiatki()
-        End If
-
+        Dim punkt As PunktXY, bazowyPiksel As Double
+        ParametryProbki(punkt, bazowyPiksel)
         AktualizujEtykieteSkali()
 
         Dim zmieniono = _silnikPodgladu.SprawdzIZaktualizujParametry(punkt, bazowyPiksel, Ustawienia.Uklad)
@@ -1628,14 +1694,7 @@ Public Class Form1
         ' Jeśli parametry próbki się nie zmieniły i wszystkie warstwy są już w buforze, składamy obraz natychmiast w RAM
         If Not zmieniono AndAlso _zestaw.Warstwy.All(Function(w) _silnikPodgladu.CzyWarstwaWBuforze(w)) Then
             _timerPodgladu.Stop()
-            Dim bmp = _silnikPodgladu.ZlozObraz(_zestaw)
-            Dim staraBaza = _bazaPodgladu
-            _bazaPodgladu = bmp
-            staraBaza?.Dispose()
-            ZastosujZoomPodgladu()
-            lblPodgladStan.Text = ""
-            ToolTip1.SetToolTip(picPodglad, "Bieżący podgląd zestawu warstw (" & OpisWarstw() & "). Kółko myszy: przybliż/oddal. Kliknij, aby otworzyć okno Zaawansowane.")
-            ToolTip1.SetToolTip(lblPodgladStan, "")
+            PokazObrazPodgladu(_silnikPodgladu.ZlozObraz(_zestaw), Nothing)
             Exit Sub
         End If
 
@@ -1656,54 +1715,22 @@ Public Class Form1
     Private Async Sub UruchomPobieraniePodgladuAsync()
         If _zestaw.Liczba = 0 OrElse _przerwanie IsNot Nothing Then Exit Sub
 
-        Dim s = BiezacaSiatka()
-        Dim punkt As PunktXY
-        Dim bazowyPiksel As Double
-
-        If s.Poprawna Then
-            punkt = s.ZasiegSiatki.Srodek
-            bazowyPiksel = If(s.RozmiarPiksela > 0, s.RozmiarPiksela, 1.0)
-            _punktProbkiBezSiatki = Nothing
-        Else
-            If Not _punktProbkiBezSiatki.HasValue Then
-                _punktProbkiBezSiatki = Ustawienia.Uklad.ZWgs84(mapa.Position.Lat, mapa.Position.Lng)
-            End If
-            punkt = _punktProbkiBezSiatki.Value
-            bazowyPiksel = PikselPodgladuBezSiatki()
-        End If
-
+        Dim punkt As PunktXY, bazowyPiksel As Double
+        ParametryProbki(punkt, bazowyPiksel)
         _silnikPodgladu.SprawdzIZaktualizujParametry(punkt, bazowyPiksel, Ustawienia.Uklad)
-        Dim pol = (PodgladWarstwSilnik.BokPodgladu * bazowyPiksel) / 2
-        Dim zasieg As New Zasieg(punkt.X - pol, punkt.Y - pol, punkt.X + pol, punkt.Y + pol)
 
         _ctsPodglad?.Cancel()
         Dim cts As New CancellationTokenSource()
         _ctsPodglad = cts
 
         lblPodgladStan.Text = "Pobieranie…"
-        Dim postep As New Progress(Of String)(Sub(kom) lblPodgladStan.Text = kom)
+        Dim postep As New Progress(Of String)(Sub(kom) If Not cts.IsCancellationRequested Then lblPodgladStan.Text = kom)
 
         Try
             Dim zadanie = ZadanieDoPodgladu()
-            Dim wynik = Await _silnikPodgladu.PobierzPodgladAsync(zadanie, _zestaw, zasieg, cts.Token, postep)
-
+            Dim wynik = Await _silnikPodgladu.PobierzPodgladAsync(zadanie, _zestaw, cts.Token, postep)
             If cts.IsCancellationRequested Then Exit Sub
-
-            If wynik.Item1 IsNot Nothing Then
-                Dim staraBaza = _bazaPodgladu
-                _bazaPodgladu = wynik.Item1
-                staraBaza?.Dispose()
-                ZastosujZoomPodgladu()
-            End If
-
-            If wynik.Item2.Count > 0 Then
-                lblPodgladStan.Text = If(wynik.Item1 IsNot Nothing, "Pobrano z uwagami", "Błąd pobierania")
-                ToolTip1.SetToolTip(lblPodgladStan, String.Join(vbCrLf, wynik.Item2))
-            Else
-                lblPodgladStan.Text = ""
-                ToolTip1.SetToolTip(lblPodgladStan, "")
-            End If
-            ToolTip1.SetToolTip(picPodglad, "Bieżący podgląd zestawu warstw (" & OpisWarstw() & "). Kółko myszy: przybliż/oddal. Kliknij, aby otworzyć okno Zaawansowane.")
+            PokazObrazPodgladu(wynik.Item1, wynik.Item2)
         Catch ex As OperationCanceledException
         Catch ex As Exception
             lblPodgladStan.Text = "Błąd podglądu"
@@ -2862,6 +2889,7 @@ Public Class Form1
             mapa.SetZoomToFitRect(New RectLatLng(g.Polnoc, g.Zachod, g.Wschod - g.Zachod, g.Polnoc - g.Poludnie))
         End If
         Komunikat(OpisKorytarza(), Color.Green)
+        If _zaladowany Then ZglosOdswiezeniePodgladu()
     End Sub
 
     ''' <summary>Usuwa obszar wzdłuż trasy - pobierany będzie cały prostokąt.</summary>
@@ -2874,6 +2902,7 @@ Public Class Form1
             PokazZnaczniki()
             Komunikat("Usunięto obszar wzdłuż trasy - pobierany będzie cały prostokąt.", Color.Green)
         End If
+        If _zaladowany Then ZglosOdswiezeniePodgladu()
     End Sub
 
     ''' <summary>Opis korytarza: trasa, szerokość pasa i liczba pobieranych segmentów.</summary>
