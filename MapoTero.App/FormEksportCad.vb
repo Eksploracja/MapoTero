@@ -46,12 +46,10 @@ Public Class FormEksportCad
         chkSciezkiWzgledne.Checked = Ustawienia.CadSciezkiWzgledne
         chkScr.Checked = Ustawienia.CadScr
         chkLsp.Checked = Ustawienia.CadLsp
-        _folder = Form1.FolderSesji
-        If _folder = "" OrElse File.Exists(_folder & "conf.txt") = False Then
-            Dim najnowszy = KonfiguracjaSesji.NajnowszyFolderSesji(FolderDownload)
-            _folder = If(Not String.IsNullOrEmpty(najnowszy), najnowszy, FolderDownload)
-        End If
+        Dim uwagaFolderu As String = ""
+        _folder = FolderSesjiDlaNarzedzia(Form1.FolderSesji, uwagaFolderu)
         WczytajSesje()
+        If uwagaFolderu <> "" Then Komunikat(uwagaFolderu & vbCrLf & txtKomunikaty.Text, Color.OrangeRed)
     End Sub
 
     Private Sub FormEksportCad_FormClosing(sender As Object, e As FormClosingEventArgs) Handles MyBase.FormClosing

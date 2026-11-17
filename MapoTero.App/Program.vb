@@ -55,6 +55,23 @@ Public Module Program
         End Get
     End Property
 
+    ''' <summary>
+    ''' Folder sesji dla okien, które tylko czytają segmenty (scalanie, eksport mapy, eksport do CAD): bieżąca sesja,
+    ''' a gdy jej folder nie ma conf.txt (np. po „Usuń pobrane” albo przed pierwszym pobraniem) - najnowsza sesja
+    ''' w download. Wtedy uwaga zawiera tekst dla użytkownika - dawniej okno przechodziło na inną sesję bez słowa.
+    ''' Okno usuwania pustych segmentów nie korzysta z tej funkcji: kasuje pliki, więc działa tylko na bieżącej sesji.
+    ''' </summary>
+    Public Function FolderSesjiDlaNarzedzia(biezacy As String, ByRef uwaga As String) As String
+        uwaga = ""
+        If Not String.IsNullOrEmpty(biezacy) AndAlso File.Exists(biezacy & "conf.txt") Then Return biezacy
+        Dim najnowszy = MapoTero.Core.KonfiguracjaSesji.NajnowszyFolderSesji(FolderDownload)
+        If String.IsNullOrEmpty(najnowszy) Then Return FolderDownload
+        uwaga = "Uwaga: folder bieżącej sesji (" & If(String.IsNullOrEmpty(biezacy), "brak", biezacy) &
+                ") nie zawiera pliku conf.txt, dlatego otwarto najnowszą sesję: " & najnowszy &
+                ". Inny folder wskażesz przyciskiem zmiany folderu."
+        Return najnowszy
+    End Function
+
     ''' <summary>Plik ustawień programu.</summary>
     Public ReadOnly Property PlikLastsettings As String
         Get

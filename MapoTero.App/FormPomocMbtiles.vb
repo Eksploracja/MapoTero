@@ -478,6 +478,10 @@ Public Module PomocProgramu
     End Function
 
     Public Function DodajPrzyciskPomocy(form As Form, temat As TematPomocy, Optional x As Integer = 12, Optional y As Integer = -1) As Button
+        'okna otwierane jako domyślna instancja (np. Form3.ShowDialog()) nie są niszczone po zamknięciu, a zdarzenie
+        'Load zachodzi przy każdym otwarciu - bez tego sprawdzenia każde otwarcie dokładało kolejny przycisk
+        Dim istniejacy = TryCast(form.Controls("btnPomoc"), Button)
+        If istniejacy IsNot Nothing Then Return istniejacy
         Dim btn As New Button()
         btn.Name = "btnPomoc"
         btn.Text = "Pomoc"

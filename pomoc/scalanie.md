@@ -35,8 +35,10 @@ Złączenie pobranych segmentów w jeden duży arkusz GeoTIFF, JPEG lub PNG z pl
 
 ## Folder segmentów i conf.txt
 
-Po otwarciu okna program automatycznie wskazuje folder bieżącej sesji pobierania (dedykowany podfolder `download\sesja_<zbior>_<timestamp>\` zawierający plik `conf.txt`, a w razie jego braku katalog `download\`)
+Po otwarciu okna program automatycznie wskazuje folder bieżącej sesji pobierania (dedykowany podfolder `download\sesja_<zbior>_<timestamp>\` zawierający plik `conf.txt`)
 i wczytuje parametry siatki, format segmentów, przedrostek, styl numeracji oraz informację o przezroczystości.
+Gdy folder bieżącej sesji nie ma pliku `conf.txt` (np. po usunięciu pobranych map albo przed pierwszym pobraniem), okno otwiera
+najnowszą sesję z `download\` i pisze o tym w polu komunikatów. Tak samo działają okna eksportu mapy i eksportu do CAD.
 
 * **zmień folder**: pozwala wskazać dowolny inny katalog z wcześniej pobraną mapą.
 * **error.txt blokuje scalanie**: dopóki w folderze istnieje plik `error.txt` (oznaczający niekompletne pobranie), scalanie nie zostanie uruchomione. Należy dopobrać brakujące segmenty albo, jeśli brak jest zamierzony, usunąć plik `error.txt` ręcznie.

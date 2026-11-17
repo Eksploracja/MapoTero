@@ -103,14 +103,12 @@ Public Class FormEksport
         If cboKolejnoscGarmin.Items.Count > 0 AndAlso cboKolejnoscGarmin.SelectedIndex < 0 Then
             cboKolejnoscGarmin.SelectedIndex = 0
         End If
-        _folder = Form1.FolderSesji
-        If _folder = "" OrElse File.Exists(_folder & "conf.txt") = False Then
-            Dim najnowszy = KonfiguracjaSesji.NajnowszyFolderSesji(FolderDownload)
-            _folder = If(Not String.IsNullOrEmpty(najnowszy), najnowszy, FolderDownload)
-        End If
+        Dim uwagaFolderu As String = ""
+        _folder = FolderSesjiDlaNarzedzia(Form1.FolderSesji, uwagaFolderu)
         WczytajSesje()
         UsunNiepasujaceNakladki()
         UstawWidok()
+        If uwagaFolderu <> "" Then Komunikat(uwagaFolderu & vbCrLf & txtKomunikaty.Text, Color.OrangeRed)
     End Sub
 
     ''' <summary>

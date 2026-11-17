@@ -39,11 +39,8 @@ Public Class Form3
 
     Private Sub Form3_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         PomocProgramu.DodajPrzyciskPomocy(Me, TematPomocy.Scalanie)
-        _folderScalania = If(FolderPoczatkowy <> "", FolderPoczatkowy, Form1.FolderSesji)
-        If _folderScalania = "" OrElse File.Exists(_folderScalania & "conf.txt") = False Then
-            Dim najnowszy = KonfiguracjaSesji.NajnowszyFolderSesji(FolderDownload)
-            _folderScalania = If(Not String.IsNullOrEmpty(najnowszy), najnowszy, FolderDownload)
-        End If
+        Dim uwagaFolderu As String = ""
+        _folderScalania = FolderSesjiDlaNarzedzia(If(FolderPoczatkowy <> "", FolderPoczatkowy, Form1.FolderSesji), uwagaFolderu)
         txtFolder.Text = _folderScalania
         txtFolder.Enabled = False
         grpParametry.Enabled = False
@@ -56,6 +53,7 @@ Public Class Form3
         If FolderPoczatkowy <> "" Then chkWorldFile.Checked = True
         OpiszWorldFile()
         WczytajParametry()
+        If uwagaFolderu <> "" Then Komunikat(uwagaFolderu & vbCrLf & txtKomunikaty.Text, Color.OrangeRed)
     End Sub
 
     ''' <summary>Parametry zbioru segmentów z pliku conf.txt w folderze scalania.</summary>

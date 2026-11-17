@@ -71,6 +71,9 @@ głównego (z regulacją krycia), a dla sesji z różnymi układami lub w JPEG w
 Na brzegach map historycznych lub tematycznych o ograniczonym zasięgu powstają białe albo jednokolorowe segmenty, które
 mają wyraźnie mniejszy rozmiar pliku od segmentów z treścią.
 
+Okno działa na folderze bieżącej sesji, który widać w jego tytule. Gdy bieżącej sesji nie ma (np. po usunięciu pobranych
+map albo przed pierwszym pobraniem), program prosi o wskazanie folderu z segmentami i nie przechodzi sam na inną sesję.
+
 1. Wybierz rozszerzenie plików z listy (`jpg`, `png`, `tif`, `gif`). Program od razu zlicza pliki w folderze bieżącej
    sesji i pokazuje ich najmniejszy, największy oraz średni rozmiar w `kB`.
 2. Sprawdź w Eksploratorze rozmiar przykładowego „pustego” segmentu i wpisz w polu *Usuń kafle mniejsze niż* wartość

@@ -3,6 +3,7 @@
 'as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
 Imports System.Drawing
+Imports System.IO
 Imports System.Reflection
 Imports System.Threading
 Imports System.Windows.Forms
@@ -119,6 +120,69 @@ Public Class PodpowiedziTesty
                         Dim tt = DirectCast(wlasnosc.GetValue(f), ToolTip)
                         Dim tip = tt.GetToolTip(btn)
                         Assert.Contains("Wyszukaj miejscowość", tip)
+                    End Using
+                Catch ex As Exception
+                    blad = ex
+                End Try
+            End Sub)
+        t.SetApartmentState(ApartmentState.STA)
+        t.Start()
+        t.Join()
+        If blad IsNot Nothing Then Throw blad
+    End Sub
+
+    <Fact>
+    Public Sub FolderSesjiDlaNarzedzia_BiezacaSesjaAlboNajnowszaZUwaga()
+        Dim folder = Path.Combine(Path.GetTempPath(), "MapoTero_Narzedzia_" & Guid.NewGuid().ToString("N")) & "\"
+        Directory.CreateDirectory(folder)
+        Try
+            'folder bez conf.txt - okno przechodzi na najnowszą sesję i mówi o tym; gdy żadnej sesji nie ma - download bez uwagi
+            Dim uwaga As String = Nothing
+            Dim wynik = MapoTero.FolderSesjiDlaNarzedzia(folder, uwaga)
+            If wynik = MapoTero.FolderDownload Then
+                Assert.Equal("", uwaga)
+            Else
+                Assert.Contains("nie zawiera pliku conf.txt", uwaga)
+                Assert.Contains(wynik, uwaga)
+            End If
+
+            'bieżąca sesja z conf.txt - bez zmiany folderu i bez uwagi
+            File.WriteAllText(folder & "conf.txt", "test")
+            wynik = MapoTero.FolderSesjiDlaNarzedzia(folder, uwaga)
+            Assert.Equal(folder, wynik)
+            Assert.Equal("", uwaga)
+        Finally
+            Directory.Delete(folder, True)
+        End Try
+    End Sub
+
+    <Fact>
+    Public Sub UsuwaniePustych_TylkoBiezacaSesja()
+        Dim folder = Path.Combine(Path.GetTempPath(), "MapoTero_Usuwanie_" & Guid.NewGuid().ToString("N"))
+        Directory.CreateDirectory(folder)
+        Try
+            'istniejący folder (także bez conf.txt, np. wynik nakładania map) - bieżąca sesja
+            Assert.Equal(folder & "\", MapoTero.Usuwanie_p_seg.FolderBiezacejSesji(folder))
+            'sam download, brak folderu albo folder nieistniejący - brak bieżącej sesji (bez przejścia na najnowszą)
+            Assert.Equal("", MapoTero.Usuwanie_p_seg.FolderBiezacejSesji(MapoTero.FolderDownload))
+            Assert.Equal("", MapoTero.Usuwanie_p_seg.FolderBiezacejSesji(""))
+            Assert.Equal("", MapoTero.Usuwanie_p_seg.FolderBiezacejSesji(folder & "_nie_ma"))
+        Finally
+            Directory.Delete(folder, True)
+        End Try
+    End Sub
+
+    <Fact>
+    Public Sub DodajPrzyciskPomocy_JedenPrzyciskPrzyPonownymOtwarciu()
+        Dim blad As Exception = Nothing
+        Dim t As New Thread(
+            Sub()
+                Try
+                    Using f As New Form()
+                        Dim b1 = PomocProgramu.DodajPrzyciskPomocy(f, TematPomocy.Scalanie)
+                        Dim b2 = PomocProgramu.DodajPrzyciskPomocy(f, TematPomocy.Scalanie)
+                        Assert.Same(b1, b2)
+                        Assert.Equal(1, f.Controls.Find("btnPomoc", False).Length)
                     End Using
                 Catch ex As Exception
                     blad = ex

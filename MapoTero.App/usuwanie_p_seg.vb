@@ -21,19 +21,49 @@ Public Class Usuwanie_p_seg
 
     Private ReadOnly _plikiBiezace As New List(Of FileInfo)()
 
+    ''' <summary>Tytuł okna z projektu (do niego dopisywany jest folder segmentów).</summary>
+    Private _tytul As String = ""
+
     Private Sub Usuwanie_p_seg_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         PomocProgramu.DodajPrzyciskPomocy(Me, TematPomocy.UsuwaniePustych, 20, 287)
+        If _tytul = "" Then _tytul = Me.Text
+        _folder = FolderBiezacejSesji(Form1.FolderSesji)
+        If _folder = "" Then
+            'bez bieżącej sesji okno nie przechodzi na inną (np. najnowszą) - kasuje pliki, więc folder wskazuje użytkownik
+            MessageBox.Show("Nie ma bieżącej sesji pobierania (np. po usunięciu pobranych map albo przed pierwszym pobraniem)." & vbCrLf & vbCrLf &
+                            "Wskaż folder z segmentami, z którego chcesz usunąć puste segmenty.", "Usuwanie pustych segmentów",
+                            MessageBoxButtons.OK, MessageBoxIcon.Information)
+            dlgFolder.Description = "Folder z segmentami do sprawdzenia"
+            dlgFolder.SelectedPath = FolderDownload
+            If dlgFolder.ShowDialog(Me) <> DialogResult.OK Then
+                BeginInvoke(New Action(AddressOf Close))
+                Exit Sub
+            End If
+            _folder = dlgFolder.SelectedPath.TrimEnd("\"c, "/"c) & "\"
+        End If
+        Me.Text = _tytul & " - " & _folder
         cmbRozszerzenie_SelectedIndexChanged(Nothing, Nothing)
     End Sub
 
-    ''' <summary>Folder segmentów bieżącej sesji.</summary>
+    ''' <summary>Folder segmentów wybrany przy otwarciu okna (bieżąca sesja albo folder wskazany przez użytkownika).</summary>
+    Private _folder As String = ""
+
+    ''' <summary>
+    ''' Folder bieżącej sesji, z którego okno może usuwać pliki: istniejący folder inny niż sam download (folder sesji
+    ''' albo np. wynik nakładania map bez conf.txt); pusty tekst - brak bieżącej sesji. Dawniej okno przechodziło wtedy
+    ''' bez ostrzeżenia na najnowszą sesję w download i usuwało jej pliki.
+    ''' </summary>
+    Friend Shared Function FolderBiezacejSesji(folderSesji As String) As String
+        If String.IsNullOrWhiteSpace(folderSesji) OrElse Not Directory.Exists(folderSesji) Then Return ""
+        If String.Equals(Path.GetFullPath(folderSesji).TrimEnd("\"c, "/"c), Path.GetFullPath(FolderDownload).TrimEnd("\"c, "/"c),
+                         StringComparison.OrdinalIgnoreCase) Then Return ""
+        Return folderSesji.TrimEnd("\"c, "/"c) & "\"
+    End Function
+
+    ''' <summary>Folder segmentów, na którym działa okno.</summary>
     Private ReadOnly Property Folder As String
         Get
-            If Not String.IsNullOrWhiteSpace(Form1.FolderSesji) AndAlso Directory.Exists(Form1.FolderSesji) AndAlso File.Exists(Path.Combine(Form1.FolderSesji, "conf.txt")) Then
-                Return Form1.FolderSesji
-            End If
-            Dim najnowszy = KonfiguracjaSesji.NajnowszyFolderSesji(FolderDownload)
-            Return If(Not String.IsNullOrEmpty(najnowszy), najnowszy, If(Not String.IsNullOrWhiteSpace(Form1.FolderSesji), Form1.FolderSesji, FolderDownload))
+            Return _folder
         End Get
     End Property
 
