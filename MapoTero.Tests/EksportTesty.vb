@@ -499,4 +499,55 @@ Public Class EksportTesty
         End Try
     End Sub
 
+    ''' <summary>
+    ''' Kafel z wyostrzaniem renderowany z marginesem: dwa sąsiednie kafle są identyczne z połówkami jednego
+    ''' podwójnego kafla, więc na ich styku nie ma linii mniejszej ostrości (dawniej kafel był wyostrzany bez sąsiadów).
+    ''' </summary>
+    <Fact>
+    Public Sub KafleZWyostrzaniemBezSzwowNaStykach()
+        Dim folder = NowyFolder()
+        Try
+            Dim los As New Random(3)
+            UtworzSegmenty(folder, "png", Sub(g, w, k)
+                                              For y = 0 To 255
+                                                  For x = 0 To 255
+                                                      Dim v = los.Next(40, 216)
+                                                      Using pedzel As New SolidBrush(Color.FromArgb(v, v, v))
+                                                          g.FillRectangle(pedzel, x, y, 1, 1)
+                                                      End Using
+                                                  Next
+                                              Next
+                                          End Sub)
+            Dim warstwy As New List(Of WarstwaEksportu) From {New WarstwaEksportu With {.Zrodlo = Zrodlo(folder, "png"), .Uklad = UkladWspolrzednych.PL1992}}
+            Dim s = Siatka2x2()
+            Dim korekta As New OpcjeKorekcjiMip()
+            korekta.UstawWgProfilu(ProfilKorektyRastra.GarminMip)
+            'piksel kafla = piksel segmentu (1 m), x0/y0 - przesunięcie od lewego górnego narożnika siatki
+            Dim przelicz = Function(x0 As Integer, y0 As Integer) As Func(Of Double, Double, PunktGeo)
+                               Return Function(x, y) UkladWspolrzednych.PL1992.DoWgs84(New PunktXY(s.ZasiegSiatki.XGora - y0 - y, s.ZasiegSiatki.YLewy + x0 + x))
+                           End Function
+            Dim a, b, ab As Integer()
+            Using bmp = EksportMapy.RenderujKafelZKorekta(warstwy, 100, 100, 1, przelicz(100, 100), korekta)
+                a = NakladanieObrazow.PikseleBitmapy(bmp)
+            End Using
+            Using bmp = EksportMapy.RenderujKafelZKorekta(warstwy, 100, 100, 1, przelicz(200, 100), korekta)
+                b = NakladanieObrazow.PikseleBitmapy(bmp)
+            End Using
+            Using bmp = EksportMapy.RenderujKafelZKorekta(warstwy, 200, 100, 1, przelicz(100, 100), korekta)
+                ab = NakladanieObrazow.PikseleBitmapy(bmp)
+            End Using
+            Dim roznice As Integer = 0
+            For y = 0 To 99
+                For x = 0 To 99
+                    For Each para In {Tuple.Create(a(y * 100 + x), ab(y * 200 + x)), Tuple.Create(b(y * 100 + x), ab(y * 200 + 100 + x))}
+                        If Math.Abs((para.Item1 And &HFF) - (para.Item2 And &HFF)) > 1 Then roznice += 1
+                    Next
+                Next
+            Next
+            Assert.Equal(0, roznice)
+        Finally
+            Usun(folder)
+        End Try
+    End Sub
+
 End Class

@@ -444,4 +444,19 @@ Public Class KompilatorMbtilesTesty
         Assert.True(di.AvailableFreeSpace > 0)
     End Sub
 
+    <Fact>
+    Public Sub OpcjeKompilatoraMbtiles_Korekta_KlonowanieIZastosowanie()
+        Dim opcje As New OpcjeKompilatoraMbtiles()
+        opcje.Korekta.UstawWgProfilu(ProfilKorektyRastra.GarminMip)
+
+        Dim klon = opcje.Klonuj()
+        Assert.NotNull(klon.Korekta)
+        Assert.True(klon.Korekta.Wlaczona)
+        Assert.Equal(ProfilKorektyRastra.GarminMip, klon.Korekta.Profil)
+
+        ' Zmiana w klonie nie powinna wpłynąć na oryginał
+        klon.Korekta.Profil = ProfilKorektyRastra.WyostrzenieKrawedzi
+        Assert.Equal(ProfilKorektyRastra.GarminMip, opcje.Korekta.Profil)
+    End Sub
+
 End Class

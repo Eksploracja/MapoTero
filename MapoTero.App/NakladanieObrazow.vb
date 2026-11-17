@@ -73,6 +73,21 @@ Friend NotInheritable Class NakladanieObrazow
         Return bmp
     End Function
 
+    ''' <summary>Piksele ARGB bitmapy (wierszami) odczytane bez przerysowania.</summary>
+    Public Shared Function PikseleBitmapy(bmp As Bitmap) As Integer()
+        Dim szer = bmp.Width, wys = bmp.Height
+        Dim piksele(szer * wys - 1) As Integer
+        Dim d = bmp.LockBits(New Rectangle(0, 0, szer, wys), ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb)
+        Try
+            For y = 0 To wys - 1
+                Marshal.Copy(IntPtr.Add(d.Scan0, y * d.Stride), piksele, y * szer, szer)
+            Next
+        Finally
+            bmp.UnlockBits(d)
+        End Try
+        Return piksele
+    End Function
+
     ''' <summary>Stosuje optymalizację czytelności obrazu pod kątem ekranów MIP / pełnego słońca.</summary>
     Public Shared Sub ZastosujKorekcjeMip(bmp As Bitmap, opcje As OpcjeKorekcjiMip)
         If bmp Is Nothing OrElse opcje Is Nothing OrElse Not opcje.Wlaczona Then Exit Sub

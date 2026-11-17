@@ -103,9 +103,9 @@ Narzędzia korzystające z sesji uwzględniają korytarz:
 
 W oknie obszaru wzdłuż trasy dostępna jest funkcja analizy ukształtowania terenu i uzupełniania rzędnych wysokościowych:
 
-* **Pobierz profil NMT:** program łączy się z państwową usługą NMT GUGiK (lotniczy skaning laserowy LIDAR) i pobiera rzeczywiste wysokości terenu dla wszystkich punktów śladu w Polsce.
+* **Wzbogać ślad o wysokości:** program łączy się z państwową usługą NMT GUGiK (lotniczy skaning laserowy LIDAR) i pobiera rzeczywiste wysokości terenu dla wszystkich punktów śladu w Polsce.
 * **Wykres profilu:** w oknie generowany jest interaktywny wykres profilu podłużnego trasy z czytelnym podsumowaniem przewyższeń: suma podejść (przewyższenie dodatnie liczone z bezpieczną histerezą 1,5 m zapobiegającą szumowi gęstego zapisu GPS), suma zejść, wysokość minimalna, maksymalna oraz całkowity dystans trasy.
-* **Zapisz GPX z wysokościami:** pozwala zapisać wzbogacony plik GPX z uzupełnionymi znacznikami `<ele>`. Taki plik można wgrać do zegarków Garmin, Suunto, Polar lub aplikacji na smartfony (Locus Map, Komoot), uzyskując dokładny profil trasy przed wyruszeniem w góry.
+* **Zapisz wzbogacony GPX:** pozwala zapisać plik GPX z uzupełnionymi znacznikami `<ele>`. Taki plik można wgrać do zegarków Garmin, Suunto, Polar lub aplikacji na smartfony (Locus Map, Komoot), uzyskując dokładny profil trasy przed wyruszeniem w góry.
 * **Przycisk Pomoc:** w lewym dolnym rogu okna korytarza otwiera podręczną instrukcję z aktywnym odnośnikiem do tego rozdziału pomocy.
 
 ---

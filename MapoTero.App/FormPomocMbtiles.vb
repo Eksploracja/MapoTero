@@ -45,6 +45,7 @@ Public Enum TematPomocy
     NakladanieMap
     UsuwaniePustych
     Ustawienia
+    KorektaFolderu
 End Enum
 
 ''' <summary>
@@ -116,6 +117,7 @@ Public Class FormPomocMbtiles
             Case TematPomocy.NakladanieMap : PomocNakladanieMap()
             Case TematPomocy.UsuwaniePustych : PomocUsuwaniePustych()
             Case TematPomocy.Ustawienia : PomocUstawienia()
+            Case TematPomocy.KorektaFolderu : PomocKorektaFolderu()
             Case Else : PomocMbtiles()
         End Select
     End Sub
@@ -282,9 +284,9 @@ Public Class FormPomocMbtiles
         DodajPunktor("Oszczędność czasu i pamięci: korytarz pozwala zredukować liczbę pobieranych kafelków nawet o 80-90%!")
 
         DodajNaglowek1("3. Profil wysokościowy i rzędne NMT / LIDAR")
-        DodajPunktor("Przycisk 'Pobierz profil NMT' pobiera rzeczywiste rzędne terenu z lotniczego skaningu laserowego (NMT GUGiK) dla wszystkich punktów trasy.")
+        DodajPunktor("Przycisk 'Wzbogać ślad o wysokości' pobiera rzeczywiste rzędne terenu z lotniczego skaningu laserowego (NMT GUGiK) dla wszystkich punktów trasy.")
         DodajPunktor("W oknie wyświetlany jest interaktywny wykres profilu z obliczoną sumą przewyższeń (podejścia, zejścia, min/max).")
-        DodajPunktor("Przycisk 'Zapisz GPX z wysokościami' eksportuje wzbogacony plik GPX z tagami <ele> dla odbiorników i zegarków turystycznych.")
+        DodajPunktor("Przycisk 'Zapisz wzbogacony GPX' eksportuje plik GPX z tagami <ele> dla odbiorników i zegarków turystycznych.")
 
         DodajStopkeOnline(_urlOnline)
     End Sub
@@ -318,6 +320,30 @@ Public Class FormPomocMbtiles
         DodajNaglowek1("1. Bezpieczeństwo danych")
         DodajPunktor("Wykryte puste pliki są bezpiecznie przenoszone do Kosza systemowego Windows, skąd w razie potrzeby można je łatwo przywrócić.")
         DodajPunktor("Usunięcie pustych segmentów zapobiega ich scalaniu do gotowego arkusza i drastycznie zmniejsza wagę baz kafelków MBTiles.")
+
+        DodajStopkeOnline(_urlOnline)
+    End Sub
+
+    Private Sub PomocKorektaFolderu()
+        Me.Text = "Pomoc i instrukcja - Korekta obrazów w folderze"
+        _urlOnline = "https://eksploracja.github.io/MapoTero/pomoc/narzedzia/"
+
+        DodajTytul("Korekta i optymalizacja obrazów w folderze")
+        DodajAkapit("Narzędzie poprawia naraz wszystkie obrazy PNG, JPEG i TIFF z wybranego folderu (np. segmenty sesji) " &
+                    "według wybranego profilu: kontrast, korekcja gamma, nasycenie barw i wyostrzanie krawędzi. " &
+                    "Oryginały zostają bez zmian - poprawione kopie trafiają do folderu wynikowego (domyślnie podfolder ""korekta"").")
+
+        DodajNaglowek1("1. Profil korekty")
+        DodajPunktor("Przycisk ""Dostosuj"" otwiera podgląd na próbce z folderu. Możesz wybrać gotowy profil (np. Garmin MIP, Podkład CAD, Skan CAD) albo ustawić własne wartości suwaków.")
+        DodajPunktor("Profil ""Brak"" nie zmienia obrazów, więc w tym oknie nie można go wybrać.")
+
+        DodajNaglowek1("2. Georeferencja")
+        DodajPunktor("Opcja ""Kopiuj pliki georeferencji"" kopiuje obok poprawionych obrazów pliki .jpgw, .pngw, .tifw, .wld, .prj, .map, .gmi, .tab, .kml i inne oraz conf.txt sesji.")
+        DodajPunktor("GeoTIFF zachowuje georeferencję zapisaną w pliku, gdy program zna jego układ współrzędnych.")
+
+        DodajNaglowek1("3. Przerwanie i błędy")
+        DodajPunktor("Przycisk ""Przerwij"" albo zamknięcie okna przerywa przetwarzanie; już zapisane kopie zostają w folderze wynikowym.")
+        DodajPunktor("Plik, którego nie da się odczytać, jest pomijany, a jego nazwę program podaje po zakończeniu pracy.")
 
         DodajStopkeOnline(_urlOnline)
     End Sub
@@ -493,11 +519,14 @@ Public Module PomocProgramu
         btn.Size = New Size(CInt(Math.Round(75 * sx)), CInt(Math.Round(26 * sy)))
         btn.Font = New Font("Segoe UI", 9.0!, FontStyle.Regular)
         btn.UseVisualStyleBackColor = True
-        btn.Anchor = AnchorStyles.Bottom Or AnchorStyles.Left
         x = CInt(Math.Round(x * sx))
         If y < 0 Then
+            btn.Anchor = AnchorStyles.Bottom Or AnchorStyles.Left
             y = form.ClientSize.Height - btn.Height - CInt(Math.Round(12 * sy))
         Else
+            'położenie z projektu - kotwica jak u sąsiednich przycisków z projektu (Top, Left); z kotwicą do dołu
+            'przycisk w oknie eksportu po włączeniu przewijania na niskim ekranie wypadał poniżej zawartości okna
+            btn.Anchor = AnchorStyles.Top Or AnchorStyles.Left
             y = CInt(Math.Round(y * sy))
         End If
         btn.Location = New Point(x, y)

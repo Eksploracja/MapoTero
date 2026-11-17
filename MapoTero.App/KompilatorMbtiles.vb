@@ -134,9 +134,13 @@ Public Class OpcjeKompilatoraMbtiles
     Public Property WypelnijLukiWarstwaNizsza As Boolean = False
     Public Property PoziomMin As Integer = 8
     Public Property PoziomMax As Integer = 18
+    ''' <summary>Opcje korekty i optymalizacji obrazu (kontrast, ostrość, MIP).</summary>
+    Public Property Korekta As OpcjeKorekcjiMip = New OpcjeKorekcjiMip With {.Wlaczona = False}
 
     Public Function Klonuj() As OpcjeKompilatoraMbtiles
-        Return DirectCast(Me.MemberwiseClone(), OpcjeKompilatoraMbtiles)
+        Dim k = DirectCast(Me.MemberwiseClone(), OpcjeKompilatoraMbtiles)
+        If Me.Korekta IsNot Nothing Then k.Korekta = Me.Korekta.Kopia()
+        Return k
     End Function
 End Class
 
@@ -315,7 +319,8 @@ Public NotInheritable Class KompilatorMbtiles
                                           token.ThrowIfCancellationRequested()
                                           Dim tx = k.Item1, ty = k.Item2
                                           Dim przelicz = EksportMapy.PrzeliczenieKafla(tx * 256.0, ty * 256.0, poziom)
-                                          Using bmp = EksportMapy.RenderujKafel(warstwyEksportu, 256, 256, nadprobkowanie, przelicz)
+                                          'z korektą - wyostrzone kafle JPEG są większe, a szacunek był zaniżony
+                                          Using bmp = EksportMapy.RenderujKafelZKorekta(warstwyEksportu, 256, 256, nadprobkowanie, przelicz, opcje.Korekta)
                                               If bmp IsNot Nothing Then
                                                   Dim dane = KodujKafel(bmp, opcje)
                                                   If dane IsNot Nothing Then
@@ -389,7 +394,7 @@ Public NotInheritable Class KompilatorMbtiles
 
         Dim nadprobkowanie As Integer = EksportMapy.LiczbaProbek(warstwyEksportu, WebMercator.RozmiarPiksela(szerokoscGeo, poziom))
         Dim przelicz = EksportMapy.PrzeliczenieKafla(tx * 256.0, ty * 256.0, poziom)
-        Return EksportMapy.RenderujKafel(warstwyEksportu, 256, 256, nadprobkowanie, przelicz)
+        Return EksportMapy.RenderujKafelZKorekta(warstwyEksportu, 256, 256, nadprobkowanie, przelicz, opcje?.Korekta)
     End Function
 
     ''' <summary>
@@ -594,8 +599,14 @@ Public NotInheritable Class KompilatorMbtiles
 
                             If moznaPiramida Then
                                 Dim suroweDzieci As Byte()()() = New Byte(liczbaWPaczce - 1)()() {}
+                                'przy wyostrzaniu także sąsiedzi (4 x 4 kafle) - kafel jest wyostrzany po pomniejszeniu
+                                Dim zSasiadami As Boolean = opcje.Korekta IsNot Nothing AndAlso opcje.Korekta.Wyostrza
                                 For i = 0 To liczbaWPaczce - 1
                                     Dim k = kaflePoziomu(biezacyOffset + i)
+                                    If zSasiadami Then
+                                        suroweDzieci(i) = EksportMapy.DzieciZSasiadami(k, odczytajKafel)
+                                        Continue For
+                                    End If
                                     suroweDzieci(i) = New Byte(3)() {}
                                     For dy = 0 To 1
                                         For dx = 0 To 1
@@ -616,7 +627,7 @@ Public NotInheritable Class KompilatorMbtiles
                                                                        Dim k = kaflePoziomu(biezacyOffset + i)
                                                                        If EksportMapy.KafelMaDane(lokalneWarstwy, k.X, k.Y, biezacyPoziom) Then
                                                                            Dim przelicz = EksportMapy.PrzeliczenieKafla(k.X * 256.0, k.Y * 256.0, biezacyPoziom)
-                                                                           Using bmp = EksportMapy.RenderujKafel(lokalneWarstwy, 256, 256, lokalneNadprobkowanie, przelicz)
+                                                                           Using bmp = EksportMapy.RenderujKafelZKorekta(lokalneWarstwy, 256, 256, lokalneNadprobkowanie, przelicz, lokalneOpcje.Korekta)
                                                                                If bmp IsNot Nothing Then
                                                                                    daneKafli(i) = KodujKafel(bmp, lokalneOpcje)
                                                                                End If
@@ -692,9 +703,17 @@ Public NotInheritable Class KompilatorMbtiles
         End Try
     End Function
 
-    ''' <summary>Tworzy kafel z 4 kafli wyższego poziomu przekazanych bezpośrednio jako tablica bajtów.</summary>
+    ''' <summary>
+    ''' Tworzy kafel z 4 kafli wyższego poziomu przekazanych bezpośrednio jako tablica bajtów; 16 kafli (z sąsiadami,
+    ''' EksportMapy.DzieciZSasiadami) - kafel wyostrzony po pomniejszeniu.
+    ''' </summary>
     Private Shared Function KafelZPiramidyZDanych(dzieci As Byte()(), opcje As OpcjeKompilatoraMbtiles) As Byte()
         If dzieci Is Nothing OrElse dzieci.All(Function(d) d Is Nothing) Then Return Nothing
+        If dzieci.Length = 16 Then
+            Using bmp = EksportMapy.KafelZDzieciWyostrzony(dzieci, opcje.Korekta)
+                Return If(bmp Is Nothing, Nothing, KodujKafel(bmp, opcje))
+            End Using
+        End If
         Using duzy As New Bitmap(512, 512, PixelFormat.Format32bppArgb)
             Dim jest As Boolean = False
             Using g = Graphics.FromImage(duzy)

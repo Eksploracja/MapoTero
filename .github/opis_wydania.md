@@ -30,6 +30,9 @@ Ustawienia i zbiory map z poprzednich wersji (plik `lastsettings.txt`, folder `w
 * **Post-processing MIP dla odbiorników Garmin (podgląd na żywo):**
   * Filtr optymalizujący kontrast, nasycenie barw, korekcję gamma ($\gamma = 0{,}75$) oraz wyostrzanie splotowe krawędzi (Laplacian 3×3) pod kątem transflektywnych wyświetlaczy Memory-In-Pixel w pełnym słońcu.
   * Nowe interaktywne okno strojenia parametrów z podglądem na żywo przed eksportem.
+  * Własne ustawienia suwaków są zapamiętywane, a wyostrzanie działa jednakowo na brzegach kafli i pasów arkusza oraz na niższych poziomach powiększenia MBTiles i JNX.
+  * Gotowe profile korekty (Garmin MIP, wyostrzenie krawędzi, stare mapy, jasne lasy, podkład CAD, skan CAD) także przy scalaniu segmentów, nakładaniu map i w wielowarstwowym MBTiles.
+  * Nowe narzędzie *Narzędzia -> Korekta i optymalizacja obrazów w folderze...*: poprawia naraz wszystkie obrazy PNG, JPEG i TIFF z folderu i zapisuje kopie z plikami georeferencji w osobnym folderze.
 * **Bezpośredni eksport do GeoTIFF (Avenza Maps, QField, GIS, CAD):**
   * Eksport wielowarstwowej mapy bezpośrednio do formatu GeoTIFF z kompresją LZW lub JPEG, z georeferencją w nagłówkach TIFF oraz opcjonalnymi plikami `.tfw`, `.prj` i `.map`.
 * **Bieżący podgląd zestawu warstw z lupą rastrową w oknie głównym:**

@@ -773,6 +773,54 @@ Public Class ScalanieTesty
         End Try
     End Sub
 
+    <Fact>
+    Public Sub Scalanie_ZKorektaObrazu_StosujeProfil()
+        Dim tempFolder = Path.Combine(Path.GetTempPath(), "MapoTero_Test_" & Guid.NewGuid().ToString("N")) & "\"
+        Directory.CreateDirectory(tempFolder)
+        Try
+            Dim bok = 50
+            Dim s = Siatka2x2(bok)
+
+            ' Ciemnozielone kafle (las)
+            Dim darkGreen = Color.FromArgb(40, 60, 30)
+            UtworzKafel(tempFolder & "_01_01.png", bok, bok, darkGreen, ImageFormat.Png)
+            UtworzKafel(tempFolder & "_01_02.png", bok, bok, darkGreen, ImageFormat.Png)
+            UtworzKafel(tempFolder & "_02_01.png", bok, bok, darkGreen, ImageFormat.Png)
+            UtworzKafel(tempFolder & "_02_02.png", bok, bok, darkGreen, ImageFormat.Png)
+
+            Dim opcjeKorekty As New OpcjeKorekcjiMip()
+            opcjeKorekty.UstawWgProfilu(ProfilKorektyRastra.GarminMip)
+
+            Dim zadanie As New ZadanieScalania With {
+                .Folder = tempFolder,
+                .Prefiks = "_",
+                .Numeracja = StylNumeracji.WierszKolumna,
+                .RozszerzenieSegmentow = "png",
+                .Siatka = s,
+                .Uklad = UkladWspolrzednych.PL1992,
+                .Format = FormatArkusza.Png,
+                .NazwaArkusza = "arkusz_z_korekta",
+                .Korekta = opcjeKorekty
+            }
+
+            Dim wynik = ScalanieSegmentow.Scal(zadanie, Nothing, CancellationToken.None)
+
+            Assert.True(File.Exists(wynik.Plik))
+            Using img = Image.FromFile(wynik.Plik)
+                Using bmp As New Bitmap(img)
+                    Dim piksel = bmp.GetPixel(25, 25)
+                    ' Gamma 0.75 powinna rozjaśnić zielony kanał powyżej wartości początkowej 60
+                    Assert.True(piksel.G > 60, "Korekta obrazu w scalaniu powinna rozjaśnić ciemną zieleń")
+                End Using
+            End Using
+        Finally
+            Try
+                Directory.Delete(tempFolder, True)
+            Catch
+            End Try
+        End Try
+    End Sub
+
     Private Class PostepSynchroniczny(Of T)
         Implements IProgress(Of T)
 

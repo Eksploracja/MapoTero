@@ -60,6 +60,25 @@ głównego (z regulacją krycia), a dla sesji z różnymi układami lub w JPEG w
 
 ---
 
+## Korekta i optymalizacja obrazów w folderze
+
+**Gdzie:** menu *Narzędzia > Korekta i optymalizacja obrazów w folderze...* albo przycisk w oknie [Eksport do CAD](../cad/).
+
+Narzędzie poprawia naraz wszystkie obrazy PNG, JPEG i TIFF leżące w jednym folderze (np. segmenty sesji):
+
+1. Wskaż **folder z obrazami**. Program podpowiada folder bieżącej sesji (a z okna eksportu do CAD - folder tego eksportu).
+2. Wskaż **folder wynikowy**, inny niż źródłowy. Domyślnie to podfolder `korekta`. Oryginały zostają bez zmian.
+3. Przyciskiem **Dostosuj** wybierz profil korekty i sprawdź efekt na próbce z folderu: *Garmin MIP*, *Wyostrzenie krawędzi*,
+   *Stare mapy i skany*, *Rozjaśnienie lasów*, *Podkład CAD*, *Skan CAD* albo własne wartości suwaków. Profilu *Brak* nie można
+   tu wybrać, bo nie zmienia obrazów.
+4. Kliknij **Rozpocznij korektę**.
+
+Opcja *Kopiuj pliki georeferencji* kopiuje obok poprawionych obrazów pliki `.jpgw`, `.pngw`, `.tifw`, `.wld`, `.prj`, `.map`,
+`.gmi`, `.tab`, `.kml` i inne oraz `conf.txt` sesji. GeoTIFF zachowuje georeferencję zapisaną w pliku, gdy program zna jego układ.
+Zamknięcie okna w trakcie pracy przerywa przetwarzanie. Pliki, których nie da się odczytać, program pomija i wymienia po zakończeniu.
+
+---
+
 ## Usuwanie pustych segmentów
 
 **Gdzie:** menu *Narzędzia > Usuwanie pustych segmentów* (<kbd>Ctrl</kbd>+<kbd>U</kbd>).

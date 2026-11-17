@@ -559,6 +559,26 @@ Public NotInheritable Class EksportMapy
     ''' Gdy kafel ma mniejszą rozdzielczość niż źródło - nadpróbkowanie (do 4 x 4 próbek na piksel).
     ''' Zwraca bitmapę 32-bitową (piksele poza obrazem przezroczyste) albo Nothing, gdy kafel jest pusty.
     ''' </summary>
+    Friend Shared Function RenderujKafelZKorekta(warstwy As List(Of WarstwaEksportu), szer As Integer, wys As Integer, nadprobkowanie As Integer,
+                                                  przelicz As Func(Of Double, Double, PunktGeo), korekta As OpcjeKorekcjiMip) As Bitmap
+        If korekta Is Nothing OrElse Not korekta.Wlaczona Then Return RenderujKafel(warstwy, szer, wys, nadprobkowanie, przelicz)
+        If Not korekta.Wyostrza Then
+            Dim bmp = RenderujKafel(warstwy, szer, wys, nadprobkowanie, przelicz)
+            If bmp IsNot Nothing Then NakladanieObrazow.ZastosujKorekcjeMip(bmp, korekta)
+            Return bmp
+        End If
+        'margines 1 px: wyostrzanie na brzegu kafla korzysta z prawdziwych sąsiadów - dawniej każdy kafel miał
+        'na brzegach linie mniejszej ostrości (siatka co 256 px widoczna na mapie)
+        Dim szerM As Integer = szer + 2, wysM As Integer = wys + 2
+        Using duzy = RenderujKafel(warstwy, szerM, wysM, nadprobkowanie, Function(x, y) przelicz(x - 1, y - 1))
+            If duzy Is Nothing Then Return Nothing
+            Dim piksele = NakladanieObrazow.PikseleBitmapy(duzy)
+            KorekcjaMip.Zastosuj(piksele, szerM, wysM, korekta)
+            Dim srodek = KorekcjaMip.Wytnij(piksele, szerM, wysM, 1)
+            Return If(srodek Is Nothing, Nothing, NakladanieObrazow.DoBitmapy(srodek, szer, wys))
+        End Using
+    End Function
+
     Friend Shared Function RenderujKafel(warstwy As List(Of WarstwaEksportu), szer As Integer, wys As Integer, nadprobkowanie As Integer,
                                           przelicz As Func(Of Double, Double, PunktGeo)) As Bitmap
         'warstwy, które mają segmenty w obszarze kafla (szybkie pominięcie pustych kafli, np. poza korytarzem trasy)
@@ -828,11 +848,8 @@ Friend Shared Function NazwaPlikuTomu(sciezkaBazowa As String, numerTomu As Inte
                         Dim x0 As Integer = px.Item1, y0 As Integer = px.Item2
                         Dim f = Function(x As Double, y As Double) New PunktGeo(plan.Obszar.Polnoc - (y0 + y) * plan.PikselSzerokosc,
                                                                                 plan.Obszar.Zachod + (x0 + x) * plan.PikselDlugosc)
-                        Using bmp = RenderujKafel(warstwy, px.Item3, px.Item4, nadprobkowanie, f)
+                        Using bmp = RenderujKafelZKorekta(warstwy, px.Item3, px.Item4, nadprobkowanie, f, z.KorekcjaMip)
                             If bmp IsNot Nothing Then
-                                If z.KorekcjaMip IsNot Nothing AndAlso z.KorekcjaMip.Wlaczona Then
-                                    NakladanieObrazow.ZastosujKorekcjeMip(bmp, z.KorekcjaMip)
-                                End If
                                 kmz.DodajKafel("kafel_" & (w + 1).ToString("D2") & "_" & (k + 1).ToString("D2") & If(png, ".png", ".jpg"),
                                                Koduj(bmp, png, z.JakoscJpeg), plan.ZasiegKafla(w, k))
                             End If
@@ -856,11 +873,8 @@ Friend Shared Function NazwaPlikuTomu(sciezkaBazowa As String, numerTomu As Inte
                     Dim x0 As Integer = px.Item1, y0 As Integer = px.Item2
                     Dim f = Function(x As Double, y As Double) New PunktGeo(plan.Obszar.Polnoc - (y0 + y) * plan.PikselSzerokosc,
                                                                             plan.Obszar.Zachod + (x0 + x) * plan.PikselDlugosc)
-                    Using bmp = RenderujKafel(warstwy, px.Item3, px.Item4, nadprobkowanie, f)
+                    Using bmp = RenderujKafelZKorekta(warstwy, px.Item3, px.Item4, nadprobkowanie, f, z.KorekcjaMip)
                         If bmp IsNot Nothing Then
-                            If z.KorekcjaMip IsNot Nothing AndAlso z.KorekcjaMip.Wlaczona Then
-                                NakladanieObrazow.ZastosujKorekcjeMip(bmp, z.KorekcjaMip)
-                            End If
                             kmz.DodajKafel("kafel_" & (w + 1).ToString("D2") & "_" & (k + 1).ToString("D2") & If(png, ".png", ".jpg"),
                                            Koduj(bmp, png, z.JakoscJpeg), plan.ZasiegKafla(w, k))
                         End If
@@ -941,7 +955,11 @@ Friend Shared Function NazwaPlikuTomu(sciezkaBazowa As String, numerTomu As Inte
         Dim warstwy = z.WarstwyRenderowania()
         'pas wierszy mieszczący się w budżecie pamięci - dawniej cały wiersz segmentów naraz (przy szerokości
         '100 000 px i boku 2000 px ok. 1,4 GB)
-        Dim pas As Integer = CInt(Math.Max(1L, Math.Min(bok, BudzetPamieciGeoTiff \ (CLng(szer) * (4 + kanaly)))))
+        'korekta obrazu pasami z sąsiednimi wierszami (bez linii mniejszej ostrości na stykach pasów) - trzy dodatkowe
+        'bufory pasa: pas oczekujący, roboczy z wierszami sąsiadów i wynik
+        Dim korekta As KorekcjaPasow = If(z.KorekcjaMip IsNot Nothing AndAlso z.KorekcjaMip.Wlaczona, New KorekcjaPasow(szer, kanaly, z.KorekcjaMip), Nothing)
+        Dim pas As Integer = CInt(Math.Max(1L, Math.Min(bok, BudzetPamieciGeoTiff \ (CLng(szer) * (4 + kanaly + If(korekta IsNot Nothing, 3 * kanaly, 0))))))
+        Dim zapiszPas As Action(Of Byte(), Integer) = Nothing
         Dim buforRgb(pas * szer * kanaly - 1) As Byte
         Dim pikseleArgb(pas * szer - 1) As Integer
         Dim taSamaSiatka As New List(Of Boolean)
@@ -950,6 +968,7 @@ Friend Shared Function NazwaPlikuTomu(sciezkaBazowa As String, numerTomu As Inte
         Next
 
         Using zapis = ZapisRastra.Utworz(format, z.Plik, szer, wys, z.JakoscJpeg, z.Uklad, s.ZasiegSiatki, kanaly = 4)
+            zapiszPas = Sub(b, k) zapis.ZapiszWiersze(b, k)
             For w = 1 To wiersze
               For y0 = 0 To bok - 1 Step pas
                 token.ThrowIfCancellationRequested()
@@ -1015,9 +1034,6 @@ Friend Shared Function NazwaPlikuTomu(sciezkaBazowa As String, numerTomu As Inte
                     End If
                 Next
 
-                If z.KorekcjaMip IsNot Nothing AndAlso z.KorekcjaMip.Wlaczona Then
-                    KorekcjaMip.Zastosuj(pikseleArgb, szer, n, z.KorekcjaMip)
-                End If
 
                 Dim iRgb As Integer = 0
                 For iPx = 0 To szer * n - 1
@@ -1033,10 +1049,15 @@ Friend Shared Function NazwaPlikuTomu(sciezkaBazowa As String, numerTomu As Inte
                     End If
                 Next
 
-                zapis.ZapiszWiersze(buforRgb, n)
+                If korekta IsNot Nothing Then
+                    korekta.Dodaj(buforRgb, n, zapiszPas)
+                Else
+                    zapis.ZapiszWiersze(buforRgb, n)
+                End If
               Next
                 postep?.Report(CInt(w * 100 \ wiersze))
             Next
+            korekta?.Zakoncz(zapiszPas)
             zapis.Zakoncz()
         End Using
 
@@ -1091,11 +1112,8 @@ Friend Shared Function NazwaPlikuTomu(sciezkaBazowa As String, numerTomu As Inte
             For ty = r.Item2 To r.Item4
                 For tx = r.Item1 To r.Item3
                     token.ThrowIfCancellationRequested()
-                    Using bmp = RenderujKafel(warstwy, 256, 256, nadprobkowanie, PrzeliczenieKafla(tx * 256.0, ty * 256.0, zmax))
+                    Using bmp = RenderujKafelZKorekta(warstwy, 256, 256, nadprobkowanie, PrzeliczenieKafla(tx * 256.0, ty * 256.0, zmax), z.KorekcjaMip)
                         If bmp IsNot Nothing Then
-                            If z.KorekcjaMip IsNot Nothing AndAlso z.KorekcjaMip.Wlaczona Then
-                                NakladanieObrazow.ZastosujKorekcjeMip(bmp, z.KorekcjaMip)
-                            End If
                             m.Zapisz(New KafelXYZ(tx, ty, zmax), Koduj(bmp, z.Png, z.JakoscJpeg))
                         End If
                     End Using
@@ -1128,7 +1146,65 @@ Friend Shared Function NazwaPlikuTomu(sciezkaBazowa As String, numerTomu As Inte
 
     ''' <summary>Kafel poziomu niższego złożony z czterech kafli poziomu wyższego (pomniejszenie 2x).</summary>
     Private Shared Function KafelZDzieci(m As MagazynKafli, k As KafelXYZ, z As ZadanieEksportu) As Byte()
-        Return KafelZDzieci(m, k, z.Png, z.JakoscJpeg)
+        If z.KorekcjaMip Is Nothing OrElse Not z.KorekcjaMip.Wyostrza Then Return KafelZDzieci(m, k, z.Png, z.JakoscJpeg)
+        Dim dzieci = DzieciZSasiadami(k, Function(d) m.Odczytaj(d))
+        Using bmp = KafelZDzieciWyostrzony(dzieci, z.KorekcjaMip)
+            Return If(bmp Is Nothing, Nothing, Koduj(bmp, z.Png, z.JakoscJpeg))
+        End Using
+    End Function
+
+    ''' <summary>
+    ''' Kafle poziomu wyższego dla kafla k: 4 x 4 (indeks wiersz * 4 + kolumna) - środkowe 2 x 2 tworzą kafel,
+    ''' zewnętrzne to sąsiedzi potrzebni do wyostrzania jego brzegów. Poza zakresem świata - Nothing.
+    ''' </summary>
+    Friend Shared Function DzieciZSasiadami(k As KafelXYZ, odczytaj As Func(Of KafelXYZ, Byte())) As Byte()()
+        Dim dzieci(15)() As Byte
+        Dim liczba As Long = 1L << (k.Z + 1)
+        For dy = 0 To 3
+            For dx = 0 To 3
+                Dim x As Integer = k.X * 2 - 1 + dx, y As Integer = k.Y * 2 - 1 + dy
+                If x < 0 OrElse y < 0 OrElse x >= liczba OrElse y >= liczba Then Continue For
+                dzieci(dy * 4 + dx) = odczytaj(New KafelXYZ(x, y, k.Z + 1))
+            Next
+        Next
+        Return dzieci
+    End Function
+
+    ''' <summary>
+    ''' Kafel poziomu niższego z 4 x 4 kafli poziomu wyższego (DzieciZSasiadami), wyostrzony po pomniejszeniu.
+    ''' Barwy kafli wyższego poziomu są już poprawione, więc tu działa tylko wyostrzanie - pomniejszenie 2x wygładza
+    ''' krawędzie i dawniej niższe poziomy (widok po oddaleniu na urządzeniu) traciły wyostrzenie. Sąsiedzi z obu
+    ''' stron sprawiają, że brzegi kafla są wyostrzone tak samo jak środek. Nothing, gdy środkowe kafle są puste.
+    ''' </summary>
+    Friend Shared Function KafelZDzieciWyostrzony(dzieci As Byte()(), korekta As OpcjeKorekcjiMip) As Bitmap
+        If dzieci(5) Is Nothing AndAlso dzieci(6) Is Nothing AndAlso dzieci(9) Is Nothing AndAlso dzieci(10) Is Nothing Then Return Nothing
+        Dim piksele() As Integer
+        Using duzy As New Bitmap(1024, 1024, PixelFormat.Format32bppArgb)
+            Using g = Graphics.FromImage(duzy)
+                g.Clear(Color.Transparent)
+                For i = 0 To 15
+                    If dzieci(i) Is Nothing Then Continue For
+                    Using ms As New MemoryStream(dzieci(i)), obraz = Image.FromStream(ms)
+                        g.DrawImage(obraz, New Rectangle((i Mod 4) * 256, (i \ 4) * 256, 256, 256))
+                    End Using
+                Next
+            End Using
+            Using sredni As New Bitmap(512, 512, PixelFormat.Format32bppArgb)
+                Using g = Graphics.FromImage(sredni)
+                    g.Clear(Color.Transparent)
+                    g.InterpolationMode = InterpolationMode.HighQualityBicubic
+                    g.PixelOffsetMode = PixelOffsetMode.Half
+                    g.DrawImage(duzy, New Rectangle(0, 0, 512, 512), 0, 0, 1024, 1024, GraphicsUnit.Pixel)
+                End Using
+                piksele = NakladanieObrazow.PikseleBitmapy(sredni)
+            End Using
+        End Using
+        'kafel to środek 256 x 256 (od piksela 128); wyostrzany fragment z marginesem 1 px
+        Dim fragment = KorekcjaMip.Wytnij(piksele, 512, 512, 127)
+        If fragment Is Nothing Then Return Nothing
+        KorekcjaMip.Zastosuj(fragment, 258, 258, korekta.TylkoWyostrzanie())
+        Dim srodek = KorekcjaMip.Wytnij(fragment, 258, 258, 1)
+        Return If(srodek Is Nothing, Nothing, NakladanieObrazow.DoBitmapy(srodek, 256, 256))
     End Function
 
     Friend Shared Function KafelZDzieci(m As MagazynKafli, k As KafelXYZ, png As Boolean, jakoscJpeg As Integer) As Byte()
@@ -1195,7 +1271,7 @@ Friend Shared Function NazwaPlikuTomu(sciezkaBazowa As String, numerTomu As Inte
                 Dim x0 As Integer = px.Item1, y0 As Integer = px.Item2
                 Dim f = Function(x As Double, y As Double) New PunktGeo(plan.Obszar.Polnoc - (y0 + y) * plan.PikselSzerokosc,
                                                                         plan.Obszar.Zachod + (x0 + x) * plan.PikselDlugosc)
-                Using bmp = RenderujKafel(warstwy, px.Item3, px.Item4, nadprobkowanie, f)
+                Using bmp = RenderujKafelZKorekta(warstwy, px.Item3, px.Item4, nadprobkowanie, f, z.KorekcjaMip)
                     If bmp IsNot Nothing Then
                         suma += Koduj(bmp, z.Png, z.JakoscJpeg).Length
                         wynik.Probki += 1
@@ -1241,7 +1317,7 @@ Friend Shared Function NazwaPlikuTomu(sciezkaBazowa As String, numerTomu As Inte
         Dim sumaBajtow As Long = 0
         For Each t In Probka(probkiGora, 12, los)
             token.ThrowIfCancellationRequested()
-            Using bmp = RenderujKafel(warstwy, 256, 256, nadpr, PrzeliczenieKafla(t.Item1 * 256.0, t.Item2 * 256.0, gora))
+            Using bmp = RenderujKafelZKorekta(warstwy, 256, 256, nadpr, PrzeliczenieKafla(t.Item1 * 256.0, t.Item2 * 256.0, gora), z.KorekcjaMip)
                 If bmp IsNot Nothing Then
                     sumaBajtow += Koduj(bmp, z.Png, z.JakoscJpeg).Length
                     wynik.Probki += 1

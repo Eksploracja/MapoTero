@@ -3104,6 +3104,12 @@ Public Class Form1
         Nakladanie_Map.ShowDialog()
     End Sub
 
+    Private Sub KorektaFolderuToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles KorektaFolderuToolStripMenuItem.Click
+        Using dlg As New FormKorektaFolderu()
+            dlg.ShowDialog(Me)
+        End Using
+    End Sub
+
     Private Sub ZnajdzDzialkeToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles ZnajdzDzialkeToolStripMenuItem.Click
         OtworzWyszukiwarke()
     End Sub

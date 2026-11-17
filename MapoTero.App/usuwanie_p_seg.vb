@@ -25,7 +25,7 @@ Public Class Usuwanie_p_seg
     Private _tytul As String = ""
 
     Private Sub Usuwanie_p_seg_Load(sender As Object, e As EventArgs) Handles MyBase.Load
-        PomocProgramu.DodajPrzyciskPomocy(Me, TematPomocy.UsuwaniePustych, 20, 287)
+        PomocProgramu.DodajPrzyciskPomocy(Me, TematPomocy.UsuwaniePustych, 140, 287)
         DodajPrzyciskFolderu()
         If _tytul = "" Then _tytul = Me.Text
         'bez bieżącej sesji okno nie przechodzi na inną (np. najnowszą) - kasuje pliki, więc folder wskazuje użytkownik

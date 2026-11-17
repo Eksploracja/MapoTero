@@ -107,6 +107,10 @@ Public Class FormEksport
         _folder = FolderSesjiDlaNarzedzia(Form1.FolderSesji, uwagaFolderu)
         WczytajSesje()
         UsunNiepasujaceNakladki()
+        'UstawWgProfilu włącza korektę, więc dawniej po odczycie stanu „wyłączona” korekta znów była zaznaczona
+        _opcjeMip = Ustawienia.OpcjeKorekty()
+        chkKorekcjaMip.Checked = _opcjeMip.Wlaczona
+        AktualizujPrzyciskMip()
         UstawWidok()
         If uwagaFolderu <> "" Then Komunikat(uwagaFolderu & vbCrLf & txtKomunikaty.Text, Color.OrangeRed)
     End Sub
@@ -298,6 +302,9 @@ Public Class FormEksport
             .KolejnoscRysowania = kOrder,
             .PoziomMin = CInt(Math.Min(nudPoziomMin.Value, nudPoziomMax.Value)), .PoziomMax = CInt(nudPoziomMax.Value), .KaflePng = chkPng.Checked,
             .Nakladka = chkNakladka.Checked AndAlso rodzaj <> RodzajEksportu.Jnx, .Metadane = UtworzMetadane()}
+        Dim mip = _opcjeMip.Kopia()
+        mip.Wlaczona = chkKorekcjaMip.Checked
+        z.KorekcjaMip = mip
         z.Nazwa = z.Metadane.Nazwa
         For Each p In lstNakladki.Items.Cast(Of PozycjaNakladki)()
             z.Nakladki.Add(p.Warstwa)
@@ -363,6 +370,13 @@ Public Class FormEksport
                                                                     cboKolejnoscGarmin.SelectedIndexChanged, chkPodzialNaTomy.CheckedChanged, nudMaksKafli.ValueChanged,
                                                                     nudPoziomMin.ValueChanged, nudPoziomMax.ValueChanged, chkPng.CheckedChanged,
                                                                     chkNakladka.CheckedChanged, chkBialePodstawa.CheckedChanged, nudJakosc.ValueChanged
+        If chkKorekcjaMip.Checked <> _opcjeMip.Wlaczona Then
+            _opcjeMip.Wlaczona = chkKorekcjaMip.Checked
+            If chkKorekcjaMip.Checked AndAlso _opcjeMip.Profil = ProfilKorektyRastra.Brak Then
+                _opcjeMip.UstawWgProfilu(ProfilKorektyRastra.GarminMip)
+            End If
+            AktualizujPrzyciskMip()
+        End If
         lblRozmiar.Text = ""
         UstawWidok()
     End Sub
@@ -639,8 +653,17 @@ Public Class FormEksport
             If dlg.ShowDialog(Me) = DialogResult.OK Then
                 _opcjeMip = dlg.Opcje
                 chkKorekcjaMip.Checked = _opcjeMip.Wlaczona
+                AktualizujPrzyciskMip()
             End If
         End Using
+    End Sub
+
+    Private Sub AktualizujPrzyciskMip()
+        If _opcjeMip IsNot Nothing AndAlso _opcjeMip.Wlaczona Then
+            btnPodgladMip.Text = "Profil: " & OpcjeKorekcjiMip.KrotkaNazwaProfilu(_opcjeMip.Profil) & "..."
+        Else
+            btnPodgladMip.Text = "Profil / Podgląd..."
+        End If
     End Sub
 
     Private Sub btnWielowarstwowyMbtiles_Click(sender As Object, e As EventArgs) Handles btnWielowarstwowyMbtiles.Click
@@ -654,6 +677,10 @@ Public Class FormEksport
 
     Private Sub FormEksport_FormClosing(sender As Object, e As FormClosingEventArgs) Handles MyBase.FormClosing
         _przerwanie?.Cancel()
+    End Sub
+
+    Private Sub FormEksport_FormClosed(sender As Object, e As FormClosedEventArgs) Handles MyBase.FormClosed
+        Ustawienia.ZapamietajKorekte(_opcjeMip)
     End Sub
 
 End Class

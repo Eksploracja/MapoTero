@@ -150,6 +150,42 @@ Public Class UstawieniaProgramu
     Public Property CadLsp As Boolean
 #End Region
 
+#Region "Korekta obrazu"
+    ''' <summary>Czy optymalizacja czytelności obrazu jest domyślnie włączona.</summary>
+    Public Property KorektaWlaczona As Boolean = False
+    ''' <summary>Domyślny profil korekty obrazu.</summary>
+    Public Property KorektaProfil As ProfilKorektyRastra = ProfilKorektyRastra.Brak
+    ''' <summary>Wartości suwaków profilu „Własny” (dawniej niezapisywane - po zamknięciu okna wracały wartości Garmin MIP).</summary>
+    Public Property KorektaGamma As Double = 0.75
+    Public Property KorektaKontrast As Double = 1.25
+    Public Property KorektaNasycenie As Double = 1.35
+    Public Property KorektaWyostrzanie As Double = 0.6
+
+    ''' <summary>
+    ''' Zapamiętana korekta obrazu. profilGdyBrak - profil podstawiany, gdy żaden nie był wybrany (okna, w których
+    ''' korekta jest celem, np. korekta folderu); stan włączenia pozostaje wtedy zapamiętany.
+    ''' </summary>
+    Public Function OpcjeKorekty(Optional profilGdyBrak As ProfilKorektyRastra = ProfilKorektyRastra.Brak) As OpcjeKorekcjiMip
+        If KorektaProfil = ProfilKorektyRastra.Brak AndAlso profilGdyBrak <> ProfilKorektyRastra.Brak Then
+            Dim o = OpcjeKorekcjiMip.Odtworz(True, profilGdyBrak, KorektaGamma, KorektaKontrast, KorektaNasycenie, KorektaWyostrzanie)
+            o.Wlaczona = KorektaWlaczona
+            Return o
+        End If
+        Return OpcjeKorekcjiMip.Odtworz(KorektaWlaczona, KorektaProfil, KorektaGamma, KorektaKontrast, KorektaNasycenie, KorektaWyostrzanie)
+    End Function
+
+    ''' <summary>Zapamiętuje korektę obrazu (włączenie, profil i wartości suwaków).</summary>
+    Public Sub ZapamietajKorekte(o As OpcjeKorekcjiMip)
+        If o Is Nothing Then Exit Sub
+        KorektaWlaczona = o.Wlaczona
+        KorektaProfil = o.Profil
+        KorektaGamma = o.Gamma
+        KorektaKontrast = o.Kontrast
+        KorektaNasycenie = o.Nasycenie
+        KorektaWyostrzanie = o.Wyostrzanie
+    End Sub
+#End Region
+
     ''' <summary>Rozszerzenie plików segmentów dla bieżącego formatu.</summary>
     Public ReadOnly Property Rozszerzenie As String
         Get
@@ -206,6 +242,12 @@ Public Class UstawieniaProgramu
         CadSciezkiWzgledne = u.Logiczna("cad_sciezki_wzgledne", CadSciezkiWzgledne)
         CadScr = u.Logiczna("cad_scr", CadScr)
         CadLsp = u.Logiczna("cad_lsp", CadLsp)
+        KorektaWlaczona = u.Logiczna("korekta_wlaczona", KorektaWlaczona)
+        KorektaProfil = CType(u.Calkowita("korekta_profil", CInt(KorektaProfil)), ProfilKorektyRastra)
+        KorektaGamma = u.Liczba("korekta_gamma", KorektaGamma)
+        KorektaKontrast = u.Liczba("korekta_kontrast", KorektaKontrast)
+        KorektaNasycenie = u.Liczba("korekta_nasycenie", KorektaNasycenie)
+        KorektaWyostrzanie = u.Liczba("korekta_wyostrzanie", KorektaWyostrzanie)
         'co najmniej jeden plik wynikowy - inaczej przycisk Eksportuj byłby nieaktywny bez widocznej przyczyny
         If Not CadDxf AndAlso Not CadScr AndAlso Not CadLsp Then CadDxf = True
         If parametryNowejSesji Then
@@ -259,7 +301,13 @@ Public Class UstawieniaProgramu
         u.Ustaw("cad_sciezki_wzgledne", CadSciezkiWzgledne)
         u.Ustaw("cad_scr", CadScr)
         u.Ustaw("cad_lsp", CadLsp)
+        u.Ustaw("korekta_wlaczona", KorektaWlaczona)
+        u.Ustaw("korekta_profil", CInt(KorektaProfil))
         u.Ustaw("szerokosc_panelu", SzerokoscPanelu)
+        u.Ustaw("korekta_gamma", KorektaGamma)
+        u.Ustaw("korekta_kontrast", KorektaKontrast)
+        u.Ustaw("korekta_nasycenie", KorektaNasycenie)
+        u.Ustaw("korekta_wyostrzanie", KorektaWyostrzanie)
         u.Zapisz(sciezka, KodowanieSystemowe())
     End Sub
 

@@ -261,6 +261,60 @@ Partial Class FormEksport
         Me.ToolTip1.SetToolTip(Me.rbOruxMaps, "Cały folder mapy skopiuj do folderu oruxmaps/mapfiles w telefonie.")
         Me.rbOruxMaps.UseVisualStyleBackColor = True
         '
+        'rbGeoTiff
+        '
+        Me.rbGeoTiff.AutoSize = True
+        Me.rbGeoTiff.Location = New System.Drawing.Point(10, 180)
+        Me.rbGeoTiff.Name = "rbGeoTiff"
+        Me.rbGeoTiff.Size = New System.Drawing.Size(325, 17)
+        Me.rbGeoTiff.TabIndex = 10
+        Me.rbGeoTiff.Text = "GeoTIFF - plik z georeferencją (QGIS, CAD, Avenza Maps)"
+        Me.ToolTip1.SetToolTip(Me.rbGeoTiff, "Bezpośredni eksport do formatu GeoTIFF z kompresją bezstratną LZW lub JPEG.")
+        Me.rbGeoTiff.UseVisualStyleBackColor = True
+        '
+        'chkGeoTiffJpeg
+        '
+        Me.chkGeoTiffJpeg.AutoSize = True
+        Me.chkGeoTiffJpeg.Location = New System.Drawing.Point(348, 180)
+        Me.chkGeoTiffJpeg.Name = "chkGeoTiffJpeg"
+        Me.chkGeoTiffJpeg.Size = New System.Drawing.Size(52, 17)
+        Me.chkGeoTiffJpeg.TabIndex = 11
+        Me.chkGeoTiffJpeg.Text = "JPEG"
+        Me.ToolTip1.SetToolTip(Me.chkGeoTiffJpeg, "Kompresja JPEG (wielokrotnie mniejszy plik arkusza kosztem minimalnej kompresji stratnej).")
+        Me.chkGeoTiffJpeg.UseVisualStyleBackColor = True
+        '
+        'chkGeoTiffCad
+        '
+        Me.chkGeoTiffCad.AutoSize = True
+        Me.chkGeoTiffCad.Location = New System.Drawing.Point(408, 180)
+        Me.chkGeoTiffCad.Name = "chkGeoTiffCad"
+        Me.chkGeoTiffCad.Size = New System.Drawing.Size(65, 17)
+        Me.chkGeoTiffCad.TabIndex = 12
+        Me.chkGeoTiffCad.Text = "dla CAD"
+        Me.ToolTip1.SetToolTip(Me.chkGeoTiffCad, "Format zgodny z programami CAD nieobsługującymi natywnego GeoTIFF (tworzy pliki world file .tfw i .prj).")
+        Me.chkGeoTiffCad.UseVisualStyleBackColor = True
+        '
+        'chkKorekcjaMip
+        '
+        Me.chkKorekcjaMip.AutoSize = True
+        Me.chkKorekcjaMip.Location = New System.Drawing.Point(10, 214)
+        Me.chkKorekcjaMip.Name = "chkKorekcjaMip"
+        Me.chkKorekcjaMip.Size = New System.Drawing.Size(275, 17)
+        Me.chkKorekcjaMip.TabIndex = 13
+        Me.chkKorekcjaMip.Text = "Korekta czytelności (kontrast, ostrość, MIP):"
+        Me.ToolTip1.SetToolTip(Me.chkKorekcjaMip, "Włącza post-processing obrazu (optymalizacja kontrastu, nasycenia, korekcja gamma i wyostrzanie krawędzi).")
+        Me.chkKorekcjaMip.UseVisualStyleBackColor = True
+        '
+        'btnPodgladMip
+        '
+        Me.btnPodgladMip.Location = New System.Drawing.Point(310, 209)
+        Me.btnPodgladMip.Name = "btnPodgladMip"
+        Me.btnPodgladMip.Size = New System.Drawing.Size(165, 26)
+        Me.btnPodgladMip.TabIndex = 14
+        Me.btnPodgladMip.Text = "Profil / Podgląd..."
+        Me.ToolTip1.SetToolTip(Me.btnPodgladMip, "Otwiera okno wyboru profilu i podglądu na żywo wyostrzania, kontrastu i nasycenia.")
+        Me.btnPodgladMip.UseVisualStyleBackColor = True
+        '
         'grpMBTiles
         '
         Me.grpMBTiles.Controls.Add(Me.chkPng)
@@ -529,9 +583,9 @@ Partial Class FormEksport
         '
         'prgEksport
         '
-        Me.prgEksport.Location = New System.Drawing.Point(12, 750)
+        Me.prgEksport.Location = New System.Drawing.Point(93, 750)
         Me.prgEksport.Name = "prgEksport"
-        Me.prgEksport.Size = New System.Drawing.Size(215, 23)
+        Me.prgEksport.Size = New System.Drawing.Size(134, 23)
         Me.prgEksport.TabIndex = 12
         '
         'btnPokazPlik

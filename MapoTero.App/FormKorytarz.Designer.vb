@@ -113,20 +113,20 @@ Partial Class FormKorytarz
         '
         Me.btnNmt.Location = New System.Drawing.Point(12, 158)
         Me.btnNmt.Name = "btnNmt"
-        Me.btnNmt.Size = New System.Drawing.Size(180, 24)
+        Me.btnNmt.Size = New System.Drawing.Size(210, 24)
         Me.btnNmt.TabIndex = 6
-        Me.btnNmt.Text = "Wysokości NMT (LIDAR)..."
-        Me.ToolTip1.SetToolTip(Me.btnNmt, "Pobiera rzędne terenu z lotniczego skaningu laserowego (LIDAR) GUGiK dla wszystkich punktów śladu.")
+        Me.btnNmt.Text = "Wzbogać ślad o wysokości..."
+        Me.ToolTip1.SetToolTip(Me.btnNmt, "Pobiera rzędne terenu z lotniczego skaningu laserowego (LIDAR) GUGiK i uzupełnia punkty trasy.")
         Me.btnNmt.UseVisualStyleBackColor = True
         '
         'btnZapiszGpx
         '
         Me.btnZapiszGpx.Enabled = False
-        Me.btnZapiszGpx.Location = New System.Drawing.Point(198, 158)
+        Me.btnZapiszGpx.Location = New System.Drawing.Point(228, 158)
         Me.btnZapiszGpx.Name = "btnZapiszGpx"
-        Me.btnZapiszGpx.Size = New System.Drawing.Size(130, 24)
+        Me.btnZapiszGpx.Size = New System.Drawing.Size(220, 24)
         Me.btnZapiszGpx.TabIndex = 7
-        Me.btnZapiszGpx.Text = "Zapisz GPX..."
+        Me.btnZapiszGpx.Text = "Zapisz wzbogacony GPX..."
         Me.ToolTip1.SetToolTip(Me.btnZapiszGpx, "Zapisuje ślad GPX z uzupełnionymi wysokościami terenu dla odbiorników Garmin i zegarków sportowych.")
         Me.btnZapiszGpx.UseVisualStyleBackColor = True
         '

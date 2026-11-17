@@ -230,6 +230,7 @@ Public Class PodpowiedziTesty
         Dim t As New Thread(
             Sub()
                 Try
+                    MapoTero.FormSzukajDzialki.OstatniaZakladka = 0
                     Using frm As New MapoTero.FormSzukajDzialki()
                         frm.Show()
                         Application.DoEvents()

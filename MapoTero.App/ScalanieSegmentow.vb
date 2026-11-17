@@ -38,6 +38,8 @@ Public Class ZadanieScalania
     Public Property Georeferencja As New OpcjeGeoreferencji()
     ''' <summary>Segmenty z przezroczystym tłem - arkusz PNG i GeoTIFF bezstratny z kanałem alfa (inne formaty: tło białe).</summary>
     Public Property Przezroczystosc As Boolean
+    ''' <summary>Opcjonalna korekta jakości obrazu (kontrast, wyostrzanie, MIP).</summary>
+    Public Property Korekta As OpcjeKorekcjiMip
 End Class
 
 ''' <summary>Wynik scalania.</summary>
@@ -85,7 +87,9 @@ Public NotInheritable Class ScalanieSegmentow
         Dim wynik As New WynikScalania With {.Plik = plik}
 
         'wysokość pasa wierszy mieszczącego się w budżecie pamięci
-        Dim pas As Integer = CInt(Math.Max(1L, Math.Min(bok, BudzetPamieci \ (CLng(szer) * kanaly))))
+        'korekta obrazu pasami z sąsiednimi wierszami (bez linii mniejszej ostrości na stykach pasów) - trzy dodatkowe bufory pasa
+        Dim korekta As KorekcjaPasow = If(z.Korekta IsNot Nothing AndAlso z.Korekta.Wlaczona, New KorekcjaPasow(szer, kanaly, z.Korekta), Nothing)
+        Dim pas As Integer = CInt(Math.Max(1L, Math.Min(bok, BudzetPamieci \ (CLng(szer) * kanaly * If(korekta IsNot Nothing, 4, 1)))))
         Dim bufor(pas * szer * kanaly - 1) As Byte
         Dim liniaSegmentu(bok * kanaly - 1) As Byte
         Dim formatPikseli As PixelFormat = If(kanaly = 4, PixelFormat.Format32bppArgb, PixelFormat.Format24bppRgb)
@@ -96,6 +100,7 @@ Public NotInheritable Class ScalanieSegmentow
 
         Try
             Using zapis = ZapisRastra.Utworz(z.Format, plik, szer, wys, z.JakoscJpeg, z.Uklad, s.ZasiegSiatki, kanaly = 4)
+                Dim zapiszPas As Action(Of Byte(), Integer) = Sub(b, k) zapis.ZapiszWiersze(b, k)
                 For w = 1 To wiersze
                     Dim segmentyWiersza As New Dictionary(Of Integer, Bitmap)()
                     'segmenty brakujące lub uszkodzone - zgłaszane raz, a nie przy każdym pasie
@@ -139,7 +144,11 @@ Public NotInheritable Class ScalanieSegmentow
                                     If Not caleWiersze Then rgb.Dispose()
                                 End Try
                             Next
-                            zapis.ZapiszWiersze(bufor, n)
+                            If korekta IsNot Nothing Then
+                                korekta.Dodaj(bufor, n, zapiszPas)
+                            Else
+                                zapis.ZapiszWiersze(bufor, n)
+                            End If
                             postep?.Report(CInt(CLng(zapis.Zapisane) * 100 \ wys))
                         Next
                     Finally
@@ -149,6 +158,7 @@ Public NotInheritable Class ScalanieSegmentow
                         segmentyWiersza.Clear()
                     End Try
                 Next
+                korekta?.Zakoncz(zapiszPas)
                 zapis.Zakoncz()
             End Using
         Catch

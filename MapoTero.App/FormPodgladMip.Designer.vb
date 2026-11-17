@@ -35,7 +35,8 @@ Partial Class FormPodgladMip
         Me.btnDomyslne = New Button()
         Me.btnZastosuj = New Button()
         Me.btnAnuluj = New Button()
-        Me.lblOpis = New Label()
+        Me.lblProfil = New Label()
+        Me.cmbProfil = New ComboBox()
         CType(Me.picPodglad, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.tbGamma, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.tbKontrast, System.ComponentModel.ISupportInitialize).BeginInit()
@@ -76,13 +77,23 @@ Partial Class FormPodgladMip
         Me.rbOryginal.Text = "Oryginał"
         Me.rbOryginal.UseVisualStyleBackColor = True
         '
-        'lblOpis
+        'lblProfil
         '
-        Me.lblOpis.Location = New Point(265, 12)
-        Me.lblOpis.Name = "lblOpis"
-        Me.lblOpis.Size = New Size(250, 40)
-        Me.lblOpis.TabIndex = 3
-        Me.lblOpis.Text = "Symulacja i optymalizacja kontrastu dla ekranów Garmin Chroma / MIP w pełnym słońcu."
+        Me.lblProfil.AutoSize = True
+        Me.lblProfil.Location = New Point(265, 8)
+        Me.lblProfil.Name = "lblProfil"
+        Me.lblProfil.Size = New Size(140, 13)
+        Me.lblProfil.TabIndex = 3
+        Me.lblProfil.Text = "Profil przetwarzania obrazu:"
+        '
+        'cmbProfil
+        '
+        Me.cmbProfil.DropDownStyle = ComboBoxStyle.DropDownList
+        Me.cmbProfil.FormattingEnabled = True
+        Me.cmbProfil.Location = New Point(265, 25)
+        Me.cmbProfil.Name = "cmbProfil"
+        Me.cmbProfil.Size = New Size(245, 21)
+        Me.cmbProfil.TabIndex = 4
         '
         'lblGamma
         '
@@ -97,7 +108,7 @@ Partial Class FormPodgladMip
         '
         Me.tbGamma.LargeChange = 5
         Me.tbGamma.Location = New Point(265, 72)
-        Me.tbGamma.Maximum = 120
+        Me.tbGamma.Maximum = 150
         Me.tbGamma.Minimum = 50
         Me.tbGamma.Name = "tbGamma"
         Me.tbGamma.Size = New Size(190, 45)
@@ -128,7 +139,7 @@ Partial Class FormPodgladMip
         Me.tbKontrast.LargeChange = 5
         Me.tbKontrast.Location = New Point(265, 127)
         Me.tbKontrast.Maximum = 200
-        Me.tbKontrast.Minimum = 100
+        Me.tbKontrast.Minimum = 50
         Me.tbKontrast.Name = "tbKontrast"
         Me.tbKontrast.Size = New Size(190, 45)
         Me.tbKontrast.TabIndex = 8
@@ -157,8 +168,8 @@ Partial Class FormPodgladMip
         '
         Me.tbNasycenie.LargeChange = 5
         Me.tbNasycenie.Location = New Point(265, 182)
-        Me.tbNasycenie.Maximum = 200
-        Me.tbNasycenie.Minimum = 100
+        Me.tbNasycenie.Maximum = 250
+        Me.tbNasycenie.Minimum = 0
         Me.tbNasycenie.Name = "tbNasycenie"
         Me.tbNasycenie.Size = New Size(190, 45)
         Me.tbNasycenie.TabIndex = 11
@@ -253,7 +264,8 @@ Partial Class FormPodgladMip
         Me.Controls.Add(Me.lblGammaVal)
         Me.Controls.Add(Me.tbGamma)
         Me.Controls.Add(Me.lblGamma)
-        Me.Controls.Add(Me.lblOpis)
+        Me.Controls.Add(Me.cmbProfil)
+        Me.Controls.Add(Me.lblProfil)
         Me.Controls.Add(Me.rbOryginal)
         Me.Controls.Add(Me.rbPodgladMip)
         Me.Controls.Add(Me.picPodglad)
@@ -262,7 +274,7 @@ Partial Class FormPodgladMip
         Me.MinimizeBox = False
         Me.Name = "FormPodgladMip"
         Me.StartPosition = FormStartPosition.CenterParent
-        Me.Text = "Optymalizacja obrazu pod ekrany MIP (Garmin / pełne słońce)"
+        Me.Text = "Korekta i optymalizacja obrazu (kontrast, ostrość, MIP)"
         CType(Me.picPodglad, System.ComponentModel.ISupportInitialize).EndInit()
         CType(Me.tbGamma, System.ComponentModel.ISupportInitialize).EndInit()
         CType(Me.tbKontrast, System.ComponentModel.ISupportInitialize).EndInit()
@@ -275,7 +287,8 @@ Partial Class FormPodgladMip
     Friend WithEvents picPodglad As PictureBox
     Friend WithEvents rbPodgladMip As RadioButton
     Friend WithEvents rbOryginal As RadioButton
-    Friend WithEvents lblOpis As Label
+    Friend WithEvents lblProfil As Label
+    Friend WithEvents cmbProfil As ComboBox
     Friend WithEvents lblGamma As Label
     Friend WithEvents tbGamma As TrackBar
     Friend WithEvents lblGammaVal As Label

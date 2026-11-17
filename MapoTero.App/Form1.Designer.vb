@@ -80,6 +80,7 @@ Partial Class Form1
         Me.ZaawansowanyMbtilesToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.NakładanieWarstwNaSiebieToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.UsuwaniePustychSegmentówToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.KorektaFolderuToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.UstawieniaToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.HelpToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.PomocOnlineToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
@@ -410,7 +411,7 @@ Partial Class Form1
         '
         'NarzedziaToolStripMenuItem
         '
-        Me.NarzedziaToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.DodajSerwerToolStripMenuItem, Me.ZnajdzDzialkeToolStripMenuItem, Me.KonwertujOziToolStripMenuItem, Me.NarzedziaSeparator1, Me.ScalanieToolStripMenuItem, Me.EksportToolStripMenuItem, Me.EksportCadToolStripMenuItem, Me.ZaawansowanyMbtilesToolStripMenuItem, Me.NakładanieWarstwNaSiebieToolStripMenuItem, Me.UsuwaniePustychSegmentówToolStripMenuItem})
+        Me.NarzedziaToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.DodajSerwerToolStripMenuItem, Me.ZnajdzDzialkeToolStripMenuItem, Me.KonwertujOziToolStripMenuItem, Me.NarzedziaSeparator1, Me.ScalanieToolStripMenuItem, Me.EksportToolStripMenuItem, Me.EksportCadToolStripMenuItem, Me.ZaawansowanyMbtilesToolStripMenuItem, Me.NakładanieWarstwNaSiebieToolStripMenuItem, Me.UsuwaniePustychSegmentówToolStripMenuItem, Me.KorektaFolderuToolStripMenuItem})
         Me.NarzedziaToolStripMenuItem.Name = "NarzedziaToolStripMenuItem"
         Me.NarzedziaToolStripMenuItem.Size = New System.Drawing.Size(70, 20)
         Me.NarzedziaToolStripMenuItem.Text = "Narzędzia"
@@ -481,6 +482,13 @@ Partial Class Form1
         Me.UsuwaniePustychSegmentówToolStripMenuItem.ShortcutKeys = CType((System.Windows.Forms.Keys.Control Or System.Windows.Forms.Keys.U), System.Windows.Forms.Keys)
         Me.UsuwaniePustychSegmentówToolStripMenuItem.Size = New System.Drawing.Size(315, 22)
         Me.UsuwaniePustychSegmentówToolStripMenuItem.Text = "Usuwanie pustych segmentów"
+        '
+        'KorektaFolderuToolStripMenuItem
+        '
+        Me.KorektaFolderuToolStripMenuItem.Name = "KorektaFolderuToolStripMenuItem"
+        Me.KorektaFolderuToolStripMenuItem.Size = New System.Drawing.Size(315, 22)
+        Me.KorektaFolderuToolStripMenuItem.Text = "Korekta i optymalizacja obrazów w folderze..."
+        Me.KorektaFolderuToolStripMenuItem.ToolTipText = "Wsadowe przetwarzanie obrazów: kontrast, ostrość, rozjaśnienie lasów i profil Garmin MIP"
         '
         'UstawieniaToolStripMenuItem
         '
@@ -1619,6 +1627,7 @@ Partial Class Form1
     Friend WithEvents InstrukcjaObsługiToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents Label29 As System.Windows.Forms.Label
     Friend WithEvents UsuwaniePustychSegmentówToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
+    Friend WithEvents KorektaFolderuToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents txtBokSegmentu As System.Windows.Forms.TextBox
     Friend WithEvents Label1 As System.Windows.Forms.Label
     Friend WithEvents lblRozmiarPikselaOpis As System.Windows.Forms.Label

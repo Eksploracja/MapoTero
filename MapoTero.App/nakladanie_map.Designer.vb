@@ -31,6 +31,8 @@ Partial Class Nakladanie_Map
         Me.txtFolderGorna = New System.Windows.Forms.TextBox()
         Me.txtFolderDolna = New System.Windows.Forms.TextBox()
         Me.btnSkladaj = New System.Windows.Forms.Button()
+        Me.chkKorekta = New System.Windows.Forms.CheckBox()
+        Me.btnKorekta = New System.Windows.Forms.Button()
         Me.dlgFolder = New System.Windows.Forms.FolderBrowserDialog()
         Me.Panel1 = New System.Windows.Forms.Panel()
         Me.txtOpis = New System.Windows.Forms.RichTextBox()
@@ -121,6 +123,25 @@ Partial Class Nakladanie_Map
         Me.btnSkladaj.TabIndex = 10
         Me.btnSkladaj.Text = "Składaj warstwy"
         Me.btnSkladaj.UseVisualStyleBackColor = true
+        '
+        'chkKorekta
+        '
+        Me.chkKorekta.AutoSize = True
+        Me.chkKorekta.Location = New System.Drawing.Point(105, 448)
+        Me.chkKorekta.Name = "chkKorekta"
+        Me.chkKorekta.Size = New System.Drawing.Size(140, 17)
+        Me.chkKorekta.TabIndex = 11
+        Me.chkKorekta.Text = "Korekta po nałożeniu"
+        Me.chkKorekta.UseVisualStyleBackColor = True
+        '
+        'btnKorekta
+        '
+        Me.btnKorekta.Location = New System.Drawing.Point(105, 468)
+        Me.btnKorekta.Name = "btnKorekta"
+        Me.btnKorekta.Size = New System.Drawing.Size(140, 24)
+        Me.btnKorekta.TabIndex = 12
+        Me.btnKorekta.Text = "Dostosuj..."
+        Me.btnKorekta.UseVisualStyleBackColor = True
         '
         'Panel1
         '
@@ -236,6 +257,8 @@ Partial Class Nakladanie_Map
         Me.Controls.Add(Me.txtOpis)
         Me.Controls.Add(Me.Panel1)
         Me.Controls.Add(Me.btnSkladaj)
+        Me.Controls.Add(Me.chkKorekta)
+        Me.Controls.Add(Me.btnKorekta)
         Me.Controls.Add(Me.GroupBoxWarstwy)
         Me.Icon = CType(resources.GetObject("$this.Icon"),System.Drawing.Icon)
         Me.Name = "Nakladanie_Map"
@@ -257,6 +280,8 @@ End Sub
     Friend WithEvents txtFolderGorna As System.Windows.Forms.TextBox
     Friend WithEvents txtFolderDolna As System.Windows.Forms.TextBox
     Friend WithEvents btnSkladaj As System.Windows.Forms.Button
+    Friend WithEvents chkKorekta As System.Windows.Forms.CheckBox
+    Friend WithEvents btnKorekta As System.Windows.Forms.Button
     Friend WithEvents dlgFolder As System.Windows.Forms.FolderBrowserDialog
     Friend WithEvents Panel1 As System.Windows.Forms.Panel
     Friend WithEvents txtOpis As System.Windows.Forms.RichTextBox

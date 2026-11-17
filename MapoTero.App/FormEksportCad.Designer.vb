@@ -33,6 +33,7 @@ Partial Class FormEksportCad
         Me.txtArkusz = New System.Windows.Forms.TextBox()
         Me.btnArkusz = New System.Windows.Forms.Button()
         Me.btnScal = New System.Windows.Forms.Button()
+        Me.btnKorektaCad = New System.Windows.Forms.Button()
         Me.rbBezRastrow = New System.Windows.Forms.RadioButton()
         Me.grpWektory = New System.Windows.Forms.GroupBox()
         Me.chkObrys = New System.Windows.Forms.CheckBox()
@@ -101,6 +102,7 @@ Partial Class FormEksportCad
         Me.grpRastry.Controls.Add(Me.txtArkusz)
         Me.grpRastry.Controls.Add(Me.btnArkusz)
         Me.grpRastry.Controls.Add(Me.btnScal)
+        Me.grpRastry.Controls.Add(Me.btnKorektaCad)
         Me.grpRastry.Controls.Add(Me.rbBezRastrow)
         Me.grpRastry.Location = New System.Drawing.Point(12, 104)
         Me.grpRastry.Name = "grpRastry"
@@ -159,6 +161,16 @@ Partial Class FormEksportCad
         Me.btnScal.Text = "scal teraz..."
         Me.ToolTip1.SetToolTip(Me.btnScal, "Łączenie segmentów tej sesji w jeden arkusz (z plikiem world file) - po scaleniu arkusz zostanie wybrany do wstawienia.")
         Me.btnScal.UseVisualStyleBackColor = True
+        '
+        'btnKorektaCad
+        '
+        Me.btnKorektaCad.Location = New System.Drawing.Point(315, 16)
+        Me.btnKorektaCad.Name = "btnKorektaCad"
+        Me.btnKorektaCad.Size = New System.Drawing.Size(171, 23)
+        Me.btnKorektaCad.TabIndex = 6
+        Me.btnKorektaCad.Text = "korekta obrazu CAD..."
+        Me.ToolTip1.SetToolTip(Me.btnKorektaCad, "Wsadowa optymalizacja rastrów pod CAD (np. stonowane podkłady lub wysoki kontrast skanów).")
+        Me.btnKorektaCad.UseVisualStyleBackColor = True
         '
         'rbBezRastrow
         '
@@ -439,6 +451,7 @@ Partial Class FormEksportCad
     Friend WithEvents txtArkusz As System.Windows.Forms.TextBox
     Friend WithEvents btnArkusz As System.Windows.Forms.Button
     Friend WithEvents btnScal As System.Windows.Forms.Button
+    Friend WithEvents btnKorektaCad As System.Windows.Forms.Button
     Friend WithEvents rbBezRastrow As System.Windows.Forms.RadioButton
     Friend WithEvents grpWektory As System.Windows.Forms.GroupBox
     Friend WithEvents chkObrys As System.Windows.Forms.CheckBox

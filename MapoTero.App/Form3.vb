@@ -26,6 +26,7 @@ Public Class Form3
     Private _ctsScalanie As CancellationTokenSource
     ''' <summary>Segmenty pobrane z przezroczystym tłem (conf.txt) - zachowywane w arkuszu PNG i GeoTIFF bezstratnym.</summary>
     Private _przezroczystosc As Boolean
+    Private _opcjeKorekty As New OpcjeKorekcjiMip()
 
     ''' <summary>
     ''' Folder segmentów do scalenia zamiast folderu bieżącej sesji (okno otwarte z eksportu do CAD); pusty - folder sesji.
@@ -38,7 +39,7 @@ Public Class Form3
     Public ReadOnly Property PlikArkusza As String = ""
 
     Private Sub Form3_Load(sender As Object, e As EventArgs) Handles MyBase.Load
-        PomocProgramu.DodajPrzyciskPomocy(Me, TematPomocy.Scalanie)
+        PomocProgramu.DodajPrzyciskPomocy(Me, TematPomocy.Scalanie, 344, 455)
         Dim uwagaFolderu As String = ""
         _folderScalania = FolderSesjiDlaNarzedzia(If(FolderPoczatkowy <> "", FolderPoczatkowy, Form1.FolderSesji), uwagaFolderu)
         txtFolder.Text = _folderScalania
@@ -52,6 +53,10 @@ Public Class Form3
         trkJakosc.Enabled = Ustawienia.FormatArkusza = FormatArkusza.Jpeg OrElse Ustawienia.FormatArkusza = FormatArkusza.GeoTiffJpeg
         If FolderPoczatkowy <> "" Then chkWorldFile.Checked = True
         OpiszWorldFile()
+        'UstawWgProfilu włącza korektę, więc dawniej po odczycie stanu „wyłączona” korekta znów była zaznaczona
+        _opcjeKorekty = Ustawienia.OpcjeKorekty()
+        chkKorekta.Checked = _opcjeKorekty.Wlaczona
+        AktualizujPrzyciskKorekty()
         WczytajParametry()
         If uwagaFolderu <> "" Then Komunikat(uwagaFolderu & vbCrLf & txtKomunikaty.Text, Color.OrangeRed)
     End Sub
@@ -173,7 +178,8 @@ Public Class Form3
             .Siatka = s, .Uklad = _uklad, .Format = WybranyFormat, .JakoscJpeg = trkJakosc.Value,
             .NazwaArkusza = "_scalone_segmenty_" & s.LiczbaKolumn & "x" & s.LiczbaWierszy,
             .Georeferencja = New OpcjeGeoreferencji With {.WorldFile = chkWorldFile.Checked, .Kml = chkKml.Checked, .Map = chkMap.Checked, .Tab = chkTab.Checked},
-            .Przezroczystosc = _przezroczystosc}
+            .Przezroczystosc = _przezroczystosc,
+            .Korekta = If(chkKorekta.Checked, _opcjeKorekty.Kopia(), Nothing)}
 
         _ctsScalanie = New CancellationTokenSource()
         btnScal.Text = "Przerwij"
@@ -261,6 +267,39 @@ Public Class Form3
         Ustawienia.ScalanieKml = chkKml.Checked
         Ustawienia.ScalanieMap = chkMap.Checked
         Ustawienia.ScalanieTab = chkTab.Checked
+        Ustawienia.ZapamietajKorekte(_opcjeKorekty)
+    End Sub
+
+    Private Sub chkKorekta_CheckedChanged(sender As Object, e As EventArgs) Handles chkKorekta.CheckedChanged
+        _opcjeKorekty.Wlaczona = chkKorekta.Checked
+        If chkKorekta.Checked AndAlso _opcjeKorekty.Profil = ProfilKorektyRastra.Brak Then
+            _opcjeKorekty.UstawWgProfilu(ProfilKorektyRastra.GarminMip)
+        End If
+        AktualizujPrzyciskKorekty()
+    End Sub
+
+    Private Sub btnKorekta_Click(sender As Object, e As EventArgs) Handles btnKorekta.Click
+        Dim probka As String = ""
+        If Directory.Exists(_folderScalania) Then
+            Dim wzorzec = If(String.IsNullOrEmpty(txtPrefiks.Text) OrElse txtPrefiks.Text = "\", "*", txtPrefiks.Text & "*") & "." & Wms.RozszerzeniePliku(cmbFormat.Text)
+            Dim pliki = Directory.GetFiles(_folderScalania, wzorzec)
+            If pliki.Length > 0 Then probka = pliki.OrderBy(Function(p) p, StringComparer.OrdinalIgnoreCase).ElementAt(pliki.Length \ 2)
+        End If
+        Using dlg As New FormPodgladMip(_opcjeKorekty, probka)
+            If dlg.ShowDialog(Me) = DialogResult.OK Then
+                _opcjeKorekty = dlg.Opcje
+                chkKorekta.Checked = _opcjeKorekty.Wlaczona
+                AktualizujPrzyciskKorekty()
+            End If
+        End Using
+    End Sub
+
+    Private Sub AktualizujPrzyciskKorekty()
+        If _opcjeKorekty IsNot Nothing AndAlso _opcjeKorekty.Wlaczona Then
+            btnKorekta.Text = "Profil: " & OpcjeKorekcjiMip.KrotkaNazwaProfilu(_opcjeKorekty.Profil) & "..."
+        Else
+            btnKorekta.Text = "Profil / Podgląd..."
+        End If
     End Sub
 
 End Class

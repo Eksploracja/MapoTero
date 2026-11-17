@@ -180,7 +180,7 @@ Public Class FormKorytarz
         Dim r = picProfil.ClientRectangle
 
         If _statystyki Is Nothing OrElse _statystyki.Punkty.Count < 2 Then
-            Dim info = "Wskaż trasę i kliknij ""Wysokości NMT (LIDAR)..."", aby pobrać profil rzędnych z Geoportalu."
+            Dim info = "Wskaż trasę i kliknij ""Wzbogać ślad o wysokości..."", aby pobrać profil rzędnych z Geoportalu."
             Using sf As New StringFormat() With {.Alignment = StringAlignment.Center, .LineAlignment = StringAlignment.Center}
                 Using f As New Font(Me.Font.FontFamily, 8.25!, FontStyle.Regular)
                     Using b As New SolidBrush(Color.DimGray)

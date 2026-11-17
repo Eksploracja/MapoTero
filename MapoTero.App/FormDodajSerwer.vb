@@ -55,7 +55,8 @@ Public Class FormDodajSerwer
                    Optional srodekMapy As PunktGeo? = Nothing,
                    Optional istniejaceZbiory As IEnumerable(Of KeyValuePair(Of String, String)) = Nothing)
         InitializeComponent()
-        PomocProgramu.DodajPrzyciskPomocy(Me, TematPomocy.DodajSerwer)
+        'na prawo od przycisków „Wpisz własny adres” (katalog) i „Wróć do listy usług” (warstwy) w lewym dolnym rogu
+        PomocProgramu.DodajPrzyciskPomocy(Me, TematPomocy.DodajSerwer, 292)
         _srodekMapy = srodekMapy
         If istniejaceZbiory IsNot Nothing Then
             _istniejaceZbiory.AddRange(istniejaceZbiory)

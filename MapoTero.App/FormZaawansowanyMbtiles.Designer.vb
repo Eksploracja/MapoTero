@@ -54,6 +54,8 @@ Partial Class FormZaawansowanyMbtiles
         Me.nudJakosc = New System.Windows.Forms.NumericUpDown()
         Me.chkPiramida = New System.Windows.Forms.CheckBox()
         Me.chkWypelnijLuki = New System.Windows.Forms.CheckBox()
+        Me.chkKorekta = New System.Windows.Forms.CheckBox()
+        Me.btnKorekta = New System.Windows.Forms.Button()
         Me.grpSzacunek = New System.Windows.Forms.GroupBox()
         Me.lvwPoziomy = New System.Windows.Forms.ListView()
         Me.colZ = CType(New System.Windows.Forms.ColumnHeader(), System.Windows.Forms.ColumnHeader)
@@ -295,6 +297,8 @@ Partial Class FormZaawansowanyMbtiles
         Me.grpUstawienia.Controls.Add(Me.nudJakosc)
         Me.grpUstawienia.Controls.Add(Me.chkPiramida)
         Me.grpUstawienia.Controls.Add(Me.chkWypelnijLuki)
+        Me.grpUstawienia.Controls.Add(Me.chkKorekta)
+        Me.grpUstawienia.Controls.Add(Me.btnKorekta)
         Me.grpUstawienia.Location = New System.Drawing.Point(12, 258)
         Me.grpUstawienia.Name = "grpUstawienia"
         Me.grpUstawienia.Size = New System.Drawing.Size(610, 189)
@@ -412,6 +416,26 @@ Partial Class FormZaawansowanyMbtiles
         Me.chkWypelnijLuki.TabIndex = 10
         Me.chkWypelnijLuki.Text = "Wypełnij brakujące poziomy powiększeń przeskalowaną warstwą niższą"
         Me.chkWypelnijLuki.UseVisualStyleBackColor = True
+        '
+        'chkKorekta
+        '
+        Me.chkKorekta.AutoSize = True
+        Me.chkKorekta.Location = New System.Drawing.Point(420, 124)
+        Me.chkKorekta.Name = "chkKorekta"
+        Me.chkKorekta.Size = New System.Drawing.Size(175, 17)
+        Me.chkKorekta.TabIndex = 11
+        Me.chkKorekta.Text = "Korekta obrazu (MIP/kontrast)"
+        Me.ToolTip1.SetToolTip(Me.chkKorekta, "Optymalizacja rastra pod kątem czytelności w słońcu (Garmin MIP), podbicie kontrastu lub wyostrzenie krawędzi")
+        Me.chkKorekta.UseVisualStyleBackColor = True
+        '
+        'btnKorekta
+        '
+        Me.btnKorekta.Location = New System.Drawing.Point(420, 148)
+        Me.btnKorekta.Name = "btnKorekta"
+        Me.btnKorekta.Size = New System.Drawing.Size(180, 24)
+        Me.btnKorekta.TabIndex = 12
+        Me.btnKorekta.Text = "Dostosuj..."
+        Me.btnKorekta.UseVisualStyleBackColor = True
         '
         'grpSzacunek
         '
@@ -601,6 +625,8 @@ Partial Class FormZaawansowanyMbtiles
     Friend WithEvents nudJakosc As NumericUpDown
     Friend WithEvents chkPiramida As CheckBox
     Friend WithEvents chkWypelnijLuki As CheckBox
+    Friend WithEvents chkKorekta As CheckBox
+    Friend WithEvents btnKorekta As Button
     Friend WithEvents grpSzacunek As GroupBox
     Friend WithEvents lvwPoziomy As ListView
     Friend WithEvents colZ As ColumnHeader

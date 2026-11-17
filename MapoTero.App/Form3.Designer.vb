@@ -27,6 +27,8 @@ Partial Class Form3
         Me.btnZmienFolder = New System.Windows.Forms.Button()
         Me.dlgFolder = New System.Windows.Forms.FolderBrowserDialog()
         Me.btnScal = New System.Windows.Forms.Button()
+        Me.chkKorekta = New System.Windows.Forms.CheckBox()
+        Me.btnKorekta = New System.Windows.Forms.Button()
         Me.lblFormatArkusza = New System.Windows.Forms.Label()
         Me.cmbFormatArkusza = New System.Windows.Forms.ComboBox()
         Me.prgScalanie = New System.Windows.Forms.ProgressBar()
@@ -411,23 +413,42 @@ Partial Class Form3
         Me.Label21.TabIndex = 69
         Me.Label21.Text = "Lokalizacja katalogu z segmentami i plikiem conf.txt"
         '
-        'txtKomunikaty
+        'chkKorekta
         '
-        Me.txtKomunikaty.BackColor = System.Drawing.SystemColors.ButtonFace
-        Me.txtKomunikaty.Location = New System.Drawing.Point(344, 319)
-        Me.txtKomunikaty.Name = "txtKomunikaty"
-        Me.txtKomunikaty.Size = New System.Drawing.Size(267, 96)
-        Me.txtKomunikaty.TabIndex = 70
-        Me.txtKomunikaty.Text = ""
+        Me.chkKorekta.AutoSize = True
+        Me.chkKorekta.Location = New System.Drawing.Point(344, 298)
+        Me.chkKorekta.Name = "chkKorekta"
+        Me.chkKorekta.Size = New System.Drawing.Size(110, 17)
+        Me.chkKorekta.TabIndex = 73
+        Me.chkKorekta.Text = "Korekta obrazu"
+        Me.chkKorekta.UseVisualStyleBackColor = True
+        '
+        'btnKorekta
+        '
+        Me.btnKorekta.Location = New System.Drawing.Point(464, 293)
+        Me.btnKorekta.Name = "btnKorekta"
+        Me.btnKorekta.Size = New System.Drawing.Size(147, 26)
+        Me.btnKorekta.TabIndex = 74
+        Me.btnKorekta.Text = "Profil / Podgląd..."
+        Me.btnKorekta.UseVisualStyleBackColor = True
         '
         'Label22
         '
         Me.Label22.AutoSize = True
-        Me.Label22.Location = New System.Drawing.Point(341, 303)
+        Me.Label22.Location = New System.Drawing.Point(341, 327)
         Me.Label22.Name = "Label22"
         Me.Label22.Size = New System.Drawing.Size(65, 13)
         Me.Label22.TabIndex = 71
         Me.Label22.Text = "Komunikaty:"
+        '
+        'txtKomunikaty
+        '
+        Me.txtKomunikaty.BackColor = System.Drawing.SystemColors.ButtonFace
+        Me.txtKomunikaty.Location = New System.Drawing.Point(344, 343)
+        Me.txtKomunikaty.Name = "txtKomunikaty"
+        Me.txtKomunikaty.Size = New System.Drawing.Size(267, 72)
+        Me.txtKomunikaty.TabIndex = 70
+        Me.txtKomunikaty.Text = ""
         '
         'groupBox2
         '
@@ -548,6 +569,8 @@ Partial Class Form3
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.ClientSize = New System.Drawing.Size(621, 491)
+        Me.Controls.Add(Me.btnKorekta)
+        Me.Controls.Add(Me.chkKorekta)
         Me.Controls.Add(Me.grpPlikiReferencyjne)
         Me.Controls.Add(Me.groupBox2)
         Me.Controls.Add(Me.Label22)
@@ -625,4 +648,6 @@ Partial Class Form3
     Friend WithEvents chkWorldFile As System.Windows.Forms.CheckBox
     Friend WithEvents chkMap As System.Windows.Forms.CheckBox
     Friend WithEvents chkTab As System.Windows.Forms.CheckBox
+    Friend WithEvents chkKorekta As System.Windows.Forms.CheckBox
+    Friend WithEvents btnKorekta As System.Windows.Forms.Button
 End Class

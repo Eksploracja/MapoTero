@@ -14,6 +14,15 @@ Public Class FormSzukajDzialki
     Private Shared _ostatniaZakladka As Integer = 0
     Private ReadOnly _poczatkowyTryb As Integer = -1
 
+    Friend Shared Property OstatniaZakladka As Integer
+        Get
+            Return _ostatniaZakladka
+        End Get
+        Set(value As Integer)
+            _ostatniaZakladka = value
+        End Set
+    End Property
+
     <DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)>
     Public Property WybranaDzialka As DzialkaKatastralna
 

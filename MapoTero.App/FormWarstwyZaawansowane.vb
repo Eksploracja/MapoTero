@@ -52,7 +52,9 @@ Public Class FormWarstwyZaawansowane
     Private ReadOnly _btnZoomReset As New Button()
     Private ReadOnly _btnZoomPlus As New Button()
     Private ReadOnly _lblZoom As New Label()
+    Private ReadOnly _btnKorekta As New Button()
     Private ReadOnly _podpowiedz As New ToolTip() With {.InitialDelay = 500, .ReshowDelay = 500, .AutoPopDelay = 15000}
+    Private _opcjeKorekty As New OpcjeKorekcjiMip()
 
     Public Sub New(zestaw As ZestawWarstw, zadanie As ZadaniePobierania, zaznaczona As Integer, silnik As PodgladWarstwSilnik)
         _zestaw = zestaw
@@ -147,6 +149,14 @@ Public Class FormWarstwyZaawansowane
         _lblZoom.Text = "1:1"
         _lblZoom.ForeColor = SystemColors.ControlDarkDark
         Controls.Add(_lblZoom)
+
+        _opcjeKorekty = Ustawienia.OpcjeKorekty(ProfilKorektyRastra.GarminMip)
+        _btnKorekta.Location = New Point(560, 386)
+        _btnKorekta.Size = New Size(140, 24)
+        AktualizujPrzyciskKorekty()
+        _podpowiedz.SetToolTip(_btnKorekta, "Podgląd i strojenie korekcji obrazu (kontrast, wyostrzanie, MIP) dla skomponowanych warstw.")
+        AddHandler _btnKorekta.Click, AddressOf Korekta_Click
+        Controls.Add(_btnKorekta)
 
         Dim btnOk As New Button With {.Text = "OK", .DialogResult = DialogResult.OK, .Location = New Point(710, 386), .Size = New Size(75, 24)}
         Dim btnAnuluj As New Button With {.Text = "Anuluj", .DialogResult = DialogResult.Cancel, .Location = New Point(795, 386), .Size = New Size(75, 24)}
@@ -422,7 +432,14 @@ Public Class FormWarstwyZaawansowane
             Exit Sub
         End If
         Dim zoom = _poziomyZoomu(_indeksZoomu)
-        Dim powiekszony = PodgladWarstwSilnik.ZastosujZoom(_bazaPodgladu, zoom, BokPodgladu, BokPodgladu)
+        Dim obrazDoWyswietlenia As Bitmap = _bazaPodgladu
+        If _opcjeKorekty.Wlaczona Then
+            obrazDoWyswietlenia = New Bitmap(_bazaPodgladu)
+            NakladanieObrazow.ZastosujKorekcjeMip(obrazDoWyswietlenia, _opcjeKorekty)
+        End If
+        Dim powiekszony = PodgladWarstwSilnik.ZastosujZoom(obrazDoWyswietlenia, zoom, BokPodgladu, BokPodgladu)
+        If obrazDoWyswietlenia IsNot _bazaPodgladu Then obrazDoWyswietlenia.Dispose()
+
         'czerwona ramka tylko po próbie pobrania - przed nią brak warstwy oznacza, że pobieranie dopiero trwa
         If _przerwanie Is Nothing AndAlso _silnik.BrakujaceWarstwy(_zestaw).Count > 0 Then PodgladWarstwSilnik.RysujRamkeBraku(powiekszony)
         Dim staryImg = _podglad.Image
@@ -430,6 +447,25 @@ Public Class FormWarstwyZaawansowane
         staryImg?.Dispose()
         _lblZoom.Text = If(zoom > 1.001, "×" & CInt(zoom), "1:1")
         AktualizujStanPrzyciskowZoomu()
+    End Sub
+
+    Private Sub Korekta_Click(sender As Object, e As EventArgs)
+        If _bazaPodgladu Is Nothing Then
+            MessageBox.Show("Najpierw pobierz podgląd kanapki warstw przyciskiem 'Pobierz podgląd'.", "Brak podglądu", MessageBoxButtons.OK, MessageBoxIcon.Information)
+            Return
+        End If
+        Using dlg As New FormPodgladMip(_opcjeKorekty, _bazaPodgladu)
+            If dlg.ShowDialog(Me) = DialogResult.OK Then
+                _opcjeKorekty = dlg.Opcje.Kopia()
+                AktualizujPrzyciskKorekty()
+                ZastosujZoomDoPodgladu()
+            End If
+        End Using
+    End Sub
+
+    Private Sub AktualizujPrzyciskKorekty()
+        Dim nazwa = If(_opcjeKorekty.Wlaczona, OpcjeKorekcjiMip.KrotkaNazwaProfilu(_opcjeKorekty.Profil), "Brak")
+        _btnKorekta.Text = "Korekta (" & nazwa & ")..."
     End Sub
 
     Private Sub AktualizujStanPrzyciskowZoomu()
@@ -441,6 +477,9 @@ Public Class FormWarstwyZaawansowane
 
     Protected Overrides Sub OnFormClosed(e As FormClosedEventArgs)
         _przerwanie?.Cancel()
+        If DialogResult = DialogResult.OK AndAlso _opcjeKorekty.Wlaczona Then
+            Ustawienia.ZapamietajKorekte(_opcjeKorekty)
+        End If
         MyBase.OnFormClosed(e)
     End Sub
 

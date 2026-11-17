@@ -16,6 +16,7 @@
 Imports System.Drawing.Imaging
 Imports System.IO
 Imports System.Threading.Tasks
+Imports MapoTero.Core
 
 ''' <summary>
 ''' Nakładanie dwóch zbiorów segmentów PNG (np. kontury działek na ortofotomapę): białe piksele warstwy górnej
@@ -23,14 +24,79 @@ Imports System.Threading.Tasks
 ''' </summary>
 Public Class Nakladanie_Map
 
+    Private _opcjeKorekty As New OpcjeKorekcjiMip()
+
     Private Sub Nakladanie_Map_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         Me.Location = New Point(200, 150)
         PomocProgramu.DodajPrzyciskPomocy(Me, TematPomocy.NakladanieMap, 15, 455)
+
+        _opcjeKorekty.UstawWgProfilu(ProfilKorektyRastra.RozjasnienieLasow)
+        chkKorekta.Checked = False
+        'UstawWgProfilu włącza korektę, a pole jest odznaczone (zdarzenie CheckedChanged nie zachodzi bez zmiany stanu)
+        _opcjeKorekty.Wlaczona = False
+        AktualizujPrzyciskKorekty()
 
         'foldery zapamiętane w lastsettings.txt, a gdy ich brak - domyślne podkatalogi folderu download
         txtFolderDolna.Text = If(Ustawienia.FolderWarstwy1 <> "", Ustawienia.FolderWarstwy1, FolderDownload & "dolna\")
         txtFolderGorna.Text = If(Ustawienia.FolderWarstwy2 <> "", Ustawienia.FolderWarstwy2, FolderDownload & "gorna\")
         txtFolderWynik.Text = If(Ustawienia.FolderWynikowy <> "", Ustawienia.FolderWynikowy, FolderDownload & "polaczone\")
+    End Sub
+
+    Private Sub chkKorekta_CheckedChanged(sender As Object, e As EventArgs) Handles chkKorekta.CheckedChanged
+        _opcjeKorekty.Wlaczona = chkKorekta.Checked
+        'po wyborze „Brak” w podglądzie zaznaczenie pola stosowało ukryte wartości suwaków poprzedniego profilu
+        If chkKorekta.Checked AndAlso _opcjeKorekty.Profil = ProfilKorektyRastra.Brak Then
+            _opcjeKorekty.UstawWgProfilu(ProfilKorektyRastra.RozjasnienieLasow)
+        End If
+        AktualizujPrzyciskKorekty()
+    End Sub
+
+    Private Sub btnKorekta_Click(sender As Object, e As EventArgs) Handles btnKorekta.Click
+        Dim probka As Bitmap = PrzygotujProbkeDoPodgladu()
+        Using dlg As New FormPodgladMip(_opcjeKorekty, probka)
+            If dlg.ShowDialog(Me) = DialogResult.OK Then
+                _opcjeKorekty = dlg.Opcje.Kopia()
+                chkKorekta.Checked = _opcjeKorekty.Wlaczona
+                AktualizujPrzyciskKorekty()
+            End If
+        End Using
+        probka?.Dispose()
+    End Sub
+
+    Private Function PrzygotujProbkeDoPodgladu() As Bitmap
+        Try
+            Dim dolna As String = KoniecUkosnik(txtFolderDolna.Text)
+            Dim gorna As String = KoniecUkosnik(txtFolderGorna.Text)
+            If Directory.Exists(dolna) AndAlso Directory.Exists(gorna) Then
+                For Each plikD In Directory.GetFiles(dolna, "*.png")
+                    Dim nazwa = Path.GetFileName(plikD)
+                    Dim plikG = Path.Combine(gorna, nazwa)
+                    If File.Exists(plikG) Then
+                        Using w1P As New Bitmap(plikD), w2P As New Bitmap(plikG)
+                            Dim res As New Bitmap(w1P.Width, w1P.Height, PixelFormat.Format32bppArgb)
+                            Using w2 As New Bitmap(w2P.Width, w2P.Height, PixelFormat.Format32bppArgb)
+                                Using g2 = Graphics.FromImage(w2)
+                                    g2.DrawImage(w2P, 0, 0, w2P.Width, w2P.Height)
+                                End Using
+                                w2.MakeTransparent(Color.White)
+                                Using g = Graphics.FromImage(res)
+                                    g.DrawImage(w1P, 0, 0, w1P.Width, w1P.Height)
+                                    g.DrawImage(w2, 0, 0, w2.Width, w2.Height)
+                                End Using
+                            End Using
+                            Return res
+                        End Using
+                    End If
+                Next
+            End If
+        Catch
+        End Try
+        Return Nothing
+    End Function
+
+    Private Sub AktualizujPrzyciskKorekty()
+        Dim nazwa = OpcjeKorekcjiMip.KrotkaNazwaProfilu(_opcjeKorekty.Profil)
+        btnKorekta.Text = "Dostosuj (" & nazwa & ")..."
     End Sub
 
     'foldery zapisywane przy zamykaniu programu w lastsettings.txt
@@ -115,8 +181,9 @@ Public Class Nakladanie_Map
         btnSkladaj.Enabled = False
         Me.UseWaitCursor = True
         Dim liczba As Integer
+        Dim opcjeKorekty = If(chkKorekta.Checked, _opcjeKorekty.Kopia(), Nothing)
         Try
-            liczba = Await Task.Run(Function() NalozWarstwy(dolna, gorna, wynik))
+            liczba = Await Task.Run(Function() NalozWarstwy(dolna, gorna, wynik, opcjeKorekty))
         Finally
             btnSkladaj.Enabled = True
             Me.UseWaitCursor = False
@@ -133,7 +200,7 @@ Public Class Nakladanie_Map
     End Function
 
     ''' <summary>Nakłada segmenty o tych samych nazwach; zwraca liczbę zapisanych plików.</summary>
-    Private Shared Function NalozWarstwy(dolna As String, gorna As String, wynik As String) As Integer
+    Private Shared Function NalozWarstwy(dolna As String, gorna As String, wynik As String, opcjeKorekty As OpcjeKorekcjiMip) As Integer
         Dim liczba As Integer = 0
 
         ' Kopiowanie conf.txt jeśli istnieje w warstwie dolnej
@@ -163,6 +230,11 @@ Public Class Nakladanie_Map
                             g.DrawImage(warstwa1Plik, 0, 0, warstwa1Plik.Width, warstwa1Plik.Height)
                             g.DrawImage(warstwa2, 0, 0, warstwa2.Width, warstwa2.Height)
                         End Using
+
+                        If opcjeKorekty IsNot Nothing AndAlso opcjeKorekty.Wlaczona Then
+                            NakladanieObrazow.ZastosujKorekcjeMip(warstwa1, opcjeKorekty)
+                        End If
+
                         Dim plikDocelowy As String = Path.Combine(wynik, nazwaPliku)
                         warstwa1.Save(plikDocelowy, ImageFormat.Png)
                         liczba += 1

@@ -35,7 +35,7 @@ Public Class FormEksportCad
     Private _folderWyniku As String = ""
 
     Private Sub FormEksportCad_Load(sender As Object, e As EventArgs) Handles MyBase.Load
-        PomocProgramu.DodajPrzyciskPomocy(Me, TematPomocy.EksportCad)
+        PomocProgramu.DodajPrzyciskPomocy(Me, TematPomocy.EksportCad, 150, 556)
         'opcje zapamiętane z poprzedniego eksportu (lastsettings.txt)
         chkObrys.Checked = Ustawienia.CadObrys
         chkSiatka.Checked = Ustawienia.CadSiatka
@@ -166,6 +166,7 @@ Public Class FormEksportCad
         txtArkusz.Enabled = rbArkusz.Checked
         btnArkusz.Enabled = rbArkusz.Checked
         btnScal.Enabled = jest
+        btnKorektaCad.Enabled = jest
         chkTrasa.Enabled = _maTrase
         chkSciezkiWzgledne.Enabled = chkDxf.Checked
         txtPlik.Text = If(Not jest, "", If(_plik <> "", _plik, DomyslnyPlik()))
@@ -207,6 +208,13 @@ Public Class FormEksportCad
             rbArkusz.Checked = True
             WybierzArkusz(plik)
         End If
+    End Sub
+
+    Private Sub btnKorektaCad_Click(sender As Object, e As EventArgs) Handles btnKorektaCad.Click
+        'folder przez właściwość - pole tekstowe wypełnione przed ShowDialog nadpisywało Load folderem bieżącej sesji
+        Using dlg As New FormKorektaFolderu() With {.FolderPoczatkowy = _folder}
+            dlg.ShowDialog(Me)
+        End Using
     End Sub
 
     ''' <summary>Sprawdza arkusz (położenie, układ, obszar sesji) i wybiera go do wstawienia.</summary>

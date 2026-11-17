@@ -493,6 +493,20 @@ Public Class PlikUstawien
         Ustaw(nazwa, wartosc.ToString(CultureInfo.InvariantCulture))
     End Sub
 
+    ''' <summary>Liczba zapisywana z kropką dziesiętną niezależnie od ustawień regionalnych.</summary>
+    Public Sub Ustaw(nazwa As String, wartosc As Double)
+        Ustaw(nazwa, wartosc.ToString("R", CultureInfo.InvariantCulture))
+    End Sub
+
+    ''' <summary>Liczba z kropką dziesiętną; gdy brak lub nie jest liczbą - wartość domyślna.</summary>
+    Public Function Liczba(nazwa As String, domyslna As Double) As Double
+        Dim w As String = Nothing
+        Dim wynik As Double
+        If _wartosci.TryGetValue(nazwa, w) AndAlso Double.TryParse(w, NumberStyles.Float, CultureInfo.InvariantCulture, wynik) AndAlso
+           Not Double.IsNaN(wynik) AndAlso Not Double.IsInfinity(wynik) Then Return wynik
+        Return domyslna
+    End Function
+
     Public Function Zawiera(nazwa As String) As Boolean
         Return _wartosci.ContainsKey(nazwa)
     End Function

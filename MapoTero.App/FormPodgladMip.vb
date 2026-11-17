@@ -26,6 +26,7 @@ Public Class FormPodgladMip
 
     Private _oryginalBmp As Bitmap
     Private _opcje As OpcjeKorekcjiMip
+    Private _wewnetrznaZmiana As Boolean
 
     <DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)>
     Public Property Opcje As OpcjeKorekcjiMip
@@ -43,8 +44,57 @@ Public Class FormPodgladMip
         WczytajObrazProbki(sciezkaProbki)
     End Sub
 
+    Public Sub New(opcje As OpcjeKorekcjiMip, probka As Bitmap)
+        InitializeComponent()
+        Me.Opcje = opcje
+        If probka IsNot Nothing Then
+            Try
+                _oryginalBmp = New Bitmap(240, 240, Imaging.PixelFormat.Format32bppArgb)
+                Using g = Graphics.FromImage(_oryginalBmp)
+                    g.Clear(Color.White)
+                    Dim x0 = Math.Max(0, (probka.Width - 240) \ 2)
+                    Dim y0 = Math.Max(0, (probka.Height - 240) \ 2)
+                    Dim w = Math.Min(240, probka.Width), h = Math.Min(240, probka.Height)
+                    g.DrawImage(probka, New Rectangle((240 - w) \ 2, (240 - h) \ 2, w, h), New Rectangle(x0, y0, w, h), GraphicsUnit.Pixel)
+                End Using
+            Catch
+                _oryginalBmp = GenerujSyntetycznaProbke()
+            End Try
+        Else
+            _oryginalBmp = GenerujSyntetycznaProbke()
+        End If
+    End Sub
+
     Private Sub FormPodgladMip_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+        InicjalizujProfile()
+        'podgląd pokazuje wybrany profil także wtedy, gdy korekta jest w oknie wywołującym odznaczona
+        _opcje.Wlaczona = (_opcje.Profil <> ProfilKorektyRastra.Brak)
         UstawKontrolkiZOpcji()
+        OdswiezPodglad()
+    End Sub
+
+    Private Sub InicjalizujProfile()
+        _wewnetrznaZmiana = True
+        cmbProfil.Items.Clear()
+        For Each p In DirectCast([Enum].GetValues(GetType(ProfilKorektyRastra)), ProfilKorektyRastra())
+            cmbProfil.Items.Add(OpcjeKorekcjiMip.NazwaProfilu(p))
+        Next
+        Dim idx = CInt(_opcje.Profil)
+        If idx >= 0 AndAlso idx < cmbProfil.Items.Count Then
+            cmbProfil.SelectedIndex = idx
+        Else
+            cmbProfil.SelectedIndex = If(_opcje.Wlaczona, CInt(ProfilKorektyRastra.GarminMip), CInt(ProfilKorektyRastra.Brak))
+        End If
+        _wewnetrznaZmiana = False
+    End Sub
+
+    Private Sub cmbProfil_SelectedIndexChanged(sender As Object, e As EventArgs) Handles cmbProfil.SelectedIndexChanged
+        If _wewnetrznaZmiana Then Exit Sub
+        Dim wybrany = CType(cmbProfil.SelectedIndex, ProfilKorektyRastra)
+        _wewnetrznaZmiana = True
+        _opcje.UstawWgProfilu(wybrany)
+        UstawKontrolkiZOpcji()
+        _wewnetrznaZmiana = False
         OdswiezPodglad()
     End Sub
 
@@ -121,7 +171,7 @@ Public Class FormPodgladMip
         _opcje.Kontrast = kVal
         _opcje.Nasycenie = nVal
         _opcje.Wyostrzanie = oVal
-        _opcje.Wlaczona = True
+        'bez włączania korekty - dawniej wybór profilu „Brak” nadal pokazywał w podglądzie poprawiony obraz
     End Sub
 
     Private Sub OdswiezPodglad()
@@ -141,6 +191,13 @@ Public Class FormPodgladMip
 
     Private Sub Suwaki_Scroll(sender As Object, e As EventArgs) Handles tbGamma.Scroll, tbKontrast.Scroll, tbNasycenie.Scroll, tbOstrz.Scroll
         AktualizujEtykiety()
+        If Not _wewnetrznaZmiana Then
+            _opcje.Profil = ProfilKorektyRastra.Wlasny
+            _opcje.Wlaczona = True
+            _wewnetrznaZmiana = True
+            cmbProfil.SelectedIndex = CInt(ProfilKorektyRastra.Wlasny)
+            _wewnetrznaZmiana = False
+        End If
         If rbPodgladMip.Checked Then OdswiezPodglad()
     End Sub
 
@@ -149,14 +206,17 @@ Public Class FormPodgladMip
     End Sub
 
     Private Sub btnDomyslne_Click(sender As Object, e As EventArgs) Handles btnDomyslne.Click
-        _opcje = New OpcjeKorekcjiMip With {.Wlaczona = True}
+        _opcje.UstawWgProfilu(ProfilKorektyRastra.GarminMip)
+        _wewnetrznaZmiana = True
+        cmbProfil.SelectedIndex = CInt(ProfilKorektyRastra.GarminMip)
         UstawKontrolkiZOpcji()
+        _wewnetrznaZmiana = False
         OdswiezPodglad()
     End Sub
 
     Protected Overrides Sub OnFormClosing(e As FormClosingEventArgs)
         If Me.DialogResult = DialogResult.OK Then
-            _opcje.Wlaczona = True
+            _opcje.Wlaczona = (_opcje.Profil <> ProfilKorektyRastra.Brak)
         End If
         MyBase.OnFormClosing(e)
     End Sub

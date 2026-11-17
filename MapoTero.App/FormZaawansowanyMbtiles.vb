@@ -27,6 +27,7 @@ Public Class FormZaawansowanyMbtiles
     Private _ctsPodglad As CancellationTokenSource
     Private _srodekGeo As New PunktGeo(52.0, 19.0) ' Domyślnie środek Polski
     Private _wTrakcieLadowania As Boolean = True
+    Private _opcjeKorekty As New OpcjeKorekcjiMip()
 
     Private Sub FormZaawansowanyMbtiles_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         _wTrakcieLadowania = True
@@ -34,6 +35,10 @@ Public Class FormZaawansowanyMbtiles
         dgvWarstwy.AllowDrop = True
         grpWarstwy.AllowDrop = True
         cmbFormat.SelectedIndex = 0 ' SmartHybrid
+
+        _opcjeKorekty = Ustawienia.OpcjeKorekty(ProfilKorektyRastra.GarminMip)
+        chkKorekta.Checked = _opcjeKorekty.Wlaczona
+        AktualizujPrzyciskKorekty()
 
         ' Domyślna lokalizacja środka mapy
         InicjalizujSrodekZMapyGlownej()
@@ -401,7 +406,8 @@ Public Class FormZaawansowanyMbtiles
             .SzybkaPiramidaWPasmach = chkPiramida.Checked,
             .WypelnijLukiWarstwaNizsza = chkWypelnijLuki.Checked,
             .PoziomMin = tbZoom.Minimum,
-            .PoziomMax = tbZoom.Maximum
+            .PoziomMax = tbZoom.Maximum,
+            .Korekta = If(chkKorekta.Checked, _opcjeKorekty.Kopia(), New OpcjeKorekcjiMip With {.Wlaczona = False})
         }
 
         Select Case cmbFormat.SelectedIndex
@@ -412,6 +418,55 @@ Public Class FormZaawansowanyMbtiles
 
         Return opcje
     End Function
+
+    Private Sub chkKorekta_CheckedChanged(sender As Object, e As EventArgs) Handles chkKorekta.CheckedChanged
+        _opcjeKorekty.Wlaczona = chkKorekta.Checked
+        'po wyborze „Brak” w podglądzie zaznaczenie pola stosowało ukryte wartości suwaków poprzedniego profilu
+        If chkKorekta.Checked AndAlso _opcjeKorekty.Profil = ProfilKorektyRastra.Brak Then
+            _opcjeKorekty.UstawWgProfilu(ProfilKorektyRastra.GarminMip)
+        End If
+        AktualizujPrzyciskKorekty()
+        If Not _wTrakcieLadowania Then OdswiezPodgladAsync()
+    End Sub
+
+    Private Async Sub btnKorekta_Click(sender As Object, e As EventArgs) Handles btnKorekta.Click
+        'próbka - kafel podglądu wyrenderowany BEZ korekty: obraz z picPodglad jest już poprawiony, więc podgląd MIP
+        'pokazywał jako „oryginał” obraz po korekcie, a jako wynik - korektę nałożoną dwukrotnie
+        Dim opcje = PobierzOpcjeZFormularza()
+        opcje.Korekta = New OpcjeKorekcjiMip With {.Wlaczona = False}
+        Dim warstwy = KopiaWarstw()
+        Dim srodek = _srodekGeo
+        Dim z = tbZoom.Value
+        Dim probka As Bitmap = Nothing
+        btnKorekta.Enabled = False
+        UseWaitCursor = True
+        Try
+            probka = Await Task.Run(Function() KompilatorMbtiles.RenderujPodgladKafla(warstwy, srodek.Szerokosc, srodek.Dlugosc, z, opcje))
+        Catch ex As Exception
+            probka = Nothing 'bez kafla podgląd użyje próbki syntetycznej
+        Finally
+            btnKorekta.Enabled = True
+            UseWaitCursor = False
+        End Try
+        If Zamkniete Then
+            probka?.Dispose()
+            Exit Sub
+        End If
+        Using dlg As New FormPodgladMip(_opcjeKorekty, probka)
+            If dlg.ShowDialog(Me) = DialogResult.OK Then
+                _opcjeKorekty = dlg.Opcje.Kopia()
+                chkKorekta.Checked = _opcjeKorekty.Wlaczona
+                AktualizujPrzyciskKorekty()
+                OdswiezPodgladAsync()
+            End If
+        End Using
+        probka?.Dispose()
+    End Sub
+
+    Private Sub AktualizujPrzyciskKorekty()
+        Dim nazwa = OpcjeKorekcjiMip.KrotkaNazwaProfilu(_opcjeKorekty.Profil)
+        btnKorekta.Text = "Dostosuj (" & nazwa & ")..."
+    End Sub
 
     Private Sub btnWybierzPlik_Click(sender As Object, e As EventArgs) Handles btnWybierzPlik.Click
         dlgSave.Filter = "Pliki MBTiles (*.mbtiles)|*.mbtiles|Wszystkie pliki (*.*)|*.*"
