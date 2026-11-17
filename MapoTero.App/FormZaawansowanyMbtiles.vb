@@ -463,6 +463,12 @@ Public Class FormZaawansowanyMbtiles
         probka?.Dispose()
     End Sub
 
+    'format mm:ss pokazywał czas powyżej godziny bez godzin (1 h 05 min jako 05:00)
+    Friend Shared Function CzasTrwania(t As TimeSpan) As String
+        Dim ci = Globalization.CultureInfo.InvariantCulture
+        Return If(t.TotalHours >= 1, CInt(Math.Floor(t.TotalHours)).ToString(ci) & ":" & t.ToString("mm\:ss", ci), t.ToString("mm\:ss", ci))
+    End Function
+
     Private Sub AktualizujPrzyciskKorekty()
         Dim nazwa = OpcjeKorekcjiMip.KrotkaNazwaProfilu(_opcjeKorekty.Profil)
         btnKorekta.Text = "Dostosuj (" & nazwa & ")..."
@@ -583,7 +589,7 @@ Public Class FormZaawansowanyMbtiles
             Dim plik As String = Await KompilatorMbtiles.KompilujAsync(KopiaWarstw(), opcje, postep, token)
             st.Stop()
             If Zamkniete Then Exit Sub
-            Loguj("SUKCES: Utworzono plik MBTiles w czasie: " & st.Elapsed.ToString("mm\:ss"), Color.DarkGreen)
+            Loguj("SUKCES: Utworzono plik MBTiles w czasie: " & CzasTrwania(st.Elapsed), Color.DarkGreen)
             'plik docelowy otwarty w innym programie - wynik zapisany pod inną nazwą
             Dim innaNazwa As Boolean = Not String.Equals(plik, opcje.PlikDocelowy, StringComparison.OrdinalIgnoreCase)
             If innaNazwa Then txtPlikWynikowy.Text = plik
@@ -594,7 +600,7 @@ Public Class FormZaawansowanyMbtiles
                                       If(innaNazwa, "Plik " & opcje.PlikDocelowy & " jest otwarty w innym programie, dlatego mapę zapisano pod inną nazwą." & vbCrLf, "") &
                                       "Plik: " & plik & vbCrLf &
                                       "Rozmiar: " & rozmiarMb.ToString("0.0") & " MB" & vbCrLf &
-                                      "Czas: " & st.Elapsed.ToString("mm\:ss") & vbCrLf & vbCrLf &
+                                      "Czas: " & CzasTrwania(st.Elapsed) & vbCrLf & vbCrLf &
                                       "Czy chcesz otworzyć folder i zaznaczyć gotowy plik w Eksploratorze Windows?",
                                       "Kompilacja zakończona sukcesem", MessageBoxButtons.YesNo, MessageBoxIcon.Information)
             If odp = DialogResult.Yes Then

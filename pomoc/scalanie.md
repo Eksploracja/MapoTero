@@ -43,7 +43,7 @@ najnowszą sesję z `download\` i pisze o tym w polu komunikatów. Tak samo dzia
 * **zmień folder**: pozwala wskazać dowolny inny katalog z wcześniej pobraną mapą.
 * **error.txt blokuje scalanie**: dopóki w folderze istnieje plik `error.txt` (oznaczający niekompletne pobranie), scalanie nie zostanie uruchomione. Należy dopobrać brakujące segmenty albo, jeśli brak jest zamierzony, usunąć plik `error.txt` ręcznie.
 * **ręczne wprowadzanie parametrów w razie braku conf.txt**: opcja aktywna tylko wtedy, gdy w folderze brakuje pliku `conf.txt`. Pozwala ręcznie podać zasięg XY, liczbę kolumn i wierszy, bok segmentu, piksel, przedrostek, format i styl numeracji.
-* **Pomoc**: przycisk w prawym dolnym rogu okna (lub klawisz <kbd>F1</kbd>) otwiera podręczne okno pomocy ze skrótowym opisem opcji scalania i odnośnikiem do tego rozdziału.
+* **Pomoc**: przycisk w dolnej części okna (lub klawisz <kbd>F1</kbd>) otwiera podręczne okno pomocy ze skrótowym opisem opcji scalania i odnośnikiem do tego rozdziału.
 
 {: .informacja }
 Jeśli sesja była pobierana wzdłuż trasy (korytarz GPX/KML), brak segmentów poza wyznaczonym pasem jest zamierzony. Scalony arkusz powstanie bez przeszkód, a teren poza korytarzem zostanie wypełniony kolorem białym (lub przezroczystością w formatach PNG i GeoTIFF).

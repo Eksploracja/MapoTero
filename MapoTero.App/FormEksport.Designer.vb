@@ -269,7 +269,7 @@ Partial Class FormEksport
         Me.rbGeoTiff.Size = New System.Drawing.Size(325, 17)
         Me.rbGeoTiff.TabIndex = 10
         Me.rbGeoTiff.Text = "GeoTIFF - plik z georeferencją (QGIS, CAD, Avenza Maps)"
-        Me.ToolTip1.SetToolTip(Me.rbGeoTiff, "Bezpośredni eksport do formatu GeoTIFF z kompresją bezstratną LZW lub JPEG.")
+        Me.ToolTip1.SetToolTip(Me.rbGeoTiff, "Bezpośredni eksport do formatu GeoTIFF z kompresją bezstratną Deflate lub JPEG.")
         Me.rbGeoTiff.UseVisualStyleBackColor = True
         '
         'chkGeoTiffJpeg

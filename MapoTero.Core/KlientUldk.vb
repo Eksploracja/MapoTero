@@ -90,8 +90,10 @@ Public NotInheritable Class KlientUldk
                     End If
                 Next
             End Using
-        Catch ex As Exception When Not (TypeOf ex Is OperationCanceledException)
-            ' Błąd sieciowy lub timeout
+        Catch ex As TaskCanceledException When Not token.IsCancellationRequested
+            'błąd sieci i odpowiedź HTTP z błędem trafiają do wywołującego (okno wyszukiwarki pokazuje komunikat) - dawniej
+            'były ignorowane, więc brak internetu wyglądał jak „nie znaleziono działek” (tak samo jak w KlientGeokodowania)
+            Throw New TimeoutException("przekroczono czas oczekiwania na odpowiedź usługi ULDK", ex)
         End Try
 
         Return wynik

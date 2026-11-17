@@ -133,7 +133,7 @@ Public Class FormPomocMbtiles
                     "Wszelkie parametry zasięgu i siatki są wczytywane automatycznie z pliku konfiguracyjnego conf.txt znajdującego się w folderze segmentów.")
 
         DodajNaglowek1("1. Formaty wynikowe arkusza")
-        DodajPunktor("GeoTIFF / BigTIFF (bezstratny LZW/Deflate): branżowy standard GIS (QGIS, ArcGIS, CAD). Posiada bezpośrednio zaszytą georeferencję w nagłówkach pliku.")
+        DodajPunktor("GeoTIFF / BigTIFF (bezstratny Deflate): branżowy standard GIS (QGIS, ArcGIS, CAD). Posiada bezpośrednio zaszytą georeferencję w nagłówkach pliku.")
         DodajPunktor("GeoTIFF (kompresja JPEG): wysoka jakość wizualna przy wielokrotnie mniejszym rozmiarze pliku na dysku (zalecane dla dużych arkuszy ortofotomapy).")
         DodajPunktor("JPEG: uniwersalny obraz z osobnymi plikami kalibracji (World File .jgw, KML, MAP, TAB). Maksymalny wymiar boku to 65 500 pikseli.")
         DodajPunktor("PNG: format z obsługą pełnej przezroczystości (kanał alfa). Idealny, gdy pobrano warstwy nakładkowe (np. same granice, rzeki lub cieniowanie rzeźby).")
@@ -531,6 +531,14 @@ Public Module PomocProgramu
         End If
         btn.Location = New Point(x, y)
         AddHandler btn.Click, Sub() FormPomocMbtiles.Pokaz(form, temat)
+        'klawisz F1 - pomoc online opisywała go w oknach narzędzi, a działał tylko w wielowarstwowym MBTiles
+        form.KeyPreview = True
+        AddHandler form.KeyDown, Sub(s As Object, e As KeyEventArgs)
+                                     If e.KeyCode = Keys.F1 AndAlso e.Modifiers = Keys.None AndAlso Not e.Handled Then
+                                         e.Handled = True
+                                         FormPomocMbtiles.Pokaz(form, temat)
+                                     End If
+                                 End Sub
         form.Controls.Add(btn)
         btn.BringToFront()
         Return btn

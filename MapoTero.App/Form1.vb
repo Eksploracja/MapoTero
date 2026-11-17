@@ -3204,7 +3204,8 @@ Public Class Form1
         'parametry sesji z lastsettings.txt (jak przy starcie bez sesji) - przedrostek, format, przezroczystość, numeracja
         If File.Exists(PlikLastsettings) Then
             Try
-                Ustawienia.Wczytaj(PlikLastsettings, parametryNowejSesji:=True)
+                'tylko parametry sesji - pełny odczyt cofał ustawienia programu zmienione od uruchomienia
+                Ustawienia.WczytajParametryNowejSesji(PlikLastsettings)
             Catch
             End Try
         End If

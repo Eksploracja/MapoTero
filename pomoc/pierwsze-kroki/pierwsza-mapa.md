@@ -88,7 +88,7 @@ Gdy komunikat wyświetli się na czerwono (*Nie udało się ściągnąć wszystk
 Pobrane segmenty możesz od razu przygotować do użycia w wybranej aplikacji:
 
 ### Wariant A: Mapa do telefonu lub nawigacji GPS (MBTiles)
-1. Wybierz menu *Narzędzia > Eksport do KMZ, MBTiles, SQLiteDB, OruxMaps* (<kbd>Ctrl</kbd>+<kbd>E</kbd>).
+1. Wybierz menu *Narzędzia > Eksport mapy (KMZ, JNX, MBTiles, SQLiteDB, OruxMaps, GeoTIFF)* (<kbd>Ctrl</kbd>+<kbd>E</kbd>).
 2. Program otworzy okno z automatycznie wczytaną sesją.
 3. W sekcji formatów zaznacz **MBTiles** (dla Locus Map, OsmAnd lub OruxMaps).
 4. Kliknij **Eksportuj**. W folderze sesji powstanie gotowy plik `_eksport_2x2.mbtiles`.

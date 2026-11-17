@@ -18,6 +18,7 @@ Imports System.Globalization
 Imports System.IO
 Imports System.IO.Compression
 Imports System.Text
+Imports System.Linq
 Imports System.Xml.Linq
 
 ''' <summary>
@@ -57,6 +58,12 @@ Public Class Korytarz
 
     ''' <summary>Nazwa trasy (z pliku lub nazwa pliku).</summary>
     Public Property Nazwa As String = ""
+
+    ''' <summary>
+    ''' Dokument GPX, z którego wczytano trasę (Nothing - trasa z KML, KMZ albo z korytarz.txt). Służy do zapisu
+    ''' wzbogaconego śladu z zachowaniem czasów punktów, punktów wpt i rozszerzeń pliku (WzbogacGpx).
+    ''' </summary>
+    Public Property DokumentGpx As XDocument
 
     ''' <summary>Czy trasa zawiera co najmniej jeden punkt.</summary>
     Public ReadOnly Property Poprawny As Boolean
@@ -154,18 +161,83 @@ Public Class Korytarz
             End Select
         Next
         If Not k.Poprawny Then k.DodajLinie(PunktyGpx(doc.Root, "wpt"))
+        k.DokumentGpx = doc
         Return k
     End Function
 
     Private Shared Function PunktyGpx(rodzic As XElement, nazwa As String) As List(Of PunktGeo)
         Dim lista As New List(Of PunktGeo)
-        For Each p In rodzic.Elements()
-            If p.Name.LocalName <> nazwa Then Continue For
+        For Each p In ElementyPunktowGpx(rodzic, nazwa)
             Dim sz As Double, dl As Double
-            If LiczbaAtrybutu(p, "lat", sz) AndAlso LiczbaAtrybutu(p, "lon", dl) Then lista.Add(New PunktGeo(sz, dl))
+            LiczbaAtrybutu(p, "lat", sz)
+            LiczbaAtrybutu(p, "lon", dl)
+            lista.Add(New PunktGeo(sz, dl))
         Next
         Return lista
     End Function
+
+    ''' <summary>Elementy punktów GPX przyjmowane do trasy: poprawne lat i lon w zakresie współrzędnych geograficznych.</summary>
+    Private Shared Function ElementyPunktowGpx(rodzic As XElement, nazwa As String) As List(Of XElement)
+        Dim lista As New List(Of XElement)
+        For Each p In rodzic.Elements()
+            If p.Name.LocalName <> nazwa Then Continue For
+            Dim sz As Double, dl As Double
+            If LiczbaAtrybutu(p, "lat", sz) AndAlso LiczbaAtrybutu(p, "lon", dl) AndAlso Math.Abs(sz) <= 90 AndAlso Math.Abs(dl) <= 180 Then lista.Add(p)
+        Next
+        Return lista
+    End Function
+
+    ''' <summary>
+    ''' Elementy punktów GPX w kolejności punktów linii trasy (ta sama kolejność i te same warunki co przy odczycie w ZGpx).
+    ''' </summary>
+    Private Shared Function ElementyTrasyGpx(doc As XDocument) As List(Of XElement)
+        Dim lista As New List(Of XElement)
+        For Each el In doc.Root.Elements()
+            Select Case el.Name.LocalName
+                Case "trk"
+                    For Each seg In el.Elements()
+                        If seg.Name.LocalName = "trkseg" Then lista.AddRange(ElementyPunktowGpx(seg, "trkpt"))
+                    Next
+                Case "rte"
+                    lista.AddRange(ElementyPunktowGpx(el, "rtept"))
+            End Select
+        Next
+        If lista.Count = 0 Then lista.AddRange(ElementyPunktowGpx(doc.Root, "wpt"))
+        Return lista
+    End Function
+
+    ''' <summary>
+    ''' Kopia dokumentu GPX z wysokościami NMT w elementach ele punktów trasy (wysokosci - kolejno dla wszystkich punktów
+    ''' linii trasy). Czasy punktów, punkty wpt, nazwy i rozszerzenia zostają - dawniej zapis tworzył nowy plik z samymi
+    ''' współrzędnymi, więc ślad z zegarka tracił czasy. Punkt bez danych NMT (NaN) zachowuje dotychczasową wysokość.
+    ''' </summary>
+    Public Shared Function WzbogacGpx(doc As XDocument, wysokosci As IList(Of Double)) As XDocument
+        Dim kopia As New XDocument(doc)
+        Dim punkty = ElementyTrasyGpx(kopia)
+        If punkty.Count <> wysokosci.Count Then Throw New ArgumentException("Liczba wysokości nie odpowiada liczbie punktów trasy", NameOf(wysokosci))
+        Dim ci = CultureInfo.InvariantCulture
+        For i = 0 To punkty.Count - 1
+            Dim h = wysokosci(i)
+            If Double.IsNaN(h) OrElse h = 0.0 Then Continue For
+            Dim p = punkty(i)
+            Dim ele = p.Elements().FirstOrDefault(Function(e) e.Name.LocalName = "ele")
+            If ele IsNot Nothing Then
+                ele.Value = h.ToString("0.0", ci)
+            Else
+                'w schemacie GPX ele jest pierwszym elementem punktu (przed time)
+                p.AddFirst(New XElement(p.Name.Namespace + "ele", h.ToString("0.0", ci)))
+            End If
+        Next
+        Return kopia
+    End Function
+
+    ''' <summary>Zapisuje wzbogacony dokument GPX w UTF-8 bez BOM.</summary>
+    Public Shared Sub ZapiszGpx(doc As XDocument, sciezka As String)
+        Dim ustawienia As New System.Xml.XmlWriterSettings With {.Encoding = New UTF8Encoding(False), .Indent = True}
+        Using w = System.Xml.XmlWriter.Create(sciezka, ustawienia)
+            doc.Save(w)
+        End Using
+    End Sub
 
     ''' <summary>KML: linie (LineString, także w MultiGeometry) i ślady gx:Track; obrys wielokąta traktowany jest jak linia.</summary>
     Private Shared Function ZKml(doc As XDocument) As Korytarz

@@ -34,7 +34,7 @@ Ustawienia i zbiory map z poprzednich wersji (plik `lastsettings.txt`, folder `w
   * Gotowe profile korekty (Garmin MIP, wyostrzenie krawędzi, stare mapy, jasne lasy, podkład CAD, skan CAD) także przy scalaniu segmentów, nakładaniu map i w wielowarstwowym MBTiles.
   * Nowe narzędzie *Narzędzia -> Korekta i optymalizacja obrazów w folderze...*: poprawia naraz wszystkie obrazy PNG, JPEG i TIFF z folderu i zapisuje kopie z plikami georeferencji w osobnym folderze.
 * **Bezpośredni eksport do GeoTIFF (Avenza Maps, QField, GIS, CAD):**
-  * Eksport wielowarstwowej mapy bezpośrednio do formatu GeoTIFF z kompresją LZW lub JPEG, z georeferencją w nagłówkach TIFF oraz opcjonalnymi plikami `.tfw`, `.prj` i `.map`.
+  * Eksport wielowarstwowej mapy bezpośrednio do formatu GeoTIFF z kompresją bezstratną Deflate lub JPEG, z georeferencją w nagłówkach TIFF oraz opcjonalnymi plikami `.tfw`, `.prj` i `.map`.
 * **Bieżący podgląd zestawu warstw z lupą rastrową w oknie głównym:**
   * Podgląd kompozycji warstw w prawym dolnym rogu okna głównego, odświeżany asynchronicznie w tle z buforem próbek i debouncingiem.
   * Skala 1:1 (piksel w piksel), lupa ×2 i widok ×½ z większym obszarem pobranym z serwera; okno *Warstwy - zaawansowane* korzysta z tej samej próbki (lupa do ×4).
@@ -48,7 +48,7 @@ Ustawienia i zbiory map z poprzednich wersji (plik `lastsettings.txt`, folder `w
 * **Odporność klastrów WMTS:**
   * Obsługa aliasów `ISOK_Cien` <-> `Cieniowanie` za load balancerem Geoportalu.
 * **Stabilność i testy regresyjne:**
-  * Kompletny pakiet **812 testów automatycznych** (.NET 10 x64) weryfikujący obliczenia matematyczne, georeferencję i interfejs użytkownika.
+  * Kompletny pakiet **886 testów automatycznych** (.NET 10 x64) weryfikujący obliczenia matematyczne, georeferencję i interfejs użytkownika.
 
 ## Zmiany w wersji 3.17
 

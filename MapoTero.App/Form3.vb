@@ -176,7 +176,7 @@ Public Class Form3
             .Folder = _folderScalania, .Prefiks = If(txtPrefiks.Text = "\", "", txtPrefiks.Text),
             .Numeracja = Siatka.StylZTekstu(cmbNumeracja.Text), .RozszerzenieSegmentow = Wms.RozszerzeniePliku(cmbFormat.Text),
             .Siatka = s, .Uklad = _uklad, .Format = WybranyFormat, .JakoscJpeg = trkJakosc.Value,
-            .NazwaArkusza = "_scalone_segmenty_" & s.LiczbaKolumn & "x" & s.LiczbaWierszy,
+            .NazwaArkusza = FormKorektaFolderu.PrzedrostekArkusza & s.LiczbaKolumn & "x" & s.LiczbaWierszy,
             .Georeferencja = New OpcjeGeoreferencji With {.WorldFile = chkWorldFile.Checked, .Kml = chkKml.Checked, .Map = chkMap.Checked, .Tab = chkTab.Checked},
             .Przezroczystosc = _przezroczystosc,
             .Korekta = If(chkKorekta.Checked, _opcjeKorekty.Kopia(), Nothing)}

@@ -258,6 +258,19 @@ Public Class UstawieniaProgramu
         End If
     End Sub
 
+    ''' <summary>
+    ''' Tylko parametry nowej sesji z lastsettings.txt: przedrostek, format, przezroczystość i numeracja segmentów.
+    ''' Nowa sesja wczytywała cały plik, a program zapisuje go dopiero przy zamknięciu - ustawienia zmienione od
+    ''' uruchomienia (korekta obrazu, opcje scalania i eksportu do CAD, foldery nakładania map) wracały do starych wartości.
+    ''' </summary>
+    Public Sub WczytajParametryNowejSesji(sciezka As String)
+        Dim u = PlikUstawien.Wczytaj(sciezka, KodowanieSystemowe())
+        Numeracja = u.Tekst("numeracja_", u.Tekst("numeracja", Numeracja))
+        If u.Zawiera("przedrostek") Then Prefiks = u.Tekst("przedrostek", "")
+        Format = NormalizujFormat(u.Tekst("format", Format))
+        Przezroczystosc = u.Logiczna("przezroczystosc", Przezroczystosc)
+    End Sub
+
     ''' <summary>Zapis lastsettings.txt - kolejność i nazwy jak w poprzednich wersjach, nowe ustawienia na końcu.</summary>
     Public Sub Zapisz(sciezka As String)
         Dim u As New PlikUstawien()

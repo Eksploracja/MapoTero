@@ -11,7 +11,7 @@ Zapis pobranej mapy w formatach dla odbiorników GPS i aplikacji mobilnych, tak�
 albo z kilkoma mapami nałożonymi na siebie.
 {: .fs-5 .fw-300 }
 
-**Gdzie w programie:** menu *Narzędzia > Eksport do KMZ, MBTiles, SQLiteDB, OruxMaps* (<kbd>Ctrl</kbd>+<kbd>E</kbd>)  
+**Gdzie w programie:** menu *Narzędzia > Eksport mapy (KMZ, JNX, MBTiles, SQLiteDB, OruxMaps, GeoTIFF)* (<kbd>Ctrl</kbd>+<kbd>E</kbd>)  
 **Dotyczy wersji:** {{ site.wersja_programu }}
 
 <details open markdown="block">

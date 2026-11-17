@@ -166,7 +166,13 @@ Public Class FormKorytarz
         dlgZapiszGpx.FileName = nazwaPliku
         If dlgZapiszGpx.ShowDialog(Me) = DialogResult.OK Then
             Try
-                Korytarz.ZapiszGpxZWysokosciami(dlgZapiszGpx.FileName, _korytarz.Nazwa, _korytarz.Linie, _linieWysokosci)
+                If _korytarz.DokumentGpx IsNot Nothing Then
+                    'trasa z pliku GPX - wysokości dopisane do oryginału (zostają czasy punktów, punkty wpt i nazwy)
+                    Dim wysokosci = _linieWysokosci.SelectMany(Function(l) l).ToList()
+                    Korytarz.ZapiszGpx(Korytarz.WzbogacGpx(_korytarz.DokumentGpx, wysokosci), dlgZapiszGpx.FileName)
+                Else
+                    Korytarz.ZapiszGpxZWysokosciami(dlgZapiszGpx.FileName, _korytarz.Nazwa, _korytarz.Linie, _linieWysokosci)
+                End If
                 MsgBox("Zapisano ślad GPX z wysokościami NMT do:" & vbCrLf & dlgZapiszGpx.FileName, MsgBoxStyle.Information)
             Catch ex As Exception
                 MsgBox("Błąd zapisu pliku GPX: " & ex.Message, MsgBoxStyle.Critical)

@@ -134,13 +134,8 @@ Public Class FormKorektaFolderu
             Return
         End If
 
-        Dim plikiObrazow As New List(Of String)()
-        For Each plik In Directory.GetFiles(zrodlo)
-            Dim ext = Path.GetExtension(plik).ToLowerInvariant()
-            If {".png", ".jpg", ".jpeg", ".tif", ".tiff"}.Contains(ext) Then
-                plikiObrazow.Add(plik)
-            End If
-        Next
+        Dim pominieteArkusze As Integer = 0
+        Dim plikiObrazow = PlikiDoKorekty(zrodlo, pominieteArkusze)
 
         If Not _opcjeKorekty.Wlaczona OrElse _opcjeKorekty.Profil = ProfilKorektyRastra.Brak Then
             MessageBox.Show("Wybierz profil korekty przyciskiem ""Dostosuj"".", "Korekta obrazów", MessageBoxButtons.OK, MessageBoxIcon.Information)
@@ -148,7 +143,8 @@ Public Class FormKorektaFolderu
         End If
 
         If plikiObrazow.Count = 0 Then
-            MessageBox.Show("W folderze źródłowym nie znaleziono obsługiwanych plików graficznych (.png, .jpg, .tif).", "Brak plików", MessageBoxButtons.OK, MessageBoxIcon.Information)
+            MessageBox.Show("W folderze źródłowym nie znaleziono obsługiwanych plików graficznych (.png, .jpg, .tif)" &
+                            If(pominieteArkusze > 0, " poza scalonymi arkuszami", "") & ".", "Brak plików", MessageBoxButtons.OK, MessageBoxIcon.Information)
             Return
         End If
 
@@ -234,7 +230,7 @@ Public Class FormKorektaFolderu
     ''' (Georeferencja.RozszerzenieWorldFile) - dawniej brakowało .jpgw i .tifw, więc segmenty JPEG i TIFF traciły położenie.
     ''' </summary>
     Friend Shared ReadOnly RozszerzeniaGeoreferencji As String() =
-        {".jpgw", ".pngw", ".tifw", ".gifw", ".jgw", ".pgw", ".tfw", ".wld", ".prj", ".map", ".gmi", ".tab", ".kml", ".points", ".set"}
+        {".jpgw", ".pngw", ".tifw", ".gifw", ".jgw", ".pgw", ".tfw", ".wld", ".prj", ".map", ".gmi", ".tab", ".kml"}
 
     Private Shared Function WykonajKorekteFolderu(pliki As List(Of String), folderCel As String,
                                                   opcje As OpcjeKorekcjiMip, kopiujGeo As Boolean,
@@ -256,7 +252,7 @@ Public Class FormKorektaFolderu
 
         Dim po As New ParallelOptions With {
             .CancellationToken = token,
-            .MaxDegreeOfParallelism = LiczbaWatkow(pliki(0))
+            .MaxDegreeOfParallelism = LiczbaWatkow(pliki)
         }
 
         Parallel.ForEach(pliki, po,
@@ -276,8 +272,9 @@ Public Class FormKorektaFolderu
 
                 If kopiujGeo Then
                     Dim rdzen = Path.ChangeExtension(plik, Nothing)
-                    For Each geoExt In rozszerzeniaGeo
-                        Dim plikGeo = rdzen & geoExt
+                    'plik .points georeferencera QGIS ma w nazwie rozszerzenie obrazu (segment.jpg.points) - dawniej
+                    'szukany jako segment.points, więc nie był kopiowany
+                    For Each plikGeo In rozszerzeniaGeo.Select(Function(r) rdzen & r).Append(plik & ".points")
                         If File.Exists(plikGeo) Then
                             Try
                                 File.Copy(plikGeo, Path.Combine(folderCel, Path.GetFileName(plikGeo)), True)
@@ -327,15 +324,42 @@ Public Class FormKorektaFolderu
     ''' <summary>
     ''' Liczba obrazów przetwarzanych równocześnie: każdy zajmuje ok. 20 bajtów na piksel (obraz źródłowy, kopia 32-bitowa,
     ''' tablice pikseli korekty) - dawniej tyle obrazów, ile rdzeni, więc duże segmenty wyczerpywały pamięć.
+    ''' Liczona dla największego obrazu partii (dawniej dla pierwszego pliku - duży obraz wśród małych segmentów
+    ''' przetwarzany był równolegle z innymi ponad budżet pamięci).
     ''' </summary>
-    Private Shared Function LiczbaWatkow(przykladowyPlik As String) As Integer
-        Dim piksele As Long = 4000L * 4000
-        Try
-            Dim n = NaglowekObrazu.Odczytaj(przykladowyPlik)
-            piksele = Math.Max(1L, n.SzerokoscPx * n.WysokoscPx)
-        Catch ex As Exception When TypeOf ex Is IOException OrElse TypeOf ex Is InvalidDataException OrElse TypeOf ex Is UnauthorizedAccessException
-        End Try
+    Friend Shared Function LiczbaWatkow(pliki As IList(Of String)) As Integer
+        Dim piksele As Long = 1
+        For Each plik In pliki
+            Try
+                Dim n = NaglowekObrazu.Odczytaj(plik)
+                piksele = Math.Max(piksele, n.SzerokoscPx * n.WysokoscPx)
+            Catch ex As Exception When TypeOf ex Is IOException OrElse TypeOf ex Is InvalidDataException OrElse TypeOf ex Is UnauthorizedAccessException
+                piksele = Math.Max(piksele, 4000L * 4000)
+            End Try
+        Next
         Return CInt(Math.Max(1L, Math.Min(Environment.ProcessorCount, BudzetPamieci \ (piksele * 20))))
+    End Function
+
+    ''' <summary>Przedrostek scalonego arkusza zapisywanego przez okno złączania segmentów (Form3).</summary>
+    Friend Const PrzedrostekArkusza As String = "_scalone_segmenty_"
+
+    ''' <summary>
+    ''' Obrazy folderu do korekty: PNG, JPEG i TIFF bez scalonych arkuszy. Arkusz z okna złączania leży w folderze sesji
+    ''' obok segmentów, jest wielokrotnie większy od segmentu i był poprawiany razem z nimi (groźba braku pamięci).
+    ''' </summary>
+    Friend Shared Function PlikiDoKorekty(folder As String, ByRef pominieteArkusze As Integer) As List(Of String)
+        pominieteArkusze = 0
+        Dim wynik As New List(Of String)()
+        For Each plik In Directory.GetFiles(folder)
+            Dim ext = Path.GetExtension(plik).ToLowerInvariant()
+            If Not {".png", ".jpg", ".jpeg", ".tif", ".tiff"}.Contains(ext) Then Continue For
+            If Path.GetFileName(plik).StartsWith(PrzedrostekArkusza, StringComparison.OrdinalIgnoreCase) Then
+                pominieteArkusze += 1
+                Continue For
+            End If
+            wynik.Add(plik)
+        Next
+        Return wynik
     End Function
 
     ''' <summary>

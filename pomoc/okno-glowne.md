@@ -63,17 +63,19 @@ Tytuł okna podaje nazwę i numer wersji programu (np. `MapoTero {{ site.wersja_
 | | Wyszukaj miejscowość lub działkę... | <kbd>Ctrl</kbd>+<kbd>F</kbd> | [Wyszukiwarka miejscowości i działek](../obszar/zaznaczanie/#wyszukiwarka-miejscowości-adresów-i-działek-katastralnych) (<kbd>Ctrl</kbd>+<kbd>D</kbd> dla działek) |
 | | Konwertuj mapę OziExplorer (.map)... | | [Konwerter map OziExplorer](../narzedzia/#konwerter-map-oziexplorer-map) |
 | | Łączenie segmentów | <kbd>Ctrl</kbd>+<kbd>L</kbd> | [Scalanie segmentów](../scalanie/) |
-| | Eksport do KMZ, MBTiles, SQLiteDB, OruxMaps | <kbd>Ctrl</kbd>+<kbd>E</kbd> | [Eksport mapy](../eksport/) |
+| | Eksport mapy (KMZ, JNX, MBTiles, SQLiteDB, OruxMaps, GeoTIFF) | <kbd>Ctrl</kbd>+<kbd>E</kbd> | [Eksport mapy](../eksport/) |
 | | Eksport do CAD (DXF, skrypt SCR, LISP)... | | [Eksport do CAD](../cad/) |
 | | Zaawansowany wielowarstwowy MBTiles... | | [Wielowarstwowy MBTiles](../mbtiles-wielowarstwowy/) |
 | | Nakładanie dwóch map png na siebie | <kbd>Ctrl</kbd>+<kbd>N</kbd> | [Narzędzia dodatkowe](../narzedzia/#nakładanie-dwóch-map-png) |
 | | Usuwanie pustych segmentów | <kbd>Ctrl</kbd>+<kbd>U</kbd> | [Narzędzia dodatkowe](../narzedzia/#usuwanie-pustych-segmentów) |
+| | Korekta i optymalizacja obrazów w folderze... | | [Narzędzia dodatkowe](../narzedzia/#korekta-i-optymalizacja-obrazów-w-folderze) |
 | **Ustawienia** | | | okno [Ustawienia](../ustawienia/) |
-| **Pomoc** | O programie | <kbd>F1</kbd> | wersja i autorzy |
+| **Pomoc** | Podręcznik użytkownika (pomoc online) | <kbd>F1</kbd> | otwiera ten podręcznik w przeglądarce |
 | | Podstawowa instrukcja obsługi | <kbd>F2</kbd> | skrócona instrukcja wbudowana w program |
 | | Pomoc na Pomorskim Forum Eksploracyjnym | <kbd>F3</kbd> | otwiera forum w przeglądarce |
+| | O programie | | wersja i autorzy |
 
-Menu *Sesja pobierania* otwiera też <kbd>Alt</kbd>+<kbd>S</kbd>. Każde samodzielne okno narzędziowe posiada ponadto w lewym dolnym rogu przycisk **Pomoc**, otwierający dedykowane okno instrukcji z bezpośrednim odnośnikiem do odpowiedniego rozdziału podręcznika online.
+Menu *Sesja pobierania* otwiera też <kbd>Alt</kbd>+<kbd>S</kbd>. Każde samodzielne okno narzędziowe ma ponadto w dolnej części przycisk **Pomoc** (oraz klawisz <kbd>F1</kbd>), otwierający dedykowane okno instrukcji z bezpośrednim odnośnikiem do odpowiedniego rozdziału podręcznika online.
 
 ---
 

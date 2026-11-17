@@ -25,7 +25,7 @@ Który format wybrać dla której aplikacji lub urządzenia.
 |---|---|---|---|
 | **KMZ: Garmin Custom Maps** | odbiorniki Garmin | kafle JPEG do 1024 × 1024 px w WGS84 | opcjonalny automatyczny podział na tomy przy ponad 100 kaflach |
 | **Garmin BirdsEye (JNX)** | odbiorniki Garmin (firmware z obsługą JNX) | wielopoziomowy raster z piramidą powiększeń | brak limitu 100 kafli, kopiowany do folderu `Garmin/BirdsEye` |
-| **GeoTIFF bezpośredni** | Avenza Maps, QField, ArcGIS, CAD, QGIS | pojedynczy georeferencjonowany plik TIF | kompresja LZW lub JPEG, z plikami `.tfw`, `.prj`, `.map` |
+| **GeoTIFF bezpośredni** | Avenza Maps, QField, ArcGIS, CAD, QGIS | pojedynczy georeferencjonowany plik TIF | kompresja bezstratna Deflate lub JPEG, z plikami `.tfw`, `.prj`, `.map` |
 | **KMZ** | Locus Map, OruxMaps, Google Earth | kafle do 1024 × 1024 px w WGS84 | brak limitu kafli, może być nakładką (PNG) |
 | **MBTiles** | Locus Map, OsmAnd, OruxMaps i wiele innych | baza SQLite z piramidą kafli Web Mercator 256 px | najbardziej uniwersalny, z poziomami powiększenia |
 | **SQLiteDB** | OsmAnd, Locus Map | baza w formacie RMaps, kafle Web Mercator | natywny format map rastrowych OsmAnd |
@@ -63,7 +63,7 @@ Format dedykowany dla odbiorników turystycznych Garmin (np. GPSMAP, eTrex, Mont
 Pojedynczy plik TIF z georeferencją zaszytą bezpośrednio w nagłówkach:
 
 * **Zastosowanie:** idealny do aplikacji mobilnych Avenza Maps i QField oraz oprogramowania GIS (QGIS, ArcGIS) i CAD bez konieczności uprzedniego scalania segmentów.
-* **Kompresja:** bezstratna LZW/Deflate lub kompresja JPEG z regulacją jakości.
+* **Kompresja:** bezstratna Deflate lub kompresja JPEG z regulacją jakości.
 * **Pliki towarzyszące:** program może utworzyć plik kalibracji World File (`.tfw`), rzut w formacie ESRI WKT (`.prj`) oraz kalibrację punktową OziExplorer (`.map`).
 
 ---
