@@ -246,7 +246,14 @@ Public Class Nakladanie_Map
                         End If
 
                         Dim plikDocelowy As String = Path.Combine(wynik, nazwaPliku)
-                        warstwa1.Save(plikDocelowy, ImageFormat.Png)
+                        'przez plik tymczasowy - przerwanie (np. zamknięcie programu) nie zostawia uszkodzonego segmentu wynikowego
+                        Dim tymczasowy As String = plikDocelowy & "." & Guid.NewGuid().ToString("N") & ".tmp"
+                        Try
+                            warstwa1.Save(tymczasowy, ImageFormat.Png)
+                            File.Move(tymczasowy, plikDocelowy, overwrite:=True)
+                        Finally
+                            If File.Exists(tymczasowy) Then File.Delete(tymczasowy)
+                        End Try
                         liczba += 1
 
                         ' Kopiowanie georeferencji z warstwy dolnej
