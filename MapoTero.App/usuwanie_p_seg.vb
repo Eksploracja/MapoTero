@@ -156,18 +156,16 @@ Public Class Usuwanie_p_seg
             Next
         Next
 
-        'do Kosza - pomyłkę przy wpisywaniu progu można cofnąć
-        Dim usuniete As Integer = 0, usunieteSegmenty As Integer = 0, bledy As Integer = 0
-        Dim zbiorSegmentow As New HashSet(Of String)(segmenty, StringComparer.OrdinalIgnoreCase)
-        For Each plik As String In doUsuniecia
-            Try
-                FileIO.FileSystem.DeleteFile(plik, FileIO.UIOption.OnlyErrorDialogs, FileIO.RecycleOption.SendToRecycleBin)
-                usuniete += 1
-                If zbiorSegmentow.Contains(plik) Then usunieteSegmenty += 1
-            Catch
-                bledy += 1
-            End Try
-        Next
+        'do Kosza - pomyłkę przy wpisywaniu progu można cofnąć; paczkami (pojedynczo ok. 70 ms na plik)
+        Cursor = Cursors.WaitCursor
+        Try
+            PrzeniesDoKosza(doUsuniecia)
+        Finally
+            Cursor = Cursors.Default
+        End Try
+        Dim bledy As Integer = doUsuniecia.Where(Function(p) File.Exists(p)).Count()
+        Dim usunieteSegmenty As Integer = segmenty.Where(Function(p) Not File.Exists(p)).Count()
+        Dim usuniete As Integer = doUsuniecia.Count - bledy
 
         txtProgKB.Text = "0"
         btnUsun.Enabled = True
@@ -176,6 +174,7 @@ Public Class Usuwanie_p_seg
         Dim opis As String = "Przeniesiono do Kosza " & usunieteSegmenty & " " & Odmiana(usunieteSegmenty, "segment", "segmenty", "segmentów")
         If usuniete > usunieteSegmenty Then opis &= " i " & (usuniete - usunieteSegmenty) & " " & Odmiana(usuniete - usunieteSegmenty, "plik", "pliki", "plików") & " georeferencyjnych"
         opis &= "."
+        If doUsuniecia.Count > MaksPlikowPojedynczo Then opis &= " W Koszu są w folderze """ & NazwaFolderuKosza & " (data i godzina)""."
         If bledy > 0 Then opis &= vbCrLf & "Nie udało się usunąć " & bledy & " " & Odmiana(bledy, "pliku", "plików", "plików") & "."
         opis &= vbCrLf & vbCrLf & "Brakujące segmenty uzupełnisz, wznawiając pobieranie przyciskiem Pobierz."
         MsgBox(opis, If(bledy > 0, MsgBoxStyle.Exclamation, MsgBoxStyle.Information), "Usuwanie pustych segmentów")

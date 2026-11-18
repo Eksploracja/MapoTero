@@ -3046,13 +3046,20 @@ Public Class Form1
         If odp = DialogResult.Yes Then
             Try
                 If tylkoPliki Then
-                    Dim usuniete As Integer = 0
-                    For Each plik In Directory.GetFiles(folder)
-                        FileIO.FileSystem.DeleteFile(plik, FileIO.UIOption.OnlyErrorDialogs, FileIO.RecycleOption.SendToRecycleBin)
-                        usuniete += 1
-                    Next
+                    'paczkami jedną operacją Windows - pojedynczo ok. 70 ms na plik (przy tysiącach segmentów okno stało minutami)
+                    Dim pliki = Directory.GetFiles(folder)
+                    Cursor = Cursors.WaitCursor
+                    Dim nieprzeniesione As Integer
+                    Try
+                        nieprzeniesione = PrzeniesDoKosza(pliki)
+                    Finally
+                        Cursor = Cursors.Default
+                    End Try
                     btnScalanie.Enabled = False
-                    Komunikat("Przeniesiono do Kosza pliki bieżącej sesji (" & usuniete & " plików) z folderu " & folder, Color.Green)
+                    Komunikat("Przeniesiono do Kosza pliki bieżącej sesji (" & (pliki.Length - nieprzeniesione) & " plików) z folderu " & folder &
+                              If(pliki.Length > MaksPlikowPojedynczo, " (w Koszu jako folder """ & NazwaFolderuKosza & " (data i godzina)"")", "") &
+                              If(nieprzeniesione > 0, "; nie udało się przenieść " & nieprzeniesione & " plików (np. otwartych w innym programie).", ""),
+                              If(nieprzeniesione > 0, Color.Red, Color.Green))
                 Else
                     FileIO.FileSystem.DeleteDirectory(folder, FileIO.UIOption.OnlyErrorDialogs, FileIO.RecycleOption.SendToRecycleBin)
                     FolderSesji = FolderDownload

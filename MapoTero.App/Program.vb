@@ -237,6 +237,111 @@ Public Module Program
     End Function
 
     ''' <summary>Otwiera folder w Eksploratorze Windows.</summary>
+    <Runtime.InteropServices.StructLayout(Runtime.InteropServices.LayoutKind.Sequential, CharSet:=Runtime.InteropServices.CharSet.Unicode)>
+    Private Structure SHFILEOPSTRUCT
+        Public hwnd As IntPtr
+        Public wFunc As UInteger
+        Public pFrom As String
+        Public pTo As String
+        Public fFlags As UShort
+        Public fAnyOperationsAborted As Integer
+        Public hNameMappings As IntPtr
+        Public lpszProgressTitle As String
+    End Structure
+
+    Private Declare Unicode Function SHFileOperation Lib "shell32.dll" Alias "SHFileOperationW" (ByRef op As SHFILEOPSTRUCT) As Integer
+
+    Private Const FO_DELETE As UInteger = 3
+    Private Const FOF_SILENT As UShort = &H4
+    Private Const FOF_NOCONFIRMATION As UShort = &H10
+    Private Const FOF_ALLOWUNDO As UShort = &H40
+    Private Const FOF_NOERRORUI As UShort = &H400
+    Private Const FOF_WANTNUKEWARNING As UShort = &H4000
+
+    ''' <summary>
+    ''' Przenosi pliki do Kosza paczkami po 500 jedną operacją Windows. Dawniej każdy plik osobno
+    ''' (FileSystem.DeleteFile) - ok. 70 ms na plik, więc usunięcie 30 000 plików sesji blokowało okno na pół godziny.
+    ''' Pliki, których paczka nie dała się przenieść, przenoszone są pojedynczo; zwraca liczbę plików, których nie przeniesiono.
+    ''' Na dysku bez Kosza (np. pendrive) Windows pyta, czy usunąć pliki trwale.
+    ''' </summary>
+    Public Function PrzeniesDoKosza(pliki As IEnumerable(Of String)) As Integer
+        Dim bledy As Integer = 0
+        Dim lista = pliki.Where(Function(p) File.Exists(p)).ToList()
+        'wiele plików: Kosz i tak przenosi każdy plik osobno (ok. 18 ms) - pliki jednego folderu przenoszone są do podfolderu
+        '(zmiana nazwy, ułamek milisekundy) i do Kosza trafia ten jeden folder (30 000 plików: ok. 20 s zamiast 9 minut)
+        If lista.Count > MaksPlikowPojedynczo Then
+            Dim pozostale As New List(Of String)
+            For Each grupa In lista.GroupBy(Function(p) Path.GetDirectoryName(p), StringComparer.OrdinalIgnoreCase)
+                If Not PrzeniesDoKoszaJakoFolder(grupa.Key, grupa.ToList()) Then pozostale.AddRange(grupa)
+            Next
+            lista = pozostale.Where(Function(p) File.Exists(p)).ToList()
+        End If
+        For start = 0 To lista.Count - 1 Step 500
+            Dim paczka = lista.Skip(start).Take(500).ToList()
+            Dim op As New SHFILEOPSTRUCT With {
+                .wFunc = FO_DELETE,
+                .pFrom = String.Join(vbNullChar, paczka) & vbNullChar & vbNullChar,
+                .fFlags = FOF_ALLOWUNDO Or FOF_NOCONFIRMATION Or FOF_SILENT Or FOF_NOERRORUI Or FOF_WANTNUKEWARNING}
+            Dim wynik As Integer = -1
+            Try
+                wynik = SHFileOperation(op)
+            Catch
+            End Try
+            If wynik = 0 AndAlso op.fAnyOperationsAborted = 0 Then Continue For
+            For Each plik In paczka
+                If Not File.Exists(plik) Then Continue For
+                Try
+                    FileIO.FileSystem.DeleteFile(plik, FileIO.UIOption.OnlyErrorDialogs, FileIO.RecycleOption.SendToRecycleBin)
+                Catch
+                    bledy += 1
+                End Try
+            Next
+        Next
+        Return bledy
+    End Function
+
+    ''' <summary>Powyżej tej liczby plików Kosz dostaje jeden folder z plikami zamiast pojedynczych plików.</summary>
+    Public Const MaksPlikowPojedynczo As Integer = 50
+
+    ''' <summary>Początek nazwy folderu, w którym pliki trafiają do Kosza (data i godzina w nazwie).</summary>
+    Public Const NazwaFolderuKosza As String = "MapoTero - usunięte pliki"
+
+    ''' <summary>
+    ''' Przenosi pliki jednego folderu do nowego podfolderu i ten podfolder do Kosza. Gdy coś się nie uda, pliki wracają na
+    ''' swoje miejsce i zwracane jest False (wtedy przenoszone są zwykłym sposobem).
+    ''' </summary>
+    Private Function PrzeniesDoKoszaJakoFolder(folder As String, pliki As List(Of String)) As Boolean
+        Dim cel As String = Path.Combine(folder, NazwaFolderuKosza & " " & DateTime.Now.ToString("yyyy-MM-dd HH-mm-ss", CultureInfo.InvariantCulture))
+        Dim przeniesione As New List(Of (Zrodlowy As String, Docelowy As String))
+        Try
+            If Directory.Exists(cel) Then cel &= " " & Guid.NewGuid().ToString("N").Substring(0, 6)
+            Directory.CreateDirectory(cel)
+            For Each p In pliki
+                Dim docelowy = Path.Combine(cel, Path.GetFileName(p))
+                Try
+                    File.Move(p, docelowy)
+                    przeniesione.Add((p, docelowy))
+                Catch
+                    'plik zajęty - zostaje i zostanie przeniesiony zwykłym sposobem (albo policzony jako błąd)
+                End Try
+            Next
+            FileIO.FileSystem.DeleteDirectory(cel, FileIO.UIOption.OnlyErrorDialogs, FileIO.RecycleOption.SendToRecycleBin)
+            Return True
+        Catch
+            For Each para In przeniesione
+                Try
+                    If File.Exists(para.Docelowy) Then File.Move(para.Docelowy, para.Zrodlowy)
+                Catch
+                End Try
+            Next
+            Try
+                If Directory.Exists(cel) AndAlso Not Directory.EnumerateFileSystemEntries(cel).Any() Then Directory.Delete(cel)
+            Catch
+            End Try
+            Return False
+        End Try
+    End Function
+
     Public Sub OtworzFolder(folder As String)
         Try
             Process.Start(New ProcessStartInfo(folder) With {.UseShellExecute = True})
