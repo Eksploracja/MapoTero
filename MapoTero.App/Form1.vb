@@ -1392,7 +1392,7 @@ Public Class Form1
                                    typZrodla:=typZrodla, nakladka:=jestNakladka, umiescPodNakladkami:=True,
                                    ignorujSsl:=zbior.Plik.IgnorujSsl)
             Case WynikDodania.BrakMiejsca
-                MsgBox("TEJ WARSTWY NIE MOŻNA JUŻ DODAĆ - wybrano już " & ZestawWarstw.MaksLiczba & " warstw.")
+                MsgBox("Nie można dodać warstwy - wybrano już " & ZestawWarstw.MaksLiczba & " warstw (więcej program nie łączy). Usuń którąś z listy wybranych warstw.", MsgBoxStyle.Exclamation, "Wybrane warstwy")
                 Exit Sub
             Case WynikDodania.JuzWybrana
                 Komunikat("Warstwa " & w.Nazwa & " jest już na liście wybranych warstw.", Color.Blue)
@@ -2218,7 +2218,7 @@ Public Class Form1
 
         'zapis parametrów sesji - na wszelki wypadek, żeby nie okazało się, że zapisuje w folderze głównym programu
         If FolderSesji = "" Then
-            MsgBox("folder segmentów jest pusty")
+            MsgBox("Nie ustalono folderu sesji - wybierz folder przyciskiem folderu w oknie głównym.", MsgBoxStyle.Exclamation, "Pobieranie")
             Exit Sub
         End If
         If Not PrzygotujFolderSesji() Then Exit Sub

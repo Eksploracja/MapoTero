@@ -102,7 +102,7 @@ Przed kliknięciem **Kompiluj MBTiles** użyj przycisku **Oszacuj rozmiar i licz
 wagę każdego poziomu zoom oraz sprawdzi zgodność z limitem **4 GB** (maksymalny rozmiar pojedynczego pliku na kartach pamięci
 sformatowanych w systemie plików FAT32 w starszych telefonach i odbiornikach GPS).
 
-W oknie dostępna jest też wbudowana pomoc pod przyciskiem **Pomoc (?)** (klawisz <kbd>F1</kbd>).
+W oknie dostępna jest też wbudowana pomoc pod przyciskiem **Pomoc** (klawisz <kbd>F1</kbd>).
 
 ---
 
