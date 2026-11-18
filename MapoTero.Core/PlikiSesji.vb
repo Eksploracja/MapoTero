@@ -468,6 +468,19 @@ End Class
 ''' </summary>
 Public Class PlikUstawien
 
+    ''' <summary>
+    ''' Plik ustawień z danymi binarnymi albo bez wpisu „folder segmentow” (pierwszego we wszystkich wersjach programu,
+    ''' także sprzed 3.12, które nie zapisywały np. wpisu „format”).
+    ''' </summary>
+    Public Shared Function WygladaNaUszkodzony(tekst As String) As Boolean
+        If String.IsNullOrEmpty(tekst) Then Return True
+        If tekst.IndexOf("folder segmentow", StringComparison.OrdinalIgnoreCase) < 0 Then Return True
+        For Each z As Char In tekst
+            If AscW(z) < 32 AndAlso z <> ChrW(13) AndAlso z <> ChrW(10) AndAlso z <> ChrW(9) Then Return True
+        Next
+        Return False
+    End Function
+
     Private ReadOnly _wartosci As New Dictionary(Of String, String)(StringComparer.OrdinalIgnoreCase)
     Private ReadOnly _kolejnosc As New List(Of String)
 

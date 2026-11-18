@@ -579,11 +579,11 @@ Public Class Form1
         'numeracja segmentów jest parametrem sesji - lastsettings.txt (np. z numeracją innej, ostatnio wczytanej sesji)
         'nie może jej zmienić, bo nazwy segmentów przestałyby pasować do plików w folderze sesji
         Dim numeracjaSesji As String = If(nowaSesja, "", _numeracjaSesji)
-        'plik bez wpisu „format” (zapisywanego zawsze) jest uszkodzony - dawniej program pisał „Wczytano ostatnio zapisane
-        'ustawienia”, choć używał domyślnych
+        'plik z danymi binarnymi albo bez wpisu „folder segmentow” (pierwszego we wszystkich wersjach programu, także sprzed
+        '3.12) jest uszkodzony - dawniej program pisał „Wczytano ostatnio zapisane ustawienia”, choć używał domyślnych
         Dim poprawny As Boolean = False
         Try
-            poprawny = File.ReadLines(PlikLastsettings, KodowanieSystemowe()).Any(Function(l) l.Trim() = "format")
+            poprawny = Not PlikUstawien.WygladaNaUszkodzony(File.ReadAllText(PlikLastsettings, KodowanieSystemowe()))
         Catch
         End Try
         If Not poprawny Then
@@ -2113,7 +2113,7 @@ Public Class Form1
         End If
         Dim siatka = BiezacaSiatka()
         If Not siatka.Poprawna Then
-            Komunikat("Niepoprawne współrzędne X, Y.", Color.Red) : Exit Sub
+            Komunikat("Niepoprawny zasięg pobierania: " & siatka.PowodNiepoprawnosci & ".", Color.Red) : Exit Sub
         End If
         If _zestaw.Liczba = 0 Then
             Komunikat("Nie wybrano żadnej warstwy. Aby wybrać warstwę kliknij w jej nazwę.", Color.Red) : Exit Sub

@@ -124,6 +124,22 @@ Public Class Siatka
     End Property
 
     ''' <summary>Najwięcej kolumn (wierszy) siatki - liczba musi się mieścić w typie Integer.</summary>
+    ''' <summary>
+    ''' Przyczyna niepoprawnej siatki dla użytkownika (pusty tekst, gdy siatka jest poprawna) - dawniej okno główne pisało
+    ''' tylko „Niepoprawne współrzędne X, Y.” bez wskazania, co poprawić.
+    ''' </summary>
+    Public ReadOnly Property PowodNiepoprawnosci As String
+        Get
+            If Poprawna Then Return ""
+            If Double.IsNaN(RozmiarPiksela) OrElse Double.IsInfinity(RozmiarPiksela) OrElse RozmiarPiksela <= 0 Then Return "rozmiar piksela musi być większy od zera"
+            If BokSegmentuPx <= 0 Then Return "bok segmentu musi być większy od zera"
+            If Obszar.Wysokosc <= 0 AndAlso Obszar.Szerokosc <= 0 Then Return "X górne musi być większe od X dolnego, a Y prawe - od Y lewego (X - północ, Y - wschód)"
+            If Obszar.Wysokosc <= 0 Then Return "X górne (północ) musi być większe od X dolnego"
+            If Obszar.Szerokosc <= 0 Then Return "Y prawe (wschód) musi być większe od Y lewego"
+            Return "obszar jest zbyt duży w stosunku do rozmiaru segmentu"
+        End Get
+    End Property
+
     Private Const MaksKolumn As Double = 1000000000.0
 
     ''' <summary>Terenowy bok segmentu (w jednostkach układu).</summary>

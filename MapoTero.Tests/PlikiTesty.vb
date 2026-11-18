@@ -513,4 +513,14 @@ Public Class PlikWarstwTesty
         End Try
     End Sub
 
+    <Fact>
+    Public Sub Lastsettings_WygladaNaUszkodzony()
+        'format sprzed 3.12 (FileOpen/Write) - bez wpisu „format”
+        Assert.False(PlikUstawien.WygladaNaUszkodzony("""folder segmentow""" & vbCrLf & """C:\Mapy\""" & vbCrLf & """chkgmi""" & vbCrLf & "#FALSE#" & vbCrLf))
+        Assert.False(PlikUstawien.WygladaNaUszkodzony("folder segmentow" & vbCrLf & "C:\Mapy\" & vbCrLf & "format" & vbCrLf & "png" & vbCrLf))
+        Assert.True(PlikUstawien.WygladaNaUszkodzony(""))
+        Assert.True(PlikUstawien.WygladaNaUszkodzony("format" & vbCrLf & "png"))
+        Assert.True(PlikUstawien.WygladaNaUszkodzony("folder segmentow" & ChrW(0) & ChrW(1) & "xyz"))
+    End Sub
+
 End Class
