@@ -571,11 +571,13 @@ Public Module PomocProgramu
     ''' Wywoływane w Load - okna otwierane jako domyślna instancja dostają obsługę tylko raz.
     ''' </summary>
     Public Sub ZamykanieKlawiszemEsc(form As Form, Optional rozmiarMinimalny As Boolean = False)
-        If rozmiarMinimalny Then form.MinimumSize = form.Size
-        If form.CancelButton IsNot Nothing Then Return
+        'tylko przy pierwszym otwarciu - dawniej rozmiar minimalny brany był przy każdym otwarciu z rozmiaru, do którego
+        'użytkownik powiększył okno poprzednio, więc okna nie dało się już zmniejszyć
         Dim znacznik As Object = Nothing
         If _oknaZEsc.TryGetValue(form, znacznik) Then Return
         _oknaZEsc.Add(form, New Object())
+        If rozmiarMinimalny Then form.MinimumSize = form.Size
+        If form.CancelButton IsNot Nothing Then Return
         form.KeyPreview = True
         AddHandler form.KeyDown, Sub(s As Object, e As KeyEventArgs)
                                      If e.KeyCode <> Keys.Escape OrElse e.Modifiers <> Keys.None OrElse e.Handled Then Return

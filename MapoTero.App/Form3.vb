@@ -62,10 +62,20 @@ Public Class Form3
         If uwagaFolderu <> "" Then Komunikat(uwagaFolderu & vbCrLf & txtKomunikaty.Text, Color.OrangeRed)
     End Sub
 
-    ''' <summary>Parametry zbioru segmentów z pliku conf.txt w folderze scalania.</summary>
+    ''' <summary>
+    ''' Parametry zbioru segmentów z pliku conf.txt w folderze scalania. Pola są najpierw czyszczone: okno otwierane
+    ''' z menu nie jest niszczone po zamknięciu, więc dawniej przy folderze bez conf.txt zostawały w nich parametry
+    ''' poprzednio scalanej sesji, a uszkodzony conf.txt dawał komunikat „Segmenty gotowe do złączenia”.
+    ''' </summary>
     Private Sub WczytajParametry()
         Dim plikConf As String = _folderScalania & "conf.txt"
         _przezroczystosc = False
+        _uklad = UkladWspolrzednych.PL1992
+        For Each pole In New TextBox() {txtXDol, txtYLewy, txtXGora, txtYPrawy, txtBokSegmentu, txtRozmiarPiksela}
+            pole.Text = ""
+        Next
+        Dim bladConf As String = ""
+        Dim confWczytany As Boolean = False
         If File.Exists(plikConf) Then
             Try
                 Dim c = KonfiguracjaSesji.Wczytaj(plikConf, KodowanieSystemowe())
@@ -80,19 +90,24 @@ Public Class Form3
                 cmbFormat.Text = Wms.RozszerzeniePliku(c.Format)
                 cmbNumeracja.Text = If(c.Numeracja = "", Ustawienia.Numeracja, c.Numeracja)
                 _uklad = UkladWspolrzednych.ZKodu(c.UkladEpsg)
+                confWczytany = True
             Catch ex As Exception
-                Komunikat("Nie udało się odczytać pliku conf.txt: " & OpisBledu.Z(ex), Color.Red)
+                bladConf = OpisBledu.Z(ex)
             End Try
         End If
         PrzeliczLiczbeSegmentow()
+        'parametry z conf.txt - pola zablokowane; bez niego (albo z nieczytelnym) użytkownik może wpisać je sam
+        chkRecznie.Enabled = Not confWczytany
+        If confWczytany Then chkRecznie.Checked = False
+        grpParametry.Enabled = chkRecznie.Checked
 
         If File.Exists(_folderScalania & "error.txt") Then
             Komunikat("W katalogu segmentów wykryto obecność pliku error.txt co świadczy o niekompletnym zestawie segmentów. Uzupełnij je i usuń plik error.txt", Color.Red)
-        ElseIf File.Exists(plikConf) = False Then
-            chkRecznie.Enabled = True
+        ElseIf bladConf <> "" Then
+            Komunikat("Nie udało się odczytać pliku " & plikConf & ": " & bladConf & ". Parametry segmentów możesz wpisać samodzielnie - zaznacz opcję 'ręczne wprowadzanie parametrów'.", Color.Red)
+        ElseIf Not confWczytany Then
             Komunikat("We wskazanym katalogu segmentów nie odnaleziono pliku konfiguracyjnego conf.txt. Jesli został on bezpowrotnie utracony, istnieje możliwość samodzielnego zdefiniowania parametrów segmentów. W tym celu zaznacz opcję 'ręczne wprowadzanie parametrów'", Color.Red)
         Else
-            chkRecznie.Enabled = False
             Komunikat("Segmenty gotowe do złączenia. Wszelkie parametry scalania zostały załadowane automatycznie z pliku conf.txt" &
                       If(_przezroczystosc, ". Segmenty mają przezroczyste tło - zachowają je formaty PNG i GeoTIFF (bezstratny), w pozostałych tło będzie białe.", ""),
                       Color.Black)
@@ -127,9 +142,7 @@ Public Class Form3
             _folderScalania = dlgFolder.SelectedPath & "\"
             txtFolder.Text = _folderScalania
             txtFolder.Enabled = True
-            If File.Exists(_folderScalania & "conf.txt") = False Then
-                MsgBox("Brak pliku konfiguracji 'conf.txt' w podanej lokalizacji.")
-            End If
+            'brak conf.txt opisuje komunikat w oknie (dawniej dodatkowo okienko bez tytułu z tą samą treścią)
             WczytajParametry()
         End If
     End Sub

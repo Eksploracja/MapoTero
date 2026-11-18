@@ -98,8 +98,11 @@ Public NotInheritable Class ScalanieSegmentow
         'pamięci; przy bardzo szerokim arkuszu (dawniej zawsze, nawet ponad 1 GB na wiersz) - każdy segment osobno dla pasa
         Dim caleWiersze As Boolean = CLng(szer) * bok * kanaly <= MaksWierszWPamieci
 
+        'zapis do pliku tymczasowego i zamiana po zakończeniu - przerwanie albo błąd ponownego scalania usuwał dawniej
+        'także poprzedni, kompletny arkusz o tej samej nazwie
+        Dim plikTymczasowy As String = plik & ".tmp"
         Try
-            Using zapis = ZapisRastra.Utworz(z.Format, plik, szer, wys, z.JakoscJpeg, z.Uklad, s.ZasiegSiatki, kanaly = 4)
+            Using zapis = ZapisRastra.Utworz(z.Format, plikTymczasowy, szer, wys, z.JakoscJpeg, z.Uklad, s.ZasiegSiatki, kanaly = 4)
                 Dim zapiszPas As Action(Of Byte(), Integer) = Sub(b, k) zapis.ZapiszWiersze(b, k)
                 For w = 1 To wiersze
                     Dim segmentyWiersza As New Dictionary(Of Integer, Bitmap)()
@@ -161,10 +164,11 @@ Public NotInheritable Class ScalanieSegmentow
                 korekta?.Zakoncz(zapiszPas)
                 zapis.Zakoncz()
             End Using
+            File.Move(plikTymczasowy, plik, overwrite:=True)
         Catch
             'niedokończony plik arkusza nie może pozostać na dysku
             Try
-                File.Delete(plik)
+                File.Delete(plikTymczasowy)
             Catch
             End Try
             Throw

@@ -52,20 +52,31 @@ Public Class FormKorytarz
 
     Private Sub btnPlik_Click(sender As Object, e As EventArgs) Handles btnPlik.Click
         If dlgPlik.ShowDialog(Me) <> DialogResult.OK Then Exit Sub
+        WczytajPlikTrasy(dlgPlik.FileName)
+    End Sub
+
+    ''' <summary>
+    ''' Wczytuje trasę z pliku. Profil wysokości poprzedniej trasy jest usuwany (a jego pobieranie przerywane) - dawniej
+    ''' zostawał na wykresie, a „Zapisz GPX” zapisywał nową trasę z wysokościami poprzedniej albo kończył się błędem.
+    ''' </summary>
+    Friend Sub WczytajPlikTrasy(plik As String)
+        _pobieranieCts?.Cancel()
+        _linieWysokosci.Clear()
+        _statystyki = Nothing
+        btnZapiszGpx.Enabled = False
+        picProfil.Invalidate()
+        txtPlik.Text = plik
         Try
-            Dim k = Korytarz.WczytajTrase(dlgPlik.FileName)
+            Dim k = Korytarz.WczytajTrase(plik)
             If Not k.Poprawny Then
                 _korytarz = Nothing
-                txtPlik.Text = dlgPlik.FileName
                 Opis("Plik nie zawiera śladu, trasy ani linii (GPX: trk, rte, wpt; KML: LineString, gx:Track).", Color.Red)
                 btnOK.Enabled = False
                 Exit Sub
             End If
             _korytarz = k
-            txtPlik.Text = dlgPlik.FileName
         Catch ex As Exception
             _korytarz = Nothing
-            txtPlik.Text = dlgPlik.FileName
             Opis("Nie udało się odczytać trasy: " & OpisBledu.Z(ex), Color.Red)
             btnOK.Enabled = False
             Exit Sub
@@ -128,17 +139,21 @@ Public Class FormKorytarz
         prgNmt.Value = 0
         prgNmt.Visible = True
 
-        _pobieranieCts = New CancellationTokenSource()
+        'trasa, dla której pobierane są wysokości - użytkownik może w tym czasie wskazać inny plik
+        Dim trasa As Korytarz = _korytarz
+        Dim cts As New CancellationTokenSource()
+        _pobieranieCts = cts
         Dim postep = New Progress(Of Integer)(Sub(p)
                                                   If Not Me.IsDisposed AndAlso prgNmt.Visible Then
                                                       prgNmt.Value = Math.Max(0, Math.Min(100, p))
                                                   End If
                                               End Sub)
         Try
-            Dim h = Await ProfilNmt.PobierzWysokosciAsync(punkty, _pobieranieCts.Token, postep)
+            Dim h = Await ProfilNmt.PobierzWysokosciAsync(punkty, cts.Token, postep)
+            If cts.IsCancellationRequested OrElse IsDisposed OrElse trasa IsNot _korytarz Then Exit Sub
             _linieWysokosci.Clear()
             Dim offset = 0
-            For Each l In _korytarz.Linie
+            For Each l In trasa.Linie
                 Dim subH As New List(Of Double)()
                 For i = 0 To l.Count - 1
                     subH.Add(h(offset + i))
@@ -153,10 +168,16 @@ Public Class FormKorytarz
         Catch ex As OperationCanceledException
             ' Anulowano
         Catch ex As Exception
-            MsgBox("Nie udało się pobrać danych wysokościowych z Geoportalu: " & OpisBledu.Z(ex), MsgBoxStyle.Exclamation)
+            If Not IsDisposed AndAlso trasa Is _korytarz Then
+                MessageBox.Show("Nie udało się pobrać danych wysokościowych z Geoportalu: " & OpisBledu.Z(ex), Text, MessageBoxButtons.OK, MessageBoxIcon.Warning)
+            End If
         Finally
-            btnNmt.Enabled = True
-            prgNmt.Visible = False
+            If _pobieranieCts Is cts Then _pobieranieCts = Nothing
+            cts.Dispose()
+            If Not IsDisposed Then
+                btnNmt.Enabled = True
+                prgNmt.Visible = False
+            End If
         End Try
     End Sub
 

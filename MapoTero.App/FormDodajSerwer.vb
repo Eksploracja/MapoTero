@@ -243,8 +243,11 @@ Public Class FormDodajSerwer
                             "Łączenie z serwerem i pobieranie opisu usługi...")
 
         Try
-            _wynikCap = Await KlientCapabilities.PobierzAsync(adres, chkIgnorujSsl.Checked, timeoutSekundy:=25, token:=token, srodekTestowy:=_srodekMapy)
+            'wynik do zmiennej lokalnej - przerwane połączenie (powrót do katalogu i wybór innej usługi) nie może
+            'nadpisać wyniku ani stanu okna połączenia, które trwa
+            Dim wynik = Await KlientCapabilities.PobierzAsync(adres, chkIgnorujSsl.Checked, timeoutSekundy:=25, token:=token, srodekTestowy:=_srodekMapy)
             If token.IsCancellationRequested OrElse IsDisposed Then Exit Function
+            _wynikCap = wynik
 
             If Not _wynikCap.Sukces Then
                 lblStatus.ForeColor = Color.Red
@@ -295,7 +298,8 @@ Public Class FormDodajSerwer
                 lblStatus.Text = "Nieoczekiwany błąd: " & MetadaneMapy.MaskujSekrety(OpisBledu.Z(ex))
             End If
         Finally
-            If Not IsDisposed Then UstawStanPolaczenia(trwa:=False)
+            'po przerwaniu przyciski ustawia nowe połączenie albo powrót do katalogu
+            If Not IsDisposed AndAlso Not token.IsCancellationRequested Then UstawStanPolaczenia(trwa:=False)
         End Try
     End Function
 

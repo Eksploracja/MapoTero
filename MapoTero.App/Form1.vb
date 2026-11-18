@@ -621,21 +621,35 @@ Public Class Form1
             If dlgFolder.ShowDialog <> DialogResult.OK Then Exit Sub
             folder = FolderZUkosnikiem(dlgFolder.SelectedPath)
             If File.Exists(folder & "conf.txt") = False Then
-                MsgBox("Brak pliku conf.txt w podanej lokalizacji.")
+                MessageBox.Show("W folderze " & folder & " nie ma pliku conf.txt - to nie jest folder sesji pobierania.", "Wczytywanie sesji",
+                                MessageBoxButtons.OK, MessageBoxIcon.Information)
                 Exit Sub
             End If
         End If
+        WczytajConfZFolderu(folder, pytajOFolder)
+    End Sub
 
-        FolderSesji = folder
-        If File.Exists(folder & "conf.txt") = False Then Exit Sub
+    ''' <summary>
+    ''' Odczyt conf.txt z folderu. Folder sesji zmienia się dopiero po udanym odczycie - dawniej uszkodzony conf.txt
+    ''' wskazanej sesji przełączał folder sesji, choć warstwy i zasięg zostawały z poprzedniej (okna scalania i eksportu
+    ''' otwierały wtedy folder z nieczytelnym conf.txt).
+    ''' </summary>
+    Friend Sub WczytajConfZFolderu(folder As String, Optional wybranyPrzezUzytkownika As Boolean = False)
+        If File.Exists(folder & "conf.txt") = False Then
+            FolderSesji = folder
+            Exit Sub
+        End If
 
         Dim c As KonfiguracjaSesji
         Try
             c = KonfiguracjaSesji.Wczytaj(folder & "conf.txt", KodowanieSystemowe())
         Catch ex As Exception
-            Komunikat("Nie udało się odczytać pliku " & folder & "conf.txt (" & OpisBledu.Z(ex) & "). Plik sesji jest uszkodzony - wybierz warstwy i zasięg od nowa albo wczytaj inną sesję.", Color.Red)
+            Komunikat("Nie udało się odczytać pliku " & folder & "conf.txt (" & OpisBledu.Z(ex) & "). Plik sesji jest uszkodzony - " &
+                      If(wybranyPrzezUzytkownika, "bieżąca sesja nie została zmieniona.", "wybierz warstwy i zasięg od nowa albo wczytaj inną sesję."), Color.Red)
+            If Not wybranyPrzezUzytkownika Then FolderSesji = folder
             Exit Sub
         End Try
+        FolderSesji = folder
 
         'zbiór map sesji - nazwa sesji przy pustej kanapce, rozwijany w drzewie warstw
         If c.RodzajMapy <> "" Then _biezacyZbior = c.RodzajMapy

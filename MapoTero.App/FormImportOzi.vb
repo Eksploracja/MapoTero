@@ -46,6 +46,8 @@ Public Class FormImportOzi
     Private _anulowanie As CancellationTokenSource
     Private _plikiWsadowe As New List(Of String)()
     Private _czyTrybWsadowy As Boolean = False
+    ''' <summary>Okno zamknięte w trakcie konwersji - zamyka się po jej przerwaniu, bez komunikatów o wyniku.</summary>
+    Private _zamknijPoZakonczeniu As Boolean
 
     Public Sub New()
         InitializeComponent()
@@ -111,6 +113,8 @@ Public Class FormImportOzi
 
     Protected Overrides Sub OnDragDrop(drgevent As DragEventArgs)
         MyBase.OnDragDrop(drgevent)
+        'w trakcie konwersji przyciski wyboru plików są zablokowane - upuszczenie pliku podmieniało opis konwertowanej mapy
+        If _anulowanie IsNot Nothing Then Exit Sub
         If drgevent.Data.GetDataPresent(DataFormats.FileDrop) Then
             Dim pliki = DirectCast(drgevent.Data.GetData(DataFormats.FileDrop), String())
             If pliki Is Nothing OrElse pliki.Length = 0 Then Exit Sub
@@ -305,6 +309,21 @@ Public Class FormImportOzi
         End If
     End Sub
 
+    ''' <summary>
+    ''' Zamknięcie krzyżykiem w trakcie konwersji przerywa ją, a okno zamyka się po zakończeniu zadania (jak w oknie
+    ''' korekty obrazów). Dawniej konwersja trwała w tle po zamknięciu okna, a na końcu pojawiał się jej komunikat.
+    ''' </summary>
+    Protected Overrides Sub OnFormClosing(e As FormClosingEventArgs)
+        If _anulowanie IsNot Nothing Then
+            _anulowanie.Cancel()
+            _zamknijPoZakonczeniu = True
+            lblStatus.Text = "Trwa przerywanie operacji..."
+            e.Cancel = True
+            Return
+        End If
+        MyBase.OnFormClosing(e)
+    End Sub
+
     Private Sub btnZamknij_Click(sender As Object, e As EventArgs) Handles btnZamknij.Click
         If _anulowanie IsNot Nothing Then
             _anulowanie.Cancel()
@@ -369,16 +388,16 @@ Public Class FormImportOzi
 
             lblStatus.Text = "Konwersja zakończona pomyślnie!"
             prgPostep.Value = 100
-            MessageBox.Show("Pomyślnie utworzono mapę:" & vbCrLf & sciezkaWyjsciowa,
+            If Not _zamknijPoZakonczeniu Then MessageBox.Show("Pomyślnie utworzono mapę:" & vbCrLf & sciezkaWyjsciowa,
                             "Konwersja zakończona", MessageBoxButtons.OK, MessageBoxIcon.Information)
         Catch ex As OperationCanceledException
             lblStatus.Text = "Konwersja została anulowana."
             prgPostep.Value = 0
-            MessageBox.Show("Konwersja została przerwana przez użytkownika.",
+            If Not _zamknijPoZakonczeniu Then MessageBox.Show("Konwersja została przerwana przez użytkownika.",
                             "Anulowano", MessageBoxButtons.OK, MessageBoxIcon.Information)
         Catch ex As Exception
             lblStatus.Text = "Błąd: " & OpisBledu.Z(ex)
-            MessageBox.Show("Wystąpił błąd podczas konwersji:" & vbCrLf & OpisBledu.Z(ex),
+            If Not _zamknijPoZakonczeniu Then MessageBox.Show("Wystąpił błąd podczas konwersji:" & vbCrLf & OpisBledu.Z(ex),
                             "Błąd konwersji", MessageBoxButtons.OK, MessageBoxIcon.Error)
         Finally
             btnKonwertuj.Enabled = True
@@ -392,6 +411,7 @@ Public Class FormImportOzi
                 _anulowanie.Dispose()
                 _anulowanie = Nothing
             End If
+            If _zamknijPoZakonczeniu Then Close()
         End Try
     End Function
 
@@ -445,16 +465,16 @@ Public Class FormImportOzi
                 End If
             End If
 
-            MessageBox.Show(msg, "Konwersja wsadowa zakończona", MessageBoxButtons.OK,
+            If Not _zamknijPoZakonczeniu Then MessageBox.Show(msg, "Konwersja wsadowa zakończona", MessageBoxButtons.OK,
                             If(wynik.Bledy.Count > 0, MessageBoxIcon.Warning, MessageBoxIcon.Information))
         Catch ex As OperationCanceledException
             lblStatus.Text = "Konwersja wsadowa została anulowana."
             prgPostep.Value = 0
-            MessageBox.Show("Konwersja wsadowa została przerwana przez użytkownika.",
+            If Not _zamknijPoZakonczeniu Then MessageBox.Show("Konwersja wsadowa została przerwana przez użytkownika.",
                             "Anulowano", MessageBoxButtons.OK, MessageBoxIcon.Information)
         Catch ex As Exception
             lblStatus.Text = "Błąd: " & OpisBledu.Z(ex)
-            MessageBox.Show("Wystąpił błąd podczas konwersji wsadowej:" & vbCrLf & OpisBledu.Z(ex),
+            If Not _zamknijPoZakonczeniu Then MessageBox.Show("Wystąpił błąd podczas konwersji wsadowej:" & vbCrLf & OpisBledu.Z(ex),
                             "Błąd konwersji", MessageBoxButtons.OK, MessageBoxIcon.Error)
         Finally
             btnKonwertuj.Enabled = True
@@ -468,6 +488,7 @@ Public Class FormImportOzi
                 _anulowanie.Dispose()
                 _anulowanie = Nothing
             End If
+            If _zamknijPoZakonczeniu Then Close()
         End Try
     End Function
 

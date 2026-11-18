@@ -572,6 +572,7 @@ Public Class FormEksport
         End If
 
         Dim token = RozpocznijPrace()
+        _trwaEksport = True
         prgEksport.Value = 0
         Komunikat("Trwa eksport do " & Path.GetFileName(z.Plik) & "...", Color.Black)
 
@@ -623,6 +624,7 @@ Public Class FormEksport
                 Komunikat("Błąd eksportu: " & OpisBledu.Z(ex), Color.Red)
             End If
         Finally
+            _trwaEksport = False
             ZakonczPrace()
         End Try
     End Sub
@@ -676,7 +678,18 @@ Public Class FormEksport
         _przerwanie?.Cancel()
     End Sub
 
+    ''' <summary>Trwa eksport (nie szacowanie rozmiaru) - zamknięcie okna wymaga potwierdzenia.</summary>
+    Private _trwaEksport As Boolean
+
     Private Sub FormEksport_FormClosing(sender As Object, e As FormClosingEventArgs) Handles MyBase.FormClosing
+        'Esc albo krzyżyk przerywały dawniej bez pytania eksport trwający nawet godzinę (okna scalania i MBTiles pytają)
+        If _trwaEksport AndAlso _przerwanie IsNot Nothing AndAlso e.CloseReason = CloseReason.UserClosing Then
+            If MessageBox.Show("Trwa eksport mapy. Przerwać go i zamknąć okno? Niedokończony plik zostanie usunięty.", "Zamykanie okna",
+                               MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2) <> DialogResult.Yes Then
+                e.Cancel = True
+                Exit Sub
+            End If
+        End If
         _przerwanie?.Cancel()
     End Sub
 

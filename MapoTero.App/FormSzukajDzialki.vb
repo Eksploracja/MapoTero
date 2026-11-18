@@ -35,8 +35,20 @@ Public Class FormSzukajDzialki
     <DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)>
     Public Property WlaczWarstwy As Boolean = True
 
+    ''' <summary>Przerwanie trwającego wyszukiwania przy zamknięciu okna.</summary>
+    Private ReadOnly _przerwanie As New Threading.CancellationTokenSource()
+
     Public Sub New()
         InitializeComponent()
+    End Sub
+
+    ''' <summary>
+    ''' Zamknięcie okna przerywa wyszukiwanie - dawniej zapytanie trwało dalej (do 30 s), a jego błąd pokazywał się
+    ''' w komunikacie już po zamknięciu okna.
+    ''' </summary>
+    Protected Overrides Sub OnFormClosed(e As FormClosedEventArgs)
+        _przerwanie.Cancel()
+        MyBase.OnFormClosed(e)
     End Sub
 
     Public Sub New(poczatkowyTryb As Integer)
@@ -88,7 +100,8 @@ Public Class FormSzukajDzialki
         btnWybierz.Enabled = False
 
         Try
-            Dim wyniki = Await KlientGeokodowania.SzukajMiejscaAsync(fraza)
+            Dim wyniki = Await KlientGeokodowania.SzukajMiejscaAsync(fraza, _przerwanie.Token)
+            If IsDisposed OrElse _przerwanie.IsCancellationRequested Then Exit Sub
             If wyniki.Count = 0 Then
                 lblStatusMiejscowosc.Text = "Nie znaleziono pasujących miejscowości ani adresów."
             Else
@@ -105,14 +118,17 @@ Public Class FormSzukajDzialki
                     lvwMiejscowosci.Select()
                 End If
             End If
-        Catch ex As Exception
+        Catch ex As OperationCanceledException When _przerwanie.IsCancellationRequested
+        Catch ex As Exception When Not IsDisposed AndAlso Not _przerwanie.IsCancellationRequested
             MessageBox.Show("Wystąpił błąd podczas łączenia z geokoderem: " & OpisBledu.Z(ex),
                             "Błąd wyszukiwania", MessageBoxButtons.OK, MessageBoxIcon.Warning)
             lblStatusMiejscowosc.Text = "Błąd wyszukiwania."
         Finally
-            btnSzukajMiejscowosc.Enabled = True
-            prgSzukajMiejscowosc.Visible = False
-            AktualizujStanPrzyciskow()
+            If Not IsDisposed Then
+                btnSzukajMiejscowosc.Enabled = True
+                prgSzukajMiejscowosc.Visible = False
+                AktualizujStanPrzyciskow()
+            End If
         End Try
     End Sub
 
@@ -153,7 +169,8 @@ Public Class FormSzukajDzialki
         btnWybierz.Enabled = False
 
         Try
-            Dim wyniki = Await KlientUldk.SzukajDzialekAsync(fraza)
+            Dim wyniki = Await KlientUldk.SzukajDzialekAsync(fraza, _przerwanie.Token)
+            If IsDisposed OrElse _przerwanie.IsCancellationRequested Then Exit Sub
             If wyniki.Count = 0 Then
                 lblStatus.Text = "Nie znaleziono działek odpowiadających kryteriom."
             Else
@@ -171,14 +188,17 @@ Public Class FormSzukajDzialki
                     lvwWyniki.Select()
                 End If
             End If
-        Catch ex As Exception
+        Catch ex As OperationCanceledException When _przerwanie.IsCancellationRequested
+        Catch ex As Exception When Not IsDisposed AndAlso Not _przerwanie.IsCancellationRequested
             MessageBox.Show("Wystąpił błąd podczas łączenia z usługą ULDK: " & OpisBledu.Z(ex),
                             "Błąd wyszukiwania", MessageBoxButtons.OK, MessageBoxIcon.Warning)
             lblStatus.Text = "Błąd wyszukiwania."
         Finally
-            btnSzukaj.Enabled = True
-            prgSzukaj.Visible = False
-            AktualizujStanPrzyciskow()
+            If Not IsDisposed Then
+                btnSzukaj.Enabled = True
+                prgSzukaj.Visible = False
+                AktualizujStanPrzyciskow()
+            End If
         End Try
     End Sub
 

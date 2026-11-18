@@ -121,17 +121,35 @@ Public Class FormKorektaFolderu
         btnDostosuj.Text = "Dostosuj (" & OpcjeKorekcjiMip.KrotkaNazwaProfilu(_opcjeKorekty.Profil) & ")..."
     End Sub
 
+    ''' <summary>
+    ''' Opis błędu w folderach źródłowym i docelowym ("" - poprawne). Puste pole folderu docelowego dawało wyjątek
+    ''' Path.GetFullPath w obsłudze kliknięcia (awaria programu), a ścieżka względna wskazywała folder bieżący procesu.
+    ''' </summary>
+    Friend Shared Function BladFolderow(zrodlo As String, cel As String) As String
+        If String.IsNullOrWhiteSpace(zrodlo) OrElse Not Path.IsPathFullyQualified(zrodlo) OrElse Not Directory.Exists(zrodlo) Then
+            Return "Folder źródłowy nie istnieje: " & zrodlo
+        End If
+        If String.IsNullOrWhiteSpace(cel) Then Return "Wskaż folder docelowy, w którym zostaną zapisane poprawione obrazy."
+        If Not Path.IsPathFullyQualified(cel) Then
+            Return "Folder docelowy musi być podany pełną ścieżką (np. C:\Mapy\korekta): " & cel
+        End If
+        Try
+            If String.Equals(Path.GetFullPath(zrodlo).TrimEnd("\"c), Path.GetFullPath(cel).TrimEnd("\"c), StringComparison.OrdinalIgnoreCase) Then
+                Return "Folder docelowy musi być inny niż źródłowy, aby uniknąć nadpisania oryginalnych plików."
+            End If
+        Catch ex As Exception
+            Return "Niepoprawna ścieżka folderu docelowego " & cel & ": " & OpisBledu.Z(ex)
+        End Try
+        Return ""
+    End Function
+
     Private Async Sub btnStart_Click(sender As Object, e As EventArgs) Handles btnStart.Click
         Dim zrodlo = txtFolderZrodlo.Text.Trim()
         Dim cel = txtFolderCel.Text.Trim()
 
-        If Not Directory.Exists(zrodlo) Then
-            MessageBox.Show("Folder źródłowy nie istnieje: " & zrodlo, "Błąd", MessageBoxButtons.OK, MessageBoxIcon.Warning)
-            Return
-        End If
-
-        If String.Equals(Path.GetFullPath(zrodlo).TrimEnd("\"c), Path.GetFullPath(cel).TrimEnd("\"c), StringComparison.OrdinalIgnoreCase) Then
-            MessageBox.Show("Folder docelowy musi być inny niż źródłowy, aby uniknąć nadpisania oryginalnych plików.", "Uwaga", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+        Dim uwagaFolderow As String = BladFolderow(zrodlo, cel)
+        If uwagaFolderow <> "" Then
+            MessageBox.Show(uwagaFolderow, "Korekta obrazów", MessageBoxButtons.OK, MessageBoxIcon.Warning)
             Return
         End If
 

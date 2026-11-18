@@ -203,6 +203,10 @@ Public NotInheritable Class KlientCapabilities
 
                 ostatniBlad = "Serwer zwrócił dokument XML inny niż WMS/WMTS (element główny: " & nazwaKorzenia & ")."
 
+            Catch ex As OperationCanceledException When token.IsCancellationRequested
+                'przerwanie (nowe połączenie, zamknięcie kreatora) - dawniej traktowane jak błąd serwera: pętla próbowała
+                'kolejnych adresów i zwracała „błąd”, a kreator przywracał przyciski w trakcie nowego połączenia
+                Throw
             Catch ex As InvalidOperationException When CzyBladCertyfikatuSsl(ex)
                 wynik.KomunikatBledu = OpisBledu.Z(ex)
                 Return wynik

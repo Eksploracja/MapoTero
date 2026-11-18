@@ -55,6 +55,12 @@ Program to jeden plik **MapoTero.exe** (wersja 64-bitowa dla systemu Windows), d
   * **Czytniki ekranu:** pola zasięgu i siatki w oknie głównym mają właściwe nazwy dostępności,
   * **Szybkie usuwanie do Kosza:** usuwanie pustych segmentów i *Usuń pobrane* dla folderu spoza `download` trwa sekundy zamiast minut (300 plików: ok. 1 s zamiast 21 s) – przy ponad 50 plikach trafiają one do Kosza jako jeden folder „MapoTero - usunięte pliki (data i godzina)”,
   * **Komunikat o złym zasięgu pobierania** mówi, co poprawić (np. „X górne (północ) musi być większe od X dolnego”), zamiast ogólnego „Niepoprawne współrzędne X, Y”,
+  * **Łączenie segmentów:** przerwane lub nieudane ponowne scalanie nie usuwa już poprzedniego arkusza; okno otwarte dla folderu bez `conf.txt` nie pokazuje parametrów poprzednio scalanej sesji, a uszkodzony `conf.txt` jest zgłaszany zamiast komunikatu „Segmenty gotowe do złączenia”,
+  * **Obszar wzdłuż trasy:** po wskazaniu innej trasy wykres wysokości i *Zapisz GPX* nie korzystają już z wysokości poprzedniej trasy,
+  * **Konwersja OziExplorer:** zamknięcie okna krzyżykiem w trakcie konwersji przerywa ją (wcześniej trwała dalej w tle),
+  * **Korekta obrazów folderu:** puste lub względne pole *folder docelowy* daje komunikat zamiast błędu programu,
+  * **Eksport:** zamknięcie okna (także klawiszem Esc) w trakcie eksportu pyta, czy go przerwać,
+  * **Wczytanie sesji z uszkodzonym `conf.txt`** nie zmienia folderu bieżącej sesji; zamknięcie wyszukiwarki działek przerywa wyszukiwanie; okna narzędzi powiększone przez użytkownika można znów zmniejszyć,
 
 * **16.11.2026 – Wersja 3.18:**
   * **Bieżący podgląd zestawu warstw z lupą rastrową (okno główne):** nowy panel podglądu na żywo w prawym dolnym narożniku okna głównego, renderujący w tle próbkę dobranych warstw ze środka siatki pobierania (przy obszarze wzdłuż trasy - ze środka pobieranego segmentu najbliższego środkowi siatki; bez siatki - ze środka widoku mapy, za którym podgląd podąża) z uwzględnieniem krycia i trybów mieszania; przyciski powiększenia pokazują próbkę w skali 1:1 (piksel w piksel), lupę ×2 albo większy obszar ×½ pobrany z serwera (nie zmniejszony wycinek); warstwy, których nie udało się pobrać, oznacza czerwona ramka i ich lista w podpowiedzi,
