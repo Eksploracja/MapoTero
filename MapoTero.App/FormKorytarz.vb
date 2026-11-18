@@ -66,7 +66,7 @@ Public Class FormKorytarz
         Catch ex As Exception
             _korytarz = Nothing
             txtPlik.Text = dlgPlik.FileName
-            Opis("Nie udało się odczytać trasy: " & ex.Message, Color.Red)
+            Opis("Nie udało się odczytać trasy: " & OpisBledu.Z(ex), Color.Red)
             btnOK.Enabled = False
             Exit Sub
         End Try
@@ -153,7 +153,7 @@ Public Class FormKorytarz
         Catch ex As OperationCanceledException
             ' Anulowano
         Catch ex As Exception
-            MsgBox("Nie udało się pobrać danych wysokościowych z Geoportalu: " & ex.Message, MsgBoxStyle.Exclamation)
+            MsgBox("Nie udało się pobrać danych wysokościowych z Geoportalu: " & OpisBledu.Z(ex), MsgBoxStyle.Exclamation)
         Finally
             btnNmt.Enabled = True
             prgNmt.Visible = False
@@ -175,7 +175,7 @@ Public Class FormKorytarz
                 End If
                 MsgBox("Zapisano ślad GPX z wysokościami NMT do:" & vbCrLf & dlgZapiszGpx.FileName, MsgBoxStyle.Information)
             Catch ex As Exception
-                MsgBox("Błąd zapisu pliku GPX: " & ex.Message, MsgBoxStyle.Critical)
+                MsgBox("Błąd zapisu pliku GPX: " & OpisBledu.Z(ex), MsgBoxStyle.Critical)
             End Try
         End If
     End Sub

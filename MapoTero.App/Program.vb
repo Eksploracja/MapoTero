@@ -22,6 +22,11 @@ Imports System.Text
 ''' </summary>
 Public Module Program
 
+#If NETCOREAPP Then
+    ''' <summary>Strona kodowa ANSI systemu Windows (w .NET Framework zwracana przez Encoding.Default).</summary>
+    Private Declare Function GetACP Lib "kernel32" () As Integer
+#End If
+
     ''' <summary>Katalog programu (pliki warstw, moduły pomocnicze).</summary>
     Public FolderProgramu As String = ""
 
@@ -116,8 +121,14 @@ Public Module Program
     Public Function KodowanieSystemowe() As Encoding
 #If NETCOREAPP Then
         RejestrujKodowania()
+        'strona kodowa systemu (GetACP, „Język dla programów nieobsługujących Unicode”), a nie formatu regionalnego
+        '(CultureInfo.CurrentCulture): przy formacie „angielski (USA)” na polskim Windows dawało to 1252 - polskie
+        'litery w ścieżkach lastsettings.txt i conf.txt były tracone („Łukasz” -> „Lukasz”), a pliki zapisane przy
+        'formacie polskim czytane jako „£ódŸ”
         Try
-            Dim cp As Integer = CultureInfo.CurrentCulture.TextInfo.ANSICodePage
+            Dim cp As Integer = GetACP()
+            'Windows z opcją „Użyj UTF-8 dla obsługi języków na całym świecie” - UTF-8 bez znacznika BOM, jak w .NET Framework
+            If cp = 65001 Then Return New UTF8Encoding(False)
             If cp > 0 Then Return Encoding.GetEncoding(cp)
         Catch
         End Try
@@ -230,7 +241,7 @@ Public Module Program
         Try
             Process.Start(New ProcessStartInfo(folder) With {.UseShellExecute = True})
         Catch ex As Exception
-            MsgBox("Nie można otworzyć folderu " & folder & ": " & ex.Message, MsgBoxStyle.Exclamation)
+            MsgBox("Nie można otworzyć folderu " & folder & ": " & Global.MapoTero.Core.OpisBledu.Z(ex), MsgBoxStyle.Exclamation)
         End Try
     End Sub
 

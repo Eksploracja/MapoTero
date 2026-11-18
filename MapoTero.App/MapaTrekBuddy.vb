@@ -103,7 +103,7 @@ Public Class MapaTrekBuddy
             If File.Exists(plikTar) Then File.Delete(plikTar)
             TarFile.CreateFromDirectory(FolderMapy, plikTar, includeBaseDirectory:=False)
         Catch ex As Exception
-            Throw New IOException("Nie udało się utworzyć archiwum TAR (" & plikTar & "): " & ex.Message, ex)
+            Throw New IOException("Nie udało się utworzyć archiwum TAR (" & plikTar & "): " & OpisBledu.Z(ex), ex)
         End Try
     End Sub
 End Class

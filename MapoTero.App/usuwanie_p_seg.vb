@@ -25,6 +25,7 @@ Public Class Usuwanie_p_seg
     Private _tytul As String = ""
 
     Private Sub Usuwanie_p_seg_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+        PomocProgramu.ZamykanieKlawiszemEsc(Me, rozmiarMinimalny:=True)
         PomocProgramu.DodajPrzyciskPomocy(Me, TematPomocy.UsuwaniePustych, 140, 287)
         DodajPrzyciskFolderu()
         If _tytul = "" Then _tytul = Me.Text

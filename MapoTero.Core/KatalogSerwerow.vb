@@ -993,7 +993,7 @@ Public NotInheritable Class KlientKataloguSerwerow
         Catch ex As OperationCanceledException When token.IsCancellationRequested
             Throw
         Catch ex As Exception
-            wynik.KomunikatBledu = "Nie udało się pobrać wykazu Geoportal.gov.pl: " & MetadaneMapy.MaskujSekrety(ex.Message)
+            wynik.KomunikatBledu = "Nie udało się pobrać wykazu Geoportal.gov.pl: " & MetadaneMapy.MaskujSekrety(OpisBledu.Z(ex))
         End Try
         Dim staryCache = SprobujZCache(sciezkaCache, maxWiekGodzin, ZrodloKataloguSerwerow.Geoportal, pozwolNaPrzeterminowany:=True)
         If staryCache IsNot Nothing Then
@@ -1042,7 +1042,7 @@ Public NotInheritable Class KlientKataloguSerwerow
         Catch ex As OperationCanceledException When token.IsCancellationRequested
             Throw
         Catch ex As Exception
-            wynik.KomunikatBledu = "Nie udało się pobrać rejestru EZiUDP: " & MetadaneMapy.MaskujSekrety(ex.Message)
+            wynik.KomunikatBledu = "Nie udało się pobrać rejestru EZiUDP: " & MetadaneMapy.MaskujSekrety(OpisBledu.Z(ex))
             Dim staryCache = SprobujZCache(sciezkaCache, maxWiekGodzin, ZrodloKataloguSerwerow.EziudpCentralne, pozwolNaPrzeterminowany:=True)
             If staryCache IsNot Nothing Then
                 staryCache.KomunikatBledu = wynik.KomunikatBledu
@@ -1182,7 +1182,7 @@ Public NotInheritable Class KlientKataloguSerwerow
         Catch ex As OperationCanceledException When token.IsCancellationRequested
             Throw
         Catch ex As Exception
-            wynik.KomunikatBledu = "Błąd wyszukiwania w EZiUDP: " & MetadaneMapy.MaskujSekrety(ex.Message)
+            wynik.KomunikatBledu = "Błąd wyszukiwania w EZiUDP: " & MetadaneMapy.MaskujSekrety(OpisBledu.Z(ex))
         End Try
         Return wynik
     End Function

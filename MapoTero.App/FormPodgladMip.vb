@@ -221,4 +221,14 @@ Public Class FormPodgladMip
         MyBase.OnFormClosing(e)
     End Sub
 
+    ''' <summary>Zwalnia próbkę i obraz podglądu (PictureBox nie zwalnia swojego obrazu) - dawniej zostawały do odśmiecania pamięci.</summary>
+    Protected Overrides Sub OnFormClosed(e As FormClosedEventArgs)
+        Dim obraz = picPodglad.Image
+        picPodglad.Image = Nothing
+        If obraz IsNot Nothing AndAlso obraz IsNot _oryginalBmp Then obraz.Dispose()
+        _oryginalBmp?.Dispose()
+        _oryginalBmp = Nothing
+        MyBase.OnFormClosed(e)
+    End Sub
+
 End Class

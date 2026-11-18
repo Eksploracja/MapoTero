@@ -404,7 +404,7 @@ Partial Class FormZaawansowanyMbtiles
         Me.chkPiramida.Name = "chkPiramida"
         Me.chkPiramida.Size = New System.Drawing.Size(395, 17)
         Me.chkPiramida.TabIndex = 9
-        Me.chkPiramida.Text = "Szybka piramida w pasmach warstw (downscale 2x przyspiesza zapis o ~70%)"
+        Me.chkPiramida.Text = "Szybka piramida w pasmach warstw (zapis do ~70% szybszy)"
         Me.chkPiramida.UseVisualStyleBackColor = True
         '
         'chkWypelnijLuki

@@ -100,7 +100,7 @@ Public Class WarstwaWielowarstwowa
             End If
             Return True
         Catch ex As Exception
-            blad = "Błąd odczytu sesji: " & ex.Message
+            blad = "Błąd odczytu sesji: " & OpisBledu.Z(ex)
             Return False
         End Try
     End Function

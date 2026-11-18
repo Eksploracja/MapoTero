@@ -30,6 +30,8 @@ Public Class FormZaawansowanyMbtiles
     Private _opcjeKorekty As New OpcjeKorekcjiMip()
 
     Private Sub FormZaawansowanyMbtiles_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+        Me.CancelButton = btnZamknij
+        PomocProgramu.DopasujDoEkranu(Me)
         _wTrakcieLadowania = True
         Me.AllowDrop = True
         dgvWarstwy.AllowDrop = True
@@ -394,7 +396,7 @@ Public Class FormZaawansowanyMbtiles
         Catch ex As OperationCanceledException
             ' Anulowanie jest oczekiwane przy szybkiej zmianie parametrów
         Catch ex As Exception
-            Loguj("Błąd renderowania podglądu: " & ex.Message, Color.Red)
+            Loguj("Błąd renderowania podglądu: " & OpisBledu.Z(ex), Color.Red)
         End Try
     End Sub
 
@@ -525,7 +527,7 @@ Public Class FormZaawansowanyMbtiles
             Loguj("Oszacowano parametry pliku: " & szacunek.LacznaLiczbaKafli.ToString("N0") & " kafli, " &
                   szacunek.TekstRozmiaru(), Color.Blue)
         Catch ex As Exception
-            Loguj("Błąd szacowania rozmiaru: " & ex.Message, Color.Red)
+            Loguj("Błąd szacowania rozmiaru: " & OpisBledu.Z(ex), Color.Red)
         Finally
             If Not Zamkniete Then btnOszacuj.Enabled = _cts Is Nothing
         End Try
@@ -610,8 +612,8 @@ Public Class FormZaawansowanyMbtiles
             Loguj("Kompilacja została przerwana przez użytkownika.", Color.DarkOrange)
         Catch ex As Exception
             If Not Zamkniete Then
-                Loguj("BŁĄD podczas kompilacji: " & ex.Message, Color.Red)
-                MessageBox.Show("Wystąpił błąd podczas tworzenia MBTiles:" & vbCrLf & ex.Message, "Błąd kompilacji", MessageBoxButtons.OK, MessageBoxIcon.Error)
+                Loguj("BŁĄD podczas kompilacji: " & OpisBledu.Z(ex), Color.Red)
+                MessageBox.Show("Wystąpił błąd podczas tworzenia MBTiles:" & vbCrLf & OpisBledu.Z(ex), "Błąd kompilacji", MessageBoxButtons.OK, MessageBoxIcon.Error)
             End If
         Finally
             _cts?.Dispose()

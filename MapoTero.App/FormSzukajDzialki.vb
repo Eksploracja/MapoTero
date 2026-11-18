@@ -106,7 +106,7 @@ Public Class FormSzukajDzialki
                 End If
             End If
         Catch ex As Exception
-            MessageBox.Show("Wystąpił błąd podczas łączenia z geokoderem: " & ex.Message,
+            MessageBox.Show("Wystąpił błąd podczas łączenia z geokoderem: " & OpisBledu.Z(ex),
                             "Błąd wyszukiwania", MessageBoxButtons.OK, MessageBoxIcon.Warning)
             lblStatusMiejscowosc.Text = "Błąd wyszukiwania."
         Finally
@@ -172,7 +172,7 @@ Public Class FormSzukajDzialki
                 End If
             End If
         Catch ex As Exception
-            MessageBox.Show("Wystąpił błąd podczas łączenia z usługą ULDK: " & ex.Message,
+            MessageBox.Show("Wystąpił błąd podczas łączenia z usługą ULDK: " & OpisBledu.Z(ex),
                             "Błąd wyszukiwania", MessageBoxButtons.OK, MessageBoxIcon.Warning)
             lblStatus.Text = "Błąd wyszukiwania."
         Finally

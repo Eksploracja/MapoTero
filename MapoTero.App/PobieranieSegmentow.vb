@@ -345,7 +345,7 @@ Public NotInheritable Class PobieranieSegmentow
                                                                                            folderDocelowy, nazwaSegmentu & "." & ext),
                                                                   folderDocelowy, nazwaSegmentu, ext, z.Georeferencja)
                                 Catch ex As Exception
-                                    blad = "nie udało się zapisać plików georeferencyjnych: " & ex.Message
+                                    blad = "nie udało się zapisać plików georeferencyjnych: " & OpisBledu.Z(ex)
                                 End Try
                             End If
                             If blad <> "" OrElse Not File.Exists(plik) OrElse New FileInfo(plik).Length = 0 Then
@@ -355,7 +355,7 @@ Public NotInheritable Class PobieranieSegmentow
                             Throw
                         Catch ex As Exception
                             'błąd jednego segmentu (np. zapisu na dysku) nie przerywa pobierania pozostałych - trafia do error.txt
-                            przyczyny(sg.Indeks) = ex.Message.Replace(vbCr, " ").Replace(vbLf, " ")
+                            przyczyny(sg.Indeks) = OpisBledu.Z(ex).Replace(vbCr, " ").Replace(vbLf, " ")
                         Finally
                             Dim n As Integer = Interlocked.Increment(licznik)
                             Dim teraz As Long = Environment.TickCount64
@@ -473,7 +473,7 @@ Public NotInheritable Class PobieranieSegmentow
             ZapiszPlik(plikDocelowy, wynik.Item1)
             Return ""
         Catch ex As Exception
-            Return ex.Message.Replace(vbCr, " ").Replace(vbLf, " ")
+            Return OpisBledu.Z(ex).Replace(vbCr, " ").Replace(vbLf, " ")
         End Try
     End Function
 
@@ -522,8 +522,8 @@ Public NotInheritable Class PobieranieSegmentow
             Return Blad(OpisLimituCzasu(limitCzasuSekundy))
         Catch ex As Exception
             If TypeOf ex Is HttpRequestException Then przepustka?.Blad()
-            Dim opis As String = ex.Message
-            If ex.InnerException IsNot Nothing Then opis &= " (" & ex.InnerException.Message & ")"
+            Dim opis As String = OpisBledu.Z(ex)
+            If ex.InnerException IsNot Nothing AndAlso Not TypeOf ex Is HttpRequestException Then opis &= " (" & ex.InnerException.Message & ")"
             Return Blad(opis.Replace(vbCr, " ").Replace(vbLf, " "))
         Finally
             przepustka?.Dispose()
@@ -571,8 +571,8 @@ Public NotInheritable Class PobieranieSegmentow
         Catch ex As OperationCanceledException
             Return Blad(OpisLimituCzasu(limitCzasuSekundy))
         Catch ex As Exception
-            Dim opis As String = ex.Message
-            If ex.InnerException IsNot Nothing Then opis &= " (" & ex.InnerException.Message & ")"
+            Dim opis As String = OpisBledu.Z(ex)
+            If ex.InnerException IsNot Nothing AndAlso Not TypeOf ex Is HttpRequestException Then opis &= " (" & ex.InnerException.Message & ")"
             Return Blad(opis.Replace(vbCr, " ").Replace(vbLf, " "))
         End Try
     End Function
@@ -598,7 +598,7 @@ Public NotInheritable Class PobieranieSegmentow
         Catch ex As OperationCanceledException When token.IsCancellationRequested
             Throw
         Catch ex As Exception
-            Return ex.Message.Replace(vbCr, " ").Replace(vbLf, " ")
+            Return OpisBledu.Z(ex).Replace(vbCr, " ").Replace(vbLf, " ")
         End Try
     End Function
 

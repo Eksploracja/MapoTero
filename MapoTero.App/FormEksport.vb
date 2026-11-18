@@ -98,6 +98,7 @@ Public Class FormEksport
     End Property
 
     Private Sub FormEksport_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+        PomocProgramu.ZamykanieKlawiszemEsc(Me)
         PomocProgramu.DodajPrzyciskPomocy(Me, TematPomocy.Eksport, 12, 748)
         DopasujDoWysokosciEkranu()
         If cboKolejnoscGarmin.Items.Count > 0 AndAlso cboKolejnoscGarmin.SelectedIndex < 0 Then
@@ -187,7 +188,7 @@ Public Class FormEksport
             s.Siatka = New Siatka(New Zasieg(Wartosc(c.XDol), Wartosc(c.YLewy), Wartosc(c.XGora), Wartosc(c.YPrawy)),
                                   Wartosc(c.RozmiarPiksela), WartoscCalkowita(c.BokSegmentuPx))
         Catch ex As Exception
-            blad = "Nie udało się odczytać pliku conf.txt: " & ex.Message
+            blad = "Nie udało się odczytać pliku conf.txt: " & OpisBledu.Z(ex)
             Return Nothing
         End Try
         If Not s.Siatka.Poprawna Then
@@ -502,7 +503,7 @@ Public Class FormEksport
         Catch ex As OperationCanceledException
             If Not Me.IsDisposed AndAlso Not Me.Disposing Then Komunikat("Przerwano szacowanie rozmiaru", Color.Red)
         Catch ex As Exception
-            If Not Me.IsDisposed AndAlso Not Me.Disposing Then Komunikat("Nie udało się oszacować rozmiaru: " & ex.Message, Color.Red)
+            If Not Me.IsDisposed AndAlso Not Me.Disposing Then Komunikat("Nie udało się oszacować rozmiaru: " & OpisBledu.Z(ex), Color.Red)
         Finally
             ZakonczPrace()
         End Try
@@ -554,7 +555,7 @@ Public Class FormEksport
         Catch ex As OperationCanceledException
             If Not Me.IsDisposed AndAlso Not Me.Disposing Then Komunikat("Przerwano szacowanie rozmiaru", Color.Red)
         Catch ex As Exception
-            If Not Me.IsDisposed AndAlso Not Me.Disposing Then Komunikat("Nie udało się oszacować rozmiaru: " & ex.Message, Color.Red)
+            If Not Me.IsDisposed AndAlso Not Me.Disposing Then Komunikat("Nie udało się oszacować rozmiaru: " & OpisBledu.Z(ex), Color.Red)
         Finally
             ZakonczPrace()
         End Try
@@ -619,7 +620,7 @@ Public Class FormEksport
             End If
         Catch ex As Exception
             If Not Me.IsDisposed AndAlso Not Me.Disposing Then
-                Komunikat("Błąd eksportu: " & ex.Message, Color.Red)
+                Komunikat("Błąd eksportu: " & OpisBledu.Z(ex), Color.Red)
             End If
         Finally
             ZakonczPrace()
@@ -635,7 +636,7 @@ Public Class FormEksport
                     Process.Start(New ProcessStartInfo("explorer.exe", "/select,""" & _ostatniPlikEksportu & """") With {.UseShellExecute = True})
                 End If
             Catch ex As Exception
-                MsgBox("Nie udało się otworzyć folderu: " & ex.Message, MsgBoxStyle.Exclamation)
+                MsgBox("Nie udało się otworzyć folderu: " & OpisBledu.Z(ex), MsgBoxStyle.Exclamation)
             End Try
         End If
     End Sub

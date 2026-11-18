@@ -302,7 +302,7 @@ Public Class PanelKatalogSerwerow
         Catch ex As Exception
             If Not IsDisposed Then
                 lblStatus.ForeColor = Color.Red
-                lblStatus.Text = "Błąd pobierania wykazu: " & MetadaneMapy.MaskujSekrety(ex.Message)
+                lblStatus.Text = "Błąd pobierania wykazu: " & MetadaneMapy.MaskujSekrety(OpisBledu.Z(ex))
             End If
         Finally
             If Not IsDisposed Then UstawStanLadowania(False)
@@ -365,7 +365,7 @@ Public Class PanelKatalogSerwerow
         Catch ex As Exception
             If Not IsDisposed Then
                 lblStatus.ForeColor = Color.Red
-                lblStatus.Text = "Błąd wyszukiwania w EZiUDP: " & MetadaneMapy.MaskujSekrety(ex.Message)
+                lblStatus.Text = "Błąd wyszukiwania w EZiUDP: " & MetadaneMapy.MaskujSekrety(OpisBledu.Z(ex))
             End If
         Finally
             If Not IsDisposed Then UstawStanLadowania(False)
@@ -664,7 +664,7 @@ Public Class PanelKatalogSerwerow
                 lblStatus.Text = "Skopiowano adres URL usługi do schowka: " & url
             Catch ex As Exception
                 lblStatus.ForeColor = Color.Red
-                lblStatus.Text = "Nie udało się skopiować adresu do schowka: " & ex.Message
+                lblStatus.Text = "Nie udało się skopiować adresu do schowka: " & OpisBledu.Z(ex)
             End Try
         End If
     End Sub
@@ -691,7 +691,7 @@ Public Class PanelKatalogSerwerow
                     lblStatus.Text = "Skopiowano nazwę usługi do schowka: """ & w.Nazwa & """."
                 Catch ex As Exception
                     lblStatus.ForeColor = Color.Red
-                    lblStatus.Text = "Nie udało się skopiować nazwy: " & ex.Message
+                    lblStatus.Text = "Nie udało się skopiować nazwy: " & OpisBledu.Z(ex)
                 End Try
             End If
         End If
@@ -708,7 +708,7 @@ Public Class PanelKatalogSerwerow
                 Process.Start(New ProcessStartInfo(url) With {.UseShellExecute = True})
             Catch ex As Exception
                 lblStatus.ForeColor = Color.Red
-                lblStatus.Text = "Nie udało się otworzyć adresu w przeglądarce: " & ex.Message
+                lblStatus.Text = "Nie udało się otworzyć adresu w przeglądarce: " & OpisBledu.Z(ex)
             End Try
         End If
     End Sub

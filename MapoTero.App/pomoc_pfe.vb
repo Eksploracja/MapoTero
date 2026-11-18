@@ -20,6 +20,7 @@ Public Class pomoc_pfe
     Private Const UrlPomocy As String = "https://forum.eksploracja.pl/viewforum.php?f=205"
 
     Private Sub pomoc_pfe_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+        PomocProgramu.ZamykanieKlawiszemEsc(Me)
         Try
             WebBrowser1.ScriptErrorsSuppressed = True
             WebBrowser1.Navigate(UrlPomocy)
@@ -32,7 +33,7 @@ Public Class pomoc_pfe
         Try
             Process.Start(New ProcessStartInfo(UrlPomocy) With {.UseShellExecute = True})
         Catch ex As Exception
-            MsgBox("Nie można otworzyć strony pomocy: " & ex.Message, MsgBoxStyle.Exclamation)
+            MsgBox("Nie można otworzyć strony pomocy: " & Global.MapoTero.Core.OpisBledu.Z(ex), MsgBoxStyle.Exclamation)
         End Try
     End Sub
 

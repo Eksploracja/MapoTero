@@ -1,4 +1,4 @@
-'Copyright (C) <2015-2026>  pajakt, Kazimierz Niecikowski
+﻿'Copyright (C) <2015-2026>  pajakt, Kazimierz Niecikowski
 'This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License
 'as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
@@ -12,15 +12,20 @@ Imports MapoTero.Core
 Imports Xunit
 
 ''' <summary>
-''' Audyt (paczka 0): działanie programu przy formacie regionalnym innym niż polski (Windows: Ustawienia > Czas i język >
+''' Działanie programu przy formacie regionalnym innym niż polski (Windows: Ustawienia > Czas i język >
 ''' Region > Format regionalny). Polscy użytkownicy często mają format „angielski (USA)” przy polskiej stronie kodowej
-''' systemu (1250). Testy opisują oczekiwane zachowanie - niepowodzenie oznacza znalezisko audytu.
+''' systemu (1250). Dawniej pliki zapisywano wtedy w stronie 1252 i polskie litery w ścieżkach ginęły (audyt P0-01).
 ''' </summary>
-<Trait("Kategoria", "Audyt")>
-Public Class AudytRegionTesty
+Public Class KodowanieIRegionTesty
 
     <DllImport("kernel32.dll")>
     Private Shared Function GetACP() As Integer
+    End Function
+
+    ''' <summary>Polskie litery da się zapisać tylko w stronie kodowej systemu 1250 albo UTF-8 (nie np. w GitHub Actions, gdzie jest 1252).</summary>
+    Private Shared Function SystemZPolskimiLiterami() As Boolean
+        Dim cp = GetACP()
+        Return cp = 1250 OrElse cp = 65001
     End Function
 
     Private Shared Sub WKulturze(nazwa As String, akcja As Action)
@@ -34,7 +39,7 @@ Public Class AudytRegionTesty
     End Sub
 
     ''' <summary>Starsze wersje (FileOpen/Print, Encoding.Default w .NET Framework) zapisywały pliki w stronie kodowej systemu (GetACP).</summary>
-    <FaktAudytu>
+    <Fact>
     Public Sub KodowanieSystemowe_NieZalezyOdFormatuRegionalnego()
         Dim systemowa = GetACP()
         For Each k In {"pl-PL", "en-US", "de-DE", "en-GB"}
@@ -45,9 +50,10 @@ Public Class AudytRegionTesty
     End Sub
 
     ''' <summary>Ścieżka folderu sesji z polskimi literami (np. nazwa użytkownika Windows) musi przetrwać zapis i odczyt lastsettings.txt.</summary>
-    <FaktAudytu>
+    <Fact>
     Public Sub Lastsettings_PolskieLiteryWSciezce_PrzyFormacieAngielskim()
-        Dim plik = Path.Combine(Path.GetTempPath(), "audyt_lastsettings_" & Guid.NewGuid().ToString("N") & ".txt")
+        If Not SystemZPolskimiLiterami() Then Return
+        Dim plik = Path.Combine(Path.GetTempPath(), "test_lastsettings_" & Guid.NewGuid().ToString("N") & ".txt")
         Dim folder = "C:\Users\Łukasz Żółć\MapoTero\download\sesja_ąęśń\"
         Try
             Dim odczytany As String = ""
@@ -66,9 +72,10 @@ Public Class AudytRegionTesty
     End Sub
 
     ''' <summary>conf.txt zapisany przy formacie polskim (starsza wersja, inny komputer) czytany przy formacie angielskim.</summary>
-    <FaktAudytu>
+    <Fact>
     Public Sub Conf_ZapisanyPrzyPolskim_CzytanyPrzyAngielskim()
-        Dim plik = Path.Combine(Path.GetTempPath(), "audyt_conf_" & Guid.NewGuid().ToString("N") & ".txt")
+        If Not SystemZPolskimiLiterami() Then Return
+        Dim plik = Path.Combine(Path.GetTempPath(), "test_conf_" & Guid.NewGuid().ToString("N") & ".txt")
         Dim folder = "C:\Mapy\Łódź_północ\"
         Try
             WKulturze("pl-PL",
@@ -87,7 +94,7 @@ Public Class AudytRegionTesty
     End Sub
 
     ''' <summary>Liczby wpisywane przez użytkownika - niezależnie od formatu regionalnego.</summary>
-    <FaktAudytu>
+    <Fact>
     Public Sub Wartosc_NiezaleznaOdFormatu()
         For Each k In {"pl-PL", "en-US", "de-DE", "fr-FR"}
             WKulturze(k,

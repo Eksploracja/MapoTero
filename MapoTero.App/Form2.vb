@@ -243,7 +243,7 @@ Public Class Form2
         Try
             u.Zapisz(PlikLastsettings)
         Catch ex As Exception
-            MsgBox("Nie udało się zapisać ustawień: " & ex.Message, MsgBoxStyle.Exclamation)
+            MsgBox("Nie udało się zapisać ustawień: " & OpisBledu.Z(ex), MsgBoxStyle.Exclamation)
         End Try
         Me.DialogResult = DialogResult.OK
         Me.Close()
@@ -281,7 +281,7 @@ Public Class Form2
             If File.Exists(PlikLastsettings) Then File.Delete(PlikLastsettings)
             Ustawienia.Zapisz(PlikLastsettings)
         Catch ex As Exception
-            MsgBox("Nie udało się zapisać ustawień: " & ex.Message, MsgBoxStyle.Exclamation)
+            MsgBox("Nie udało się zapisać ustawień: " & OpisBledu.Z(ex), MsgBoxStyle.Exclamation)
         End Try
         Form1.Komunikat("Przywrócono ustawienia domyślne programu (lastsettings.txt)", Color.Green)
     End Sub

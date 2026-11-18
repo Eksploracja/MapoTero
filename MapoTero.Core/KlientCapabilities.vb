@@ -204,10 +204,10 @@ Public NotInheritable Class KlientCapabilities
                 ostatniBlad = "Serwer zwrócił dokument XML inny niż WMS/WMTS (element główny: " & nazwaKorzenia & ")."
 
             Catch ex As InvalidOperationException When CzyBladCertyfikatuSsl(ex)
-                wynik.KomunikatBledu = ex.Message
+                wynik.KomunikatBledu = OpisBledu.Z(ex)
                 Return wynik
             Catch ex As Exception
-                ostatniBlad = ex.Message
+                ostatniBlad = OpisBledu.Z(ex)
             End Try
         Next
         If ostatniBlad <> "" Then bledy.Add(ostatniBlad)
@@ -308,7 +308,7 @@ Public NotInheritable Class KlientCapabilities
                 If Not ignorujSsl Then
                     Throw New InvalidOperationException("Połączenie HTTPS nie powiodło się z powodu błędu certyfikatu SSL serwera. Zaznacz opcję ""Ignoruj błędy certyfikatów SSL"" i spróbuj ponownie.", ex)
                 End If
-                Throw New InvalidOperationException("Nie udało się nawiązać bezpiecznego połączenia SSL/TLS z serwerem: " & ex.Message, ex)
+                Throw New InvalidOperationException("Nie udało się nawiązać bezpiecznego połączenia SSL/TLS z serwerem: " & OpisBledu.Z(ex), ex)
             Catch ex As HttpRequestException When proba < LiczbaProbPobrania AndAlso Not TypeOf ex Is BladHttp
             End Try
             Await Task.Delay(1000 * proba, token).ConfigureAwait(False)
@@ -359,7 +359,7 @@ Public NotInheritable Class KlientCapabilities
             Catch ex As OperationCanceledException When Not token.IsCancellationRequested
                 Return New OdpowiedHttpProby With {.Blad = "Serwer nie odpowiedział w ciągu " & Math.Max(5, timeoutSekundy) & " s."}
             Catch ex As Exception When Not token.IsCancellationRequested
-                Return New OdpowiedHttpProby With {.Blad = ex.Message}
+                Return New OdpowiedHttpProby With {.Blad = OpisBledu.Z(ex)}
             End Try
         End Using
     End Function

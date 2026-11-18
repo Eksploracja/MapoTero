@@ -220,7 +220,7 @@ Public Class FormImportOzi
             txtPlikObrazu.Text = _ozi.PlikObrazu
             OdswiezInformacje()
         Catch ex As Exception
-            MessageBox.Show("Nie udało się odczytać pliku kalibracji: " & ex.Message,
+            MessageBox.Show("Nie udało się odczytać pliku kalibracji: " & OpisBledu.Z(ex),
                             "Błąd pliku kalibracji", MessageBoxButtons.OK, MessageBoxIcon.Error)
         End Try
     End Sub
@@ -233,7 +233,7 @@ Public Class FormImportOzi
             txtPlikObrazu.Text = sciezka
             OdswiezInformacje()
         Catch ex As Exception
-            MessageBox.Show("Błąd odczytu pliku obrazu: " & ex.Message, "Błąd obrazu", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            MessageBox.Show("Błąd odczytu pliku obrazu: " & OpisBledu.Z(ex), "Błąd obrazu", MessageBoxButtons.OK, MessageBoxIcon.Error)
         End Try
     End Sub
 
@@ -377,8 +377,8 @@ Public Class FormImportOzi
             MessageBox.Show("Konwersja została przerwana przez użytkownika.",
                             "Anulowano", MessageBoxButtons.OK, MessageBoxIcon.Information)
         Catch ex As Exception
-            lblStatus.Text = "Błąd: " & ex.Message
-            MessageBox.Show("Wystąpił błąd podczas konwersji:" & vbCrLf & ex.Message,
+            lblStatus.Text = "Błąd: " & OpisBledu.Z(ex)
+            MessageBox.Show("Wystąpił błąd podczas konwersji:" & vbCrLf & OpisBledu.Z(ex),
                             "Błąd konwersji", MessageBoxButtons.OK, MessageBoxIcon.Error)
         Finally
             btnKonwertuj.Enabled = True
@@ -453,8 +453,8 @@ Public Class FormImportOzi
             MessageBox.Show("Konwersja wsadowa została przerwana przez użytkownika.",
                             "Anulowano", MessageBoxButtons.OK, MessageBoxIcon.Information)
         Catch ex As Exception
-            lblStatus.Text = "Błąd: " & ex.Message
-            MessageBox.Show("Wystąpił błąd podczas konwersji wsadowej:" & vbCrLf & ex.Message,
+            lblStatus.Text = "Błąd: " & OpisBledu.Z(ex)
+            MessageBox.Show("Wystąpił błąd podczas konwersji wsadowej:" & vbCrLf & OpisBledu.Z(ex),
                             "Błąd konwersji", MessageBoxButtons.OK, MessageBoxIcon.Error)
         Finally
             btnKonwertuj.Enabled = True
@@ -898,7 +898,7 @@ Public Class FormImportOzi
                 Throw
             Catch ex As Exception
                 wynik.Pominiete += 1
-                wynik.Bledy.Add($"{nazwaPliku}: {ex.Message}")
+                wynik.Bledy.Add($"{nazwaPliku}: {OpisBledu.Z(ex)}")
             End Try
         Next
 

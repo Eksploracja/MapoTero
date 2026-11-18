@@ -92,7 +92,7 @@ Public Class FormEksportCad
         Try
             _konfiguracja = KonfiguracjaSesji.Wczytaj(plik, KodowanieSystemowe())
         Catch ex As Exception
-            Komunikat("Nie udało się odczytać pliku conf.txt: " & ex.Message, Color.Red)
+            Komunikat("Nie udało się odczytać pliku conf.txt: " & OpisBledu.Z(ex), Color.Red)
             UstawWidok()
             Exit Sub
         End Try
@@ -234,7 +234,7 @@ Public Class FormEksportCad
                       If(uwagi.Any(Function(u) u.StartsWith("Uwaga")), Color.Red, Color.Black))
         Catch ex As Exception
             txtArkusz.Text = ""
-            Komunikat("Nie można wstawić arkusza " & Path.GetFileName(sciezka) & ": " & ex.Message, Color.Red)
+            Komunikat("Nie można wstawić arkusza " & Path.GetFileName(sciezka) & ": " & OpisBledu.Z(ex), Color.Red)
         End Try
         UstawWidok()
     End Sub
@@ -338,7 +338,7 @@ Public Class FormEksportCad
             _folderWyniku = Path.GetDirectoryName(plikDxf)
             btnOtworzFolder.Enabled = True
         Catch ex As Exception
-            Komunikat("Eksport nie powiódł się: " & ex.Message, Color.Red)
+            Komunikat("Eksport nie powiódł się: " & OpisBledu.Z(ex), Color.Red)
         Finally
             Cursor = Cursors.Default
             Enabled = True

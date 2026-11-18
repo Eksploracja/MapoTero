@@ -360,7 +360,7 @@ Public Class FormWarstwyZaawansowane
         Catch ex As OperationCanceledException
         Catch ex As Exception
             If Not IsDisposed Then
-                _lblStan.Text = "Błąd podglądu: " & ex.Message
+                _lblStan.Text = "Błąd podglądu: " & OpisBledu.Z(ex)
                 _podpowiedz.SetToolTip(_lblStan, ex.ToString())
             End If
         Finally

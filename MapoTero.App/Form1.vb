@@ -225,8 +225,36 @@ Public Class Form1
         End Set
     End Property
 
+    ''' <summary>
+    ''' Nazwy pól dla czytników ekranu - bez nich Windows brał nazwę z poprzedniej etykiety w kolejności kontrolek
+    ''' (np. pole „Segment [pix]” czytane było jako „Brak warstw”, pole X dolne jako „=”).
+    ''' </summary>
+    Private Sub UstawNazwyDostepnosci()
+        txtXDol.AccessibleName = "Zasięg: X dolne (północ) w metrach"
+        txtXGora.AccessibleName = "Zasięg: X górne (północ) w metrach"
+        txtYLewy.AccessibleName = "Zasięg: Y lewe (wschód) w metrach"
+        txtYPrawy.AccessibleName = "Zasięg: Y prawe (wschód) w metrach"
+        txtRozmiarPiksela.AccessibleName = "Rozmiar piksela w metrach"
+        txtBokSegmentu.AccessibleName = "Bok segmentu w pikselach"
+        txtZasiegSegmentuKm.AccessibleName = "Zasięg segmentu w terenie w kilometrach"
+        txtSzerokoscKm.AccessibleName = "Szerokość siatki w kilometrach"
+        txtWysokoscKm.AccessibleName = "Wysokość siatki w kilometrach"
+        txtSzerokoscPx.AccessibleName = "Szerokość siatki w pikselach"
+        txtWysokoscPx.AccessibleName = "Wysokość siatki w pikselach"
+        txtLiczbaKolumn.AccessibleName = "Liczba kolumn segmentów"
+        txtLiczbaWierszy.AccessibleName = "Liczba wierszy segmentów"
+        txtSzukajWarstwy.AccessibleName = "Szukaj warstwy"
+        txtKomunikaty.AccessibleName = "Komunikaty"
+    End Sub
+
     ''' <summary>Wyświetla komunikat w polu komunikatów okna głównego.</summary>
     Public Sub Komunikat(tekst As String, kolor As Color)
+        'w trakcie uruchamiania kolejne komunikaty (np. „Wczytano ostatnio zapisane ustawienia”) zastępowały wcześniejszy
+        'błąd (uszkodzony conf.txt, brak zbiorów map) - błędy startu zostają widoczne, następne błędy są dopisywane
+        If Not _zaladowany AndAlso txtKomunikaty.ForeColor = Color.Red AndAlso txtKomunikaty.Text <> "" Then
+            If kolor <> Color.Red Then Exit Sub
+            tekst = txtKomunikaty.Text & vbCrLf & tekst
+        End If
         txtKomunikaty.ForeColor = kolor
         txtKomunikaty.Text = tekst
     End Sub
@@ -306,6 +334,13 @@ Public Class Form1
             End Try
         End If
         Dim folderDoWczytania As String = KonfiguracjaSesji.FolderSesjiDoWczytania(zapamietany, FolderDownload)
+        'zapamiętany folder sesji usunięto lub przeniesiono - dawniej program po cichu wczytywał inną (najnowszą) sesję
+        If zapamietany <> "" AndAlso
+           Not String.Equals(zapamietany.TrimEnd("\"c), FolderDownload.TrimEnd("\"c), StringComparison.OrdinalIgnoreCase) AndAlso
+           Not String.Equals(zapamietany.TrimEnd("\"c), folderDoWczytania.TrimEnd("\"c), StringComparison.OrdinalIgnoreCase) Then
+            Komunikat("Nie znaleziono sesji z poprzedniego uruchomienia (folder " & zapamietany & " nie istnieje lub nie ma pliku conf.txt)" &
+                      If(folderDoWczytania <> "", " - wczytano najnowszą sesję: " & folderDoWczytania, "") & ".", Color.Red)
+        End If
 
         Dim nowaSesja As Boolean = String.IsNullOrEmpty(folderDoWczytania) OrElse File.Exists(Path.Combine(folderDoWczytania, "conf.txt")) = False
         If nowaSesja Then
@@ -340,6 +375,7 @@ Public Class Form1
         UstawEdycjeXY(False)
         UstawWidokZaznaczeniaWgs(False)
         InicjalizujPrzyciskSzukaj()
+        UstawNazwyDostepnosci()
         InicjalizujNowaSesje()
         PrzygotujListeWarstw()
         AddHandler _timerPodgladu.Tick, AddressOf TimerPodgladu_Tick
@@ -391,7 +427,7 @@ Public Class Form1
         Try
             Ustawienia.Zapisz(PlikLastsettings)
         Catch ex As Exception
-            MsgBox("Nie udało się zapisać ustawień: " & ex.Message, MsgBoxStyle.Exclamation)
+            MsgBox("Nie udało się zapisać ustawień: " & OpisBledu.Z(ex), MsgBoxStyle.Exclamation)
         End Try
     End Sub
 
@@ -543,6 +579,17 @@ Public Class Form1
         'numeracja segmentów jest parametrem sesji - lastsettings.txt (np. z numeracją innej, ostatnio wczytanej sesji)
         'nie może jej zmienić, bo nazwy segmentów przestałyby pasować do plików w folderze sesji
         Dim numeracjaSesji As String = If(nowaSesja, "", _numeracjaSesji)
+        'plik bez wpisu „format” (zapisywanego zawsze) jest uszkodzony - dawniej program pisał „Wczytano ostatnio zapisane
+        'ustawienia”, choć używał domyślnych
+        Dim poprawny As Boolean = False
+        Try
+            poprawny = File.ReadLines(PlikLastsettings, KodowanieSystemowe()).Any(Function(l) l.Trim() = "format")
+        Catch
+        End Try
+        If Not poprawny Then
+            Komunikat("Plik " & PlikLastsettings & " jest uszkodzony - użyto domyślnych ustawień programu (zostaną zapisane przy zamknięciu programu).", Color.Red)
+            Exit Sub
+        End If
         Try
             Ustawienia.Wczytaj(PlikLastsettings, nowaSesja)
         Catch
@@ -586,7 +633,7 @@ Public Class Form1
         Try
             c = KonfiguracjaSesji.Wczytaj(folder & "conf.txt", KodowanieSystemowe())
         Catch ex As Exception
-            Komunikat("Nie udało się odczytać pliku conf.txt: " & ex.Message, Color.Red)
+            Komunikat("Nie udało się odczytać pliku " & folder & "conf.txt (" & OpisBledu.Z(ex) & "). Plik sesji jest uszkodzony - wybierz warstwy i zasięg od nowa albo wczytaj inną sesję.", Color.Red)
             Exit Sub
         End Try
 
@@ -672,7 +719,7 @@ Public Class Form1
                 File.Delete(plikKorytarza)
             End If
         Catch ex As Exception
-            Komunikat("Nie udało się zapisać pliku conf.txt: " & ex.Message, Color.Red)
+            Komunikat("Nie udało się zapisać pliku conf.txt: " & OpisBledu.Z(ex), Color.Red)
             Exit Sub
         End Try
 
@@ -792,7 +839,7 @@ Public Class Form1
             FolderSesji = nowy
             Return True
         Catch ex As Exception
-            Komunikat("Nie udało się utworzyć folderu " & nowy & ": " & ex.Message, Color.Red)
+            Komunikat("Nie udało się utworzyć folderu " & nowy & ": " & OpisBledu.Z(ex), Color.Red)
             Return False
         End Try
     End Function
@@ -805,7 +852,7 @@ Public Class Form1
             FolderSesji = nowyFolder
             Return True
         Catch ex As Exception
-            Komunikat("Nie udało się utworzyć folderu sesji " & nowyFolder & ": " & ex.Message, Color.Red)
+            Komunikat("Nie udało się utworzyć folderu sesji " & nowyFolder & ": " & OpisBledu.Z(ex), Color.Red)
             Return False
         End Try
     End Function
@@ -863,7 +910,7 @@ Public Class Form1
                 Try
                     z.Plik = PlikWarstw.Wczytaj(plik)
                 Catch ex As Exception
-                    z.Blad = ex.Message
+                    z.Blad = OpisBledu.Z(ex)
                 End Try
             End If
             _zbiory.Add(z)
@@ -871,7 +918,7 @@ Public Class Form1
         WczytajKatalog()
 
         If _zbiory.Count = 0 Then
-            Komunikat("Brak plików z listą zbiorów map.", Color.Red)
+            Komunikat("Brak zbiorów map: nie znaleziono pliku " & Path.Combine(FolderWarstwProgramu, "warstwy.txt") & ". Skopiuj folder warstwy z archiwum programu obok pliku MapoTero.exe.", Color.Red)
         ElseIf ZnajdzZbior(_biezacyZbior) Is Nothing Then
             _biezacyZbior = If(ZnajdzZbior(DomyslnyZbiorMap) IsNot Nothing, DomyslnyZbiorMap, _zbiory(0).Nazwa)
         End If
@@ -897,7 +944,7 @@ Public Class Form1
                     Komunikat("Pominięto błędne wiersze katalogu warstw (" & _katalog.Bledy.Count & "): " & _katalog.Bledy(0), Color.Red)
                 End If
             Catch ex As Exception
-                Komunikat("Nie udało się odczytać katalogu warstw: " & ex.Message, Color.Red)
+                Komunikat("Nie udało się odczytać katalogu warstw: " & OpisBledu.Z(ex), Color.Red)
             End Try
         End If
         Dim pliki As New Dictionary(Of String, PlikWarstw)(StringComparer.OrdinalIgnoreCase)
@@ -1734,7 +1781,7 @@ Public Class Form1
         Catch ex As OperationCanceledException
         Catch ex As Exception
             lblPodgladStan.Text = "Błąd podglądu"
-            ToolTip1.SetToolTip(lblPodgladStan, ex.Message)
+            ToolTip1.SetToolTip(lblPodgladStan, OpisBledu.Z(ex))
         Finally
             If _ctsPodglad Is cts Then _ctsPodglad = Nothing
             cts.Dispose()
@@ -2195,7 +2242,7 @@ Public Class Form1
         Try
             wynik = Await PobieranieSegmentow.PobierzAsync(zadanie, postep, przerwanie.Token)
         Catch ex As Exception
-            Komunikat("Błąd pobierania: " & MetadaneMapy.MaskujSekrety(ex.Message), Color.Red)
+            Komunikat("Błąd pobierania: " & MetadaneMapy.MaskujSekrety(OpisBledu.Z(ex)), Color.Red)
         Finally
             If _przerwanie Is przerwanie Then _przerwanie = Nothing
             przerwanie.Dispose()
@@ -2850,7 +2897,7 @@ Public Class Form1
                     End If
                 End Using
             Catch ex As Exception
-                MsgBox("Nie udało się odczytać pliku trasy: " & ex.Message, MsgBoxStyle.Critical)
+                MsgBox("Nie udało się odczytać pliku trasy: " & OpisBledu.Z(ex), MsgBoxStyle.Critical)
             End Try
         End If
     End Sub
@@ -3013,7 +3060,7 @@ Public Class Form1
                     Komunikat("Przeniesiono do Kosza folder sesji: " & folder, Color.Green)
                 End If
             Catch ex As Exception
-                Komunikat("Nie udało się przenieść sesji do Kosza: " & ex.Message, Color.Red)
+                Komunikat("Nie udało się przenieść sesji do Kosza: " & OpisBledu.Z(ex), Color.Red)
             End Try
         End If
     End Sub
@@ -3077,7 +3124,7 @@ Public Class Form1
         Try
             Process.Start(New ProcessStartInfo(url) With {.UseShellExecute = True})
         Catch ex As Exception
-            MsgBox("Nie można otworzyć strony pomocy: " & ex.Message, MsgBoxStyle.Exclamation)
+            MsgBox("Nie można otworzyć strony pomocy: " & OpisBledu.Z(ex), MsgBoxStyle.Exclamation)
         End Try
     End Sub
 

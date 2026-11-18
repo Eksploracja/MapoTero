@@ -40,6 +40,7 @@ Public Class FormKorektaFolderu
     Public Property FolderPoczatkowy As String = ""
 
     Private Sub FormKorektaFolderu_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+        Me.CancelButton = btnZamknij
         PomocProgramu.DodajPrzyciskPomocy(Me, TematPomocy.KorektaFolderu, 15, 287)
         _opcjeKorekty = Ustawienia.OpcjeKorekty(ProfilKorektyRastra.GarminMip)
         'w tym oknie korekta jest celem - zawsze włączona (profil „Brak” dałby kopie bez zmian)
@@ -151,7 +152,7 @@ Public Class FormKorektaFolderu
         Try
             If Not Directory.Exists(cel) Then Directory.CreateDirectory(cel)
         Catch ex As Exception
-            MessageBox.Show("Nie udało się utworzyć folderu docelowego: " & ex.Message, "Błąd", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            MessageBox.Show("Nie udało się utworzyć folderu docelowego: " & OpisBledu.Z(ex), "Błąd", MessageBoxButtons.OK, MessageBoxIcon.Error)
             Return
         End Try
 
@@ -203,9 +204,9 @@ Public Class FormKorektaFolderu
         Catch ex As OperationCanceledException
             lblStatus.Text = "Przetwarzanie zostało przerwane przez użytkownika."
         Catch ex As Exception
-            lblStatus.Text = "Błąd: " & ex.Message
+            lblStatus.Text = "Błąd: " & OpisBledu.Z(ex)
             If Not _zamknijPoZakonczeniu Then
-                MessageBox.Show("Wystąpił błąd podczas przetwarzania: " & ex.Message, "Błąd", MessageBoxButtons.OK, MessageBoxIcon.Error)
+                MessageBox.Show("Wystąpił błąd podczas przetwarzania: " & OpisBledu.Z(ex), "Błąd", MessageBoxButtons.OK, MessageBoxIcon.Error)
             End If
         Finally
             _cts.Dispose()
@@ -266,7 +267,7 @@ Public Class FormKorektaFolderu
                 Try
                     KorygujPlik(plik, sciezkaCel, opcje)
                 Catch ex As Exception When Not TypeOf ex Is OperationCanceledException
-                    bledy.Add(nazwa & ": " & ex.Message)
+                    bledy.Add(nazwa & ": " & OpisBledu.Z(ex))
                     Return
                 End Try
 

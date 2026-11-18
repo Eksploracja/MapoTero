@@ -119,7 +119,7 @@ Public Class ZrodloWmts
                                                     PobieranieSegmentow.OpisLimituCzasu(z.LimitCzasuSekundy), ex)
             Catch ex As Exception When proba < z.IloscProb
             Catch ex As Exception
-                Throw New InvalidOperationException("nie udało się pobrać opisu usługi WMTS (" & MetadaneMapy.MaskujSekrety(adres) & "): " & ex.Message, ex)
+                Throw New InvalidOperationException("nie udało się pobrać opisu usługi WMTS (" & MetadaneMapy.MaskujSekrety(adres) & "): " & OpisBledu.Z(ex), ex)
             End Try
             Await Task.Delay(TimeSpan.FromSeconds(Math.Max(0, z.PrzerwaSekundy)), token).ConfigureAwait(False)
         Next
@@ -134,7 +134,7 @@ Public Class ZrodloWmts
             End Using
             usluga = UslugaWmts.Wczytaj(tekstXml, adres)
         Catch ex As Exception
-            Throw New InvalidOperationException("niepoprawny opis usługi WMTS (" & MetadaneMapy.MaskujSekrety(adres) & "): " & ex.Message, ex)
+            Throw New InvalidOperationException("niepoprawny opis usługi WMTS (" & MetadaneMapy.MaskujSekrety(adres) & "): " & OpisBledu.Z(ex), ex)
         End Try
         'wspólny folder kafli wszystkich usług sesji - nazwa kafla to skrót jego adresu
         Dim zrodlo As New ZrodloWmts(folderDocelowy, z.LimitCzasuSekundy, Math.Max(1, Math.Min(100, z.JakoscJpegWmts)),
@@ -290,8 +290,8 @@ Public Class ZrodloWmts
         Catch ex As OperationCanceledException When token.IsCancellationRequested
             Throw
         Catch ex As Exception
-            Dim opis As String = ex.Message
-            If ex.InnerException IsNot Nothing Then opis &= " (" & ex.InnerException.Message & ")"
+            Dim opis As String = OpisBledu.Z(ex)
+            If ex.InnerException IsNot Nothing AndAlso Not TypeOf ex Is HttpRequestException Then opis &= " (" & ex.InnerException.Message & ")"
             Return Tuple.Create(CType(Nothing, Integer()), opis.Replace(vbCr, " ").Replace(vbLf, " "))
         End Try
     End Function
@@ -696,8 +696,8 @@ Public Class ZrodloWmts
                     Interlocked.Increment(_udaneObrazki)
                     Return Tuple.Create(bajtyCache, "")
                 Else
-                    Dim opis As String = ex.Message
-                    If ex.InnerException IsNot Nothing Then opis &= " (" & ex.InnerException.Message & ")"
+                    Dim opis As String = OpisBledu.Z(ex)
+                    If ex.InnerException IsNot Nothing AndAlso Not TypeOf ex Is HttpRequestException Then opis &= " (" & ex.InnerException.Message & ")"
                     Return Tuple.Create(CType(Nothing, Byte()), MetadaneMapy.MaskujSekrety(opis).Replace(vbCr, " ").Replace(vbLf, " "))
                 End If
             Finally

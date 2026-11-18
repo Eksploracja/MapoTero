@@ -27,6 +27,7 @@ Public Class Nakladanie_Map
     Private _opcjeKorekty As New OpcjeKorekcjiMip()
 
     Private Sub Nakladanie_Map_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+        PomocProgramu.ZamykanieKlawiszemEsc(Me, rozmiarMinimalny:=True)
         Me.Location = New Point(200, 150)
         PomocProgramu.DodajPrzyciskPomocy(Me, TematPomocy.NakladanieMap, 15, 455)
 
@@ -148,25 +149,34 @@ Public Class Nakladanie_Map
         Dim gorna As String = KoniecUkosnik(txtFolderGorna.Text)
         Dim wynik As String = KoniecUkosnik(txtFolderWynik.Text)
 
+        'ścieżka względna (np. wpisane „abc”) wskazywałaby folder względem bieżącego katalogu procesu, a nie folderu programu
+        If Not Path.IsPathRooted(dolna) OrElse Not Path.IsPathRooted(gorna) OrElse Not Path.IsPathRooted(wynik) Then
+            MessageBox.Show("Podaj pełne ścieżki folderów (np. C:\Mapy\dolna\) albo wskaż je przyciskami ""dolna"", ""górna"" i ""połączone"".",
+                            "Nakładanie map", MessageBoxButtons.OK, MessageBoxIcon.Exclamation)
+            Exit Sub
+        End If
         If Not Directory.Exists(dolna) OrElse Not Directory.Exists(gorna) Then
-            MsgBox("Błąd. Folder warstwy dolnej lub górnej nie istnieje:" & vbCrLf & dolna & vbCrLf & gorna & vbCrLf & vbCrLf &
-                   "Pobierz do nich segmenty obu map (format png, te same ustawienia geometrii) i powtórz operację.")
+            MessageBox.Show("Folder warstwy dolnej lub górnej nie istnieje:" & vbCrLf & dolna & vbCrLf & gorna & vbCrLf & vbCrLf &
+                   "Pobierz do nich segmenty obu map (format png, te same ustawienia geometrii) i powtórz operację.",
+                            "Nakładanie map", MessageBoxButtons.OK, MessageBoxIcon.Exclamation)
             Exit Sub
         End If
         If String.Equals(dolna, gorna, StringComparison.OrdinalIgnoreCase) OrElse String.Equals(dolna, wynik, StringComparison.OrdinalIgnoreCase) OrElse
            String.Equals(gorna, wynik, StringComparison.OrdinalIgnoreCase) Then
             MsgBox("Folder warstwy dolnej:" & vbCrLf & dolna & vbCrLf & "Folder warstwy górnej:" & vbCrLf & gorna & vbCrLf &
-                   "Folder warstw połączonych:" & vbCrLf & wynik & vbCrLf & vbCrLf & "Wybierz trzy różne foldery.")
+                   "Folder warstw połączonych:" & vbCrLf & wynik & vbCrLf & vbCrLf & "Wybierz trzy różne foldery.", MsgBoxStyle.Exclamation, "Nakładanie map")
             Exit Sub
         End If
         If Directory.GetFiles(dolna, "*.png").Length = 0 Then
-            MsgBox("Błąd. Katalog warstwy dolnej nie zawiera plików do połączenia" & vbCrLf &
-                   "Umieść w nim segmenty warstwy podkładowej w formacie png o identycznej nazwie oraz rozdzielczości jak katalogu warstwy górnej")
+            MsgBox("Folder warstwy dolnej nie zawiera segmentów png:" & vbCrLf & dolna & vbCrLf & vbCrLf &
+                   "Umieść w nim segmenty warstwy podkładowej w formacie png o tych samych nazwach i rozdzielczości co w folderze warstwy górnej.",
+                   MsgBoxStyle.Exclamation, "Nakładanie map")
             Exit Sub
         End If
         If Directory.GetFiles(gorna, "*.png").Length = 0 Then
-            MsgBox("Błąd. Katalog warstwy górnej nie zawiera plików do połączenia" & vbCrLf &
-                   "Umieść w nich segmenty nakładanej warstwy w formacie png o identycznej nazwie oraz rozdzielczości jak katalogu warstwy dolnej")
+            MsgBox("Folder warstwy górnej nie zawiera segmentów png:" & vbCrLf & gorna & vbCrLf & vbCrLf &
+                   "Umieść w nim segmenty nakładanej warstwy w formacie png o tych samych nazwach i rozdzielczości co w folderze warstwy dolnej.",
+                   MsgBoxStyle.Exclamation, "Nakładanie map")
             Exit Sub
         End If
 
@@ -174,7 +184,7 @@ Public Class Nakladanie_Map
         Try
             Directory.CreateDirectory(wynik)
         Catch ex As Exception
-            MsgBox("Nie udało się utworzyć folderu " & wynik & ": " & ex.Message, MsgBoxStyle.Exclamation)
+            MsgBox("Nie udało się utworzyć folderu " & wynik & ": " & OpisBledu.Z(ex), MsgBoxStyle.Exclamation, "Nakładanie map")
             Exit Sub
         End Try
 

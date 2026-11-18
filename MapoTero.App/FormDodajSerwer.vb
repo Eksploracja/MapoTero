@@ -292,7 +292,7 @@ Public Class FormDodajSerwer
         Catch ex As Exception
             If Not IsDisposed Then
                 lblStatus.ForeColor = Color.Red
-                lblStatus.Text = "Nieoczekiwany błąd: " & MetadaneMapy.MaskujSekrety(ex.Message)
+                lblStatus.Text = "Nieoczekiwany błąd: " & MetadaneMapy.MaskujSekrety(OpisBledu.Z(ex))
             End If
         Finally
             If Not IsDisposed Then UstawStanPolaczenia(trwa:=False)
@@ -790,7 +790,7 @@ Public Class FormDodajSerwer
             End If
         Catch ex As Exception
             If Not IsDisposed Then
-                MessageBox.Show("Nie udało się pobrać próbki kafelka: " & ex.Message, "Błąd podglądu", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+                MessageBox.Show("Nie udało się pobrać próbki kafelka: " & OpisBledu.Z(ex), "Błąd podglądu", MessageBoxButtons.OK, MessageBoxIcon.Warning)
             End If
         Finally
             _przerwanieProbki?.Dispose()
@@ -912,7 +912,7 @@ Public Class FormDodajSerwer
             Me.Close()
 
         Catch ex As Exception
-            MessageBox.Show("Błąd podczas zapisywania zbioru map: " & ex.Message, "Błąd zapisu", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            MessageBox.Show("Błąd podczas zapisywania zbioru map: " & OpisBledu.Z(ex), "Błąd zapisu", MessageBoxButtons.OK, MessageBoxIcon.Error)
         End Try
     End Sub
 

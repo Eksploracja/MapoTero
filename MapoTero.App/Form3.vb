@@ -39,6 +39,7 @@ Public Class Form3
     Public ReadOnly Property PlikArkusza As String = ""
 
     Private Sub Form3_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+        PomocProgramu.ZamykanieKlawiszemEsc(Me, rozmiarMinimalny:=True)
         PomocProgramu.DodajPrzyciskPomocy(Me, TematPomocy.Scalanie, 344, 455)
         Dim uwagaFolderu As String = ""
         _folderScalania = FolderSesjiDlaNarzedzia(If(FolderPoczatkowy <> "", FolderPoczatkowy, Form1.FolderSesji), uwagaFolderu)
@@ -80,7 +81,7 @@ Public Class Form3
                 cmbNumeracja.Text = If(c.Numeracja = "", Ustawienia.Numeracja, c.Numeracja)
                 _uklad = UkladWspolrzednych.ZKodu(c.UkladEpsg)
             Catch ex As Exception
-                Komunikat("Nie udało się odczytać pliku conf.txt: " & ex.Message, Color.Red)
+                Komunikat("Nie udało się odczytać pliku conf.txt: " & OpisBledu.Z(ex), Color.Red)
             End Try
         End If
         PrzeliczLiczbeSegmentow()
@@ -204,7 +205,7 @@ Public Class Form3
             Form1.Komunikat("Scalanie segmentów zostało przerwane.", Color.OrangeRed)
         Catch ex As Exception
             If Not Me.IsDisposed AndAlso Not Me.Disposing Then
-                Komunikat("Błąd. Segmenty nie zostały scalone: " & ex.Message, Color.Red)
+                Komunikat("Błąd. Segmenty nie zostały scalone: " & OpisBledu.Z(ex), Color.Red)
             End If
             Exit Sub
         Finally

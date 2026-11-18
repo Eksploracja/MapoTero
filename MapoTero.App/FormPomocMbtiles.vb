@@ -99,7 +99,7 @@ Public Class FormPomocMbtiles
         Try
             Process.Start(New ProcessStartInfo(url) With {.UseShellExecute = True})
         Catch ex As Exception
-            MessageBox.Show("Nie udało się otworzyć adresu w przeglądarce: " & ex.Message,
+            MessageBox.Show("Nie udało się otworzyć adresu w przeglądarce: " & Global.MapoTero.Core.OpisBledu.Z(ex),
                             "Pomoc online", MessageBoxButtons.OK, MessageBoxIcon.Warning)
         End Try
     End Sub
@@ -543,5 +543,47 @@ Public Module PomocProgramu
         btn.BringToFront()
         Return btn
     End Function
+
+    ''' <summary>
+    ''' Okno o stałym rozmiarze, wyższe lub szersze niż ekran roboczy (np. laptop 1366 x 768 - 728 px nad paskiem zadań),
+    ''' zmniejszane do ekranu z paskami przewijania - dawniej przyciski u dołu okna były poza ekranem.
+    ''' Tylko dla okien bez kontrolek zakotwiczonych do dołu lub prawej (przy przewijaniu przesuwałyby się na zawartość).
+    ''' </summary>
+    Public Sub DopasujDoEkranu(form As Form)
+        Dim ekran As Rectangle = Screen.FromControl(form).WorkingArea
+        If form.Height <= ekran.Height AndAlso form.Width <= ekran.Width Then Return
+        Dim klient As Size = form.ClientSize
+        form.AutoScroll = True
+        form.AutoScrollMinSize = klient
+        Dim zaWysokie As Boolean = form.Height > ekran.Height
+        Dim zaSzerokie As Boolean = form.Width > ekran.Width
+        Dim w As Integer = Math.Min(form.Width + If(zaWysokie, SystemInformation.VerticalScrollBarWidth, 0), ekran.Width)
+        Dim h As Integer = Math.Min(form.Height + If(zaSzerokie, SystemInformation.HorizontalScrollBarHeight, 0), ekran.Height)
+        form.StartPosition = FormStartPosition.Manual
+        form.Bounds = New Rectangle(ekran.Left + (ekran.Width - w) \ 2, ekran.Top + (ekran.Height - h) \ 2, w, h)
+    End Sub
+
+    Private ReadOnly _oknaZEsc As New Runtime.CompilerServices.ConditionalWeakTable(Of Form, Object)()
+
+    ''' <summary>
+    ''' Klawisz Esc zamyka okno narzędzia (jak przycisk zamykania okna) - w 8 oknach bez przycisku Anuluj/Zamknij nie działał.
+    ''' Okna z pracą w tle same pytają w FormClosing, czy przerwać. Esc przy rozwiniętej liście zwija tylko listę.
+    ''' Wywoływane w Load - okna otwierane jako domyślna instancja dostają obsługę tylko raz.
+    ''' </summary>
+    Public Sub ZamykanieKlawiszemEsc(form As Form, Optional rozmiarMinimalny As Boolean = False)
+        If rozmiarMinimalny Then form.MinimumSize = form.Size
+        If form.CancelButton IsNot Nothing Then Return
+        Dim znacznik As Object = Nothing
+        If _oknaZEsc.TryGetValue(form, znacznik) Then Return
+        _oknaZEsc.Add(form, New Object())
+        form.KeyPreview = True
+        AddHandler form.KeyDown, Sub(s As Object, e As KeyEventArgs)
+                                     If e.KeyCode <> Keys.Escape OrElse e.Modifiers <> Keys.None OrElse e.Handled Then Return
+                                     Dim lista = TryCast(form.ActiveControl, ComboBox)
+                                     If lista IsNot Nothing AndAlso lista.DroppedDown Then Return
+                                     e.Handled = True
+                                     form.Close()
+                                 End Sub
+    End Sub
 
 End Module
