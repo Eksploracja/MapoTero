@@ -585,41 +585,6 @@ Public Class UzytkownikInterakcjaTesty
     End Sub
 
     <Fact>
-    Public Sub TestUzytkownik_Narzedzia_NakladanieMap_WalidacjaFolderow()
-        UruchomWWatkuSta(
-            Sub()
-                Using f As New Global.MapoTero.nakladanie_map()
-                    f.Show()
-                    Application.DoEvents()
-
-                    Dim txtDolna = DirectCast(f.Controls.Find("txtFolderDolna", True)(0), TextBox)
-                    Dim txtGorna = DirectCast(f.Controls.Find("txtFolderGorna", True)(0), TextBox)
-                    Dim txtWynik = DirectCast(f.Controls.Find("txtFolderWynik", True)(0), TextBox)
-
-                    ' 1. Te same foldery
-                    txtDolna.Text = "C:\TestFolder"
-                    txtGorna.Text = "C:\TestFolder"
-                    txtWynik.Text = "C:\TestFolder"
-                    Application.DoEvents()
-
-                    ' 2. Puste foldery
-                    txtDolna.Text = ""
-                    txtGorna.Text = ""
-                    txtWynik.Text = ""
-                    Application.DoEvents()
-
-                    ' 3. Różne nieistniejące foldery
-                    txtDolna.Text = "C:\FolderNieistniejacy_1"
-                    txtGorna.Text = "C:\FolderNieistniejacy_2"
-                    txtWynik.Text = "C:\FolderNieistniejacy_3"
-                    Application.DoEvents()
-
-                    f.Close()
-                End Using
-            End Sub)
-    End Sub
-
-    <Fact>
     Public Sub TestUzytkownik_FormDodajSerwer_KatalogIFiltry()
         UruchomWWatkuSta(
             Sub()

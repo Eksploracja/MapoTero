@@ -70,7 +70,7 @@ Public Class Usuwanie_p_seg
 
     ''' <summary>
     ''' Folder bieżącej sesji, z którego okno może usuwać pliki: istniejący folder inny niż sam download (folder sesji
-    ''' albo np. wynik nakładania map bez conf.txt); pusty tekst - brak bieżącej sesji. Dawniej okno przechodziło wtedy
+    ''' albo np. folder segmentów bez conf.txt); pusty tekst - brak bieżącej sesji. Dawniej okno przechodziło wtedy
     ''' bez ostrzeżenia na najnowszą sesję w download i usuwało jej pliki.
     ''' </summary>
     Friend Shared Function FolderBiezacejSesji(folderSesji As String) As String

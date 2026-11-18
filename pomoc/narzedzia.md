@@ -6,7 +6,7 @@ nav_order: 16
 # Narzędzia dodatkowe
 {: .no_toc }
 
-Konwerter map OziExplorer, nakładanie dwóch pobranych map PNG, usuwanie pustych segmentów oraz tworzenie paczek TrekBuddy (.tar).
+Konwerter map OziExplorer, usuwanie pustych segmentów oraz tworzenie paczek TrekBuddy (.tar).
 {: .fs-5 .fw-300 }
 
 **Gdzie w programie:** menu *Narzędzia* oraz menu *Ustawienia*  
@@ -36,27 +36,14 @@ Narzędzie przetwarza kalibrowane skany papierowych map turystycznych i archiwal
 
 ---
 
-## Nakładanie dwóch map PNG
+## Nakładanie dwóch pobranych map
 
-**Gdzie:** menu *Narzędzia > Nakładanie dwóch map png na siebie* (<kbd>Ctrl</kbd>+<kbd>N</kbd>).
+Dawne narzędzie *Nakładanie dwóch map png na siebie* zostało usunięte - to samo, z regulacją krycia, dla map o różnej
+siatce i w każdym formacie, robią:
 
-![Okno Nakładanie dwóch map na siebie]({{ '/pomoc/obrazy/14-nakladanie-map.png' | relative_url }})
-
-*Rysunek 1. Okno nakładania dwóch map PNG o jednakowej siatce.*
-
-Narzędzie łączy dwa wcześniej pobrane zestawy segmentów PNG o **identycznych nazwach plików, wymiarach i siatce**:
-
-1. Wskaż folder **Dolna (podkładowa)** i **Górna (nakładana)**. Pamiętaj, że ich wskazanie przełącza bieżący folder sesji
-   okna głównego (żeby ułatwić pobranie obu map po kolei).
-2. Wskaż osobny folder **Połączone** (zostanie utworzony automatycznie, musi być inny niż oba foldery źródłowe).
-3. Kliknij **Składaj warstwy**.
-
-Program kopiuje `conf.txt` z warstwy dolnej, zamienia **białe piksele** warstwy górnej na przezroczyste i zapisuje
-wynikowe segmenty PNG (obsługuje także 8-bitowe PNG z paletą barw).
-
-{: .wskazowka }
-Jeśli dopiero planujesz pobrać dwie mapy razem, wygodniej jest połączyć je od razu w panelu *Wybrane warstwy* okna
-głównego (z regulacją krycia), a dla sesji z różnymi układami lub w JPEG w oknie [Eksport mapy](../eksport/nakladki/).
+* panel *Wybrane warstwy* okna głównego - gdy obie mapy dopiero pobierasz (warstwy łączone od razu przy pobieraniu),
+* okno [Eksport mapy z nakładką](../eksport/nakladki/) - gdy obie mapy są już pobrane w osobnych sesjach
+  (także scalony arkusz GeoTIFF z plikami dla programów CAD i GIS).
 
 ---
 

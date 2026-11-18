@@ -161,7 +161,7 @@ Public Class PodpowiedziTesty
         Dim folder = Path.Combine(Path.GetTempPath(), "MapoTero_Usuwanie_" & Guid.NewGuid().ToString("N"))
         Directory.CreateDirectory(folder)
         Try
-            'istniejący folder (także bez conf.txt, np. wynik nakładania map) - bieżąca sesja
+            'istniejący folder (także bez conf.txt, np. folder segmentów spoza programu) - bieżąca sesja
             Assert.Equal(folder & "\", MapoTero.Usuwanie_p_seg.FolderBiezacejSesji(folder))
             'sam download, brak folderu albo folder nieistniejący - brak bieżącej sesji (bez przejścia na najnowszą)
             Assert.Equal("", MapoTero.Usuwanie_p_seg.FolderBiezacejSesji(MapoTero.FolderDownload))

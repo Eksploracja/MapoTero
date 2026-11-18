@@ -102,4 +102,4 @@ Mapę, która przy różnych przybliżeniach pokazuje różne warstwy, tworzy
 
 ➡️ **Kolejny krok:** [Mapa w telefonie i odbiorniku GPS →](../aplikacje/)
 
-*Zobacz też: [Wybór formatu](../formaty/) · [Ustawienia: przezroczyste tło](../../ustawienia/#sesja-pobierania) · [Nakładanie dwóch map PNG](../../narzedzia/)*
+*Zobacz też: [Wybór formatu](../formaty/) · [Ustawienia: przezroczyste tło](../../ustawienia/#sesja-pobierania)*

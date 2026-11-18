@@ -78,7 +78,6 @@ Partial Class Form1
         Me.EksportToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.EksportCadToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.ZaawansowanyMbtilesToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
-        Me.NakładanieWarstwNaSiebieToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.UsuwaniePustychSegmentówToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.KorektaFolderuToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.UstawieniaToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
@@ -411,7 +410,7 @@ Partial Class Form1
         '
         'NarzedziaToolStripMenuItem
         '
-        Me.NarzedziaToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.DodajSerwerToolStripMenuItem, Me.ZnajdzDzialkeToolStripMenuItem, Me.KonwertujOziToolStripMenuItem, Me.NarzedziaSeparator1, Me.ScalanieToolStripMenuItem, Me.EksportToolStripMenuItem, Me.EksportCadToolStripMenuItem, Me.ZaawansowanyMbtilesToolStripMenuItem, Me.NakładanieWarstwNaSiebieToolStripMenuItem, Me.UsuwaniePustychSegmentówToolStripMenuItem, Me.KorektaFolderuToolStripMenuItem})
+        Me.NarzedziaToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.DodajSerwerToolStripMenuItem, Me.ZnajdzDzialkeToolStripMenuItem, Me.KonwertujOziToolStripMenuItem, Me.NarzedziaSeparator1, Me.ScalanieToolStripMenuItem, Me.EksportToolStripMenuItem, Me.EksportCadToolStripMenuItem, Me.ZaawansowanyMbtilesToolStripMenuItem, Me.UsuwaniePustychSegmentówToolStripMenuItem, Me.KorektaFolderuToolStripMenuItem})
         Me.NarzedziaToolStripMenuItem.Name = "NarzedziaToolStripMenuItem"
         Me.NarzedziaToolStripMenuItem.Size = New System.Drawing.Size(70, 20)
         Me.NarzedziaToolStripMenuItem.Text = "Narzędzia"
@@ -465,16 +464,11 @@ Partial Class Form1
         Me.EksportCadToolStripMenuItem.Text = "Eksport do CAD (DXF, skrypt SCR, LISP)..."
         Me.EksportCadToolStripMenuItem.ToolTipText = "Rysunek DXF i skrypt SCR dla AutoCAD, AutoCAD LT, BricsCAD, ZWCAD: rastry na właściwych współrzędnych, obrys i siatka segmentów"
         '
-        'NakładanieWarstwNaSiebieToolStripMenuItem
         '
         Me.ZaawansowanyMbtilesToolStripMenuItem.Name = "ZaawansowanyMbtilesToolStripMenuItem"
         Me.ZaawansowanyMbtilesToolStripMenuItem.Size = New System.Drawing.Size(315, 22)
         Me.ZaawansowanyMbtilesToolStripMenuItem.Text = "Zaawansowany wielowarstwowy MBTiles..."
         Me.ZaawansowanyMbtilesToolStripMenuItem.ToolTipText = "Kompilacja pliku MBTiles z różnych warstw i poziomów zoom (np. Topo 50k -> Topo 10k -> Ortofoto)"
-                Me.NakładanieWarstwNaSiebieToolStripMenuItem.Name = "NakładanieWarstwNaSiebieToolStripMenuItem"
-        Me.NakładanieWarstwNaSiebieToolStripMenuItem.ShortcutKeys = CType((System.Windows.Forms.Keys.Control Or System.Windows.Forms.Keys.N), System.Windows.Forms.Keys)
-        Me.NakładanieWarstwNaSiebieToolStripMenuItem.Size = New System.Drawing.Size(315, 22)
-        Me.NakładanieWarstwNaSiebieToolStripMenuItem.Text = "Nakładanie dwóch map png na siebie"
         '
         'UsuwaniePustychSegmentówToolStripMenuItem
         '
@@ -1611,7 +1605,6 @@ Partial Class Form1
     Friend WithEvents DodajSerwerToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents NarzedziaSeparator1 As System.Windows.Forms.ToolStripSeparator
     Friend WithEvents btnDodajSerwer As System.Windows.Forms.Button
-    Friend WithEvents NakładanieWarstwNaSiebieToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents UstawieniaToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents HelpToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents PomocOnlineToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem

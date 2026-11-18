@@ -66,7 +66,6 @@ Tytuł okna podaje nazwę i numer wersji programu (np. `MapoTero {{ site.wersja_
 | | Eksport mapy (KMZ, JNX, MBTiles, SQLiteDB, OruxMaps, GeoTIFF) | <kbd>Ctrl</kbd>+<kbd>E</kbd> | [Eksport mapy](../eksport/) |
 | | Eksport do CAD (DXF, skrypt SCR, LISP)... | | [Eksport do CAD](../cad/) |
 | | Zaawansowany wielowarstwowy MBTiles... | | [Wielowarstwowy MBTiles](../mbtiles-wielowarstwowy/) |
-| | Nakładanie dwóch map png na siebie | <kbd>Ctrl</kbd>+<kbd>N</kbd> | [Narzędzia dodatkowe](../narzedzia/#nakładanie-dwóch-map-png) |
 | | Usuwanie pustych segmentów | <kbd>Ctrl</kbd>+<kbd>U</kbd> | [Narzędzia dodatkowe](../narzedzia/#usuwanie-pustych-segmentów) |
 | | Korekta i optymalizacja obrazów w folderze... | | [Narzędzia dodatkowe](../narzedzia/#korekta-i-optymalizacja-obrazów-w-folderze) |
 | **Ustawienia** | | | okno [Ustawienia](../ustawienia/) |

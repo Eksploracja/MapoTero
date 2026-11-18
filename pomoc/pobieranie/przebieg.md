@@ -105,7 +105,7 @@ Nie działa w trybie TrekBuddy ani przy odświeżaniu mapy.
 
 W trakcie pobierania program blokuje zmiany, które rozjechałyby parametry sesji z pobieranymi segmentami:
 zmianę zbioru map i warstw, zaznaczanie obszaru, wczytywanie i zapis sesji, okno *Ustawienia*, scalanie,
-usuwanie map, dodawanie serwera, nakładanie map i usuwanie pustych segmentów. Przy próbie program wyświetla
+usuwanie map, dodawanie serwera i usuwanie pustych segmentów. Przy próbie program wyświetla
 *„… będzie możliwe po zakończeniu lub przerwaniu pobierania segmentów”*.
 
 ---

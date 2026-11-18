@@ -108,6 +108,8 @@ Public Class UstawieniaProgramu
 
 #Region "Foldery"
     Public Property FolderSegmentow As String = ""
+    'foldery usuniętego narzędzia nakładania dwóch map PNG - zapisywane dalej, żeby lastsettings.txt miał te same
+    'wpisy co w starszych wersjach programu (wersje sprzed 3.12 czytały plik po kolei, bez nazw)
     Public Property FolderWarstwy1 As String = ""
     Public Property FolderWarstwy2 As String = ""
     Public Property FolderWynikowy As String = ""
@@ -261,7 +263,7 @@ Public Class UstawieniaProgramu
     ''' <summary>
     ''' Tylko parametry nowej sesji z lastsettings.txt: przedrostek, format, przezroczystość i numeracja segmentów.
     ''' Nowa sesja wczytywała cały plik, a program zapisuje go dopiero przy zamknięciu - ustawienia zmienione od
-    ''' uruchomienia (korekta obrazu, opcje scalania i eksportu do CAD, foldery nakładania map) wracały do starych wartości.
+    ''' uruchomienia (korekta obrazu, opcje scalania i eksportu do CAD, foldery dawnego nakładania map) wracały do starych wartości.
     ''' </summary>
     Public Sub WczytajParametryNowejSesji(sciezka As String)
         Dim u = PlikUstawien.Wczytaj(sciezka, KodowanieSystemowe())

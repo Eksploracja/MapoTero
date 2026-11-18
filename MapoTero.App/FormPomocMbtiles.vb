@@ -42,7 +42,6 @@ Public Enum TematPomocy
     Szukaj
     ImportOzi
     Korytarz
-    NakladanieMap
     UsuwaniePustych
     Ustawienia
     KorektaFolderu
@@ -114,7 +113,6 @@ Public Class FormPomocMbtiles
             Case TematPomocy.Szukaj : PomocSzukaj()
             Case TematPomocy.ImportOzi : PomocImportOzi()
             Case TematPomocy.Korytarz : PomocKorytarz()
-            Case TematPomocy.NakladanieMap : PomocNakladanieMap()
             Case TematPomocy.UsuwaniePustych : PomocUsuwaniePustych()
             Case TematPomocy.Ustawienia : PomocUstawienia()
             Case TematPomocy.KorektaFolderu : PomocKorektaFolderu()
@@ -287,24 +285,6 @@ Public Class FormPomocMbtiles
         DodajPunktor("Przycisk 'Wzbogać ślad o wysokości' pobiera rzeczywiste rzędne terenu z lotniczego skaningu laserowego (NMT GUGiK) dla wszystkich punktów trasy.")
         DodajPunktor("W oknie wyświetlany jest interaktywny wykres profilu z obliczoną sumą przewyższeń (podejścia, zejścia, min/max).")
         DodajPunktor("Przycisk 'Zapisz wzbogacony GPX' eksportuje plik GPX z tagami <ele> dla odbiorników i zegarków turystycznych.")
-
-        DodajStopkeOnline(_urlOnline)
-    End Sub
-
-    Private Sub PomocNakladanieMap()
-        Me.Text = "Pomoc i instrukcja - Nakładanie dwóch map na siebie"
-        _urlOnline = "https://eksploracja.github.io/MapoTero/pomoc/narzedzia/"
-
-        DodajTytul("Nakładanie dwóch warstw mapowych na siebie")
-        DodajAkapit("Narzędzie umożliwia cyfrowe zmiksowanie dwóch wcześniej pobranych zestawów segmentów o tym samym zasięgu i wymiarach w jeden wspólny zestaw.")
-
-        DodajNaglowek1("1. Warstwa dolna i górna")
-        DodajPunktor("Warstwa dolna (podkład): zazwyczaj współczesna ortofotomapa satelitarna lub mapa hipsometryczna.")
-        DodajPunktor("Warstwa górna (nakładka): mapa archiwalna, skan topograficzny lub siatka granic.")
-        DodajPunktor("Krycie suwakiem: określa stopień przezroczystości warstwy górnej (np. 50% pozwala idealnie porównać dawny przebieg dróg i lasów ze stanem obecnym).")
-
-        DodajNaglowek1("2. Wymagania")
-        DodajPunktor("Oba foldery muszą zawierać segmenty o identycznych wymiarach pikselowych i nazwach odpowiadających tej samej siatce.")
 
         DodajStopkeOnline(_urlOnline)
     End Sub

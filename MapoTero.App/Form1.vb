@@ -767,7 +767,7 @@ Public Class Form1
 
     ''' <summary>
     ''' Segmenty innej sesji w folderze: conf.txt z inną siatką, układem, serwerem lub warstwami albo brak conf.txt
-    ''' (sesja nieznana - np. folder wynikowy nakładania map) przy plikach o nazwach segmentów bieżącej sesji.
+    ''' (sesja nieznana - np. folder z segmentami spoza programu) przy plikach o nazwach segmentów bieżącej sesji.
     ''' Zwraca liczbę takich plików (0 - folder pusty, nowy albo z tą samą sesją, czyli wznowienie) i opis przyczyny.
     ''' </summary>
     Private Function SegmentyInnejSesji(folder As String, ByRef opis As String) As Integer
@@ -3164,12 +3164,6 @@ Public Class Form1
     Private Sub UsuwaniePustychSegmentowToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles UsuwaniePustychSegmentówToolStripMenuItem.Click
         If PobieranieTrwa("Usuwanie pustych segmentów") Then Exit Sub
         Usuwanie_p_seg.ShowDialog()
-    End Sub
-
-    Private Sub NakladanieWarstwToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles NakładanieWarstwNaSiebieToolStripMenuItem.Click
-        'okno nakładania zmienia folder sesji pobierania
-        If PobieranieTrwa("Nakładanie map") Then Exit Sub
-        Nakladanie_Map.ShowDialog()
     End Sub
 
     Private Sub KorektaFolderuToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles KorektaFolderuToolStripMenuItem.Click

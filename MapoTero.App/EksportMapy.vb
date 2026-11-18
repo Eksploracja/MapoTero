@@ -102,7 +102,7 @@ Public Class ZrodloSegmentow
 
     ''' <summary>
     ''' Białe piksele (np. tło warstw WMS, które nie obsługują TRANSPARENT=TRUE, albo segmentów JPEG) stają się przezroczyste -
-    ''' tak jak w narzędziu nakładania map png. Zmiana opróżnia pamięć podręczną segmentów.
+    ''' tak jak w dawnym narzędziu nakładania map png. Zmiana opróżnia pamięć podręczną segmentów.
     ''' </summary>
     Public Property BialePrzezroczyste As Boolean
         Get

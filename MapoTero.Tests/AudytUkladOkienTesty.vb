@@ -197,7 +197,6 @@ Public Class AudytUkladOkienTesty
                         Zbadaj("FormKorytarz", Function() New Global.MapoTero.FormKorytarz(New Korytarz()))
                         Zbadaj("FormPodgladMip", Function() New Global.MapoTero.FormPodgladMip(New OpcjeKorekcjiMip()))
                         Zbadaj("FormSzukajDzialki", Function() New Global.MapoTero.FormSzukajDzialki())
-                        Zbadaj("Nakladanie_Map", Function() New Global.MapoTero.Nakladanie_Map())
                         Zbadaj("usuwanie_p_seg", Function() New Global.MapoTero.usuwanie_p_seg())
                         Zbadaj("AboutBox1", Function() New Global.MapoTero.AboutBox1())
                         Zbadaj("Instrukcja_Obslugi", Function() New Global.MapoTero.Instrukcja_Obslugi())
