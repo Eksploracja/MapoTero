@@ -13,7 +13,7 @@ Pełny opis programu: każde okno, każda opcja i gotowe sposoby pracy dla najcz
 
 {: .informacja }
 Skrócony opis obsługi znajdziesz również w [skróconej instrukcji]({{ '/#skrócona-instrukcja-obsługi' | relative_url }})
-na stronie głównej oraz w samym programie (menu *Pomoc > Podstawowa instrukcja obsługi*, klawisz <kbd>F2</kbd>).
+na stronie głównej oraz w samym programie (menu *Pomoc > Krótka instrukcja (bez internetu)*).
 
 ---
 

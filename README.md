@@ -53,6 +53,7 @@ Program to jeden plik **MapoTero.exe** (wersja 64-bitowa dla systemu Windows), d
   * **Wielowarstwowy MBTiles na laptopach 1366×768:** okno zmniejsza się do wysokości ekranu z paskiem przewijania – przyciski *Kompiluj MBTiles* i *Zamknij* były poza ekranem,
   * **Usunięte narzędzie *Nakładanie dwóch map png na siebie*:** to samo, z regulacją krycia, dla map o różnej siatce i w każdym formacie (także GeoTIFF), robią panel *Wybrane warstwy* przy pobieraniu oraz okno *Eksport mapy* z nakładką dla dwóch pobranych sesji; skrót Ctrl+N jest wolny,
   * **Jednolite nazwy w oknach:** menu *Narzędzia > Scalanie segmentów* (dawniej *Łączenie segmentów*) i przycisk *Scal segmenty* (dawniej *Złącz segmenty*); przyciski zaczynają się wielką literą we wszystkich oknach (np. *Zmień folder*, *Dodaj warstwę...*, *Oszacuj rozmiar*); pokazanie wyniku w Eksploratorze to wszędzie *Pokaż w folderze*; okno *O programie* jest po polsku, a komunikaty mają tytuły z nazwą okna,
+  * **Uporządkowane menu *Pomoc*:** pozycje mają nazwy, z których widać różnicę: *Podręcznik użytkownika (online)* (F1) i *Krótka instrukcja (bez internetu)*; nowe pozycje *Zgłoś błąd lub pomysł (GitHub)*, *Otwórz folder danych programu* (ustawienia, pobrane mapy i `awarie.log` – także gdy program zapisuje dane w `%LocalAppData%\MapoTero`), *Co nowego w programie* i *Wesprzyj rozwój programu*; klawisze F2 i F3 nie otwierają już instrukcji i forum, bo w Windows służą do innych czynności; w oknie *O programie* jest przycisk *Wesprzyj rozwój programu*,
   * **Czytniki ekranu:** pola zasięgu i siatki w oknie głównym mają właściwe nazwy dostępności,
   * **Szybkie usuwanie do Kosza:** usuwanie pustych segmentów i *Usuń pobrane* dla folderu spoza `download` trwa sekundy zamiast minut (300 plików: ok. 1 s zamiast 21 s) – przy ponad 50 plikach trafiają one do Kosza jako jeden folder „MapoTero - usunięte pliki (data i godzina)”,
   * **Komunikat o złym zasięgu pobierania** mówi, co poprawić (np. „X górne (północ) musi być większe od X dolnego”), zamiast ogólnego „Niepoprawne współrzędne X, Y”,
@@ -240,7 +241,8 @@ Zbiory map to pliki tekstowe w katalogu `warstwy`: w pierwszym wierszu adres ser
 
 * 📖 **Podręcznik użytkownika online:** [eksploracja.github.io/MapoTero/pomoc/](https://eksploracja.github.io/MapoTero/pomoc/) – pełna dokumentacja z opisem wszystkich okien, narzędzi, formatów plików i poradnikami dla aplikacji mobilnych oraz CAD,
 * 👥 **Oficjalny fanpage na Facebooku:** [facebook.com/mapotero.opensource](https://www.facebook.com/mapotero.opensource) – aktualności, informacje o kolejnych wydaniach, dyskusje i ciekawostki,
-* 💬 **Dyskusja i wsparcie techniczne:** dział *"Programy GPS/GIS wspierające eksplorację"* na [Pomorskim Forum Eksploracyjnym](https://forum.eksploracja.pl/viewforum.php?f=205).
+* 💬 **Dyskusja i wsparcie techniczne:** dział *"Programy GPS/GIS wspierające eksplorację"* na [Pomorskim Forum Eksploracyjnym](https://forum.eksploracja.pl/viewforum.php?f=205),
+* ☕ **Wesprzyj rozwój programu:** [buycoffee.to/mapy](https://buycoffee.to/mapy) – postaw kawę autorowi (także z menu *Pomoc* w programie).
 
 ---
 

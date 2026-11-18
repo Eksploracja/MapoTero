@@ -3161,6 +3161,26 @@ Public Class Form1
         Instrukcja_Obslugi.ShowDialog()
     End Sub
 
+    Private Sub ZglosBladToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles ZglosBladToolStripMenuItem.Click
+        OtworzStrone(AdresZgloszenBledow, "Zgłoś błąd lub pomysł")
+    End Sub
+
+    ''' <summary>
+    ''' Folder danych bywa w %LocalAppData%\MapoTero (program w Program Files), więc użytkownik nie znajduje
+    ''' lastsettings.txt, pobranych map ani awarie.log obok exe.
+    ''' </summary>
+    Private Sub FolderDanychToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles FolderDanychToolStripMenuItem.Click
+        OtworzFolder(FolderDanych)
+    End Sub
+
+    Private Sub CoNowegoToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles CoNowegoToolStripMenuItem.Click
+        OtworzStrone(AdresWydan, "Co nowego w programie")
+    End Sub
+
+    Private Sub WesprzyjToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles WesprzyjToolStripMenuItem.Click
+        OtworzStrone(AdresWsparcia, "Wesprzyj rozwój programu")
+    End Sub
+
     Private Sub UsuwaniePustychSegmentowToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles UsuwaniePustychSegmentówToolStripMenuItem.Click
         If PobieranieTrwa("Usuwanie pustych segmentów") Then Exit Sub
         Usuwanie_p_seg.ShowDialog()

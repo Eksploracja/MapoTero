@@ -198,6 +198,12 @@ Public Module Program
     ''' <summary>Adres zgłaszania błędów programu.</summary>
     Public Const AdresZgloszenBledow As String = "https://github.com/Eksploracja/MapoTero/issues"
 
+    ''' <summary>Lista wydań programu z opisem zmian (menu Pomoc > Co nowego w programie).</summary>
+    Public Const AdresWydan As String = "https://github.com/Eksploracja/MapoTero/releases"
+
+    ''' <summary>Strona wsparcia autora programu (menu Pomoc > Wesprzyj rozwój programu, okno O programie).</summary>
+    Public Const AdresWsparcia As String = "https://buycoffee.to/mapy"
+
     ''' <summary>Plik z opisem nieobsłużonych błędów programu (w folderze danych).</summary>
     Public Const NazwaPlikuAwarii As String = "awarie.log"
 
@@ -341,6 +347,15 @@ Public Module Program
             Return False
         End Try
     End Function
+
+    ''' <summary>Otwiera adres w domyślnej przeglądarce internetowej; błąd pokazuje w komunikacie z podanym tytułem.</summary>
+    Public Sub OtworzStrone(adres As String, tytul As String)
+        Try
+            Process.Start(New ProcessStartInfo(adres) With {.UseShellExecute = True})
+        Catch ex As Exception
+            MsgBox("Nie można otworzyć strony " & adres & ": " & Global.MapoTero.Core.OpisBledu.Z(ex), MsgBoxStyle.Exclamation, tytul)
+        End Try
+    End Sub
 
     Public Sub OtworzFolder(folder As String)
         Try

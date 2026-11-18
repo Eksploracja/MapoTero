@@ -87,6 +87,11 @@ Partial Class Form1
         Me.PomocPomorskieForumEksploracyjneToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.HelpSeparator1 = New System.Windows.Forms.ToolStripSeparator()
         Me.AboutToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.ZglosBladToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.FolderDanychToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.HelpSeparator2 = New System.Windows.Forms.ToolStripSeparator()
+        Me.CoNowegoToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.WesprzyjToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.MenuStrip1 = New System.Windows.Forms.MenuStrip()
         Me.Label47 = New System.Windows.Forms.Label()
         Me.Label46 = New System.Windows.Forms.Label()
@@ -493,7 +498,7 @@ Partial Class Form1
         '
         'HelpToolStripMenuItem
         '
-        Me.HelpToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.PomocOnlineToolStripMenuItem, Me.InstrukcjaObsługiToolStripMenuItem, Me.PomocPomorskieForumEksploracyjneToolStripMenuItem, Me.HelpSeparator1, Me.AboutToolStripMenuItem})
+        Me.HelpToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.PomocOnlineToolStripMenuItem, Me.InstrukcjaObsługiToolStripMenuItem, Me.HelpSeparator1, Me.PomocPomorskieForumEksploracyjneToolStripMenuItem, Me.ZglosBladToolStripMenuItem, Me.FolderDanychToolStripMenuItem, Me.HelpSeparator2, Me.CoNowegoToolStripMenuItem, Me.WesprzyjToolStripMenuItem, Me.AboutToolStripMenuItem})
         Me.HelpToolStripMenuItem.Name = "HelpToolStripMenuItem"
         Me.HelpToolStripMenuItem.Size = New System.Drawing.Size(57, 20)
         Me.HelpToolStripMenuItem.Text = "Pomoc"
@@ -503,22 +508,22 @@ Partial Class Form1
         Me.PomocOnlineToolStripMenuItem.Name = "PomocOnlineToolStripMenuItem"
         Me.PomocOnlineToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F1
         Me.PomocOnlineToolStripMenuItem.Size = New System.Drawing.Size(335, 22)
-        Me.PomocOnlineToolStripMenuItem.Text = "Podręcznik użytkownika (pomoc online)"
+        Me.PomocOnlineToolStripMenuItem.Text = "Podręcznik użytkownika (online)"
         Me.PomocOnlineToolStripMenuItem.ToolTipText = "Otwiera pełny podręcznik użytkownika i pomoc programu w przeglądarce internetowej"
         '
         'InstrukcjaObsługiToolStripMenuItem
         '
         Me.InstrukcjaObsługiToolStripMenuItem.Name = "InstrukcjaObsługiToolStripMenuItem"
-        Me.InstrukcjaObsługiToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F2
         Me.InstrukcjaObsługiToolStripMenuItem.Size = New System.Drawing.Size(335, 22)
-        Me.InstrukcjaObsługiToolStripMenuItem.Text = "Podstawowa instrukcja obsługi"
+        Me.InstrukcjaObsługiToolStripMenuItem.Text = "Krótka instrukcja (bez internetu)"
+        Me.InstrukcjaObsługiToolStripMenuItem.ToolTipText = "Otwiera wbudowaną skróconą instrukcję obsługi w oknie programu"
         '
         'PomocPomorskieForumEksploracyjneToolStripMenuItem
         '
         Me.PomocPomorskieForumEksploracyjneToolStripMenuItem.Name = "PomocPomorskieForumEksploracyjneToolStripMenuItem"
-        Me.PomocPomorskieForumEksploracyjneToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F3
         Me.PomocPomorskieForumEksploracyjneToolStripMenuItem.Size = New System.Drawing.Size(335, 22)
-        Me.PomocPomorskieForumEksploracyjneToolStripMenuItem.Text = "Pomoc na Pomorskim Forum Eksploracyjnym"
+        Me.PomocPomorskieForumEksploracyjneToolStripMenuItem.Text = "Zadaj pytanie na forum (PFE)"
+        Me.PomocPomorskieForumEksploracyjneToolStripMenuItem.ToolTipText = "Otwiera dział MapoTero na Pomorskim Forum Eksploracyjnym w przeglądarce internetowej"
         '
         'HelpSeparator1
         '
@@ -530,6 +535,39 @@ Partial Class Form1
         Me.AboutToolStripMenuItem.Name = "AboutToolStripMenuItem"
         Me.AboutToolStripMenuItem.Size = New System.Drawing.Size(335, 22)
         Me.AboutToolStripMenuItem.Text = "O programie"
+        '
+        'ZglosBladToolStripMenuItem
+        '
+        Me.ZglosBladToolStripMenuItem.Name = "ZglosBladToolStripMenuItem"
+        Me.ZglosBladToolStripMenuItem.Size = New System.Drawing.Size(335, 22)
+        Me.ZglosBladToolStripMenuItem.Text = "Zgłoś błąd lub pomysł (GitHub)"
+        Me.ZglosBladToolStripMenuItem.ToolTipText = "Otwiera stronę zgłoszeń programu na GitHubie w przeglądarce internetowej"
+        '
+        'FolderDanychToolStripMenuItem
+        '
+        Me.FolderDanychToolStripMenuItem.Name = "FolderDanychToolStripMenuItem"
+        Me.FolderDanychToolStripMenuItem.Size = New System.Drawing.Size(335, 22)
+        Me.FolderDanychToolStripMenuItem.Text = "Otwórz folder danych programu"
+        Me.FolderDanychToolStripMenuItem.ToolTipText = "Otwiera folder z ustawieniami (lastsettings.txt), pobranymi mapami (download) i plikiem awarie.log"
+        '
+        'HelpSeparator2
+        '
+        Me.HelpSeparator2.Name = "HelpSeparator2"
+        Me.HelpSeparator2.Size = New System.Drawing.Size(332, 6)
+        '
+        'CoNowegoToolStripMenuItem
+        '
+        Me.CoNowegoToolStripMenuItem.Name = "CoNowegoToolStripMenuItem"
+        Me.CoNowegoToolStripMenuItem.Size = New System.Drawing.Size(335, 22)
+        Me.CoNowegoToolStripMenuItem.Text = "Co nowego w programie"
+        Me.CoNowegoToolStripMenuItem.ToolTipText = "Otwiera listę wydań programu z opisem zmian w przeglądarce internetowej"
+        '
+        'WesprzyjToolStripMenuItem
+        '
+        Me.WesprzyjToolStripMenuItem.Name = "WesprzyjToolStripMenuItem"
+        Me.WesprzyjToolStripMenuItem.Size = New System.Drawing.Size(335, 22)
+        Me.WesprzyjToolStripMenuItem.Text = "Wesprzyj rozwój programu"
+        Me.WesprzyjToolStripMenuItem.ToolTipText = "Postaw kawę autorowi programu (buycoffee.to)"
         '
         'MenuStrip1
         '
@@ -1610,6 +1648,11 @@ Partial Class Form1
     Friend WithEvents PomocOnlineToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents HelpSeparator1 As System.Windows.Forms.ToolStripSeparator
     Friend WithEvents AboutToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
+    Friend WithEvents ZglosBladToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
+    Friend WithEvents FolderDanychToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
+    Friend WithEvents HelpSeparator2 As System.Windows.Forms.ToolStripSeparator
+    Friend WithEvents CoNowegoToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
+    Friend WithEvents WesprzyjToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents PomocPomorskieForumEksploracyjneToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents MenuStrip1 As System.Windows.Forms.MenuStrip
     Friend WithEvents txtSzukajWarstwy As System.Windows.Forms.TextBox

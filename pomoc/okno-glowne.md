@@ -69,10 +69,14 @@ Tytuł okna podaje nazwę i numer wersji programu (np. `MapoTero {{ site.wersja_
 | | Usuwanie pustych segmentów | <kbd>Ctrl</kbd>+<kbd>U</kbd> | [Narzędzia dodatkowe](../narzedzia/#usuwanie-pustych-segmentów) |
 | | Korekta i optymalizacja obrazów w folderze... | | [Narzędzia dodatkowe](../narzedzia/#korekta-i-optymalizacja-obrazów-w-folderze) |
 | **Ustawienia** | | | okno [Ustawienia](../ustawienia/) |
-| **Pomoc** | Podręcznik użytkownika (pomoc online) | <kbd>F1</kbd> | otwiera ten podręcznik w przeglądarce |
-| | Podstawowa instrukcja obsługi | <kbd>F2</kbd> | skrócona instrukcja wbudowana w program |
-| | Pomoc na Pomorskim Forum Eksploracyjnym | <kbd>F3</kbd> | otwiera forum w przeglądarce |
-| | O programie | | wersja i autorzy |
+| **Pomoc** | Podręcznik użytkownika (online) | <kbd>F1</kbd> | otwiera ten podręcznik w przeglądarce |
+| | Krótka instrukcja (bez internetu) | | skrócona instrukcja wbudowana w program |
+| | Zadaj pytanie na forum (PFE) | | otwiera dział MapoTero na Pomorskim Forum Eksploracyjnym |
+| | Zgłoś błąd lub pomysł (GitHub) | | otwiera stronę zgłoszeń programu na GitHubie |
+| | Otwórz folder danych programu | | folder z `lastsettings.txt`, folderem `download` i `awarie.log` ([Gdzie program zapisuje dane](../pierwsze-kroki/dane-programu/)) |
+| | Co nowego w programie | | lista wydań z opisem zmian |
+| | Wesprzyj rozwój programu | | strona [buycoffee.to/mapy](https://buycoffee.to/mapy) – postaw kawę autorowi |
+| | O programie | | wersja i autorzy; przycisk *Wesprzyj rozwój programu* |
 
 Menu *Sesja pobierania* otwiera też <kbd>Alt</kbd>+<kbd>S</kbd>. Każde samodzielne okno narzędziowe ma ponadto w dolnej części przycisk **Pomoc** (oraz klawisz <kbd>F1</kbd>), otwierający dedykowane okno instrukcji z bezpośrednim odnośnikiem do odpowiedniego rozdziału podręcznika online.
 
