@@ -781,7 +781,7 @@ Public Class FormDodajSerwer
                                             "Podgląd próbki WMTS", MessageBoxButtons.OK, MessageBoxIcon.Warning)
                         End If
                     Else
-                        MessageBox.Show("Wybierz warstwę, aby pobrać próbkę.", "Informacja", MessageBoxButtons.OK, MessageBoxIcon.Information)
+                        MessageBox.Show("Wybierz warstwę, aby pobrać próbkę.", "Podgląd próbki", MessageBoxButtons.OK, MessageBoxIcon.Information)
                     End If
                 End Using
             End Using

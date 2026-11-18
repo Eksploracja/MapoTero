@@ -49,7 +49,7 @@ albo z kilkoma mapami nałożonymi na siebie.
 
 | Grupa | Zawartość |
 |---|---|
-| *Folder segmentów (z plikiem conf.txt)* | folder eksportowanej sesji. Opcja **zmień folder** wskazuje inną sesję. Pod spodem: liczba segmentów (i ile z nich istnieje), piksel, układ, opis mapy, źródło danych i data pobrania |
+| *Folder segmentów (z plikiem conf.txt)* | folder eksportowanej sesji. Opcja **Zmień folder** wskazuje inną sesję. Pod spodem: liczba segmentów (i ile z nich istnieje), piksel, układ, opis mapy, źródło danych i data pobrania |
 | *Format* | Garmin BirdsEye (JNX), KMZ dla Garmin (z podziałem na tomy), GeoTIFF, KMZ, MBTiles, SQLiteDB, OruxMaps. Przycisk **Wielowarstwowy...** otwiera [kreator wielowarstwowego MBTiles](../mbtiles-wielowarstwowy/) |
 | *Kafle Web Mercator (MBTiles, SQLiteDB, OruxMaps, JNX)* | zakres poziomów powiększenia, kafle PNG. Zobacz: [Poziomy powiększenia i rozmiar pliku](powiekszenia/) |
 | *Warstwy i przezroczystość* | nakładka, białe tło przezroczyste, warstwy z innych folderów z kryciem oraz filtr MIP dla Garmina. Zobacz: [Nakładki i łączenie warstw](nakladki/) |

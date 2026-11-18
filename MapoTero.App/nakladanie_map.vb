@@ -151,7 +151,7 @@ Public Class Nakladanie_Map
 
         'ścieżka względna (np. wpisane „abc”) wskazywałaby folder względem bieżącego katalogu procesu, a nie folderu programu
         If Not Path.IsPathRooted(dolna) OrElse Not Path.IsPathRooted(gorna) OrElse Not Path.IsPathRooted(wynik) Then
-            MessageBox.Show("Podaj pełne ścieżki folderów (np. C:\Mapy\dolna\) albo wskaż je przyciskami ""dolna"", ""górna"" i ""połączone"".",
+            MessageBox.Show("Podaj pełne ścieżki folderów (np. C:\Mapy\dolna\) albo wskaż je przyciskami ""Dolna"", ""Górna"" i ""Połączone"".",
                             "Nakładanie map", MessageBoxButtons.OK, MessageBoxIcon.Exclamation)
             Exit Sub
         End If
@@ -199,7 +199,7 @@ Public Class Nakladanie_Map
             Me.UseWaitCursor = False
         End Try
 
-        MsgBox("Pliki zostały zapisane (" & liczba & ")", MsgBoxStyle.Information, "Informacja")
+        MsgBox("Pliki zostały zapisane (" & liczba & ")", MsgBoxStyle.Information, "Nakładanie map")
         OtworzFolder(wynik)
     End Sub
 

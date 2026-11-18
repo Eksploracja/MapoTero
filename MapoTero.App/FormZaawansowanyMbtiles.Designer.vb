@@ -319,12 +319,12 @@ Partial Class FormZaawansowanyMbtiles
         '
         Me.txtPlikWynikowy.Location = New System.Drawing.Point(89, 22)
         Me.txtPlikWynikowy.Name = "txtPlikWynikowy"
-        Me.txtPlikWynikowy.Size = New System.Drawing.Size(345, 20)
+        Me.txtPlikWynikowy.Size = New System.Drawing.Size(325, 20)
         Me.txtPlikWynikowy.TabIndex = 1
         '
         'btnWybierzPlik
         '
-        Me.btnWybierzPlik.Location = New System.Drawing.Point(440, 20)
+        Me.btnWybierzPlik.Location = New System.Drawing.Point(420, 20)
         Me.btnWybierzPlik.Name = "btnWybierzPlik"
         Me.btnWybierzPlik.Size = New System.Drawing.Size(75, 23)
         Me.btnWybierzPlik.TabIndex = 2
@@ -333,11 +333,11 @@ Partial Class FormZaawansowanyMbtiles
         '
         'btnPokazWFolderze
         '
-        Me.btnPokazWFolderze.Location = New System.Drawing.Point(520, 20)
+        Me.btnPokazWFolderze.Location = New System.Drawing.Point(500, 20)
         Me.btnPokazWFolderze.Name = "btnPokazWFolderze"
-        Me.btnPokazWFolderze.Size = New System.Drawing.Size(80, 23)
+        Me.btnPokazWFolderze.Size = New System.Drawing.Size(100, 23)
         Me.btnPokazWFolderze.TabIndex = 3
-        Me.btnPokazWFolderze.Text = "Pokaż..."
+        Me.btnPokazWFolderze.Text = "Pokaż w folderze"
         Me.ToolTip1.SetToolTip(Me.btnPokazWFolderze, "Otwiera folder i zaznacza plik MBTiles w Eksploratorze Windows")
         Me.btnPokazWFolderze.UseVisualStyleBackColor = True
         '

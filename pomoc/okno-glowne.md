@@ -62,7 +62,7 @@ Tytuł okna podaje nazwę i numer wersji programu (np. `MapoTero {{ site.wersja_
 | **Narzędzia** | Dodaj nowy serwer WMS / WMTS... | | [Kreator serwerów](../serwery/kreator/) |
 | | Wyszukaj miejscowość lub działkę... | <kbd>Ctrl</kbd>+<kbd>F</kbd> | [Wyszukiwarka miejscowości i działek](../obszar/zaznaczanie/#wyszukiwarka-miejscowości-adresów-i-działek-katastralnych) (<kbd>Ctrl</kbd>+<kbd>D</kbd> dla działek) |
 | | Konwertuj mapę OziExplorer (.map)... | | [Konwerter map OziExplorer](../narzedzia/#konwerter-map-oziexplorer-map) |
-| | Łączenie segmentów | <kbd>Ctrl</kbd>+<kbd>L</kbd> | [Scalanie segmentów](../scalanie/) |
+| | Scalanie segmentów | <kbd>Ctrl</kbd>+<kbd>L</kbd> | [Scalanie segmentów](../scalanie/) |
 | | Eksport mapy (KMZ, JNX, MBTiles, SQLiteDB, OruxMaps, GeoTIFF) | <kbd>Ctrl</kbd>+<kbd>E</kbd> | [Eksport mapy](../eksport/) |
 | | Eksport do CAD (DXF, skrypt SCR, LISP)... | | [Eksport do CAD](../cad/) |
 | | Zaawansowany wielowarstwowy MBTiles... | | [Wielowarstwowy MBTiles](../mbtiles-wielowarstwowy/) |

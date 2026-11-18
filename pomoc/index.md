@@ -49,7 +49,7 @@ Instrukcję od instalacji do pierwszej gotowej mapy znajdziesz w rozdziale [Pier
 ## Jak korzystać z pomocy
 
 * Menu po lewej stronie prowadzi przez rozdziały w kolejności pracy z programem. Pole wyszukiwania znajduje dowolne słowo w całej pomocy.
-* Nazwy elementów programu zapisane są *kursywą*, dokładnie tak jak w oknach. Ścieżki menu mają postać *Narzędzia > Łączenie segmentów*.
+* Nazwy elementów programu zapisane są *kursywą*, dokładnie tak jak w oknach. Ścieżki menu mają postać *Narzędzia > Scalanie segmentów*.
 * Każda strona zaczyna się od najkrótszej drogi, a szczegóły i opcje są opisane niżej.
 * Współrzędne: w programie **X oznacza północ, a Y wschód** (konwencja geodezyjna). W programach CAD i GIS osie są przypisane odwrotnie.
 

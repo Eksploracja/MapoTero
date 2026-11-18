@@ -359,7 +359,7 @@ Public Class FormKorektaFolderu
         Return CInt(Math.Max(1L, Math.Min(Environment.ProcessorCount, BudzetPamieci \ (piksele * 20))))
     End Function
 
-    ''' <summary>Przedrostek scalonego arkusza zapisywanego przez okno złączania segmentów (Form3).</summary>
+    ''' <summary>Przedrostek scalonego arkusza zapisywanego przez okno scalania segmentów (Form3).</summary>
     Friend Const PrzedrostekArkusza As String = "_scalone_segmenty_"
 
     ''' <summary>

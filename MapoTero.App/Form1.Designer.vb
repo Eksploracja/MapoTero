@@ -449,7 +449,7 @@ Partial Class Form1
         Me.ScalanieToolStripMenuItem.Name = "ScalanieToolStripMenuItem"
         Me.ScalanieToolStripMenuItem.ShortcutKeys = CType((System.Windows.Forms.Keys.Control Or System.Windows.Forms.Keys.L), System.Windows.Forms.Keys)
         Me.ScalanieToolStripMenuItem.Size = New System.Drawing.Size(315, 22)
-        Me.ScalanieToolStripMenuItem.Text = "Łączenie segmentów"
+        Me.ScalanieToolStripMenuItem.Text = "Scalanie segmentów"
         '
         'EksportToolStripMenuItem
         '

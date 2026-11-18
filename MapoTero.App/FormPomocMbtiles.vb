@@ -125,10 +125,10 @@ Public Class FormPomocMbtiles
 #Region "Treści pomocy dla poszczególnych narzędzi"
 
     Private Sub PomocScalanie()
-        Me.Text = "Pomoc i instrukcja - Złączanie pobranych segmentów"
+        Me.Text = "Pomoc i instrukcja - Scalanie segmentów"
         _urlOnline = "https://eksploracja.github.io/MapoTero/pomoc/scalanie/"
 
-        DodajTytul("Złączanie pobranych segmentów w jeden arkusz mapy")
+        DodajTytul("Scalanie pobranych segmentów w jeden arkusz mapy")
         DodajAkapit("Narzędzie łączy pobrane kafelki i segmenty rastrowe z folderu sesji w jeden jednolity, wielki arkusz mapy o wysokiej rozdzielczości. " &
                     "Wszelkie parametry zasięgu i siatki są wczytywane automatycznie z pliku konfiguracyjnego conf.txt znajdującego się w folderze segmentów.")
 

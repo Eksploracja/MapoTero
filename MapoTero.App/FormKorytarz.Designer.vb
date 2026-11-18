@@ -65,7 +65,7 @@ Partial Class FormKorytarz
         Me.btnPlik.Name = "btnPlik"
         Me.btnPlik.Size = New System.Drawing.Size(90, 23)
         Me.btnPlik.TabIndex = 2
-        Me.btnPlik.Text = "wybierz..."
+        Me.btnPlik.Text = "Wybierz..."
         Me.ToolTip1.SetToolTip(Me.btnPlik, "Ślad lub trasa zapisana np. w Mapy.com, Komoot, Locus Map, OsmAnd albo Google Earth.")
         Me.btnPlik.UseVisualStyleBackColor = True
         '

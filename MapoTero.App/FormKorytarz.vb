@@ -194,9 +194,9 @@ Public Class FormKorytarz
                 Else
                     Korytarz.ZapiszGpxZWysokosciami(dlgZapiszGpx.FileName, _korytarz.Nazwa, _korytarz.Linie, _linieWysokosci)
                 End If
-                MsgBox("Zapisano ślad GPX z wysokościami NMT do:" & vbCrLf & dlgZapiszGpx.FileName, MsgBoxStyle.Information)
+                MsgBox("Zapisano ślad GPX z wysokościami NMT do:" & vbCrLf & dlgZapiszGpx.FileName, MsgBoxStyle.Information, "Obszar wzdłuż trasy")
             Catch ex As Exception
-                MsgBox("Błąd zapisu pliku GPX: " & OpisBledu.Z(ex), MsgBoxStyle.Critical)
+                MsgBox("Błąd zapisu pliku GPX: " & OpisBledu.Z(ex), MsgBoxStyle.Critical, "Obszar wzdłuż trasy")
             End Try
         End If
     End Sub

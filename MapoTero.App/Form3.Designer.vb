@@ -94,7 +94,7 @@ Partial Class Form3
         Me.btnZmienFolder.Name = "btnZmienFolder"
         Me.btnZmienFolder.Size = New System.Drawing.Size(79, 20)
         Me.btnZmienFolder.TabIndex = 2
-        Me.btnZmienFolder.Text = "zmień folder"
+        Me.btnZmienFolder.Text = "Zmień folder"
         Me.btnZmienFolder.UseVisualStyleBackColor = True
         '
         'lblFormatArkusza
@@ -130,7 +130,7 @@ Partial Class Form3
         Me.btnScal.Name = "btnScal"
         Me.btnScal.Size = New System.Drawing.Size(117, 54)
         Me.btnScal.TabIndex = 26
-        Me.btnScal.Text = "Złącz segmenty"
+        Me.btnScal.Text = "Scal segmenty"
         Me.btnScal.UseVisualStyleBackColor = True
         '
         'grpParametry
@@ -586,7 +586,7 @@ Partial Class Form3
         Me.Controls.Add(Me.txtFolder)
         Me.Icon = CType(resources.GetObject("$this.Icon"), System.Drawing.Icon)
         Me.Name = "Form3"
-        Me.Text = "Złączanie segmentów w jeden plik"
+        Me.Text = "Scalanie segmentów w jeden arkusz"
         Me.grpParametry.ResumeLayout(False)
         Me.grpParametry.PerformLayout()
         Me.groupBox2.ResumeLayout(False)

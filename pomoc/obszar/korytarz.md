@@ -25,7 +25,7 @@ krętej to wielokrotnie mniej danych.
 
 1. Ustaw zbiór map, warstwę, segment i piksel.
 2. Wybierz *Sesja pobierania > obszar pobierania wzdłuż trasy (GPX, KML, KMZ)...* albo po prostu przeciągnij plik trasy z Eksploratora Windows na okno programu lub mapę (Drag &amp; Drop).
-3. Kliknij **wybierz...** i wskaż plik trasy (jeśli nie przeciągnięto go myszą).
+3. Kliknij **Wybierz...** i wskaż plik trasy (jeśli nie przeciągnięto go myszą).
 4. Ustaw *Szerokość pasa po każdej stronie trasy [m]* i kliknij **OK**.
 5. Sprawdź na mapie przebieg trasy (czerwona linia) oraz siatkę segmentów (kolor niebieski). W komunikacie u dołu zobaczysz liczbę wyznaczonych segmentów.
 6. Kliknij **Pobierz**.
@@ -54,7 +54,7 @@ Takie pliki generują serwisy i aplikacje turystyczne (np. Mapy.com, Komoot, Loc
 
 | Pole | Opis |
 |---|---|
-| *Plik trasy (GPX, KML, KMZ)* | przycisk **wybierz...** wskazuje plik |
+| *Plik trasy (GPX, KML, KMZ)* | przycisk **Wybierz...** wskazuje plik |
 | *Szerokość pasa po każdej stronie trasy [m]* | od 10 do 50 000 m (domyślnie 1000 m). Pobrane zostaną segmenty, które choć częściowo leżą w zadanej odległości od trasy |
 
 Pas mierzony jest symetrycznie od osi trasy, więc szerokość 1000 m daje korytarz o łącznej rozpiętości 2 km.

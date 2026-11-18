@@ -33,7 +33,7 @@ Public Class pomoc_pfe
         Try
             Process.Start(New ProcessStartInfo(UrlPomocy) With {.UseShellExecute = True})
         Catch ex As Exception
-            MsgBox("Nie można otworzyć strony pomocy: " & Global.MapoTero.Core.OpisBledu.Z(ex), MsgBoxStyle.Exclamation)
+            MsgBox("Nie można otworzyć strony pomocy: " & Global.MapoTero.Core.OpisBledu.Z(ex), MsgBoxStyle.Exclamation, "Pomoc")
         End Try
     End Sub
 

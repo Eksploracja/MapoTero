@@ -83,7 +83,7 @@ Po prawej stronie okna znajduje się panel **Symulacja i podgląd zoomu**:
 
 ## Parametry pliku
 
-* **Plik wynikowy** (domyślnie `mapa_wielowarstwowa_RRRRMMDD_GGMM.mbtiles` w `download\`) i przycisk **Pokaż...** otwierający plik w Eksploratorze.
+* **Plik wynikowy** (domyślnie `mapa_wielowarstwowa_RRRRMMDD_GGMM.mbtiles` w `download\`) i przycisk **Pokaż w folderze** otwierający plik w Eksploratorze.
 * **Nazwa mapy**: nazwa widoczna na liście map w aplikacji mobilnej.
 * **Format kafli:**
   * *Smart Hybrid (JPG + PNG przezroczyste)* *(zalecany)*: kafle pełne zapisuje jako lekki JPEG, a kafle z przezroczystością lub na brzegach jako PNG.

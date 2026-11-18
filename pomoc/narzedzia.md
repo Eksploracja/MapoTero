@@ -46,10 +46,10 @@ Narzędzie przetwarza kalibrowane skany papierowych map turystycznych i archiwal
 
 Narzędzie łączy dwa wcześniej pobrane zestawy segmentów PNG o **identycznych nazwach plików, wymiarach i siatce**:
 
-1. Wskaż folder **dolna (podkładowa)** i **górna (nakładana)**. Pamiętaj, że ich wskazanie przełącza bieżący folder sesji
+1. Wskaż folder **Dolna (podkładowa)** i **Górna (nakładana)**. Pamiętaj, że ich wskazanie przełącza bieżący folder sesji
    okna głównego (żeby ułatwić pobranie obu map po kolei).
-2. Wskaż osobny folder **połączone** (zostanie utworzony automatycznie, musi być inny niż oba foldery źródłowe).
-3. Kliknij **Składaj warstwy** (w instrukcji widocznej wewnątrz samego okna programu przycisk nazywany jest jeszcze „Połącz mapy”).
+2. Wskaż osobny folder **Połączone** (zostanie utworzony automatycznie, musi być inny niż oba foldery źródłowe).
+3. Kliknij **Składaj warstwy**.
 
 Program kopiuje `conf.txt` z warstwy dolnej, zamienia **białe piksele** warstwy górnej na przezroczyste i zapisuje
 wynikowe segmenty PNG (obsługuje także 8-bitowe PNG z paletą barw).

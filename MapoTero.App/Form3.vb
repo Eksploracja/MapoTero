@@ -227,7 +227,7 @@ Public Class Form3
                 _ctsScalanie = Nothing
             End If
             If Not Me.IsDisposed AndAlso Not Me.Disposing Then
-                btnScal.Text = "Złącz segmenty"
+                btnScal.Text = "Scal segmenty"
                 btnScal.Enabled = True
                 Me.UseWaitCursor = False
             End If

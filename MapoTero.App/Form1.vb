@@ -427,7 +427,7 @@ Public Class Form1
         Try
             Ustawienia.Zapisz(PlikLastsettings)
         Catch ex As Exception
-            MsgBox("Nie udało się zapisać ustawień: " & OpisBledu.Z(ex), MsgBoxStyle.Exclamation)
+            MsgBox("Nie udało się zapisać ustawień: " & OpisBledu.Z(ex), MsgBoxStyle.Exclamation, "Ustawienia")
         End Try
     End Sub
 
@@ -2902,7 +2902,7 @@ Public Class Form1
             Try
                 Dim k = Korytarz.WczytajTrase(plik)
                 If Not k.Poprawny Then
-                    MsgBox("Plik " & Path.GetFileName(plik) & " nie zawiera śladu, trasy ani linii (GPX: trk, rte, wpt; KML/KMZ: LineString, gx:Track).", MsgBoxStyle.Exclamation)
+                    MsgBox("Plik " & Path.GetFileName(plik) & " nie zawiera śladu, trasy ani linii (GPX: trk, rte, wpt; KML/KMZ: LineString, gx:Track).", MsgBoxStyle.Exclamation, "Obszar wzdłuż trasy")
                     Exit Sub
                 End If
                 Using okno As New FormKorytarz(k)
@@ -2911,7 +2911,7 @@ Public Class Form1
                     End If
                 End Using
             Catch ex As Exception
-                MsgBox("Nie udało się odczytać pliku trasy: " & OpisBledu.Z(ex), MsgBoxStyle.Critical)
+                MsgBox("Nie udało się odczytać pliku trasy: " & OpisBledu.Z(ex), MsgBoxStyle.Critical, "Obszar wzdłuż trasy")
             End Try
         End If
     End Sub
@@ -3145,7 +3145,7 @@ Public Class Form1
         Try
             Process.Start(New ProcessStartInfo(url) With {.UseShellExecute = True})
         Catch ex As Exception
-            MsgBox("Nie można otworzyć strony pomocy: " & OpisBledu.Z(ex), MsgBoxStyle.Exclamation)
+            MsgBox("Nie można otworzyć strony pomocy: " & OpisBledu.Z(ex), MsgBoxStyle.Exclamation, "Pomoc")
         End Try
     End Sub
 

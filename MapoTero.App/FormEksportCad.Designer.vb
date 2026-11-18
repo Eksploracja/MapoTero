@@ -85,7 +85,7 @@ Partial Class FormEksportCad
         Me.btnFolder.Name = "btnFolder"
         Me.btnFolder.Size = New System.Drawing.Size(90, 23)
         Me.btnFolder.TabIndex = 2
-        Me.btnFolder.Text = "zmień..."
+        Me.btnFolder.Text = "Zmień..."
         Me.btnFolder.UseVisualStyleBackColor = True
         '
         'lblInfo
@@ -132,7 +132,7 @@ Partial Class FormEksportCad
         Me.rbArkusz.Size = New System.Drawing.Size(100, 17)
         Me.rbArkusz.TabIndex = 1
         Me.rbArkusz.Text = "scalony arkusz:"
-        Me.ToolTip1.SetToolTip(Me.rbArkusz, "Arkusz utworzony poleceniem Łączenie segmentów (GeoTIFF albo JPEG / PNG z plikiem world file).")
+        Me.ToolTip1.SetToolTip(Me.rbArkusz, "Arkusz utworzony poleceniem Scalanie segmentów (GeoTIFF albo JPEG / PNG z plikiem world file).")
         Me.rbArkusz.UseVisualStyleBackColor = True
         '
         'txtArkusz
@@ -149,7 +149,7 @@ Partial Class FormEksportCad
         Me.btnArkusz.Name = "btnArkusz"
         Me.btnArkusz.Size = New System.Drawing.Size(90, 23)
         Me.btnArkusz.TabIndex = 3
-        Me.btnArkusz.Text = "wybierz..."
+        Me.btnArkusz.Text = "Wybierz..."
         Me.btnArkusz.UseVisualStyleBackColor = True
         '
         'btnScal
@@ -158,8 +158,8 @@ Partial Class FormEksportCad
         Me.btnScal.Name = "btnScal"
         Me.btnScal.Size = New System.Drawing.Size(90, 23)
         Me.btnScal.TabIndex = 5
-        Me.btnScal.Text = "scal teraz..."
-        Me.ToolTip1.SetToolTip(Me.btnScal, "Łączenie segmentów tej sesji w jeden arkusz (z plikiem world file) - po scaleniu arkusz zostanie wybrany do wstawienia.")
+        Me.btnScal.Text = "Scal teraz..."
+        Me.ToolTip1.SetToolTip(Me.btnScal, "Scalanie segmentów tej sesji w jeden arkusz (z plikiem world file) - po scaleniu arkusz zostanie wybrany do wstawienia.")
         Me.btnScal.UseVisualStyleBackColor = True
         '
         'btnKorektaCad
@@ -168,7 +168,7 @@ Partial Class FormEksportCad
         Me.btnKorektaCad.Name = "btnKorektaCad"
         Me.btnKorektaCad.Size = New System.Drawing.Size(171, 23)
         Me.btnKorektaCad.TabIndex = 6
-        Me.btnKorektaCad.Text = "korekta obrazu CAD..."
+        Me.btnKorektaCad.Text = "Korekta obrazu CAD..."
         Me.ToolTip1.SetToolTip(Me.btnKorektaCad, "Wsadowa optymalizacja rastrów pod CAD (np. stonowane podkłady lub wysoki kontrast skanów).")
         Me.btnKorektaCad.UseVisualStyleBackColor = True
         '
@@ -344,7 +344,7 @@ Partial Class FormEksportCad
         Me.btnPlik.Name = "btnPlik"
         Me.btnPlik.Size = New System.Drawing.Size(90, 23)
         Me.btnPlik.TabIndex = 9
-        Me.btnPlik.Text = "zmień..."
+        Me.btnPlik.Text = "Zmień..."
         Me.btnPlik.UseVisualStyleBackColor = True
         '
         'txtKomunikaty
@@ -383,7 +383,7 @@ Partial Class FormEksportCad
         Me.btnOtworzFolder.Name = "btnOtworzFolder"
         Me.btnOtworzFolder.Size = New System.Drawing.Size(130, 26)
         Me.btnOtworzFolder.TabIndex = 13
-        Me.btnOtworzFolder.Text = "otwórz folder"
+        Me.btnOtworzFolder.Text = "Pokaż w folderze"
         Me.ToolTip1.SetToolTip(Me.btnOtworzFolder, "Folder z zapisanym rysunkiem DXF i skryptem SCR.")
         Me.btnOtworzFolder.UseVisualStyleBackColor = True
         '

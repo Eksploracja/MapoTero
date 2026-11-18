@@ -9,7 +9,7 @@ nav_order: 10
 Pliki georeferencji zapisywane obok segmentów i scalonych arkuszy: który program czyta dany format.
 {: .fs-5 .fw-300 }
 
-**Gdzie w programie:** menu *Ustawienia > Pliki kalibracji segmentów* oraz okno *Łączenie segmentów*  
+**Gdzie w programie:** menu *Ustawienia > Pliki kalibracji segmentów* oraz okno *Scalanie segmentów*  
 **Dotyczy wersji:** {{ site.wersja_programu }}
 
 <details open markdown="block">

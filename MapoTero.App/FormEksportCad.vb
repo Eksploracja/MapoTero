@@ -117,7 +117,7 @@ Public Class FormEksportCad
             Komunikat("W folderze nie ma jeszcze pobranych segmentów - można wyeksportować sam obrys i siatkę segmentów.", Color.Black)
         ElseIf istniejace > EksportCad.ZalecanaLiczbaRastrow Then
             Komunikat("Segmentów jest " & istniejace & " - program CAD może działać wolno. Rozważ scalenie segmentów w jeden arkusz " &
-                      "(Narzędzia > Łączenie segmentów) i wstawienie arkusza.", Color.Black)
+                      "(Narzędzia > Scalanie segmentów) i wstawienie arkusza.", Color.Black)
         Else
             Komunikat("Wybierz elementy mapy i kliknij Eksportuj.", Color.Black)
         End If
@@ -196,7 +196,7 @@ Public Class FormEksportCad
         WybierzArkusz(dlgArkusz.FileName)
     End Sub
 
-    ''' <summary>Scalenie segmentów sesji w arkusz (okno Łączenie segmentów) i wybranie go do wstawienia.</summary>
+    ''' <summary>Scalenie segmentów sesji w arkusz (okno Scalanie segmentów) i wybranie go do wstawienia.</summary>
     Private Sub btnScal_Click(sender As Object, e As EventArgs) Handles btnScal.Click
         If _konfiguracja Is Nothing OrElse Form1.PobieranieTrwa("Scalanie segmentów") Then Exit Sub
         Dim plik As String = ""

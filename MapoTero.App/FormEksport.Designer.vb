@@ -111,7 +111,7 @@ Partial Class FormEksport
         Me.btnFolder.Name = "btnFolder"
         Me.btnFolder.Size = New System.Drawing.Size(80, 23)
         Me.btnFolder.TabIndex = 2
-        Me.btnFolder.Text = "zmień folder"
+        Me.btnFolder.Text = "Zmień folder"
         Me.btnFolder.UseVisualStyleBackColor = True
         '
         'lblInfo
@@ -432,7 +432,7 @@ Partial Class FormEksport
         Me.btnUsunNakladke.Name = "btnUsunNakladke"
         Me.btnUsunNakladke.Size = New System.Drawing.Size(108, 23)
         Me.btnUsunNakladke.TabIndex = 5
-        Me.btnUsunNakladke.Text = "usuń warstwę"
+        Me.btnUsunNakladke.Text = "Usuń warstwę"
         Me.btnUsunNakladke.UseVisualStyleBackColor = True
         '
         'btnDodajNakladke
@@ -441,7 +441,7 @@ Partial Class FormEksport
         Me.btnDodajNakladke.Name = "btnDodajNakladke"
         Me.btnDodajNakladke.Size = New System.Drawing.Size(108, 23)
         Me.btnDodajNakladke.TabIndex = 4
-        Me.btnDodajNakladke.Text = "dodaj warstwę..."
+        Me.btnDodajNakladke.Text = "Dodaj warstwę..."
         Me.ToolTip1.SetToolTip(Me.btnDodajNakladke, "Wskaż folder innej sesji pobierania (z plikiem conf.txt), np. granice działek pobrane w PNG z przezroczystym tłem.")
         Me.btnDodajNakladke.UseVisualStyleBackColor = True
         '
@@ -505,7 +505,7 @@ Partial Class FormEksport
         Me.btnDopasuj.Name = "btnDopasuj"
         Me.btnDopasuj.Size = New System.Drawing.Size(80, 23)
         Me.btnDopasuj.TabIndex = 4
-        Me.btnDopasuj.Text = "dopasuj"
+        Me.btnDopasuj.Text = "Dopasuj"
         Me.ToolTip1.SetToolTip(Me.btnDopasuj, "Wybiera najwyższy poziom powiększenia, przy którym szacowany rozmiar mapy mieści się w limicie.")
         Me.btnDopasuj.UseVisualStyleBackColor = True
         '
@@ -543,7 +543,7 @@ Partial Class FormEksport
         Me.btnOszacuj.Name = "btnOszacuj"
         Me.btnOszacuj.Size = New System.Drawing.Size(100, 23)
         Me.btnOszacuj.TabIndex = 0
-        Me.btnOszacuj.Text = "oszacuj rozmiar"
+        Me.btnOszacuj.Text = "Oszacuj rozmiar"
         Me.ToolTip1.SetToolTip(Me.btnOszacuj, "Renderuje kilka próbnych kafli i na ich podstawie szacuje rozmiar pliku.")
         Me.btnOszacuj.UseVisualStyleBackColor = True
         '

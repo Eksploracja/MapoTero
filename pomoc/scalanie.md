@@ -9,7 +9,7 @@ nav_order: 11
 Złączenie pobranych segmentów w jeden duży arkusz GeoTIFF, JPEG lub PNG z plikami kalibracji.
 {: .fs-5 .fw-300 }
 
-**Gdzie w programie:** menu *Narzędzia > Łączenie segmentów* (<kbd>Ctrl</kbd>+<kbd>L</kbd>) lub ikona szachownicy w oknie głównym  
+**Gdzie w programie:** menu *Narzędzia > Scalanie segmentów* (<kbd>Ctrl</kbd>+<kbd>L</kbd>) lub ikona szachownicy w oknie głównym  
 **Dotyczy wersji:** {{ site.wersja_programu }}
 
 <details open markdown="block">
@@ -24,10 +24,10 @@ Złączenie pobranych segmentów w jeden duży arkusz GeoTIFF, JPEG lub PNG z pl
 1. Pobierz wszystkie segmenty mapy (w folderze nie może być pliku `error.txt`).
 2. Naciśnij <kbd>Ctrl</kbd>+<kbd>L</kbd> albo kliknij ikonę szachownicy w oknie głównym.
 3. Sprawdź wybrany *Format scalonego arkusza* (domyślnie **GeoTIFF (bezstratny)**) i zaznacz ewentualne pliki referencyjne.
-4. Kliknij **Złącz segmenty**.
+4. Kliknij **Scal segmenty**.
 5. Gotowy plik `_scalone_segmenty_<kol>x<wier>.tif` (lub `.jpg`/`.png`) powstanie w folderze sesji.
 
-![Okno Złączanie segmentów w jeden plik]({{ '/pomoc/obrazy/09-scalanie.png' | relative_url }})
+![Okno Scalanie segmentów w jeden arkusz]({{ '/pomoc/obrazy/09-scalanie.png' | relative_url }})
 
 *Rysunek 1. Okno łączenia pobranych segmentów w jeden duży arkusz.*
 
@@ -40,7 +40,7 @@ i wczytuje parametry siatki, format segmentów, przedrostek, styl numeracji oraz
 Gdy folder bieżącej sesji nie ma pliku `conf.txt` (np. po usunięciu pobranych map albo przed pierwszym pobraniem), okno otwiera
 najnowszą sesję z `download\` i pisze o tym w polu komunikatów. Tak samo działają okna eksportu mapy i eksportu do CAD.
 
-* **zmień folder**: pozwala wskazać dowolny inny katalog z wcześniej pobraną mapą.
+* **Zmień folder**: pozwala wskazać dowolny inny katalog z wcześniej pobraną mapą.
 * **error.txt blokuje scalanie**: dopóki w folderze istnieje plik `error.txt` (oznaczający niekompletne pobranie), scalanie nie zostanie uruchomione. Należy dopobrać brakujące segmenty albo, jeśli brak jest zamierzony, usunąć plik `error.txt` ręcznie.
 * **ręczne wprowadzanie parametrów w razie braku conf.txt**: opcja aktywna tylko wtedy, gdy w folderze brakuje pliku `conf.txt`. Pozwala ręcznie podać zasięg XY, liczbę kolumn i wierszy, bok segmentu, piksel, przedrostek, format i styl numeracji.
 * **Pomoc**: przycisk w dolnej części okna (lub klawisz <kbd>F1</kbd>) otwiera podręczne okno pomocy ze skrótowym opisem opcji scalania i odnośnikiem do tego rozdziału.
@@ -78,7 +78,7 @@ Wybrane pola są zapamiętywane między uruchomieniami programu:
 * *twórz plik referencyjny MapInfo (.tab)*
 
 {: .wskazowka }
-Jeśli uruchamiasz scalanie bezpośrednio przyciskiem **scal teraz...** z okna *Eksport do CAD*, program automatycznie
+Jeśli uruchamiasz scalanie bezpośrednio przyciskiem **Scal teraz...** z okna *Eksport do CAD*, program automatycznie
 zaznacza tworzenie pliku world file, aby CAD mógł od razu wstawić arkusz na właściwe współrzędne.
 
 ---
@@ -87,7 +87,7 @@ zaznacza tworzenie pliku world file, aby CAD mógł od razu wstawić arkusz na w
 
 MapoTero scala segmenty strumieniowo, pasami wierszy. Zużycie pamięci RAM zależy tylko od szerokości pojedynczego rzędu segmentów, a nie od całkowitej powierzchni mapy. Nawet arkusz o boku kilkudziesięciu tysięcy pikseli i wadze powyżej 4 GB (zapisywany automatycznie w standardzie BigTIFF) nie przepełni pamięci RAM, wymagając jedynie wolnego miejsca na dysku.
 
-W trakcie scalania przycisk **Złącz segmenty** zmienia się na **Przerwij**. Operację można bezpiecznie zatrzymać w dowolnej chwili.
+W trakcie scalania przycisk **Scal segmenty** zmienia się na **Przerwij**. Operację można bezpiecznie zatrzymać w dowolnej chwili.
 
 ---
 

@@ -22,7 +22,7 @@ Jak otworzyć pobrane segmenty i scalone arkusze w popularnych programach GIS i 
 
 Najwygodniejszym formatem dla QGIS jest scalony arkusz **GeoTIFF** (zapisuje układ współrzędnych i położenie wewnątrz pliku):
 
-1. Scal segmenty poleceniem *Narzędzia > Łączenie segmentów* (<kbd>Ctrl</kbd>+<kbd>L</kbd>) z formatem **GeoTIFF (bezstratny)**.
+1. Scal segmenty poleceniem *Narzędzia > Scalanie segmentów* (<kbd>Ctrl</kbd>+<kbd>L</kbd>) z formatem **GeoTIFF (bezstratny)**.
 2. Przeciągnij powstały plik `_scalone_segmenty_….tif` z Eksploratora prosto do okna mapy QGIS.
 3. Jeśli eksportujesz w formacie **JPEG** lub **PNG** (albo chcesz wczytać pojedyncze segmenty), zaznacz tworzenie **world file i `.prj`**. Obok obrazu powstaną pliki np. `.jpgw` i `.prj`, a QGIS wczyta układ automatycznie.
 
@@ -60,7 +60,7 @@ ArcGIS Pro i ArcMap odczytują bezpośrednio:
 
 ## OziExplorer
 
-Włącz generowanie pliku **`.map`** w *Ustawieniach* (dla segmentów) lub w oknie *Łączenie segmentów* (dla całego arkusza).
+Włącz generowanie pliku **`.map`** w *Ustawieniach* (dla segmentów) lub w oknie *Scalanie segmentów* (dla całego arkusza).
 Otwórz plik `.map` w OziExplorerze (*File > Load from File > Load Map File*). Pamiętaj, aby nie przenosić pliku obrazu
 bez towarzyszącego mu `.map` do innego katalogu (w pliku `.map` zapisana jest ścieżka pliku graficznego).
 

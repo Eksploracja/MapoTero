@@ -400,22 +400,22 @@ Public Class FormEksport
         If dlgFolder.ShowDialog <> DialogResult.OK Then Exit Sub
         Dim folder As String = dlgFolder.SelectedPath & "\"
         If String.Equals(folder, _folder, StringComparison.OrdinalIgnoreCase) Then
-            MsgBox("Wskaż folder innej sesji pobierania niż folder mapy podstawowej.", MsgBoxStyle.Exclamation)
+            MsgBox("Wskaż folder innej sesji pobierania niż folder mapy podstawowej.", MsgBoxStyle.Exclamation, "Eksport mapy")
             Exit Sub
         End If
         Dim blad As String = ""
         Dim s = OdczytajSesje(folder, blad)
         If s Is Nothing Then
-            MsgBox(blad, MsgBoxStyle.Exclamation)
+            MsgBox(blad, MsgBoxStyle.Exclamation, "Eksport mapy")
             Exit Sub
         End If
         If s.Zrodlo.LiczbaSegmentow = 0 Then
-            MsgBox("W folderze nie ma pobranych segmentów.", MsgBoxStyle.Exclamation)
+            MsgBox("W folderze nie ma pobranych segmentów.", MsgBoxStyle.Exclamation, "Eksport mapy")
             Exit Sub
         End If
         'warstwa musi pokrywać choć część mapy podstawowej
         If Not Pokrywa(_sesja, s) Then
-            MsgBox("Segmenty z tego folderu nie pokrywają obszaru mapy podstawowej.", MsgBoxStyle.Exclamation)
+            MsgBox("Segmenty z tego folderu nie pokrywają obszaru mapy podstawowej.", MsgBoxStyle.Exclamation, "Eksport mapy")
             Exit Sub
         End If
         'segmenty bez przezroczystego tła (JPEG albo PNG pobrane bez TRANSPARENT=TRUE) - białe tło domyślnie przezroczyste
@@ -638,7 +638,7 @@ Public Class FormEksport
                     Process.Start(New ProcessStartInfo("explorer.exe", "/select,""" & _ostatniPlikEksportu & """") With {.UseShellExecute = True})
                 End If
             Catch ex As Exception
-                MsgBox("Nie udało się otworzyć folderu: " & OpisBledu.Z(ex), MsgBoxStyle.Exclamation)
+                MsgBox("Nie udało się otworzyć folderu: " & OpisBledu.Z(ex), MsgBoxStyle.Exclamation, "Eksport mapy")
             End Try
         End If
     End Sub

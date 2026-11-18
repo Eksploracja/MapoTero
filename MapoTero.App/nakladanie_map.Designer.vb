@@ -72,7 +72,7 @@ Partial Class Nakladanie_Map
         Me.ButtonPolaczone.Name = "ButtonPolaczone"
         Me.ButtonPolaczone.Size = New System.Drawing.Size(122, 23)
         Me.ButtonPolaczone.TabIndex = 9
-        Me.ButtonPolaczone.Text = "połączone"
+        Me.ButtonPolaczone.Text = "Połączone"
         Me.ButtonPolaczone.UseVisualStyleBackColor = true
         '
         'ButtonGorna
@@ -81,7 +81,7 @@ Partial Class Nakladanie_Map
         Me.ButtonGorna.Name = "ButtonGorna"
         Me.ButtonGorna.Size = New System.Drawing.Size(122, 23)
         Me.ButtonGorna.TabIndex = 8
-        Me.ButtonGorna.Text = "górna (nakładana)"
+        Me.ButtonGorna.Text = "Górna (nakładana)"
         Me.ButtonGorna.UseVisualStyleBackColor = true
         '
         'ButtonDolna
@@ -90,7 +90,7 @@ Partial Class Nakladanie_Map
         Me.ButtonDolna.Name = "ButtonDolna"
         Me.ButtonDolna.Size = New System.Drawing.Size(122, 23)
         Me.ButtonDolna.TabIndex = 7
-        Me.ButtonDolna.Text = "dolna (podkładowa)"
+        Me.ButtonDolna.Text = "Dolna (podkładowa)"
         Me.ButtonDolna.UseVisualStyleBackColor = true
         '
         'txtFolderWynik

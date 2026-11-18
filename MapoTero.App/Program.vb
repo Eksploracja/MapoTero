@@ -346,7 +346,7 @@ Public Module Program
         Try
             Process.Start(New ProcessStartInfo(folder) With {.UseShellExecute = True})
         Catch ex As Exception
-            MsgBox("Nie można otworzyć folderu " & folder & ": " & Global.MapoTero.Core.OpisBledu.Z(ex), MsgBoxStyle.Exclamation)
+            MsgBox("Nie można otworzyć folderu " & folder & ": " & Global.MapoTero.Core.OpisBledu.Z(ex), MsgBoxStyle.Exclamation, "Otwieranie folderu")
         End Try
     End Sub
 

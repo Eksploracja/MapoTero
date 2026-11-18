@@ -150,7 +150,7 @@ Public NotInheritable Class EksportCad
                     If z.Rastry.Count >= MaksRastrow Then
                         Throw New InvalidDataException("Sesja zawiera ponad " & MaksRastrow.ToString("N0", CultureInfo.CurrentCulture) &
                                                        " segmentów - takiej liczby obrazów programy CAD nie wyświetlą sprawnie. " &
-                                                       "Scal segmenty w jeden arkusz (Narzędzia > Łączenie segmentów) i wstaw arkusz.")
+                                                       "Scal segmenty w jeden arkusz (Narzędzia > Scalanie segmentów) i wstaw arkusz.")
                     End If
                     'wymiary z nagłówka pliku: rysunek CAD musi podać rzeczywistą liczbę pikseli obrazu, a plik uszkodzony
                     '(np. odpowiedź serwera z błędem zapisana jako obraz) zostałby w programie CAD pokazany jako brakujący
