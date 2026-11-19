@@ -115,7 +115,8 @@ Public Class FormEksport
 
     Private Sub FormEksport_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         PomocProgramu.ZamykanieKlawiszemEsc(Me)
-        PomocProgramu.DodajPrzyciskPomocy(Me, TematPomocy.Eksport, 12, 780)
+        'okno otwarte jako scalanie segmentów - pomoc o arkuszu
+        PomocProgramu.DodajPrzyciskPomocy(Me, If(ArkuszDomyslnie, TematPomocy.Scalanie, TematPomocy.Eksport), 12, 780)
         DopasujDoWysokosciEkranu()
         If cboKolejnoscGarmin.Items.Count > 0 AndAlso cboKolejnoscGarmin.SelectedIndex < 0 Then
             cboKolejnoscGarmin.SelectedIndex = 0

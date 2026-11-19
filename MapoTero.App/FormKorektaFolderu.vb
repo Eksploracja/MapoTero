@@ -170,7 +170,7 @@ Public Class FormKorektaFolderu
         Try
             If Not Directory.Exists(cel) Then Directory.CreateDirectory(cel)
         Catch ex As Exception
-            MessageBox.Show("Nie udało się utworzyć folderu docelowego: " & OpisBledu.Z(ex), "Błąd", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            MessageBox.Show("Nie udało się utworzyć folderu docelowego: " & OpisBledu.Z(ex), "Korekta obrazów", MessageBoxButtons.OK, MessageBoxIcon.Error)
             Return
         End Try
 
@@ -224,7 +224,7 @@ Public Class FormKorektaFolderu
         Catch ex As Exception
             lblStatus.Text = "Błąd: " & OpisBledu.Z(ex)
             If Not _zamknijPoZakonczeniu Then
-                MessageBox.Show("Wystąpił błąd podczas przetwarzania: " & OpisBledu.Z(ex), "Błąd", MessageBoxButtons.OK, MessageBoxIcon.Error)
+                MessageBox.Show("Wystąpił błąd podczas przetwarzania: " & OpisBledu.Z(ex), "Korekta obrazów", MessageBoxButtons.OK, MessageBoxIcon.Error)
             End If
         Finally
             _cts.Dispose()
@@ -359,11 +359,11 @@ Public Class FormKorektaFolderu
         Return CInt(Math.Max(1L, Math.Min(Environment.ProcessorCount, BudzetPamieci \ (piksele * 20))))
     End Function
 
-    ''' <summary>Przedrostek scalonego arkusza zapisywanego przez okno scalania segmentów (Form3).</summary>
+    ''' <summary>Przedrostek arkusza zapisywanego przez scalanie segmentów (okno Eksport mapy, format Arkusz).</summary>
     Friend Const PrzedrostekArkusza As String = "_scalone_segmenty_"
 
     ''' <summary>
-    ''' Obrazy folderu do korekty: PNG, JPEG i TIFF bez scalonych arkuszy. Arkusz z okna złączania leży w folderze sesji
+    ''' Obrazy folderu do korekty: PNG, JPEG i TIFF bez scalonych arkuszy. Arkusz ze scalania leży w folderze sesji
     ''' obok segmentów, jest wielokrotnie większy od segmentu i był poprawiany razem z nimi (groźba braku pamięci).
     ''' </summary>
     Friend Shared Function PlikiDoKorekty(folder As String, ByRef pominieteArkusze As Integer) As List(Of String)

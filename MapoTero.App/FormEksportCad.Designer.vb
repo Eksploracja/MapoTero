@@ -85,7 +85,7 @@ Partial Class FormEksportCad
         Me.btnFolder.Name = "btnFolder"
         Me.btnFolder.Size = New System.Drawing.Size(90, 23)
         Me.btnFolder.TabIndex = 2
-        Me.btnFolder.Text = "Zmień..."
+        Me.btnFolder.Text = "Zmień folder"
         Me.btnFolder.UseVisualStyleBackColor = True
         '
         'lblInfo

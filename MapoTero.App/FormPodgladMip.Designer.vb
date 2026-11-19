@@ -274,7 +274,7 @@ Partial Class FormPodgladMip
         Me.MinimizeBox = False
         Me.Name = "FormPodgladMip"
         Me.StartPosition = FormStartPosition.CenterParent
-        Me.Text = "Korekta i optymalizacja obrazu (kontrast, ostrość, MIP)"
+        Me.Text = "Korekta obrazu - profil i podgląd (kontrast, ostrość, MIP)"
         CType(Me.picPodglad, System.ComponentModel.ISupportInitialize).EndInit()
         CType(Me.tbGamma, System.ComponentModel.ISupportInitialize).EndInit()
         CType(Me.tbKontrast, System.ComponentModel.ISupportInitialize).EndInit()

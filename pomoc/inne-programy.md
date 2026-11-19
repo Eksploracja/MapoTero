@@ -53,14 +53,14 @@ ArcGIS Pro i ArcMap odczytują bezpośrednio:
 
 * **Cała mapa:** w oknie [Eksport mapy](../eksport/) wybierz format **KMZ (Locus Map, OruxMaps, Google Earth)** (bez limitu kafli)
   i otwórz plik `_eksport_….kmz` w Google Earth Pro.
-* **Scalony arkusz lub pojedyncze segmenty:** podczas scalania (albo w ustawieniach segmentów) zaznacz plik referencyjny `.kml`.
+* **Scalony arkusz lub pojedyncze segmenty:** przy scalaniu (pole *.kml* pod formatem *Arkusz*) albo w ustawieniach segmentów zaznacz plik `.kml`.
   MapoTero zapisuje dokładne narożniki `gx:LatLonQuad` oraz obrót `LatLonBox`, więc mapa pasuje dokładnie na całym obszarze Polski.
 
 ---
 
 ## OziExplorer
 
-Włącz generowanie pliku **`.map`** w *Ustawieniach* (dla segmentów) lub w oknie *Scalanie segmentów* (dla całego arkusza).
+Włącz generowanie pliku **`.map`** w *Ustawieniach* (dla segmentów) lub pod formatem *Arkusz* w oknie *Eksport mapy* (dla całego arkusza).
 Otwórz plik `.map` w OziExplorerze (*File > Load from File > Load Map File*). Pamiętaj, aby nie przenosić pliku obrazu
 bez towarzyszącego mu `.map` do innego katalogu (w pliku `.map` zapisana jest ścieżka pliku graficznego).
 

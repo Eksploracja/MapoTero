@@ -170,16 +170,6 @@ Public Class SzacunekKompilacjiMbtiles
     Public Function TekstRozmiaru() As String
         Return SzacunekRozmiaru.Tekst(LacznyRozmiarBajty)
     End Function
-
-    Public Function OpisStatusuFat32() As String
-        If CzyPrzekraczaFat32 Then
-            Return "UWAGA: Szacowany rozmiar przekracza 4 GB! Plik nie zmieści się na kartach microSD sformatowanych w FAT32 (wymagany exFAT lub zmniejszenie maksymalnego zoomu)."
-        ElseIf LacznyRozmiarBajty > 2147483648L Then
-            Return "Rozmiar powyżej 2 GB - upewnij się, że masz wystarczająco dużo wolnego miejsca w telefonie."
-        Else
-            Return "Rozmiar optymalny dla urządzeń mobilnych (Locus Map, OruxMaps)."
-        End If
-    End Function
 End Class
 
 ''' <summary>Raport postępu tworzenia wielowarstwowego MBTiles.</summary>

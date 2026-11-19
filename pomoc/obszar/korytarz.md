@@ -11,7 +11,7 @@ Zamiast całego prostokąta program pobiera tylko segmenty leżące w pasie wzd�
 krętej to wielokrotnie mniej danych.
 {: .fs-5 .fw-300 }
 
-**Gdzie w programie:** menu *Sesja pobierania > obszar pobierania wzdłuż trasy (GPX, KML, KMZ)...*  
+**Gdzie w programie:** menu *Sesja pobierania > Obszar pobierania wzdłuż trasy (GPX, KML, KMZ)...*  
 **Dotyczy wersji:** {{ site.wersja_programu }}
 
 <details open markdown="block">
@@ -24,7 +24,7 @@ krętej to wielokrotnie mniej danych.
 ## Najkrótsza droga
 
 1. Ustaw zbiór map, warstwę, segment i piksel.
-2. Wybierz *Sesja pobierania > obszar pobierania wzdłuż trasy (GPX, KML, KMZ)...* albo po prostu przeciągnij plik trasy z Eksploratora Windows na okno programu lub mapę (Drag &amp; Drop).
+2. Wybierz *Sesja pobierania > Obszar pobierania wzdłuż trasy (GPX, KML, KMZ)...* albo po prostu przeciągnij plik trasy z Eksploratora Windows na okno programu lub mapę (Drag &amp; Drop).
 3. Kliknij **Wybierz...** i wskaż plik trasy (jeśli nie przeciągnięto go myszą).
 4. Ustaw *Szerokość pasa po każdej stronie trasy [m]* i kliknij **OK**.
 5. Sprawdź na mapie przebieg trasy (czerwona linia) oraz siatkę segmentów (kolor niebieski). W komunikacie u dołu zobaczysz liczbę wyznaczonych segmentów.
@@ -94,7 +94,7 @@ Narzędzia korzystające z sesji uwzględniają korytarz:
 
 ## Powrót do pobierania prostokąta
 
-* Menu *Sesja pobierania > usuń obszar wzdłuż trasy (pobieranie całego prostokąta)*: przywraca standardowy prostokąt z siatką i uchwytami.
+* Menu *Sesja pobierania > Usuń obszar wzdłuż trasy (pobieranie całego prostokąta)*: przywraca standardowy prostokąt z siatką i uchwytami.
 * Zaznaczenie nowego obszaru prawym przyciskiem myszy również usuwa korytarz trasy.
 
 ---

@@ -415,7 +415,7 @@ Partial Class FormImportOzi
         Me.ShowIcon = False
         Me.ShowInTaskbar = False
         Me.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent
-        Me.Text = "Konwerter map OziExplorer (.map) -> Garmin JNX / KMZ / MBTiles"
+        Me.Text = "Konwerter map OziExplorer (.map)"
         Me.grpInfo.ResumeLayout(False)
         Me.grpInfo.PerformLayout()
         Me.grpFormat.ResumeLayout(False)

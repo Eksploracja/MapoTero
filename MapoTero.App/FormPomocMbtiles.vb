@@ -310,7 +310,7 @@ Public Class FormPomocMbtiles
         Me.Text = "Pomoc i instrukcja - Korekta obrazów w folderze"
         _urlOnline = "https://eksploracja.github.io/MapoTero/pomoc/narzedzia/"
 
-        DodajTytul("Korekta i optymalizacja obrazów w folderze")
+        DodajTytul("Korekta obrazów w folderze")
         DodajAkapit("Narzędzie poprawia naraz wszystkie obrazy PNG, JPEG i TIFF z wybranego folderu (np. segmenty sesji) " &
                     "według wybranego profilu: kontrast, korekcja gamma, nasycenie barw i wyostrzanie krawędzi. " &
                     "Oryginały zostają bez zmian - poprawione kopie trafiają do folderu wynikowego (domyślnie podfolder ""korekta"").")
@@ -492,7 +492,7 @@ Public Module PomocProgramu
     End Function
 
     Public Function DodajPrzyciskPomocy(form As Form, temat As TematPomocy, Optional x As Integer = 12, Optional y As Integer = -1) As Button
-        'okna otwierane jako domyślna instancja (np. Form3.ShowDialog()) nie są niszczone po zamknięciu, a zdarzenie
+        'okna otwierane jako domyślna instancja (np. FormEksport.ShowDialog()) nie są niszczone po zamknięciu, a zdarzenie
         'Load zachodzi przy każdym otwarciu - bez tego sprawdzenia każde otwarcie dokładało kolejny przycisk
         Dim istniejacy = TryCast(form.Controls("btnPomoc"), Button)
         If istniejacy IsNot Nothing Then Return istniejacy

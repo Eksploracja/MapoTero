@@ -532,7 +532,7 @@ Partial Class FormZaawansowanyMbtiles
         Me.btnPomoc.Size = New System.Drawing.Size(85, 28)
         Me.btnPomoc.TabIndex = 9
         Me.btnPomoc.Text = "Pomoc"
-        Me.ToolTip1.SetToolTip(Me.btnPomoc, "Instrukcja obsługi i wskazówki dotyczące wielowarstwowego MBTiles (F1)")
+        Me.ToolTip1.SetToolTip(Me.btnPomoc, "Instrukcja obsługi MBTiles wieloskalowego (F1)")
         Me.btnPomoc.UseVisualStyleBackColor = True
         '
         'btnKompiluj

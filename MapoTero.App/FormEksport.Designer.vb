@@ -99,7 +99,7 @@ Partial Class FormEksport
         Me.lblFolder.Name = "lblFolder"
         Me.lblFolder.Size = New System.Drawing.Size(196, 13)
         Me.lblFolder.TabIndex = 0
-        Me.lblFolder.Text = "Folder segmentów (z plikiem conf.txt):"
+        Me.lblFolder.Text = "Folder sesji (segmenty i plik conf.txt):"
         '
         'txtFolder
         '

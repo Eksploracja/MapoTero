@@ -87,7 +87,7 @@ Pobieranie przerywa też zamknięcie programu. Brakujące segmenty można dopobr
 Aby dokończyć przerwane lub niepełne pobieranie:
 
 1. Jeśli program był zamknięty, uruchom go. Ostatnia sesja (z podfolderu `download\sesja_...`) wczyta się automatycznie. Sesję z innego folderu
-   wczytaj z menu *Sesja pobierania > wczytaj ustawienia sesji (conf.txt)*.
+   wczytaj z menu *Sesja pobierania > Wczytaj ustawienia sesji (conf.txt)*.
 2. Nie zmieniaj zasięgu, segmentu, piksela, układu ani warstw.
 3. Kliknij **Pobierz**.
 

@@ -221,7 +221,7 @@ Public Class CiezkieTestyLive
                 Assert.True(New FileInfo(plik).Length > 1000, "Plik segmentu powinien zawierać złożony obraz")
             Next
 
-            ' 2. Scalanie segmentów w jeden arkusz (Form3 backend)
+            ' 2. Scalanie segmentów w jeden arkusz (silnik arkusza eksportu)
             Dim zadanieScalania As New ZadanieScalania With {
                 .Folder = folderTestu,
                 .Prefiks = "_",

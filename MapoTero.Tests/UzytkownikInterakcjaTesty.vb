@@ -519,7 +519,6 @@ Public Class UzytkownikInterakcjaTesty
                     Dim numKrycie = DirectCast(f.Controls.Find("numKrycie", True)(0), NumericUpDown)
                     Dim lblKrycie = DirectCast(f.Controls.Find("lblKrycie", True)(0), Label)
                     Dim btnZaaw = DirectCast(f.Controls.Find("btnWarstwyZaawansowane", True)(0), Button)
-                    Dim btnKosz = DirectCast(f.Controls.Find("btnResetujWarstwy", True)(0), Button)
 
                     ' Pole krycia musi mieć wystarczającą szerokość na liczbę 100 i strzałki (min 48 px)
                     Assert.True(numKrycie.Width >= 48, $"Szerokość numKrycie ({numKrycie.Width}) powinna wynosić co najmniej 48 px, aby nie przycinać liczby 100.")

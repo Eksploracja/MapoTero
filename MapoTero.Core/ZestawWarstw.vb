@@ -166,13 +166,6 @@ Public Class ZestawWarstw
         End Get
     End Property
 
-    ''' <summary>Czy któraś warstwa ma krycie mniejsze niż 100% lub nietypowy tryb mieszania (pobieranie wymaga wtedy nakładania warstw w programie).</summary>
-    Public ReadOnly Property CzesciowoPrzezroczysty As Boolean
-        Get
-            Return _warstwy.Any(Function(w) w.Krycie < PelneKrycie OrElse w.TrybMieszania <> TrybMieszania.Zwykly)
-        End Get
-    End Property
-
     Public Function Kopia() As ZestawWarstw
         Dim z As New ZestawWarstw()
         For Each w In _warstwy

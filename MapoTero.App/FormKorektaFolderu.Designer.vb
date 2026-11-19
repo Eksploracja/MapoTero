@@ -197,7 +197,7 @@ Partial Class FormKorektaFolderu
         Me.MinimizeBox = False
         Me.Name = "FormKorektaFolderu"
         Me.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent
-        Me.Text = "Korekta i optymalizacja obrazów w folderze"
+        Me.Text = "Korekta obrazów w folderze"
         Me.grpParametry.ResumeLayout(False)
         Me.grpParametry.PerformLayout()
         Me.ResumeLayout(False)

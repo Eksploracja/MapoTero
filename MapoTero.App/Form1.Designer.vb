@@ -101,7 +101,6 @@ Partial Class Form1
         Me.txtRozmiarPiksela = New System.Windows.Forms.TextBox()
         Me.ToolTip1 = New System.Windows.Forms.ToolTip(Me.components)
         Me.grpWybraneWarstwy = New System.Windows.Forms.GroupBox()
-        Me.btnResetujWarstwy = New System.Windows.Forms.Button()
         Me.lstWybraneWarstwy = New MapoTero.ListaWarstw()
         Me.btnWarstwaWyzej = New System.Windows.Forms.Button()
         Me.btnWarstwaNizej = New System.Windows.Forms.Button()
@@ -202,7 +201,7 @@ Partial Class Form1
         Me.btnPobierz.TabIndex = 6
         Me.btnPobierz.Tag = ""
         Me.btnPobierz.Text = "Pobierz"
-        Me.ToolTip1.SetToolTip(Me.btnPobierz, "Rozpocznij proces pobierania mapy.")
+        Me.ToolTip1.SetToolTip(Me.btnPobierz, "Rozpocznij pobieranie mapy (albo wznów pobieranie bieżącej sesji)")
         Me.btnPobierz.UseVisualStyleBackColor = False
         '
         'grpDaneZrodlowe
@@ -359,7 +358,7 @@ Partial Class Form1
         Me.btnPrzerwij.TabIndex = 245
         Me.btnPrzerwij.Tag = ""
         Me.btnPrzerwij.Text = "Przerwij pobieranie"
-        Me.ToolTip1.SetToolTip(Me.btnPrzerwij, "Anuluj rozpoczęty proces pobierania mapy")
+        Me.ToolTip1.SetToolTip(Me.btnPrzerwij, "Przerwij pobieranie mapy - pobrane segmenty zostają w folderze")
         Me.btnPrzerwij.UseVisualStyleBackColor = True
         '
         'SesjaToolStripMenuItem
@@ -377,14 +376,14 @@ Partial Class Form1
         Me.ZapiszToolStripMenuItem.Name = "ZapiszToolStripMenuItem"
         Me.ZapiszToolStripMenuItem.ShortcutKeys = CType((System.Windows.Forms.Keys.Alt Or System.Windows.Forms.Keys.Z), System.Windows.Forms.Keys)
         Me.ZapiszToolStripMenuItem.Size = New System.Drawing.Size(290, 22)
-        Me.ZapiszToolStripMenuItem.Text = "zapisz ustawienia sesji (conf.txt)"
+        Me.ZapiszToolStripMenuItem.Text = "Zapisz ustawienia sesji (conf.txt)"
         '
         'WczytajToolStripMenuItem1
         '
         Me.WczytajToolStripMenuItem1.Name = "WczytajToolStripMenuItem1"
         Me.WczytajToolStripMenuItem1.ShortcutKeys = CType((System.Windows.Forms.Keys.Alt Or System.Windows.Forms.Keys.W), System.Windows.Forms.Keys)
         Me.WczytajToolStripMenuItem1.Size = New System.Drawing.Size(290, 22)
-        Me.WczytajToolStripMenuItem1.Text = "wczytaj ustawienia sesji (conf.txt)"
+        Me.WczytajToolStripMenuItem1.Text = "Wczytaj ustawienia sesji (conf.txt)"
         '
         'SesjaSeparator1
         '
@@ -395,7 +394,7 @@ Partial Class Form1
         '
         Me.KorytarzToolStripMenuItem.Name = "KorytarzToolStripMenuItem"
         Me.KorytarzToolStripMenuItem.Size = New System.Drawing.Size(290, 22)
-        Me.KorytarzToolStripMenuItem.Text = "obszar pobierania wzdłuż trasy (GPX, KML, KMZ)..."
+        Me.KorytarzToolStripMenuItem.Text = "Obszar pobierania wzdłuż trasy (GPX, KML, KMZ)..."
         Me.KorytarzToolStripMenuItem.ToolTipText = "Pobieranie tylko segmentów w pasie wzdłuż trasy zaplanowanej np. w Mapy.com, Komoot lub Locus Map"
         '
         'UsunKorytarzToolStripMenuItem
@@ -403,7 +402,7 @@ Partial Class Form1
         Me.UsunKorytarzToolStripMenuItem.Enabled = False
         Me.UsunKorytarzToolStripMenuItem.Name = "UsunKorytarzToolStripMenuItem"
         Me.UsunKorytarzToolStripMenuItem.Size = New System.Drawing.Size(290, 22)
-        Me.UsunKorytarzToolStripMenuItem.Text = "usuń obszar wzdłuż trasy (pobieranie całego prostokąta)"
+        Me.UsunKorytarzToolStripMenuItem.Text = "Usuń obszar wzdłuż trasy (pobieranie całego prostokąta)"
         '
         'SesjaSeparator2
         '
@@ -414,7 +413,7 @@ Partial Class Form1
         '
         Me.OdswiezToolStripMenuItem.Name = "OdswiezToolStripMenuItem"
         Me.OdswiezToolStripMenuItem.Size = New System.Drawing.Size(290, 22)
-        Me.OdswiezToolStripMenuItem.Text = "odśwież mapę - pobierz ponownie wszystkie segmenty"
+        Me.OdswiezToolStripMenuItem.Text = "Odśwież mapę (pobierz ponownie wszystkie segmenty)"
         Me.OdswiezToolStripMenuItem.ToolTipText = "Ponowne pobranie wszystkich segmentów bieżącej sesji (np. po aktualizacji ortofotomapy); stary plik segmentu jest zastępowany dopiero po udanym pobraniu nowego"
         '
         'NarzedziaToolStripMenuItem
@@ -423,7 +422,7 @@ Partial Class Form1
         Me.NarzedziaToolStripMenuItem.Name = "NarzedziaToolStripMenuItem"
         Me.NarzedziaToolStripMenuItem.Size = New System.Drawing.Size(70, 20)
         Me.NarzedziaToolStripMenuItem.Text = "Narzędzia"
-        Me.NarzedziaToolStripMenuItem.ToolTipText = "Opcjonalne narzędzia wykorzystywane jedynie w szczególnych przypadkach"
+        Me.NarzedziaToolStripMenuItem.ToolTipText = "Scalanie i eksport mapy, eksport do CAD, kreator serwerów, wyszukiwarka, konwerter OziExplorer, profil wysokościowy i korekta obrazów"
         '
         '
         'DodajSerwerToolStripMenuItem
@@ -446,7 +445,7 @@ Partial Class Form1
         Me.KonwertujOziToolStripMenuItem.Name = "KonwertujOziToolStripMenuItem"
         Me.KonwertujOziToolStripMenuItem.Size = New System.Drawing.Size(315, 22)
         Me.KonwertujOziToolStripMenuItem.Text = "Konwertuj mapę OziExplorer (.map)..."
-        Me.KonwertujOziToolStripMenuItem.ToolTipText = "Konwertuje kalibrowany skan mapy Ozi (.map) do formatu JNX, KMZ lub MBTiles"
+        Me.KonwertujOziToolStripMenuItem.ToolTipText = "Konwertuje kalibrowany skan mapy OziExplorer (.map) do JNX, KMZ, MBTiles, SQLiteDB albo OruxMaps"
         '
         'ProfilNmtToolStripMenuItem
         '
@@ -484,7 +483,7 @@ Partial Class Form1
         '
         Me.KorektaFolderuToolStripMenuItem.Name = "KorektaFolderuToolStripMenuItem"
         Me.KorektaFolderuToolStripMenuItem.Size = New System.Drawing.Size(315, 22)
-        Me.KorektaFolderuToolStripMenuItem.Text = "Korekta i optymalizacja obrazów w folderze..."
+        Me.KorektaFolderuToolStripMenuItem.Text = "Korekta obrazów w folderze..."
         Me.KorektaFolderuToolStripMenuItem.ToolTipText = "Wsadowe przetwarzanie obrazów: kontrast, ostrość, rozjaśnienie lasów i profil Garmin MIP"
         '
         'UstawieniaToolStripMenuItem
@@ -664,7 +663,6 @@ Partial Class Form1
         Me.grpWybraneWarstwy.Controls.Add(Me.btnWarstwaWyzej)
         Me.grpWybraneWarstwy.Controls.Add(Me.btnWarstwaNizej)
         Me.grpWybraneWarstwy.Controls.Add(Me.btnUsunWarstwe)
-        Me.grpWybraneWarstwy.Controls.Add(Me.btnResetujWarstwy)
         Me.grpWybraneWarstwy.Controls.Add(Me.lblKrycie)
         Me.grpWybraneWarstwy.Controls.Add(Me.numKrycie)
         Me.grpWybraneWarstwy.Controls.Add(Me.btnWarstwyZaawansowane)
@@ -723,22 +721,11 @@ Partial Class Form1
         Me.ToolTip1.SetToolTip(Me.btnUsunWarstwe, "Usuń zaznaczoną warstwę (Delete)")
         Me.btnUsunWarstwe.UseVisualStyleBackColor = True
         '
-        'btnResetujWarstwy
-        '
-        Me.btnResetujWarstwy.Image = Global.MapoTero.My.Resources.Resources.kosz
-        Me.btnResetujWarstwy.Location = New System.Drawing.Point(67, 142)
-        Me.btnResetujWarstwy.Margin = New System.Windows.Forms.Padding(0)
-        Me.btnResetujWarstwy.Name = "btnResetujWarstwy"
-        Me.btnResetujWarstwy.Size = New System.Drawing.Size(22, 23)
-        Me.btnResetujWarstwy.TabIndex = 304
-        Me.ToolTip1.SetToolTip(Me.btnResetujWarstwy, "Usuń zaznaczoną warstwę (Delete)")
-        Me.btnResetujWarstwy.UseVisualStyleBackColor = True
-        '
         'lblKrycie
         '
         Me.lblKrycie.AutoSize = True
         Me.lblKrycie.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.lblKrycie.Location = New System.Drawing.Point(88, 147)
+        Me.lblKrycie.Location = New System.Drawing.Point(67, 147)
         Me.lblKrycie.Name = "lblKrycie"
         Me.lblKrycie.Size = New System.Drawing.Size(42, 13)
         Me.lblKrycie.TabIndex = 305
@@ -749,7 +736,7 @@ Partial Class Form1
         '
         Me.numKrycie.Increment = New Decimal(New Integer() {5, 0, 0, 0})
         Me.numKrycie.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.numKrycie.Location = New System.Drawing.Point(132, 144)
+        Me.numKrycie.Location = New System.Drawing.Point(111, 144)
         Me.numKrycie.Minimum = New Decimal(New Integer() {5, 0, 0, 0})
         Me.numKrycie.Name = "numKrycie"
         Me.numKrycie.Size = New System.Drawing.Size(50, 20)
@@ -790,7 +777,7 @@ Partial Class Form1
         Me.btnPomniejsz.Size = New System.Drawing.Size(23, 30)
         Me.btnPomniejsz.TabIndex = 296
         Me.btnPomniejsz.Text = "-"
-        Me.ToolTip1.SetToolTip(Me.btnPomniejsz, "Powiększ")
+        Me.ToolTip1.SetToolTip(Me.btnPomniejsz, "Pomniejsz")
         Me.btnPomniejsz.UseVisualStyleBackColor = True
         '
         'btnSzukajDzialki
@@ -1008,7 +995,7 @@ Partial Class Form1
         Me.btnUsunPobrane.Name = "btnUsunPobrane"
         Me.btnUsunPobrane.Size = New System.Drawing.Size(30, 30)
         Me.btnUsunPobrane.TabIndex = 307
-        Me.ToolTip1.SetToolTip(Me.btnUsunPobrane, "usuń pobrane mapy bieżącej sesji (do Kosza)")
+        Me.ToolTip1.SetToolTip(Me.btnUsunPobrane, "Usuń pobrane mapy bieżącej sesji (do Kosza)")
         Me.btnUsunPobrane.UseVisualStyleBackColor = True
         '
         'btnZnaczniki
@@ -1021,7 +1008,7 @@ Partial Class Form1
         Me.btnZnaczniki.Name = "btnZnaczniki"
         Me.btnZnaczniki.Size = New System.Drawing.Size(30, 30)
         Me.btnZnaczniki.TabIndex = 306
-        Me.ToolTip1.SetToolTip(Me.btnZnaczniki, "pokaż na mapie siatkę segmentów dla zasięgu z pól XY i wyśrodkuj na niej mapę")
+        Me.ToolTip1.SetToolTip(Me.btnZnaczniki, "Pokaż na mapie siatkę segmentów dla zasięgu z pól XY i wyśrodkuj na niej mapę")
         Me.btnZnaczniki.UseVisualStyleBackColor = True
         '
         'btnScalanie
@@ -1033,7 +1020,7 @@ Partial Class Form1
         Me.btnScalanie.Name = "btnScalanie"
         Me.btnScalanie.Size = New System.Drawing.Size(30, 30)
         Me.btnScalanie.TabIndex = 305
-        Me.ToolTip1.SetToolTip(Me.btnScalanie, "złącz pobrane segmenty w jeden arkusz")
+        Me.ToolTip1.SetToolTip(Me.btnScalanie, "Scalanie segmentów - arkusz GeoTIFF, JPEG albo PNG (okno Eksport mapy, format Arkusz)")
         Me.btnScalanie.UseVisualStyleBackColor = True
         '
         'btnOtworzFolder
@@ -1045,7 +1032,7 @@ Partial Class Form1
         Me.btnOtworzFolder.Name = "btnOtworzFolder"
         Me.btnOtworzFolder.Size = New System.Drawing.Size(30, 30)
         Me.btnOtworzFolder.TabIndex = 304
-        Me.ToolTip1.SetToolTip(Me.btnOtworzFolder, "wyświetl folder z segmentami pobranej mapy")
+        Me.ToolTip1.SetToolTip(Me.btnOtworzFolder, "Wyświetl folder z segmentami pobranej mapy")
         Me.btnOtworzFolder.UseVisualStyleBackColor = True
         '
         'mapa
@@ -1736,7 +1723,6 @@ Partial Class Form1
     Friend WithEvents chkEdycjaXY As System.Windows.Forms.CheckBox
     Friend WithEvents btnOtworzFolder As System.Windows.Forms.Button
     Friend WithEvents btnScalanie As System.Windows.Forms.Button
-    Friend WithEvents btnResetujWarstwy As System.Windows.Forms.Button
     Friend WithEvents lstWybraneWarstwy As MapoTero.ListaWarstw
     Friend WithEvents btnWarstwaWyzej As System.Windows.Forms.Button
     Friend WithEvents btnWarstwaNizej As System.Windows.Forms.Button

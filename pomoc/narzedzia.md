@@ -48,9 +48,9 @@ siatce i w każdym formacie, robią:
 
 ---
 
-## Korekta i optymalizacja obrazów w folderze
+## Korekta obrazów w folderze
 
-**Gdzie:** menu *Narzędzia > Korekta i optymalizacja obrazów w folderze...* albo przycisk w oknie [Eksport do CAD](../cad/).
+**Gdzie:** menu *Narzędzia > Korekta obrazów w folderze...* albo przycisk w oknie [Eksport do CAD](../cad/).
 
 Narzędzie poprawia naraz wszystkie obrazy PNG, JPEG i TIFF leżące w jednym folderze (np. segmenty sesji):
 

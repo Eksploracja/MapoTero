@@ -36,7 +36,7 @@ albo z kilkoma mapami nałożonymi na siebie.
 
 | Nr | Sekcja okna | Opis |
 |---|---|---|
-| **1** | *Folder segmentów* | folder sesji (`conf.txt`) oraz podsumowanie: liczba segmentów, piksel, układ, opis mapy i data |
+| **1** | *Folder sesji* | folder sesji (`conf.txt`) oraz podsumowanie: liczba segmentów, piksel, układ, opis mapy i data |
 | **2** | *Format* | wybór formatu: Garmin BirdsEye (JNX), KMZ dla Garmin (z opcją podziału na tomy), KMZ, MBTiles, SQLiteDB, OruxMaps, *Arkusz* (scalanie segmentów: GeoTIFF, JPEG, PNG z plikami georeferencji), TrekBuddy / Locus Map (`.tar`) lub *Wieloskalowy...* |
 | **3** | *Kafle Web Mercator* | zakres poziomów powiększenia i opcja przezroczystych kafli PNG |
 | **4** | *Warstwy, przezroczystość i filtr MIP* | nakładka, przezroczyste białe tło, nakładanie warstw z innych sesji oraz korekcja MIP dla ekranów Garmin |
@@ -49,7 +49,7 @@ albo z kilkoma mapami nałożonymi na siebie.
 
 | Grupa | Zawartość |
 |---|---|
-| *Folder segmentów (z plikiem conf.txt)* | folder eksportowanej sesji. Opcja **Zmień folder** wskazuje inną sesję. Pod spodem: liczba segmentów (i ile z nich istnieje), piksel, układ, opis mapy, źródło danych i data pobrania |
+| *Folder sesji (segmenty i plik conf.txt)* | folder eksportowanej sesji. Opcja **Zmień folder** wskazuje inną sesję. Pod spodem: liczba segmentów (i ile z nich istnieje), piksel, układ, opis mapy, źródło danych i data pobrania |
 | *Format* | Garmin BirdsEye (JNX), KMZ dla Garmin (z podziałem na tomy), KMZ, MBTiles, SQLiteDB, OruxMaps, *Arkusz* ([Scalanie segmentów](../scalanie/): format arkusza i pliki world file i `.prj`, `.map`, `.tab`, `.kml`), [TrekBuddy / Locus Map](aplikacje/#trekbuddy). Pole *Korekta obrazu* z przyciskiem *Profil / Podgląd...* poprawia obraz. Przycisk **Wieloskalowy...** otwiera [MBTiles wieloskalowy](../mbtiles-wielowarstwowy/) |
 | *Kafle Web Mercator (MBTiles, SQLiteDB, OruxMaps, JNX)* | zakres poziomów powiększenia, kafle PNG. Zobacz: [Poziomy powiększenia i rozmiar pliku](powiekszenia/) |
 | *Warstwy i przezroczystość* | nakładka, białe tło przezroczyste, warstwy z innych folderów z kryciem oraz filtr MIP dla Garmina. Zobacz: [Nakładki i łączenie warstw](nakladki/) |

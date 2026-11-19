@@ -9,7 +9,7 @@ nav_order: 8
 Każde pobieranie tworzy sesję: folder z segmentami, plikami kalibracji i plikiem `conf.txt`, z którego korzystają scalanie i eksport.
 {: .fs-5 .fw-300 }
 
-**Gdzie w programie:** menu *Sesja pobierania > zapisz / wczytaj ustawienia sesji (conf.txt)*  
+**Gdzie w programie:** menu *Sesja pobierania > Zapisz / Wczytaj ustawienia sesji (conf.txt)*  
 **Dotyczy wersji:** {{ site.wersja_programu }}
 
 <details open markdown="block">
@@ -25,7 +25,7 @@ Każda nowa sesja pobierania zapisuje się automatycznie do dedykowanego podfold
 `download\sesja_<nazwa_zbioru>_<RRRR-MM-DD_GGMMSS>\` (ścieżkę aktywnego folderu widać na pasku stanu u dołu okna).
 Dzięki temu główny katalog `download\` pozostaje czysty, a różne sesje i pobrane mapy nie mieszają się ze sobą.
 Kiedy wznawiasz pobieranie tej samej mapy, program kontynuuje zapis w tym samym podfolderze i dociąga brakujące kafle.
-Możesz także zapisać sesję w wybranym przez siebie miejscu na dysku (*Sesja pobierania > zapisz ustawienia sesji*).
+Możesz także zapisać sesję w wybranym przez siebie miejscu na dysku (*Sesja pobierania > Zapisz ustawienia sesji*).
 
 | Plik lub podfolder | Kiedy powstaje | Zawartość |
 |---|---|---|
@@ -57,7 +57,7 @@ Pliki `conf.txt` zapisane w starszych wersjach MapoTero wczytują się poprawnie
 ## Zapisywanie i wczytywanie sesji
 
 * **Automatycznie przy starcie:** program przywraca ostatnio używany folder sesji z pliku `lastsettings.txt` (lub najnowszy podfolder w `download\`, jeśli zawiera `conf.txt`), dzięki czemu możesz od razu kontynuować pracę, scalić arkusz lub wyeksportować mapę.
-* **Zapisz ustawienia sesji (`Alt`+`Z`):** *Sesja pobierania > zapisz ustawienia sesji (conf.txt)* pozwala wskazać dowolny
+* **Zapisz ustawienia sesji (`Alt`+`Z`):** *Sesja pobierania > Zapisz ustawienia sesji (conf.txt)* pozwala wskazać dowolny
   folder (np. `D:\Mapy\Okolica_topo\`), zapisać tam `conf.txt` (i ewentualnie `korytarz.txt`) i od razu przestawić
   program na zapis kolejnych segmentów do tego folderu. Jeśli w wybranym folderze leżą segmenty innej sesji, program
   wyświetli ostrzeżenie.
@@ -67,7 +67,7 @@ Pliki `conf.txt` zapisane w starszych wersjach MapoTero wczytują się poprawnie
   program dobierze zalecany), zwija drzewo warstw z rozwiniętymi skanami map topograficznych GUGiK i pokazuje całą Polskę.
   Ustawienia programu i pobrane pliki zostają, a następne pobieranie trafi do nowego podfolderu sesji w `download\`.
   Gdy są wybrane warstwy lub zasięg, program prosi o potwierdzenie.
-* **Wczytaj ustawienia sesji (`Alt`+`W`):** *Sesja pobierania > wczytaj ustawienia sesji (conf.txt)* odtwarza cały stan
+* **Wczytaj ustawienia sesji (`Alt`+`W`):** *Sesja pobierania > Wczytaj ustawienia sesji (conf.txt)* odtwarza cały stan
   z wybranego folderu (musi zawierać `conf.txt`): warstwy, krycia, zasięg, piksel, korytarz oraz rysuje siatkę na mapie.
   Przydaje się do dopobrania braków lub odświeżenia starej mapy.
 

@@ -89,7 +89,7 @@ Public Class FormSzukajDzialki
         Dim fraza = txtZapytanieMiejscowosc.Text.Trim()
         If String.IsNullOrEmpty(fraza) Then
             MessageBox.Show("Wpisz nazwę miejscowości, wsi, ulicę lub adres.",
-                            "Wyszukiwarka", MessageBoxButtons.OK, MessageBoxIcon.Information)
+                            "Wyszukiwarka miejscowości", MessageBoxButtons.OK, MessageBoxIcon.Information)
             Exit Sub
         End If
 

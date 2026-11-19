@@ -1355,7 +1355,6 @@ Public Class Form1
     Private Sub OdswiezPrzyciskiWarstw()
         Dim i As Integer = lstWybraneWarstwy.Zaznaczona
         Dim pobieranie As Boolean = _przerwanie IsNot Nothing
-        btnResetujWarstwy.Enabled = (i >= 0 OrElse _zestaw.Liczba = 1) AndAlso _zestaw.Liczba > 0 AndAlso Not pobieranie
         btnUsunWarstwe.Enabled = (i >= 0 OrElse _zestaw.Liczba = 1) AndAlso _zestaw.Liczba > 0 AndAlso Not pobieranie
         btnWarstwaWyzej.Enabled = i >= 0 AndAlso i < _zestaw.Liczba - 1 AndAlso Not pobieranie
         btnWarstwaNizej.Enabled = i > 0 AndAlso Not pobieranie
@@ -1440,11 +1439,6 @@ Public Class Form1
                                              " Uwaga: wybrano same nakładki, a format pobierania to ." & Ustawienia.Format & " (bez przezroczystości). " &
                                              "Zmień go w oknie Ustawienia - kliknij format na pasku stanu u dołu okna.", "")
         Komunikat("Wskazano warstwę: " & w.Nazwa & infoWstawienia & "." & If(opisPiksela <> "", " " & opisPiksela, "") & ostrzezenieFormat, Color.Green)
-    End Sub
-
-    Private Sub btnResetujWarstwy_Click(sender As Object, e As EventArgs) Handles btnResetujWarstwy.Click
-        If PobieranieTrwa("Zmiana listy warstw") Then Exit Sub
-        UsunZaznaczonaWarstwe()
     End Sub
 
     Private Sub btnUsunWarstwe_Click(sender As Object, e As EventArgs) Handles btnUsunWarstwe.Click
@@ -2242,7 +2236,7 @@ Public Class Form1
         If _korytarz IsNot Nothing Then
             liczbaSegmentow = _korytarz.Segmenty(siatka, Ustawienia.Uklad).Count
             If liczbaSegmentow = 0 Then
-                Komunikat("Trasa nie przecina obszaru pobierania - wybierz trasę ponownie albo usuń obszar wzdłuż trasy (menu Sesja pobierania).", Color.Red) : Exit Sub
+                Komunikat("Trasa nie przecina obszaru pobierania - wybierz trasę ponownie albo usuń obszar wzdłuż trasy (Sesja pobierania > Usuń obszar wzdłuż trasy).", Color.Red) : Exit Sub
             End If
         End If
 
@@ -3273,7 +3267,7 @@ Public Class Form1
             .UseVisualStyleBackColor = True, .TabIndex = btnZnaczniki.TabIndex}
         btnZnaczniki.Parent.Controls.Add(_btnNowaSesja)
         _btnNowaSesja.BringToFront()
-        ToolTip1.SetToolTip(_btnNowaSesja, "nowa sesja - wyczyść warstwy, zasięg i widok mapy (pobrane pliki zostają)")
+        ToolTip1.SetToolTip(_btnNowaSesja, "Nowa sesja - wyczyść warstwy, zasięg i widok mapy (pobrane pliki zostają)")
         AddHandler _btnNowaSesja.Click, Sub() NowaSesja(pytaj:=True)
 
         _menuNowaSesja = New ToolStripMenuItem("Nowa sesja") With {.Name = "NowaSesjaToolStripMenuItem", .Image = UtworzIkoneNowejSesji()}

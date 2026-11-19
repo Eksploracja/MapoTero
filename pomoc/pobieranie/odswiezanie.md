@@ -10,7 +10,7 @@ parent: Pobieranie map
 Ponowne pobranie wszystkich segmentów sesji, np. gdy serwer udostępnił nowszą ortofotomapę albo zaktualizowane dane.
 {: .fs-5 .fw-300 }
 
-**Gdzie w programie:** menu *Sesja pobierania > odśwież mapę (pobierz ponownie wszystkie segmenty)*  
+**Gdzie w programie:** menu *Sesja pobierania > Odśwież mapę (pobierz ponownie wszystkie segmenty)*  
 **Dotyczy wersji:** {{ site.wersja_programu }}
 
 ## Kiedy odświeżać
@@ -25,9 +25,9 @@ Do zwykłego dokończenia przerwanego pobierania odświeżanie nie jest potrzebn
 
 ## Jak odświeżyć
 
-1. Wczytaj sesję, którą chcesz odświeżyć (*Sesja pobierania > wczytaj ustawienia sesji (conf.txt)*), jeśli nie jest
+1. Wczytaj sesję, którą chcesz odświeżyć (*Sesja pobierania > Wczytaj ustawienia sesji (conf.txt)*), jeśli nie jest
    bieżącą sesją.
-2. Wybierz *Sesja pobierania > odśwież mapę (pobierz ponownie wszystkie segmenty)*.
+2. Wybierz *Sesja pobierania > Odśwież mapę (pobierz ponownie wszystkie segmenty)*.
 3. Potwierdź pytanie *Pobrać ponownie wszystkie segmenty mapy do folderu…?*
 
 Program pobiera wszystkie segmenty sesji od nowa, także te, które już są w folderze. Przy obszarze wzdłuż trasy

@@ -104,7 +104,7 @@ Partial Class FormPomocMbtiles
         Me.ShowIcon = False
         Me.ShowInTaskbar = False
         Me.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent
-        Me.Text = "Pomoc i instrukcja - Kreator wielowarstwowego MBTiles"
+        Me.Text = "Pomoc i instrukcja"
         Me.pnlDol.ResumeLayout(False)
         Me.ResumeLayout(False)
 

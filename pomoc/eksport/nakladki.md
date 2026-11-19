@@ -96,7 +96,7 @@ w oknie głównym ([Wybrane warstwy i ich kolejność](../../okno-glowne/#zbiory
 Łączenie w oknie eksportu przydaje się wtedy, gdy sesje były już pobrane osobno, powstały w różnych układach
 współrzędnych albo wymagają usunięcia białego tła z gotowych segmentów JPEG.
 Mapę, która przy różnych przybliżeniach pokazuje różne warstwy, tworzy
-[kreator wielowarstwowego MBTiles](../../mbtiles-wielowarstwowy/).
+[MBTiles wieloskalowy](../../mbtiles-wielowarstwowy/).
 
 ---
 
