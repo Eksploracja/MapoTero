@@ -356,7 +356,6 @@ Public Class AudytKliknijWszystkoTesty
                         ZbadajOkno("usuwanie_p_seg", Function() New Global.MapoTero.usuwanie_p_seg())
                         ZbadajOkno("AboutBox1", Function() New Global.MapoTero.AboutBox1())
                         ZbadajOkno("Instrukcja_Obslugi", Function() New Global.MapoTero.Instrukcja_Obslugi())
-                        ZbadajOkno("pomoc_pfe", Function() New Global.MapoTero.pomoc_pfe())
                         'okno główne na końcu - jego polecenia otwierają okna narzędzi (zamykane przez strażnika)
                         _raport.AppendLine("=== Okno główne")
                         ZbadajOknoGlowne(glowne)

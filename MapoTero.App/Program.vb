@@ -197,6 +197,8 @@ Public Module Program
 
     ''' <summary>Adres zgłaszania błędów programu.</summary>
     Public Const AdresZgloszenBledow As String = "https://github.com/Eksploracja/MapoTero/issues"
+    ''' <summary>Dział MapoTero na Pomorskim Forum Eksploracyjnym (menu Pomoc - Zadaj pytanie na forum).</summary>
+    Public Const AdresForumPfe As String = "https://forum.eksploracja.pl/viewforum.php?f=205"
 
     ''' <summary>Lista wydań programu z opisem zmian (menu Pomoc > Co nowego w programie).</summary>
     Public Const AdresWydan As String = "https://github.com/Eksploracja/MapoTero/releases"

@@ -3154,7 +3154,7 @@ Public Class Form1
     End Sub
 
     Private Sub PomocPomorskieForumEksploracyjneToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles PomocPomorskieForumEksploracyjneToolStripMenuItem.Click
-        pomoc_pfe.OtworzWPrzegladarce()
+        OtworzStrone(AdresForumPfe, "Zadaj pytanie na forum")
     End Sub
 
     Private Sub InstrukcjaObslugiToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles InstrukcjaObsługiToolStripMenuItem.Click

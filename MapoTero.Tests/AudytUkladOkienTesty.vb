@@ -200,7 +200,6 @@ Public Class AudytUkladOkienTesty
                         Zbadaj("usuwanie_p_seg", Function() New Global.MapoTero.usuwanie_p_seg())
                         Zbadaj("AboutBox1", Function() New Global.MapoTero.AboutBox1())
                         Zbadaj("Instrukcja_Obslugi", Function() New Global.MapoTero.Instrukcja_Obslugi())
-                        Zbadaj("pomoc_pfe", Function() New Global.MapoTero.pomoc_pfe())
                     End Using
                     Zbadaj("Form1", Function() New Global.MapoTero.Form1())
                 Catch ex As Exception
