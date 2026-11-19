@@ -94,16 +94,13 @@ Aby dokończyć przerwane lub niepełne pobieranie:
 Program pominie segmenty, które już są w folderze, i pobierze tylko brakujące, także te z luk w środku mapy.
 Pozostałości po zapisie przerwanym w połowie (pliki `.tmp`) usuwa sam.
 
-Segmenty usunięte narzędziem [*Usuwanie pustych segmentów*](../../narzedzia/) program pomija: zapamiętuje je w pliku
-`usuniete_puste_segmenty.txt` w folderze sesji. Pobiera je ponownie tylko [odświeżanie mapy](../odswiezanie/).
-
 ---
 
 ## Czego nie można robić w trakcie pobierania
 
 W trakcie pobierania program blokuje zmiany, które rozjechałyby parametry sesji z pobieranymi segmentami:
 zmianę zbioru map i warstw, zaznaczanie obszaru, wczytywanie i zapis sesji, scalanie,
-usuwanie map, dodawanie serwera i usuwanie pustych segmentów. Przy próbie program wyświetla
+usuwanie map i dodawanie serwera. Przy próbie program wyświetla
 *„… będzie możliwe po zakończeniu lub przerwaniu pobierania segmentów”*. Okno *Ustawienia* otwiera się, ale pozwala
 zmienić tylko widok współrzędnych i układ nowej sesji.
 

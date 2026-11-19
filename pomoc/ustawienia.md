@@ -31,9 +31,8 @@ Wszystkie opcje okna *Ustawienia*: co robi każda, jaka jest wartość domyślna
 | **2** | [Nowa sesja](#nowa-sesja) | domyślny układ współrzędnych dla czystego startu programu |
 | **3** | [Widok okna głównego](#widok-okna-głównego) | etykiety współrzędnych i wyświetlanie siatki |
 | **4** | [Pliki kalibracji segmentów](#pliki-kalibracji-segmentów) | dodatkowe pliki `.map`, `.kml`, world file, `.tab`, `.wld`, `.gmi` |
-| **5** | [TrekBuddy i Locus Map](#trekbuddy-i-locus-map) | zapis mapy w paczce `.tar` i wybór nazwy paczki |
-| **6** | [Pobieranie](#pobieranie) | liczba prób, przerwy, równoczesne pobrania, limit czasu i jakość JPEG składanych segmentów |
-| **7** | [Usługi kafelkowe](#usługi-kafelkowe) | zachowywanie kafli w `_kafle_wmts` |
+| **5** | [Pobieranie](#pobieranie) | liczba prób, przerwy, równoczesne pobrania, limit czasu i jakość JPEG składanych segmentów |
+| **6** | [Usługi kafelkowe](#usługi-kafelkowe) | zachowywanie kafli w `_kafle_wmts` |
 
 Okienko grupuje zarówno parametry zapisywane dla konkretnej sesji pobierania (`conf.txt`), jak i ogólne opcje pracy programu (`lastsettings.txt`).
 
@@ -91,14 +90,9 @@ OziExplorer, MapInfo, Google Earth, GPS Tuner). Opis każdego formatu znajdziesz
 
 ## TrekBuddy i Locus Map
 
-| Opcja | Domyślnie | Co robi |
-|---|---|---|
-| *twórz mapę TrekBuddy / Locus Map (.tar)* | wyłączone | Przełącza pobieranie w tryb paczki `.tar` z segmentami `512 × 512 px` i plikami `.map` / `.set`. Po wyłączeniu wraca poprzedni bok segmentu z okna głównego. |
-| *nazwa paczki (po przedrostku)* | `sam przedrostek` | Dodaje do nazwy folderu i archiwum `.tar` nazwę zbioru map, nazwę warstwy albo oba elementy. Pod spodem widać podgląd nazwy. |
-
-W trybie TrekBuddy wyłączone są indywidualne pliki kalibracji segmentów i zmiana stylu numeracji. Tryb jest parametrem
-sesji: program zapisuje go w `conf.txt`, więc po ponownym uruchomieniu albo wczytaniu sesji wraca razem z nią.
-*Nowa sesja* wyłącza tryb TrekBuddy, bo przywraca domyślny bok segmentu.
+Od wersji 3.19 okno *Ustawienia* nie ma trybu TrekBuddy. Mapę TrekBuddy / Locus Map (`.tar`) tworzy okno
+[Eksport mapy](../eksport/aplikacje/#trekbuddy) z dowolnej pobranej sesji. Sesję TrekBuddy z poprzednich wersji (tryb
+zapisany w `conf.txt`) program nadal wznawia w tym trybie.
 
 ---
 

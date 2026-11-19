@@ -65,7 +65,7 @@ W ZWCAD (oraz GstarCAD / progeCAD):
 
 Gdy obszar jest duży i w folderze znajduje się ponad kilkaset segmentów (program ostrzega powyżej **1000 rastrów**, a twardy limit eksportu wynosi **10 000**):
 
-1. W oknie *Eksport do CAD* w grupie *Rastry wstawiane do rysunku* kliknij przycisk **Scal teraz...**.
+1. W oknie *Eksport do CAD* w grupie *Rastry wstawiane do rysunku* kliknij przycisk **Scal segmenty...** (otworzy się okno *Eksport mapy* z formatem *Arkusz*).
 2. W otwartym oknie scalania wybierz format **GeoTIFF (bezstratny)** albo **JPEG** (pole world file zaznaczy się samo) i kliknij **Scal segmenty**.
 3. Po powrocie do okna eksportu CAD program automatycznie wybierze opcję **scalony arkusz** ze wskazaniem powstałego pliku.
 

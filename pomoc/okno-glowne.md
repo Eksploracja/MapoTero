@@ -27,7 +27,7 @@ Opis każdego elementu okna głównego: mapy podglądu, list zbiorów map i wars
 
 | Nr | Element okna | Do czego służy |
 |---|---|---|
-| **1** | Pasek menu | sesja pobierania (zapis/wczytanie `conf.txt`, korytarz GPX/KML, odświeżanie), narzędzia (wyszukiwarka miejscowości i działek, konwerter Ozi, kreator serwerów, scalanie, eksport, CAD, wielowarstwowy MBTiles, nakładanie, usuwanie pustych), ustawienia i pomoc |
+| **1** | Pasek menu | sesja pobierania (zapis/wczytanie `conf.txt`, korytarz GPX/KML, odświeżanie), narzędzia (kreator serwerów, wyszukiwarka miejscowości i działek, konwerter Ozi, profil wysokościowy trasy, scalanie i eksport mapy, CAD, korekta obrazów), ustawienia i pomoc |
 | **2** | Mapa podglądu | podkład orientacyjny (OSM / Google / Bing), zaznaczanie obszaru prawym przyciskiem myszy, siatka segmentów z uchwytami oraz przycisk lupy 🔍 (wyszukiwarka) |
 | **3** | Drzewo *Wybierz mapy* | wszystkie zbiory i warstwy pogrupowane tematycznie, wyszukiwarka *szukaj warstwy…*, rozwijanie/zwijanie (`⊞`/`⊟`) oraz przycisk `[+]` (kreator serwerów) |
 | **4** | *Wybrane warstwy oraz ich kolejność* | „kanapka” do 12 warstw (1 = podkład), zmiana kolejności (`▲`/`▼` lub przeciąganie), usuwanie (`✕`), ustawienie `Krycie %`, przycisk `…` (*Warstwy - zaawansowane*) oraz ikona kosza |
@@ -62,11 +62,10 @@ Tytuł okna podaje nazwę i numer wersji programu (np. `MapoTero {{ site.wersja_
 | **Narzędzia** | Dodaj nowy serwer WMS / WMTS... | | [Kreator serwerów](../serwery/kreator/) |
 | | Wyszukaj miejscowość lub działkę... | <kbd>Ctrl</kbd>+<kbd>F</kbd> | [Wyszukiwarka miejscowości i działek](../obszar/zaznaczanie/#wyszukiwarka-miejscowości-adresów-i-działek-katastralnych) (<kbd>Ctrl</kbd>+<kbd>D</kbd> dla działek) |
 | | Konwertuj mapę OziExplorer (.map)... | | [Konwerter map OziExplorer](../narzedzia/#konwerter-map-oziexplorer-map) |
-| | Scalanie segmentów | <kbd>Ctrl</kbd>+<kbd>L</kbd> | [Scalanie segmentów](../scalanie/) |
-| | Eksport mapy (KMZ, JNX, MBTiles, SQLiteDB, OruxMaps, GeoTIFF) | <kbd>Ctrl</kbd>+<kbd>E</kbd> | [Eksport mapy](../eksport/) |
+| | Profil wysokościowy trasy (GPX, KML)... | | [Profil wysokościowy trasy](../narzedzia/#profil-wysokościowy-trasy) |
+| | Scalanie segmentów | <kbd>Ctrl</kbd>+<kbd>L</kbd> | okno [Eksport mapy](../eksport/) z formatem *Arkusz* - [Scalanie segmentów](../scalanie/) |
+| | Eksport mapy (JNX, KMZ, MBTiles, SQLiteDB, OruxMaps, arkusz, TrekBuddy) | <kbd>Ctrl</kbd>+<kbd>E</kbd> | [Eksport mapy](../eksport/) |
 | | Eksport do CAD (DXF, skrypt SCR, LISP)... | | [Eksport do CAD](../cad/) |
-| | Zaawansowany wielowarstwowy MBTiles... | | [Wielowarstwowy MBTiles](../mbtiles-wielowarstwowy/) |
-| | Usuwanie pustych segmentów | <kbd>Ctrl</kbd>+<kbd>U</kbd> | [Narzędzia dodatkowe](../narzedzia/#usuwanie-pustych-segmentów) |
 | | Korekta i optymalizacja obrazów w folderze... | | [Narzędzia dodatkowe](../narzedzia/#korekta-i-optymalizacja-obrazów-w-folderze) |
 | **Ustawienia** | | | okno [Ustawienia](../ustawienia/) |
 | **Pomoc** | Podręcznik użytkownika (online) | <kbd>F1</kbd> | otwiera ten podręcznik w przeglądarce |

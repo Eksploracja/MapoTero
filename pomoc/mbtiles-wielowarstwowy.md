@@ -10,7 +10,7 @@ Kompilacja kilku pobranych sesji do jednego pliku MBTiles: każda warstwa może 
 powiększeń albo mieszać się z warstwami leżącymi pod nią.
 {: .fs-5 .fw-300 }
 
-**Gdzie w programie:** menu *Narzędzia > Zaawansowany wielowarstwowy MBTiles...* lub przycisk *Wielowarstwowy...* w oknie eksportu  
+**Gdzie w programie:** przycisk *Wieloskalowy...* w oknie *Eksport mapy* (od wersji 3.19 bez osobnej pozycji w menu *Narzędzia*)  
 **Dotyczy wersji:** {{ site.wersja_programu }}
 
 <details open markdown="block">

@@ -24,7 +24,7 @@ Mapa jako podkład w rysunku CAD: rysunek DXF, skrypt SCR albo program LISP, z r
 
 1. Pobierz mapę w układzie **PL-2000** (strefa 5–8 dopasowana do obszaru) albo **PL-1992**, aby jednostką rysunku był **metr**.
 2. Wybierz menu *Narzędzia > Eksport do CAD (DXF, skrypt SCR, LISP)...*.
-3. Zostaw wybrane *pobrane segmenty* (albo użyj przycisku **Scal teraz...** przy dużej liczbie segmentów).
+3. Zostaw wybrane *pobrane segmenty* (albo użyj przycisku **Scal segmenty...** przy dużej liczbie segmentów).
 4. Zaznacz pliki wynikowe (`rysunek DXF`, `skrypt SCR`, opcjonalnie `program LISP`) i kliknij **Eksportuj**.
 5. Otwórz utworzony plik `_cad_<kol>x<wier>.dxf` bezpośrednio w programie CAD albo wstaw mapę do istniejącego rysunku poleceniem `SCRIPT` / `APPLOAD` ([Wstawianie w programach CAD](programy/)).
 
@@ -39,7 +39,7 @@ Mapa jako podkład w rysunku CAD: rysunek DXF, skrypt SCR albo program LISP, z r
 * **Pobrane segmenty (osobny obraz dla każdego segmentu)**: każdy plik segmentu trafia do rysunku jako osobna encja rastra.
   Limit w jednym rysunku to **10 000 rastrów** (powyżej 1000 program CAD może działać wolno, o czym program ostrzega komunikatem).
 * **Scalony arkusz**: wstawia jeden plik arkusza utworzony przez *Scalanie segmentów* (GeoTIFF albo JPEG/PNG z plikiem world file).
-  Przycisk **Wybierz...** wskazuje istniejący arkusz, a **Scal teraz...** uruchamia od razu okno scalania dla bieżącej sesji
+  Przycisk **Wybierz...** wskazuje istniejący arkusz, a **Scal segmenty...** otwiera okno *Eksport mapy* z formatem *Arkusz* dla bieżącej sesji
   i automatycznie wybiera powstały arkusz.
 * **Bez rastrów: tylko obrys i siatka segmentów**: przydatne do wstawienia samego skorowidza przed pobraniem mapy.
 

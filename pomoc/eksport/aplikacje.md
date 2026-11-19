@@ -134,11 +134,14 @@ i scalony arkusz z plikiem `.kml` ([Scalanie segmentów](../../scalanie/)).
 
 ## TrekBuddy
 
-Mapy TrekBuddy (archiwum `.tar` z kalibracją) program tworzy już **przy pobieraniu**, w trybie TrekBuddy
-włączanym w oknie *Ustawienia* (poza oknem eksportu). Zob. [Ustawienia: TrekBuddy i Locus Map](../../ustawienia/#trekbuddy-i-locus-map).
+Format *TrekBuddy / Locus Map* w oknie eksportu tworzy archiwum `.tar` z dowolnej pobranej sesji: arkusz mapy (z nakładkami
+i korektą obrazu) pocięty na kafle `512 × 512 px` w podfolderze `set`, plik kalibracji `.map` całego obszaru i listę kafli `.set`.
+Plik `_trekbuddy_<kol>x<wier>.tar` powstaje w folderze sesji. Locus Map: skopiuj go do folderu `Locus/maps`.
+
+Do wersji 3.18 paczkę tworzyło pobieranie w trybie TrekBuddy włączanym w oknie *Ustawienia*, przed pobieraniem.
 
 ---
 
-➡️ **Kolejny krok:** [Zaawansowany wielowarstwowy MBTiles →](../../mbtiles-wielowarstwowy/)
+➡️ **Kolejny krok:** [MBTiles wieloskalowy →](../../mbtiles-wielowarstwowy/)
 
 *Zobacz też: [Wybór formatu](../formaty/) · [Poziomy powiększenia i rozmiar pliku](../powiekszenia/) · [Problemy i najczęstsze pytania](../../problemy/)*

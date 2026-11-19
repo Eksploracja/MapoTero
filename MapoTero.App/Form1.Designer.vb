@@ -471,7 +471,7 @@ Partial Class Form1
         Me.EksportToolStripMenuItem.Name = "EksportToolStripMenuItem"
         Me.EksportToolStripMenuItem.ShortcutKeys = CType((System.Windows.Forms.Keys.Control Or System.Windows.Forms.Keys.E), System.Windows.Forms.Keys)
         Me.EksportToolStripMenuItem.Size = New System.Drawing.Size(315, 22)
-        Me.EksportToolStripMenuItem.Text = "Eksport mapy (KMZ, JNX, MBTiles, SQLiteDB, OruxMaps, GeoTIFF)"
+        Me.EksportToolStripMenuItem.Text = "Eksport mapy (JNX, KMZ, MBTiles, SQLiteDB, OruxMaps, arkusz, TrekBuddy)"
         '
         'EksportCadToolStripMenuItem
         '

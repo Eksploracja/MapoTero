@@ -127,8 +127,8 @@ Public Class FormPomocMbtiles
         _urlOnline = "https://eksploracja.github.io/MapoTero/pomoc/scalanie/"
 
         DodajTytul("Scalanie pobranych segmentów w jeden arkusz mapy")
-        DodajAkapit("Narzędzie łączy pobrane kafelki i segmenty rastrowe z folderu sesji w jeden jednolity, wielki arkusz mapy o wysokiej rozdzielczości. " &
-                    "Wszelkie parametry zasięgu i siatki są wczytywane automatycznie z pliku konfiguracyjnego conf.txt znajdującego się w folderze segmentów.")
+        DodajAkapit("Scalanie łączy segmenty z folderu sesji w jeden arkusz mapy. Polecenie Scalanie segmentów otwiera okno Eksport mapy " &
+                    "z formatem Arkusz; parametry siatki program wczytuje z pliku conf.txt w folderze sesji.")
 
         DodajNaglowek1("1. Formaty wynikowe arkusza")
         DodajPunktor("GeoTIFF / BigTIFF (bezstratny Deflate): branżowy standard GIS (QGIS, ArcGIS, CAD). Posiada bezpośrednio zaszytą georeferencję w nagłówkach pliku.")
@@ -137,14 +137,14 @@ Public Class FormPomocMbtiles
         DodajPunktor("PNG: format z obsługą pełnej przezroczystości (kanał alfa). Idealny, gdy pobrano warstwy nakładkowe (np. same granice, rzeki lub cieniowanie rzeźby).")
 
         DodajNaglowek1("2. Pliki georeferencji (kalibracji)")
-        DodajPunktor("World File (.jgw / .pgw / .tfw): uniwersalny plik współrzędnych piksela dla systemów CAD i GIS.")
+        DodajPunktor("World file i .prj (.tifw i .tfw, .jpgw, .pngw): plik współrzędnych piksela dla programów CAD i GIS.")
         DodajPunktor("KML (Google Earth): plik nakładki naziemnej do natychmiastowego wyświetlenia arkusza w trójwymiarowym globusie Google Earth.")
         DodajPunktor("MAP (OziExplorer / TrekBuddy): kalibracja punktowa dla tradycyjnych programów nawigacyjnych.")
         DodajPunktor("TAB (MapInfo Professional): plik tabeli georeferencyjnej dla środowiska MapInfo.")
 
         DodajNaglowek1("3. Wskazówki i rozwiązywanie problemów")
-        DodajPunktor("Brak pliku conf.txt: jeśli plik konfiguracyjny uległ utracie, zaznacz opcję 'ręczne wprowadzanie parametrów' i uzupełnij współrzędne zasięgu oraz rozmiar segmentu.")
-        DodajPunktor("Wykryto error.txt: obecność pliku error.txt oznacza, że nie pobrano wszystkich segmentów. Uzupełnij brakujące segmenty w oknie głównym przed scalaniem.")
+        DodajPunktor("Plik error.txt w folderze oznacza, że nie pobrano wszystkich segmentów - okno ostrzega o nim, a w arkuszu brakujące segmenty będą białymi polami. Uzupełnij je przyciskiem Pobierz w oknie głównym.")
+        DodajPunktor("Na arkusz można nałożyć warstwy z innych folderów (grupa Warstwy i przezroczystość) i poprawić obraz polem Korekta obrazu.")
 
         DodajStopkeOnline(_urlOnline)
     End Sub
@@ -161,7 +161,8 @@ Public Class FormPomocMbtiles
         DodajPunktor("Garmin Custom Maps (KMZ): standardowy format Garmina. Posiada ograniczenie do 100 kafli na plik - w razie potrzeby włącz opcję 'automatyczny podział na tomy', a program utworzy spójne części mieszczące się w limicie urządzenia.")
         DodajPunktor("MBTiles / SQLiteDB: kafelkowa baza SQLite w standardzie Web Mercator, dedykowana dla aplikacji mobilnych (Locus Map, OsmAnd, OruxMaps).")
         DodajPunktor("OruxMaps: folder z bazą kafli i plikiem XML gotowy do wrzucenia do katalogu map OruxMaps.")
-        DodajPunktor("GeoTIFF bezpośredni: pojedynczy georeferencjonowany plik TIF dla Avenza Maps i aplikacji GIS.")
+        DodajPunktor("Arkusz (scalanie segmentów): jeden plik GeoTIFF, JPEG albo PNG z georeferencją dla Avenza Maps, QGIS i programów CAD, z plikami world file i .prj, .map, .tab, .kml.")
+        DodajPunktor("TrekBuddy / Locus Map: archiwum .tar z kaflami 512 px, plikiem .map i listą .set - z dowolnej pobranej sesji.")
 
         DodajNaglowek1("2. Piramida powiększeń (Zoom Od - Zoom Do)")
         DodajPunktor("Dla formatów kafelkowych (JNX, MBTiles, SQLiteDB) program generuje automatyczną piramidę powiększeń od poziomu przeglądowego do szczegółowego.")
@@ -169,7 +170,7 @@ Public Class FormPomocMbtiles
 
         DodajNaglowek1("3. Filtr MIP dla ekranów Garmin")
         DodajPunktor("Opcja korekcji MIP optymalizuje kontrast, nasycenie i ostrość splotową dla ekranów transflektywnych Garmina, zapewniając doskonałą czytelność w pełnym słońcu.")
-        DodajPunktor("Przycisk 'Podgląd MIP...' w oknie głównym pozwala obejrzeć efekt wyostrzenia i korekty na żywo na próbce mapy przed eksportem.")
+        DodajPunktor("Przycisk 'Profil / Podgląd...' obok pola Korekta obrazu pozwala wybrać profil i obejrzeć efekt na próbce mapy przed eksportem.")
 
         DodajNaglowek1("4. Dostosowanie do ekranu")
         DodajPunktor("Okno eksportu automatycznie dopasowuje swoją wysokość do rozdzielczości ekranu, włączając w razie potrzeby pionowy pasek przewijania.")
@@ -256,6 +257,10 @@ Public Class FormPomocMbtiles
                      "  • Potsdam / Rauenberg (mapy niemieckie Messtischblatt 1:25k i Großblatt)," & vbCrLf &
                      "  • Pulkovo 1942 / Układ 1965 / Układ 1942 (mapy topograficzne z okresu PRL).")
         DodajPunktor("Współrzędne są precyzyjnie przeliczane do elipsoidy WGS84, dzięki czemu mapa nie jest przesunięta względem śladów GPS.")
+
+        DodajNaglowek1("Formaty wynikowe i korekta obrazu")
+        DodajPunktor("Garmin BirdsEye (JNX), Garmin Custom Maps (KMZ), MBTiles, SQLiteDB (OsmAnd, Locus Map) i OruxMaps (folder mapy) - bazy kafli zapisuje ten sam kod co okno Eksport mapy.")
+        DodajPunktor("Pole Korekta obrazu i przycisk Profil / Podgląd działają jak w oknie eksportu (podgląd na próbce ze skanu).")
 
         DodajNaglowek1("2. Tryb pojedynczy i wsadowy (Batch)")
         DodajPunktor("Możesz wybrać pojedynczy plik .map albo cały folder zawierający dziesiątki arkuszy.")
@@ -346,7 +351,7 @@ Public Class FormPomocMbtiles
         DodajPunktor("Odstęp zapytań i ochrona serwerów: ogranicza tempo pobierania, zapobiegając blokadom IP ze strony serwerów rządowych.")
         DodajPunktor("Zachowuj pobrane kafle WMTS: pozostawia surowe kafelki w pamięci podręcznej, co umożliwia błyskawiczne ponowne generowanie mapy offline.")
         DodajPunktor("Jakość JPEG przy składaniu: dotyczy segmentów składanych z kafli WMTS/XYZ, z kilku serwerów WMS albo z warstw o kryciu poniżej 100 %.")
-        DodajPunktor("Tryb TrekBuddy / Locus Map program zapisuje w conf.txt sesji, więc wraca razem z wczytaną sesją.")
+        DodajPunktor("Mapę TrekBuddy / Locus Map (.tar) tworzy okno Eksport mapy - okno Ustawienia nie ma już trybu TrekBuddy.")
 
         DodajNaglowek1("4. Otwieranie okna")
         DodajPunktor("Okno otwiera menu Ustawienia oraz kliknięcie formatu segmentów na pasku stanu.")

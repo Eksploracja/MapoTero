@@ -89,7 +89,7 @@ Jeśli błąd się powtarza, zgłoś go na [forum](https://forum.eksploracja.pl/
 
 **Dlaczego przycisk scalania (szachownica) jest nieaktywny?**  
 Ponieważ bieżący folder sesji nie ma jeszcze `conf.txt` (nowa sesja przed pierwszym pobraniem) albo zawiera plik `error.txt`
-(pobieranie nie jest kompletne). W przypadku zamierzonych braków (np. po usunięciu pustych segmentów) usuń `error.txt` ręcznie.
+(pobieranie nie jest kompletne). W przypadku zamierzonych braków usuń `error.txt` ręcznie.
 
 **Jak pobrać nową mapę, nie nadpisując poprzedniej?**  
 Zapisz sesję w nowym folderze (<kbd>Alt</kbd>+<kbd>Z</kbd>) przed pobieraniem albo zgódź się na utworzenie nowego podfolderu

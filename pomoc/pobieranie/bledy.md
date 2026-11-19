@@ -58,7 +58,7 @@ Najczęstsze przyczyny:
 Program automatycznie maskuje w pliku `error.txt` oraz logach awarii wrażliwe parametry (takie jak klucze API, tokeny w adresach URL czy dane autoryzacji), zastępując je ciągiem `***`. Przesłanie pliku `error.txt` na forum pomocy nie ujawnia prywatnych kluczy dostępowych.
 
 {: .informacja }
-Plik `error.txt` istnieje również w trakcie trwania pobierania i znika automatycznie po zapisaniu kompletu segmentów. Dopóki plik znajduje się w folderze, okno scalania blokuje łączenie niekompletnego arkusza, a moduł eksportu ostrzega o brakujących kaflach. Jeśli brak segmentów jest zamierzony (np. po usunięciu pustych krawędzi), usuń `error.txt` ręcznie.
+Plik `error.txt` istnieje również w trakcie trwania pobierania i znika automatycznie po zapisaniu kompletu segmentów. Dopóki plik znajduje się w folderze, przycisk scalania w oknie głównym jest nieaktywny, a okno eksportu (także arkusza) ostrzega o brakujących segmentach. Jeśli brak segmentów jest zamierzony (np. po usunięciu pustych krawędzi), usuń `error.txt` ręcznie.
 
 ---
 
@@ -87,10 +87,11 @@ Segment pobrany bez błędów sieciowych, ale pozbawiony treści graficznej, wyn
 
 ---
 
-## Usuwanie pustych segmentów
+## Puste segmenty
 
-Puste segmenty z krawędzi mapy zajmują miejsce na dysku i spowalniają późniejszy eksport. Narzędzie *Narzędzia > Usuwanie pustych segmentów* kasuje pliki mniejsze od zadanego progu bajtów (zob. [Narzędzia dodatkowe](../../narzedzia/)).
-Program zapamiętuje usunięte segmenty w pliku `usuniete_puste_segmenty.txt` w folderze sesji, więc przy kolejnym kliknięciu *Pobierz* ich nie pobiera ([Wznawianie](../przebieg/#wznawianie)). Pobierze je dopiero [odświeżanie mapy](../odswiezanie/) albo usunięcie tego pliku.
+Biały segment (np. poza zasięgiem danych serwera) program od razu pobiera drugi raz; drugi biały wynik przyjmuje jako
+prawdziwy obraz. Eksport do formatów kafelkowych nie zapisuje pustych kafli, a [obszar wzdłuż trasy](../../obszar/korytarz/)
+nie pobiera segmentów poza pasem. Dawne narzędzie *Usuwanie pustych segmentów* zostało usunięte w wersji 3.19.
 
 ---
 
