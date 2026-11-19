@@ -3163,10 +3163,6 @@ Public Class Form1
         End Using
     End Sub
 
-    Private Sub ZaawansowanyMbtilesToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles ZaawansowanyMbtilesToolStripMenuItem.Click
-        FormZaawansowanyMbtiles.ShowDialog()
-    End Sub
-
     ''' <summary>
     ''' Okno Ustawienia - z menu Ustawienia i po kliknięciu formatu na pasku stanu (bez osobnej pozycji w menu Sesja pobierania,
     ''' bo otwierałaby to samo okno pod inną nazwą).
@@ -3227,11 +3223,6 @@ Public Class Form1
 
     Private Sub WesprzyjToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles WesprzyjToolStripMenuItem.Click
         OtworzStrone(AdresWsparcia, "Wesprzyj rozwój programu")
-    End Sub
-
-    Private Sub UsuwaniePustychSegmentowToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles UsuwaniePustychSegmentówToolStripMenuItem.Click
-        If PobieranieTrwa("Usuwanie pustych segmentów") Then Exit Sub
-        Usuwanie_p_seg.ShowDialog()
     End Sub
 
     Private Sub KorektaFolderuToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles KorektaFolderuToolStripMenuItem.Click

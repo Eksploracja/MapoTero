@@ -228,8 +228,8 @@ Partial Class FormEksport
         Me.btnWielowarstwowyMbtiles.Name = "btnWielowarstwowyMbtiles"
         Me.btnWielowarstwowyMbtiles.Size = New System.Drawing.Size(130, 23)
         Me.btnWielowarstwowyMbtiles.TabIndex = 7
-        Me.btnWielowarstwowyMbtiles.Text = "Wielowarstwowy..."
-        Me.ToolTip1.SetToolTip(Me.btnWielowarstwowyMbtiles, "Otwiera zaawansowany kreator tworzenia pliku MBTiles z różnych warstw i poziomów zoom.")
+        Me.btnWielowarstwowyMbtiles.Text = "Wieloskalowy..."
+        Me.ToolTip1.SetToolTip(Me.btnWielowarstwowyMbtiles, "MBTiles wieloskalowy: jeden plik z różnych map - każda widoczna w wybranym zakresie powiększeń (np. topo 1:50k z daleka, ortofotomapa w zbliżeniu).")
         Me.btnWielowarstwowyMbtiles.UseVisualStyleBackColor = True
         Me.rbMBTiles.AutoSize = True
         Me.rbMBTiles.Location = New System.Drawing.Point(10, 114)
@@ -301,7 +301,7 @@ Partial Class FormEksport
         Me.chkKorekcjaMip.Name = "chkKorekcjaMip"
         Me.chkKorekcjaMip.Size = New System.Drawing.Size(275, 17)
         Me.chkKorekcjaMip.TabIndex = 13
-        Me.chkKorekcjaMip.Text = "Korekta czytelności (kontrast, ostrość, MIP):"
+        Me.chkKorekcjaMip.Text = "Korekta obrazu"
         Me.ToolTip1.SetToolTip(Me.chkKorekcjaMip, "Włącza post-processing obrazu (optymalizacja kontrastu, nasycenia, korekcja gamma i wyostrzanie krawędzi).")
         Me.chkKorekcjaMip.UseVisualStyleBackColor = True
         '

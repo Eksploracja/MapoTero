@@ -118,7 +118,7 @@ Public Class FormKorektaFolderu
 
     Private Sub AktualizujEtykieteProfilu()
         lblProfilOpis.Text = "Profil: " & OpcjeKorekcjiMip.NazwaProfilu(_opcjeKorekty.Profil)
-        btnDostosuj.Text = "Dostosuj (" & OpcjeKorekcjiMip.KrotkaNazwaProfilu(_opcjeKorekty.Profil) & ")..."
+        btnDostosuj.Text = "Profil: " & OpcjeKorekcjiMip.KrotkaNazwaProfilu(_opcjeKorekty.Profil) & "..."
     End Sub
 
     ''' <summary>
@@ -157,7 +157,7 @@ Public Class FormKorektaFolderu
         Dim plikiObrazow = PlikiDoKorekty(zrodlo, pominieteArkusze)
 
         If Not _opcjeKorekty.Wlaczona OrElse _opcjeKorekty.Profil = ProfilKorektyRastra.Brak Then
-            MessageBox.Show("Wybierz profil korekty przyciskiem ""Dostosuj"".", "Korekta obrazów", MessageBoxButtons.OK, MessageBoxIcon.Information)
+            MessageBox.Show("Wybierz profil korekty przyciskiem ""Profil / Podgląd"".", "Korekta obrazów", MessageBoxButtons.OK, MessageBoxIcon.Information)
             Return
         End If
 

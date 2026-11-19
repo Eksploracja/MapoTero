@@ -25,7 +25,6 @@ Public Class PrzyciskPomocyTesty
             ("FormImportOzi", Function() New MapoTero.FormImportOzi()),
             ("FormSzukajDzialki - miejscowości", Function() New MapoTero.FormSzukajDzialki()),
             ("FormSzukajDzialki - działki", Function() New MapoTero.FormSzukajDzialki(1)),
-            ("usuwanie_p_seg", Function() New MapoTero.usuwanie_p_seg()),
             ("FormKorektaFolderu", Function() New MapoTero.FormKorektaFolderu())}
     End Function
 

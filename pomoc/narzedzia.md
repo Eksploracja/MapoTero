@@ -55,7 +55,7 @@ Narzędzie poprawia naraz wszystkie obrazy PNG, JPEG i TIFF leżące w jednym fo
 
 1. Wskaż **folder z obrazami**. Program podpowiada folder bieżącej sesji (a z okna eksportu do CAD - folder tego eksportu).
 2. Wskaż **folder wynikowy**, inny niż źródłowy. Domyślnie to podfolder `korekta`. Oryginały zostają bez zmian.
-3. Przyciskiem **Dostosuj** wybierz profil korekty i sprawdź efekt na próbce z folderu: *Garmin MIP*, *Wyostrzenie krawędzi*,
+3. Przyciskiem **Profil / Podgląd** wybierz profil korekty i sprawdź efekt na próbce z folderu: *Garmin MIP*, *Wyostrzenie krawędzi*,
    *Stare mapy i skany*, *Rozjaśnienie lasów*, *Podkład CAD*, *Skan CAD* albo własne wartości suwaków. Profilu *Brak* nie można
    tu wybrać, bo nie zmienia obrazów.
 4. Kliknij **Rozpocznij korektę**.

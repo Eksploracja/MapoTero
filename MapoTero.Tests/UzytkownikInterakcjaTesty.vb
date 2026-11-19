@@ -542,46 +542,6 @@ Public Class UzytkownikInterakcjaTesty
     End Sub
 
     <Fact>
-    Public Sub TestUzytkownik_Narzedzia_UsuwaniePustychSegmentow()
-        UruchomWWatkuSta(
-            Sub()
-                Using f As New Global.MapoTero.usuwanie_p_seg()
-                    f.Show()
-                    Application.DoEvents()
-
-                    Dim txtProg = DirectCast(f.Controls.Find("txtProgKB", True)(0), TextBox)
-                    Dim cmbRozszerzenie = DirectCast(f.Controls.Find("cmbRozszerzenie", True)(0), ComboBox)
-                    Dim btnUsun = DirectCast(f.Controls.Find("btnUsun", True)(0), Button)
-
-                    ' 1. Wprowadzanie wartości progu
-                    txtProg.Text = "0"
-                    Application.DoEvents()
-                    txtProg.Text = "2.5"
-                    Application.DoEvents()
-                    txtProg.Text = "abc"
-                    Application.DoEvents()
-                    txtProg.Text = "-5"
-                    Application.DoEvents()
-                    txtProg.Text = "999999"
-                    Application.DoEvents()
-
-                    ' 2. Zmiana filtra rozszerzeń
-                    For i As Integer = 0 To cmbRozszerzenie.Items.Count - 1
-                        cmbRozszerzenie.SelectedIndex = i
-                        Application.DoEvents()
-                    Next
-
-                    ' 3. Walidacja wartości progu i kontrolek
-                    txtProg.Text = "10"
-                    Application.DoEvents()
-                    Assert.Equal("10", txtProg.Text)
-
-                    f.Close()
-                End Using
-            End Sub)
-    End Sub
-
-    <Fact>
     Public Sub TestUzytkownik_FormDodajSerwer_KatalogIFiltry()
         UruchomWWatkuSta(
             Sub()

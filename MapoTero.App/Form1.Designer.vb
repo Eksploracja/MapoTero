@@ -77,8 +77,6 @@ Partial Class Form1
         Me.ScalanieToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.EksportToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.EksportCadToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
-        Me.ZaawansowanyMbtilesToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
-        Me.UsuwaniePustychSegmentówToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.KorektaFolderuToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.UstawieniaToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.HelpToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
@@ -420,7 +418,7 @@ Partial Class Form1
         '
         'NarzedziaToolStripMenuItem
         '
-        Me.NarzedziaToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.DodajSerwerToolStripMenuItem, Me.ZnajdzDzialkeToolStripMenuItem, Me.KonwertujOziToolStripMenuItem, Me.NarzedziaSeparator1, Me.ScalanieToolStripMenuItem, Me.EksportToolStripMenuItem, Me.EksportCadToolStripMenuItem, Me.ZaawansowanyMbtilesToolStripMenuItem, Me.UsuwaniePustychSegmentówToolStripMenuItem, Me.KorektaFolderuToolStripMenuItem})
+        Me.NarzedziaToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.DodajSerwerToolStripMenuItem, Me.ZnajdzDzialkeToolStripMenuItem, Me.KonwertujOziToolStripMenuItem, Me.NarzedziaSeparator1, Me.ScalanieToolStripMenuItem, Me.EksportToolStripMenuItem, Me.EksportCadToolStripMenuItem, Me.KorektaFolderuToolStripMenuItem})
         Me.NarzedziaToolStripMenuItem.Name = "NarzedziaToolStripMenuItem"
         Me.NarzedziaToolStripMenuItem.Size = New System.Drawing.Size(70, 20)
         Me.NarzedziaToolStripMenuItem.Text = "Narzędzia"
@@ -473,19 +471,6 @@ Partial Class Form1
         Me.EksportCadToolStripMenuItem.Size = New System.Drawing.Size(315, 22)
         Me.EksportCadToolStripMenuItem.Text = "Eksport do CAD (DXF, skrypt SCR, LISP)..."
         Me.EksportCadToolStripMenuItem.ToolTipText = "Rysunek DXF i skrypt SCR dla AutoCAD, AutoCAD LT, BricsCAD, ZWCAD: rastry na właściwych współrzędnych, obrys i siatka segmentów"
-        '
-        '
-        Me.ZaawansowanyMbtilesToolStripMenuItem.Name = "ZaawansowanyMbtilesToolStripMenuItem"
-        Me.ZaawansowanyMbtilesToolStripMenuItem.Size = New System.Drawing.Size(315, 22)
-        Me.ZaawansowanyMbtilesToolStripMenuItem.Text = "Zaawansowany wielowarstwowy MBTiles..."
-        Me.ZaawansowanyMbtilesToolStripMenuItem.ToolTipText = "Kompilacja pliku MBTiles z różnych warstw i poziomów zoom (np. Topo 50k -> Topo 10k -> Ortofoto)"
-        '
-        'UsuwaniePustychSegmentówToolStripMenuItem
-        '
-        Me.UsuwaniePustychSegmentówToolStripMenuItem.Name = "UsuwaniePustychSegmentówToolStripMenuItem"
-        Me.UsuwaniePustychSegmentówToolStripMenuItem.ShortcutKeys = CType((System.Windows.Forms.Keys.Control Or System.Windows.Forms.Keys.U), System.Windows.Forms.Keys)
-        Me.UsuwaniePustychSegmentówToolStripMenuItem.Size = New System.Drawing.Size(315, 22)
-        Me.UsuwaniePustychSegmentówToolStripMenuItem.Text = "Usuwanie pustych segmentów"
         '
         'KorektaFolderuToolStripMenuItem
         '
@@ -1678,7 +1663,6 @@ Partial Class Form1
     Friend WithEvents tvWarstwy As MapoTero.DrzewoWarstw
     Friend WithEvents InstrukcjaObsługiToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents Label29 As System.Windows.Forms.Label
-    Friend WithEvents UsuwaniePustychSegmentówToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents KorektaFolderuToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents txtBokSegmentu As System.Windows.Forms.TextBox
     Friend WithEvents Label1 As System.Windows.Forms.Label
@@ -1707,7 +1691,6 @@ Partial Class Form1
     Friend WithEvents ScalanieToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents EksportToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents EksportCadToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
-    Friend WithEvents ZaawansowanyMbtilesToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents grpRozmiarSiatki As System.Windows.Forms.GroupBox
     Friend WithEvents txtLiczbaWierszy As System.Windows.Forms.TextBox
     Friend WithEvents Label21 As System.Windows.Forms.Label

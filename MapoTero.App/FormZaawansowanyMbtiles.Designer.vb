@@ -424,7 +424,7 @@ Partial Class FormZaawansowanyMbtiles
         Me.chkKorekta.Name = "chkKorekta"
         Me.chkKorekta.Size = New System.Drawing.Size(175, 17)
         Me.chkKorekta.TabIndex = 11
-        Me.chkKorekta.Text = "Korekta obrazu (MIP/kontrast)"
+        Me.chkKorekta.Text = "Korekta obrazu"
         Me.ToolTip1.SetToolTip(Me.chkKorekta, "Optymalizacja rastra pod kątem czytelności w słońcu (Garmin MIP), podbicie kontrastu lub wyostrzenie krawędzi")
         Me.chkKorekta.UseVisualStyleBackColor = True
         '
@@ -434,7 +434,7 @@ Partial Class FormZaawansowanyMbtiles
         Me.btnKorekta.Name = "btnKorekta"
         Me.btnKorekta.Size = New System.Drawing.Size(180, 24)
         Me.btnKorekta.TabIndex = 12
-        Me.btnKorekta.Text = "Dostosuj..."
+        Me.btnKorekta.Text = "Profil / Podgląd..."
         Me.btnKorekta.UseVisualStyleBackColor = True
         '
         'grpSzacunek
@@ -584,7 +584,7 @@ Partial Class FormZaawansowanyMbtiles
         Me.MaximizeBox = False
         Me.Name = "FormZaawansowanyMbtiles"
         Me.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent
-        Me.Text = "Zaawansowany kreator wielowarstwowego / wieloskalowego MBTiles"
+        Me.Text = "MBTiles wieloskalowy - różne mapy dla różnych powiększeń"
         Me.grpWarstwy.ResumeLayout(False)
         CType(Me.dgvWarstwy, System.ComponentModel.ISupportInitialize).EndInit()
         Me.grpPodglad.ResumeLayout(False)

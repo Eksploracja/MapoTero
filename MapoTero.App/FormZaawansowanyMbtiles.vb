@@ -473,7 +473,7 @@ Public Class FormZaawansowanyMbtiles
 
     Private Sub AktualizujPrzyciskKorekty()
         Dim nazwa = OpcjeKorekcjiMip.KrotkaNazwaProfilu(_opcjeKorekty.Profil)
-        btnKorekta.Text = "Dostosuj (" & nazwa & ")..."
+        btnKorekta.Text = "Profil: " & nazwa & "..."
     End Sub
 
     Private Sub btnWybierzPlik_Click(sender As Object, e As EventArgs) Handles btnWybierzPlik.Click
@@ -584,7 +584,7 @@ Public Class FormZaawansowanyMbtiles
                                                                    End If
                                                                End Sub)
 
-        Loguj("Rozpoczęto kompilację wielowarstwowego MBTiles do: " & opcje.PlikDocelowy, Color.DarkGreen)
+        Loguj("Rozpoczęto kompilację MBTiles wieloskalowego do: " & opcje.PlikDocelowy, Color.DarkGreen)
         Dim st = Diagnostics.Stopwatch.StartNew()
 
         Try

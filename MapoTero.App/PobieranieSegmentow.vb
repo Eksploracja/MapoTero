@@ -290,15 +290,7 @@ Public NotInheritable Class PobieranieSegmentow
         'brakujące segmenty są zawsze pobierane, istniejące pliki pomijane - wznowienie i uzupełnienie sesji nie wymaga opcji;
         'dawna opcja „pobieraj tylko powyżej ostatniego” (z czasów, gdy program pobierał wszystko od nowa) pomijała luki
         'przed ostatnim segmentem, więc zostawiała dziury - usunięta, pole w conf.txt zostaje dla zgodności.
-        'Pomijane są tylko segmenty usunięte jako puste (lista w folderze sesji); odświeżanie mapy pobiera wszystkie
         Dim doPobrania As List(Of OpisSegmentu) = segmenty
-        If Not z.Odswiez Then
-            Dim usuniete = UsunietePusteSegmenty.Wczytaj(folderDocelowy)
-            If usuniete.Count > 0 Then
-                doPobrania = segmenty.Where(Function(sg) Not usuniete.Contains(nazwa(sg))).ToList()
-                wynik.Wszystkie = doPobrania.Count
-            End If
-        End If
 
         Dim plikBledow As String = Path.Combine(z.Folder, "error.txt")
         Dim przyczyny As New ConcurrentDictionary(Of Integer, String)

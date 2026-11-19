@@ -168,7 +168,7 @@ Partial Class FormEksportCad
         Me.btnKorektaCad.Name = "btnKorektaCad"
         Me.btnKorektaCad.Size = New System.Drawing.Size(171, 23)
         Me.btnKorektaCad.TabIndex = 6
-        Me.btnKorektaCad.Text = "Korekta obrazu CAD..."
+        Me.btnKorektaCad.Text = "Korekta obrazów w folderze..."
         Me.ToolTip1.SetToolTip(Me.btnKorektaCad, "Wsadowa optymalizacja rastrów pod CAD (np. stonowane podkłady lub wysoki kontrast skanów).")
         Me.btnKorektaCad.UseVisualStyleBackColor = True
         '

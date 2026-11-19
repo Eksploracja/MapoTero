@@ -157,22 +157,6 @@ Public Class PodpowiedziTesty
     End Sub
 
     <Fact>
-    Public Sub UsuwaniePustych_TylkoBiezacaSesja()
-        Dim folder = Path.Combine(Path.GetTempPath(), "MapoTero_Usuwanie_" & Guid.NewGuid().ToString("N"))
-        Directory.CreateDirectory(folder)
-        Try
-            'istniejący folder (także bez conf.txt, np. folder segmentów spoza programu) - bieżąca sesja
-            Assert.Equal(folder & "\", MapoTero.Usuwanie_p_seg.FolderBiezacejSesji(folder))
-            'sam download, brak folderu albo folder nieistniejący - brak bieżącej sesji (bez przejścia na najnowszą)
-            Assert.Equal("", MapoTero.Usuwanie_p_seg.FolderBiezacejSesji(MapoTero.FolderDownload))
-            Assert.Equal("", MapoTero.Usuwanie_p_seg.FolderBiezacejSesji(""))
-            Assert.Equal("", MapoTero.Usuwanie_p_seg.FolderBiezacejSesji(folder & "_nie_ma"))
-        Finally
-            Directory.Delete(folder, True)
-        End Try
-    End Sub
-
-    <Fact>
     Public Sub DodajPrzyciskPomocy_JedenPrzyciskPrzyPonownymOtwarciu()
         Dim blad As Exception = Nothing
         Dim t As New Thread(

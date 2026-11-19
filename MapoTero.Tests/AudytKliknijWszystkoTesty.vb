@@ -353,7 +353,6 @@ Public Class AudytKliknijWszystkoTesty
                         ZbadajOkno("FormKorytarz", Function() New Global.MapoTero.FormKorytarz(New Korytarz()))
                         ZbadajOkno("FormPodgladMip", Function() New Global.MapoTero.FormPodgladMip(New OpcjeKorekcjiMip()))
                         ZbadajOkno("FormSzukajDzialki", Function() New Global.MapoTero.FormSzukajDzialki())
-                        ZbadajOkno("usuwanie_p_seg", Function() New Global.MapoTero.usuwanie_p_seg())
                         ZbadajOkno("AboutBox1", Function() New Global.MapoTero.AboutBox1())
                         ZbadajOkno("Instrukcja_Obslugi", Function() New Global.MapoTero.Instrukcja_Obslugi())
                         'okno główne na końcu - jego polecenia otwierają okna narzędzi (zamykane przez strażnika)

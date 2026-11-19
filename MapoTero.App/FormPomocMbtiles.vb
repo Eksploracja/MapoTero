@@ -42,7 +42,6 @@ Public Enum TematPomocy
     Szukaj
     ImportOzi
     Korytarz
-    UsuwaniePustych
     Ustawienia
     KorektaFolderu
 End Enum
@@ -113,7 +112,6 @@ Public Class FormPomocMbtiles
             Case TematPomocy.Szukaj : PomocSzukaj()
             Case TematPomocy.ImportOzi : PomocImportOzi()
             Case TematPomocy.Korytarz : PomocKorytarz()
-            Case TematPomocy.UsuwaniePustych : PomocUsuwaniePustych()
             Case TematPomocy.Ustawienia : PomocUstawienia()
             Case TematPomocy.KorektaFolderu : PomocKorektaFolderu()
             Case Else : PomocMbtiles()
@@ -289,21 +287,6 @@ Public Class FormPomocMbtiles
         DodajStopkeOnline(_urlOnline)
     End Sub
 
-    Private Sub PomocUsuwaniePustych()
-        Me.Text = "Pomoc i instrukcja - Usuwanie pustych segmentów"
-        _urlOnline = "https://eksploracja.github.io/MapoTero/pomoc/narzedzia/"
-
-        DodajTytul("Wykrywanie i usuwanie pustych (jednolitych) segmentów")
-        DodajAkapit("Narzędzie analizuje pliki w folderze pobierania i wykrywa segmenty jednolicie białe lub puste, " &
-                    "które serwery WMS zwracają dla obszarów leżących poza zasięgiem danych (np. poza granicami kraju lub na morzu).")
-
-        DodajNaglowek1("1. Bezpieczeństwo danych")
-        DodajPunktor("Wykryte puste pliki są bezpiecznie przenoszone do Kosza systemowego Windows, skąd w razie potrzeby można je łatwo przywrócić.")
-        DodajPunktor("Usunięcie pustych segmentów zapobiega ich scalaniu do gotowego arkusza i drastycznie zmniejsza wagę baz kafelków MBTiles.")
-
-        DodajStopkeOnline(_urlOnline)
-    End Sub
-
     Private Sub PomocKorektaFolderu()
         Me.Text = "Pomoc i instrukcja - Korekta obrazów w folderze"
         _urlOnline = "https://eksploracja.github.io/MapoTero/pomoc/narzedzia/"
@@ -314,7 +297,7 @@ Public Class FormPomocMbtiles
                     "Oryginały zostają bez zmian - poprawione kopie trafiają do folderu wynikowego (domyślnie podfolder ""korekta"").")
 
         DodajNaglowek1("1. Profil korekty")
-        DodajPunktor("Przycisk ""Dostosuj"" otwiera podgląd na próbce z folderu. Możesz wybrać gotowy profil (np. Garmin MIP, Podkład CAD, Skan CAD) albo ustawić własne wartości suwaków.")
+        DodajPunktor("Przycisk ""Profil / Podgląd"" otwiera podgląd na próbce z folderu. Możesz wybrać gotowy profil (np. Garmin MIP, Podkład CAD, Skan CAD) albo ustawić własne wartości suwaków.")
         DodajPunktor("Profil ""Brak"" nie zmienia obrazów, więc w tym oknie nie można go wybrać.")
 
         DodajNaglowek1("2. Georeferencja")
@@ -359,10 +342,10 @@ Public Class FormPomocMbtiles
     End Sub
 
     Private Sub PomocMbtiles()
-        Me.Text = "Pomoc i instrukcja - Kreator wielowarstwowego MBTiles"
+        Me.Text = "Pomoc i instrukcja - MBTiles wieloskalowy"
         _urlOnline = "https://eksploracja.github.io/MapoTero/pomoc/mbtiles-wielowarstwowy/"
 
-        DodajTytul("Kreator wielowarstwowego i wieloskalowego MBTiles")
+        DodajTytul("MBTiles wieloskalowy - różne mapy dla różnych powiększeń")
         DodajAkapit("Narzędzie umożliwia skompilowanie wielu wcześniej pobranych sesji mapowych do jednego, uniwersalnego pliku bazy kafelków MBTiles. " &
                     "Dzięki niemu w aplikacjach mobilnych (OruxMaps, Locus Map, OsmAnd i innych) możesz w zależności od skali powiększenia oglądać zupełnie inne mapy " &
                     "(np. z daleka przeglądową topo 1:100k, w zbliżeniu szczegółową topo 1:10k, a w maksymalnym powiększeniu ortofotomapę) lub łączyć je ze sobą.")
