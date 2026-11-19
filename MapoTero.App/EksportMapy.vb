@@ -1387,6 +1387,7 @@ Friend MustInherit Class MagazynKafli
         Polaczenie = New SQLiteConnection(EksportMapy.ParametryPolaczenia(plikBazy, "Wal"))
         Polaczenie.Open()
         Wykonaj("PRAGMA synchronous = OFF;")
+        Wykonaj("PRAGMA cache_size = -64000;")
         Wykonaj("PRAGMA journal_mode = WAL;")
     End Sub
 
@@ -1476,23 +1477,55 @@ Friend MustInherit Class MagazynKafli
 
 End Class
 
-''' <summary>MBTiles: wiersze kafli liczone od dołu (TMS), opis mapy w tabeli metadata.</summary>
+''' <summary>Opis mapy zapisywany w tabeli metadata pliku MBTiles.</summary>
+Friend Class OpisMbtiles
+    Public Property Nazwa As String = ""
+    Public Property Opis As String = ""
+    Public Property Atrybucja As String = ""
+    ''' <summary>Nakładka (type = overlay) wyświetlana nad mapą podkładową aplikacji; inaczej baselayer.</summary>
+    Public Property Nakladka As Boolean
+    ''' <summary>Kafle PNG (format = png); inaczej JPEG.</summary>
+    Public Property Png As Boolean
+    Public Property PoziomMin As Integer
+    Public Property PoziomMax As Integer
+    Public Property Obszar As ProstokatGeo
+    Public Property Wersja As String = "1.1"
+End Class
+
+''' <summary>
+''' MBTiles: wiersze kafli liczone od dołu (TMS), opis mapy w tabeli metadata. Jedyny zapis MBTiles w programie -
+''' używają go eksport mapy, MBTiles wieloskalowy (KompilatorMbtiles) i konwerter OziExplorer; dawniej każde z nich
+''' miało własną kopię poleceń SQL, a różnice (np. tabela android_metadata tylko w jednym) wynikały z przypadku.
+''' </summary>
 Friend Class MagazynMBTiles
     Inherits MagazynKafli
 
     Public Sub New(z As ZadanieEksportu, obszar As ProstokatGeo)
-        MyBase.New(z.Plik, z)
+        Me.New(z.Plik, New OpisMbtiles With {.Nazwa = z.Nazwa, .Opis = z.Metadane.Opis, .Atrybucja = z.Metadane.Atrybucja,
+                                             .Nakladka = z.Nakladka, .Png = z.Png, .PoziomMin = z.PoziomMin, .PoziomMax = z.PoziomMax,
+                                             .Obszar = obszar}, z)
+    End Sub
+
+    ''' <param name="z">Zadanie eksportu albo Nothing (kompilator wieloskalowy, konwerter Ozi).</param>
+    Public Sub New(plik As String, opis As OpisMbtiles, Optional z As ZadanieEksportu = Nothing)
+        MyBase.New(plik, z)
         Wykonaj("CREATE TABLE metadata (name text, value text);")
         Wykonaj("CREATE TABLE tiles (zoom_level integer, tile_column integer, tile_row integer, tile_data blob);")
+        'indeks od początku: piramida odczytuje kafle poziomu wyżej zapytaniem SELECT - bez indeksu każde przeglądało
+        'całą tabelę i czas zapisu rósł z kwadratem liczby kafli
         Wykonaj("CREATE UNIQUE INDEX tile_index ON tiles (zoom_level, tile_column, tile_row);")
+        'tabela oczekiwana przez bazy SQLite otwierane w Androidzie
+        Wykonaj("CREATE TABLE android_metadata (locale text);")
+        Wykonaj("INSERT INTO android_metadata VALUES ('pl_PL');")
         Dim ci = Globalization.CultureInfo.InvariantCulture
+        Dim obszar = opis.Obszar
         Dim srodekSz As Double = (obszar.Polnoc + obszar.Poludnie) / 2
         Dim meta As New Dictionary(Of String, String) From {
-            {"name", z.Nazwa}, {"type", If(z.Nakladka, "overlay", "baselayer")}, {"version", "1.1"}, {"description", z.Metadane.Opis},
-            {"format", If(z.Png, "png", "jpg")}, {"minzoom", z.PoziomMin.ToString(ci)}, {"maxzoom", z.PoziomMax.ToString(ci)},
+            {"name", opis.Nazwa}, {"type", If(opis.Nakladka, "overlay", "baselayer")}, {"version", opis.Wersja}, {"description", opis.Opis},
+            {"format", If(opis.Png, "png", "jpg")}, {"minzoom", opis.PoziomMin.ToString(ci)}, {"maxzoom", opis.PoziomMax.ToString(ci)},
             {"bounds", String.Format(ci, "{0},{1},{2},{3}", obszar.Zachod, obszar.Poludnie, obszar.Wschod, obszar.Polnoc)},
-            {"center", String.Format(ci, "{0},{1},{2}", (obszar.Zachod + obszar.Wschod) / 2, srodekSz, z.PoziomMax)}}
-        If z.Metadane.Atrybucja <> "" Then meta("attribution") = z.Metadane.Atrybucja
+            {"center", String.Format(ci, "{0},{1},{2}", (obszar.Zachod + obszar.Wschod) / 2, srodekSz, opis.PoziomMax)}}
+        If Not String.IsNullOrEmpty(opis.Atrybucja) Then meta("attribution") = opis.Atrybucja
         For Each m In meta
             Wstaw("INSERT INTO metadata (name, value) VALUES (@0, @1);", m.Key, m.Value)
         Next

@@ -464,207 +464,134 @@ Public NotInheritable Class KompilatorMbtiles
         lacznieKafli = Math.Max(1, lacznieKafli)
         Dim przetworzoneKafle As Long = 0
 
-        ' Utworzenie bazy SQLite
-        Dim connectionString = EksportMapy.ParametryPolaczenia(plikTmp, "Memory")
-        Using conn As New SQLiteConnection(connectionString)
-            conn.Open()
-            Using cmd = conn.CreateCommand()
-                cmd.CommandText = "PRAGMA page_size = 4096; PRAGMA cache_size = -64000; PRAGMA synchronous = OFF; PRAGMA journal_mode = MEMORY;"
-                cmd.ExecuteNonQuery()
+        ' Utworzenie bazy MBTiles - wspólny zapis z eksportem mapy (dawniej własna kopia poleceń SQL)
+        Dim opisMapy As New OpisMbtiles With {.Nazwa = opcje.NazwaMapy, .Opis = opcje.OpisMapy, .Atrybucja = opcje.Atrybucja,
+                                              .Png = opcje.FormatKafli <> FormatKafliMbtiles.TylkoJpeg, .PoziomMin = minZ, .PoziomMax = maxZ,
+                                              .Obszar = obszarGlobalny, .Wersja = "1.3"}
+        Using magazyn As New MagazynMBTiles(plikTmp, opisMapy)
+            Dim odczytajKafel As Func(Of KafelXYZ, Byte()) = AddressOf magazyn.Odczytaj
+            ' Generowanie poziomów: od najwyższego do najniższego
+            ' Aby móc składać poziomy niższe z wyższych (piramida), idziemy w dół
+            For poziom = maxZ To minZ Step -1
+                token.ThrowIfCancellationRequested()
 
-                ' Tworzenie tabel
-                'indeks od początku: szybka piramida odczytuje kafle poziomu wyżej zapytaniem SELECT - bez indeksu każde
-                'przeglądało całą tabelę i czas kompilacji rósł z kwadratem liczby kafli
-                cmd.CommandText = "CREATE TABLE metadata (name text, value text);" &
-                                  "CREATE TABLE tiles (zoom_level integer, tile_column integer, tile_row integer, tile_data blob);" &
-                                  "CREATE UNIQUE INDEX tile_index ON tiles (zoom_level, tile_column, tile_row);" &
-                                  "CREATE TABLE IF NOT EXISTS android_metadata (locale text);" &
-                                  "INSERT INTO android_metadata VALUES ('pl_PL');"
-                cmd.ExecuteNonQuery()
-            End Using
-
-            ' Wstawienie metadanych
-            Dim ci = Globalization.CultureInfo.InvariantCulture
-            Dim srodekSz As Double = (obszarGlobalny.Polnoc + obszarGlobalny.Poludnie) / 2
-            Dim srodekDl As Double = (obszarGlobalny.Zachod + obszarGlobalny.Wschod) / 2
-            Dim formatStr = If(opcje.FormatKafli = FormatKafliMbtiles.TylkoJpeg, "jpg", "png")
-
-            Dim metadane As New Dictionary(Of String, String) From {
-                {"name", opcje.NazwaMapy},
-                {"type", "baselayer"},
-                {"version", "1.3"},
-                {"description", opcje.OpisMapy},
-                {"format", formatStr},
-                {"minzoom", minZ.ToString(ci)},
-                {"maxzoom", maxZ.ToString(ci)},
-                {"bounds", String.Format(ci, "{0},{1},{2},{3}", obszarGlobalny.Zachod, obszarGlobalny.Poludnie, obszarGlobalny.Wschod, obszarGlobalny.Polnoc)},
-                {"center", String.Format(ci, "{0},{1},{2}", srodekDl, srodekSz, maxZ)},
-                {"attribution", opcje.Atrybucja}
-            }
-
-            Using cmdMeta = conn.CreateCommand()
-                cmdMeta.CommandText = "INSERT INTO metadata (name, value) VALUES (@n, @v);"
-                Dim pN = cmdMeta.Parameters.Add("@n", DbType.String)
-                Dim pV = cmdMeta.Parameters.Add("@v", DbType.String)
-                For Each kv In metadane
-                    pN.Value = kv.Key
-                    pV.Value = kv.Value
-                    cmdMeta.ExecuteNonQuery()
-                Next
-            End Using
-
-            ' Polecenia wstawiania i odczytu kafli
-            Using cmdInsert = conn.CreateCommand(), cmdSelect = conn.CreateCommand()
-                cmdInsert.CommandText = "INSERT OR REPLACE INTO tiles (zoom_level, tile_column, tile_row, tile_data) VALUES (@z, @x, @y, @d);"
-                Dim pZ = cmdInsert.Parameters.Add("@z", DbType.Int32)
-                Dim pX = cmdInsert.Parameters.Add("@x", DbType.Int32)
-                Dim pY = cmdInsert.Parameters.Add("@y", DbType.Int32)
-                Dim pD = cmdInsert.Parameters.Add("@d", DbType.Binary)
-
-                cmdSelect.CommandText = "SELECT tile_data FROM tiles WHERE zoom_level = @z AND tile_column = @x AND tile_row = @y;"
-                Dim sZ = cmdSelect.Parameters.Add("@z", DbType.Int32)
-                Dim sX = cmdSelect.Parameters.Add("@x", DbType.Int32)
-                Dim sY = cmdSelect.Parameters.Add("@y", DbType.Int32)
-
-                ' Funkcja odczytu kafla z bazy do piramidy
-                Dim odczytajKafel = Function(k As KafelXYZ) As Byte()
-                                        sZ.Value = k.Z
-                                        sX.Value = k.X
-                                        sY.Value = k.WierszTms
-                                        Return TryCast(cmdSelect.ExecuteScalar(), Byte())
-                                    End Function
-
-                ' Generowanie poziomów: od najwyższego do najniższego
-                ' Aby móc składać poziomy niższe z wyższych (piramida), idziemy w dół
-                For poziom = maxZ To minZ Step -1
-                    token.ThrowIfCancellationRequested()
-
-                    Dim aktywne = WarstwyDlaPoziomu(warstwy, poziom)
-                    If aktywne.Count = 0 AndAlso opcje.WypelnijLukiWarstwaNizsza Then
-                        For p = poziom - 1 To 0 Step -1
-                            Dim nizsze = WarstwyDlaPoziomu(warstwy, p)
-                            If nizsze.Count > 0 Then
-                                aktywne = nizsze
-                                Exit For
-                            End If
-                        Next
-                    End If
-
-                    If aktywne.Count = 0 Then
-                        Continue For
-                    End If
-
-                    Dim obszarPoziomu = WyznaczObszarWgs84(aktywne)
-                    Dim zakres = WebMercator.ZakresKafli(obszarPoziomu, poziom)
-                    Dim warstwyEksportu = aktywne.Select(Function(w) w.DoWarstwyEksportu()).ToList()
-
-                    Dim srodekSzPoziomu As Double = (obszarPoziomu.Polnoc + obszarPoziomu.Poludnie) / 2
-                    Dim nadprobkowanie As Integer = EksportMapy.LiczbaProbek(warstwyEksportu, WebMercator.RozmiarPiksela(srodekSzPoziomu, poziom))
-
-                    ' Sprawdzenie, czy ten poziom można wygenerować szybką piramidą 2x z poziomu poziom+1
-                    ' (Możliwe tylko wtedy, gdy poziom+1 istnieje w bazy i ma ten sam zestaw warstw!)
-                    Dim moznaPiramida As Boolean = False
-                    If opcje.SzybkaPiramidaWPasmach AndAlso poziom < maxZ Then
-                        Dim warstwyWyzej = WarstwyDlaPoziomu(warstwy, poziom + 1)
-                        ' Porównanie zestawu warstw
-                        If warstwyWyzej.Count = aktywne.Count AndAlso
-                           warstwyWyzej.All(Function(w1) aktywne.Any(Function(w2) w2.Folder = w1.Folder)) Then
-                            moznaPiramida = True
+                Dim aktywne = WarstwyDlaPoziomu(warstwy, poziom)
+                If aktywne.Count = 0 AndAlso opcje.WypelnijLukiWarstwaNizsza Then
+                    For p = poziom - 1 To 0 Step -1
+                        Dim nizsze = WarstwyDlaPoziomu(warstwy, p)
+                        If nizsze.Count > 0 Then
+                            aktywne = nizsze
+                            Exit For
                         End If
+                    Next
+                End If
+
+                If aktywne.Count = 0 Then
+                    Continue For
+                End If
+
+                Dim obszarPoziomu = WyznaczObszarWgs84(aktywne)
+                Dim zakres = WebMercator.ZakresKafli(obszarPoziomu, poziom)
+                Dim warstwyEksportu = aktywne.Select(Function(w) w.DoWarstwyEksportu()).ToList()
+
+                Dim srodekSzPoziomu As Double = (obszarPoziomu.Polnoc + obszarPoziomu.Poludnie) / 2
+                Dim nadprobkowanie As Integer = EksportMapy.LiczbaProbek(warstwyEksportu, WebMercator.RozmiarPiksela(srodekSzPoziomu, poziom))
+
+                ' Sprawdzenie, czy ten poziom można wygenerować szybką piramidą 2x z poziomu poziom+1
+                ' (Możliwe tylko wtedy, gdy poziom+1 istnieje w bazy i ma ten sam zestaw warstw!)
+                Dim moznaPiramida As Boolean = False
+                If opcje.SzybkaPiramidaWPasmach AndAlso poziom < maxZ Then
+                    Dim warstwyWyzej = WarstwyDlaPoziomu(warstwy, poziom + 1)
+                    ' Porównanie zestawu warstw
+                    If warstwyWyzej.Count = aktywne.Count AndAlso
+                       warstwyWyzej.All(Function(w1) aktywne.Any(Function(w2) w2.Folder = w1.Folder)) Then
+                        moznaPiramida = True
+                    End If
+                End If
+
+                ' Przygotowanie listy współrzędnych do przetworzenia na tym poziomie
+                Dim kaflePoziomu As New List(Of KafelXYZ)
+                For ty = zakres.Item2 To zakres.Item4
+                    For tx = zakres.Item1 To zakres.Item3
+                        kaflePoziomu.Add(New KafelXYZ(tx, ty, poziom))
+                    Next
+                Next
+
+                Const RozmiarPaczki As Integer = 128
+                Dim po As New ParallelOptions With {
+                    .CancellationToken = token,
+                    .MaxDegreeOfParallelism = Environment.ProcessorCount
+                }
+
+                magazyn.RozpocznijPoziom(poziom)
+
+                For offset = 0 To kaflePoziomu.Count - 1 Step RozmiarPaczki
+                    token.ThrowIfCancellationRequested()
+                    Dim biezacyOffset = offset
+                    Dim liczbaWPaczce = Math.Min(RozmiarPaczki, kaflePoziomu.Count - biezacyOffset)
+                    Dim daneKafli As Byte()() = New Byte(liczbaWPaczce - 1)() {}
+
+                    If moznaPiramida Then
+                        Dim suroweDzieci As Byte()()() = New Byte(liczbaWPaczce - 1)()() {}
+                        'przy wyostrzaniu także sąsiedzi (4 x 4 kafle) - kafel jest wyostrzany po pomniejszeniu
+                        Dim zSasiadami As Boolean = opcje.Korekta IsNot Nothing AndAlso opcje.Korekta.Wyostrza
+                        For i = 0 To liczbaWPaczce - 1
+                            Dim k = kaflePoziomu(biezacyOffset + i)
+                            If zSasiadami Then
+                                suroweDzieci(i) = EksportMapy.DzieciZSasiadami(k, odczytajKafel)
+                                Continue For
+                            End If
+                            suroweDzieci(i) = New Byte(3)() {}
+                            For dy = 0 To 1
+                                For dx = 0 To 1
+                                    suroweDzieci(i)(dy * 2 + dx) = odczytajKafel(New KafelXYZ(k.X * 2 + dx, k.Y * 2 + dy, poziom + 1))
+                                Next
+                            Next
+                        Next
+
+                        Parallel.For(0, liczbaWPaczce, po, Sub(i)
+                                                               daneKafli(i) = KafelZPiramidyZDanych(suroweDzieci(i), opcje)
+                                                           End Sub)
+                    Else
+                        Dim biezacyPoziom = poziom
+                        Dim lokalneWarstwy = warstwyEksportu
+                        Dim lokalneNadprobkowanie = nadprobkowanie
+                        Dim lokalneOpcje = opcje
+                        Parallel.For(0, liczbaWPaczce, po, Sub(i)
+                                                               Dim k = kaflePoziomu(biezacyOffset + i)
+                                                               If EksportMapy.KafelMaDane(lokalneWarstwy, k.X, k.Y, biezacyPoziom) Then
+                                                                   Dim przelicz = EksportMapy.PrzeliczenieKafla(k.X * 256.0, k.Y * 256.0, biezacyPoziom)
+                                                                   Using bmp = EksportMapy.RenderujKafelZKorekta(lokalneWarstwy, 256, 256, lokalneNadprobkowanie, przelicz, lokalneOpcje.Korekta)
+                                                                       If bmp IsNot Nothing Then
+                                                                           daneKafli(i) = KodujKafel(bmp, lokalneOpcje)
+                                                                       End If
+                                                                   End Using
+                                                               End If
+                                                           End Sub)
                     End If
 
-                    ' Przygotowanie listy współrzędnych do przetworzenia na tym poziomie
-                    Dim kaflePoziomu As New List(Of KafelXYZ)
-                    For ty = zakres.Item2 To zakres.Item4
-                        For tx = zakres.Item1 To zakres.Item3
-                            kaflePoziomu.Add(New KafelXYZ(tx, ty, poziom))
-                        Next
+                    For i = 0 To liczbaWPaczce - 1
+                        Dim dane = daneKafli(i)
+                        If dane IsNot Nothing Then
+                            magazyn.Zapisz(kaflePoziomu(biezacyOffset + i), dane)
+                        End If
                     Next
 
-                    Const RozmiarPaczki As Integer = 128
-                    Dim po As New ParallelOptions With {
-                        .CancellationToken = token,
-                        .MaxDegreeOfParallelism = Environment.ProcessorCount
-                    }
-
-                    Using trans = conn.BeginTransaction()
-                        cmdInsert.Transaction = trans
-                        cmdSelect.Transaction = trans
-
-                        For offset = 0 To kaflePoziomu.Count - 1 Step RozmiarPaczki
-                            token.ThrowIfCancellationRequested()
-                            Dim biezacyOffset = offset
-                            Dim liczbaWPaczce = Math.Min(RozmiarPaczki, kaflePoziomu.Count - biezacyOffset)
-                            Dim daneKafli As Byte()() = New Byte(liczbaWPaczce - 1)() {}
-
-                            If moznaPiramida Then
-                                Dim suroweDzieci As Byte()()() = New Byte(liczbaWPaczce - 1)()() {}
-                                'przy wyostrzaniu także sąsiedzi (4 x 4 kafle) - kafel jest wyostrzany po pomniejszeniu
-                                Dim zSasiadami As Boolean = opcje.Korekta IsNot Nothing AndAlso opcje.Korekta.Wyostrza
-                                For i = 0 To liczbaWPaczce - 1
-                                    Dim k = kaflePoziomu(biezacyOffset + i)
-                                    If zSasiadami Then
-                                        suroweDzieci(i) = EksportMapy.DzieciZSasiadami(k, odczytajKafel)
-                                        Continue For
-                                    End If
-                                    suroweDzieci(i) = New Byte(3)() {}
-                                    For dy = 0 To 1
-                                        For dx = 0 To 1
-                                            suroweDzieci(i)(dy * 2 + dx) = odczytajKafel(New KafelXYZ(k.X * 2 + dx, k.Y * 2 + dy, poziom + 1))
-                                        Next
-                                    Next
-                                Next
-
-                                Parallel.For(0, liczbaWPaczce, po, Sub(i)
-                                                                       daneKafli(i) = KafelZPiramidyZDanych(suroweDzieci(i), opcje)
-                                                                   End Sub)
-                            Else
-                                Dim biezacyPoziom = poziom
-                                Dim lokalneWarstwy = warstwyEksportu
-                                Dim lokalneNadprobkowanie = nadprobkowanie
-                                Dim lokalneOpcje = opcje
-                                Parallel.For(0, liczbaWPaczce, po, Sub(i)
-                                                                       Dim k = kaflePoziomu(biezacyOffset + i)
-                                                                       If EksportMapy.KafelMaDane(lokalneWarstwy, k.X, k.Y, biezacyPoziom) Then
-                                                                           Dim przelicz = EksportMapy.PrzeliczenieKafla(k.X * 256.0, k.Y * 256.0, biezacyPoziom)
-                                                                           Using bmp = EksportMapy.RenderujKafelZKorekta(lokalneWarstwy, 256, 256, lokalneNadprobkowanie, przelicz, lokalneOpcje.Korekta)
-                                                                               If bmp IsNot Nothing Then
-                                                                                   daneKafli(i) = KodujKafel(bmp, lokalneOpcje)
-                                                                               End If
-                                                                           End Using
-                                                                       End If
-                                                                   End Sub)
-                            End If
-
-                            For i = 0 To liczbaWPaczce - 1
-                                Dim dane = daneKafli(i)
-                                If dane IsNot Nothing Then
-                                    Dim k = kaflePoziomu(biezacyOffset + i)
-                                    pZ.Value = k.Z
-                                    pX.Value = k.X
-                                    pY.Value = k.WierszTms
-                                    pD.Value = dane
-                                    cmdInsert.ExecuteNonQuery()
-                                End If
-                            Next
-
-                            przetworzoneKafle += liczbaWPaczce
-                            If postep IsNot Nothing Then
-                                Dim proc As Integer = CInt(Math.Min(98, przetworzoneKafle * 98 \ lacznieKafli))
-                                Dim ostKafel = kaflePoziomu(biezacyOffset + liczbaWPaczce - 1)
-                                postep.Report(New RaportPostepuKompilacji With {
-                                    .Procent = proc,
-                                    .AktualnyPoziom = poziom,
-                                    .WykonaneKafle = przetworzoneKafle,
-                                    .WszystkieKafle = lacznieKafli,
-                                    .Komunikat = "Poziom " & poziom & " (" & ostKafel.X & "," & ostKafel.Y & ") - " & proc & "% [wielowątkowo]"
-                                })
-                            End If
-                        Next
-                        trans.Commit()
-                    End Using
+                    przetworzoneKafle += liczbaWPaczce
+                    If postep IsNot Nothing Then
+                        Dim proc As Integer = CInt(Math.Min(98, przetworzoneKafle * 98 \ lacznieKafli))
+                        Dim ostKafel = kaflePoziomu(biezacyOffset + liczbaWPaczce - 1)
+                        postep.Report(New RaportPostepuKompilacji With {
+                            .Procent = proc,
+                            .AktualnyPoziom = poziom,
+                            .WykonaneKafle = przetworzoneKafle,
+                            .WszystkieKafle = lacznieKafli,
+                            .Komunikat = "Poziom " & poziom & " (" & ostKafel.X & "," & ostKafel.Y & ") - " & proc & "% [wielowątkowo]"
+                        })
+                    End If
                 Next
-            End Using
+                magazyn.ZakonczPoziom()
+            Next
 
             If postep IsNot Nothing Then
                 postep.Report(New RaportPostepuKompilacji With {
@@ -674,10 +601,7 @@ Public NotInheritable Class KompilatorMbtiles
             End If
 
             ' Zamknięcie w trybie DELETE (zgodność z Androidem i kartami microSD)
-            Using cmdFinal = conn.CreateCommand()
-                cmdFinal.CommandText = "PRAGMA journal_mode = DELETE; PRAGMA locking_mode = NORMAL;"
-                cmdFinal.ExecuteNonQuery()
-            End Using
+            magazyn.ZakonczZapis()
         End Using
 
         ' Wyczyszczenie puli połączeń SQLite przed podmianą pliku

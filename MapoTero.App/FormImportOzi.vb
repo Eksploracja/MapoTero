@@ -737,72 +737,30 @@ Public Class FormImportOzi
             Dim kafle = KafleDoWygenerowania(ozi)
             Dim zMax = kafle.Max(Function(k) k.Z)
             Dim zMin = kafle.Min(Function(k) k.Z)
-            Dim srodekSz = (ozi.ZasiegWgs84.Polnoc + ozi.ZasiegWgs84.Poludnie) / 2.0
 
-            EksportMapy.UsunPlikBazy(plikWyjsciowy)
             Try
-            Using polaczenie As New SQLiteConnection(EksportMapy.ParametryPolaczenia(plikWyjsciowy, "Wal"))
-                polaczenie.Open()
-                Using cmdInit As New SQLiteCommand("PRAGMA synchronous = OFF; PRAGMA journal_mode = WAL; CREATE TABLE metadata (name text, value text); CREATE TABLE tiles (zoom_level integer, tile_column integer, tile_row integer, tile_data blob); CREATE UNIQUE INDEX tile_index ON tiles (zoom_level, tile_column, tile_row);", polaczenie)
-                    cmdInit.ExecuteNonQuery()
-                End Using
-
-                Dim ci = CultureInfo.InvariantCulture
                 Dim tytul = If(String.IsNullOrEmpty(ozi.Tytul), Path.GetFileNameWithoutExtension(plikWyjsciowy), ozi.Tytul)
-                Dim meta As New Dictionary(Of String, String) From {
-                    {"name", tytul},
-                    {"type", "baselayer"},
-                    {"version", "1.1"},
-                    {"description", "Konwersja z mapy OziExplorer (.map)"},
-                    {"format", "jpg"},
-                    {"minzoom", zMin.ToString(ci)},
-                    {"maxzoom", zMax.ToString(ci)},
-                    {"bounds", String.Format(ci, "{0},{1},{2},{3}", ozi.ZasiegWgs84.Zachod, ozi.ZasiegWgs84.Poludnie, ozi.ZasiegWgs84.Wschod, ozi.ZasiegWgs84.Polnoc)},
-                    {"center", String.Format(ci, "{0},{1},{2}", (ozi.ZasiegWgs84.Zachod + ozi.ZasiegWgs84.Wschod) / 2.0, srodekSz, zMax)}
-                }
-
-                Using cmdMeta As New SQLiteCommand("INSERT INTO metadata (name, value) VALUES (@n, @v);", polaczenie)
-                    Dim pN = cmdMeta.Parameters.Add("@n", DbType.String)
-                    Dim pV = cmdMeta.Parameters.Add("@v", DbType.String)
-                    For Each m In meta
-                        pN.Value = m.Key
-                        pV.Value = m.Value
-                        cmdMeta.ExecuteNonQuery()
+                Dim opis As New OpisMbtiles With {.Nazwa = tytul, .Opis = "Konwersja z mapy OziExplorer (.map)",
+                                                  .PoziomMin = zMin, .PoziomMax = zMax, .Obszar = ozi.ZasiegWgs84}
+                'wspólny zapis MBTiles eksportu (dawniej własna kopia poleceń SQL)
+                Using magazyn As New MagazynMBTiles(plikWyjsciowy, opis)
+                    Dim licznik = 0
+                    Dim zapisane = 0
+                    magazyn.RozpocznijPoziom(zMax)
+                    For Each k In kafle
+                        token.ThrowIfCancellationRequested()
+                        Dim dane = KafelMercatora(srcBmp, ozi, k.X, k.Y, k.Z, jakosc)
+                        If dane IsNot Nothing Then
+                            magazyn.Zapisz(k, dane)
+                            zapisane += 1
+                        End If
+                        licznik += 1
+                        postep?.Report(CInt(licznik * 100L / kafle.Count))
                     Next
+                    magazyn.ZakonczPoziom()
+                    If zapisane = 0 Then Throw New InvalidOperationException("Nie wygenerowano żadnych kafli - kalibracja nie pokrywa obrazu mapy.")
+                    magazyn.ZakonczZapis()
                 End Using
-
-                Dim licznik = 0
-                Dim zapisane = 0
-                Using trans = polaczenie.BeginTransaction()
-                    Using cmdTile As New SQLiteCommand("INSERT OR REPLACE INTO tiles (zoom_level, tile_column, tile_row, tile_data) VALUES (@z, @x, @y, @d);", polaczenie, trans)
-                        Dim pZ = cmdTile.Parameters.Add("@z", DbType.Int32)
-                        Dim pX = cmdTile.Parameters.Add("@x", DbType.Int32)
-                        Dim pY = cmdTile.Parameters.Add("@y", DbType.Int32)
-                        Dim pD = cmdTile.Parameters.Add("@d", DbType.Binary)
-                        For Each k In kafle
-                            token.ThrowIfCancellationRequested()
-                            Dim dane = KafelMercatora(srcBmp, ozi, k.X, k.Y, k.Z, jakosc)
-                            If dane IsNot Nothing Then
-                                ' W MBTiles wiersze liczone są od dołu (TMS)
-                                pZ.Value = k.Z
-                                pX.Value = k.X
-                                pY.Value = k.WierszTms
-                                pD.Value = dane
-                                cmdTile.ExecuteNonQuery()
-                                zapisane += 1
-                            End If
-                            licznik += 1
-                            postep?.Report(CInt(licznik * 100L / kafle.Count))
-                        Next
-                        trans.Commit()
-                    End Using
-                End Using
-                If zapisane = 0 Then Throw New InvalidOperationException("Nie wygenerowano żadnych kafli - kalibracja nie pokrywa obrazu mapy.")
-
-                Using cmdDel As New SQLiteCommand("PRAGMA journal_mode = DELETE;", polaczenie)
-                    cmdDel.ExecuteNonQuery()
-                End Using
-            End Using
             Catch
                 'anulowanie lub błąd: niedokończona baza MBTiles (z plikami -wal, -shm) usuwana z dysku
                 SQLiteConnection.ClearAllPools()
