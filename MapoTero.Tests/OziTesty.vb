@@ -365,6 +365,71 @@ Public Class OziTesty
         End Try
     End Sub
 
+    ''' <summary>
+    ''' Konwerter Ozi zapisuje SQLiteDB i OruxMaps klasami eksportu mapy (dawniej tylko JNX, KMZ i MBTiles z własnym
+    ''' zapisem), a korekta obrazu zmienia kafle.
+    ''' </summary>
+    <Fact>
+    Public Sub KonwersjaOzi_SQLiteDB_OruxMaps_IKorekta()
+        Dim folder = NowyFolderOzi()
+        Try
+            Dim obraz = Path.Combine(folder, "mala.png")
+            Using bmp As New System.Drawing.Bitmap(600, 400)
+                Using g = System.Drawing.Graphics.FromImage(bmp)
+                    g.Clear(System.Drawing.Color.FromArgb(150, 150, 150))
+                    g.FillRectangle(System.Drawing.Brushes.DarkGreen, 100, 100, 300, 150)
+                End Using
+                bmp.Save(obraz, System.Drawing.Imaging.ImageFormat.Png)
+            End Using
+            Dim linie = NaglowekMap("Mala", "mala.png", "Latitude/Longitude")
+            Dim nr = 1
+            For Each p In {(0, 0, 50.0, 20.0), (600, 0, 50.0, 20.02), (600, 400, 49.99, 20.02), (0, 400, 49.99, 20.0)}
+                linie.Add(String.Format(Globalization.CultureInfo.InvariantCulture, "Point{0:00},xy, {1}, {2},in, deg, {3:0.0000000}, 0,N, {4:0.0000000}, 0,E, grid,,,,N",
+                                        nr, p.Item1, p.Item2, p.Item3, p.Item4))
+                nr += 1
+            Next
+            Dim plikMap = Path.Combine(folder, "mala.map")
+            File.WriteAllLines(plikMap, linie)
+            Dim ozi = PlikKalibracjiOzi.Wczytaj(plikMap)
+
+            Dim plikSqlitedb = Path.Combine(folder, "mala" & FormImportOzi.RozszerzenieWyniku(FormatKonwersjiOzi.SQLiteDB))
+            FormImportOzi.Konwertuj(ozi, FormatKonwersjiOzi.SQLiteDB, plikSqlitedb, 50, 85, False, Nothing, Nothing, CancellationToken.None)
+            Using pol As New System.Data.SQLite.SQLiteConnection("Data Source=" & plikSqlitedb & ";Pooling=False")
+                pol.Open()
+                Using cmd As New System.Data.SQLite.SQLiteCommand("SELECT count(*) FROM tiles", pol)
+                    Assert.True(CLng(cmd.ExecuteScalar()) > 0)
+                End Using
+                Using cmd As New System.Data.SQLite.SQLiteCommand("SELECT tilenumbering FROM info", pol)
+                    Assert.Equal("BigPlanet", CStr(cmd.ExecuteScalar()))
+                End Using
+            End Using
+
+            Dim folderOrux = Path.Combine(folder, "mala_orux")
+            FormImportOzi.Konwertuj(ozi, FormatKonwersjiOzi.OruxMaps, folderOrux, 50, 85, False, Nothing, Nothing, CancellationToken.None)
+            Assert.True(File.Exists(Path.Combine(folderOrux, MapaOruxMaps.NazwaBazy)))
+            Assert.Single(Directory.GetFiles(folderOrux, "*" & MapaOruxMaps.RozszerzenieKalibracji))
+
+            'korekta (kontrast) zmienia kafel w porównaniu z kaflem bez korekty
+            Dim z = FormImportOzi.PoziomSzczegolowy(ozi)
+            Dim k = WebMercator.ZakresKafli(ozi.ZasiegWgs84, z)
+            Dim kx = (k.Item1 + k.Item3) \ 2, ky = (k.Item2 + k.Item4) \ 2
+            Dim korekta As New OpcjeKorekcjiMip()
+            korekta.UstawWgProfilu(ProfilKorektyRastra.GarminMip)
+            Using src As New System.Drawing.Bitmap(obraz)
+                Dim bez = FormImportOzi.KafelMercatora(src, ozi, kx, ky, z, 95)
+                Dim zKorekta = FormImportOzi.KafelMercatora(src, ozi, kx, ky, z, 95, korekta)
+                Assert.NotNull(bez)
+                Assert.NotNull(zKorekta)
+                Assert.False(bez.SequenceEqual(zKorekta))
+            End Using
+        Finally
+            Try
+                Directory.Delete(folder, True)
+            Catch
+            End Try
+        End Try
+    End Sub
+
     Private Shared Function NowyFolderOzi() As String
         Dim f = Path.Combine(Path.GetTempPath(), "MapoTero_Ozi_" & Guid.NewGuid().ToString("N"))
         Directory.CreateDirectory(f)

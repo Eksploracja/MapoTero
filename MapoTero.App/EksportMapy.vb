@@ -498,7 +498,7 @@ Public NotInheritable Class EksportMapy
     End Sub
 
     ''' <summary>Usuwa plik wynikowy (OruxMaps - pliki mapy w jej folderze i pusty folder).</summary>
-    Private Shared Sub UsunWynik(z As ZadanieEksportu)
+    Friend Shared Sub UsunWynik(z As ZadanieEksportu)
         If z.Rodzaj = RodzajEksportu.GeoTiff Then
             If File.Exists(z.Plik) Then File.Delete(z.Plik)
             Dim tfw = Path.ChangeExtension(z.Plik, ".tfw")
@@ -1086,7 +1086,7 @@ Friend Shared Function NazwaPlikuTomu(sciezkaBazowa As String, numerTomu As Inte
 
 #Region "Kafle Web Mercator (MBTiles, SQLiteDB, OruxMaps)"
 
-    Private Shared Function UtworzMagazyn(z As ZadanieEksportu, obszar As ProstokatGeo) As MagazynKafli
+    Friend Shared Function UtworzMagazyn(z As ZadanieEksportu, obszar As ProstokatGeo) As MagazynKafli
         Select Case z.Rodzaj
             Case RodzajEksportu.SQLiteDB : Return New MagazynSQLiteDB(z)
             Case RodzajEksportu.OruxMaps : Return New MagazynOruxMaps(z, obszar)
