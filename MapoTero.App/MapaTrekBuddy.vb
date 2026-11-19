@@ -107,3 +107,108 @@ Public Class MapaTrekBuddy
         End Try
     End Sub
 End Class
+
+''' <summary>
+''' Eksport mapy TrekBuddy / Locus Map z okna Eksport mapy: arkusz sesji (z nakładkami i korektą, jak arkusz GeoTIFF)
+''' cięty pasami na kafle 512 x 512 px nazwane wg położenia w pikselach (_x_y), plik .map całego obszaru, lista kafli
+''' .set i archiwum .tar. Dawniej mapę TrekBuddy trzeba było włączyć w Ustawieniach przed pobieraniem (segmenty 512 px
+''' i paczka powstawały przy pobieraniu), więc z gotowej sesji nie dało się jej zrobić.
+''' </summary>
+Public Class ZapisKafliTrekBuddy
+    Inherits ZapisRastra
+
+    Private ReadOnly _folderSet As String
+    Private ReadOnly _nazwa As String
+    Private ReadOnly _jakosc As Integer
+    Private ReadOnly _pas() As Byte
+    Private _wierszWPasie As Integer
+    Private _pasOd As Integer
+    Private ReadOnly _pliki As New List(Of String)
+
+    ''' <param name="folderMapy">Folder roboczy mapy (powstaje w nim podfolder set).</param>
+    ''' <param name="nazwa">Nazwa mapy - przedrostek nazw kafli i nazwa plików .map i .set.</param>
+    Public Sub New(folderMapy As String, nazwa As String, szerokosc As Integer, wysokosc As Integer, jakosc As Integer)
+        MyBase.New(szerokosc, wysokosc, 3)
+        _folderSet = Path.Combine(folderMapy, "set")
+        _nazwa = nazwa
+        _jakosc = jakosc
+        Directory.CreateDirectory(_folderSet)
+        ReDim _pas(MapaTrekBuddy.BokSegmentu * szerokosc * 3 - 1)
+    End Sub
+
+    ''' <summary>Nazwy plików kafli (w kolejności wierszy) - zawartość pliku .set.</summary>
+    Public ReadOnly Property Pliki As List(Of String)
+        Get
+            Return _pliki
+        End Get
+    End Property
+
+    Protected Overrides Sub ZapiszWierszeWewn(rgb() As Byte, liczbaWierszy As Integer)
+        Dim bajtyWiersza As Integer = Szerokosc * 3
+        Dim r As Integer = 0
+        While r < liczbaWierszy
+            Dim ile As Integer = Math.Min(liczbaWierszy - r, MapaTrekBuddy.BokSegmentu - _wierszWPasie)
+            Buffer.BlockCopy(rgb, r * bajtyWiersza, _pas, _wierszWPasie * bajtyWiersza, ile * bajtyWiersza)
+            _wierszWPasie += ile
+            r += ile
+            If _wierszWPasie = MapaTrekBuddy.BokSegmentu Then ZapiszPas()
+        End While
+    End Sub
+
+    ''' <summary>Tnie pas wierszy na kafle; kafle na prawym i dolnym brzegu uzupełniane bielą do pełnego boku.</summary>
+    Private Sub ZapiszPas()
+        If _wierszWPasie = 0 Then Exit Sub
+        Dim bok As Integer = MapaTrekBuddy.BokSegmentu
+        Dim ci = Globalization.CultureInfo.InvariantCulture
+        For x0 = 0 To Szerokosc - 1 Step bok
+            Dim w As Integer = Math.Min(bok, Szerokosc - x0)
+            Using bmp As New Bitmap(bok, bok, Imaging.PixelFormat.Format24bppRgb)
+                Dim dane = bmp.LockBits(New Rectangle(0, 0, bok, bok), Imaging.ImageLockMode.WriteOnly, Imaging.PixelFormat.Format24bppRgb)
+                Try
+                    Dim linia(bok * 3 - 1) As Byte
+                    For y = 0 To bok - 1
+                        Array.Fill(linia, CByte(255))
+                        If y < _wierszWPasie Then
+                            Dim zr As Integer = (y * Szerokosc + x0) * 3
+                            For i = 0 To w - 1
+                                'GDI+ przechowuje piksele w kolejności BGR
+                                linia(i * 3) = _pas(zr + i * 3 + 2)
+                                linia(i * 3 + 1) = _pas(zr + i * 3 + 1)
+                                linia(i * 3 + 2) = _pas(zr + i * 3)
+                            Next
+                        End If
+                        Runtime.InteropServices.Marshal.Copy(linia, 0, IntPtr.Add(dane.Scan0, y * dane.Stride), bok * 3)
+                    Next
+                Finally
+                    bmp.UnlockBits(dane)
+                End Try
+                Dim nazwaPliku As String = _nazwa & "_" & x0.ToString(ci) & "_" & _pasOd.ToString(ci) & ".jpg"
+                File.WriteAllBytes(Path.Combine(_folderSet, nazwaPliku), EksportMapy.Koduj(bmp, False, _jakosc))
+                _pliki.Add(nazwaPliku)
+            End Using
+        Next
+        _pasOd += _wierszWPasie
+        _wierszWPasie = 0
+    End Sub
+
+    Public Overrides Sub Zakoncz()
+        ZapiszPas()
+    End Sub
+
+    Public Overrides Sub Dispose()
+    End Sub
+
+    ''' <summary>
+    ''' Kończy mapę: plik .map całego obszaru i .set w folderze mapy, archiwum .tar (System.Formats.Tar) i usunięcie
+    ''' folderu roboczego.
+    ''' </summary>
+    Public Shared Sub UtworzPaczke(folderMapy As String, nazwa As String, pliki As IEnumerable(Of String), uklad As UkladWspolrzednych,
+                                   zasieg As Zasieg, szerokosc As Integer, wysokosc As Integer, plikTar As String)
+        Dim obraz = ZapisGeoreferencji.Obraz(uklad, zasieg, szerokosc, wysokosc, folderMapy, nazwa & ".jpg")
+        Georeferencja.Zapisz(Path.Combine(folderMapy, nazwa & ".map"), Georeferencja.MapOzi(obraz), KodowanieSystemowe())
+        File.WriteAllLines(Path.Combine(folderMapy, nazwa & ".set"), pliki, KodowanieSystemowe())
+        If File.Exists(plikTar) Then File.Delete(plikTar)
+        TarFile.CreateFromDirectory(folderMapy, plikTar, includeBaseDirectory:=False)
+        Directory.Delete(folderMapy, True)
+    End Sub
+End Class

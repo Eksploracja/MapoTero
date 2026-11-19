@@ -21,8 +21,9 @@ Imports MapoTero.Core
 ''' <summary>
 ''' Eksport pobranych segmentów do formatów map dla odbiorników GPS i aplikacji mobilnych:
 ''' KMZ (Garmin Custom Maps, Locus Map, OruxMaps), MBTiles (Locus Map, OsmAnd, OruxMaps), SQLiteDB (OsmAnd, Locus Map)
-''' i mapy offline OruxMaps. Na mapę można nałożyć warstwy z innych folderów sesji (np. granice działek na ortofotomapę),
-''' a mapę z przezroczystym tłem wyeksportować jako nakładkę wyświetlaną nad mapą podkładową aplikacji.
+''' i mapy offline OruxMaps, mapa TrekBuddy / Locus Map (.tar) oraz arkusz - segmenty scalone w jeden plik GeoTIFF, JPEG
+''' albo PNG z georeferencją (dawne okno Scalanie segmentów). Na mapę można nałożyć warstwy z innych folderów sesji
+''' (np. granice działek na ortofotomapę), a mapę z przezroczystym tłem wyeksportować jako nakładkę.
 ''' </summary>
 Public Class FormEksport
 
@@ -73,12 +74,27 @@ Public Class FormEksport
     Private _przerwanie As CancellationTokenSource
     Private _ostatniPlikEksportu As String = ""
     Private _opcjeMip As New OpcjeKorekcjiMip()
+
+    ''' <summary>
+    ''' Okno otwarte poleceniem „Scalanie segmentów” (menu, przycisk okna głównego, okno CAD) - zaznaczony format Arkusz.
+    ''' Scalanie ma od wersji 3.19 jedno okno z eksportem: arkusz dostał nakładki, a kod zapisu arkusza jest w jednym miejscu.
+    ''' </summary>
+    <ComponentModel.DesignerSerializationVisibility(ComponentModel.DesignerSerializationVisibility.Hidden)>
+    Public Property ArkuszDomyslnie As Boolean
+
+    ''' <summary>Folder sesji zamiast bieżącej sesji okna głównego (okno otwarte z eksportu do CAD).</summary>
+    <ComponentModel.DesignerSerializationVisibility(ComponentModel.DesignerSerializationVisibility.Hidden)>
+    Public Property FolderPoczatkowy As String = ""
+
+    ''' <summary>Ostatni zapisany arkusz (pusty - nie zapisano) - okno CAD wstawia go do rysunku.</summary>
+    <ComponentModel.DesignerSerializationVisibility(ComponentModel.DesignerSerializationVisibility.Hidden)>
+    Public ReadOnly Property PlikArkusza As String = ""
     ''' <summary>Programowe ustawianie kontrolek warstwy (bez reakcji na zdarzenia).</summary>
     Private _ustawianie As Boolean
 
     ''' <summary>Rozmiar obszaru roboczego formularza w projekcie (jednostki projektanta, przed skalowaniem czcionki).</summary>
     Private Const ProjektSzerokoscKlienta As Integer = 510
-    Private Const ProjektWysokoscKlienta As Integer = 788
+    Private Const ProjektWysokoscKlienta As Integer = 820
 
     ''' <summary>
     ''' Rozmiar obszaru roboczego po skalowaniu okna do bieżącej czcionki. Dawniej używano wprost wartości z projektu,
@@ -99,15 +115,30 @@ Public Class FormEksport
 
     Private Sub FormEksport_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         PomocProgramu.ZamykanieKlawiszemEsc(Me)
-        PomocProgramu.DodajPrzyciskPomocy(Me, TematPomocy.Eksport, 12, 748)
+        PomocProgramu.DodajPrzyciskPomocy(Me, TematPomocy.Eksport, 12, 780)
         DopasujDoWysokosciEkranu()
         If cboKolejnoscGarmin.Items.Count > 0 AndAlso cboKolejnoscGarmin.SelectedIndex < 0 Then
             cboKolejnoscGarmin.SelectedIndex = 0
         End If
         Dim uwagaFolderu As String = ""
-        _folder = FolderSesjiDlaNarzedzia(Form1.FolderSesji, uwagaFolderu)
+        If FolderPoczatkowy <> "" AndAlso Directory.Exists(FolderPoczatkowy) Then
+            _folder = If(FolderPoczatkowy.EndsWith("\"), FolderPoczatkowy, FolderPoczatkowy & "\")
+        Else
+            _folder = FolderSesjiDlaNarzedzia(Form1.FolderSesji, uwagaFolderu)
+        End If
+        'opcje arkusza zapamiętane jak dawniej w oknie scalania
+        cmbFormatArkusza.SelectedIndex = Math.Max(0, Math.Min(cmbFormatArkusza.Items.Count - 1, CInt(Ustawienia.FormatArkusza)))
+        chkArkuszWorldFile.Checked = Ustawienia.ScalanieWorldFile
+        chkArkuszMap.Checked = Ustawienia.ScalanieMap
+        chkArkuszTab.Checked = Ustawienia.ScalanieTab
+        chkArkuszKml.Checked = Ustawienia.ScalanieKml
+        If ArkuszDomyslnie Then rbGeoTiff.Checked = True
         WczytajSesje()
         UsunNiepasujaceNakladki()
+        If File.Exists(_folder & "error.txt") Then
+            uwagaFolderu = If(uwagaFolderu = "", "", uwagaFolderu & vbCrLf) &
+                "W folderze sesji jest plik error.txt - pobieranie nie zostało ukończone i części segmentów brakuje (w mapie będą białe pola). Uzupełnij je przyciskiem Pobierz w oknie głównym."
+        End If
         'UstawWgProfilu włącza korektę, więc dawniej po odczycie stanu „wyłączona” korekta znów była zaznaczona
         _opcjeMip = Ustawienia.OpcjeKorekty()
         chkKorekcjaMip.Checked = _opcjeMip.Wlaczona
@@ -258,6 +289,7 @@ Public Class FormEksport
             If rbOruxMaps.Checked Then Return RodzajEksportu.OruxMaps
             If rbKmz.Checked Then Return RodzajEksportu.Kmz
             If rbGeoTiff.Checked Then Return RodzajEksportu.GeoTiff
+            If rbTrekBuddy.Checked Then Return RodzajEksportu.TrekBuddy
             Return RodzajEksportu.KmzGarmin
         End Get
     End Property
@@ -277,6 +309,13 @@ Public Class FormEksport
         Return m
     End Function
 
+    ''' <summary>Format arkusza wybrany na liście (kolejność pozycji jak w wyliczeniu FormatArkusza).</summary>
+    Private ReadOnly Property WybranyFormatArkusza As FormatArkusza
+        Get
+            Return CType(Math.Max(0, cmbFormatArkusza.SelectedIndex), FormatArkusza)
+        End Get
+    End Property
+
     Private Function UtworzZadanie() As ZadanieEksportu
         Dim rodzaj As RodzajEksportu = WybranyRodzaj
         Dim nazwa As String = "_eksport_" & _sesja.Siatka.LiczbaKolumn & "x" & _sesja.Siatka.LiczbaWierszy
@@ -286,7 +325,13 @@ Public Class FormEksport
             Case RodzajEksportu.MBTiles : rozszerzenie = ".mbtiles"
             Case RodzajEksportu.SQLiteDB : rozszerzenie = ".sqlitedb"
             Case RodzajEksportu.OruxMaps : rozszerzenie = "_oruxmaps"
-            Case RodzajEksportu.GeoTiff : rozszerzenie = ".tif"
+            Case RodzajEksportu.GeoTiff
+                'nazwa jak dawniej w oknie scalania - korekta obrazów w folderze pomija arkusze po przedrostku
+                nazwa = FormKorektaFolderu.PrzedrostekArkusza & _sesja.Siatka.LiczbaKolumn & "x" & _sesja.Siatka.LiczbaWierszy
+                rozszerzenie = "." & ZapisRastra.Rozszerzenie(WybranyFormatArkusza)
+            Case RodzajEksportu.TrekBuddy
+                nazwa = "_trekbuddy_" & _sesja.Siatka.LiczbaKolumn & "x" & _sesja.Siatka.LiczbaWierszy
+                rozszerzenie = ".tar"
             Case RodzajEksportu.KmzGarmin : rozszerzenie = "_garmin.kmz"
             Case Else : rozszerzenie = ".kmz"
         End Select
@@ -306,6 +351,9 @@ Public Class FormEksport
         Dim mip = _opcjeMip.Kopia()
         mip.Wlaczona = chkKorekcjaMip.Checked
         z.KorekcjaMip = mip
+        z.FormatArkusza = WybranyFormatArkusza
+        z.Georeferencja = New OpcjeGeoreferencji With {.WorldFile = chkArkuszWorldFile.Checked, .Map = chkArkuszMap.Checked,
+                                                       .Tab = chkArkuszTab.Checked, .Kml = chkArkuszKml.Checked}
         z.Nazwa = z.Metadane.Nazwa
         For Each p In lstNakladki.Items.Cast(Of PozycjaNakladki)()
             z.Nakladki.Add(p.Warstwa)
@@ -320,10 +368,10 @@ Public Class FormEksport
         Dim piramida As Boolean = rodzaj = RodzajEksportu.MBTiles OrElse rodzaj = RodzajEksportu.SQLiteDB OrElse rodzaj = RodzajEksportu.OruxMaps OrElse rodzaj = RodzajEksportu.Jnx
         Dim garmin As Boolean = rodzaj = RodzajEksportu.KmzGarmin OrElse rodzaj = RodzajEksportu.Jnx
         Dim geotiff As Boolean = rodzaj = RodzajEksportu.GeoTiff
-        chkGeoTiffJpeg.Enabled = wolny AndAlso geotiff
-        chkGeoTiffCad.Enabled = wolny AndAlso geotiff
-        chkGeoTiffJpeg.Visible = geotiff
-        chkGeoTiffCad.Visible = geotiff
+        cmbFormatArkusza.Enabled = wolny AndAlso geotiff
+        For Each c As CheckBox In {chkArkuszWorldFile, chkArkuszMap, chkArkuszTab, chkArkuszKml}
+            c.Enabled = wolny AndAlso geotiff
+        Next
         chkKorekcjaMip.Enabled = wolny
         btnPodgladMip.Enabled = wolny
         grpFormat.Enabled = wolny
@@ -349,6 +397,14 @@ Public Class FormEksport
         lblPlan.Text = ""
         If _sesja Is Nothing Then Exit Sub
         Dim z = UtworzZadanie()
+        If z.Rodzaj = RodzajEksportu.GeoTiff OrElse z.Rodzaj = RodzajEksportu.TrekBuddy Then
+            Dim sz As Long = _sesja.Siatka.SzerokoscPx, wy As Long = _sesja.Siatka.WysokoscPx
+            Dim bokTb As Integer = MapaTrekBuddy.BokSegmentu
+            lblPlan.Text = If(z.Rodzaj = RodzajEksportu.GeoTiff,
+                              "Arkusz " & sz.ToString("N0") & " x " & wy.ToString("N0") & " px, " & cmbFormatArkusza.Text,
+                              "Kafle " & bokTb & " px: " & (((sz + bokTb - 1) \ bokTb) * ((wy + bokTb - 1) \ bokTb)).ToString("N0") & ", JPEG")
+            Exit Sub
+        End If
         If z.Piramida Then
             lblPlan.Text = "Liczba kafli: do " & EksportMapy.LiczbaKafliMBTiles(z).ToString("N0") & " (poziomy " & z.PoziomMin & "-" & z.PoziomMax &
                            "), kafle " & If(z.Png, "PNG", "JPEG")
@@ -367,7 +423,7 @@ Public Class FormEksport
     End Sub
 
     Private Sub OpcjeZmienione(sender As Object, e As EventArgs) Handles rbKmzGarmin.CheckedChanged, rbKmz.CheckedChanged, rbMBTiles.CheckedChanged,
-                                                                    rbSQLiteDB.CheckedChanged, rbOruxMaps.CheckedChanged, rbJnx.CheckedChanged, rbGeoTiff.CheckedChanged, chkGeoTiffJpeg.CheckedChanged, chkGeoTiffCad.CheckedChanged, chkKorekcjaMip.CheckedChanged,
+                                                                    rbSQLiteDB.CheckedChanged, rbOruxMaps.CheckedChanged, rbJnx.CheckedChanged, rbGeoTiff.CheckedChanged, rbTrekBuddy.CheckedChanged, cmbFormatArkusza.SelectedIndexChanged, chkArkuszWorldFile.CheckedChanged, chkArkuszMap.CheckedChanged, chkArkuszTab.CheckedChanged, chkArkuszKml.CheckedChanged, chkKorekcjaMip.CheckedChanged,
                                                                     cboKolejnoscGarmin.SelectedIndexChanged, chkPodzialNaTomy.CheckedChanged, nudMaksKafli.ValueChanged,
                                                                     nudPoziomMin.ValueChanged, nudPoziomMax.ValueChanged, chkPng.CheckedChanged,
                                                                     chkNakladka.CheckedChanged, chkBialePodstawa.CheckedChanged, nudJakosc.ValueChanged
@@ -590,7 +646,17 @@ Public Class FormEksport
                 Select Case z.Rodzaj
                     Case RodzajEksportu.GeoTiff
                         Dim rozmiar As Long = If(File.Exists(z.Plik), New FileInfo(z.Plik).Length, 0)
-                        Komunikat("Zapisano plik GeoTIFF: " & z.Plik & " (" & SzacunekRozmiaru.Tekst(rozmiar) & "). Plik z georeferencją gotowy do użycia w Avenza Maps, QField, QGIS lub programach CAD.", Color.Green)
+                        _PlikArkusza = z.Plik
+                        Dim brakujace = BrakujaceSegmentyPozaKorytarzem(z)
+                        If brakujace.Count > 0 Then
+                            Komunikat("Zapisano arkusz " & z.Plik & " (" & SzacunekRozmiaru.Tekst(rozmiar) & "), ale brakowało " & brakujace.Count &
+                                      If(brakujace.Count = 1, " segmentu", " segmentów") & " (białe pola), m.in.: " & String.Join(", ", brakujace.Take(5)), Color.Red)
+                        Else
+                            Komunikat("Zapisano arkusz " & z.Plik & " (" & SzacunekRozmiaru.Tekst(rozmiar) & "). Plik z georeferencją gotowy do użycia w Avenza Maps, QField, QGIS lub programach CAD.", Color.Green)
+                        End If
+                    Case RodzajEksportu.TrekBuddy
+                        Dim rozmiar As Long = If(File.Exists(z.Plik), New FileInfo(z.Plik).Length, 0)
+                        Komunikat("Zapisano mapę TrekBuddy / Locus Map: " & z.Plik & " (" & SzacunekRozmiaru.Tekst(rozmiar) & "). Locus Map: skopiuj plik .tar do Locus/maps.", Color.Green)
                     Case RodzajEksportu.Jnx
                         Dim rozmiar As Long = If(File.Exists(z.Plik), New FileInfo(z.Plik).Length, 0)
                         Komunikat("Zapisano mapę BirdsEye: " & z.Plik & " (" & SzacunekRozmiaru.Tekst(rozmiar) & "). Skopiuj plik .jnx do folderu Garmin/BirdsEye w urządzeniu lub na karcie SD.", Color.Green)
@@ -628,6 +694,25 @@ Public Class FormEksport
             ZakonczPrace()
         End Try
     End Sub
+
+    ''' <summary>
+    ''' Brakujące segmenty arkusza bez tych spoza korytarza trasy - przy pobieraniu wzdłuż trasy brak segmentów poza pasem
+    ''' jest zamierzony (jak dawniej w oknie scalania).
+    ''' </summary>
+    Private Function BrakujaceSegmentyPozaKorytarzem(z As ZadanieEksportu) As List(Of String)
+        Dim lista = z.BrakujaceSegmenty.ToList()
+        Dim korytarz = Core.Korytarz.ZFolderu(_folder)
+        If korytarz Is Nothing OrElse lista.Count = 0 Then Return lista
+        Dim k = _sesja.Konfiguracja
+        Dim s = _sesja.Siatka
+        Dim wKorytarzu As New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
+        For Each klucz In korytarz.Segmenty(s, _sesja.Uklad)
+            wKorytarzu.Add(s.NazwaSegmentu(k.Prefiks, Siatka.StylZTekstu(k.Numeracja), klucz \ s.LiczbaKolumn + 1, klucz Mod s.LiczbaKolumn + 1) &
+                           "." & Wms.RozszerzeniePliku(k.Format))
+        Next
+        lista.RemoveAll(Function(n) Not wKorytarzu.Contains(n))
+        Return lista
+    End Function
 
     Private Sub btnPokazPlik_Click(sender As Object, e As EventArgs) Handles btnPokazPlik.Click
         If Not String.IsNullOrEmpty(_ostatniPlikEksportu) Then
@@ -695,6 +780,11 @@ Public Class FormEksport
 
     Private Sub FormEksport_FormClosed(sender As Object, e As FormClosedEventArgs) Handles MyBase.FormClosed
         Ustawienia.ZapamietajKorekte(_opcjeMip)
+        Ustawienia.FormatArkusza = WybranyFormatArkusza
+        Ustawienia.ScalanieWorldFile = chkArkuszWorldFile.Checked
+        Ustawienia.ScalanieMap = chkArkuszMap.Checked
+        Ustawienia.ScalanieTab = chkArkuszTab.Checked
+        Ustawienia.ScalanieKml = chkArkuszKml.Checked
     End Sub
 
 End Class

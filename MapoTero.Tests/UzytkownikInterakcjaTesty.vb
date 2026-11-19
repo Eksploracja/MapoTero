@@ -246,7 +246,6 @@ Public Class UzytkownikInterakcjaTesty
                     Dim chkSiatka = DirectCast(f.Controls.Find("chkSiatkaSegmentow", True)(0), CheckBox)
                     Dim chkKursorWgs = DirectCast(f.Controls.Find("chkKursorWgs", True)(0), CheckBox)
                     Dim chkZaznaczenieWgs = DirectCast(f.Controls.Find("chkZaznaczenieWgs", True)(0), CheckBox)
-                    Dim chkTrekBuddy = DirectCast(f.Controls.Find("chkTrekBuddy", True)(0), CheckBox)
                     Dim chkPrzezroczystosc = DirectCast(f.Controls.Find("chkPrzezroczystosc", True)(0), CheckBox)
                     Dim chkZachowajKafle = DirectCast(f.Controls.Find("chkZachowajKafle", True)(0), CheckBox)
 
@@ -269,13 +268,8 @@ Public Class UzytkownikInterakcjaTesty
                         Application.DoEvents()
                     Next
 
-                    ' 2. Tryb TrekBuddy (włączenie i wyłączenie)
-                    chkTrekBuddy.Checked = True
-                    Application.DoEvents()
-                    Assert.True(chkTrekBuddy.Checked)
-                    chkTrekBuddy.Checked = False
-                    Application.DoEvents()
-                    Assert.False(chkTrekBuddy.Checked)
+                    'okno Ustawienia nie ma już trybu TrekBuddy - mapa TrekBuddy powstaje w oknie Eksport mapy
+                    Assert.Empty(f.Controls.Find("chkTrekBuddy", True))
 
                     ' 3. Zmiana formatu segmentów
                     For i As Integer = 0 To cmbFormat.Items.Count - 1
@@ -305,68 +299,6 @@ Public Class UzytkownikInterakcjaTesty
                     nudIloscProb.Value = 5
                     nudPrzerwa.Value = 200
                     Application.DoEvents()
-
-                    f.Close()
-                End Using
-            End Sub)
-    End Sub
-
-    <Fact>
-    Public Sub TestUzytkownik_Form3_Scalanie_ReczneParametryIFormaty()
-        UruchomWWatkuSta(
-            Sub()
-                Using f As New Global.MapoTero.Form3()
-                    f.Show()
-                    Application.DoEvents()
-
-                    Dim chkRecznie = DirectCast(f.Controls.Find("chkRecznie", True)(0), CheckBox)
-                    Dim cmbFormatArkusza = DirectCast(f.Controls.Find("cmbFormatArkusza", True)(0), ComboBox)
-                    Dim trkJakosc = DirectCast(f.Controls.Find("trkJakosc", True)(0), TrackBar)
-                    Dim txtXDol = DirectCast(f.Controls.Find("txtXDol", True)(0), TextBox)
-                    Dim txtYLewy = DirectCast(f.Controls.Find("txtYLewy", True)(0), TextBox)
-                    Dim txtXGora = DirectCast(f.Controls.Find("txtXGora", True)(0), TextBox)
-                    Dim txtYPrawy = DirectCast(f.Controls.Find("txtYPrawy", True)(0), TextBox)
-                    Dim txtBok = DirectCast(f.Controls.Find("txtBokSegmentu", True)(0), TextBox)
-                    Dim txtPiksel = DirectCast(f.Controls.Find("txtRozmiarPiksela", True)(0), TextBox)
-
-                    Dim chkWorldFile = DirectCast(f.Controls.Find("chkWorldFile", True)(0), CheckBox)
-                    Dim chkKml = DirectCast(f.Controls.Find("chkKml", True)(0), CheckBox)
-                    Dim chkMap = DirectCast(f.Controls.Find("chkMap", True)(0), CheckBox)
-                    Dim chkTab = DirectCast(f.Controls.Find("chkTab", True)(0), CheckBox)
-
-                    ' 1. Włączenie ręcznego wprowadzania parametrów
-                    chkRecznie.Enabled = True
-                    chkRecznie.Checked = True
-                    Application.DoEvents()
-
-                    ' 2. Zmiana formatu arkusza scalonego
-                    For i As Integer = 0 To cmbFormatArkusza.Items.Count - 1
-                        cmbFormatArkusza.SelectedIndex = i
-                        Application.DoEvents()
-                        ' Sprawdzenie suwaka jakości JPEG
-                        trkJakosc.Value = 75
-                        Application.DoEvents()
-                    Next
-
-                    ' 3. Przełączanie formatów georeferencji
-                    For Each chk In {chkWorldFile, chkKml, chkMap, chkTab}
-                        chk.Checked = Not chk.Checked
-                        Application.DoEvents()
-                    Next
-
-                    ' 4. Wprowadzanie poprawnych parametrów siatki 2x2
-                    txtXDol.Text = "200000"
-                    txtYLewy.Text = "500000"
-                    txtXGora.Text = "202048"
-                    txtYPrawy.Text = "502048"
-                    txtBok.Text = "1024"
-                    txtPiksel.Text = "1.0"
-                    Application.DoEvents()
-
-                    Dim txtKol = DirectCast(f.Controls.Find("txtLiczbaKolumn", True)(0), TextBox)
-                    Dim txtWie = DirectCast(f.Controls.Find("txtLiczbaWierszy", True)(0), TextBox)
-                    Assert.Equal("2", txtKol.Text)
-                    Assert.Equal("2", txtWie.Text)
 
                     f.Close()
                 End Using

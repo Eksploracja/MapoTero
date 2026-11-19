@@ -151,6 +151,11 @@ Public Class ZrodloSegmentow
         Return _folder & _siatka.NazwaSegmentu(_prefiks, _styl, wiersz, kolumna) & "." & _rozszerzenie
     End Function
 
+    ''' <summary>Nazwa pliku segmentu (bez folderu) - w komunikacie o brakujących segmentach arkusza.</summary>
+    Friend Function NazwaPliku(wiersz As Integer, kolumna As Integer) As String
+        Return Path.GetFileName(SciezkaSegmentu(wiersz, kolumna))
+    End Function
+
     ''' <summary>Czy w prostokącie (w układzie segmentów) jest co najmniej jeden istniejący segment.</summary>
     Public Function MaDane(obszar As Zasieg) As Boolean
         If _liczbaIstniejacych = 0 Then Return False
@@ -313,6 +318,8 @@ Public Enum RodzajEksportu
     OruxMaps
     ''' <summary>GeoTIFF z georeferencją (Avenza Maps, QField, GIS, CAD).</summary>
     GeoTiff
+    ''' <summary>Mapa TrekBuddy / Locus Map: archiwum .tar z kaflami 512 px arkusza, plikiem .map i listą .set.</summary>
+    TrekBuddy
 End Enum
 
 ''' <summary>Warstwa mapy nakładana podczas eksportu na mapę podstawową (np. granice działek na ortofotomapie).</summary>
@@ -356,12 +363,15 @@ Public Class ZadanieEksportu
     ''' (kafle PNG, w MBTiles typ "overlay"). Nie dotyczy KMZ dla odbiorników Garmin (tylko JPEG).
     ''' </summary>
     Public Property Nakladka As Boolean
-    ''' <summary>GeoTIFF: kompresja JPEG (mniejszy plik, zalecany dla Avenza Maps).</summary>
-    Public Property GeoTiffJpeg As Boolean = True
-    ''' <summary>GeoTIFF: generuj dodatkowo pliki georeferencji .tfw i .prj dla CAD.</summary>
-    Public Property GeoTiffPlikiCad As Boolean = True
-    ''' <summary>GeoTIFF: generuj plik kalibracji .map dla OziExplorer.</summary>
-    Public Property GeoTiffPlikMap As Boolean = False
+    ''' <summary>
+    ''' Arkusz (RodzajEksportu.GeoTiff): format pliku - GeoTIFF bezstratny, GeoTIFF z kompresją JPEG, JPEG albo PNG.
+    ''' Arkusz zastępuje dawne okno Scalanie segmentów, więc ma wszystkie jego formaty.
+    ''' </summary>
+    Public Property FormatArkusza As FormatArkusza = FormatArkusza.GeoTiffJpeg
+    ''' <summary>Arkusz: pliki georeferencji obok obrazu (world file i .prj, .map, .tab, .kml).</summary>
+    Public Property Georeferencja As New OpcjeGeoreferencji With {.WorldFile = True}
+    ''' <summary>Arkusz: segmenty mapy podstawowej, których brakowało w folderze (w arkuszu białe pola) - wypełniane eksportem.</summary>
+    Public ReadOnly Property BrakujaceSegmenty As New List(Of String)
     ''' <summary>Opcje korekcji obrazu pod ekrany transflektywne (Garmin MIP / pełne słońce).</summary>
     Public Property KorekcjaMip As New OpcjeKorekcjiMip()
     ''' <summary>Warstwy nakładane na mapę podstawową (od dołu do góry).</summary>
@@ -479,7 +489,7 @@ Public NotInheritable Class EksportMapy
 
     Public Shared Sub Eksportuj(z As ZadanieEksportu, postep As IProgress(Of Integer), token As CancellationToken)
         Try
-            If z.Rodzaj = RodzajEksportu.GeoTiff Then
+            If z.Rodzaj = RodzajEksportu.GeoTiff OrElse z.Rodzaj = RodzajEksportu.TrekBuddy Then
                 EksportGeoTiff(z, postep, token)
             ElseIf z.Piramida Then
                 EksportPiramidy(z, postep, token)
@@ -499,16 +509,15 @@ Public NotInheritable Class EksportMapy
 
     ''' <summary>Usuwa plik wynikowy (OruxMaps - pliki mapy w jej folderze i pusty folder).</summary>
     Friend Shared Sub UsunWynik(z As ZadanieEksportu)
-        If z.Rodzaj = RodzajEksportu.GeoTiff Then
+        If z.Rodzaj = RodzajEksportu.TrekBuddy Then
             If File.Exists(z.Plik) Then File.Delete(z.Plik)
-            Dim tfw = Path.ChangeExtension(z.Plik, ".tfw")
-            If File.Exists(tfw) Then File.Delete(tfw)
-            Dim tifw = Path.ChangeExtension(z.Plik, ".tifw")
-            If File.Exists(tifw) Then File.Delete(tifw)
-            Dim prj = Path.ChangeExtension(z.Plik, ".prj")
-            If File.Exists(prj) Then File.Delete(prj)
-            Dim map = Path.ChangeExtension(z.Plik, ".map")
-            If File.Exists(map) Then File.Delete(map)
+            Dim folderMapy = FolderRoboczyTrekBuddy(z)
+            If Directory.Exists(folderMapy) Then Directory.Delete(folderMapy, True)
+        ElseIf z.Rodzaj = RodzajEksportu.GeoTiff Then
+            'arkusz zapisywany jest do pliku tymczasowego i podmieniany na końcu - przerwanie albo błąd nie usuwa
+            'poprzedniego, kompletnego arkusza o tej samej nazwie (jak dawniej w oknie scalania)
+            Dim tmp = z.Plik & ".tmp"
+            If File.Exists(tmp) Then File.Delete(tmp)
         ElseIf z.Rodzaj = RodzajEksportu.OruxMaps Then
             If Not Directory.Exists(z.Plik) Then Exit Sub
             UsunPlikBazy(Path.Combine(z.Plik, MapaOruxMaps.NazwaBazy))
@@ -931,6 +940,15 @@ Friend Shared Function NazwaPlikuTomu(sciezkaBazowa As String, numerTomu As Inte
     ''' <summary>Największy rozmiar pasa wierszy eksportu GeoTIFF w pamięci (bajty; testy zmniejszają go, by sprawdzić zapis pasami).</summary>
     Friend Shared Property BudzetPamieciGeoTiff As Long = 256L * 1024 * 1024
 
+    ''' <summary>Folder roboczy mapy TrekBuddy (obok archiwum .tar, o tej samej nazwie; usuwany po spakowaniu).</summary>
+    Friend Shared Function FolderRoboczyTrekBuddy(z As ZadanieEksportu) As String
+        Return Path.Combine(Path.GetDirectoryName(z.Plik), Path.GetFileNameWithoutExtension(z.Plik))
+    End Function
+
+    ''' <summary>
+    ''' Arkusz (GeoTIFF, JPEG, PNG) albo mapa TrekBuddy: mapa podstawowa z nakładkami renderowana pasami wierszy w układzie
+    ''' sesji. TrekBuddy tnie te same pasy na kafle 512 px (ZapisKafliTrekBuddy).
+    ''' </summary>
     Private Shared Sub EksportGeoTiff(z As ZadanieEksportu, postep As IProgress(Of Integer), token As CancellationToken)
         Dim s = z.Zrodlo.Siatka
         If s Is Nothing OrElse Not s.Poprawna OrElse s.LiczbaKolumn = 0 OrElse s.LiczbaWierszy = 0 Then
@@ -939,18 +957,21 @@ Friend Shared Function NazwaPlikuTomu(sciezkaBazowa As String, numerTomu As Inte
         Dim bok As Integer = s.BokSegmentuPx
         Dim kolumny As Integer = s.LiczbaKolumn
         Dim wiersze As Integer = s.LiczbaWierszy
-        Dim format As FormatArkusza = If(z.GeoTiffJpeg, FormatArkusza.GeoTiffJpeg, FormatArkusza.GeoTiff)
-        Dim kanaly As Integer = If(z.GeoTiffJpeg, 3, If(z.Nakladka OrElse z.KaflePng, 4, 3))
+        Dim trekBuddy As Boolean = z.Rodzaj = RodzajEksportu.TrekBuddy
+        Dim format As FormatArkusza = If(trekBuddy, FormatArkusza.Jpeg, z.FormatArkusza)
+        'kanał alfa tylko w formatach, które go zapisują (GeoTIFF bezstratny, PNG); JPEG - białe tło
+        Dim kanaly As Integer = If(ZapisRastra.ObslugujePrzezroczystosc(format) AndAlso (z.Nakladka OrElse z.KaflePng), 4, 3)
         'rozmiar sprawdzany przed alokacją buforów (dawniej bardzo szeroka mapa kończyła się OverflowException)
         If s.SzerokoscPx > Integer.MaxValue \ 4 OrElse s.WysokoscPx > Integer.MaxValue Then
             Throw New ArgumentException("Arkusz " & s.SzerokoscPx & " x " & s.WysokoscPx & " pikseli jest zbyt duży do zapisu w jednym pliku GeoTIFF")
         End If
         Dim szer As Integer = CInt(s.SzerokoscPx)
         Dim wys As Integer = CInt(s.WysokoscPx)
-        Dim maks As Integer = ZapisRastra.MaksymalnyBok(format)
+        Dim maks As Integer = If(trekBuddy, Integer.MaxValue, ZapisRastra.MaksymalnyBok(format))
         If szer > maks OrElse wys > maks Then
-            Throw New ArgumentException("Arkusz " & szer & " x " & wys & " pikseli przekracza możliwości formatu (maks. " & maks & " pikseli)")
+            Throw New ArgumentException("Arkusz " & szer & " x " & wys & " pikseli przekracza możliwości formatu (maks. " & maks & " pikseli) - wybierz GeoTIFF lub PNG")
         End If
+        z.BrakujaceSegmenty.Clear()
 
         Dim warstwy = z.WarstwyRenderowania()
         'pas wierszy mieszczący się w budżecie pamięci - dawniej cały wiersz segmentów naraz (przy szerokości
@@ -967,7 +988,14 @@ Friend Shared Function NazwaPlikuTomu(sciezkaBazowa As String, numerTomu As Inte
             taSamaSiatka.Add(TaSamaSiatkaPikseli(warstwa.Zrodlo.Siatka, warstwa.Uklad, s, z.Uklad))
         Next
 
-        Using zapis = ZapisRastra.Utworz(format, z.Plik, szer, wys, z.JakoscJpeg, z.Uklad, s.ZasiegSiatki, kanaly = 4)
+        Dim plikTymczasowy As String = z.Plik & ".tmp"
+        Dim folderTb As String = If(trekBuddy, FolderRoboczyTrekBuddy(z), "")
+        Dim nazwaTb As String = Path.GetFileNameWithoutExtension(z.Plik)
+        If trekBuddy AndAlso Directory.Exists(folderTb) Then Directory.Delete(folderTb, True)
+        Dim zapisTb As ZapisRastra = Nothing
+        Using zapis As ZapisRastra = If(trekBuddy, New ZapisKafliTrekBuddy(folderTb, nazwaTb, szer, wys, z.JakoscJpeg),
+                                        ZapisRastra.Utworz(format, plikTymczasowy, szer, wys, z.JakoscJpeg, z.Uklad, s.ZasiegSiatki, kanaly = 4))
+            zapisTb = zapis
             zapiszPas = Sub(b, k) zapis.ZapiszWiersze(b, k)
             For w = 1 To wiersze
               For y0 = 0 To bok - 1 Step pas
@@ -985,7 +1013,10 @@ Friend Shared Function NazwaPlikuTomu(sciezkaBazowa As String, numerTomu As Inte
                     If taSamaSiatka(iw) Then
                         For k = 1 To kolumny
                             Dim dane = zr.Segment(w, k)
-                            If dane Is Nothing Then Continue For
+                            If dane Is Nothing Then
+                                If iw = 0 AndAlso y0 = 0 Then z.BrakujaceSegmenty.Add(zr.NazwaPliku(w, k))
+                                Continue For
+                            End If
                             Dim x0 As Integer = (k - 1) * bok
                             For y = 0 To n - 1
                                 Dim idxCel = y * szer + x0
@@ -1061,24 +1092,27 @@ Friend Shared Function NazwaPlikuTomu(sciezkaBazowa As String, numerTomu As Inte
             zapis.Zakoncz()
         End Using
 
+        If trekBuddy Then
+            ZapisKafliTrekBuddy.UtworzPaczke(folderTb, nazwaTb, DirectCast(zapisTb, ZapisKafliTrekBuddy).Pliki, z.Uklad, s.ZasiegSiatki, szer, wys, z.Plik)
+            Exit Sub
+        End If
+        File.Move(plikTymczasowy, z.Plik, overwrite:=True)
+
+        'pliki georeferencji obok arkusza (GeoTIFF ma georeferencję także w samym pliku)
         Dim folderZapisu = Path.GetDirectoryName(z.Plik)
         If Not String.IsNullOrEmpty(folderZapisu) AndAlso Not folderZapisu.EndsWith(Path.DirectorySeparatorChar.ToString()) Then
             folderZapisu &= Path.DirectorySeparatorChar
         End If
         Dim nazwaBezRozszerzenia = Path.GetFileNameWithoutExtension(z.Plik)
-        Dim obrazGeoref = ZapisGeoreferencji.Obraz(z.Uklad, s.ZasiegSiatki, szer, wys, folderZapisu, Path.GetFileName(z.Plik))
-
-        If z.GeoTiffPlikiCad Then
-            Dim opcjeCad As New OpcjeGeoreferencji With {.WorldFile = True}
-            ZapisGeoreferencji.ZapiszPliki(obrazGeoref, folderZapisu, nazwaBezRozszerzenia, "tif", opcjeCad)
+        Dim rozszerzenie = ZapisRastra.Rozszerzenie(format)
+        If z.Georeferencja IsNot Nothing AndAlso z.Georeferencja.Dowolna Then
+            Dim obrazGeoref = ZapisGeoreferencji.Obraz(z.Uklad, s.ZasiegSiatki, szer, wys, folderZapisu, Path.GetFileName(z.Plik))
+            ZapisGeoreferencji.ZapiszPliki(obrazGeoref, folderZapisu, nazwaBezRozszerzenia, rozszerzenie, z.Georeferencja)
+            'world file GeoTIFF: programy CAD szukają .tfw (ZapiszPliki tworzy rozszerzenie z pierwszej i ostatniej litery)
             Dim sciezkaTfw = Path.Combine(folderZapisu, nazwaBezRozszerzenia & ".tfw")
-            If Not File.Exists(sciezkaTfw) Then
+            If z.Georeferencja.WorldFile AndAlso rozszerzenie = "tif" AndAlso Not File.Exists(sciezkaTfw) Then
                 Georeferencja.Zapisz(sciezkaTfw, Georeferencja.WorldFile(obrazGeoref), Program.KodowanieSystemowe())
             End If
-        End If
-        If z.GeoTiffPlikMap Then
-            Dim opcjeMap As New OpcjeGeoreferencji With {.Map = True}
-            ZapisGeoreferencji.ZapiszPliki(obrazGeoref, folderZapisu, nazwaBezRozszerzenia, "tif", opcjeMap)
         End If
     End Sub
 

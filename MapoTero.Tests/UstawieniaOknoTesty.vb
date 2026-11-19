@@ -56,7 +56,7 @@ Public Class UstawieniaOknoTesty
     Public Sub WTrakciePobieraniaDostepneTylkoUstawieniaWidoku()
         WOknie(True,
             Sub(f)
-                For Each nazwa In {"grpSesja", "grpKalibracja", "grpTrekBuddy", "grpPobieranie", "grpWmts",
+                For Each nazwa In {"grpSesja", "grpKalibracja", "grpPobieranie", "grpWmts",
                                    "chkSiatkaSegmentow", "btnPrzywroc"}
                     Assert.False(K(f, nazwa).Enabled, nazwa & " powinno być wyłączone w trakcie pobierania")
                 Next

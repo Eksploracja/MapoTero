@@ -3130,9 +3130,15 @@ Public Class Form1
         End If
     End Sub
 
-    Private Sub btnScalanie_Click(sender As Object, e As EventArgs) Handles btnScalanie.Click
+    ''' <summary>
+    ''' Scalanie segmentów (przycisk i menu): okno Eksport mapy z wybranym formatem Arkusz - dawne osobne okno scalania
+    ''' robiło to samo co eksport GeoTIFF, bez nakładek.
+    ''' </summary>
+    Private Sub btnScalanie_Click(sender As Object, e As EventArgs) Handles btnScalanie.Click, ScalanieToolStripMenuItem.Click
         If PobieranieTrwa("Scalanie segmentów") Then Exit Sub
-        Form3.ShowDialog()
+        Using f As New FormEksport() With {.ArkuszDomyslnie = True}
+            f.ShowDialog(Me)
+        End Using
     End Sub
 
     Private Sub DodajSerwerToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles DodajSerwerToolStripMenuItem.Click, btnDodajSerwer.Click
@@ -3146,11 +3152,6 @@ Public Class Form1
                 Komunikat("Dodano zbiór map: " & okno.WynikNazwaZbioru, Color.Green)
             End If
         End Using
-    End Sub
-
-    Private Sub ScalanieToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles ScalanieToolStripMenuItem.Click
-        If PobieranieTrwa("Scalanie segmentów") Then Exit Sub
-        Form3.ShowDialog()
     End Sub
 
     Private Sub EksportToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles EksportToolStripMenuItem.Click

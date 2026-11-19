@@ -200,7 +200,8 @@ Public Class FormEksportCad
     Private Sub btnScal_Click(sender As Object, e As EventArgs) Handles btnScal.Click
         If _konfiguracja Is Nothing OrElse Form1.PobieranieTrwa("Scalanie segmentów") Then Exit Sub
         Dim plik As String = ""
-        Using f As New Form3() With {.FolderPoczatkowy = _folder}
+        'okno Eksport mapy z formatem Arkusz (dawne okno scalania)
+        Using f As New FormEksport() With {.FolderPoczatkowy = _folder, .ArkuszDomyslnie = True}
             f.ShowDialog(Me)
             plik = f.PlikArkusza
         End Using
@@ -270,7 +271,7 @@ Public Class FormEksportCad
             If istniejace > EksportCad.ZalecanaLiczbaRastrow Then
                 Dim komunikatRastrow As String = "Wybrana sesja zawiera " & istniejace & " pojedynczych segmentów rastrowych." & vbCrLf & vbCrLf &
                                                  "Wstawienie ponad 1 000 rastrów do rysunku może drastycznie spowolnić lub zawiesić program CAD." & vbCrLf &
-                                                 "Zalecane jest wcześniejsze scalenie segmentów w jeden arkusz (przycisk 'Scal teraz…')." & vbCrLf & vbCrLf &
+                                                 "Zalecane jest wcześniejsze scalenie segmentów w jeden arkusz (przycisk 'Scal segmenty…')." & vbCrLf & vbCrLf &
                                                  "Czy na pewno chcesz kontynuować eksport pojedynczych segmentów?"
                 If MessageBox.Show(komunikatRastrow, "Duża liczba rastrów w CAD", MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2) <> DialogResult.Yes Then
                     Exit Sub

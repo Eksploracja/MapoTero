@@ -62,12 +62,6 @@ Partial Class Form2
         Me.chkTab = New System.Windows.Forms.CheckBox()
         Me.chkWldPoints = New System.Windows.Forms.CheckBox()
         Me.chkGmi = New System.Windows.Forms.CheckBox()
-        Me.grpTrekBuddy = New System.Windows.Forms.GroupBox()
-        Me.chkTrekBuddy = New System.Windows.Forms.CheckBox()
-        Me.lblNazwaTB = New System.Windows.Forms.Label()
-        Me.cmbNazwaTB = New System.Windows.Forms.ComboBox()
-        Me.lblPodgladTB = New System.Windows.Forms.Label()
-        Me.lblPodgladNazwyTB = New System.Windows.Forms.Label()
         Me.grpPobieranie = New System.Windows.Forms.GroupBox()
         Me.lblIloscProb = New System.Windows.Forms.Label()
         Me.nudIloscProb = New System.Windows.Forms.NumericUpDown()
@@ -89,7 +83,6 @@ Partial Class Form2
         Me.grpNowaSesja.SuspendLayout()
         Me.grpWidok.SuspendLayout()
         Me.grpKalibracja.SuspendLayout()
-        Me.grpTrekBuddy.SuspendLayout()
         Me.grpPobieranie.SuspendLayout()
         Me.grpWmts.SuspendLayout()
         CType(Me.nudIloscProb, System.ComponentModel.ISupportInitialize).BeginInit()
@@ -147,7 +140,7 @@ Partial Class Form2
         Me.txtPrefiks.Name = "txtPrefiks"
         Me.txtPrefiks.Size = New System.Drawing.Size(214, 20)
         Me.txtPrefiks.TabIndex = 4
-        Me.ToolTip1.SetToolTip(Me.txtPrefiks, "Wspólny przedrostek nazw wszystkich pobieranych segmentów, np. przedrostek _ daje pliki _01_02.jpg. Przedrostek jest też początkiem nazwy paczki TrekBuddy.")
+        Me.ToolTip1.SetToolTip(Me.txtPrefiks, "Wspólny przedrostek nazw wszystkich pobieranych segmentów, np. przedrostek _ daje pliki _01_02.jpg.")
         '
         'lblNumeracja
         '
@@ -165,7 +158,7 @@ Partial Class Form2
         Me.cmbNumeracja.Name = "cmbNumeracja"
         Me.cmbNumeracja.Size = New System.Drawing.Size(214, 21)
         Me.cmbNumeracja.TabIndex = 6
-        Me.ToolTip1.SetToolTip(Me.cmbNumeracja, "Sposób numerowania segmentów w nazwach plików: NrWiersza_NrKolumny - numer wiersza i kolumny (np. _03_12), 01_02_03 - kolejne numery z zerem wiodącym (_01, _02 ...), 1_2_3 - kolejne numery bez zer (_1, _2 ...). W trybie TrekBuddy segmenty nazywane są wg położenia w pikselach.")
+        Me.ToolTip1.SetToolTip(Me.cmbNumeracja, "Sposób numerowania segmentów w nazwach plików: NrWiersza_NrKolumny - numer wiersza i kolumny (np. _03_12), 01_02_03 - kolejne numery z zerem wiodącym (_01, _02 ...), 1_2_3 - kolejne numery bez zer (_1, _2 ...).")
         '
         'chkPrzezroczystosc
         '
@@ -278,7 +271,7 @@ Partial Class Form2
         Me.grpKalibracja.TabIndex = 3
         Me.grpKalibracja.TabStop = False
         Me.grpKalibracja.Text = "Pliki kalibracji segmentów"
-        Me.ToolTip1.SetToolTip(Me.grpKalibracja, "Dodatkowe pliki kalibracji (georeferencji) tworzone dla każdego pobranego segmentu. W trybie TrekBuddy kalibracja zapisywana jest w pliku .map paczki, a te ustawienia nie są używane.")
+        Me.ToolTip1.SetToolTip(Me.grpKalibracja, "Dodatkowe pliki kalibracji (georeferencji) tworzone dla każdego pobranego segmentu.")
         '
         'chkMap
         '
@@ -345,66 +338,6 @@ Partial Class Form2
         Me.chkGmi.TabIndex = 5
         Me.chkGmi.Text = "plik .gmi / GPS Tuner 5.x"
         Me.ToolTip1.SetToolTip(Me.chkGmi, "GPS Tuner 5.x.")
-        '
-        'grpTrekBuddy
-        '
-        Me.grpTrekBuddy.Controls.Add(Me.chkTrekBuddy)
-        Me.grpTrekBuddy.Controls.Add(Me.lblNazwaTB)
-        Me.grpTrekBuddy.Controls.Add(Me.cmbNazwaTB)
-        Me.grpTrekBuddy.Controls.Add(Me.lblPodgladTB)
-        Me.grpTrekBuddy.Controls.Add(Me.lblPodgladNazwyTB)
-        Me.grpTrekBuddy.Location = New System.Drawing.Point(264, 184)
-        Me.grpTrekBuddy.Name = "grpTrekBuddy"
-        Me.grpTrekBuddy.Size = New System.Drawing.Size(240, 150)
-        Me.grpTrekBuddy.TabIndex = 4
-        Me.grpTrekBuddy.TabStop = False
-        Me.grpTrekBuddy.Text = "TrekBuddy i Locus Map"
-        '
-        'chkTrekBuddy
-        '
-        Me.chkTrekBuddy.AutoSize = True
-        Me.chkTrekBuddy.UseVisualStyleBackColor = True
-        Me.chkTrekBuddy.Location = New System.Drawing.Point(12, 20)
-        Me.chkTrekBuddy.Name = "chkTrekBuddy"
-        Me.chkTrekBuddy.Size = New System.Drawing.Size(210, 17)
-        Me.chkTrekBuddy.TabIndex = 0
-        Me.chkTrekBuddy.Text = "twórz mapę TrekBuddy / Locus Map (.tar)"
-        Me.ToolTip1.SetToolTip(Me.chkTrekBuddy, "Tworzy mapę TrekBuddy / Locus Map: segmenty 512 px nazwane wg położenia w pikselach, plik kalibracji .map i archiwum .tar. Po wyłączeniu przywracany jest poprzedni bok segmentu.")
-        '
-        'lblNazwaTB
-        '
-        Me.lblNazwaTB.AutoSize = True
-        Me.lblNazwaTB.Location = New System.Drawing.Point(12, 46)
-        Me.lblNazwaTB.Name = "lblNazwaTB"
-        Me.lblNazwaTB.TabIndex = 1
-        Me.lblNazwaTB.Text = "nazwa paczki (po przedrostku)"
-        '
-        'cmbNazwaTB
-        '
-        Me.cmbNazwaTB.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
-        Me.cmbNazwaTB.FormattingEnabled = True
-        Me.cmbNazwaTB.Location = New System.Drawing.Point(12, 62)
-        Me.cmbNazwaTB.Name = "cmbNazwaTB"
-        Me.cmbNazwaTB.Size = New System.Drawing.Size(214, 21)
-        Me.cmbNazwaTB.TabIndex = 2
-        Me.ToolTip1.SetToolTip(Me.cmbNazwaTB, "Co dopisać po przedrostku w nazwie paczki TrekBuddy / Locus Map.")
-        '
-        'lblPodgladTB
-        '
-        Me.lblPodgladTB.AutoSize = True
-        Me.lblPodgladTB.Location = New System.Drawing.Point(12, 94)
-        Me.lblPodgladTB.Name = "lblPodgladTB"
-        Me.lblPodgladTB.TabIndex = 3
-        Me.lblPodgladTB.Text = "podgląd nazwy paczki:"
-        '
-        'lblPodgladNazwyTB
-        '
-        Me.lblPodgladNazwyTB.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
-        Me.lblPodgladNazwyTB.Location = New System.Drawing.Point(12, 110)
-        Me.lblPodgladNazwyTB.Name = "lblPodgladNazwyTB"
-        Me.lblPodgladNazwyTB.Size = New System.Drawing.Size(214, 30)
-        Me.lblPodgladNazwyTB.TabIndex = 4
-        Me.lblPodgladNazwyTB.Text = "_"
         '
         'grpPobieranie
         '
@@ -591,7 +524,6 @@ Partial Class Form2
         Me.Controls.Add(Me.btnPrzywroc)
         Me.Controls.Add(Me.grpWmts)
         Me.Controls.Add(Me.grpPobieranie)
-        Me.Controls.Add(Me.grpTrekBuddy)
         Me.Controls.Add(Me.grpKalibracja)
         Me.Controls.Add(Me.grpWidok)
         Me.Controls.Add(Me.grpNowaSesja)
@@ -617,8 +549,6 @@ Partial Class Form2
         Me.grpWidok.PerformLayout()
         Me.grpKalibracja.ResumeLayout(False)
         Me.grpKalibracja.PerformLayout()
-        Me.grpTrekBuddy.ResumeLayout(False)
-        Me.grpTrekBuddy.PerformLayout()
         Me.grpPobieranie.ResumeLayout(False)
         Me.grpPobieranie.PerformLayout()
         Me.grpWmts.ResumeLayout(False)
@@ -650,12 +580,6 @@ Partial Class Form2
     Friend WithEvents chkTab As System.Windows.Forms.CheckBox
     Friend WithEvents chkWldPoints As System.Windows.Forms.CheckBox
     Friend WithEvents chkGmi As System.Windows.Forms.CheckBox
-    Friend WithEvents grpTrekBuddy As System.Windows.Forms.GroupBox
-    Friend WithEvents chkTrekBuddy As System.Windows.Forms.CheckBox
-    Friend WithEvents lblNazwaTB As System.Windows.Forms.Label
-    Friend WithEvents cmbNazwaTB As System.Windows.Forms.ComboBox
-    Friend WithEvents lblPodgladTB As System.Windows.Forms.Label
-    Friend WithEvents lblPodgladNazwyTB As System.Windows.Forms.Label
     Friend WithEvents grpPobieranie As System.Windows.Forms.GroupBox
     Friend WithEvents lblIloscProb As System.Windows.Forms.Label
     Friend WithEvents nudIloscProb As System.Windows.Forms.NumericUpDown

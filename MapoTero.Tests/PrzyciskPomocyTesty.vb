@@ -16,7 +16,6 @@ Public Class PrzyciskPomocyTesty
     Private Shared Function Okna() As List(Of (Nazwa As String, Utworz As Func(Of Form)))
         Return New List(Of (String, Func(Of Form))) From {
             ("Form2 (Ustawienia)", Function() New MapoTero.Form2()),
-            ("Form3 (złączanie segmentów)", Function() New MapoTero.Form3()),
             ("FormEksport", Function() New MapoTero.FormEksport()),
             ("FormEksportCad", Function() New MapoTero.FormEksportCad()),
             ("FormDodajSerwer - katalog", Function() New MapoTero.FormDodajSerwer()),

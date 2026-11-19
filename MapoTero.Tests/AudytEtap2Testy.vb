@@ -134,52 +134,38 @@ Public Class AudytEtap2Testy
         Assert.True(wynik.Sukces, wynik.KomunikatBledu)
     End Function
 
-    ''' <summary>E2-02: okno scalania nie zostawia parametrów poprzedniego folderu; uszkodzony conf.txt nie jest „gotowy do złączenia”.</summary>
+    ''' <summary>
+    ''' Scalanie segmentów otwiera okno Eksport mapy z formatem Arkusz i folderem wskazanym przez okno CAD (dawne okno
+    ''' scalania Form3 usunięte); folder bez conf.txt nie pozwala eksportować.
+    ''' </summary>
     <Fact>
-    Public Sub OknoScalania_FolderBezConfIUszkodzonyConf()
-        Dim zConf = NowyFolder(), bezConf = NowyFolder(), uszkodzony = NowyFolder()
+    Public Sub OknoEksportu_ScalanieOtwieraArkuszWeWskazanymFolderze()
+        Dim zConf = NowyFolder(), bezConf = NowyFolder()
         Try
             Dim c As New KonfiguracjaSesji With {.Folder = zConf, .XDol = "500000", .YLewy = "600000", .XGora = "500100", .YPrawy = "600100",
                                                   .BokSegmentuPx = "50", .RozmiarPiksela = "1", .Format = "png", .Prefiks = "_", .UkladEpsg = 2180}
             c.Zapisz(zConf & "conf.txt", Encoding.UTF8)
-            File.WriteAllBytes(uszkodzony & "conf.txt", Array.Empty(Of Byte)())
-            Assert.ThrowsAny(Of Exception)(Function() KonfiguracjaSesji.Wczytaj(uszkodzony & "conf.txt", Encoding.UTF8))
-
             WWatkuSta(
                 Sub()
-                    Using f As New MapoTero.Form3() With {.FolderPoczatkowy = zConf}
+                    Using f As New MapoTero.FormEksport() With {.FolderPoczatkowy = zConf, .ArkuszDomyslnie = True}
                         f.Show()
                         Application.DoEvents()
-                        Dim txtXDol = Kontrolka(Of TextBox)(f, "txtXDol")
-                        Dim chkRecznie = Kontrolka(Of CheckBox)(f, "chkRecznie")
-                        Dim txtKomunikaty = Kontrolka(Of TextBoxBase)(f, "txtKomunikaty")
-                        Assert.Equal("500000", txtXDol.Text)
-                        Assert.False(chkRecznie.Enabled)
-
-                        Dim wczytaj = GetType(MapoTero.Form3).GetMethod("WczytajParametry", BindingFlags.Instance Or BindingFlags.NonPublic)
-                        UstawPole(f, "_folderScalania", bezConf)
-                        wczytaj.Invoke(f, Nothing)
-                        Assert.Equal("", txtXDol.Text)
-                        Assert.True(chkRecznie.Enabled)
-
-                        chkRecznie.Checked = True
-                        UstawPole(f, "_folderScalania", uszkodzony)
-                        wczytaj.Invoke(f, Nothing)
-                        Assert.Contains("Nie udało się odczytać", txtKomunikaty.Text)
-                        Assert.True(chkRecznie.Enabled)
-
-                        'powrót do folderu z conf.txt - ręczne parametry wyłączone, pola zablokowane
-                        UstawPole(f, "_folderScalania", zConf)
-                        wczytaj.Invoke(f, Nothing)
-                        Assert.False(chkRecznie.Checked)
-                        Assert.False(Kontrolka(Of GroupBox)(f, "grpParametry").Enabled)
-                        Assert.StartsWith("Segmenty gotowe", txtKomunikaty.Text)
+                        Assert.True(Kontrolka(Of RadioButton)(f, "rbGeoTiff").Checked)
+                        Assert.True(Kontrolka(Of ComboBox)(f, "cmbFormatArkusza").Enabled)
+                        Assert.True(Kontrolka(Of CheckBox)(f, "chkArkuszWorldFile").Enabled)
+                        Assert.Contains(zConf.TrimEnd("\"c), Kontrolka(Of TextBox)(f, "txtFolder").Text)
+                        Assert.True(Kontrolka(Of Button)(f, "btnEksportuj").Enabled)
+                        Assert.Equal("", f.PlikArkusza)
+                    End Using
+                    Using f As New MapoTero.FormEksport() With {.FolderPoczatkowy = bezConf, .ArkuszDomyslnie = True}
+                        f.Show()
+                        Application.DoEvents()
+                        Assert.False(Kontrolka(Of Button)(f, "btnEksportuj").Enabled)
                     End Using
                 End Sub)
         Finally
             UsunFolder(zConf)
             UsunFolder(bezConf)
-            UsunFolder(uszkodzony)
         End Try
     End Sub
 

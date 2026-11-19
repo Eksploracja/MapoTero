@@ -342,7 +342,6 @@ Public Class AudytKliknijWszystkoTesty
                         glowne.Show()
                         Pompuj(1500)
                         ZbadajOkno("Form2", Function() New Global.MapoTero.Form2())
-                        ZbadajOkno("Form3", Function() New Global.MapoTero.Form3())
                         ZbadajOkno("FormEksport", Function() New Global.MapoTero.FormEksport())
                         ZbadajOkno("FormEksportCad", Function() New Global.MapoTero.FormEksportCad())
                         ZbadajOkno("FormZaawansowanyMbtiles", Function() New Global.MapoTero.FormZaawansowanyMbtiles())

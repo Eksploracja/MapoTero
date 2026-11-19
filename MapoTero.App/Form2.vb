@@ -23,9 +23,6 @@ Imports MapoTero.Core
 ''' </summary>
 Public Class Form2
 
-    ''' <summary>Opisy stylów nazwy paczki TrekBuddy (indeks = UstawieniaProgramu.StylNazwyTrekBuddy).</summary>
-    Private Shared ReadOnly StyleNazwyTB As String() = {"sam przedrostek", "nazwa zbioru map", "nazwa warstwy", "zbiór map + warstwa"}
-
     ''' <summary>Blokuje reakcję na zdarzenia kontrolek podczas ich wypełniania.</summary>
     Private _wypelnianie As Boolean
 
@@ -49,7 +46,6 @@ Public Class Form2
         If cmbFormat.Items.Count > 0 Then Exit Sub
         cmbFormat.Items.AddRange(UstawieniaProgramu.FormatySegmentow)
         cmbNumeracja.Items.AddRange(UstawieniaProgramu.StyleNumeracji)
-        cmbNazwaTB.Items.AddRange(StyleNazwyTB)
         For Each u In UkladWspolrzednych.Wszystkie
             cmbUkladDomyslny.Items.Add(u)
         Next
@@ -80,9 +76,6 @@ Public Class Form2
             chkTab.Checked = u.PlikTab
             chkWldPoints.Checked = u.PlikWldPoints
             chkGmi.Checked = u.PlikGmi
-            'TrekBuddy
-            chkTrekBuddy.Checked = u.TrekBuddy
-            cmbNazwaTB.SelectedIndex = Math.Max(0, Math.Min(StyleNazwyTB.Length - 1, u.StylNazwyTrekBuddy))
             'pobieranie
             Ustaw(nudIloscProb, u.IloscProbPobrania)
             Ustaw(nudPrzerwa, u.PrzerwaMiedzyProbami)
@@ -94,18 +87,17 @@ Public Class Form2
             _wypelnianie = False
         End Try
         OdswiezDostepnosc()
-        OdswiezPodgladTB()
         UstawBlokadePobierania()
     End Sub
 
     ''' <summary>
     ''' W trakcie pobierania można zmienić tylko widok współrzędnych i układ nowej sesji. Pozostałe ustawienia zmieniają
-    ''' parametry trwającej sesji (format, przedrostek, numeracja, bok segmentu TrekBuddy, conf.txt) albo siatkę na mapie,
+    ''' parametry trwającej sesji (format, przedrostek, numeracja, conf.txt) albo siatkę na mapie,
     ''' dlatego są wyłączone; dawniej okno w ogóle nie otwierało się w trakcie pobierania.
     ''' </summary>
     Private Sub UstawBlokadePobierania()
         Dim pobieranie As Boolean = TrwaPobieranie
-        For Each c As Control In New Control() {grpSesja, grpKalibracja, grpTrekBuddy, grpPobieranie, grpWmts,
+        For Each c As Control In New Control() {grpSesja, grpKalibracja, grpPobieranie, grpWmts,
                                                 chkSiatkaSegmentow, btnPrzywroc}
             c.Enabled = Not pobieranie
         Next
@@ -117,28 +109,9 @@ Public Class Form2
         pole.Value = Math.Max(pole.Minimum, Math.Min(pole.Maximum, CDec(wartosc)))
     End Sub
 
-#Region "TrekBuddy i Locus Map"
-
-    ''' <summary>
-    ''' W trybie TrekBuddy / Locus Map segmenty nazywane są wg położenia w pikselach, a kalibracja zapisywana jest w pliku .map
-    ''' paczki - numeracja i pliki kalibracji segmentów nie są wtedy używane.
-    ''' Wartości tych ustawień pozostają bez zmian i wracają do użytku po wyłączeniu trybu.
-    ''' </summary>
+    ''' <summary>Przezroczyste tło tylko dla formatów, które je zapisują (PNG, GIF).</summary>
     Private Sub OdswiezDostepnosc()
-        Dim tb As Boolean = chkTrekBuddy.Checked
         chkPrzezroczystosc.Enabled = Wms.CzyFormatZPrzezroczystoscia(CStr(cmbFormat.SelectedItem))
-        grpKalibracja.Enabled = Not tb
-        cmbNumeracja.Enabled = Not tb
-        lblNumeracja.Enabled = Not tb
-        lblNazwaTB.Enabled = tb
-        cmbNazwaTB.Enabled = tb
-        lblPodgladTB.Enabled = tb
-        lblPodgladNazwyTB.Enabled = tb
-    End Sub
-
-    Private Sub chkTrekBuddy_CheckedChanged(sender As Object, e As EventArgs) Handles chkTrekBuddy.CheckedChanged
-        If _wypelnianie Then Exit Sub
-        OdswiezDostepnosc()
     End Sub
 
     Private Sub cmbFormat_SelectedIndexChanged(sender As Object, e As EventArgs) Handles cmbFormat.SelectedIndexChanged
@@ -146,22 +119,13 @@ Public Class Form2
         OdswiezDostepnosc()
     End Sub
 
-    Private Sub cmbNazwaTB_SelectedIndexChanged(sender As Object, e As EventArgs) Handles cmbNazwaTB.SelectedIndexChanged
-        If _wypelnianie Then Exit Sub
-        OdswiezPodgladTB()
-    End Sub
+#Region "TrekBuddy (tylko wznowienie sesji z dawnych wersji)"
 
-    Private Sub txtPrefiks_TextChanged(sender As Object, e As EventArgs) Handles txtPrefiks.TextChanged
-        If _wypelnianie Then Exit Sub
-        OdswiezPodgladTB()
-    End Sub
-
-    ''' <summary>Podgląd nazwy paczki dla wartości wpisanych w oknie.</summary>
-    Private Sub OdswiezPodgladTB()
-        lblPodgladNazwyTB.Text = txtPrefiks.Text & DopisekTrekBuddy(cmbNazwaTB.SelectedIndex)
-    End Sub
-
-    ''' <summary>Dopisek do przedrostka w nazwie paczki TrekBuddy / Locus Map wg stylu.</summary>
+    ''' <summary>
+    ''' Mapę TrekBuddy / Locus Map tworzy od wersji 3.19 okno Eksport mapy z dowolnej sesji, więc okno Ustawienia nie ma
+    ''' już trybu TrekBuddy. Tryb zostaje tylko dla wznawianej sesji z dawnej wersji (pole w conf.txt) - jej segmenty
+    ''' mają nazwy i folder paczki TrekBuddy, a nazwa paczki powstaje wg zapisanego stylu (lastsettings.txt).
+    ''' </summary>
     Private Shared Function DopisekTrekBuddy(styl As Integer) As String
         Dim s As String = ""
         Select Case styl
@@ -173,12 +137,9 @@ Public Class Form2
         Return MapaTrekBuddy.BezpiecznaNazwa(s)
     End Function
 
-    ''' <summary>
-    ''' Nazwa paczki TrekBuddy / Locus Map wg zapisanego stylu - wywoływane także z okna głównego po zmianie warstw.
-    ''' </summary>
+    ''' <summary>Nazwa paczki TrekBuddy wg zapisanego stylu - wywoływane z okna głównego po zmianie warstw.</summary>
     Public Sub OdswiezNazweTrekBuddy()
         Ustawienia.NazwaTrekBuddy = DopisekTrekBuddy(Ustawienia.StylNazwyTrekBuddy)
-        If Me.Visible Then OdswiezPodgladTB()
     End Sub
 
 #End Region
@@ -227,17 +188,6 @@ Public Class Form2
         u.PlikWldPoints = chkWldPoints.Checked
         u.PlikGmi = chkGmi.Checked
 
-        'TrekBuddy: segment 512 px, a po wyłączeniu - bok segmentu sprzed włączenia trybu
-        Dim bylTrekBuddy As Boolean = u.TrekBuddy
-        u.TrekBuddy = chkTrekBuddy.Checked
-        If u.TrekBuddy AndAlso Not bylTrekBuddy Then
-            u.BokSegmentuPrzedTrekBuddy = Form1.BokSegmentu
-            Form1.BokSegmentu = MapaTrekBuddy.BokSegmentu.ToString()
-        ElseIf bylTrekBuddy AndAlso Not u.TrekBuddy Then
-            Form1.BokSegmentu = If(u.BokSegmentuPrzedTrekBuddy <> "", u.BokSegmentuPrzedTrekBuddy, "2000")
-            u.BokSegmentuPrzedTrekBuddy = ""
-        End If
-        u.StylNazwyTrekBuddy = Math.Max(0, cmbNazwaTB.SelectedIndex)
         OdswiezNazweTrekBuddy()
 
         'pobieranie

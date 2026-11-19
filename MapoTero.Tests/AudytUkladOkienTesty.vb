@@ -186,7 +186,6 @@ Public Class AudytUkladOkienTesty
                         Application.DoEvents()
                         glowne.Hide()
                         Zbadaj("Form2", Function() New Global.MapoTero.Form2())
-                        Zbadaj("Form3", Function() New Global.MapoTero.Form3())
                         Zbadaj("FormEksport", Function() New Global.MapoTero.FormEksport())
                         Zbadaj("FormEksportCad", Function() New Global.MapoTero.FormEksportCad())
                         Zbadaj("FormZaawansowanyMbtiles", Function() New Global.MapoTero.FormZaawansowanyMbtiles())

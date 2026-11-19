@@ -158,7 +158,7 @@ Partial Class FormEksportCad
         Me.btnScal.Name = "btnScal"
         Me.btnScal.Size = New System.Drawing.Size(90, 23)
         Me.btnScal.TabIndex = 5
-        Me.btnScal.Text = "Scal teraz..."
+        Me.btnScal.Text = "Scal segmenty..."
         Me.ToolTip1.SetToolTip(Me.btnScal, "Scalanie segmentów tej sesji w jeden arkusz (z plikiem world file) - po scaleniu arkusz zostanie wybrany do wstawienia.")
         Me.btnScal.UseVisualStyleBackColor = True
         '
