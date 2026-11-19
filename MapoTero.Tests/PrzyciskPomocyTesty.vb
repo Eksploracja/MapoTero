@@ -22,6 +22,7 @@ Public Class PrzyciskPomocyTesty
             ("FormDodajSerwer - katalog", Function() New MapoTero.FormDodajSerwer()),
             ("FormDodajSerwer - warstwy", Function() New MapoTero.FormDodajSerwer("https://example.invalid/wms")),
             ("FormKorytarz", Function() New MapoTero.FormKorytarz(Nothing)),
+            ("FormProfilNmt", Function() New MapoTero.FormProfilNmt()),
             ("FormImportOzi", Function() New MapoTero.FormImportOzi()),
             ("FormSzukajDzialki - miejscowości", Function() New MapoTero.FormSzukajDzialki()),
             ("FormSzukajDzialki - działki", Function() New MapoTero.FormSzukajDzialki(1)),

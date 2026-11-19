@@ -3245,6 +3245,12 @@ Public Class Form1
         End Using
     End Sub
 
+    Private Sub ProfilNmtToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles ProfilNmtToolStripMenuItem.Click
+        Using frm As New FormProfilNmt()
+            frm.ShowDialog(Me)
+        End Using
+    End Sub
+
 #Region "Nowa sesja"
 
     ''' <summary>Przycisk „nowa sesja” obok przycisków folderu, siatki, scalania i usuwania (tworzony w kodzie).</summary>

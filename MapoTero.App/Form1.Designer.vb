@@ -71,6 +71,7 @@ Partial Class Form1
         Me.DodajSerwerToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.ZnajdzDzialkeToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.KonwertujOziToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.ProfilNmtToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.btnSzukajDzialki = New System.Windows.Forms.Button()
         Me.NarzedziaSeparator1 = New System.Windows.Forms.ToolStripSeparator()
         Me.btnDodajSerwer = New System.Windows.Forms.Button()
@@ -418,7 +419,7 @@ Partial Class Form1
         '
         'NarzedziaToolStripMenuItem
         '
-        Me.NarzedziaToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.DodajSerwerToolStripMenuItem, Me.ZnajdzDzialkeToolStripMenuItem, Me.KonwertujOziToolStripMenuItem, Me.NarzedziaSeparator1, Me.ScalanieToolStripMenuItem, Me.EksportToolStripMenuItem, Me.EksportCadToolStripMenuItem, Me.KorektaFolderuToolStripMenuItem})
+        Me.NarzedziaToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.DodajSerwerToolStripMenuItem, Me.ZnajdzDzialkeToolStripMenuItem, Me.KonwertujOziToolStripMenuItem, Me.ProfilNmtToolStripMenuItem, Me.NarzedziaSeparator1, Me.ScalanieToolStripMenuItem, Me.EksportToolStripMenuItem, Me.EksportCadToolStripMenuItem, Me.KorektaFolderuToolStripMenuItem})
         Me.NarzedziaToolStripMenuItem.Name = "NarzedziaToolStripMenuItem"
         Me.NarzedziaToolStripMenuItem.Size = New System.Drawing.Size(70, 20)
         Me.NarzedziaToolStripMenuItem.Text = "Narzędzia"
@@ -446,6 +447,13 @@ Partial Class Form1
         Me.KonwertujOziToolStripMenuItem.Size = New System.Drawing.Size(315, 22)
         Me.KonwertujOziToolStripMenuItem.Text = "Konwertuj mapę OziExplorer (.map)..."
         Me.KonwertujOziToolStripMenuItem.ToolTipText = "Konwertuje kalibrowany skan mapy Ozi (.map) do formatu JNX, KMZ lub MBTiles"
+        '
+        'ProfilNmtToolStripMenuItem
+        '
+        Me.ProfilNmtToolStripMenuItem.Name = "ProfilNmtToolStripMenuItem"
+        Me.ProfilNmtToolStripMenuItem.Size = New System.Drawing.Size(315, 22)
+        Me.ProfilNmtToolStripMenuItem.Text = "Profil wysokościowy trasy (GPX, KML)..."
+        Me.ProfilNmtToolStripMenuItem.ToolTipText = "Wysokości terenu z NMT GUGiK dla punktów trasy, wykres profilu i zapis GPX z wysokościami"
         '
         'NarzedziaSeparator1
         '
@@ -1756,5 +1764,6 @@ Partial Class Form1
     Friend WithEvents lblPodgladStan As System.Windows.Forms.Label
     Friend WithEvents ZnajdzDzialkeToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents KonwertujOziToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
+    Friend WithEvents ProfilNmtToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents btnSzukajDzialki As System.Windows.Forms.Button
 End Class

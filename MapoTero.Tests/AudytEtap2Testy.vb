@@ -183,16 +183,17 @@ Public Class AudytEtap2Testy
         End Try
     End Sub
 
-    ''' <summary>E2-03: wskazanie nowej trasy usuwa profil wysokości poprzedniej (zapis GPX nie łączy tras).</summary>
+    ''' <summary>E2-03: wskazanie nowej trasy usuwa profil wysokości poprzedniej (zapis GPX nie łączy tras).
+    ''' Profil przeniesiony z okna korytarza do osobnego narzędzia FormProfilNmt.</summary>
     <Fact>
-    Public Sub OknoKorytarza_NowaTrasaUsuwaProfilPoprzedniej()
+    Public Sub OknoProfiluNmt_NowaTrasaUsuwaProfilPoprzedniej()
         Dim folder = NowyFolder()
         Try
             Dim plik = folder & "pusta.gpx"
             File.WriteAllText(plik, "<?xml version=""1.0""?><gpx version=""1.1"" xmlns=""http://www.topografix.com/GPX/1/1""></gpx>")
             WWatkuSta(
                 Sub()
-                    Using f As New MapoTero.FormKorytarz(Nothing)
+                    Using f As New MapoTero.FormProfilNmt()
                         f.Show()
                         Application.DoEvents()
                         Dim linie = Pole(Of List(Of IList(Of Double)))(f, "_linieWysokosci")
@@ -206,6 +207,8 @@ Public Class AudytEtap2Testy
                         Assert.Empty(linie)
                         Assert.Null(Pole(Of Object)(f, "_statystyki"))
                         Assert.False(btnZapiszGpx.Enabled)
+                        'pusty plik - brak trasy, więc nie ma czego pobierać
+                        Assert.False(Kontrolka(Of Button)(f, "btnNmt").Enabled)
                     End Using
                 End Sub)
         Finally

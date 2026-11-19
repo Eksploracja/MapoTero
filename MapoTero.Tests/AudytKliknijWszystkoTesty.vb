@@ -351,6 +351,7 @@ Public Class AudytKliknijWszystkoTesty
                         ZbadajOkno("FormImportOzi", Function() New Global.MapoTero.FormImportOzi())
                         ZbadajOkno("FormKorektaFolderu", Function() New Global.MapoTero.FormKorektaFolderu())
                         ZbadajOkno("FormKorytarz", Function() New Global.MapoTero.FormKorytarz(New Korytarz()))
+                        ZbadajOkno("FormProfilNmt", Function() New Global.MapoTero.FormProfilNmt())
                         ZbadajOkno("FormPodgladMip", Function() New Global.MapoTero.FormPodgladMip(New OpcjeKorekcjiMip()))
                         ZbadajOkno("FormSzukajDzialki", Function() New Global.MapoTero.FormSzukajDzialki())
                         ZbadajOkno("AboutBox1", Function() New Global.MapoTero.AboutBox1())

@@ -32,12 +32,7 @@ Partial Class FormKorytarz
         Me.lblOpis = New System.Windows.Forms.Label()
         Me.btnOK = New System.Windows.Forms.Button()
         Me.btnAnuluj = New System.Windows.Forms.Button()
-        Me.btnNmt = New System.Windows.Forms.Button()
-        Me.btnZapiszGpx = New System.Windows.Forms.Button()
-        Me.picProfil = New System.Windows.Forms.PictureBox()
-        Me.prgNmt = New System.Windows.Forms.ProgressBar()
         Me.dlgPlik = New System.Windows.Forms.OpenFileDialog()
-        Me.dlgZapiszGpx = New System.Windows.Forms.SaveFileDialog()
         Me.ToolTip1 = New System.Windows.Forms.ToolTip(Me.components)
         CType(Me.nudSzerokosc, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
@@ -109,49 +104,10 @@ Partial Class FormKorytarz
         Me.lblOpis.TabIndex = 6
         Me.lblOpis.Text = "Wskaż plik z trasą. Pobierane będą tylko segmenty w pasie wzdłuż trasy - zasięg pobierania zostanie ustawiony na prostokąt obejmujący cały pas."
         '
-        'btnNmt
-        '
-        Me.btnNmt.Location = New System.Drawing.Point(12, 158)
-        Me.btnNmt.Name = "btnNmt"
-        Me.btnNmt.Size = New System.Drawing.Size(210, 24)
-        Me.btnNmt.TabIndex = 6
-        Me.btnNmt.Text = "Wzbogać ślad o wysokości..."
-        Me.ToolTip1.SetToolTip(Me.btnNmt, "Pobiera rzędne terenu z lotniczego skaningu laserowego (LIDAR) GUGiK i uzupełnia punkty trasy.")
-        Me.btnNmt.UseVisualStyleBackColor = True
-        '
-        'btnZapiszGpx
-        '
-        Me.btnZapiszGpx.Enabled = False
-        Me.btnZapiszGpx.Location = New System.Drawing.Point(228, 158)
-        Me.btnZapiszGpx.Name = "btnZapiszGpx"
-        Me.btnZapiszGpx.Size = New System.Drawing.Size(220, 24)
-        Me.btnZapiszGpx.TabIndex = 7
-        Me.btnZapiszGpx.Text = "Zapisz wzbogacony GPX..."
-        Me.ToolTip1.SetToolTip(Me.btnZapiszGpx, "Zapisuje ślad GPX z uzupełnionymi wysokościami terenu dla odbiorników Garmin i zegarków sportowych.")
-        Me.btnZapiszGpx.UseVisualStyleBackColor = True
-        '
-        'picProfil
-        '
-        Me.picProfil.BackColor = System.Drawing.Color.White
-        Me.picProfil.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
-        Me.picProfil.Location = New System.Drawing.Point(12, 188)
-        Me.picProfil.Name = "picProfil"
-        Me.picProfil.Size = New System.Drawing.Size(436, 90)
-        Me.picProfil.TabIndex = 8
-        Me.picProfil.TabStop = False
-        '
-        'prgNmt
-        '
-        Me.prgNmt.Location = New System.Drawing.Point(12, 289)
-        Me.prgNmt.Name = "prgNmt"
-        Me.prgNmt.Size = New System.Drawing.Size(250, 20)
-        Me.prgNmt.TabIndex = 9
-        Me.prgNmt.Visible = False
-        '
         'btnOK
         '
         Me.btnOK.Enabled = False
-        Me.btnOK.Location = New System.Drawing.Point(282, 286)
+        Me.btnOK.Location = New System.Drawing.Point(282, 166)
         Me.btnOK.Name = "btnOK"
         Me.btnOK.Size = New System.Drawing.Size(80, 26)
         Me.btnOK.TabIndex = 10
@@ -161,7 +117,7 @@ Partial Class FormKorytarz
         'btnAnuluj
         '
         Me.btnAnuluj.DialogResult = System.Windows.Forms.DialogResult.Cancel
-        Me.btnAnuluj.Location = New System.Drawing.Point(368, 286)
+        Me.btnAnuluj.Location = New System.Drawing.Point(368, 166)
         Me.btnAnuluj.Name = "btnAnuluj"
         Me.btnAnuluj.Size = New System.Drawing.Size(80, 26)
         Me.btnAnuluj.TabIndex = 11
@@ -173,22 +129,13 @@ Partial Class FormKorytarz
         Me.dlgPlik.Filter = "Trasy (*.gpx;*.kml;*.kmz)|*.gpx;*.kml;*.kmz|Wszystkie pliki (*.*)|*.*"
         Me.dlgPlik.Title = "Plik trasy"
         '
-        'dlgZapiszGpx
-        '
-        Me.dlgZapiszGpx.Filter = "Ślad GPX (*.gpx)|*.gpx|Wszystkie pliki (*.*)|*.*"
-        Me.dlgZapiszGpx.Title = "Zapisz ślad z wysokościami NMT"
-        '
         'FormKorytarz
         '
         Me.AcceptButton = Me.btnOK
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.CancelButton = Me.btnAnuluj
-        Me.ClientSize = New System.Drawing.Size(460, 324)
-        Me.Controls.Add(Me.prgNmt)
-        Me.Controls.Add(Me.picProfil)
-        Me.Controls.Add(Me.btnZapiszGpx)
-        Me.Controls.Add(Me.btnNmt)
+        Me.ClientSize = New System.Drawing.Size(460, 204)
         Me.Controls.Add(Me.btnAnuluj)
         Me.Controls.Add(Me.btnOK)
         Me.Controls.Add(Me.chkBuforAdaptacyjny)
@@ -220,11 +167,6 @@ Partial Class FormKorytarz
     Friend WithEvents lblOpis As System.Windows.Forms.Label
     Friend WithEvents btnOK As System.Windows.Forms.Button
     Friend WithEvents btnAnuluj As System.Windows.Forms.Button
-    Friend WithEvents btnNmt As System.Windows.Forms.Button
-    Friend WithEvents btnZapiszGpx As System.Windows.Forms.Button
-    Friend WithEvents picProfil As System.Windows.Forms.PictureBox
-    Friend WithEvents prgNmt As System.Windows.Forms.ProgressBar
     Friend WithEvents dlgPlik As System.Windows.Forms.OpenFileDialog
-    Friend WithEvents dlgZapiszGpx As System.Windows.Forms.SaveFileDialog
     Friend WithEvents ToolTip1 As System.Windows.Forms.ToolTip
 End Class

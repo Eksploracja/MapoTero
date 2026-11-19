@@ -42,6 +42,7 @@ Public Enum TematPomocy
     Szukaj
     ImportOzi
     Korytarz
+    ProfilNmt
     Ustawienia
     KorektaFolderu
 End Enum
@@ -112,6 +113,7 @@ Public Class FormPomocMbtiles
             Case TematPomocy.Szukaj : PomocSzukaj()
             Case TematPomocy.ImportOzi : PomocImportOzi()
             Case TematPomocy.Korytarz : PomocKorytarz()
+            Case TematPomocy.ProfilNmt : PomocProfilNmt()
             Case TematPomocy.Ustawienia : PomocUstawienia()
             Case TematPomocy.KorektaFolderu : PomocKorektaFolderu()
             Case Else : PomocMbtiles()
@@ -279,10 +281,22 @@ Public Class FormPomocMbtiles
         DodajPunktor("Program wyznaczy pas o tej szerokości po obu stronach śladu i wybierze tylko te segmenty siatki, przez które przebiega bufor.")
         DodajPunktor("Oszczędność czasu i pamięci: korytarz pozwala zredukować liczbę pobieranych kafelków nawet o 80-90%!")
 
-        DodajNaglowek1("3. Profil wysokościowy i rzędne NMT / LIDAR")
-        DodajPunktor("Przycisk 'Wzbogać ślad o wysokości' pobiera rzeczywiste rzędne terenu z lotniczego skaningu laserowego (NMT GUGiK) dla wszystkich punktów trasy.")
-        DodajPunktor("W oknie wyświetlany jest interaktywny wykres profilu z obliczoną sumą przewyższeń (podejścia, zejścia, min/max).")
-        DodajPunktor("Przycisk 'Zapisz wzbogacony GPX' eksportuje plik GPX z tagami <ele> dla odbiorników i zegarków turystycznych.")
+        DodajAkapit("Profil wysokościowy trasy (wysokości z NMT) jest osobnym narzędziem w menu Narzędzia.")
+
+        DodajStopkeOnline(_urlOnline)
+    End Sub
+
+    Private Sub PomocProfilNmt()
+        Me.Text = "Pomoc i instrukcja - Profil wysokościowy trasy"
+        _urlOnline = "https://eksploracja.github.io/MapoTero/pomoc/narzedzia/"
+
+        DodajTytul("Profil wysokościowy trasy (NMT / LIDAR)")
+        DodajAkapit("Narzędzie pobiera wysokości terenu z numerycznego modelu terenu GUGiK (lotniczy skaning laserowy) dla punktów trasy " &
+                    "z pliku GPX, KML lub KMZ. Dane obejmują tylko obszar Polski - punkty za granicą zostają bez wysokości.")
+        DodajPunktor("Przycisk 'Pobierz wysokości z NMT' odpytuje usługę wysokościową Geoportalu dla wszystkich punktów trasy.")
+        DodajPunktor("Wykres pokazuje profil terenu wzdłuż trasy z wysokością najniższą i najwyższą oraz sumą podejść i zejść.")
+        DodajPunktor("Przycisk 'Zapisz GPX z wysokościami' zapisuje ślad z tagami <ele> dla odbiorników i zegarków turystycznych; " &
+                     "z pliku GPX zostają czasy punktów, punkty wpt i nazwy.")
 
         DodajStopkeOnline(_urlOnline)
     End Sub
