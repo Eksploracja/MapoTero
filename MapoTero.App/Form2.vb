@@ -29,8 +29,15 @@ Public Class Form2
     ''' <summary>Blokuje reakcję na zdarzenia kontrolek podczas ich wypełniania.</summary>
     Private _wypelnianie As Boolean
 
+    ''' <summary>
+    ''' Ustawiane przez okno główne przed otwarciem okna: trwa pobieranie segmentów (część ustawień wyłączona).
+    ''' Przekazywane z zewnątrz, a nie odczytywane z Form1, bo testy tworzą to okno bez okna głównego.
+    ''' </summary>
+    <System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)>
+    Public Property TrwaPobieranie As Boolean
+
     Private Sub Form2_Load(sender As Object, e As EventArgs) Handles MyBase.Load
-        PomocProgramu.DodajPrzyciskPomocy(Me, TematPomocy.Ustawienia, 202, 433)
+        PomocProgramu.DodajPrzyciskPomocy(Me, TematPomocy.Ustawienia, 202, 387)
     End Sub
 
     Private Sub Form2_VisibleChanged(sender As Object, e As EventArgs) Handles MyBase.VisibleChanged
@@ -60,13 +67,11 @@ Public Class Form2
             txtPrefiks.Text = u.Prefiks
             cmbNumeracja.SelectedItem = u.Numeracja
             If cmbNumeracja.SelectedIndex < 0 Then cmbNumeracja.SelectedIndex = 0
-            chkPowyzejOstatniego.Checked = u.PobierajPowyzejOstatniego
             cmbUkladDomyslny.SelectedItem = u.UkladDomyslny
             'widok okna głównego
             chkKursorISrodek.Checked = u.KursorISrodekMapy
             chkKursorWgs.Checked = u.KursorWgs84
             chkZaznaczenieWgs.Checked = u.ZaznaczenieWgs84
-            chkEdycjaXY.Checked = u.EdycjaXY
             chkSiatkaSegmentow.Checked = u.SiatkaSegmentowNaMapie
             'pliki kalibracji
             chkMap.Checked = u.PlikMap
@@ -85,12 +90,26 @@ Public Class Form2
             Ustaw(nudLimitCzasu, u.LimitCzasuSekundy)
             chkZachowajKafle.Checked = u.ZachowajKafleWmts
             Ustaw(nudJakoscWmts, u.JakoscJpegWmts)
-            chkZamienXY.Checked = u.ZamienXY
         Finally
             _wypelnianie = False
         End Try
         OdswiezDostepnosc()
         OdswiezPodgladTB()
+        UstawBlokadePobierania()
+    End Sub
+
+    ''' <summary>
+    ''' W trakcie pobierania można zmienić tylko widok współrzędnych i układ nowej sesji. Pozostałe ustawienia zmieniają
+    ''' parametry trwającej sesji (format, przedrostek, numeracja, bok segmentu TrekBuddy, conf.txt) albo siatkę na mapie,
+    ''' dlatego są wyłączone; dawniej okno w ogóle nie otwierało się w trakcie pobierania.
+    ''' </summary>
+    Private Sub UstawBlokadePobierania()
+        Dim pobieranie As Boolean = TrwaPobieranie
+        For Each c As Control In New Control() {grpSesja, grpKalibracja, grpTrekBuddy, grpPobieranie, grpWmts,
+                                                chkSiatkaSegmentow, btnPrzywroc}
+            c.Enabled = Not pobieranie
+        Next
+        Me.Text = If(pobieranie, "Ustawienia (trwa pobieranie - część ustawień można zmienić po jego zakończeniu)", "Ustawienia")
     End Sub
 
     ''' <summary>Wartość pola liczbowego ograniczona do jego zakresu.</summary>
@@ -102,7 +121,7 @@ Public Class Form2
 
     ''' <summary>
     ''' W trybie TrekBuddy / Locus Map segmenty nazywane są wg położenia w pikselach, a kalibracja zapisywana jest w pliku .map
-    ''' paczki - numeracja, pliki kalibracji segmentów i pobieranie powyżej ostatniego segmentu nie są wtedy używane.
+    ''' paczki - numeracja i pliki kalibracji segmentów nie są wtedy używane.
     ''' Wartości tych ustawień pozostają bez zmian i wracają do użytku po wyłączeniu trybu.
     ''' </summary>
     Private Sub OdswiezDostepnosc()
@@ -111,7 +130,6 @@ Public Class Form2
         grpKalibracja.Enabled = Not tb
         cmbNumeracja.Enabled = Not tb
         lblNumeracja.Enabled = Not tb
-        chkPowyzejOstatniego.Enabled = Not tb
         lblNazwaTB.Enabled = tb
         cmbNazwaTB.Enabled = tb
         lblPodgladTB.Enabled = tb
@@ -186,29 +204,20 @@ Public Class Form2
         Form1.stFormat.Text = "." & u.Format
         u.Prefiks = txtPrefiks.Text
         If cmbNumeracja.SelectedItem IsNot Nothing Then u.Numeracja = CStr(cmbNumeracja.SelectedItem)
-        u.PobierajPowyzejOstatniego = chkPowyzejOstatniego.Checked
         Dim uklad = TryCast(cmbUkladDomyslny.SelectedItem, UkladWspolrzednych)
         If uklad IsNot Nothing Then u.UkladDomyslny = uklad
 
         'widok okna głównego
-        Dim bylaEdycjaXY As Boolean = u.EdycjaXY
         u.KursorISrodekMapy = chkKursorISrodek.Checked
         u.KursorWgs84 = chkKursorWgs.Checked
         u.ZaznaczenieWgs84 = chkZaznaczenieWgs.Checked
         Dim bylaSiatka As Boolean = u.SiatkaSegmentowNaMapie
-        u.EdycjaXY = chkEdycjaXY.Checked
         u.SiatkaSegmentowNaMapie = chkSiatkaSegmentow.Checked
         If bylaSiatka <> u.SiatkaSegmentowNaMapie AndAlso Form1.SiatkaWidoczna Then
             Form1.OdswiezSiatke()
         End If
         Form1.UstawWidokWspolrzednych(u.KursorISrodekMapy)
         Form1.UstawWidokZaznaczeniaWgs(u.ZaznaczenieWgs84)
-        Form1.UstawEdycjeXY(u.EdycjaXY)
-        If u.EdycjaXY AndAlso Not bylaEdycjaXY Then
-            Form1.Komunikat("Wyłączono zaznaczanie na mapie zasięgu pobierania prawym przyciskiem myszy. Określ samodzielnie współrzędne XY zasięgu mapy i wpisz je w odpowiednie pola", Color.Green)
-        ElseIf bylaEdycjaXY AndAlso Not u.EdycjaXY Then
-            Form1.Komunikat("", Color.Black)
-        End If
 
         'pliki kalibracji segmentów
         u.PlikMap = chkMap.Checked
@@ -238,7 +247,7 @@ Public Class Form2
         u.LimitCzasuSekundy = CInt(nudLimitCzasu.Value)
         u.ZachowajKafleWmts = chkZachowajKafle.Checked
         u.JakoscJpegWmts = CInt(nudJakoscWmts.Value)
-        u.ZamienXY = chkZamienXY.Checked
+
 
         Try
             u.Zapisz(PlikLastsettings)

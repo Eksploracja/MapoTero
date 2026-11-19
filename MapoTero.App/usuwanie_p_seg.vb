@@ -165,6 +165,14 @@ Public Class Usuwanie_p_seg
         End Try
         Dim bledy As Integer = doUsuniecia.Where(Function(p) File.Exists(p)).Count()
         Dim usunieteSegmenty As Integer = segmenty.Where(Function(p) Not File.Exists(p)).Count()
+        'lista usuniętych - wznowione pobieranie ich nie pobierze (dawniej trzeba było włączyć opcję „pobieraj tylko
+        'powyżej ostatniego”, która pomijała też segmenty niepobrane z powodu błędu)
+        Dim zapisanoListe As Boolean = True
+        Try
+            UsunietePusteSegmenty.Dopisz(Folder, segmenty.Where(Function(p) Not File.Exists(p)))
+        Catch
+            zapisanoListe = False
+        End Try
         Dim usuniete As Integer = doUsuniecia.Count - bledy
 
         txtProgKB.Text = "0"
@@ -176,7 +184,10 @@ Public Class Usuwanie_p_seg
         opis &= "."
         If doUsuniecia.Count > MaksPlikowPojedynczo Then opis &= " W Koszu są w folderze """ & NazwaFolderuKosza & " (data i godzina)""."
         If bledy > 0 Then opis &= vbCrLf & "Nie udało się usunąć " & bledy & " " & Odmiana(bledy, "pliku", "plików", "plików") & "."
-        opis &= vbCrLf & vbCrLf & "Brakujące segmenty uzupełnisz, wznawiając pobieranie przyciskiem Pobierz."
+        opis &= vbCrLf & vbCrLf & If(zapisanoListe,
+            "Program zapamiętał usunięte segmenty i nie pobierze ich ponownie. Segmenty brakujące z innego powodu uzupełnisz, " &
+            "wznawiając pobieranie przyciskiem Pobierz.",
+            "Nie udało się zapisać listy usuniętych segmentów (" & UsunietePusteSegmenty.NazwaPliku & ") - wznowione pobieranie pobierze je ponownie.")
         MsgBox(opis, If(bledy > 0, MsgBoxStyle.Exclamation, MsgBoxStyle.Information), "Usuwanie pustych segmentów")
         Form1.Komunikat(opis.Replace(vbCrLf, " "), If(bledy > 0, Color.Red, Color.Green))
     End Sub

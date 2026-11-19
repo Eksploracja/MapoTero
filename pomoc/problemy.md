@@ -40,8 +40,8 @@ Objaw, najczęstsza przyczyna i sprawdzony sposób rozwiązania.
   pusty obraz bez błędu. Przełącz układ pobierania z powrotem na **PL-1992**.
 * **Przykryta nakładka w kanapce:** jeśli w panelu *Wybrane warstwy* nieprzezroczysta warstwa leży wyżej (ma wyższy numer)
   niż nakładka lub mapa pod spodem, zakryje ją w całości. Sprawdź kolejność w oknie głównym albo przyciskiem **…** (okno warstw zaawansowanych).
-* **Zamieniona kolejność osi X i Y (zewnętrzne serwery WMS):** dla serwerów niezgodnych ze standardem WMS 1.3.0 włącz
-  w *Ustawieniach* opcję *zamień kolejność X i Y w zapytaniu* (dla Geoportalu musi być **wyłączona**).
+* **Zamieniona kolejność osi X i Y (zewnętrzne serwery WMS):** dla serwera niezgodnego ze standardem WMS 1.3.0 zmień
+  w jego adresie w pliku zbioru map `VERSION=1.3.0` na `VERSION=1.1.1` (zob. [Błędy pobierania](../pobieranie/bledy/)).
 
 ---
 

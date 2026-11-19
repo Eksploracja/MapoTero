@@ -22,12 +22,13 @@ Dokładny zasięg można wpisać z klawiatury, np. narożniki arkusza mapy, dzia
 
 ## Włączenie wpisywania z klawiatury
 
-1. Otwórz menu **Ustawienia**.
-2. W grupie *Widok okna głównego* zaznacz **wpisywanie zasięgu XY z klawiatury**.
-3. Kliknij **OK**.
+1. W schemacie siatki okna głównego zaznacz małe pole wyboru obok pola `x` górnego (dymek: *wpisywanie współrzędnych
+   XY z klawiatury*).
+2. Wpisz współrzędne w pola `x` i `y`.
 
 Pola zasięgu stają się edytowalne, a zaznaczanie prawym przyciskiem myszy i uchwyty na mapie są wyłączone
-(żeby przypadkowe kliknięcie nie zmieniło wpisanych wartości). Aby wrócić do zaznaczania myszą, wyłącz tę opcję.
+(żeby przypadkowe kliknięcie nie zmieniło wpisanych wartości). Aby wrócić do zaznaczania myszą, odznacz to pole.
+Program zapamiętuje jego stan do następnego uruchomienia. W trakcie pobierania pola nie można przełączyć.
 
 ---
 

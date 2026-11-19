@@ -96,7 +96,7 @@ do orientacji w terenie.
 | zmiana zasięgu siatki | przeciągnij uchwyt lewym przyciskiem myszy |
 
 **Podkład mapy** wybiera się przełącznikami na mapie: *OpenStreetMap* (domyślny), *GoogleMap* albo
-*SatelliteBingsMap* (zdjęcia satelitarne).
+*SatelliteBingsMap* (zdjęcia satelitarne). Program zapamiętuje wybrany podkład do następnego uruchomienia.
 
 **Współrzędne pod mapą** (widoczne po włączeniu opcji *współrzędne kursora i środka mapy* w *Ustawieniach*):
 
@@ -178,7 +178,7 @@ Grupa *Schemat siatki segmentów pobieranej mapy i zasięgu zaznaczenia* zawiera
 * **x dolne i górne**: południowa i północna krawędź (X = północ),
 * **y lewe i prawe**: zachodnia i wschodnia krawędź (Y = wschód).
 
-Pola wypełniają się automatycznie przy zaznaczaniu myszą na mapie. Ręczna edycja jest dostępna po włączeniu opcji *wpisywanie zasięgu XY z klawiatury* w *Ustawieniach* (zob. [Wpisywanie współrzędnych](../obszar/wspolrzedne/)). Przy aktywnej opcji *współrzędne zaznaczenia w WGS84* obok pól widać wartości w stopniach geograficznych.
+Pola wypełniają się automatycznie przy zaznaczaniu myszą na mapie. Ręczną edycję włącza małe pole wyboru obok pola `x` górnego w schemacie siatki (zob. [Wpisywanie współrzędnych](../obszar/wspolrzedne/)). Przy aktywnej opcji *współrzędne zaznaczenia w WGS84* obok pól widać wartości w stopniach geograficznych.
 
 Przycisk z pinezką (*pokaż na mapie siatkę segmentów…*) centruje mapę na zasięgu wpisanym w polach XY i rysuje narożniki siatki.
 
@@ -216,7 +216,7 @@ Pole **Komunikaty** u dołu okna wyświetla informacje o przebiegu pracy:
 * **niebieski**: podpowiedź do wybranej warstwy,
 * **pomarańczowy**: siatka zbyt gęsta, by wyświetlić wszystkie linie na mapie.
 
-**Pasek stanu** pokazuje: procentowy postęp pobierania, format plików (np. `.jpeg`), ścieżkę bieżącej sesji oraz nazwę ostatnio zapisanego segmentu.
+**Pasek stanu** pokazuje: procentowy postęp pobierania, format plików (np. `.jpeg`), ścieżkę bieżącej sesji oraz nazwę ostatnio zapisanego segmentu. Kliknięcie formatu otwiera okno [Ustawienia](../ustawienia/#sesja-pobierania), w którym go zmienisz.
 
 ## Czynności zablokowane podczas pobierania
 

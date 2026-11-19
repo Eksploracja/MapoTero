@@ -342,12 +342,18 @@ Public Class FormPomocMbtiles
 
         DodajNaglowek1("2. Widok okna głównego i kursor")
         DodajPunktor("Współrzędne kursora i środka mapy: wyświetla na bieżąco pozycję kursora myszy w układzie pobierania oraz w WGS84.")
-        DodajPunktor("Edycja pól XY: pozwala ręcznie korygować liczby w polach zasięgu z klawiatury.")
+        DodajPunktor("Wpisywanie zasięgu XY z klawiatury włącza małe pole wyboru obok pola x górnego w schemacie siatki okna głównego.")
         DodajPunktor("Siatka segmentów na mapie: włącza rysowanie siatki kafli bezpośrednio na podkładzie mapowym.")
 
         DodajNaglowek1("3. Pobieranie i serwery WMS/WMTS")
         DodajPunktor("Odstęp zapytań i ochrona serwerów: ogranicza tempo pobierania, zapobiegając blokadom IP ze strony serwerów rządowych.")
         DodajPunktor("Zachowuj pobrane kafle WMTS: pozostawia surowe kafelki w pamięci podręcznej, co umożliwia błyskawiczne ponowne generowanie mapy offline.")
+        DodajPunktor("Jakość JPEG przy składaniu: dotyczy segmentów składanych z kafli WMTS/XYZ, z kilku serwerów WMS albo z warstw o kryciu poniżej 100 %.")
+        DodajPunktor("Tryb TrekBuddy / Locus Map program zapisuje w conf.txt sesji, więc wraca razem z wczytaną sesją.")
+
+        DodajNaglowek1("4. Otwieranie okna")
+        DodajPunktor("Okno otwiera menu Ustawienia oraz kliknięcie formatu segmentów na pasku stanu.")
+        DodajPunktor("W trakcie pobierania można zmienić tylko widok współrzędnych i układ nowej sesji; pozostałe opcje są wyłączone do końca pobierania.")
 
         DodajStopkeOnline(_urlOnline)
     End Sub

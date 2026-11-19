@@ -174,6 +174,7 @@ Partial Class Form1
         Me.txtYLewy = New System.Windows.Forms.TextBox()
         Me.txtXDol = New System.Windows.Forms.TextBox()
         Me.PictureBox2 = New System.Windows.Forms.PictureBox()
+        Me.chkEdycjaXY = New System.Windows.Forms.CheckBox()
         Me.Panel2 = New System.Windows.Forms.Panel()
         Me.splPanel = New System.Windows.Forms.Splitter()
         Me.Panel3 = New System.Windows.Forms.Panel()
@@ -312,6 +313,7 @@ Partial Class Form1
         '
         'StatusStrip1
         '
+        Me.StatusStrip1.ShowItemToolTips = True
         Me.StatusStrip1.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.stPostep, Me.stFormat, Me.stFolder, Me.stSegment})
         Me.StatusStrip1.Location = New System.Drawing.Point(0, 662)
         Me.StatusStrip1.Name = "StatusStrip1"
@@ -332,6 +334,9 @@ Partial Class Form1
         Me.stFormat.Name = "stFormat"
         Me.stFormat.Size = New System.Drawing.Size(70, 17)
         Me.stFormat.Text = "rozszerzenie"
+        Me.stFormat.IsLink = True
+        Me.stFormat.LinkBehavior = System.Windows.Forms.LinkBehavior.HoverUnderline
+        Me.stFormat.ToolTipText = "Format pobieranych segmentów - kliknij, aby go zmienić w oknie Ustawienia"
         '
         'stFolder
         '
@@ -1391,6 +1396,7 @@ Partial Class Form1
         Me.grpSchemat.Controls.Add(Me.lblOpisXDol)
         Me.grpSchemat.Controls.Add(Me.txtYLewy)
         Me.grpSchemat.Controls.Add(Me.txtXDol)
+        Me.grpSchemat.Controls.Add(Me.chkEdycjaXY)
         Me.grpSchemat.Controls.Add(Me.PictureBox2)
         Me.grpSchemat.Location = New System.Drawing.Point(5, 3)
         Me.grpSchemat.Name = "grpSchemat"
@@ -1518,6 +1524,16 @@ Partial Class Form1
         Me.txtXDol.Size = New System.Drawing.Size(62, 20)
         Me.txtXDol.TabIndex = 304
         Me.txtXDol.Text = "682000"
+        '
+        'chkEdycjaXY
+        '
+        Me.chkEdycjaXY.Location = New System.Drawing.Point(145, 52)
+        Me.chkEdycjaXY.Name = "chkEdycjaXY"
+        Me.chkEdycjaXY.Size = New System.Drawing.Size(14, 14)
+        Me.chkEdycjaXY.TabIndex = 307
+        Me.chkEdycjaXY.AccessibleName = "Wpisywanie zasięgu XY z klawiatury"
+        Me.ToolTip1.SetToolTip(Me.chkEdycjaXY, "Zaznacz, aby wpisywać współrzędne XY zasięgu pobierania z klawiatury. Zaznaczanie obszaru prawym przyciskiem myszy i uchwyty na mapie są wtedy wyłączone.")
+        Me.chkEdycjaXY.UseVisualStyleBackColor = True
         '
         'PictureBox2
         '
@@ -1726,6 +1742,7 @@ Partial Class Form1
     Friend WithEvents txtYLewy As System.Windows.Forms.TextBox
     Friend WithEvents txtXDol As System.Windows.Forms.TextBox
     Friend WithEvents PictureBox2 As System.Windows.Forms.PictureBox
+    Friend WithEvents chkEdycjaXY As System.Windows.Forms.CheckBox
     Friend WithEvents btnOtworzFolder As System.Windows.Forms.Button
     Friend WithEvents btnScalanie As System.Windows.Forms.Button
     Friend WithEvents btnResetujWarstwy As System.Windows.Forms.Button

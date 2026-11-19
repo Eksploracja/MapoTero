@@ -35,7 +35,7 @@ Program:
 Nowe zaznaczenie zastępuje poprzednie, w tym również aktywny [obszar wzdłuż trasy](../korytarz/).
 
 {: .informacja }
-Zaznaczanie myszą jest zablokowane w trakcie aktywnego pobierania oraz gdy włączona jest opcja *wpisywanie zasięgu XY z klawiatury*.
+Zaznaczanie myszą jest zablokowane w trakcie aktywnego pobierania oraz gdy zaznaczone jest pole wpisywania zasięgu XY z klawiatury (obok pola `x` górnego w schemacie siatki).
 
 Zaznaczony prostokąt jest prostokątem na mapie podglądu (w stopniach geograficznych). W płaskim układzie pobierania (np. PL-1992) tworzy lekko obrócony czworokąt, więc program wyznacza prostokąt opisany obejmujący wszystkie jego narożniki.
 

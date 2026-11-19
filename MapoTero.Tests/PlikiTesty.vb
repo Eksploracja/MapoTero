@@ -63,6 +63,46 @@ Public Class PlikiSesjiTesty
         Assert.True(d.PobierajPowyzejOstatniego)
         Assert.Equal("1_2_3", d.Numeracja)
         Assert.Equal(2178, d.UkladEpsg)
+        Assert.False(d.TrekBuddy)
+    End Sub
+
+    ''' <summary>
+    ''' Tryb TrekBuddy zapisywany na końcu conf.txt (dawniej niezapisywany - wznowione po ponownym uruchomieniu pobieranie
+    ''' sesji TrekBuddy zapisywało w niej zwykłe segmenty); plik bez tego pola (starsze wersje) - tryb wyłączony.
+    ''' </summary>
+    <Fact>
+    Public Sub ConfZapamietujeTrybTrekBuddy()
+        Dim c As New KonfiguracjaSesji With {.Folder = "D:\mapy\", .BokSegmentuPx = "512", .Format = "jpeg", .TrekBuddy = True,
+            .TrybyMieszaniaWarstw = "0"}
+        Dim tekst = c.DoTekstu()
+        Assert.EndsWith("""0""" & vbCrLf & "#TRUE#" & vbCrLf, tekst)
+        Assert.True(New CzytnikPlikuVbTest(tekst).Konfiguracja().TrekBuddy)
+        'plik ze starszej wersji kończy się na trybach mieszania warstw
+        Dim stary = tekst.Substring(0, tekst.LastIndexOf("#TRUE#", StringComparison.Ordinal))
+        Assert.False(New CzytnikPlikuVbTest(stary).Konfiguracja().TrekBuddy)
+    End Sub
+
+    ''' <summary>
+    ''' Lista segmentów usuniętych jako puste: nazwy bez rozszerzenia i folderu, bez powtórzeń i bez względu na wielkość
+    ''' liter; brak pliku - pusta lista. (Zastępuje opcję „pobieraj tylko powyżej ostatniego”.)
+    ''' </summary>
+    <Fact>
+    Public Sub ListaUsunietychPustychSegmentow()
+        Dim folder = Path.Combine(Path.GetTempPath(), "mt_usuniete_" & Guid.NewGuid().ToString("N"))
+        Directory.CreateDirectory(folder)
+        Try
+            Assert.Empty(UsunietePusteSegmenty.Wczytaj(folder))
+            UsunietePusteSegmenty.Dopisz(folder, {Path.Combine(folder, "_01_02.jpg"), "_01_03.jpg"})
+            UsunietePusteSegmenty.Dopisz(folder, {"_01_02.JPG", "_05_07.png"})
+            Dim lista = UsunietePusteSegmenty.Wczytaj(folder)
+            Assert.Equal(3, lista.Count)
+            Assert.Contains("_01_02", lista)
+            Assert.Contains("_01_03", lista)
+            Assert.Contains("_05_07", lista)
+            Assert.Equal({"_01_02", "_01_03", "_05_07"}, File.ReadAllLines(Path.Combine(folder, UsunietePusteSegmenty.NazwaPliku)))
+        Finally
+            Directory.Delete(folder, True)
+        End Try
     End Sub
 
     Private Shared Function Sesja() As KonfiguracjaSesji

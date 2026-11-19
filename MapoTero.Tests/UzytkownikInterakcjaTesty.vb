@@ -244,14 +244,11 @@ Public Class UzytkownikInterakcjaTesty
                     Application.DoEvents()
 
                     Dim chkSiatka = DirectCast(f.Controls.Find("chkSiatkaSegmentow", True)(0), CheckBox)
-                    Dim chkEdycjaXY = DirectCast(f.Controls.Find("chkEdycjaXY", True)(0), CheckBox)
                     Dim chkKursorWgs = DirectCast(f.Controls.Find("chkKursorWgs", True)(0), CheckBox)
                     Dim chkZaznaczenieWgs = DirectCast(f.Controls.Find("chkZaznaczenieWgs", True)(0), CheckBox)
                     Dim chkTrekBuddy = DirectCast(f.Controls.Find("chkTrekBuddy", True)(0), CheckBox)
                     Dim chkPrzezroczystosc = DirectCast(f.Controls.Find("chkPrzezroczystosc", True)(0), CheckBox)
-                    Dim chkPowyzejOstatniego = DirectCast(f.Controls.Find("chkPowyzejOstatniego", True)(0), CheckBox)
                     Dim chkZachowajKafle = DirectCast(f.Controls.Find("chkZachowajKafle", True)(0), CheckBox)
-                    Dim chkZamienXY = DirectCast(f.Controls.Find("chkZamienXY", True)(0), CheckBox)
 
                     Dim cmbFormat = DirectCast(f.Controls.Find("cmbFormat", True)(0), ComboBox)
                     Dim cmbNumeracja = DirectCast(f.Controls.Find("cmbNumeracja", True)(0), ComboBox)
@@ -264,8 +261,8 @@ Public Class UzytkownikInterakcjaTesty
                     Dim nudPrzerwa = DirectCast(f.Controls.Find("nudPrzerwa", True)(0), NumericUpDown)
 
                     ' 1. Przełączanie wszystkich checkboxów
-                    For Each chk In {chkSiatka, chkEdycjaXY, chkKursorWgs, chkZaznaczenieWgs,
-                                     chkPrzezroczystosc, chkPowyzejOstatniego, chkZachowajKafle, chkZamienXY}
+                    For Each chk In {chkSiatka, chkKursorWgs, chkZaznaczenieWgs,
+                                     chkPrzezroczystosc, chkZachowajKafle}
                         chk.Checked = Not chk.Checked
                         Application.DoEvents()
                         chk.Checked = Not chk.Checked

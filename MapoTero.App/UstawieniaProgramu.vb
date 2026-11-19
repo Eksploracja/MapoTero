@@ -48,10 +48,6 @@ Public Class UstawieniaProgramu
     Public Property PrzerwaMiedzyProbami As Integer = 5
     ''' <summary>Liczba segmentów pobieranych jednocześnie.</summary>
     Public Property LiczbaWatkow As Integer = 4
-    ''' <summary>Zamiana kolejności X i Y w zapytaniu (serwery niezgodne ze standardem).</summary>
-    Public Property ZamienXY As Boolean
-    ''' <summary>Przy powtórnym pobieraniu tylko segmenty o numerze wyższym niż ostatni pobrany.</summary>
-    Public Property PobierajPowyzejOstatniego As Boolean
     ''' <summary>Limit czasu oczekiwania na odpowiedź serwera [s].</summary>
     Public Property LimitCzasuSekundy As Integer = 120
     ''' <summary>Tworzenie mapy TrekBuddy / Locus Map.</summary>
@@ -123,6 +119,15 @@ Public Class UstawieniaProgramu
     Public Property SiatkaSegmentowNaMapie As Boolean = True
     ''' <summary>Szerokość prawego panelu ustawiona przez użytkownika w pikselach; 0 - szerokość domyślna.</summary>
     Public Property SzerokoscPanelu As Integer
+    ''' <summary>Podkład mapy w oknie głównym: osm, google albo bing (dawniej po każdym uruchomieniu wracał OpenStreetMap).</summary>
+    Public Property PodkladMapy As String = "osm"
+
+    ''' <summary>Podkład z listy obsługiwanych; nieznany - osm.</summary>
+    Public Shared Function NormalizujPodklad(podklad As String) As String
+        Dim p As String = If(podklad, "").Trim().ToLowerInvariant()
+        Return If(p = "google" OrElse p = "bing", p, "osm")
+    End Function
+
     Public Property SrodekMapySzerokosc As String = "52.3"
     Public Property SrodekMapyDlugosc As String = "19.2"
     Public Property SkalaMapy As String = "6"
@@ -211,7 +216,9 @@ Public Class UstawieniaProgramu
         FolderWarstwy1 = u.Tekst("dolna", FolderWarstwy1)
         FolderWarstwy2 = u.Tekst("gorna", FolderWarstwy2)
         FolderWynikowy = u.Tekst("polaczone", FolderWynikowy)
-        ZamienXY = u.Logiczna("XYswitched", ZamienXY)
+        'XYswitched (zamiana X i Y w zapytaniu) nie jest już odczytywane - opcja działała na wszystkie serwery i pozostawiona
+        'włączona psuła pobieranie z Geoportalu; serwer niezgodny z WMS 1.3.0 obsługuje VERSION=1.1.1 w adresie
+        PodkladMapy = NormalizujPodklad(u.Tekst("podklad_mapy", PodkladMapy))
         'zapisywane jako "numeracja_" (dawny plik domyślny zawierał "numeracja")
         Numeracja = u.Tekst("numeracja_", u.Tekst("numeracja", Numeracja))
         IloscProbPobrania = u.Calkowita("iloscProbPobrania", IloscProbPobrania)
@@ -286,7 +293,9 @@ Public Class UstawieniaProgramu
         u.Ustaw("dolna", If(FolderWarstwy1 = "", FolderDownload & "dolna\", FolderWarstwy1))
         u.Ustaw("gorna", If(FolderWarstwy2 = "", FolderDownload & "gorna\", FolderWarstwy2))
         u.Ustaw("polaczone", If(FolderWynikowy = "", FolderDownload & "polaczone\", FolderWynikowy))
-        u.Ustaw("XYswitched", ZamienXY)
+        'wpis zostaje (zawsze wyłączony), żeby starsze wersje programu nie włączały zamiany z dawnej wartości
+        u.Ustaw("XYswitched", False)
+        u.Ustaw("podklad_mapy", PodkladMapy)
         u.Ustaw("numeracja_", Numeracja)
         u.Ustaw("iloscProbPobrania", IloscProbPobrania)
         u.Ustaw("przerwaMiedzyProbami", PrzerwaMiedzyProbami)
@@ -331,7 +340,6 @@ Public Class UstawieniaProgramu
         Prefiks = "_"
         Format = "jpeg"
         Przezroczystosc = False
-        PobierajPowyzejOstatniego = False
         EdycjaXY = False
         KursorWgs84 = False
         ZaznaczenieWgs84 = False
@@ -353,7 +361,7 @@ Public Class UstawieniaProgramu
         TrekBuddy = False
         StylNazwyTrekBuddy = 0
         BokSegmentuPrzedTrekBuddy = ""
-        ZamienXY = False
+        PodkladMapy = "osm"
         'układ bieżącej sesji zmienia okno ustawień (Form1.PrzelaczUklad) - z przeliczeniem wpisanego zasięgu
         UkladDomyslny = UkladWspolrzednych.PL1992
         SrodekMapySzerokosc = "52.3"

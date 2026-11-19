@@ -91,8 +91,9 @@ Wybrane segmenty **wraz z ich plikami georeferencyjnymi** (`.map`, `.kml`, `.tab
 zostają przeniesione do **Kosza** systemu Windows (pomyłkę można więc cofnąć).
 
 {: .informacja }
-Jeżeli później wznowisz pobieranie w tym samym folderze, włącz w *Ustawieniach* opcję *pobieraj tylko segmenty o numerze
-wyższym niż ostatni pobrany*, inaczej program pobierze usunięte segmenty od nowa.
+Program zapisuje nazwy usuniętych segmentów w pliku `usuniete_puste_segmenty.txt` w folderze sesji. Jeżeli później
+wznowisz pobieranie w tym folderze, program ich nie pobierze; pobierze tylko segmenty brakujące z innego powodu.
+Usunięte segmenty pobiera ponownie dopiero odświeżanie mapy (menu *Sesja pobierania*).
 
 ---
 

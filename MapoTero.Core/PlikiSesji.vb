@@ -182,6 +182,11 @@ Public Class KonfiguracjaSesji
     ''' wszystkie warstwy w trybie zwykłym).
     ''' </summary>
     Public Property TrybyMieszaniaWarstw As String = ""
+    ''' <summary>
+    ''' Tryb TrekBuddy / Locus Map (segmenty nazwane wg położenia w pikselach, paczka .tar). Nowe pole na końcu pliku;
+    ''' brak w starszych plikach - tryb wyłączony.
+    ''' </summary>
+    Public Property TrekBuddy As Boolean
 
     Public Sub New()
         For i = 0 To 11
@@ -223,6 +228,7 @@ Public Class KonfiguracjaSesji
         If Not r.KoniecPliku Then c.AdresyWarstw = r.Nastepne()
         If Not r.KoniecPliku Then c.ZbioryWarstw = r.Nastepne()
         If Not r.KoniecPliku Then c.TrybyMieszaniaWarstw = r.Nastepne()
+        If Not r.KoniecPliku Then c.TrekBuddy = r.NastepnyLogiczny()
         Return c
     End Function
 
@@ -255,6 +261,7 @@ Public Class KonfiguracjaSesji
         w.Tekst(AdresyWarstw)
         w.Tekst(ZbioryWarstw)
         w.Tekst(TrybyMieszaniaWarstw)
+        w.Logiczny(TrekBuddy)
         Return w.ToString()
     End Function
 
@@ -555,6 +562,47 @@ Public Class PlikUstawien
 
     Public Sub Zapisz(sciezka As String, kodowanie As Encoding)
         File.WriteAllText(sciezka, DoTekstu(), kodowanie)
+    End Sub
+
+End Class
+
+''' <summary>
+''' Segmenty usunięte narzędziem „Usuwanie pustych segmentów”, zapisane w folderze sesji (plik usuniete_puste_segmenty.txt,
+''' nazwy plików bez rozszerzenia, po jednej w wierszu). Wznowione pobieranie je pomija - zastępuje to dawną opcję
+''' „pobieraj tylko segmenty o numerze wyższym niż ostatni”, która pomijała też luki po segmentach niepobranych z powodu błędu.
+''' </summary>
+Public NotInheritable Class UsunietePusteSegmenty
+
+    Public Const NazwaPliku As String = "usuniete_puste_segmenty.txt"
+
+    Private Sub New()
+    End Sub
+
+    ''' <summary>Nazwy usuniętych segmentów (bez rozszerzenia, bez względu na wielkość liter); brak pliku - pusty zbiór.</summary>
+    Public Shared Function Wczytaj(folder As String) As HashSet(Of String)
+        Dim wynik As New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
+        If String.IsNullOrEmpty(folder) Then Return wynik
+        Dim plik As String = Path.Combine(folder, NazwaPliku)
+        If Not File.Exists(plik) Then Return wynik
+        For Each wiersz In File.ReadAllLines(plik, Encoding.UTF8)
+            Dim nazwa As String = wiersz.Trim()
+            If nazwa <> "" Then wynik.Add(nazwa)
+        Next
+        Return wynik
+    End Function
+
+    ''' <summary>Dopisuje nazwy segmentów (ścieżki lub nazwy plików - rozszerzenie i folder są pomijane) do listy w folderze.</summary>
+    Public Shared Sub Dopisz(folder As String, segmenty As IEnumerable(Of String))
+        Dim wszystkie = Wczytaj(folder)
+        Dim przed As Integer = wszystkie.Count
+        For Each s In segmenty
+            Dim nazwa As String = Path.GetFileNameWithoutExtension(s)
+            If Not String.IsNullOrWhiteSpace(nazwa) Then wszystkie.Add(nazwa)
+        Next
+        If wszystkie.Count = przed Then Exit Sub
+        Dim lista = wszystkie.ToList()
+        lista.Sort(StringComparer.OrdinalIgnoreCase)
+        File.WriteAllLines(Path.Combine(folder, NazwaPliku), lista, New UTF8Encoding(False))
     End Sub
 
 End Class

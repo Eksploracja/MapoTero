@@ -264,8 +264,33 @@ Public Class Form1
         For Each c As Control In New Control() {txtXDol, txtYLewy, txtXGora, txtYPrawy, lblOpisXDol, lblOpisYLewy, lblOpisXGora, lblOpisYPrawy}
             c.Enabled = wlaczona
         Next
+        _ustawianieEdycjiXY = True
+        chkEdycjaXY.Checked = wlaczona
+        _ustawianieEdycjiXY = False
         'przy wpisywaniu z klawiatury narożniki siatki są zwykłymi pinezkami, inaczej - uchwytami zmiany zasięgu
         If _siatkaWidoczna Then OdswiezSiatke()
+    End Sub
+
+    ''' <summary>Blokuje reakcję pola edycji XY na zaznaczenie ustawiane w kodzie (UstawEdycjeXY).</summary>
+    Private _ustawianieEdycjiXY As Boolean
+
+    ''' <summary>
+    ''' Pole przy współrzędnych XY w schemacie siatki: wpisywanie zasięgu z klawiatury (dawniej opcja w oknie Ustawienia -
+    ''' przełącza się ją przy samych polach, a nie w osobnym oknie). Stan zapamiętywany w lastsettings.txt.
+    ''' </summary>
+    Private Sub chkEdycjaXY_CheckedChanged(sender As Object, e As EventArgs) Handles chkEdycjaXY.CheckedChanged
+        If _ustawianieEdycjiXY Then Exit Sub
+        Dim wlaczona As Boolean = chkEdycjaXY.Checked
+        If wlaczona = Ustawienia.EdycjaXY Then Exit Sub
+        If _przeciaganyUchwyt IsNot Nothing Then ZakonczPrzeciaganie(anuluj:=True)
+        Ustawienia.EdycjaXY = wlaczona
+        UstawEdycjeXY(wlaczona)
+        If wlaczona Then
+            Komunikat("Wpisz współrzędne XY zasięgu pobierania w pola schematu siatki. Zaznaczanie obszaru prawym przyciskiem " &
+                      "myszy i uchwyty na mapie są wyłączone, dopóki pole przy współrzędnych jest zaznaczone.", Color.Green)
+        Else
+            Komunikat("Zaznacz na mapie prawym przyciskiem myszy obszar do pobrania.", Color.Green)
+        End If
     End Sub
 
     ''' <summary>Pokazuje lub ukrywa współrzędne WGS84 zaznaczenia.</summary>
@@ -398,6 +423,7 @@ Public Class Form1
         UstawWidokZaznaczeniaWgs(Ustawienia.ZaznaczenieWgs84)
         UstawEdycjeXY(Ustawienia.EdycjaXY)
         UstawSzerokoscPanelu(Ustawienia.SzerokoscPanelu)
+        UstawPodkladMapy(Ustawienia.PodkladMapy)
 
         'drzewo zbiorów map - warstwy wczytane z conf.txt zostają (każda pamięta swój serwer, więc zbiór sesji na liście
         'ich nie czyści; dawniej po ponownym uruchomieniu warstwy sesji znikały i trzeba je było wybrać od nowa)
@@ -678,7 +704,10 @@ Public Class Form1
         Ustawienia.Prefiks = c.Prefiks
         Ustawienia.Przezroczystosc = c.Przezroczystosc
         _dataPobrania = c.DataPobrania
-        Ustawienia.PobierajPowyzejOstatniego = c.PobierajPowyzejOstatniego
+        'tryb TrekBuddy jest parametrem sesji (nazwy segmentów, paczka .tar) - dawniej niezapisywany, więc po ponownym
+        'uruchomieniu wznowione pobieranie sesji TrekBuddy zapisywało w niej zwykłe segmenty; bok segmentu jest w conf.txt
+        Ustawienia.TrekBuddy = c.TrekBuddy
+        Ustawienia.BokSegmentuPrzedTrekBuddy = ""
         If c.Numeracja <> "" Then Ustawienia.Numeracja = c.Numeracja
         _numeracjaSesji = c.Numeracja
         lblSrodekSzer.Text = c.SrodekMapySzerokosc
@@ -752,7 +781,7 @@ Public Class Form1
             .XDol = txtXDol.Text, .YLewy = txtYLewy.Text, .XGora = txtXGora.Text, .YPrawy = txtYPrawy.Text,
             .BokSegmentuPx = txtBokSegmentu.Text, .RozmiarPiksela = txtRozmiarPiksela.Text,
             .LiczbaWarstw = _zestaw.Liczba, .KrycieWarstw = _zestaw.TekstKrycia(), .Format = Ustawienia.Format, .Prefiks = Ustawienia.Prefiks,
-            .PobierajPowyzejOstatniego = Ustawienia.PobierajPowyzejOstatniego,
+            .TrekBuddy = Ustawienia.TrekBuddy,
             .SrodekMapySzerokosc = lblSrodekSzer.Text.Replace(","c, "."c), .SrodekMapyDlugosc = lblSrodekDlug.Text.Replace(","c, "."c),
             .SkalaMapy = lblZoom.Text.Replace(","c, "."c), .Numeracja = Ustawienia.Numeracja, .UkladEpsg = Ustawienia.Uklad.Epsg,
             .Przezroczystosc = EfektywnaPrzezroczystosc(), .DataPobrania = _dataPobrania,
@@ -1408,7 +1437,8 @@ Public Class Form1
         Dim opisPiksela As String = DobierzRozmiarPiksela(bylaPusta)
         Dim infoWstawienia As String = If(indeksNowej < _zestaw.Liczba - 1, " (umieszczono pod nakładką)", "")
         Dim ostrzezenieFormat As String = If(_zestaw.CzySameNakladki() AndAlso Not Wms.CzyFormatZPrzezroczystoscia(Ustawienia.Format),
-                                             " Uwaga: wybrano same nakładki, a format pobierania to ." & Ustawienia.Format & " (bez przezroczystości).", "")
+                                             " Uwaga: wybrano same nakładki, a format pobierania to ." & Ustawienia.Format & " (bez przezroczystości). " &
+                                             "Zmień go w oknie Ustawienia - kliknij format na pasku stanu u dołu okna.", "")
         Komunikat("Wskazano warstwę: " & w.Nazwa & infoWstawienia & "." & If(opisPiksela <> "", " " & opisPiksela, "") & ostrzezenieFormat, Color.Green)
     End Sub
 
@@ -2102,7 +2132,7 @@ Public Class Form1
         Return New ZadaniePobierania With {
             .Uklad = Ustawienia.Uklad, .Siatka = If(siatka.Poprawna, siatka, Nothing),
             .Zbiory = _zestaw.Zbiory(), .ZrodlaMap = ZrodlaMapSesji(),
-            .Format = Ustawienia.Format, .ZamienOsie = Ustawienia.ZamienXY, .LimitCzasuSekundy = Ustawienia.LimitCzasuSekundy,
+            .Format = Ustawienia.Format, .LimitCzasuSekundy = Ustawienia.LimitCzasuSekundy,
             .IloscProb = Math.Max(1, Ustawienia.IloscProbPobrania), .JakoscJpegWmts = Ustawienia.JakoscJpegWmts,
             .Przezroczystosc = EfektywnaPrzezroczystosc(),
             .Folder = Path.Combine(Path.GetTempPath(), "MapoTero_podglad") & "\"}
@@ -2229,11 +2259,10 @@ Public Class Form1
             .AdresSerwera = _zestaw(0).Adres, .Warstwy = _zestaw.Nazwy(), .Krycia = _zestaw.Krycia(), .Adresy = _zestaw.Adresy(),
             .Zbiory = _zestaw.Zbiory(), .ZrodlaMap = zrodlaSesji, .Uklad = Ustawienia.Uklad,
             .Siatka = siatka, .Format = Ustawienia.Format, .Prefiks = Ustawienia.Prefiks,
-            .Numeracja = Siatka.StylZTekstu(Ustawienia.Numeracja), .Folder = FolderSesji, .ZamienOsie = Ustawienia.ZamienXY,
+            .Numeracja = Siatka.StylZTekstu(Ustawienia.Numeracja), .Folder = FolderSesji,
             .IloscProb = Math.Max(1, Ustawienia.IloscProbPobrania), .PrzerwaSekundy = Ustawienia.PrzerwaMiedzyProbami,
             .LiczbaWatkow = Ustawienia.LiczbaWatkow, .LimitCzasuSekundy = Ustawienia.LimitCzasuSekundy,
             .ZachowajKafleWmts = Ustawienia.ZachowajKafleWmts, .JakoscJpegWmts = Ustawienia.JakoscJpegWmts,
-            .PobierajPowyzejOstatniego = Ustawienia.PobierajPowyzejOstatniego,
             .Georeferencja = Ustawienia.OpcjeGeoreferencji(), .TrekBuddy = Ustawienia.TrekBuddy, .NazwaTrekBuddy = Ustawienia.NazwaTrekBuddy,
             .Przezroczystosc = EfektywnaPrzezroczystosc(), .Korytarz = _korytarz, .Odswiez = odswiez}
 
@@ -2245,6 +2274,7 @@ Public Class Form1
         _btnNowaSesja.Enabled = False
         OdswiezToolStripMenuItem.Enabled = False
         KorytarzToolStripMenuItem.Enabled = False
+        chkEdycjaXY.Enabled = False
         Komunikat(If(odswiez, "Trwa odświeżanie segmentów (", "Trwa pobieranie segmentów (") & liczbaSegmentow & ")", Color.Black)
 
         'własna kopia - zwalniane jest zawsze źródło tego pobierania, nawet gdyby pole wskazywało już inne
@@ -2267,6 +2297,7 @@ Public Class Form1
             _btnNowaSesja.Enabled = True
             OdswiezToolStripMenuItem.Enabled = True
             KorytarzToolStripMenuItem.Enabled = True
+            chkEdycjaXY.Enabled = True
             stPostep.Value = 0
             stSegment.Text = ""
             OdswiezPrzyciskiWarstw()
@@ -2294,6 +2325,7 @@ Public Class Form1
         btnScalanie.Enabled = File.Exists(zadanie.Folder & "error.txt") = False
     End Sub
 
+
     Private Sub PokazPostep(p As PostepPobierania)
         If p.Komunikat <> "" Then Komunikat(p.Komunikat, Color.Black)
         If p.Wszystkie > 0 Then stPostep.Value = Math.Min(100, CInt(p.Pobrane * 100L \ p.Wszystkie))
@@ -2320,18 +2352,30 @@ Public Class Form1
     'zdarzenie CheckedChanged zachodzi także przy ODZNACZANIU przycisku - reaguje tylko zaznaczony
     Private Sub rbOsm_CheckedChanged(sender As Object, e As EventArgs) Handles rbOsm.CheckedChanged
         If rbOsm.Checked = False Then Exit Sub
+        Ustawienia.PodkladMapy = "osm"
         GMapProvider.UserAgent = Program.UserAgentProgramu
         ZmienPodkladMapy(GMapProviders.OpenStreetMap)
     End Sub
 
     Private Sub rbGoogle_CheckedChanged(sender As Object, e As EventArgs) Handles rbGoogle.CheckedChanged
         If rbGoogle.Checked = False Then Exit Sub
+        Ustawienia.PodkladMapy = "google"
         ZmienPodkladMapy(GMapProviders.GoogleMap)
     End Sub
 
     Private Sub rbBing_CheckedChanged(sender As Object, e As EventArgs) Handles rbBing.CheckedChanged
         If rbBing.Checked = False Then Exit Sub
+        Ustawienia.PodkladMapy = "bing"
         ZmienPodkladMapy(GMapProviders.BingSatelliteMap)
+    End Sub
+
+    ''' <summary>Zaznacza podkład mapy zapamiętany w lastsettings.txt (zaznaczenie wywołuje zmianę podkładu).</summary>
+    Private Sub UstawPodkladMapy(podklad As String)
+        Select Case UstawieniaProgramu.NormalizujPodklad(podklad)
+            Case "google" : rbGoogle.Checked = True
+            Case "bing" : rbBing.Checked = True
+            Case Else : rbOsm.Checked = True
+        End Select
     End Sub
 
     ''' <summary>Po zmianie podkładu mapy kafle wczytywane są ponownie, gdy skończy się wczytywanie kafli w toku.</summary>
@@ -3123,9 +3167,13 @@ Public Class Form1
         FormZaawansowanyMbtiles.ShowDialog()
     End Sub
 
-    Private Sub UstawieniaToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles UstawieniaToolStripMenuItem.Click
-        'okno ustawień zmienia parametry sesji (przedrostek, format, numeracja, bok segmentu TrekBuddy)
-        If PobieranieTrwa("Zmiana ustawień") Then Exit Sub
+    ''' <summary>
+    ''' Okno Ustawienia - z menu Ustawienia i po kliknięciu formatu na pasku stanu (bez osobnej pozycji w menu Sesja pobierania,
+    ''' bo otwierałaby to samo okno pod inną nazwą).
+    ''' W trakcie pobierania okno pozwala zmienić tylko widok współrzędnych i układ domyślny (Form2.WypelnijKontrolki).
+    ''' </summary>
+    Private Sub UstawieniaToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles UstawieniaToolStripMenuItem.Click, stFormat.Click
+        Form2.TrwaPobieranie = _przerwanie IsNot Nothing
         Form2.ShowDialog()
     End Sub
 
@@ -3292,7 +3340,9 @@ Public Class Form1
             End Try
         End If
         If Ustawienia.Format = "" Then Ustawienia.Format = "jpeg"
-        Ustawienia.PobierajPowyzejOstatniego = False
+        'nowa sesja ma domyślny bok segmentu (niżej), więc nie może zostać w trybie TrekBuddy (segmenty 512 px)
+        Ustawienia.TrekBuddy = False
+        Ustawienia.BokSegmentuPrzedTrekBuddy = ""
         stFormat.Text = "." & Ustawienia.Format
         FolderSesji = FolderDownload
         _numeracjaSesji = ""

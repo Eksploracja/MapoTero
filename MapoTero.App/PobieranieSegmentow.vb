@@ -50,7 +50,6 @@ Public Class ZadaniePobierania
     Public Property ZachowajKafleWmts As Boolean
     ''' <summary>WMTS: jakość JPEG segmentów składanych z kafli.</summary>
     Public Property JakoscJpegWmts As Integer = 90
-    Public Property PobierajPowyzejOstatniego As Boolean
     Public Property Georeferencja As New OpcjeGeoreferencji()
     Public Property TrekBuddy As Boolean
     ''' <summary>Dopisek do nazwy paczki TrekBuddy / Locus Map.</summary>
@@ -288,12 +287,17 @@ Public NotInheritable Class PobieranieSegmentow
         UsunPlikiTymczasowe(folderDocelowy, z.Prefiks & "*." & ext & "*.tmp")
         ZapiszKoordynaty(z, segmenty, nazwa, adres)
 
-        'brakujące segmenty są zawsze pobierane (istniejące pliki pomijane); opcja "powyżej ostatniego" pomija też luki
-        'przed ostatnim pobranym segmentem (dawniej filtrowała tylko istniejące pliki, więc nic nie zmieniała)
+        'brakujące segmenty są zawsze pobierane, istniejące pliki pomijane - wznowienie i uzupełnienie sesji nie wymaga opcji;
+        'dawna opcja „pobieraj tylko powyżej ostatniego” (z czasów, gdy program pobierał wszystko od nowa) pomijała luki
+        'przed ostatnim segmentem, więc zostawiała dziury - usunięta, pole w conf.txt zostaje dla zgodności.
+        'Pomijane są tylko segmenty usunięte jako puste (lista w folderze sesji); odświeżanie mapy pobiera wszystkie
         Dim doPobrania As List(Of OpisSegmentu) = segmenty
-        If z.PobierajPowyzejOstatniego AndAlso Not z.TrekBuddy AndAlso Not z.Odswiez Then
-            Dim ostatni As Integer = segmenty.FindLastIndex(Function(sg) File.Exists(Path.Combine(folderDocelowy, nazwa(sg) & "." & ext)))
-            If ostatni >= 0 Then doPobrania = segmenty.GetRange(ostatni + 1, segmenty.Count - ostatni - 1)
+        If Not z.Odswiez Then
+            Dim usuniete = UsunietePusteSegmenty.Wczytaj(folderDocelowy)
+            If usuniete.Count > 0 Then
+                doPobrania = segmenty.Where(Function(sg) Not usuniete.Contains(nazwa(sg))).ToList()
+                wynik.Wszystkie = doPobrania.Count
+            End If
         End If
 
         Dim plikBledow As String = Path.Combine(z.Folder, "error.txt")
