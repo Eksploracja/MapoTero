@@ -61,7 +61,7 @@ Public Class WarstwaWielowarstwowa
     Public ReadOnly Property ZasiegWgs84 As ProstokatGeo
         Get
             If Siatka Is Nothing OrElse Not Siatka.Poprawna Then Return New ProstokatGeo()
-            Return ProstokatGeo.Opisany(Uklad, Siatka.ZasiegSiatki)
+            Return ProstokatGeo.Opisany(Uklad, If(Zrodlo IsNot Nothing, Zrodlo.ZasiegMapy, Siatka.ZasiegSiatki))
         End Get
     End Property
 
@@ -521,6 +521,7 @@ Public NotInheritable Class KompilatorMbtiles
         Next
         lacznieKafli = Math.Max(1, lacznieKafli)
         Dim przetworzoneKafle As Long = 0
+        Dim zapisaneKafle As Long = 0
 
         ' Utworzenie bazy MBTiles - wspólny zapis z eksportem mapy (dawniej własna kopia poleceń SQL)
         Dim opisMapy As New OpisMbtiles With {.Nazwa = opcje.NazwaMapy, .Opis = opcje.OpisMapy, .Atrybucja = opcje.Atrybucja,
@@ -558,7 +559,7 @@ Public NotInheritable Class KompilatorMbtiles
                 ' Sprawdzenie, czy ten poziom można wygenerować szybką piramidą 2x z poziomu poziom+1
                 ' (Możliwe tylko wtedy, gdy poziom+1 istnieje w bazy i ma ten sam zestaw warstw!)
                 Dim moznaPiramida As Boolean = False
-                If opcje.SzybkaPiramidaWPasmach AndAlso poziom < maxZ Then
+                If opcje.SzybkaPiramidaWPasmach AndAlso poziom < maxZ AndAlso Not warstwyEksportu.Any(Function(w) w.Zrodlo.PrzytnijDoObszaru) Then
                     Dim warstwyWyzej = WarstwyDlaPoziomu(warstwy, poziom + 1)
                     ' Porównanie zestawu warstw
                     If warstwyWyzej.Count = aktywne.Count AndAlso
@@ -632,6 +633,7 @@ Public NotInheritable Class KompilatorMbtiles
                         Dim dane = daneKafli(i)
                         If dane IsNot Nothing Then
                             magazyn.Zapisz(kaflePoziomu(biezacyOffset + i), dane)
+                            zapisaneKafle += 1
                         End If
                     Next
 
@@ -659,6 +661,9 @@ Public NotInheritable Class KompilatorMbtiles
             End If
 
             ' Zamknięcie w trybie DELETE (zgodność z Androidem i kartami microSD)
+            If zapisaneKafle = 0 AndAlso warstwy.Any(Function(w) w.Zrodlo IsNot Nothing AndAlso w.Zrodlo.PrzytnijDoObszaru) Then
+                Throw New InvalidOperationException("Brak obrazu mapy w wybranym obszarze.")
+            End If
             magazyn.ZakonczZapis()
         End Using
 

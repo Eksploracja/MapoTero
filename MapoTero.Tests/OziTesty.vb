@@ -127,6 +127,7 @@ Public Class OziTesty
     End Sub
 
     <Fact>
+    <Trait("Kategoria", "Siec")>
     Public Async Function KonwertujPobranaMapeOziDoKmzIJnxAsync() As Task
         Dim folderTestu = Path.Combine(Path.GetTempPath(), "MapoTero_OziTest_" & Guid.NewGuid().ToString("N"))
         Directory.CreateDirectory(folderTestu)

@@ -63,6 +63,74 @@ Public Class EksportTesty
         Return New ZrodloSegmentow(folder, "_", StylNumeracji.WierszKolumna, rozszerzenie, Siatka2x2())
     End Function
 
+    <Fact>
+    Public Sub EksportKreatora_PrzerwanyZapisZostawiaPoprzedniPlik()
+        Dim folder = NowyFolder()
+        Try
+            Dim plik = Path.Combine(folder, "mapa.mbtiles")
+            File.WriteAllText(plik, "poprzednia mapa")
+            Dim z = Zadanie(RodzajEksportu.MBTiles, Zrodlo(folder, "png"), plik)
+            Assert.ThrowsAny(Of OperationCanceledException)(
+                Sub() EksportMapy.EksportujBezpiecznie(z, Nothing, New CancellationToken(True)))
+            Assert.Equal("poprzednia mapa", File.ReadAllText(plik))
+            Assert.Equal(plik, z.Plik)
+            Assert.Empty(Directory.GetDirectories(folder))
+        Finally
+            Usun(folder)
+        End Try
+    End Sub
+
+    <Fact>
+    Public Sub WymianaPlikow_CofaPodmianeGdyDrugiPlikNieMozeZostacZapisany()
+        Dim folder = NowyFolder()
+        Try
+            Dim roboczy = Directory.CreateDirectory(Path.Combine(folder, "roboczy")).FullName
+            File.WriteAllText(Path.Combine(folder, "mapa.tif"), "poprzednia mapa")
+            Directory.CreateDirectory(Path.Combine(folder, "mapa.tfw"))
+            Dim nowe = {Path.Combine(roboczy, "mapa.tif"), Path.Combine(roboczy, "mapa.tfw")}
+            For Each plik In nowe
+                File.WriteAllText(plik, "nowy plik")
+            Next
+            Assert.ThrowsAny(Of IOException)(Sub() WymianaPlikowMapy.Zatwierdz(nowe, folder, Path.Combine(roboczy, "kopie")))
+            Assert.Equal("poprzednia mapa", File.ReadAllText(Path.Combine(folder, "mapa.tif")))
+        Finally
+            Usun(folder)
+        End Try
+    End Sub
+
+    <Fact>
+    Public Sub EksportKreatora_MaskaKorytarzaJestWidocznaWGotowychKaflach()
+        Dim folder = NowyFolder()
+        Try
+            UtworzSegmenty(folder, "png", Sub(g, w, k) g.Clear(Color.Red))
+            Dim siatka = Siatka2x2()
+            Dim u = UkladWspolrzednych.PL1992
+            Dim naTrasie As New PunktXY(487200, 637250)
+            Dim pozaTrasa As New PunktXY(487275, 637250)
+            Dim trasa As New Korytarz With {.SzerokoscMetry = 30}
+            trasa.DodajLinie({u.DoWgs84(487200, 637100), u.DoWgs84(487200, 637400)})
+            Dim zr As New ZrodloSegmentow(folder, "_", StylNumeracji.WierszKolumna, "png", siatka,
+                                          przytnijDoObszaru:=True, maska:=trasa.UtworzMaske(siatka.Obszar, u))
+            Dim z = Zadanie(RodzajEksportu.MBTiles, zr, folder & "korytarz.mbtiles")
+            z.KaflePng = True
+            Dim wyniki = EksportMapy.EksportujBezpiecznie(z, Nothing, CancellationToken.None)
+            Assert.Equal(z.Plik, Assert.Single(wyniki))
+            Using pol = Polacz(z.Plik)
+                For Each punkt In {naTrasie, pozaTrasa}
+                    Dim p = PikselKafla(punkt, 16)
+                    Dim dane = TryCast(Zapytanie(pol, $"SELECT tile_data FROM tiles WHERE zoom_level=16 AND tile_column={p.Item1} AND tile_row={(1 << 16) - 1 - p.Item2}"), Byte())
+                    If punkt.Equals(naTrasie) Then Assert.NotNull(dane)
+                    If dane Is Nothing Then Continue For
+                    Using bmp = Obraz(dane)
+                        Assert.Equal(punkt.Equals(naTrasie), bmp.GetPixel(p.Item3, p.Item4).A > 0)
+                    End Using
+                Next
+            End Using
+        Finally
+            Usun(folder)
+        End Try
+    End Sub
+
     Private Shared Function Zadanie(rodzaj As RodzajEksportu, zrodlo As ZrodloSegmentow, plik As String) As ZadanieEksportu
         Dim m As New MetadaneMapy With {.Tytul = "Test warstwa", .DataPobrania = New Date(2026, 10, 19)}
         m.Warstwy.Add("Test warstwa")

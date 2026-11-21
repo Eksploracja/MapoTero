@@ -1,4 +1,4 @@
-'Copyright (C) <2026>  MapoTero
+﻿'Copyright (C) <2026>  MapoTero
 '
 'This program is free software: you can redistribute it and/or modify
 'it under the terms of the GNU General Public License as published by
@@ -50,6 +50,8 @@ Public Class WynikGeokodowania
                 Case "peak" : Return "szczyt górski"
                 Case "water", "lake" : Return "jezioro / woda"
                 Case "forest" : Return "las"
+                Case "wspolrzedne" : Return "współrzędne"
+                Case "dzialka" : Return "działka ewidencyjna"
                 Case Else
                     Select Case Kategoria.ToLowerInvariant()
                         Case "place" : Return "miejsce"

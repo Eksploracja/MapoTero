@@ -1,4 +1,4 @@
-'Copyright (C) <2015-2026> pajakt, Kazimierz Niecikowski
+﻿'Copyright (C) <2015-2026> pajakt, Kazimierz Niecikowski
 'This program is free software: you can redistribute it and/or modify
 'it under the terms of the GNU General Public License as published by
 'the Free Software Foundation, either version 3 of the License, or
@@ -92,9 +92,7 @@ Public Class FormPasekZaznaczania
         desiredX = Math.Max(ekran.WorkingArea.Left + 10, Math.Min(desiredX, ekran.WorkingArea.Right - Me.Width - 10))
         desiredY = Math.Max(ekran.WorkingArea.Top + 10, Math.Min(desiredY, ekran.WorkingArea.Bottom - Me.Height - 10))
         Me.Location = New Point(desiredX, desiredY)
-            If Me.Owner.WindowState = FormWindowState.Minimized Then
-                Me.Owner.WindowState = FormWindowState.Normal
-            End If
+            FormKreatorMapy.PrzywrocZMinimalizacji(Me.Owner)
             Me.Owner.Activate()
             Me.Owner.BringToFront()
         Else

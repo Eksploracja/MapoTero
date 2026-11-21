@@ -438,9 +438,48 @@ Public Class Korytarz
     Public Function Segmenty(siatka As Siatka, uklad As UkladWspolrzednych, Optional szerokoscM As Double = -1) As HashSet(Of Integer)
         Dim wynik As New HashSet(Of Integer)
         If siatka Is Nothing OrElse Not siatka.Poprawna OrElse siatka.ZbytDuza OrElse Not Poprawny Then Return wynik
+        OdwiedzPolaKorytarza(siatka, UtworzRzutowanie(uklad), Math.Max(0, If(szerokoscM >= 0, szerokoscM, SzerokoscMetry)),
+                             AddressOf wynik.Contains, Sub(klucz, a, b) wynik.Add(klucz))
+        Return wynik
+    End Function
+
+    ''' <summary>Maska pikseli pasa trasy. Każdy punkt sprawdza tylko odcinki mogące przecinać jego pole indeksu.</summary>
+    Public Function UtworzMaske(obszar As Zasieg, uklad As UkladWspolrzednych) As Func(Of Double, Double, Boolean)
+        If Not Poprawny OrElse Not obszar.Poprawny Then Throw New ArgumentException("Niepoprawny obszar korytarza.")
         Dim r = UtworzRzutowanie(uklad)
+        Dim d = SzerokoscMetry
+        Dim bok = Math.Max(Math.Max(64.0, 2 * d) / Math.Max(r.SkalaX, r.SkalaY), Math.Max(obszar.Szerokosc, obszar.Wysokosc) / 40000)
+        Dim siatka As New Siatka(obszar, bok, 1)
+        Dim indeksOdcinkow As New Dictionary(Of Integer, List(Of (A As PunktXY, B As PunktXY)))
+        OdwiedzPolaKorytarza(siatka, r, d, Function(klucz) False,
+            Sub(klucz, a, b)
+                Dim lista As List(Of (PunktXY, PunktXY)) = Nothing
+                If Not indeksOdcinkow.TryGetValue(klucz, lista) Then
+                    lista = New List(Of (PunktXY, PunktXY))
+                    indeksOdcinkow.Add(klucz, lista)
+                End If
+                lista.Add((a, b))
+            End Sub)
+        Dim gora = siatka.ZasiegSiatki.XGora
+        Dim lewe = obszar.YLewy
+        Dim kolumny = siatka.LiczbaKolumn, wiersze = siatka.LiczbaWierszy
+        Return Function(x, y)
+                   If x < obszar.XDol OrElse x > obszar.XGora OrElse y < lewe OrElse y > obszar.YPrawy Then Return False
+                   Dim w = Indeks((gora - x) / bok, wiersze)
+                   Dim k = Indeks((y - lewe) / bok, kolumny)
+                   Dim odcinki As List(Of (PunktXY, PunktXY)) = Nothing
+                   If Not indeksOdcinkow.TryGetValue((w - 1) * kolumny + k - 1, odcinki) Then Return False
+                   Dim p As New PunktXY(x * r.SkalaX, y * r.SkalaY)
+                   For Each odcinek In odcinki
+                       If OdlegloscPunktuOdOdcinka(p, odcinek.Item1, odcinek.Item2) <= d Then Return True
+                   Next
+                   Return False
+               End Function
+    End Function
+
+    Private Sub OdwiedzPolaKorytarza(siatka As Siatka, r As Rzutowanie, d As Double,
+                                           pomin As Func(Of Integer, Boolean), dodaj As Action(Of Integer, PunktXY, PunktXY))
         Dim kolumny As Integer = siatka.LiczbaKolumn, wiersze As Integer = siatka.LiczbaWierszy
-        Dim d As Double = Math.Max(0, If(szerokoscM >= 0, szerokoscM, SzerokoscMetry))
 
         'siatka w metrach: lewy dolny narożnik i boki segmentu
         Dim x0 As Double = siatka.Obszar.XDol * r.SkalaX, y0 As Double = siatka.Obszar.YLewy * r.SkalaY
@@ -469,15 +508,14 @@ Public Class Korytarz
                     Dim k1 As Integer = Indeks((yMax + d - y0) / bokY, kolumny)
                     For k = k0 To k1
                         Dim klucz As Integer = (w - 1) * kolumny + (k - 1)
-                        If wynik.Contains(klucz) Then Continue For
+                        If pomin(klucz) Then Continue For
                         Dim yl As Double = y0 + (k - 1) * bokY
-                        If OdlegloscOdcinkaOdProstokata(a, b, xd, yl, xd + bokX, yl + bokY) <= d Then wynik.Add(klucz)
+                        If OdlegloscOdcinkaOdProstokata(a, b, xd, yl, xd + bokX, yl + bokY) <= d Then dodaj(klucz, a, b)
                     Next
                 Next
             Next
         Next
-        Return wynik
-    End Function
+    End Sub
 
     ''' <summary>
     ''' Punkt próbki podglądu warstw: środek pobieranego segmentu korytarza najbliższego środkowi siatki. Środek

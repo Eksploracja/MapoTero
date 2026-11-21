@@ -178,6 +178,46 @@ Public Class ZestawWarstw
         Return _warstwy.Any(Function(w) w.TaSama(adres, nazwa))
     End Function
 
+    Public Function TaSamaKompozycja(inny As ZestawWarstw) As Boolean
+        If inny Is Nothing OrElse Liczba <> inny.Liczba Then Return False
+        For i = 0 To Liczba - 1
+            If Not KluczWarstwy(Me(i)).Equals(KluczWarstwy(inny(i))) Then Return False
+        Next
+        Return True
+    End Function
+
+    Private Shared Function KluczWarstwy(w As WarstwaWybrana) As (String, String, String)
+        Return (w.Zbior, w.Adres, w.Nazwa)
+    End Function
+
+    ''' <summary>Zmiany wyglądu warstw współdzielonych przez stopnie skali, z zachowaniem ich domyślnego krycia.</summary>
+    Public NotInheritable Class ZmianyWygladu
+        Private ReadOnly _krycie As New Dictionary(Of (String, String, String), Integer)
+        Private ReadOnly _tryby As New Dictionary(Of (String, String, String), TrybMieszania)
+
+        Public Sub Zapisz(przed As ZestawWarstw, po As ZestawWarstw)
+            For i = 0 To przed.Liczba - 1
+                Dim klucz = KluczWarstwy(przed(i))
+                If przed(i).Krycie <> po(i).Krycie Then
+                    Dim delta As Integer
+                    _krycie.TryGetValue(klucz, delta)
+                    _krycie(klucz) = delta + po(i).Krycie - przed(i).Krycie
+                End If
+                If przed(i).TrybMieszania <> po(i).TrybMieszania Then _tryby(klucz) = po(i).TrybMieszania
+            Next
+        End Sub
+
+        Public Sub Zastosuj(zestaw As ZestawWarstw)
+            For Each w In zestaw.Warstwy
+                Dim klucz = KluczWarstwy(w)
+                Dim delta As Integer
+                Dim tryb As TrybMieszania
+                If _krycie.TryGetValue(klucz, delta) Then w.Krycie = Math.Clamp(w.Krycie + delta, 0, 100)
+                If _tryby.TryGetValue(klucz, tryb) Then w.TrybMieszania = tryb
+            Next
+        End Sub
+    End Class
+
     Public Function Dodaj(nazwa As String, Optional krycie As Integer = PelneKrycie, Optional adres As String = "",
                           Optional zbior As String = "", Optional zalecanyPiksel As Double = 0,
                           Optional typZrodla As TypUslugiMapowej = TypUslugiMapowej.Nieznana,

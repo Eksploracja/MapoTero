@@ -12,6 +12,7 @@ Imports Xunit
 Public Class PobierzIKompilujTest
 
     <Fact>
+    <Trait("Kategoria", "Siec")>
     Public Async Function PobierzObszarGminyIKompilujMbtilesAsync() As Task
         'folder wyników: zmienna środowiskowa MAPOTERO_FOLDER_TESTU (np. folder download programu, by obejrzeć mapę),
         'a gdy jej brak - folder tymczasowy (dawniej ścieżka wpisana na stałe, nieistniejąca na innych komputerach i w CI)

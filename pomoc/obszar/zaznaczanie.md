@@ -51,11 +51,14 @@ Oprócz ręcznego zaznaczania myszą możesz szybko zlokalizować interesujący 
 
 ### Zakładka 1: Miejscowość / Adres
 
-Korzysta z geokodera OpenStreetMap Nominatim. Pozwala znaleźć dowolne miasto, wieś, osadę, ulicę, szczyt górski lub konkretny adres:
+Korzysta z geokoderów Photon oraz OpenStreetMap Nominatim. Pozwala znaleźć dowolne miasto, wieś, osadę, ulicę, szczyt górski lub konkretny adres:
 
-1. Wpisz poszukiwaną nazwę (np. `Kraków`, `Zakopane Krupówki`, `Gdańsk Długa 1`, `Babia Góra`) i kliknij **Szukaj** (lub naciśnij <kbd>Enter</kbd>).
-2. Wybierz odpowiedni wpis z listy wyników (lista podaje pełną nazwę, typ obiektu oraz współrzędne geograficzne).
-3. Kliknij **Pokaż na mapie** (lub dwukrotnie kliknij wynik na liście).
+1. Wpisz poszukiwaną nazwę (np. `Kraków`, `Zakopane Krupówki`, `Gdańsk Długa 1`, `Babia Góra`). Program podpowiada pasujące miejscowości na żywo już w trakcie wpisywania, porządkując wyniki z uwzględnieniem odległości od aktualnego centrum mapy podglądu.
+2. Możesz także wkleić bezpośrednio współrzędne punktu:
+   * stopnie dziesiętne WGS84 (np. `50.0614, 19.9366` skopiowane z Google Maps),
+   * stopnie, minuty i sekundy (np. `50°03'41"N 19°56'12"E`),
+   * współrzędne geodezyjne X Y w układzie PL-1992 lub PL-2000 (gdzie X to północ).
+3. Wybierz odpowiedni wpis z listy wyników i kliknij **Pokaż na mapie** (lub dwukrotnie kliknij wynik na liście).
 
 Program automatycznie przesunie mapę podglądu i ustawi optymalny poziom powiększenia (dla miast i gmin dopasuje widok do całego ich obszaru).
 

@@ -38,6 +38,7 @@ Public Class ZrodloSegmentow
     Private ReadOnly _pikselX As Double
     Private ReadOnly _pikselY As Double
     Private ReadOnly _zasieg As Zasieg
+    Private ReadOnly _maska As Func(Of Double, Double, Boolean)
 
     'pliki segmentów istniejące na dysku (wiersz, kolumna od 0) - brakujące, np. poza korytarzem trasy, są przezroczyste
     Private ReadOnly _istnieje(,) As Boolean
@@ -56,7 +57,8 @@ Public Class ZrodloSegmentow
     Private _pokolenie As Integer
     Private ReadOnly _blokada As New Object()
 
-    Public Sub New(folder As String, prefiks As String, styl As StylNumeracji, rozszerzenie As String, siatka As Siatka)
+    Public Sub New(folder As String, prefiks As String, styl As StylNumeracji, rozszerzenie As String, siatka As Siatka,
+                   Optional przytnijDoObszaru As Boolean = False, Optional maska As Func(Of Double, Double, Boolean) = Nothing)
         _folder = folder
         _prefiks = prefiks
         _styl = styl
@@ -64,6 +66,9 @@ Public Class ZrodloSegmentow
         _siatka = siatka
         _bok = siatka.BokSegmentuPx
         _zasieg = siatka.ZasiegSiatki
+        _maska = maska
+        Me.PrzytnijDoObszaru = przytnijDoObszaru
+        ZasiegMapy = If(przytnijDoObszaru, siatka.Obszar, _zasieg)
         _pikselX = siatka.RozmiarPiksela
         _pikselY = siatka.RozmiarPiksela
         'ok. 256 MB na zdekodowane segmenty
@@ -79,6 +84,9 @@ Public Class ZrodloSegmentow
             Next
         Next
     End Sub
+
+    Public ReadOnly Property PrzytnijDoObszaru As Boolean
+    Public ReadOnly Property ZasiegMapy As Zasieg
 
     Public ReadOnly Property Siatka As Siatka
         Get
@@ -191,6 +199,8 @@ Public Class ZrodloSegmentow
     ''' <summary>Czy w prostokącie (w układzie segmentów) jest co najmniej jeden istniejący segment.</summary>
     Public Function MaDane(obszar As Zasieg) As Boolean
         If _liczbaIstniejacych = 0 Then Return False
+        If PrzytnijDoObszaru AndAlso (obszar.XGora <= ZasiegMapy.XDol OrElse obszar.XDol >= ZasiegMapy.XGora OrElse
+                                    obszar.YPrawy <= ZasiegMapy.YLewy OrElse obszar.YLewy >= ZasiegMapy.YPrawy) Then Return False
         Dim bok As Double = _siatka.BokSegmentu
         Dim k0 As Double = Math.Floor((obszar.YLewy - _zasieg.YLewy) / bok)
         Dim k1 As Double = Math.Floor((obszar.YPrawy - _zasieg.YLewy) / bok)
@@ -211,6 +221,9 @@ Public Class ZrodloSegmentow
     ''' krycie (0-255), a - krycie (0-255). Zwraca False poza obrazem lub w miejscu brakującego segmentu.
     ''' </summary>
     Public Function Probka(x As Double, y As Double, ByRef r As Double, ByRef g As Double, ByRef b As Double, ByRef a As Double) As Boolean
+        If PrzytnijDoObszaru AndAlso (x < ZasiegMapy.XDol OrElse x > ZasiegMapy.XGora OrElse
+                                    y < ZasiegMapy.YLewy OrElse y > ZasiegMapy.YPrawy) Then Return False
+        If _maska IsNot Nothing AndAlso Not _maska(x, y) Then Return False
         'współrzędne piksela (środki pikseli w liczbach całkowitych)
         Dim kol As Double = (y - _zasieg.YLewy) / _pikselY - 0.5
         Dim wie As Double = (_zasieg.XGora - x) / _pikselX - 0.5
@@ -412,6 +425,24 @@ Public Class ZadanieEksportu
         End Get
     End Property
 
+    ''' <summary>
+    ''' Mapa wieloskalowa (kreator, JNX): osobne źródło segmentów dla każdego zakresu poziomów. Pusta lista - wszystkie
+    ''' poziomy z <see cref="Zrodlo"/>. Poziomy bez źródła na liście nie trafiają do pliku.
+    ''' </summary>
+    Public ReadOnly Property ZrodlaPoziomow As New List(Of ZrodloPoziomow)
+
+    ''' <summary>Warstwy rysowane na poziomie powiększenia: źródło skali tego poziomu (mapa wieloskalowa) i nakładki; Nothing - poziom poza planem skal.</summary>
+    Public Function WarstwyRenderowania(poziom As Integer) As List(Of WarstwaEksportu)
+        If ZrodlaPoziomow.Count = 0 Then Return WarstwyRenderowania()
+        Dim zp = ZrodlaPoziomow.FirstOrDefault(Function(x) x.PoziomMin <= poziom AndAlso poziom <= x.PoziomMax)
+        If zp Is Nothing Then Return Nothing
+        Dim lista As New List(Of WarstwaEksportu) From {New WarstwaEksportu With {.Zrodlo = zp.Zrodlo, .Uklad = Uklad, .Krycie = 1}}
+        For Each w In Nakladki
+            If w.Zrodlo IsNot Nothing AndAlso w.Krycie > 0 Then lista.Add(w)
+        Next
+        Return lista
+    End Function
+
     ''' <summary>Warstwy w kolejności rysowania: mapa podstawowa, a na niej nakładki.</summary>
     Public Function WarstwyRenderowania() As List(Of WarstwaEksportu)
         Dim lista As New List(Of WarstwaEksportu) From {New WarstwaEksportu With {.Zrodlo = Zrodlo, .Uklad = Uklad, .Krycie = 1}}
@@ -420,6 +451,13 @@ Public Class ZadanieEksportu
         Next
         Return lista
     End Function
+End Class
+
+''' <summary>Źródło segmentów jednej skali mapy wieloskalowej i jej zakres poziomów powiększenia.</summary>
+Public Class ZrodloPoziomow
+    Public Property PoziomMin As Integer
+    Public Property PoziomMax As Integer
+    Public Property Zrodlo As ZrodloSegmentow
 End Class
 
 ''' <summary>Szacunek rozmiaru pliku eksportu (na podstawie kilku wyrenderowanych próbnych kafli).</summary>
@@ -483,12 +521,12 @@ Public NotInheritable Class EksportMapy
 
     ''' <summary>Obszar eksportu w WGS84 (prostokąt opisany na mapie podstawowej).</summary>
     Public Shared Function ObszarKafli(z As ZadanieEksportu) As ProstokatGeo
-        Return ProstokatGeo.Opisany(z.Uklad, z.Zrodlo.Siatka.ZasiegSiatki)
+        Return ProstokatGeo.Opisany(z.Uklad, z.Zrodlo.ZasiegMapy)
     End Function
 
     ''' <summary>Plan kafli KMZ dla zadania.</summary>
     Public Shared Function PlanKmz(z As ZadanieEksportu) As PlanKmz
-        Dim obszar = ProstokatGeo.Wpisany(z.Uklad, z.Zrodlo.Siatka.ZasiegSiatki)
+        Dim obszar = ProstokatGeo.Wpisany(z.Uklad, z.Zrodlo.ZasiegMapy)
         'podział na tomy: plan w pełnej rozdzielczości (limit kafli dotyczy pojedynczego tomu, nie całej mapy) -
         'z limitem w planie rozdzielczość malała do MaksKafli i zawsze powstawał jeden tom
         Dim limit As Integer = If(z.Rodzaj = RodzajEksportu.KmzGarmin AndAlso Not z.PodzialNaTomy, z.MaksKafli, 0)
@@ -505,10 +543,60 @@ Public NotInheritable Class EksportMapy
         Return suma
     End Function
 
+    Friend Shared Function IstniejaceTomyKmz(plik As String) As IEnumerable(Of String)
+        Dim folder = Path.GetDirectoryName(Path.GetFullPath(plik))
+        If Not Directory.Exists(folder) Then Return Enumerable.Empty(Of String)()
+        Dim prefix = System.Text.RegularExpressions.Regex.Escape(Path.GetFileNameWithoutExtension(plik))
+        Dim wzorzec As New System.Text.RegularExpressions.Regex("^" & prefix & "_tom[0-9]{2,}_z_[0-9]{2,}\.kmz$",
+                                                                 System.Text.RegularExpressions.RegexOptions.IgnoreCase)
+        Return Directory.EnumerateFiles(folder, "*.kmz").Where(Function(p) wzorzec.IsMatch(Path.GetFileName(p)))
+    End Function
+
+    ''' <summary>Eksport kreatora zapisuje całą mapę i kalibrację przed podmianą dotychczasowego wyniku.</summary>
+    Friend Shared Function EksportujBezpiecznie(z As ZadanieEksportu, postep As IProgress(Of Integer),
+                                                 token As CancellationToken) As String()
+        Dim docelowy = z.Plik
+        Dim folder = Path.GetDirectoryName(Path.GetFullPath(docelowy))
+        Dim roboczy = Path.Combine(folder, ".mapotero-" & Guid.NewGuid().ToString("N"))
+        Directory.CreateDirectory(roboczy)
+        Dim kopie = Path.Combine(roboczy, "kopie")
+        Dim zachowajKopie As Boolean = False
+        Try
+            z.Plik = Path.Combine(roboczy, Path.GetFileName(docelowy))
+            Eksportuj(z, postep, token)
+            token.ThrowIfCancellationRequested()
+            Dim pliki = Directory.GetFiles(roboczy).OrderBy(Function(p) p, StringComparer.OrdinalIgnoreCase).ToArray()
+            Dim mapy = pliki.Where(Function(p) String.Equals(Path.GetExtension(p), Path.GetExtension(docelowy), StringComparison.OrdinalIgnoreCase)).
+                Select(Function(p) Path.Combine(folder, Path.GetFileName(p))).ToArray()
+            If mapy.Length = 0 Then Throw New IOException("Eksport nie utworzył żadnego pliku mapy.")
+            Dim stare As New List(Of String)
+            If z.Rodzaj = RodzajEksportu.KmzGarmin Then
+                stare.AddRange(IstniejaceTomyKmz(docelowy))
+                If File.Exists(docelowy) Then stare.Add(docelowy)
+            End If
+            WymianaPlikowMapy.Zatwierdz(pliki, folder, kopie, stare.Except(mapy, StringComparer.OrdinalIgnoreCase))
+            Return mapy
+        Catch ex As AggregateException When Directory.Exists(kopie)
+            zachowajKopie = True
+            Throw
+        Finally
+            z.Plik = docelowy
+            If Not zachowajKopie Then
+                Try
+                    Directory.Delete(roboczy, recursive:=True)
+                Catch ex As IOException
+                Catch ex As UnauthorizedAccessException
+                End Try
+            End If
+        End Try
+    End Function
+
     Public Shared Sub Eksportuj(z As ZadanieEksportu, postep As IProgress(Of Integer), token As CancellationToken)
         Try
             If z.Rodzaj = RodzajEksportu.GeoTiff OrElse z.Rodzaj = RodzajEksportu.TrekBuddy Then
                 EksportGeoTiff(z, postep, token)
+            ElseIf z.Rodzaj = RodzajEksportu.Jnx AndAlso z.Zrodlo.PrzytnijDoObszaru Then
+                EksportPrzycietegoJnx(z, postep, token)
             ElseIf z.Piramida Then
                 EksportPiramidy(z, postep, token)
             Else
@@ -642,6 +730,24 @@ Public NotInheritable Class EksportMapy
                             End If
                         Next
                     Next
+                    If sa = 0 AndAlso zrodlo.PrzytnijDoObszaru Then
+                        ' Przy bardzo małym obszarze wszystkie regularne próbki piksela mogą wypaść poza mapą.
+                        Dim lewyGorny = siatka.Punkt(px, py)
+                        Dim prawyDolny = siatka.Punkt(px + 1, py + 1)
+                        Dim obszar = zrodlo.ZasiegMapy
+                        Dim wysokosc = Math.Abs(lewyGorny.X - prawyDolny.X)
+                        Dim szerokosc = Math.Abs(lewyGorny.Y - prawyDolny.Y)
+                        If wysokosc > obszar.Wysokosc OrElse szerokosc > obszar.Szerokosc Then
+                            Dim x0 = Math.Max(obszar.XDol, Math.Min(lewyGorny.X, prawyDolny.X))
+                            Dim x1 = Math.Min(obszar.XGora, Math.Max(lewyGorny.X, prawyDolny.X))
+                            Dim y0 = Math.Max(obszar.YLewy, Math.Min(lewyGorny.Y, prawyDolny.Y))
+                            Dim y1 = Math.Min(obszar.YPrawy, Math.Max(lewyGorny.Y, prawyDolny.Y))
+                            If x1 > x0 AndAlso y1 > y0 AndAlso zrodlo.Probka((x0 + x1) / 2, (y0 + y1) / 2, sr, sg, sb, sa) Then
+                                Dim udzial = n * n * Math.Max(1.0 / 255, (x1 - x0) / wysokosc * ((y1 - y0) / szerokosc))
+                                sr *= udzial : sg *= udzial : sb *= udzial : sa *= udzial
+                            End If
+                        End If
+                    End If
                     If sa <= 0 Then Continue For
                     Dim k As Double = aktywne(iw).Krycie / (n * n * 255.0)
                     sr *= k : sg *= k : sb *= k : sa *= k
@@ -852,6 +958,7 @@ Friend Shared Function NazwaPlikuTomu(sciezkaBazowa As String, numerTomu As Inte
         Dim nadprobkowanie As Integer = LiczbaProbek(z, PikselWMetrach(z) * plan.Pomniejszenie)
         Dim png As Boolean = z.Png
         Dim gotowe As Integer = 0
+        Dim zapisane As Integer = 0
 
         Dim filtr As Func(Of ProstokatGeo, Boolean) = Function(zasiegKafla)
                                                           Dim narozniki() As PunktGeo = {
@@ -885,6 +992,7 @@ Friend Shared Function NazwaPlikuTomu(sciezkaBazowa As String, numerTomu As Inte
                             If bmp IsNot Nothing Then
                                 kmz.DodajKafel("kafel_" & (w + 1).ToString("D2") & "_" & (k + 1).ToString("D2") & If(png, ".png", ".jpg"),
                                                Koduj(bmp, png, z.JakoscJpeg), plan.ZasiegKafla(w, k))
+                                zapisane += 1
                             End If
                         End Using
                         gotowe += 1
@@ -910,12 +1018,16 @@ Friend Shared Function NazwaPlikuTomu(sciezkaBazowa As String, numerTomu As Inte
                         If bmp IsNot Nothing Then
                             kmz.DodajKafel("kafel_" & (w + 1).ToString("D2") & "_" & (k + 1).ToString("D2") & If(png, ".png", ".jpg"),
                                            Koduj(bmp, png, z.JakoscJpeg), plan.ZasiegKafla(w, k))
+                            zapisane += 1
                         End If
                     End Using
                     gotowe += 1
                     postep?.Report(Math.Min(100, gotowe * 100 \ lacznieStandard))
                 Next
             Next
+            If z.Zrodlo.PrzytnijDoObszaru AndAlso zapisane = 0 Then
+                Throw New InvalidOperationException("Brak obrazu mapy w wybranym obszarze.")
+            End If
             kmz.Zakoncz()
         End Using
     End Sub
@@ -980,17 +1092,23 @@ Friend Shared Function NazwaPlikuTomu(sciezkaBazowa As String, numerTomu As Inte
         End If
         Dim bok As Integer = s.BokSegmentuPx
         Dim kolumny As Integer = s.LiczbaKolumn
-        Dim wiersze As Integer = s.LiczbaWierszy
+        Dim zasieg = z.Zrodlo.ZasiegMapy
+        Dim przycinany = z.Zrodlo.PrzytnijDoObszaru
+        Dim szerPx = If(przycinany, CLng(Math.Ceiling(zasieg.Szerokosc / s.RozmiarPiksela)), s.SzerokoscPx)
+        Dim wysPx = If(przycinany, CLng(Math.Ceiling(zasieg.Wysokosc / s.RozmiarPiksela)), s.WysokoscPx)
         Dim trekBuddy As Boolean = z.Rodzaj = RodzajEksportu.TrekBuddy
         Dim format As FormatArkusza = If(trekBuddy, FormatArkusza.Jpeg, z.FormatArkusza)
         'kanał alfa tylko w formatach, które go zapisują (GeoTIFF bezstratny, PNG); JPEG - białe tło
         Dim kanaly As Integer = If(ZapisRastra.ObslugujePrzezroczystosc(format) AndAlso (z.Nakladka OrElse z.KaflePng), 4, 3)
         'rozmiar sprawdzany przed alokacją buforów (dawniej bardzo szeroka mapa kończyła się OverflowException)
-        If s.SzerokoscPx > Integer.MaxValue \ 4 OrElse s.WysokoscPx > Integer.MaxValue Then
-            Throw New ArgumentException("Arkusz " & s.SzerokoscPx & " x " & s.WysokoscPx & " pikseli jest zbyt duży do zapisu w jednym pliku GeoTIFF")
+        If szerPx > Integer.MaxValue \ 4 OrElse wysPx > Integer.MaxValue Then
+            Throw New ArgumentException("Arkusz " & szerPx & " x " & wysPx & " pikseli jest zbyt duży do zapisu w jednym pliku GeoTIFF")
         End If
-        Dim szer As Integer = CInt(s.SzerokoscPx)
-        Dim wys As Integer = CInt(s.WysokoscPx)
+        Dim szer As Integer = CInt(szerPx)
+        Dim wys As Integer = CInt(wysPx)
+        Dim wiersze = CInt(Math.Ceiling(wys / CDbl(bok)))
+        Dim pikselX = If(przycinany, zasieg.Wysokosc / wys, s.RozmiarPiksela)
+        Dim pikselY = If(przycinany, zasieg.Szerokosc / szer, s.RozmiarPiksela)
         Dim maks As Integer = If(trekBuddy, Integer.MaxValue, ZapisRastra.MaksymalnyBok(format))
         If szer > maks OrElse wys > maks Then
             Throw New ArgumentException("Arkusz " & szer & " x " & wys & " pikseli przekracza możliwości formatu (maks. " & maks & " pikseli) - wybierz GeoTIFF lub PNG")
@@ -1009,7 +1127,7 @@ Friend Shared Function NazwaPlikuTomu(sciezkaBazowa As String, numerTomu As Inte
         Dim pikseleArgb(pas * szer - 1) As Integer
         Dim taSamaSiatka As New List(Of Boolean)
         For Each warstwa In warstwy
-            taSamaSiatka.Add(TaSamaSiatkaPikseli(warstwa.Zrodlo.Siatka, warstwa.Uklad, s, z.Uklad))
+            taSamaSiatka.Add(Not przycinany AndAlso TaSamaSiatkaPikseli(warstwa.Zrodlo.Siatka, warstwa.Uklad, s, z.Uklad))
         Next
 
         Dim plikTymczasowy As String = z.Plik & ".tmp"
@@ -1017,14 +1135,16 @@ Friend Shared Function NazwaPlikuTomu(sciezkaBazowa As String, numerTomu As Inte
         Dim nazwaTb As String = Path.GetFileNameWithoutExtension(z.Plik)
         If trekBuddy AndAlso Directory.Exists(folderTb) Then Directory.Delete(folderTb, True)
         Dim zapisTb As ZapisRastra = Nothing
+        Dim saPiksele = False
         Using zapis As ZapisRastra = If(trekBuddy, New ZapisKafliTrekBuddy(folderTb, nazwaTb, szer, wys, z.JakoscJpeg),
-                                        ZapisRastra.Utworz(format, plikTymczasowy, szer, wys, z.JakoscJpeg, z.Uklad, s.ZasiegSiatki, kanaly = 4))
+                                        ZapisRastra.Utworz(format, plikTymczasowy, szer, wys, z.JakoscJpeg, z.Uklad, zasieg, kanaly = 4))
             zapisTb = zapis
             zapiszPas = Sub(b, k) zapis.ZapiszWiersze(b, k)
             For w = 1 To wiersze
-              For y0 = 0 To bok - 1 Step pas
+              Dim wierszeWPaskuSegmentow = Math.Min(bok, wys - (w - 1) * bok)
+              For y0 = 0 To wierszeWPaskuSegmentow - 1 Step pas
                 token.ThrowIfCancellationRequested()
-                Dim n As Integer = Math.Min(pas, bok - y0)
+                Dim n As Integer = Math.Min(pas, wierszeWPaskuSegmentow - y0)
                 'Domyślne tło: białe dla RGB (-1 = 0xFFFFFFFF), przezroczyste dla RGBA (0)
                 Dim domyslnyKolor As Integer = If(kanaly = 4, 0, -1)
                 Array.Fill(pikseleArgb, domyslnyKolor, 0, n * szer)
@@ -1064,14 +1184,12 @@ Friend Shared Function NazwaPlikuTomu(sciezkaBazowa As String, numerTomu As Inte
                             Next
                         Next
                     Else
-                        Dim pikselX = s.RozmiarPiksela
-                        Dim pikselY = s.RozmiarPiksela
                         For y = 0 To n - 1
                             Dim pyWiersz = (w - 1) * bok + y0 + y
-                            Dim pX = s.ZasiegSiatki.XGora - (pyWiersz + 0.5) * pikselX
+                            Dim pX = zasieg.XGora - (pyWiersz + 0.5) * pikselX
                             Dim idxCel = y * szer
                             For x = 0 To szer - 1
-                                Dim pY = s.ZasiegSiatki.YLewy + (x + 0.5) * pikselY
+                                Dim pY = zasieg.YLewy + (x + 0.5) * pikselY
                                 Dim pWarstwy As PunktXY
                                 If warstwa.Uklad.Epsg = z.Uklad.Epsg Then
                                     pWarstwy = New PunktXY(pX, pY)
@@ -1081,6 +1199,7 @@ Friend Shared Function NazwaPlikuTomu(sciezkaBazowa As String, numerTomu As Inte
                                 End If
                                 Dim r, g, b, a As Double
                                 If zr.Probka(pWarstwy.X, pWarstwy.Y, r, g, b, a) AndAlso a > 0 Then
+                                    saPiksele = True
                                     Dim efA As Double = (a / 255.0) * krycie
                                     pikseleArgb(idxCel + x) = NalozPiksel(pikseleArgb(idxCel + x), r, g, b, efA)
                                 End If
@@ -1112,12 +1231,13 @@ Friend Shared Function NazwaPlikuTomu(sciezkaBazowa As String, numerTomu As Inte
               Next
                 postep?.Report(CInt(w * 100 \ wiersze))
             Next
+            If przycinany AndAlso Not saPiksele Then Throw New InvalidOperationException("Brak obrazu mapy w wybranym obszarze.")
             korekta?.Zakoncz(zapiszPas)
             zapis.Zakoncz()
         End Using
 
         If trekBuddy Then
-            ZapisKafliTrekBuddy.UtworzPaczke(folderTb, nazwaTb, DirectCast(zapisTb, ZapisKafliTrekBuddy).Pliki, z.Uklad, s.ZasiegSiatki, szer, wys, z.Plik)
+            ZapisKafliTrekBuddy.UtworzPaczke(folderTb, nazwaTb, DirectCast(zapisTb, ZapisKafliTrekBuddy).Pliki, z.Uklad, zasieg, szer, wys, z.Plik)
             Exit Sub
         End If
         File.Move(plikTymczasowy, z.Plik, overwrite:=True)
@@ -1130,7 +1250,7 @@ Friend Shared Function NazwaPlikuTomu(sciezkaBazowa As String, numerTomu As Inte
         Dim nazwaBezRozszerzenia = Path.GetFileNameWithoutExtension(z.Plik)
         Dim rozszerzenie = ZapisRastra.Rozszerzenie(format)
         If z.Georeferencja IsNot Nothing AndAlso z.Georeferencja.Dowolna Then
-            Dim obrazGeoref = ZapisGeoreferencji.Obraz(z.Uklad, s.ZasiegSiatki, szer, wys, folderZapisu, Path.GetFileName(z.Plik))
+            Dim obrazGeoref = ZapisGeoreferencji.Obraz(z.Uklad, zasieg, szer, wys, folderZapisu, Path.GetFileName(z.Plik))
             ZapisGeoreferencji.ZapiszPliki(obrazGeoref, folderZapisu, nazwaBezRozszerzenia, rozszerzenie, z.Georeferencja)
             'world file GeoTIFF: programy CAD szukają .tfw (ZapiszPliki tworzy rozszerzenie z pierwszej i ostatniej litery)
             Dim sciezkaTfw = Path.Combine(folderZapisu, nazwaBezRozszerzenia & ".tfw")
@@ -1156,50 +1276,96 @@ Friend Shared Function NazwaPlikuTomu(sciezkaBazowa As String, numerTomu As Inte
     Private Shared Sub EksportPiramidy(z As ZadanieEksportu, postep As IProgress(Of Integer), token As CancellationToken)
         UsunWynik(z)
         Dim obszar = ObszarKafli(z)
-        Dim warstwy = z.WarstwyRenderowania()
         Dim wszystkie As Long = Math.Max(1, LiczbaKafliMBTiles(z))
         Dim gotowe As Long = 0
+        Dim zapisane As Long = 0
         Dim srodekSz As Double = (obszar.Polnoc + obszar.Poludnie) / 2
 
         Using m = UtworzMagazyn(z, obszar)
-            'najwyższy poziom - kafle renderowane bezpośrednio z segmentów
+            ' Przycięte mapy renderujemy w każdym zoomie, bo pomniejszanie kafli rozmywa granicę maski. Mapa wieloskalowa
+            ' (ZrodlaPoziomow) też - pomniejszony kafel szczegółowej skali nie jest mapą skali przeglądowej.
             Dim zmax As Integer = z.PoziomMax
-            Dim nadprobkowanie As Integer = LiczbaProbek(z, WebMercator.RozmiarPiksela(srodekSz, zmax))
-            Dim r = WebMercator.ZakresKafli(obszar, zmax)
-            m.RozpocznijPoziom(zmax)
-            For ty = r.Item2 To r.Item4
-                For tx = r.Item1 To r.Item3
-                    token.ThrowIfCancellationRequested()
-                    Using bmp = RenderujKafelZKorekta(warstwy, 256, 256, nadprobkowanie, PrzeliczenieKafla(tx * 256.0, ty * 256.0, zmax), z.KorekcjaMip)
-                        If bmp IsNot Nothing Then
-                            m.Zapisz(New KafelXYZ(tx, ty, zmax), Koduj(bmp, z.Png, z.JakoscJpeg))
-                        End If
-                    End Using
-                    gotowe += 1
-                    postep?.Report(CInt(gotowe * 100 \ wszystkie))
-                Next
-            Next
-            m.ZakonczPoziom()
+            Dim minBezposredni = If(z.Zrodlo.PrzytnijDoObszaru OrElse z.ZrodlaPoziomow.Count > 0, z.PoziomMin, zmax)
 
-            'niższe poziomy - z czterech kafli poziomu wyższego (piramida)
-            For poziom = zmax - 1 To z.PoziomMin Step -1
+            For poziom = zmax To z.PoziomMin Step -1
                 Dim rp = WebMercator.ZakresKafli(obszar, poziom)
+                Dim warstwy = z.WarstwyRenderowania(poziom)
+                If warstwy Is Nothing Then
+                    ' poziom poza planem skal - nie trafia do pliku
+                    gotowe += CLng(rp.Item3 - rp.Item1 + 1) * (rp.Item4 - rp.Item2 + 1)
+                    Continue For
+                End If
+                Dim nadprobkowanie = LiczbaProbek(warstwy, WebMercator.RozmiarPiksela(srodekSz, poziom))
                 m.RozpocznijPoziom(poziom)
                 For ty = rp.Item2 To rp.Item4
                     For tx = rp.Item1 To rp.Item3
                         token.ThrowIfCancellationRequested()
                         Dim k As New KafelXYZ(tx, ty, poziom)
-                        Dim dane = KafelZDzieci(m, k, z)
-                        If dane IsNot Nothing Then m.Zapisz(k, dane)
+                        Dim dane As Byte() = Nothing
+                        If poziom >= minBezposredni Then
+                            Using bmp = RenderujKafelZKorekta(warstwy, 256, 256, nadprobkowanie, PrzeliczenieKafla(tx * 256.0, ty * 256.0, poziom), z.KorekcjaMip)
+                                If bmp IsNot Nothing Then dane = Koduj(bmp, z.Png, z.JakoscJpeg)
+                            End Using
+                        Else
+                            dane = KafelZDzieci(m, k, z)
+                        End If
+                        If dane IsNot Nothing Then
+                            m.Zapisz(k, dane)
+                            zapisane += 1
+                        End If
                         gotowe += 1
                         postep?.Report(CInt(Math.Min(100, gotowe * 100 \ wszystkie)))
                     Next
                 Next
                 m.ZakonczPoziom()
             Next
+            If z.Zrodlo.PrzytnijDoObszaru AndAlso zapisane = 0 Then
+                Throw New InvalidOperationException("Brak obrazu mapy w wybranym obszarze.")
+            End If
             m.ZakonczZapis()
         End Using
         SQLiteConnection.ClearAllPools()
+    End Sub
+
+    Private Shared Sub EksportPrzycietegoJnx(z As ZadanieEksportu, postep As IProgress(Of Integer), token As CancellationToken)
+        ' JPEG w JNX nie obsługuje przezroczystości. Każdy poziom ma własną siatkę kafli wpisaną w obszar.
+        Dim obszar = ProstokatGeo.Wpisany(z.Uklad, z.Zrodlo.ZasiegMapy)
+        Dim szerokoscGeo = (obszar.Polnoc + obszar.Poludnie) / 2
+        Dim poziomy As New List(Of PoziomJnx)
+        Dim plany = Enumerable.Range(z.PoziomMin, z.PoziomMax - z.PoziomMin + 1).
+            Select(Function(p) New PlanKmz(obszar, WebMercator.RozmiarPiksela(szerokoscGeo, p), 256, 0)).ToList()
+        Dim wszystkie = plany.Sum(Function(p) CLng(p.LiczbaKafli))
+        Dim gotowe As Long = 0
+        For i = 0 To plany.Count - 1
+            Dim plan = plany(i)
+            Dim zoom = z.PoziomMin + i
+            ' Mapa wieloskalowa: każdy poziom rysowany ze źródła swojej skali (np. WIG 1:300 000 przy oddaleniu)
+            Dim warstwy = z.WarstwyRenderowania(zoom)
+            If warstwy Is Nothing Then
+                gotowe += plan.LiczbaKafli
+                Continue For
+            End If
+            Dim poziom As New PoziomJnx(ZapisJnx.SkalaDlaPoziomu(zoom, szerokoscGeo))
+            Dim probki = LiczbaProbek(warstwy, WebMercator.RozmiarPiksela(szerokoscGeo, zoom))
+            For w = 0 To plan.Wiersze - 1
+                For k = 0 To plan.Kolumny - 1
+                    token.ThrowIfCancellationRequested()
+                    Dim px = plan.PikseleKafla(w, k)
+                    Dim zasieg = plan.ZasiegKafla(w, k)
+                    Dim przelicz = Function(x As Double, y As Double) New PunktGeo(zasieg.Polnoc - y * plan.PikselSzerokosc,
+                                                                                 zasieg.Zachod + x * plan.PikselDlugosc)
+                    Using bmp = RenderujKafelZKorekta(warstwy, px.Item3, px.Item4, probki, przelicz, z.KorekcjaMip)
+                        If bmp IsNot Nothing Then
+                            poziom.Kafle.Add(New KafelJnx(zasieg, Koduj(bmp, False, z.JakoscJpeg), CShort(bmp.Width), CShort(bmp.Height)))
+                        End If
+                    End Using
+                    gotowe += 1
+                    postep?.Report(CInt(gotowe * 100 \ wszystkie))
+                Next
+            Next
+            If poziom.Kafle.Count > 0 Then poziomy.Add(poziom)
+        Next
+        ZapisJnx.Zapisz(z.Plik, z.Nazwa, z.KolejnoscRysowania, poziomy)
     End Sub
 
     ''' <summary>Kafel poziomu niższego złożony z czterech kafli poziomu wyższego (pomniejszenie 2x).</summary>

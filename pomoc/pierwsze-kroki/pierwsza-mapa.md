@@ -19,6 +19,9 @@ Praktyczny samouczek: pobierzesz fragment mapy topograficznej 1:25 000, a nastę
 {:toc}
 </details>
 
+{: .wskazowka }
+**Szukasz najprostszej i najszybszej drogi bez ręcznych ustawień?** Wciśnij w programie <kbd>Ctrl</kbd>+<kbd>K</kbd> (lub kliknij ikonę różdżki pod powiększeniem mapy), aby otworzyć [Szybki kreator mapy](../../narzedzia/#szybki-kreator-mapy). Kreator prowadzi w 4 krokach od wyboru urządzenia docelowego po gotowy plik. Poniższy poradnik pokazuje pełną, klasyczną ścieżkę pracy w oknie głównym programu z ręczną kontrolą wszystkich parametrów.
+
 ---
 
 ## Przed rozpoczęciem

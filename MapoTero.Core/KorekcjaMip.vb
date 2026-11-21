@@ -59,6 +59,16 @@ Public Class OpcjeKorekcjiMip
     ''' <summary>Siła wyostrzania krawędzi filtrem splotowym (Laplacian 3x3): 0.0..1.5, standardowo 0.6.</summary>
     Public Property Wyostrzanie As Double = 0.6
 
+    ''' <summary>Wyłącza korektę i ustawia neutralne suwaki (obraz bez zmian): profil Brak, gamma, kontrast i nasycenie 1, bez wyostrzania.</summary>
+    Public Sub Resetuj()
+        Profil = ProfilKorektyRastra.Brak
+        Wlaczona = False
+        Gamma = 1.0
+        Kontrast = 1.0
+        Nasycenie = 1.0
+        Wyostrzanie = 0.0
+    End Sub
+
     Public Sub UstawWgProfilu(p As ProfilKorektyRastra)
         Me.Profil = p
         Select Case p

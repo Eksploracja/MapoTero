@@ -251,6 +251,7 @@ czechy_ztm10_wms | 0 | Skan mapy topograficznej 1:10 000 (ZTM 10, WMS – zaleca
 czechy_ztm25_wms | 0 | Skan mapy topograficznej 1:25 000 (ZTM 25, WMS – zalecany układ WGS84/UTM) | CZ_Topo_25k
 czechy_ztm50_wms | 0 | Skan mapy topograficznej 1:50 000 (ZTM 50, WMS – zalecany układ WGS84/UTM) | CZ_Topo_50k
 czechy_orto_WMTS | ORTOFOTO_WM | Ortofotomapa lotnicza (Ortofoto ČR, kafle WMTS – każdy układ) | CZ_Ortofoto
+czechy_orto_wms | 0 | Ortofotomapa lotnicza (Ortofoto ČR, WMS – każdy układ, poza Czechami przezroczysta) | CZ_Ortofoto_WMS
 
 >> Słowacja (ZBGIS i Freemap)
 slowacja_freemap | outdoor | Mapa turystyczna Karpat – szlaki i rzeźba (Freemap Slovakia, kafle XYZ – każdy układ) | SK_Freemap_Out

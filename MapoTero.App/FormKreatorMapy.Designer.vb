@@ -413,7 +413,7 @@ Partial Class FormKreatorMapy
         Me.lblOpisCelGarmin.Location = New System.Drawing.Point(62, 120)
         Me.lblOpisCelGarmin.Name = "lblOpisCelGarmin"
         Me.lblOpisCelGarmin.Size = New System.Drawing.Size(680, 40)
-        Me.lblOpisCelGarmin.Text = "Plik Garmin Custom Maps (KMZ), który działa na każdym odbiorniku, albo JNX (BirdsEye). Korekta kontrastu poprawia czytelność ekranu w słońcu."
+        Me.lblOpisCelGarmin.Text = "KMZ dla urządzeń obsługujących Garmin Custom Maps albo JNX dla urządzeń obsługujących pliki BirdsEye."
 
         Me.rbCelWydruk.AutoSize = True
         Me.rbCelWydruk.Font = New System.Drawing.Font("Segoe UI", 10.5!, System.Drawing.FontStyle.Bold)

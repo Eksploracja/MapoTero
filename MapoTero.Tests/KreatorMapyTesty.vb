@@ -121,10 +121,8 @@ Public Class KreatorMapyTesty
                     Dim k = Application.OpenForms.OfType(Of Global.MapoTero.FormKreatorMapy)().FirstOrDefault()
                     Assert.NotNull(k)
 
-                    ' Przejdź do kroku 3
+                    ' Przejdź do kroku 2 (obszar)
                     Dim btnDalej = DirectCast(k.Controls.Find("btnDalej", True)(0), Button)
-                    btnDalej.PerformClick()
-                    Application.DoEvents()
                     btnDalej.PerformClick()
                     Application.DoEvents()
 
@@ -148,6 +146,32 @@ Public Class KreatorMapyTesty
                     Assert.True(k.Visible)
 
                     k.Close()
+                    f.Close()
+                End Using
+            End Sub)
+    End Sub
+
+    <Fact>
+    Public Sub SiatkaPrzyciskow_GornyRzadPrzygotowanie_DolnyPobranePliki()
+        UruchomWWatkuSta(
+            Sub()
+                Using f As New Global.MapoTero.Form1()
+                    f.Show()
+                    Application.DoEvents()
+                    Dim k = Function(nazwa As String) f.Controls.Find(nazwa, True)(0)
+                    Dim kreator = k("btnKreator"), siatka = k("btnZnaczniki"), nowa = k("btnNowaSesja")
+                    Dim folder = k("btnOtworzFolder"), usun = k("btnUsunPobrane"), scalanie = k("btnScalanie")
+                    'górny rząd: kreator, siatka, nowa sesja
+                    Assert.Equal(siatka.Top, kreator.Top)
+                    Assert.Equal(siatka.Top, nowa.Top)
+                    Assert.True(kreator.Right < siatka.Left AndAlso siatka.Right < nowa.Left)
+                    'dolny rząd: folder, usuwanie, scalanie - pod nimi, w tych samych kolumnach
+                    Assert.Equal(usun.Top, folder.Top)
+                    Assert.Equal(usun.Top, scalanie.Top)
+                    Assert.True(siatka.Bottom < usun.Top)
+                    Assert.Equal(kreator.Left, folder.Left)
+                    Assert.Equal(siatka.Left, usun.Left)
+                    Assert.Equal(nowa.Left, scalanie.Left)
                     f.Close()
                 End Using
             End Sub)
@@ -384,18 +408,15 @@ Public Class KreatorMapyTesty
 
                         ' 4. Krok 4 - opcje zaawansowane korekty rastra i zoomu
                         Dim chkKorekta = DirectCast(k.Controls.Find("chkKorektaObrazu", True)(0), CheckBox)
-                        Dim lblProfil = DirectCast(k.Controls.Find("lblProfil", True)(0), Label)
-                        Dim cboProfil = DirectCast(k.Controls.Find("cboProfilKorekty", True)(0), ComboBox)
                         Dim btnDostosujKorekte = DirectCast(k.Controls.Find("btnDostosujKorekte", True)(0), Button)
+                        Dim lblProfilKorekty = DirectCast(k.Controls.Find("lblProfilKorekty", True)(0), Label)
                         Dim chkZoom = DirectCast(k.Controls.Find("chkWlasnyZoom", True)(0), CheckBox)
                         Dim btnWieloskalowy = DirectCast(k.Controls.Find("btnOtworzWieloskalowy", True)(0), Button)
                         Dim lblWieloskalowyOpis = DirectCast(k.Controls.Find("lblWieloskalowyOpis", True)(0), Label)
 
-                        Assert.True(lblProfil.Top >= chkKorekta.Bottom, "Checkbox korekty nachodzi na etykietę profilu!")
-                        Assert.True(cboProfil.Top >= chkKorekta.Bottom, "Checkbox korekty nachodzi na combobox profilu!")
-                        Assert.True(cboProfil.Left >= lblProfil.Right, "Etykieta profilu nachodzi na combobox profilu!")
-                        Assert.True(btnDostosujKorekte.Left >= cboProfil.Right, "Combobox profilu nachodzi na przycisk dostosowania suwaków!")
-                        Assert.True(chkZoom.Top >= cboProfil.Bottom, "Combobox profilu nachodzi na checkbox własnego zoomu!")
+                        Assert.True(btnDostosujKorekte.Left >= chkKorekta.Right, "Pole korekty nachodzi na przycisk okna korekty!")
+                        Assert.True(lblProfilKorekty.Left >= btnDostosujKorekte.Right, "Przycisk okna korekty nachodzi na opis profilu!")
+                        Assert.True(chkZoom.Top >= btnDostosujKorekte.Bottom, "Przycisk okna korekty nachodzi na pole własnego zoomu!")
                         Assert.True(lblWieloskalowyOpis.Left >= btnWieloskalowy.Right, "Przycisk narzędzia wieloskalowego nachodzi na opis!")
 
                         k.Close()

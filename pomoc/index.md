@@ -19,9 +19,9 @@ na stronie głównej oraz w samym programie (menu *Pomoc > Krótka instrukcja (b
 
 ## Od czego zacząć
 
-Zanim przejdziesz do instalacji i pobierania, zobacz rozdział [Do czego służy MapoTero](do-czego-sluzy/). Opisuje cztery główne zastosowania programu: od poszukiwań terenowych i turystyki po przygotowanie podkładów w CAD i GIS.
-
-Instrukcję od instalacji do pierwszej gotowej mapy znajdziesz w rozdziale [Pierwsze kroki](pierwsze-kroki/). Warto też przejrzeć [Pojęcia podstawowe](pojecia/): rozmiar piksela, segment i kanapka warstw decydują o czytelności oraz wielkości plików.
+* **Szukasz najkrótszej drogi?** Uruchom program i wciśnij <kbd>Ctrl</kbd>+<kbd>K</kbd> (lub kliknij ikonę różdżki pod powiększeniem mapy), aby otworzyć [Szybki kreator mapy](narzedzia/#szybki-kreator-mapy). W 4 prostych krokach przygotujesz gotową mapę na telefon, odbiornik Garmin, do wydruku lub projektu inżynierskiego.
+* **Chcesz poznać możliwości programu?** Zobacz rozdział [Do czego służy MapoTero](do-czego-sluzy/). Opisuje cztery główne zastosowania: od poszukiwań historycznych i turystyki po przygotowanie podkładów w CAD i GIS.
+* **Wolisz pełną ręczną kontrolę?** Przejdź do rozdziału [Pierwsze kroki](pierwsze-kroki/) i samouczka [Pierwsza mapa krok po kroku](pierwsze-kroki/pierwsza-mapa/). Warto też przejrzeć [Pojęcia podstawowe](pojecia/): rozmiar piksela, segment i kanapka warstw decydują o czytelności oraz wielkości plików.
 
 ---
 
@@ -29,29 +29,32 @@ Instrukcję od instalacji do pierwszej gotowej mapy znajdziesz w rozdziale [Pier
 
 | Chcę… | Przeczytaj |
 |---|---|
+| najszybciej przygotować gotową mapę w 4 krokach (smartfon, Garmin, wydruk, CAD) | [Szybki kreator mapy](narzedzia/#szybki-kreator-mapy) |
 | dowiedzieć się, do czego służy program i co potrafi | [Do czego służy MapoTero](do-czego-sluzy/) |
 | mapę offline w telefonie z Androidem (Locus Map, OsmAnd, OruxMaps, AlpineQuest) | [Wybór obszaru](obszar/) → [Pobieranie](pobieranie/) → [Eksport mapy](eksport/) → [Mapa w telefonie](eksport/aplikacje/) |
 | mapę offline na iPhone lub iPada (Guru Maps) | [Mapa w telefonie i odbiorniku GPS: Guru Maps](eksport/aplikacje/#guru-maps-iphone-ipad-android) |
-| mapę w odbiorniku Garmin | [Eksport mapy](eksport/) → [Formaty: JNX, KMZ](eksport/formaty/) |
-| szybko znaleźć miejscowość, adres lub działkę katastralną | [Wyszukiwarka miejscowości i działek](obszar/zaznaczanie/#wyszukiwarka-miejscowości-adresów-i-działek-katastralnych) |
-| mapę tylko wzdłuż trasy wycieczki | [Obszar wzdłuż trasy](obszar/korytarz/) |
-| profil wysokościowy trasy GPX z NMT | [Profil wysokościowy trasy](narzedzia/#profil-wysokościowy-trasy) |
-| nałożyć mapę historyczną lub cieniowanie na ortofotomapę | [Kompozycje warstw i plastyczna rzeźba](pobieranie/kompozycje/) · [Okno główne: kanapka warstw](okno-glowne/#zbiory-map-i-warstwy) · [Nakładki i łączenie warstw](eksport/nakladki/) |
-| mapę, która zmienia się z powiększeniem | [MBTiles wieloskalowy](mbtiles-wielowarstwowy/) |
-| przekonwertować mapę OziExplorer (.map) do JNX, KMZ, MBTiles, SQLiteDB albo OruxMaps | [Konwerter map OziExplorer](narzedzia/#konwerter-map-oziexplorer-map) |
+| mapę w odbiorniku Garmin (JNX BirdsEye bez limitu lub KMZ z podziałem na tomy) | [Eksport mapy](eksport/) → [Formaty: JNX, KMZ](eksport/formaty/) |
+| szybko znaleźć miejscowość, adres lub działkę katastralną (ULDK GUGiK) | [Wyszukiwarka miejscowości i działek](obszar/zaznaczanie/#wyszukiwarka-miejscowości-adresów-i-działek-katastralnych) |
+| mapę tylko wzdłuż trasy wycieczki (bufor wzdłuż śladu GPX/KML/KMZ) | [Obszar wzdłuż trasy](obszar/korytarz/) |
+| profil wysokościowy trasy GPX/KML z państwowego LIDAR NMT | [Profil wysokościowy trasy](narzedzia/#profil-wysokościowy-trasy) |
+| nałożyć cieniowanie rzeźby lub mapę historyczną na ortofotomapę (tryb *Rzeźba terenu*) | [Kompozycje warstw i plastyczna rzeźba](pobieranie/kompozycje/) · [Okno główne: kanapka warstw](okno-glowne/#zbiory-map-i-warstwy) · [Nakładki i łączenie warstw](eksport/nakladki/) |
+| mapę, która automatycznie zmienia się wraz ze stopniem przybliżenia (wieloskalową) | [MBTiles wieloskalowy](mbtiles-wielowarstwowy/) · [Szybki kreator: mapy wieloskalowe](narzedzia/#szybki-kreator-mapy) |
+| przekonwertować kalibrowaną mapę OziExplorer (.map) z transformacją do WGS84 | [Konwerter map OziExplorer](narzedzia/#konwerter-map-oziexplorer-map) |
+| poprawić czytelność lub kontrast map i skanów (profil Garmin MIP, CAD) | [Korekta obrazów w folderze](narzedzia/#korekta-obrazów-w-folderze) · [Scalanie z korektą](scalanie/#nakładki-i-korekta-obrazu) |
 | podkład pod pomiary w terenie w QField (leśnictwo, ochrona przyrody, geodezja) | [Mapa w telefonie: QField](eksport/aplikacje/#qfield-android-ios) · [Współpraca z QGIS](inne-programy/#qgis) |
 | jeden arkusz GeoTIFF do QGIS lub ArcGIS | [Scalanie segmentów](scalanie/) → [Współpraca z innymi programami](inne-programy/) |
-| podkład do rysunku w AutoCAD, BricsCAD, ZWCAD | [Eksport do CAD](cad/) |
-| mapy z serwera, którego nie ma na liście (albo z wykazu powiatów) | [Dodawanie serwerów map](serwery/) |
-| rozwiązać problem | [Problemy i najczęstsze pytania](problemy/) |
+| podkład rastrowy i siatkę do rysunku w AutoCAD, BricsCAD, ZWCAD (DXF, SCR, LISP) | [Eksport do CAD](cad/) |
+| mapy z serwera, którego nie ma na liście (albo z wykazu powiatów i gmin EZiUDP) | [Dodawanie serwerów map](serwery/) |
+| rozwiązać problem lub wyjaśnić błąd pobierania | [Problemy i najczęstsze pytania](problemy/) |
 
 ---
 
 ## Jak korzystać z pomocy
 
-* Menu po lewej stronie prowadzi przez rozdziały w kolejności pracy z programem. Pole wyszukiwania znajduje dowolne słowo w całej pomocy.
+* Menu po lewej stronie prowadzi przez rozdziały w logicznej kolejności pracy z programem. Pole wyszukiwania u góry pozwala znaleźć dowolne słowo w całej dokumentacji.
+* Każde okno niezależnego narzędzia w programie posiada w dolnej części przycisk **Pomoc** (oraz skrót klawiszowy <kbd>F1</kbd>), który natychmiast wyświetla podręczną instrukcję wraz z bezpośrednim linkiem do właściwego rozdziału w dokumentacji.
 * Nazwy elementów programu zapisane są *kursywą*, dokładnie tak jak w oknach. Ścieżki menu mają postać *Narzędzia > Scalanie segmentów*.
-* Każda strona zaczyna się od najkrótszej drogi, a szczegóły i opcje są opisane niżej.
+* Każda strona zaczyna się od najkrótszej drogi, a szczegóły techniczne i opcje zaawansowane opisane są niżej.
 * Współrzędne: w programie **X oznacza północ, a Y wschód** (konwencja geodezyjna). W programach CAD i GIS osie są przypisane odwrotnie.
 
 {: .wskazowka }

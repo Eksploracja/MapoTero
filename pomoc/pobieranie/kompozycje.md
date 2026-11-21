@@ -38,9 +38,12 @@ Do dokładnego zestrojenia kompozycji służy okno **Warstwy - zaawansowane**, o
 
 | Tryb mieszania | Jak działa | Kiedy stosować |
 |---|---|---|
+| **Rzeźba terenu (Hillshade)** | Dedykowany tryb dla numerycznego modelu terenu: jasność 180 (płaski teren przy słońcu 45° nad horyzontem) jest neutralna. Płaski teren zachowuje w 100% oryginalne barwy, stoki w cieniu ciemnieją, a oświetlone lekko jaśnieją. | **Zalecany dla cieniowania rzeźby NMT** na ortofotomapie i mapach topograficznych. Rozwiązuje problem trybu Mnożenie, który kładł na całej mapie szarą zasłonę. |
 | **Zwykły (Normal)** | Standardowe przenikanie przezroczystości (alfa). | Nakładki wektorowe z przezroczystym tłem (granice działek, numery, szlaki). W przypadku cieniowania NMT na ortofotomapie wymaga niskiego krycia (35–50%), inaczej tworzy szare zamglenie. |
 | **Mnożenie (Multiply)** | Piksele warstwy górnej mnożą się z tłem. Biel staje się całkowicie niewidoczna, a cienie i ciemne linie przenikają w podkład. | Mapy topograficzne ze skanów papierowych i BDOT10k łączone z cieniowaniem NMT lub hipsometrią. Zachowuje ostrość czarnych napisów i siatki ulic. |
 | **Nakładka (Overlay)** | Wzmacnia kontrasty: rozjaśnia partie jasne i przyciemnia cienie, nie zamulając barw pośrednich szarością. | Plastyczna ortofotomapa 3D z cieniowaniem NMT. Pozwala uwypuklić zbocza i doliny bez efektu przymglenia zdjęcia lotniczego. |
+| **Ciemniej / Jaśniej** | Wybiera odpowiednio ciemniejszy lub jaśniejszy kolor z obu warstw. | Specjalne efekty nakładania jasnych szlaków lub ciemnych granic. |
+| **Ekran (Screen)** | Rozjaśnia tło, czerń staje się niewidoczna (odwrotność mnożenia). | Warstwy nocne, radary lub rozświetlenia. |
 
 ---
 
@@ -57,12 +60,12 @@ Połączenie aktualnego zdjęcia lotniczego z numerycznym modelem terenu (NMT 1 
 *Rysunek 1. Plastyczna ortofotomapa 3D: podkład lotniczy 25 cm z nałożonym cieniowaniem NMT w trybie Nakładka.*
 
 * **Warstwa 1 (podkład):** *Ortofotomapy > Ortofotomapa standardowa (kafle WMTS)*, krycie 100%.
-* **Warstwa 2 (wierzch):** *Rzeźba terenu > Cieniowanie rzeźby NMT 1 m (kafle WMTS)*, tryb **Nakładka**, krycie **75%** (lub tryb Zwykły z kryciem 40–50%).
+* **Warstwa 2 (wierzch):** *Rzeźba terenu > Cieniowanie rzeźby NMT 1 m (kafle WMTS)*, tryb **Rzeźba terenu** z kryciem **70%** (lub tryb **Nakładka** z kryciem 75%).
 * **Zalecany piksel:** 0,25 m/pix (lub 0,5 m/pix dla mniejszego rozmiaru plików).
 * **Format zapisu:** JPEG (jakość 90) lub PNG.
 
 {: .wskazowka }
-Tryb Nakładka zachowuje naturalne nasycenie zieleni lasów i dachów zabudowy, wzmacniając jedynie światłocień na zboczach. W trybie Zwykłym zbyt wysokie krycie cieniowania pokrywa ortofotomapę szarym nalotem.
+Tryb **Rzeźba terenu** (oraz Nakładka) zachowuje naturalne nasycenie zieleni lasów i dachów zabudowy, wzmacniając jedynie światłocień na zboczach bez szarej zasłony na płaskim terenie. W trybie Zwykłym zbyt wysokie krycie cieniowania pokrywa ortofotomapę szarym nalotem.
 
 ---
 

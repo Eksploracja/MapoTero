@@ -27,6 +27,7 @@ Public Class ZadaniePobierania
     Public Property Warstwy As New List(Of String)
     ''' <summary>Krycie kolejnych warstw (procent); brak wartości - warstwa w pełni kryjąca.</summary>
     Public Property Krycia As New List(Of Integer)
+    Public Property TrybyMieszania As String = ""
     ''' <summary>Adresy serwerów WMS / usług WMTS kolejnych warstw; brak wartości - AdresSerwera.</summary>
     Public Property Adresy As New List(Of String)
     ''' <summary>Nazwy zbiorów map kolejnych warstw (indeksy w <see cref="ZrodlaMap"/>).</summary>
@@ -93,6 +94,7 @@ Public Class ZadaniePobierania
     ''' <summary>Warstwy z kryciem, adresem serwera i typem źródła.</summary>
     Public Function WybranyZestaw() As ZestawWarstw
         Dim z As New ZestawWarstw()
+        Dim tryby = ZestawWarstw.TrybyMieszaniaZTekstu(TrybyMieszania, Warstwy.Count)
         For i = 0 To Warstwy.Count - 1
             Dim adres As String = If(i < Adresy.Count AndAlso Not String.IsNullOrEmpty(Adresy(i)), Adresy(i), AdresSerwera)
             Dim zbior As String = If(i < Zbiory.Count, Zbiory(i), "")
@@ -100,7 +102,7 @@ Public Class ZadaniePobierania
             Dim typZrodla As TypUslugiMapowej = If(src IsNot Nothing, src.EfektywnyTyp, TypUslugiMapowej.Nieznana)
             Dim nakladka As Boolean = If(src IsNot Nothing, src.OpcjeKafli(Warstwy(i)).Nakladka, False)
             Dim bezSsl As Boolean = IgnorujSsl OrElse If(src IsNot Nothing, src.IgnorujSsl, False)
-            z.Dodaj(Warstwy(i), If(i < Krycia.Count, Krycia(i), ZestawWarstw.PelneKrycie), adres, zbior, 0, typZrodla, nakladka, False, bezSsl)
+            z.Dodaj(Warstwy(i), If(i < Krycia.Count, Krycia(i), ZestawWarstw.PelneKrycie), adres, zbior, 0, typZrodla, nakladka, False, bezSsl, tryby(i))
         Next
         Return z
     End Function
@@ -121,6 +123,7 @@ Public Class WynikPobierania
     Public Property Wszystkie As Integer
     ''' <summary>Liczba segmentów, których nie udało się pobrać (wykaz w error.txt).</summary>
     Public Property Nieudane As Integer
+    Public Property PierwszyBlad As String = ""
     Public Property Przerwano As Boolean
 End Class
 
@@ -419,7 +422,9 @@ Public NotInheritable Class PobieranieSegmentow
                     plik.WriteLine(MetadaneMapy.MaskujSekrety(adres(sg)))
                     Dim przyczyna As String = Nothing
                     If przyczyny.TryGetValue(sg.Indeks, przyczyna) AndAlso przyczyna <> "" Then
-                        plik.WriteLine("przyczyna: " & MetadaneMapy.MaskujSekrety(przyczyna).Replace(""""c, "'"c))
+                        Dim opis = MetadaneMapy.MaskujSekrety(przyczyna)
+                        If wynik.PierwszyBlad = "" Then wynik.PierwszyBlad = opis
+                        plik.WriteLine("przyczyna: " & opis.Replace(""""c, "'"c))
                     ElseIf wynik.Przerwano Then
                         plik.WriteLine("przyczyna: przerwano pobieranie")
                     End If

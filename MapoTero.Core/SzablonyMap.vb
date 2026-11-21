@@ -42,6 +42,20 @@ Public Enum CelMapy
     ProjektCadGis
 End Enum
 
+''' <summary>Grupa warstw, których krycie reguluje jeden suwak w kreatorze (krok 2).</summary>
+Public Enum RodzajRegulacji
+    ''' <summary>Warstwa bez suwaka (np. podkład).</summary>
+    Brak = 0
+    ''' <summary>Cieniowanie rzeźby terenu nałożone na mapę.</summary>
+    Cieniowanie = 1
+    ''' <summary>Nakładki szlaków (piesze, rowerowe, MTB).</summary>
+    Szlaki = 2
+    ''' <summary>Mapa topograficzna nałożona na cieniowanie (np. w kompozycji dziedzictwa kulturowego).</summary>
+    MapaTopograficzna = 3
+    ''' <summary>Zabytki i stanowiska archeologiczne (NID).</summary>
+    Zabytki = 4
+End Enum
+
 ''' <summary>Definicja pojedynczej warstwy wchodzącej w skład gotowego zestawu (szablonu).</summary>
 Public Class WarstwaSzablonu
     ''' <summary>Nazwa pliku zbioru map z folderu warstwy (np. TOPO_WMTS, ortofotomapa_WMTS).</summary>
@@ -56,6 +70,42 @@ Public Class WarstwaSzablonu
     Public Property Nakladka As Boolean = False
     ''' <summary>Opcjonalna czytelna etykieta warstwy wyświetlana w kreatorze.</summary>
     Public Property NazwaWyswietlana As String = ""
+    ''' <summary>Suwak kreatora regulujący krycie warstwy (Brak - rozpoznawany automatycznie: szlaki, cieniowanie).</summary>
+    Public Property Regulacja As RodzajRegulacji = RodzajRegulacji.Brak
+
+    ''' <summary>Grupa warstw włączana i wyłączana jednym polem w kreatorze (np. „Zabytki archeologiczne”); pusty - zawsze włączona.</summary>
+    Public Property Grupa As String = ""
+
+    ''' <summary>Adres serwera, gdy plik zbioru nie istnieje (styl zapisany z warstwy dodanej w oknie głównym).</summary>
+    Public Property Adres As String = ""
+    ''' <summary>Rodzaj usługi do <see cref="Adres"/>.</summary>
+    Public Property TypZrodla As TypUslugiMapowej = TypUslugiMapowej.Nieznana
+
+    ''' <summary>Warstwa stylu z warstwy zestawu (krycie i tryb mieszania takie, jak w zestawie).</summary>
+    Public Shared Function ZWarstwyWybranej(w As WarstwaWybrana, Optional wzor As WarstwaSzablonu = Nothing) As WarstwaSzablonu
+        Return New WarstwaSzablonu(w.Zbior, w.Nazwa, w.Krycie, w.Nakladka, w.TrybMieszania, If(wzor?.NazwaWyswietlana, "")) With {
+            .Regulacja = If(wzor IsNot Nothing, wzor.Regulacja, RodzajRegulacji.Brak),
+            .Grupa = If(wzor?.Grupa, ""), .Adres = If(w.Adres, ""), .TypZrodla = w.TypZrodla}
+    End Function
+
+    ''' <summary>Ustawia grupę warstwy (pole wyboru w kreatorze) i zwraca ją (do budowania szablonów).</summary>
+    Public Function ZGrupa(nazwa As String) As WarstwaSzablonu
+        Grupa = nazwa
+        Return Me
+    End Function
+
+    ''' <summary>Ustawia suwak kreatora regulujący warstwę i zwraca ją (do budowania szablonów).</summary>
+    Public Function ZRegulacja(r As RodzajRegulacji) As WarstwaSzablonu
+        Regulacja = r
+        Return Me
+    End Function
+
+    ''' <summary>Etykieta warstwy dla użytkownika (nazwa wyświetlana albo nazwa na serwerze).</summary>
+    Public ReadOnly Property Etykieta As String
+        Get
+            Return If(String.IsNullOrWhiteSpace(NazwaWyswietlana), Warstwa, NazwaWyswietlana)
+        End Get
+    End Property
 
     Public Sub New()
     End Sub
@@ -85,6 +135,11 @@ Public Class StopienSkali
     Public Property Piksel As Double = 1.0
     ''' <summary>Warstwy stopnia (od podkładu w górę).</summary>
     Public ReadOnly Property Warstwy As New List(Of WarstwaSzablonu)()
+    ''' <summary>
+    ''' Stopień dodatkowy, domyślnie wyłączony (np. ortofotomapa przy zbliżeniach ponad najdokładniejszą mapę). Nie trafia
+    ''' do planu automatycznego ani do wyboru skali po pikselu, bo zwiększa plik kilkakrotnie i zmienia charakter mapy.
+    ''' </summary>
+    Public Property Opcjonalny As Boolean
 
     Public Overrides Function ToString() As String
         Return Opis
@@ -97,6 +152,21 @@ Public Class PlanStopnia
     Public Property Piksel As Double
     Public Property PoziomMin As Integer
     Public Property PoziomMax As Integer
+    ''' <summary>Warstwy stopnia wybrane przez użytkownika (Nothing - wszystkie warstwy stopnia).</summary>
+    Public Property Warstwy As List(Of WarstwaSzablonu)
+
+    ''' <summary>Warstwy do pobrania dla tego stopnia.</summary>
+    Public ReadOnly Property WarstwyEfektywne As IList(Of WarstwaSzablonu)
+        Get
+            If Warstwy IsNot Nothing Then Return Warstwy
+            Return If(Stopien IsNot Nothing, CType(Stopien.Warstwy, IList(Of WarstwaSzablonu)), New List(Of WarstwaSzablonu)())
+        End Get
+    End Property
+
+    Public Function Kopia() As PlanStopnia
+        Return New PlanStopnia With {.Stopien = Stopien, .Piksel = Piksel, .PoziomMin = PoziomMin, .PoziomMax = PoziomMax,
+                                     .Warstwy = If(Warstwy Is Nothing, Nothing, New List(Of WarstwaSzablonu)(Warstwy))}
+    End Function
 
     Public Overrides Function ToString() As String
         Return $"{Stopien?.Opis} ({Piksel:0.##} m, zoom {PoziomMin}-{PoziomMax})"
@@ -112,7 +182,7 @@ Public Class SzablonMapy
     Public Property Piktogram As String = ""
     ''' <summary>Sugerowany rozmiar piksela w metrach - dobrany do rozdzielczości warstw zestawu (bez rozmywania i zbędnego powiększania pliku).</summary>
     Public Property DomyslnyPiksel As Double = 1.0
-    ''' <summary>Profil korekty obrazu proponowany dla tego zestawu (poza odbiornikami Garmin, które zawsze dostają profil MIP).</summary>
+    ''' <summary>Profil korekty obrazu podpowiadany po otwarciu okna korekty (korekta jest domyślnie wyłączona - decyzja autora).</summary>
     Public Property ProfilKorekty As ProfilKorektyRastra = ProfilKorektyRastra.Brak
     ''' <summary>Szerokość geograficzna reprezentatywnego punktu próbki podglądu (miejsce, w którym zestaw dobrze wygląda).</summary>
     Public Property ProbkaLat As Double = 52.0
@@ -120,6 +190,8 @@ Public Class SzablonMapy
     Public Property ProbkaLon As Double = 19.0
     ''' <summary>Rozmiar piksela dla próbki podglądu.</summary>
     Public Property ProbkaPiksel As Double = 1.0
+    ''' <summary>Ograniczenia zasięgu map zestawu (np. arkusze zachowane tylko dla części kraju); pusty - brak ograniczeń.</summary>
+    Public Property UwagaPokrycia As String = ""
     ''' <summary>Warstwy składające się na tę mozaikę mapową (od podkładu w górę); w mapie wieloskalowej - najdokładniejszy stopień.</summary>
     Public ReadOnly Property Warstwy As New List(Of WarstwaSzablonu)()
     ''' <summary>Stopnie skali od najdokładniejszego (pusta lista - mapa jednoskalowa z warstw <see cref="Warstwy"/>).</summary>
@@ -156,7 +228,21 @@ Public Class SzablonMapy
     ''' <summary>Czy szablon ma kilka stopni skali (mapa wieloskalowa).</summary>
     Public ReadOnly Property Wieloskalowy As Boolean
         Get
-            Return StopnieSkali.Count > 1
+            Return StopnieGlowne.Count > 1
+        End Get
+    End Property
+
+    ''' <summary>Stopnie skali bez stopni opcjonalnych, od najdokładniejszego.</summary>
+    Public ReadOnly Property StopnieGlowne As List(Of StopienSkali)
+        Get
+            Return StopnieSkali.Where(Function(st) Not st.Opcjonalny).ToList()
+        End Get
+    End Property
+
+    ''' <summary>Stopień opcjonalny szablonu (np. ortofotomapa przy zbliżeniu); Nothing, gdy szablon go nie ma.</summary>
+    Public ReadOnly Property StopienOpcjonalny As StopienSkali
+        Get
+            Return StopnieSkali.FirstOrDefault(Function(st) st.Opcjonalny)
         End Get
     End Property
 
@@ -172,11 +258,24 @@ Public Class SzablonMapy
         Return st
     End Function
 
+    ''' <summary>
+    ''' Dodaje stopień opcjonalny - dokładniejszy od głównych, pobierany tylko na życzenie użytkownika (np. ortofotomapa
+    ''' na powiększeniach, na których najdokładniejsza mapa byłaby już tylko powiększonymi pikselami).
+    ''' </summary>
+    Public Function DodajStopienOpcjonalny(opis As String, piksel As Double, ParamArray warstwy() As WarstwaSzablonu) As StopienSkali
+        Dim st As New StopienSkali With {.Opis = opis, .Piksel = piksel, .Opcjonalny = True}
+        st.Warstwy.AddRange(warstwy)
+        StopnieSkali.Add(st)
+        Return st
+    End Function
+
     ''' <summary>Stopień skali najbliższy (w skali logarytmicznej) podanemu pikselowi; Nothing dla mapy jednoskalowej.</summary>
     Public Function StopienDlaPiksela(piksel As Double) As StopienSkali
-        If StopnieSkali.Count = 0 Then Return Nothing
-        If piksel <= 0 Then Return StopnieSkali(0)
-        Return StopnieSkali.OrderBy(Function(st) Math.Abs(Math.Log(piksel / st.Piksel))).First()
+        'stopień opcjonalny pomijamy - inaczej piksel 1 m dałby ortofotomapę zamiast mapy topograficznej
+        Dim glowne = StopnieGlowne
+        If glowne.Count = 0 Then Return Nothing
+        If piksel <= 0 Then Return glowne(0)
+        Return glowne.OrderBy(Function(st) Math.Abs(Math.Log(piksel / st.Piksel))).First()
     End Function
 
     ''' <summary>Warstwy do pobrania przy danym pikselu: w mapie wieloskalowej - stopnia najbliższego pikselowi.</summary>
@@ -192,6 +291,13 @@ Public Class SzablonMapy
         Return zestaw
     End Function
 
+    ''' <summary>Zestaw z podanych warstw szablonu (np. warstw stopnia wybranych przez użytkownika).</summary>
+    Public Function UtworzZestaw(zrodlaMap As IDictionary(Of String, PlikWarstw), warstwy As IList(Of WarstwaSzablonu)) As ZestawWarstw
+        Dim zestaw As New ZestawWarstw()
+        ZarzadcaSzablonow.ZastosujWarstwy(Me, warstwy, zestaw, zrodlaMap)
+        Return zestaw
+    End Function
+
     ''' <summary>Zestaw warstw wskazanego stopnia skali.</summary>
     Public Function UtworzZestaw(zrodlaMap As IDictionary(Of String, PlikWarstw), stopien As StopienSkali) As ZestawWarstw
         Dim zestaw As New ZestawWarstw()
@@ -199,10 +305,23 @@ Public Class SzablonMapy
         Return zestaw
     End Function
 
+    ''' <summary>Grupy warstw włączane polami wyboru w kreatorze, w kolejności warstw.</summary>
+    Public Function GrupyWarstw() As List(Of String)
+        Return Warstwy.Concat(StopnieSkali.SelectMany(Function(st) st.Warstwy)).
+            Select(Function(w) w.Grupa).Where(Function(g) Not String.IsNullOrEmpty(g)).Distinct().ToList()
+    End Function
+
+    ''' <summary>Warstwy bez wyłączonych grup (kolejność bez zmian).</summary>
+    Public Shared Function BezGrup(warstwy As IEnumerable(Of WarstwaSzablonu), wylaczone As ICollection(Of String)) As List(Of WarstwaSzablonu)
+        If warstwy Is Nothing Then Return New List(Of WarstwaSzablonu)()
+        If wylaczone Is Nothing OrElse wylaczone.Count = 0 Then Return warstwy.ToList()
+        Return warstwy.Where(Function(w) String.IsNullOrEmpty(w.Grupa) OrElse Not wylaczone.Contains(w.Grupa)).ToList()
+    End Function
+
     ''' <summary>Opis stopni skali (np. „1:10 000 → 1:50 000 → 1:100 000”); pusty dla mapy jednoskalowej.</summary>
     Public Function OpisSkal() As String
         If Not Wieloskalowy Then Return ""
-        Return String.Join(" → ", StopnieSkali.Select(Function(st) st.Opis))
+        Return String.Join(" → ", StopnieGlowne.Select(Function(st) st.Opis))
     End Function
 
     ''' <summary>Zwięzłe podsumowanie składników szablonu dla interfejsu użytkownika.</summary>
@@ -316,14 +435,38 @@ Public Module ZarzadcaSzablonow
         Return _domyslneSzablony.AsReadOnly()
     End Function
 
-    ''' <summary>Filtruje szablony dopasowane do wskazanego urządzenia lub celu.</summary>
-    Public Function PobierzDlaCelu(cel As CelMapy) As List(Of SzablonMapy)
-        Return _domyslneSzablony.Where(Function(s) s.PasujeDoCelu(cel)).ToList()
+    Private ReadOnly _wlasneSzablony As New List(Of SzablonMapy)()
+
+    ''' <summary>Style zapisane przez użytkownika (<see cref="SzablonyWlasne"/>).</summary>
+    Public Function PobierzWlasne() As IReadOnlyList(Of SzablonMapy)
+        Return _wlasneSzablony.AsReadOnly()
     End Function
 
-    ''' <summary>Zwraca szablon o podanym identyfikatorze.</summary>
+    Public Sub UstawWlasne(style As IEnumerable(Of SzablonMapy))
+        _wlasneSzablony.Clear()
+        If style IsNot Nothing Then _wlasneSzablony.AddRange(style)
+    End Sub
+
+    ''' <summary>Gotowe style i style użytkownika.</summary>
+    Public Function PobierzWszystkie() As List(Of SzablonMapy)
+        Return _domyslneSzablony.Concat(_wlasneSzablony).ToList()
+    End Function
+
+    ''' <summary>
+    ''' Style dopasowane do celu: gotowe, potem zapisane przez użytkownika, na końcu „Moje warstwy z okna głównego”.
+    ''' </summary>
+    Public Function PobierzDlaCelu(cel As CelMapy) As List(Of SzablonMapy)
+        Dim gotowe = _domyslneSzablony.Where(Function(s) s.PasujeDoCelu(cel)).ToList()
+        Dim indeksWarstwOkna = gotowe.FindIndex(Function(s) s.Id = "wlasny_zestaw")
+        Dim wlasne = _wlasneSzablony.Where(Function(s) s.PasujeDoCelu(cel))
+        If indeksWarstwOkna < 0 Then indeksWarstwOkna = gotowe.Count
+        gotowe.InsertRange(indeksWarstwOkna, wlasne)
+        Return gotowe
+    End Function
+
+    ''' <summary>Zwraca szablon o podanym identyfikatorze (gotowy albo zapisany przez użytkownika).</summary>
     Public Function ZnajdzSzablon(id As String) As SzablonMapy
-        Return _domyslneSzablony.FirstOrDefault(Function(s) String.Equals(s.Id, id, StringComparison.OrdinalIgnoreCase))
+        Return PobierzWszystkie().FirstOrDefault(Function(s) String.Equals(s.Id, id, StringComparison.OrdinalIgnoreCase))
     End Function
 
     ''' <summary>
@@ -351,6 +494,11 @@ Public Module ZarzadcaSzablonow
                 If plik IsNot Nothing AndAlso zrodlaMap IsNot Nothing Then zrodlaMap(w.Zbior) = plik
             End If
             Dim zalecany As Double = szablon.DomyslnyPiksel
+            If plik Is Nothing AndAlso Not String.IsNullOrEmpty(w.Adres) Then
+                ' styl zapisany z warstwy spoza folderu warstwy - adres zapamiętany w stylu
+                adres = w.Adres
+                typZrodla = w.TypZrodla
+            End If
             If plik IsNot Nothing Then
                 adres = plik.Adres
                 typZrodla = plik.EfektywnyTyp
@@ -397,6 +545,74 @@ Public Module ZarzadcaSzablonow
         Return Nothing
     End Function
 
+    ''' <summary>
+    ''' Suwak regulujący warstwę szablonu: ustawiony w szablonie albo rozpoznany - nakładki szlaków (Waymarked Trails)
+    ''' i cieniowanie nad podkładem. Najniższa warstwa nie ma suwaka (zmniejszenie krycia podkładu odsłania puste tło).
+    ''' </summary>
+    Public Function RegulacjaWarstwy(w As WarstwaSzablonu, indeks As Integer) As RodzajRegulacji
+        If w Is Nothing Then Return RodzajRegulacji.Brak
+        If w.Regulacja <> RodzajRegulacji.Brak Then Return w.Regulacja
+        Return RegulacjaPoNazwie(w.Zbior, w.Warstwa, indeks)
+    End Function
+
+    ''' <summary>Suwak dla warstwy zestawu z okna głównego (rozpoznawany po zbiorze i nazwie).</summary>
+    Public Function RegulacjaWarstwy(w As WarstwaWybrana, indeks As Integer) As RodzajRegulacji
+        If w Is Nothing Then Return RodzajRegulacji.Brak
+        Return RegulacjaPoNazwie(w.Zbior, w.Nazwa, indeks)
+    End Function
+
+    Private Function RegulacjaPoNazwie(zbior As String, nazwa As String, indeks As Integer) As RodzajRegulacji
+        If indeks <= 0 Then Return RodzajRegulacji.Brak
+        If String.Equals(zbior, "Waymarked_Trails", StringComparison.OrdinalIgnoreCase) Then Return RodzajRegulacji.Szlaki
+        If CzyNazwaCieniowania(nazwa) Then Return RodzajRegulacji.Cieniowanie
+        If Not String.IsNullOrEmpty(zbior) AndAlso zbior.StartsWith("zabytki", StringComparison.OrdinalIgnoreCase) Then Return RodzajRegulacji.Zabytki
+        Return RodzajRegulacji.Brak
+    End Function
+
+    ''' <summary>Nazwa suwaka regulacji dla użytkownika.</summary>
+    Public Function NazwaRegulacji(r As RodzajRegulacji) As String
+        Select Case r
+            Case RodzajRegulacji.Cieniowanie : Return "Cieniowanie terenu"
+            Case RodzajRegulacji.Szlaki : Return "Szlaki"
+            Case RodzajRegulacji.MapaTopograficzna : Return "Mapa topograficzna"
+            Case RodzajRegulacji.Zabytki : Return "Zabytki (NID)"
+            Case Else : Return ""
+        End Select
+    End Function
+
+    ''' <summary>Suwaki szablonu z kryciem bazowym (pierwsza warstwa danego rodzaju w najdokładniejszym stopniu), w stałej kolejności.</summary>
+    Public Function RegulacjeSzablonu(szablon As SzablonMapy) As List(Of KeyValuePair(Of RodzajRegulacji, Integer))
+        Dim wynik As New List(Of KeyValuePair(Of RodzajRegulacji, Integer))()
+        If szablon Is Nothing Then Return wynik
+        Dim znalezione As New Dictionary(Of RodzajRegulacji, Integer)()
+        For i = 0 To szablon.Warstwy.Count - 1
+            Dim r = RegulacjaWarstwy(szablon.Warstwy(i), i)
+            If r <> RodzajRegulacji.Brak AndAlso Not znalezione.ContainsKey(r) Then znalezione(r) = szablon.Warstwy(i).Krycie
+        Next
+        For Each r In [Enum].GetValues(GetType(RodzajRegulacji)).Cast(Of RodzajRegulacji)()
+            If znalezione.ContainsKey(r) Then wynik.Add(New KeyValuePair(Of RodzajRegulacji, Integer)(r, znalezione(r)))
+        Next
+        Return wynik
+    End Function
+
+    ''' <summary>
+    ''' Ustawia krycie warstw zestawu według suwaków. Zestaw musi być utworzony z <paramref name="warstwySzablonu"/>
+    ''' (warstwa i zestawu odpowiada warstwie i szablonu). Krycie zmienia się proporcjonalnie do bazowego - np. słabsze
+    ''' cieniowanie mniej dokładnego stopnia skali (45% przy 70%) zostaje słabsze także po przesunięciu suwaka.
+    ''' </summary>
+    Public Sub ZastosujRegulacje(warstwySzablonu As IList(Of WarstwaSzablonu), zestaw As ZestawWarstw,
+                                 wartosci As IDictionary(Of RodzajRegulacji, Integer), bazowe As IDictionary(Of RodzajRegulacji, Integer))
+        If warstwySzablonu Is Nothing OrElse zestaw Is Nothing OrElse wartosci Is Nothing Then Exit Sub
+        For i = 0 To Math.Min(warstwySzablonu.Count, zestaw.Liczba) - 1
+            Dim r = RegulacjaWarstwy(warstwySzablonu(i), i)
+            Dim wartosc As Integer
+            If r = RodzajRegulacji.Brak OrElse Not wartosci.TryGetValue(r, wartosc) Then Continue For
+            Dim baza As Integer = 0
+            If bazowe IsNot Nothing Then bazowe.TryGetValue(r, baza)
+            zestaw(i).Krycie = If(baza > 0, Math.Max(0, Math.Min(100, CInt(Math.Round(wartosc * warstwySzablonu(i).Krycie / CDbl(baza), MidpointRounding.AwayFromZero)))), wartosc)
+        Next
+    End Sub
+
     ''' <summary>Indeks warstwy cieniowania w szablonie (jak <see cref="ZnajdzWarstweCieniowania"/>); -1, gdy brak.</summary>
     Public Function IndeksCieniowania(szablon As SzablonMapy) As Integer
         If szablon Is Nothing Then Return -1
@@ -433,12 +649,15 @@ Public Module ZarzadcaSzablonow
     ''' trafia do stopnia o pikselu najbliższym rozdzielczości poziomu (w skali logarytmicznej), a najmniej dokładny
     ''' stopień obejmuje jeszcze 3 poziomy poniżej swojej rozdzielczości.
     ''' </summary>
-    Public Function PlanStopni(szablon As SzablonMapy, pikselNajdokladniejszy As Double, szerokoscGeo As Double) As List(Of PlanStopnia)
+    Public Function PlanStopni(szablon As SzablonMapy, pikselNajdokladniejszy As Double, szerokoscGeo As Double,
+                               Optional zOpcjonalnym As Boolean = False) As List(Of PlanStopnia)
         Dim plan As New List(Of PlanStopnia)()
-        If szablon Is Nothing OrElse szablon.StopnieSkali.Count = 0 OrElse pikselNajdokladniejszy <= 0 Then Return plan
-        plan.Add(New PlanStopnia With {.Stopien = szablon.StopnieSkali(0), .Piksel = pikselNajdokladniejszy})
-        For i = 1 To szablon.StopnieSkali.Count - 1
-            Dim st = szablon.StopnieSkali(i)
+        If szablon Is Nothing OrElse pikselNajdokladniejszy <= 0 Then Return plan
+        Dim glowne = szablon.StopnieGlowne
+        If glowne.Count = 0 Then Return plan
+        plan.Add(New PlanStopnia With {.Stopien = glowne(0), .Piksel = pikselNajdokladniejszy})
+        For i = 1 To glowne.Count - 1
+            Dim st = glowne(i)
             If st.Piksel > plan.Last().Piksel * 1.8 Then plan.Add(New PlanStopnia With {.Stopien = st, .Piksel = st.Piksel})
         Next
         Dim cos = Math.Max(0.1, Math.Cos(szerokoscGeo * Math.PI / 180.0))
@@ -457,22 +676,93 @@ Public Module ZarzadcaSzablonow
         Next
         'stopień bez żadnego poziomu (np. piksel użytkownika zbliżony do następnego stopnia) nie jest pobierany
         plan.RemoveAll(Function(ps) ps.PoziomMin > ps.PoziomMax)
+        If zOpcjonalnym Then
+            Dim opcjonalny = PlanStopniaOpcjonalnego(szablon, plan, szerokoscGeo)
+            If opcjonalny IsNot Nothing Then plan.Insert(0, opcjonalny)
+        End If
         Return plan
+    End Function
+
+    ''' <summary>
+    ''' Stopień opcjonalny szablonu nad najdokładniejszym stopniem planu: od następnego powiększenia do powiększenia
+    ''' odpowiadającego pikselowi stopnia (co najmniej jeden poziom, najwyżej 20). Zaczyna się zaraz nad planem, bo na
+    ''' północy kraju mapa 2 m kończy się na zoom 15 i stały zakres zostawiałby pusty poziom 16. Nothing - szablon nie ma
+    ''' stopnia opcjonalnego albo plan jest już równie dokładny.
+    ''' </summary>
+    Public Function PlanStopniaOpcjonalnego(szablon As SzablonMapy, plan As IList(Of PlanStopnia), szerokoscGeo As Double) As PlanStopnia
+        Dim st = szablon?.StopienOpcjonalny
+        If st Is Nothing OrElse plan Is Nothing OrElse st.Piksel <= 0 Then Return Nothing
+        Dim glowne = plan.Where(Function(ps) ps.Stopien Is Nothing OrElse Not ps.Stopien.Opcjonalny).ToList()
+        If glowne.Count = 0 Then Return Nothing
+        If st.Piksel * 1.8 > glowne.Min(Function(ps) ps.Piksel) Then Return Nothing
+        Dim cos = Math.Max(0.1, Math.Cos(szerokoscGeo * Math.PI / 180.0))
+        Dim naturalny = CInt(Math.Round(Math.Log(156543.034 * cos / st.Piksel, 2)))
+        Dim zOd = glowne.Max(Function(ps) ps.PoziomMax) + 1
+        If zOd > 20 Then Return Nothing
+        Return New PlanStopnia With {.Stopien = st, .Piksel = st.Piksel, .PoziomMin = zOd, .PoziomMax = Math.Min(20, Math.Max(zOd, naturalny))}
+    End Function
+
+    ''' <summary>
+    ''' Błąd planu skal ustawionego przez użytkownika (pusty tekst - plan poprawny): brak skal, zły piksel, zakres
+    ''' powiększeń od > do, skala bez warstw albo nakładające się zakresy (kompilator nie wie, którą mapę pokazać).
+    ''' </summary>
+    Public Function SprawdzPlan(plan As IList(Of PlanStopnia)) As String
+        If plan Is Nothing OrElse plan.Count = 0 Then Return "Zaznacz co najmniej jedną skalę."
+        For Each ps In plan
+            Dim nazwa = If(ps.Stopien IsNot Nothing, ps.Stopien.Opis, "?")
+            If ps.Piksel <= 0 Then Return $"Skala {nazwa}: rozmiar piksela musi być większy od zera."
+            If ps.PoziomMin < 0 OrElse ps.PoziomMax > 22 Then Return $"Skala {nazwa}: powiększenia muszą być w zakresie 0-22."
+            If ps.PoziomMin > ps.PoziomMax Then Return $"Skala {nazwa}: powiększenie „od”” jest większe niż „do””."
+            If ps.WarstwyEfektywne.Count = 0 Then Return $"Skala {nazwa}: zaznacz co najmniej jedną warstwę."
+        Next
+        Dim posortowane = plan.OrderByDescending(Function(ps) ps.PoziomMax).ToList()
+        For i = 1 To posortowane.Count - 1
+            If posortowane(i).PoziomMax >= posortowane(i - 1).PoziomMin Then
+                Return $"Zakresy powiększeń skal {posortowane(i - 1).Stopien?.Opis} i {posortowane(i).Stopien?.Opis} nakładają się - każdy poziom może należeć tylko do jednej skali."
+            End If
+        Next
+        Return ""
+    End Function
+
+    ''' <summary>Poziomy powiększenia między najniższym a najwyższym, które nie należą do żadnej skali planu (na nich mapa będzie pusta).</summary>
+    Public Function LukiPlanu(plan As IList(Of PlanStopnia)) As List(Of Integer)
+        Dim luki As New List(Of Integer)()
+        If plan Is Nothing OrElse plan.Count = 0 Then Return luki
+        For z = plan.Min(Function(ps) ps.PoziomMin) To plan.Max(Function(ps) ps.PoziomMax)
+            Dim poziom = z
+            If Not plan.Any(Function(ps) ps.PoziomMin <= poziom AndAlso poziom <= ps.PoziomMax) Then luki.Add(z)
+        Next
+        Return luki
+    End Function
+
+    ''' <summary>Dopasowuje bok segmentu małego obszaru bez zmiany rozmiaru piksela ani siatki dużych sesji.</summary>
+    Public Function BokSegmentuKreatora(zasieg As Zasieg, piksel As Double) As Integer
+        If Not zasieg.Poprawny OrElse piksel <= 0 Then Return 1024
+        Return CInt(Math.Clamp(Math.Ceiling(Math.Max(zasieg.Szerokosc, zasieg.Wysokosc) / piksel / 16) * 16, 64, 1024))
     End Function
 
     ''' <summary>Łączny szacunek mapy wieloskalowej: suma segmentów, rozmiaru i czasu wszystkich stopni planu.</summary>
     Public Function SzacujWieloskalowo(plan As IList(Of PlanStopnia), zasieg As Zasieg, Optional korytarz As Korytarz = Nothing,
-                                       Optional uklad As UkladWspolrzednych = Nothing, Optional liczbaZrodel As Integer = 1) As SzacunekKreatora
+                                       Optional uklad As UkladWspolrzednych = Nothing, Optional liczbaZrodel As Integer = 1,
+                                       Optional zrodlaStopni As IList(Of Integer) = Nothing) As SzacunekKreatora
         If plan Is Nothing OrElse plan.Count = 0 Then Return New SzacunekKreatora()
-        Dim wynik = SzacujParametry(zasieg, plan(0).Piksel, 1024, korytarz, uklad, RodzajEksportu.MBTiles, True, liczbaZrodel)
+        Dim szacuj = Function(i As Integer) SzacujParametry(zasieg, plan(i).Piksel,
+            If(zrodlaStopni Is Nothing, 1024, BokSegmentuKreatora(zasieg, plan(i).Piksel)),
+            korytarz, uklad, RodzajEksportu.MBTiles, True, If(zrodlaStopni Is Nothing, liczbaZrodel, zrodlaStopni(i)),
+            przyciety:=zrodlaStopni IsNot Nothing)
+        Dim wynik = szacuj(0)
         For i = 1 To plan.Count - 1
-            Dim s = SzacujParametry(zasieg, plan(i).Piksel, 1024, korytarz, uklad, RodzajEksportu.MBTiles, True, liczbaZrodel)
+            Dim s = szacuj(i)
             wynik.LiczbaSegmentow += s.LiczbaSegmentow
             wynik.LiczbaSegmentowPelnych += s.LiczbaSegmentowPelnych
             wynik.SzacowanyRozmiarMbMin += s.SzacowanyRozmiarMbMin
             wynik.SzacowanyRozmiarMbMax += s.SzacowanyRozmiarMbMax
             wynik.SzacowanyRozmiarMb += s.SzacowanyRozmiarMb
             wynik.SzacowanyCzasSekundy += s.SzacowanyCzasSekundy
+            If s.PoziomOstrzezenia > wynik.PoziomOstrzezenia Then
+                wynik.PoziomOstrzezenia = s.PoziomOstrzezenia
+                wynik.Ostrzezenie = s.Ostrzezenie
+            End If
         Next
         Return wynik
     End Function
@@ -485,7 +775,8 @@ Public Module ZarzadcaSzablonow
                                    Optional uklad As UkladWspolrzednych = Nothing,
                                    Optional formatDocelowy As RodzajEksportu = RodzajEksportu.MBTiles,
                                    Optional wielopoziomowy As Boolean = True,
-                                   Optional liczbaZrodel As Integer = 1) As SzacunekKreatora
+                                   Optional liczbaZrodel As Integer = 1,
+                                   Optional przyciety As Boolean = False) As SzacunekKreatora
         Dim wynik As New SzacunekKreatora()
         If Not zasieg.Poprawny OrElse piksel <= 0 OrElse bok <= 0 Then
             Return wynik
@@ -518,7 +809,11 @@ Public Module ZarzadcaSzablonow
 
         Select Case formatDocelowy
             Case RodzajEksportu.MBTiles, RodzajEksportu.SQLiteDB, RodzajEksportu.OruxMaps
-                If wielopoziomowy Then
+                If przyciety Then
+                    ' Kafle PNG z alfą, nawet dla mapy o pełnym kryciu wewnątrz obszaru.
+                    mbMin = 1.0
+                    mbMax = 2.6
+                ElseIf wielopoziomowy Then
                     ' Piramida powiększeń dodaje ok. 33% kafelków z niższych zoomów
                     mbMin = 0.35
                     mbMax = 0.6
@@ -543,8 +838,15 @@ Public Module ZarzadcaSzablonow
                 mbMax = 0.45
         End Select
 
-        wynik.SzacowanyRozmiarMbMin = Math.Round(wynik.LiczbaSegmentow * mbMin, 1)
-        wynik.SzacowanyRozmiarMbMax = Math.Round(wynik.LiczbaSegmentow * mbMax, 1)
+        Dim jednostkiRozmiaru As Double = wynik.LiczbaSegmentow
+        If przyciety Then
+            Dim obszarPx = Math.Ceiling(zasieg.Szerokosc / piksel) * Math.Ceiling(zasieg.Wysokosc / piksel)
+            Dim jednostkaPx = 1024.0 * 1024
+            jednostkiRozmiaru = Math.Max(0.05, Math.Min(obszarPx, CDbl(wynik.LiczbaSegmentow) * bok * bok) / jednostkaPx)
+        End If
+        Dim miejsca = If(przyciety, 2, 1)
+        wynik.SzacowanyRozmiarMbMin = Math.Round(jednostkiRozmiaru * mbMin, miejsca)
+        wynik.SzacowanyRozmiarMbMax = Math.Round(jednostkiRozmiaru * mbMax, miejsca)
         wynik.SzacowanyRozmiarMb = Math.Round((wynik.SzacowanyRozmiarMbMin + wynik.SzacowanyRozmiarMbMax) / 2.0, 1)
 
         ' Czas: pobieranie 4-wątkowe (ok. 4 zapytania/s), każde źródło zestawu to osobne zapytanie na segment
@@ -557,7 +859,7 @@ Public Module ZarzadcaSzablonow
             Case RodzajEksportu.GeoTiff, RodzajEksportu.KmzGarmin
                 czasKompilacji = CInt(Math.Ceiling(wynik.LiczbaSegmentow / 25.0))
         End Select
-        wynik.SzacowanyCzasSekundy = czasPobierania + czasKompilacji
+        wynik.SzacowanyCzasSekundy = czasPobierania + czasKompilacji + If(przyciety, Math.Max(1, liczbaZrodel) * 2, 0)
 
         ' Progi ostrzeżeń są te same, co próg pytania przed generowaniem (WymagaPotwierdzenia = poziom >= 1)
         If formatDocelowy = RodzajEksportu.KmzGarmin AndAlso wynik.LiczbaSegmentow > LimitKafliGarmin Then
@@ -602,7 +904,7 @@ Public Module ZarzadcaSzablonow
 
     ''' <summary>Wariant zalecany początkującym dla danego celu (True - wielopoziomowy).</summary>
     Public Function ZalecanyWariantWielopoziomowy(cel As CelMapy) As Boolean
-        'Garmin: KMZ działa na każdym odbiorniku bez dodatkowych kroków, JNX wymaga obsługi BirdsEye;
+        'Garmin: KMZ wymaga obsługi Custom Maps, JNX wymaga obsługi BirdsEye;
         'wydruk i CAD/GIS: jeden arkusz GeoTIFF
         Return cel = CelMapy.TelefonTablet
     End Function
@@ -679,6 +981,23 @@ Public Module ZarzadcaSzablonow
         Return If(w Is Nothing, 0, w.ZalecanyPiksel / 2.0)
     End Function
 
+    ''' <summary>
+    ''' Rozmiar wydruku arkusza przy 254 dpi (0,1 mm na piksel - ta sama rozdzielczość co <see cref="SkalaWydruku"/>)
+    ''' i najmniejszy format papieru A, na którym się mieści (w dowolnej orientacji), np. „wydruk 42 × 30 cm – A3”.
+    ''' </summary>
+    Public Function OpisArkuszaWydruku(szerokoscM As Double, wysokoscM As Double, piksel As Double) As String
+        If piksel <= 0 OrElse szerokoscM <= 0 OrElse wysokoscM <= 0 Then Return ""
+        Dim szerMm = szerokoscM / piksel * 0.1
+        Dim wysMm = wysokoscM / piksel * 0.1
+        Dim krotszy = Math.Min(szerMm, wysMm), dluzszy = Math.Max(szerMm, wysMm)
+        Dim formaty = {("A4", 210.0, 297.0), ("A3", 297.0, 420.0), ("A2", 420.0, 594.0), ("A1", 594.0, 841.0), ("A0", 841.0, 1189.0)}
+        Dim rozmiar = String.Format(CultureInfo.CurrentCulture, "wydruk {0:0.#} × {1:0.#} cm", szerMm / 10, wysMm / 10)
+        For Each f In formaty
+            If krotszy <= f.Item2 AndAlso dluzszy <= f.Item3 Then Return rozmiar & " – mieści się na " & f.Item1
+        Next
+        Return rozmiar & " – większy niż A0 (wydruk z kilku arkuszy albo większy piksel)"
+    End Function
+
     ''' <summary>Skala wydruku odpowiadająca pikselowi przy 254 dpi (0,1 mm na piksel) - np. 1 m -> 10 000.</summary>
     Public Function SkalaWydruku(piksel As Double) As Integer
         If piksel <= 0 Then Return 0
@@ -729,6 +1048,14 @@ Public Module ZarzadcaSzablonow
     ''' przy 10 m, 1:100 000 przy 25 m i mapę przeglądową przy 60 m. Osobnego zestawu skanów map topograficznych
     ''' nie ma: skany z 1992 r. to te same mapy, które podaje TOPO, a wydania z 1965 r. są czarno-białe i nieczytelne.
     ''' </summary>
+    ''' <summary>Opis stopnia opcjonalnego z ortofotomapą (szablony turystyczne).</summary>
+    Public Const OpisStopniaOrtofotomapy As String = "ortofotomapa przy zbliżeniu"
+    ''' <summary>
+    ''' Piksel stopnia z ortofotomapą: 0,75 m odpowiada zoom 17 na całej szerokości Polski (49-55°N). Zoom 18 (0,4 m)
+    ''' zwiększyłby plik jeszcze czterokrotnie, a na telefonie przegląda się go zwykle powiększeniem kafli zoom 17.
+    ''' </summary>
+    Public Const PikselStopniaOrtofotomapy As Double = 0.75
+
     Private Function UtworzDomyslneSzablony() As List(Of SzablonMapy)
         Dim lista As New List(Of SzablonMapy)()
         Const ZbiorCieniowania = "numer_mod_terenu_cieniowanie_WMTS"
@@ -736,30 +1063,46 @@ Public Module ZarzadcaSzablonow
         Dim cien = Function(krycie As Integer) New WarstwaSzablonu(ZbiorCieniowania, "ISOK_Cien", krycie, True, TrybMieszania.RzezbaTerenu, "Cieniowanie rzeźby terenu")
         Dim topo = Function() New WarstwaSzablonu("TOPO_WMTS", "MAPA TOPOGRAFICZNA", 100, False, TrybMieszania.Zwykly, "Mapa topograficzna GUGiK")
         Dim szlakiPiesze = Function() New WarstwaSzablonu("Waymarked_Trails", "hiking", 100, True, TrybMieszania.Zwykly, "Szlaki piesze")
+        Dim ortoPl = Function() New WarstwaSzablonu("ortofotomapa_WMTS", "ORTOFOTOMAPA", 100, False, TrybMieszania.Zwykly, "Ortofotomapa")
 
         ' 1. Turystyka piesza (próbka: Hala Gąsienicowa)
         Dim sPiesza As New SzablonMapy(
             "piesza_gory", "Turystyka piesza", "Turystyka",
-            "Urzędowa mapa topograficzna GUGiK z cieniowaniem rzeźby terenu i szlakami pieszymi (OpenStreetMap). Przy oddalaniu 1:10 000 przechodzi w 1:50 000, 1:100 000 i mapę przeglądową.",
+            "Urzędowa mapa topograficzna GUGiK z cieniowaniem rzeźby terenu i szlakami pieszymi (OpenStreetMap). Przy oddalaniu 1:10 000 przechodzi w 1:25 000, 1:50 000, 1:100 000 i mapę przeglądową.",
             "🥾", 2.0, ProfilKorektyRastra.Brak, CelMapy.TelefonTablet, CelMapy.OdbiornikGarmin, CelMapy.WydrukKomputer) With {
             .ProbkaLat = 49.244, .ProbkaLon = 20.005}
         sPiesza.DodajStopien("1:10 000", 2.0, topo(), cien(70), szlakiPiesze())
+        ' 1:25 000 - przy 5 m serwer TOPO podaje mapę 1:25 000 (czarno-biała zabudowa), między 1:10 000 a 1:50 000
+        sPiesza.DodajStopien("1:25 000", 5.0, topo(), cien(70), szlakiPiesze())
         sPiesza.DodajStopien("1:50 000", 10.0, topo(), cien(70), szlakiPiesze())
         ' 1:100 000 bez szlaków (przy 25 m linie szlaków zlewały się w gąszcz) i ze słabszym cieniowaniem (Tatry czerniały)
         sPiesza.DodajStopien("1:100 000", 25.0, topo(), cien(45))
         sPiesza.DodajStopien("przeglądowa", 60.0, topo())
+        ' Na zoom 17 mapa 1:10 000 byłaby już tylko powiększonymi pikselami - na życzenie ortofotomapa ze szlakami
+        ' (bez cieniowania, które na zdjęciu tylko przyciemnia). Poza Polską ortofotomapa GUGiK jest czarna.
+        sPiesza.DodajStopienOpcjonalny(OpisStopniaOrtofotomapy, PikselStopniaOrtofotomapy, ortoPl(), szlakiPiesze())
         lista.Add(sPiesza)
 
         ' 2. Góry po obu stronach granicy (próbka: Śnieżka) - OpenTopoMap obejmuje też Czechy i Słowację
         Dim otm = Function() New WarstwaSzablonu("OpenTopoMap", "opentopomap", 100, False, TrybMieszania.Zwykly, "OpenTopoMap")
         Dim sGory As New SzablonMapy(
             "gory_poziomice", "Góry z poziomicami", "Turystyka",
-            "OpenTopoMap z poziomicami, cieniowaniem i nazwami szczytów oraz szlakami pieszymi. Obejmuje też czeską, słowacką i niemiecką stronę gór, gdzie mapy GUGiK są puste.",
+            "OpenTopoMap z poziomicami, nazwami szczytów i szlakami pieszymi, wzmocniona cieniowaniem LiDAR. Obejmuje też czeską, słowacką i niemiecką stronę gór, gdzie mapy GUGiK są puste.",
             "⛰️", 2.0, ProfilKorektyRastra.Brak, CelMapy.TelefonTablet, CelMapy.OdbiornikGarmin, CelMapy.WydrukKomputer) With {
             .ProbkaLat = 50.736, .ProbkaLon = 15.74}
-        sGory.DodajStopien("szczegółowa", 2.0, otm(), szlakiPiesze())
-        sGory.DodajStopien("średnia", 8.0, otm(), szlakiPiesze())
+        ' Cieniowanie ISOK obejmuje Polskę i pas przygraniczny; za nim zostaje cieniowanie samej OpenTopoMap
+        sGory.DodajStopien("szczegółowa", 2.0, otm(), cien(50), szlakiPiesze())
+        sGory.DodajStopien("średnia", 8.0, otm(), cien(50), szlakiPiesze())
         sGory.DodajStopien("przeglądowa", 30.0, otm())
+        ' Ortofotomapa przy zbliżeniu (próbki 2026-11-21: Śnieżka, Kasprowy Wierch, trójstyk przy Bogatyni). Polska na
+        ' spodzie, bo poza Polską ma nieprzezroczystą czerń; Słowacja, Czechy i Saksonia nad nią są poza swoim krajem
+        ' przezroczyste. Czechy z WMS, nie z kafli WMTS: kafle mają dziury przy granicy (HTTP 400 po polskiej stronie
+        ' Karkonoszy od zoom 15), a brak kafla przerywa pobieranie segmentu.
+        sGory.DodajStopienOpcjonalny(OpisStopniaOrtofotomapy, PikselStopniaOrtofotomapy, ortoPl(),
+                                     New WarstwaSzablonu("slowacja_orto_wms", "1", 100, True, TrybMieszania.Zwykly, "Ortofotomapa Słowacji"),
+                                     New WarstwaSzablonu("czechy_orto_wms", "0", 100, True, TrybMieszania.Zwykly, "Ortofotomapa Czech"),
+                                     New WarstwaSzablonu("niemcy_saksonia_dop_wms", "sn_dop_020", 100, True, TrybMieszania.Zwykly, "Ortofotomapa Saksonii"),
+                                     szlakiPiesze())
         lista.Add(sGory)
 
         ' 3. Trasy rowerowe i MTB (próbka: Góry Izerskie, Świeradów-Zdrój - trasa rowerowa 13)
@@ -777,40 +1120,41 @@ Public Module ZarzadcaSzablonow
         sRower.DodajStopien("przeglądowa", 30.0, osm())
         lista.Add(sRower)
 
-        ' 4. Eksploracja terenu (próbka: Bieszczady, wąwozy nad Cisną) - jednoskalowa, bo jej sensem są szczegóły
-        ' Cieniowanie w trybie zwykłym 60%: na ciemnej ortofotomapie lasu żaden tryb mieszania nie pokazuje rzeźby,
-        ' więc rzeźba LiDAR częściowo zastępuje obraz lotniczy.
-        Dim sLas As New SzablonMapy(
-            "las_eksploracja", "Eksploracja terenu (LiDAR)", "Teren",
-            "Rzeźba terenu ze skanowania laserowego (LiDAR, NMT 1 m) przenikająca się z ortofotomapą. Widać wąwozy, rowy, nasypy, grodziska i okopy ukryte pod koronami drzew.",
-            "🌲", 1.0, ProfilKorektyRastra.Brak, CelMapy.TelefonTablet, CelMapy.OdbiornikGarmin, CelMapy.WydrukKomputer, CelMapy.ProjektCadGis) With {
-            .ProbkaLat = 49.19, .ProbkaLon = 22.42}
-        sLas.Warstwy.Add(New WarstwaSzablonu("ortofotomapa_WMTS", "ORTOFOTOMAPA", 100, False, TrybMieszania.Zwykly, "Ortofotomapa"))
-        sLas.Warstwy.Add(New WarstwaSzablonu(ZbiorCieniowania, "ISOK_Cien", 60, True, TrybMieszania.Zwykly, "Rzeźba terenu LiDAR"))
-        lista.Add(sLas)
+        ' 4. Dziedzictwo kulturowe (próbka: Ojców) - jednoskalowe, bo jego sensem są szczegóły terenu.
+        ' Na dole cieniowanie LiDAR w pełnym kryciu, na nim mapa topograficzna przez mnożenie (biel mapy znika,
+        ' rzeźba prześwituje), na wierzchu zabytki NID. Bez warstwy Immovable_Monuments (INSPIRE) - ma nieprzezroczyste
+        ' szare tło i zasłaniała całą mapę; zasięgi zabytków nieruchomych są przezroczyste i barwne.
+        Dim sDziedzictwo As New SzablonMapy(
+            "dziedzictwo", "Dziedzictwo kulturowe", "Teren",
+            "Rzeźba terenu LiDAR z prześwitującą mapą topograficzną 1:10 000 oraz zabytkami NID: zabytki nieruchome z rejestru i ewidencji, rejestr i ewidencja stanowisk archeologicznych (grodziska, kurhany, osady).",
+            "🏛️", 1.0, ProfilKorektyRastra.Brak, CelMapy.TelefonTablet, CelMapy.OdbiornikGarmin, CelMapy.WydrukKomputer, CelMapy.ProjektCadGis) With {
+            .ProbkaLat = 50.205, .ProbkaLon = 19.828, .ProbkaPiksel = 1.5,
+            .UwagaPokrycia = "Zabytki pokazują dane Narodowego Instytutu Dziedzictwa: zasięgi obiektów z rejestru i ewidencji oraz stanowiska archeologiczne. Ewidencje w usługach NID nie są kompletne (gminne ewidencje zabytków bywają szersze), a część obiektów ma tylko punkt bez zasięgu."}
+        sDziedzictwo.Warstwy.Add(New WarstwaSzablonu(ZbiorCieniowania, "ISOK_Cien", 100, False, TrybMieszania.Zwykly, "Rzeźba terenu LiDAR"))
+        ' Mapa topograficzna 30% (decyzja autora) - rzeźba LiDAR dominuje, mapa daje nazwy, drogi i zabudowę
+        sDziedzictwo.Warstwy.Add(New WarstwaSzablonu("TOPO_WMTS", "MAPA TOPOGRAFICZNA", 30, True, TrybMieszania.Mnozenie, "Mapa topograficzna GUGiK").ZRegulacja(RodzajRegulacji.MapaTopograficzna))
+        ' Ewidencja zabytków nieruchomych (usługa ZEN) pod rejestrem - obiekty rejestrowe są ważniejsze i rysowane na wierzchu;
+        ' jedno pole „Zabytki nieruchome” włącza obie warstwy (dawniej styl miał tylko rejestr)
+        sDziedzictwo.Warstwy.Add(New WarstwaSzablonu("zabytki_ewidencja_nieruchomych_NID", "Ewidencja_zabytkow_nieruchomych_I", 100, True, TrybMieszania.Zwykly, "Ewidencja zabytków nieruchomych").ZGrupa("Zabytki nieruchome"))
+        sDziedzictwo.Warstwy.Add(New WarstwaSzablonu("zabytki_zasiegi_NID", "Zabytki_nieruchome_I", 100, True, TrybMieszania.Zwykly, "Zabytki nieruchome (zasięgi)").ZGrupa("Zabytki nieruchome"))
+        sDziedzictwo.Warstwy.Add(New WarstwaSzablonu("zabytki_archeo_NID", "Archaeological_Monuments", 100, True, TrybMieszania.Zwykly, "Rejestr zabytków archeologicznych").ZGrupa("Zabytki archeologiczne"))
+        sDziedzictwo.Warstwy.Add(New WarstwaSzablonu("zabytki_ewidencja_archeo_NID", "Ewidencja_zabytków_archeologicznych", 100, True, TrybMieszania.Zwykly, "Ewidencja stanowisk archeologicznych").ZGrupa("Zabytki archeologiczne"))
+        lista.Add(sDziedzictwo)
 
-        ' 5. Plastyczna mapa rzeźby terenu (próbka: Tarnica, Bieszczady)
-        Dim hipso = Function() New WarstwaSzablonu("numer_mod_terenu_WMTS", "HipsoCien", 100, False, TrybMieszania.Zwykly, "Hipsometria z cieniowaniem")
-        Dim szczyty = Function() New WarstwaSzablonu("szczyty", "szczyty", 100, True, TrybMieszania.Zwykly, "Szczyty")
-        Dim sRzezba As New SzablonMapy(
-            "rzezba_terenu", "Plastyczna rzeźba terenu", "Teren",
-            "Barwna mapa wysokości (hipsometria) z cieniowaniem rzeźby terenu i nazwami szczytów. Dobrze wygląda na wydruku, plakacie i jako tło do planowania wycieczek.",
-            "🏔️", 4.0, ProfilKorektyRastra.Brak, CelMapy.TelefonTablet, CelMapy.WydrukKomputer, CelMapy.ProjektCadGis) With {
-            .ProbkaLat = 49.078, .ProbkaLon = 22.72}
-        sRzezba.DodajStopien("szczegółowa", 4.0, hipso(), szczyty())
-        sRzezba.DodajStopien("średnia", 15.0, hipso(), szczyty())
-        sRzezba.DodajStopien("przeglądowa", 50.0, hipso())
-        lista.Add(sRzezba)
-
-        ' 6. Mapy WIG (próbka: Twierdza Modlin); 1:25 000 zachowała się tylko dla części kraju - pod nią 1:100 000,
-        ' żeby przy zbliżeniu nie było pustych miejsc. Podgląd przy 6 m pokazuje barwną mapę 1:100 000.
+        ' 6. Mapy WIG (próbka: Twierdza Modlin); 1:25 000 zachowała się tylko dla części kraju. W stopniu 1:25 000
+        ' od dołu: WIG 1:100 000 (wypełnia miejsca bez arkuszy 1:25 000), Messtischblatt (ziemie dawnych Niemiec),
+        ' na wierzchu WIG 1:25 000 - przykrywa Messtischblatt tam, gdzie są oba (decyzja autora 2026-11-21).
+        ' Podgląd przy 6 m pokazuje barwną mapę 1:100 000.
         Dim wig100 = Function() New WarstwaSzablonu(ZbiorHistoryczny, "wig100k_2180", 100, False, TrybMieszania.Zwykly, "Mapa taktyczna WIG 1:100 000")
         Dim sWig As New SzablonMapy(
             "historia_wig", "Mapy WIG 1918–1939", "Historia",
-            "Przedwojenne mapy WIG z cieniowaniem rzeźby, obszar II RP. Przy zbliżeniu 1:25 000 (gdzie się zachowała, gdzie indziej 1:100 000), przy oddalaniu barwne 1:100 000 i 1:300 000.",
+            "Przedwojenne mapy WIG z cieniowaniem rzeźby. Przy zbliżeniu WIG 1:25 000, a gdzie jej brak - niemiecki Messtischblatt lub WIG 1:100 000; przy oddalaniu barwne 1:100 000 i 1:300 000.",
             "📜", 2.0, ProfilKorektyRastra.StareMapyKontrast, CelMapy.TelefonTablet, CelMapy.OdbiornikGarmin, CelMapy.WydrukKomputer) With {
-            .ProbkaLat = 52.435, .ProbkaLon = 20.685, .ProbkaPiksel = 6.0}
-        sWig.DodajStopien("1:25 000", 2.0, wig100(), New WarstwaSzablonu(ZbiorHistoryczny, "wig25k_2180", 100, True, TrybMieszania.Zwykly, "Mapa szczegółowa WIG 1:25 000"), cien(50))
+            .ProbkaLat = 52.435, .ProbkaLon = 20.685, .ProbkaPiksel = 6.0,
+            .UwagaPokrycia = "Pokrycie: WIG 1:25 000 zachowała się tylko dla części II RP, Messtischblatt obejmuje ziemie dawnych Niemiec, a WIG 1:100 000 - II RP i pas sąsiednich terenów. Poza arkuszami 1:25 000 przy zbliżeniu widać powiększoną mapę 1:100 000."}
+        sWig.DodajStopien("1:25 000", 2.0, wig100(),
+                          New WarstwaSzablonu(ZbiorHistoryczny, "m25k_2180", 100, True, TrybMieszania.Zwykly, "Messtischblatt 1:25 000"),
+                          New WarstwaSzablonu(ZbiorHistoryczny, "wig25k_2180", 100, True, TrybMieszania.Zwykly, "Mapa szczegółowa WIG 1:25 000"), cien(50))
         sWig.DodajStopien("1:100 000", 6.0, wig100(), cien(50))
         sWig.DodajStopien("1:300 000", 20.0, New WarstwaSzablonu(ZbiorHistoryczny, "wig300k_3857", 100, False, TrybMieszania.Zwykly, "Mapa operacyjna WIG 1:300 000"))
         lista.Add(sWig)
@@ -822,7 +1166,8 @@ Public Module ZarzadcaSzablonow
             "historia_niemieckie", "Mapy niemieckie do 1945", "Historia",
             "Pomorze, Śląsk, Prusy, Wielkopolska. Przy zbliżeniu Messtischblatt 1:25 000 (gdzie indziej Karte des Deutschen Reiches), przy oddalaniu KdR 1:100 000 (ok. 1900) i mapa 1:300 000.",
             "🏰", 2.0, ProfilKorektyRastra.StareMapyKontrast, CelMapy.TelefonTablet, CelMapy.OdbiornikGarmin, CelMapy.WydrukKomputer) With {
-            .ProbkaLat = 53.778, .ProbkaLon = 20.48, .ProbkaPiksel = 6.0}
+            .ProbkaLat = 53.778, .ProbkaLon = 20.48, .ProbkaPiksel = 6.0,
+            .UwagaPokrycia = "Pokrycie: tylko ziemie ówczesnych Niemiec - Pomorze, Śląsk, Prusy Wschodnie, a na Karte des Deutschen Reiches (ok. 1900) także Wielkopolska. W centralnej i wschodniej Polsce mapa będzie pusta - wybierz Mapy WIG."}
         sNiem.DodajStopien("1:25 000", 2.0, kdr(), New WarstwaSzablonu(ZbiorHistoryczny, "m25k_2180", 100, True, TrybMieszania.Zwykly, "Messtischblatt 1:25 000"), cien(50))
         sNiem.DodajStopien("1:100 000", 6.0, kdr(), cien(50))
         sNiem.DodajStopien("1:300 000", 20.0, New WarstwaSzablonu(ZbiorHistoryczny, "ukvme_2180", 100, False, TrybMieszania.Zwykly, "Übersichtskarte von Mitteleuropa 1:300 000"))

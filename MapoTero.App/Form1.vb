@@ -2283,6 +2283,7 @@ Public Class Form1
 
         Dim zadanie As New ZadaniePobierania With {
             .AdresSerwera = _zestaw(0).Adres, .Warstwy = _zestaw.Nazwy(), .Krycia = _zestaw.Krycia(), .Adresy = _zestaw.Adresy(),
+            .TrybyMieszania = _zestaw.TekstTrybowMieszania(),
             .Zbiory = _zestaw.Zbiory(), .ZrodlaMap = zrodlaSesji, .Uklad = Ustawienia.Uklad,
             .Siatka = siatka, .Format = Ustawienia.Format, .Prefiks = Ustawienia.Prefiks,
             .Numeracja = Siatka.StylZTekstu(Ustawienia.Numeracja), .Folder = FolderSesji,
@@ -2568,6 +2569,15 @@ Public Class Form1
     End Sub
 
     ''' <summary>Znaczniki i siatka segmentów po zakończeniu zaznaczania obszaru pobierania (puszczenie prawego przycisku).</summary>
+    ' Zasięg zaznaczony prawym przyciskiem myszy w tej sesji programu (także dopasowany potem uchwytami) - kreator mapy
+    ' pomija wtedy krok wyboru obszaru. Obszar z lastsettings.txt, wpisany w pola XY albo z wyszukiwarki się nie liczy.
+    Private _zasiegZaznaczonyMysza As Zasieg?
+
+    ''' <summary>Czy pola XY pokazują obszar zaznaczony w tej sesji prawym przyciskiem myszy (i ewentualnie dopasowany uchwytami).</summary>
+    Friend Function CzyZasiegZaznaczonyMysza() As Boolean
+        Return _zasiegZaznaczonyMysza.HasValue AndAlso _zasiegZaznaczonyMysza.Value.Equals(ZasiegPolXY())
+    End Function
+
     Private Sub mapa_OnSelectionChange(Selection As RectLatLng, ZoomToFit As Boolean) Handles mapa.OnSelectionChange
         If _przerwanie IsNot Nothing OrElse Ustawienia.EdycjaXY Then
             'zaznaczenie bez skutku - pozostawione na mapie nadpisywało potem pola XY przy każdym ruchu myszy
@@ -2577,6 +2587,7 @@ Public Class Form1
         If Selection.IsEmpty OrElse Selection.WidthLng <= 0.00001 OrElse Selection.HeightLat <= 0.00001 Then Exit Sub
         If _korytarz IsNot Nothing Then UsunKorytarz(False)
         UstawObszarZZaznaczenia(Selection)
+        _zasiegZaznaczonyMysza = ZasiegPolXY()
         Dim s = BiezacaSiatka()
         If s.Poprawna Then
             WyczyscZnaczniki()
@@ -2735,7 +2746,11 @@ Public Class Form1
         mapa.Cursor = Cursors.Default
         Dim zmieniono As Boolean = Not anuluj AndAlso Not RowneZasiegi(_zasiegPrzeciagany, _zasiegPrzedPrzeciaganiem)
         If zmieniono Then
+            Dim zaznaczonyMysza = _zasiegZaznaczonyMysza.HasValue AndAlso _zasiegZaznaczonyMysza.Value.Equals(
+                New Zasieg(Wartosc(_polaPrzedPrzeciaganiem(0)), Wartosc(_polaPrzedPrzeciaganiem(1)), Wartosc(_polaPrzedPrzeciaganiem(2)), Wartosc(_polaPrzedPrzeciaganiem(3))))
             UstawPolaZasiegu(_zasiegPrzeciagany)
+            ' dopasowanie uchwytami tego samego zaznaczenia zostaje zaznaczeniem myszą
+            If zaznaczonyMysza Then _zasiegZaznaczonyMysza = ZasiegPolXY()
             'współrzędne WGS84 zaznaczenia - prostokąt opisany na nowym zasięgu
             Dim g = ProstokatGeo.Opisany(Ustawienia.Uklad, _zasiegPrzeciagany)
             lblZaznSzerGora.Text = "lat= " & Liczba(Math.Round(g.Polnoc, 4))
@@ -3302,9 +3317,9 @@ Public Class Form1
     ''' położenie liczone jest z przeskalowanych już przycisków, więc zgadza się przy każdej czcionce i skalowaniu.
     ''' </summary>
     Private Sub InicjalizujNowaSesje()
-        Dim krok As Integer = btnZnaczniki.Left - btnOtworzFolder.Left
+        'kolumna przycisku scalania pod spodem - liczona z odstępu przycisków wychodziła o 1 px obok po skalowaniu
         _btnNowaSesja = New Button With {
-            .Name = "btnNowaSesja", .Size = btnZnaczniki.Size, .Location = New Point(btnZnaczniki.Left + krok, btnZnaczniki.Top),
+            .Name = "btnNowaSesja", .Size = btnZnaczniki.Size, .Location = New Point(btnScalanie.Left, btnZnaczniki.Top),
             .Anchor = btnZnaczniki.Anchor, .Image = UtworzIkoneNowejSesji(), .ImageAlign = ContentAlignment.MiddleCenter,
             .UseVisualStyleBackColor = True, .TabIndex = btnZnaczniki.TabIndex}
         btnZnaczniki.Parent.Controls.Add(_btnNowaSesja)
@@ -3583,13 +3598,17 @@ Public Class Form1
     Private _btnKreator As Button
     Private _menuKreator As ToolStripMenuItem
 
+    ''' <summary>
+    ''' Przycisk i pozycja menu kreatora mapy. Przycisk stoi w lewym górnym rogu siatki przycisków, bo od kreatora
+    ''' zaczyna się pracę; górny rząd to przygotowanie mapy (kreator, siatka, nowa sesja), dolny - pobrane pliki
+    ''' (folder, usuwanie, scalanie). Położenie liczone z przeskalowanych już przycisków.
+    ''' </summary>
     Private Sub InicjalizujKreator()
-        Dim krok As Integer = btnUsunPobrane.Left - btnScalanie.Left
         _btnKreator = New Button With {
-            .Name = "btnKreator", .Size = btnUsunPobrane.Size, .Location = New Point(btnUsunPobrane.Left + krok, btnUsunPobrane.Top),
-            .Anchor = btnUsunPobrane.Anchor, .Image = UtworzIkoneKreatora(), .ImageAlign = ContentAlignment.MiddleCenter,
-            .UseVisualStyleBackColor = True, .TabIndex = btnUsunPobrane.TabIndex + 1}
-        btnUsunPobrane.Parent.Controls.Add(_btnKreator)
+            .Name = "btnKreator", .Size = btnZnaczniki.Size, .Location = New Point(btnOtworzFolder.Left, btnZnaczniki.Top),
+            .Anchor = btnZnaczniki.Anchor, .Image = UtworzIkoneKreatora(), .ImageAlign = ContentAlignment.MiddleCenter,
+            .UseVisualStyleBackColor = True, .TabIndex = btnZnaczniki.TabIndex - 1}
+        btnZnaczniki.Parent.Controls.Add(_btnKreator)
         _btnKreator.BringToFront()
         ToolTip1.SetToolTip(_btnKreator, "Szybki kreator mapy (Ctrl+K) - prowadzi krok po kroku od celu do gotowej mapy")
         AddHandler _btnKreator.Click, Sub() OtworzKreatorMapy()
@@ -3601,35 +3620,48 @@ Public Class Form1
         NarzedziaToolStripMenuItem.DropDownItems.Insert(1, New ToolStripSeparator())
     End Sub
 
-    ''' <summary>Ikona kreatora mapy: mapa z różdżką/gwiazdą.</summary>
+    ''' <summary>
+    ''' Ikona kreatora: różdżka z dużą żółtą gwiazdką i dwoma iskrami (powszechny znak kreatora). Poprzednia ikona
+    ''' (mapa z fioletową kreską) w 16 px wyglądała jak ołówek na kartce, czyli jak „edytuj”.
+    ''' </summary>
     Public Shared Function UtworzIkoneKreatora(Optional rozmiar As Integer = 16) As Bitmap
         Dim bmp As New Bitmap(rozmiar, rozmiar, Imaging.PixelFormat.Format32bppArgb)
         Using g = Graphics.FromImage(bmp)
             g.SmoothingMode = Drawing2D.SmoothingMode.AntiAlias
             g.PixelOffsetMode = Drawing2D.PixelOffsetMode.HighQuality
             g.Clear(Color.Transparent)
-            ' Kontur mapy w tle
-            Dim rog() As PointF = {New PointF(1.5!, 2.0!), New PointF(11.5!, 2.0!), New PointF(11.5!, 13.5!), New PointF(1.5!, 13.5!)}
-            Using pedzel As New SolidBrush(Color.FromArgb(240, 245, 255))
-                g.FillPolygon(pedzel, rog)
+            g.ScaleTransform(rozmiar / 16.0!, rozmiar / 16.0!)
+            'trzonek różdżki z jasną końcówką
+            Using pioro As New Pen(Color.FromArgb(60, 60, 70), 2.4!) With {.StartCap = Drawing2D.LineCap.Round, .EndCap = Drawing2D.LineCap.Round}
+                g.DrawLine(pioro, 2.0!, 14.0!, 8.6!, 7.4!)
             End Using
-            Using pioro As New Pen(Color.FromArgb(50, 100, 180), 1.0!)
-                g.DrawPolygon(pioro, rog)
+            Using pioro As New Pen(Color.FromArgb(235, 235, 240), 2.4!) With {.EndCap = Drawing2D.LineCap.Round}
+                g.DrawLine(pioro, 8.6!, 7.4!, 9.8!, 6.2!)
             End Using
-            ' Magiczna różdżka / gwiazda
-            Using pedzelGwiazda As New SolidBrush(Color.FromArgb(255, 170, 0))
-                g.FillEllipse(pedzelGwiazda, 8.5!, 1.5!, 6.5!, 6.5!)
-            End Using
-            Using pioroRozdzka As New Pen(Color.FromArgb(140, 60, 200), 2.0!)
-                g.DrawLine(pioroRozdzka, 4.0!, 12.0!, 10.5!, 5.5!)
-            End Using
-            Using pioroBlask As New Pen(Color.White, 1.2!)
-                g.DrawLine(pioroBlask, 11.5!, 2.5!, 11.5!, 7.0!)
-                g.DrawLine(pioroBlask, 9.2!, 4.7!, 13.8!, 4.7!)
-            End Using
+            'gwiazdki
+            RysujGwiazdke(g, 11.6!, 4.4!, 4.3!, Color.FromArgb(255, 200, 0), Color.FromArgb(190, 120, 0))
+            RysujGwiazdke(g, 4.2!, 4.0!, 2.4!, Color.FromArgb(255, 215, 60), Color.FromArgb(190, 120, 0))
+            RysujGwiazdke(g, 13.6!, 11.2!, 2.2!, Color.FromArgb(255, 215, 60), Color.FromArgb(190, 120, 0))
         End Using
         Return bmp
     End Function
+
+    ''' <summary>Czteroramienna gwiazdka (iskra) o środku (x, y) i promieniu r.</summary>
+    Private Shared Sub RysujGwiazdke(g As Graphics, x As Single, y As Single, r As Single, wypelnienie As Color, obrys As Color)
+        Dim wew As Single = r * 0.36!
+        Dim pkt(7) As PointF
+        For i = 0 To 7
+            Dim kat = i * Math.PI / 4.0 - Math.PI / 2.0
+            Dim promien = If(i Mod 2 = 0, r, wew)
+            pkt(i) = New PointF(x + CSng(Math.Cos(kat) * promien), y + CSng(Math.Sin(kat) * promien))
+        Next
+        Using pedzel As New SolidBrush(wypelnienie)
+            g.FillPolygon(pedzel, pkt)
+        End Using
+        Using pioro As New Pen(obrys, 0.8!) With {.LineJoin = Drawing2D.LineJoin.Round}
+            g.DrawPolygon(pioro, pkt)
+        End Using
+    End Sub
 
     ''' <summary>Silnik podglądu zestawu warstw współdzielony z oknem kreatora.</summary>
     Friend Function SilnikPodgladu() As PodgladWarstwSilnik
@@ -3670,9 +3702,7 @@ Public Class Form1
         AddHandler _oknoKreatora.FormClosed, Sub()
                                                  _oknoKreatora = Nothing
                                                  Enabled = True
-                                                 If WindowState = FormWindowState.Minimized Then
-                                                     WindowState = FormWindowState.Normal
-                                                 End If
+                                                 FormKreatorMapy.PrzywrocZMinimalizacji(Me)
                                                  Show()
                                                  Activate()
                                                  BringToFront()

@@ -226,7 +226,7 @@ Public Class FormPomocMbtiles
 
     Private Sub PomocSzukaj()
         Me.Text = "Pomoc i instrukcja - Wyszukiwarka miejscowości i działek"
-        _urlOnline = "https://eksploracja.github.io/MapoTero/pomoc/obszar/zaznaczanie/"
+        _urlOnline = "https://eksploracja.github.io/MapoTero/pomoc/obszar/zaznaczanie/#wyszukiwarka-miejscowości-adresów-i-działek-katastralnych"
 
         DodajTytul("Wyszukiwarka miejscowości, adresów i działek katastralnych")
         DodajAkapit("Narzędzie pozwala szybko zlokalizować dowolny punkt w Polsce i wycentrować na nim mapę główną, " &
@@ -247,7 +247,7 @@ Public Class FormPomocMbtiles
 
     Private Sub PomocImportOzi()
         Me.Text = "Pomoc i instrukcja - Konwerter kalibracji OziExplorer (.map)"
-        _urlOnline = "https://eksploracja.github.io/MapoTero/pomoc/narzedzia/"
+        _urlOnline = "https://eksploracja.github.io/MapoTero/pomoc/narzedzia/#konwerter-map-oziexplorer-map"
 
         DodajTytul("Konwerter skalibrowanych map OziExplorer (.map)")
         DodajAkapit("Narzędzie konwertuje kalibrowane skany papierowych map turystycznych i archiwalnych (pliki .map wraz z obrazem) " &
@@ -295,7 +295,7 @@ Public Class FormPomocMbtiles
 
     Private Sub PomocProfilNmt()
         Me.Text = "Pomoc i instrukcja - Profil wysokościowy trasy"
-        _urlOnline = "https://eksploracja.github.io/MapoTero/pomoc/narzedzia/"
+        _urlOnline = "https://eksploracja.github.io/MapoTero/pomoc/narzedzia/#profil-wysokościowy-trasy"
 
         DodajTytul("Profil wysokościowy trasy (NMT / LIDAR)")
         DodajAkapit("Narzędzie pobiera wysokości terenu z numerycznego modelu terenu GUGiK (lotniczy skaning laserowy) dla punktów trasy " &
@@ -310,7 +310,7 @@ Public Class FormPomocMbtiles
 
     Private Sub PomocKorektaFolderu()
         Me.Text = "Pomoc i instrukcja - Korekta obrazów w folderze"
-        _urlOnline = "https://eksploracja.github.io/MapoTero/pomoc/narzedzia/"
+        _urlOnline = "https://eksploracja.github.io/MapoTero/pomoc/narzedzia/#korekta-obrazów-w-folderze"
 
         DodajTytul("Korekta obrazów w folderze")
         DodajAkapit("Narzędzie poprawia naraz wszystkie obrazy PNG, JPEG i TIFF z wybranego folderu (np. segmenty sesji) " &
@@ -408,7 +408,8 @@ Public Class FormPomocMbtiles
                      "  • 3 Ciemniej (Darken) - wybiera ciemniejszy odcień z obu warstw." & vbCrLf &
                      "  • 4 Jaśniej (Lighten) - wybiera jaśniejszy kolor z obu warstw (np. jasne drogi/cieki wodne na ciemnym tle)." & vbCrLf &
                      "  • 5 Ekran (Screen) - rozjaśnia tło, czerń znika (odwrotność mnożenia, np. dla nocnych świateł czy radarów)." & vbCrLf &
-                     "  • 6 Nakładka (Overlay) - łączy mnożenie i ekran, podbijając kontrast (idealne dla cieniowania rzeźby terenu / hillshade).")
+                     "  • 6 Nakładka (Overlay) - łączy mnożenie i ekran, podbijając kontrast (idealne dla cieniowania rzeźby terenu / hillshade)." & vbCrLf &
+                     "  • 7 Rzeźba terenu - dedykowany dla cieniowania rzeźby NMT: jasność 180 płaskiego terenu jest neutralna, stoki ciemnieją/jaśnieją bez szarej zasłony.")
 
         DodajNaglowek1("6. Symulator podglądu na żywo")
         DodajPunktor("Przesuwaj suwak 'Poziom zoom' w prawym panelu, aby podejrzeć kafel podglądu dla każdego powiększenia.")
@@ -431,15 +432,18 @@ Public Class FormPomocMbtiles
 
         DodajNaglowek1("1. Krok po kroku")
         DodajPunktor("Krok 1: Cel. Wybierz, gdzie będziesz używać mapy: telefon lub tablet, odbiornik Garmin, wydruk albo projekt CAD/GIS. Program dobierze format pliku i parametry.")
-        DodajPunktor("Krok 2: Styl. Gotowe zestawy warstw z podglądem: turystyka piesza, góry z poziomicami (także za granicą), rower i MTB, eksploracja terenu LiDAR, plastyczna rzeźba terenu, mapy WIG 1918–1939, mapy niemieckie do 1945, działki EGiB albo własne warstwy z okna głównego. Suwak reguluje siłę cieniowania, a podgląd można przesuwać i oddalać myszką.")
-        DodajPunktor("Krok 3: Obszar. Wyszukaj miejscowość i wybierz promień, zaznacz prostokąt na mapie albo wskaż plik trasy GPX/KML/KMZ (program pobierze tylko pas wzdłuż trasy).")
-        DodajPunktor("Krok 4: Zapis. Wybierz format (zalecany jest zaznaczony), sprawdź szacowany rozmiar i czas, a potem kliknij Generuj mapę.")
+        DodajPunktor("Krok 2: Obszar. Gdy przed otwarciem kreatora zaznaczysz obszar na mapie prawym przyciskiem myszy, kreator pominie ten krok (wrócisz do niego, klikając Obszar na pasku kroków). Wyszukaj miejscowość i wybierz promień, zaznacz prostokąt na mapie albo wskaż plik trasy GPX/KML/KMZ (program pobierze tylko pas wzdłuż trasy). Plik trasy można przeciągnąć myszą na okno. W polu wyszukiwania można wkleić współrzędne punktu, np. 50.0614, 19.9366 (WGS84) albo X Y w PL-1992 lub PL-2000, albo działkę: identyfikator TERYT lub „działka Wieliczka 123/4”” (obszar to działka z pasem 150 m). Pozycja wg granic na liście promieni bierze prostokąt miejscowości z wyszukiwarki. Przycisk Profil... pokazuje profil wysokościowy wczytanej trasy.")
+        DodajPunktor("Krok 3: Styl. Gotowe zestawy warstw z podglądem: turystyka piesza, góry z poziomicami (także za granicą), rower i MTB, dziedzictwo kulturowe z zabytkami NID (rejestr i ewidencja), mapy WIG 1918–1939, mapy niemieckie do 1945, działki EGiB albo własne warstwy z okna głównego. Suwaki regulują krycie cieniowania, szlaków, mapy topograficznej i zabytków (krycie z okna zaawansowanego jest nadrzędne); w dziedzictwie kulturowym pola wyboru włączają zabytki archeologiczne i nieruchome; pod treścią kroku widać ograniczenia pokrycia map historycznych. Przycisk w rogu podglądu otwiera duży podgląd w skali 1:1. Zapisz jako mój styl zapisuje bieżącą kompozycję pod własną nazwą (kategoria Moje style), Usuń mój styl ją usuwa.")
+        DodajPunktor("Krok 4: Zapis. Wybierz format (zalecany jest zaznaczony), sprawdź szacowany rozmiar i czas, a potem kliknij Generuj mapę. Korekta obrazu jest domyślnie wyłączona: zaznacz pole Korekta obrazu albo kliknij Profil / Podgląd, żeby ją ustawić (okno podpowiada profil, np. Garmin MIP; przycisk Resetuj korektę przywraca obraz bez zmian).")
 
         DodajNaglowek1("2. Wskazówki")
         DodajPunktor("Rozmiar piksela jest dobrany do rozdzielczości danych stylu. Opis obok pola podaje odpowiadającą skalę wydruku. Jeśli piksel jest mniejszy niż dane, kreator to pokaże - mniejszy piksel tylko powiększa plik.")
-        DodajPunktor("Garmin: format KMZ działa na każdym odbiorniku, ale odbiorniki wyświetlają łącznie do 100 kafli (nowsze modele 500). Przy większym obszarze kreator ostrzega - wtedy zwiększ piksel albo wybierz JNX.")
-        DodajPunktor("Mapa wieloskalowa (MBTiles): style topograficzne i historyczne przy oddalaniu przełączają się na mapy w mniejszej skali, np. 1:10 000, 1:50 000, 1:100 000. Kreator pobiera każdą skalę osobno. Pole Mapa wieloskalowa w kroku 4 można odznaczyć.")
+        DodajPunktor("Garmin: KMZ wymaga obsługi Custom Maps. Większość zgodnych urządzeń obsługuje do 100 obrazów JPEG, wybrane modele do 500. Przy większym obszarze zmniejsz rozdzielczość albo wybierz JNX, jeśli urządzenie obsługuje ten format.")
+        DodajPunktor("Każde powiększenie gotowej mapy ma ten sam wybrany zasięg. W MBTiles i SQLiteDB fragmenty kafli poza nim są przezroczyste. Kafle JPEG dla Garmina mieszczą się w prostokącie wpisanym w obszar.")
+        DodajPunktor("Wydruk: kreator podaje rozmiar arkusza GeoTIFF w centymetrach i najmniejszy format papieru A. Po zakończeniu przycisk Otwórz mapę otwiera plik w programie przypisanym w Windows.")
+        DodajPunktor("Mapa wieloskalowa (MBTiles, SQLiteDB i Garmin JNX): style topograficzne i historyczne przy oddalaniu przełączają się na mapy w mniejszej skali, np. 1:10 000, 1:50 000, 1:100 000. Kreator pobiera każdą skalę osobno. Przycisk Ustawienia skal pozwala wyłączyć skalę, zmienić jej piksel, powiększenia i warstwy.")
         DodajPunktor("Opcje zaawansowane (korekta obrazu, zakres powiększeń, ustawienia Garmin, MBTiles wieloskalowy) są zwinięte - zwykle nie trzeba ich zmieniać.")
+        DodajPunktor("Podczas pobierania kreator pokazuje pozostały czas liczony z rzeczywistej prędkości pobierania.")
         DodajPunktor("Gdy części fragmentów nie uda się pobrać, przycisk Ponów pobieranie pobierze tylko brakujące i zapisze plik ponownie. Wstecz wraca do ustawień bez utraty wyborów.")
         DodajPunktor("Pobrane segmenty kreator zapisuje w folderze download (podfolder Kreator_...). Przycisk Przejdź do mapy w oknie głównym wczytuje je jako sesję.")
         DodajPunktor("Po zakończeniu kreator podpowiada, do którego folderu w telefonie lub odbiorniku skopiować plik.")

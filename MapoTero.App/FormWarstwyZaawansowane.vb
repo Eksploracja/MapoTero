@@ -57,7 +57,19 @@ Public Class FormWarstwyZaawansowane
     Private ReadOnly _podpowiedz As New ToolTip() With {.InitialDelay = 500, .ReshowDelay = 500, .AutoPopDelay = 15000}
     Private _opcjeKorekty As New OpcjeKorekcjiMip()
 
-    Public Sub New(zestaw As ZestawWarstw, zadanie As ZadaniePobierania, zaznaczona As Integer, silnik As PodgladWarstwSilnik)
+    ' Korekta przekazana przez kreator: domyślnie wyłączona, wraca do kreatora i nie zmienia zapamiętanej korekty programu
+    Private ReadOnly _korektaZKreatora As Boolean
+
+    ''' <summary>Korekta obrazu ustawiona w oknie (kreator odczytuje ją po zamknięciu przyciskiem OK).</summary>
+    Public ReadOnly Property OpcjeKorekty As OpcjeKorekcjiMip
+        Get
+            Return _opcjeKorekty.Kopia()
+        End Get
+    End Property
+
+    Public Sub New(zestaw As ZestawWarstw, zadanie As ZadaniePobierania, zaznaczona As Integer, silnik As PodgladWarstwSilnik,
+                   Optional korekta As OpcjeKorekcjiMip = Nothing)
+        _korektaZKreatora = korekta IsNot Nothing
         _zestaw = zestaw
         _zadanie = zadanie
         _silnik = silnik
@@ -159,7 +171,8 @@ Public Class FormWarstwyZaawansowane
         _lblZoom.ForeColor = SystemColors.ControlDarkDark
         Controls.Add(_lblZoom)
 
-        _opcjeKorekty = Ustawienia.OpcjeKorekty(ProfilKorektyRastra.GarminMip)
+        ' Z kreatora korekta jest domyślnie wyłączona (dawniej zawsze zapamiętana korekta albo profil Garmin MIP)
+        _opcjeKorekty = If(korekta IsNot Nothing, korekta.Kopia(), Ustawienia.OpcjeKorekty(ProfilKorektyRastra.GarminMip))
         _btnKorekta.Location = New Point(560, 386)
         _btnKorekta.Size = New Size(140, 24)
         AktualizujPrzyciskKorekty()
@@ -485,7 +498,7 @@ Public Class FormWarstwyZaawansowane
 
     Protected Overrides Sub OnFormClosed(e As FormClosedEventArgs)
         _przerwanie?.Cancel()
-        If DialogResult = DialogResult.OK AndAlso _opcjeKorekty.Wlaczona Then
+        If DialogResult = DialogResult.OK AndAlso _opcjeKorekty.Wlaczona AndAlso Not _korektaZKreatora Then
             Ustawienia.ZapamietajKorekte(_opcjeKorekty)
         End If
         MyBase.OnFormClosed(e)

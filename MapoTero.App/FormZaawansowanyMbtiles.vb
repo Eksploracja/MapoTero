@@ -63,7 +63,10 @@ Public Class FormZaawansowanyMbtiles
             Me.Text = "MBTiles wieloskalowy - dopasowanie warstw i powiększeń kreatora"
             btnZastosujKreator.Visible = True
             btnZamknij.Text = "Anuluj"
-            btnKompiluj.Text = "Pobierz i kompiluj..."
+            ' Pobieranie i zapis robi kreator - przycisk tylko wracał do kreatora, dublował „Zastosuj i wróć” i miał ucięty
+            ' napis („Pobierz i”)
+            btnKompiluj.Visible = False
+            btnZastosujKreator.Left = btnPomoc.Left - btnZastosujKreator.Width - 8
             AktualizujPrzyciskKorekty()
             PrzeliczKolejnoscWarstw()
             OdswiezTabeleWarstw()

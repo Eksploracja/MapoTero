@@ -1,4 +1,4 @@
-'Copyright (C) <2015-2026> pajakt, Kazimierz Niecikowski
+﻿'Copyright (C) <2015-2026> pajakt, Kazimierz Niecikowski
 'This program is free software: you can redistribute it and/or modify
 'it under the terms of the GNU General Public License as published by
 'the Free Software Foundation, either version 3 of the License, or
@@ -11,6 +11,31 @@ Imports MapoTero.Core
 Imports Xunit
 
 Public Class SzablonyMapTesty
+
+    <Fact>
+    Public Sub Kreator_DopasowujeBokSegmentuDoObszaruIZachowujePiksel()
+        Dim obszar As New Zasieg(500000, 500000, 500070, 500100)
+        Assert.Equal(64, ZarzadcaSzablonow.BokSegmentuKreatora(obszar, 60))
+        Assert.Equal(400, ZarzadcaSzablonow.BokSegmentuKreatora(obszar, 0.25))
+        Assert.Equal(1024, ZarzadcaSzablonow.BokSegmentuKreatora(obszar, 0.05))
+    End Sub
+
+    <Fact>
+    Public Sub ZmianyWygladu_ZachowujaRozniceMiedzySkalami()
+        Dim przed As New ZestawWarstw()
+        przed.Dodaj("cien", 65, "test", "NMT")
+        Dim po = przed.Kopia()
+        po(0).Krycie = 45
+        po(0).TrybMieszania = TrybMieszania.Mnozenie
+        Assert.True(przed.TaSamaKompozycja(po))
+        Dim zmiany As New ZestawWarstw.ZmianyWygladu()
+        zmiany.Zapisz(przed, po)
+        Dim przegladowa As New ZestawWarstw()
+        przegladowa.Dodaj("cien", 45, "test", "NMT")
+        zmiany.Zastosuj(przegladowa)
+        Assert.Equal(25, przegladowa(0).Krycie)
+        Assert.Equal(TrybMieszania.Mnozenie, przegladowa(0).TrybMieszania)
+    End Sub
 
     <Fact>
     Public Sub ZarzadcaSzablonow_PobierzDomyslne_ZwracaGotoweSzablony()
@@ -34,7 +59,7 @@ Public Class SzablonyMapTesty
 
         Dim dlaCad = ZarzadcaSzablonow.PobierzDlaCelu(CelMapy.ProjektCadGis)
         Assert.Contains(dlaCad, Function(s) s.Id = "dzialka_kataster")
-        Assert.Contains(dlaCad, Function(s) s.Id = "las_eksploracja")
+        Assert.Contains(dlaCad, Function(s) s.Id = "dziedzictwo")
     End Sub
 
     <Fact>
@@ -210,11 +235,11 @@ Public Class SzablonyMapTesty
 
     <Fact>
     Public Sub PlanStopni_TopoPrzelaczaSkalePoPoziomach()
-        ' TOPO: 2 m (1:10 000), 10 m (1:50 000), 25 m (1:100 000), 60 m (przeglądowa) na 50° N
+        ' TOPO: 2 m (1:10 000), 5 m (1:25 000), 10 m (1:50 000), 25 m (1:100 000), 60 m (przeglądowa) na 50° N
         Dim plan = ZarzadcaSzablonow.PlanStopni(ZarzadcaSzablonow.ZnajdzSzablon("piesza_gory"), 2.0, 50.0)
-        Assert.Equal(4, plan.Count)
-        Assert.Equal({15, 13, 12, 8}, plan.Select(Function(ps) ps.PoziomMin).ToArray())
-        Assert.Equal({16, 14, 12, 11}, plan.Select(Function(ps) ps.PoziomMax).ToArray())
+        Assert.Equal({"1:10 000", "1:25 000", "1:50 000", "1:100 000", "przeglądowa"}, plan.Select(Function(ps) ps.Stopien.Opis).ToArray())
+        Assert.Equal({15, 14, 13, 12, 8}, plan.Select(Function(ps) ps.PoziomMin).ToArray())
+        Assert.Equal({16, 14, 13, 12, 11}, plan.Select(Function(ps) ps.PoziomMax).ToArray())
         ' poziomy ciągłe, bez luk i nakładania
         For i = 1 To plan.Count - 1
             Assert.Equal(plan(i - 1).PoziomMin - 1, plan(i).PoziomMax)
@@ -223,7 +248,7 @@ Public Class SzablonyMapTesty
 
     <Fact>
     Public Sub PlanStopni_PikselUzytkownikaPomijaZbyteczneStopnie()
-        ' Piksel 8 m: stopień 10 m za blisko - zostaje 8 m, 25 m i 60 m
+        ' Piksel 8 m: stopnie 5 m i 10 m za blisko - zostaje 8 m, 25 m i 60 m
         Dim plan = ZarzadcaSzablonow.PlanStopni(ZarzadcaSzablonow.ZnajdzSzablon("piesza_gory"), 8.0, 50.0)
         Assert.Equal(8.0, plan(0).Piksel)
         Assert.DoesNotContain(plan, Function(ps) ps.Piksel = 10.0)
@@ -248,7 +273,7 @@ Public Class SzablonyMapTesty
         Dim jedno = ZarzadcaSzablonow.SzacujParametry(zasieg, 2.0)
         Dim wiele = ZarzadcaSzablonow.SzacujWieloskalowo(plan, zasieg)
         Assert.True(wiele.LiczbaSegmentow > jedno.LiczbaSegmentow)
-        Assert.True(wiele.LiczbaSegmentow < jedno.LiczbaSegmentow * 1.2, "stopnie mniej dokładne to mały dodatek")
+        Assert.True(wiele.LiczbaSegmentow < jedno.LiczbaSegmentow * 1.3, "stopnie mniej dokładne to mały dodatek")
     End Sub
 
     <Fact>
@@ -271,6 +296,114 @@ Public Class SzablonyMapTesty
         Assert.Equal(TrybMieszania.RzezbaTerenu, TrybMieszaniaRozszerzenia.ZTekstu(TrybMieszaniaRozszerzenia.NazwaWyswietlana(TrybMieszania.RzezbaTerenu)))
         Assert.Equal(TrybMieszania.RzezbaTerenu, ZestawWarstw.TrybyMieszaniaZTekstu("0;6", 2)(1))
         Assert.Contains("7 Rzeźba terenu", TrybMieszaniaRozszerzenia.WszystkieNazwy)
+    End Sub
+
+    <Fact>
+    Public Sub Szablony_BezPlastycznejRzezbyIZDziedzictwem()
+        Assert.Null(ZarzadcaSzablonow.ZnajdzSzablon("rzezba_terenu"))
+        Assert.Null(ZarzadcaSzablonow.ZnajdzSzablon("las_eksploracja"))
+        Dim d = ZarzadcaSzablonow.ZnajdzSzablon("dziedzictwo")
+        Assert.Equal("Dziedzictwo kulturowe", d.Nazwa)
+        ' cieniowanie na dole, mapa topograficzna przez mnożenie, na wierzchu zabytki NID (bez warstwy z szarym tłem)
+        Assert.Equal("ISOK_Cien", d.Warstwy(0).Warstwa)
+        Assert.Equal(TrybMieszania.Mnozenie, d.Warstwy(1).TrybMieszania)
+        Assert.True(d.Warstwy(1).Krycie < 100)
+        Assert.DoesNotContain(d.Warstwy, Function(w) w.Warstwa = "Immovable_Monuments")
+        Assert.True(d.Warstwy.Skip(2).All(Function(w) w.Zbior.StartsWith("zabytki")))
+    End Sub
+
+    <Fact>
+    Public Sub Wig_MesstischblattPodWig25k()
+        Dim st = ZarzadcaSzablonow.ZnajdzSzablon("historia_wig").StopnieSkali(0)
+        Dim nazwy = st.Warstwy.Select(Function(w) w.Warstwa).ToList()
+        Assert.True(nazwy.IndexOf("wig100k_2180") < nazwy.IndexOf("m25k_2180"))
+        Assert.True(nazwy.IndexOf("m25k_2180") < nazwy.IndexOf("wig25k_2180"))
+        Assert.False(String.IsNullOrEmpty(ZarzadcaSzablonow.ZnajdzSzablon("historia_wig").UwagaPokrycia))
+        Assert.False(String.IsNullOrEmpty(ZarzadcaSzablonow.ZnajdzSzablon("historia_niemieckie").UwagaPokrycia))
+    End Sub
+
+    <Fact>
+    Public Sub Gory_ZCieniowaniem()
+        Dim s = ZarzadcaSzablonow.ZnajdzSzablon("gory_poziomice")
+        Assert.Contains(s.Warstwy, Function(w) w.Warstwa = "ISOK_Cien" AndAlso w.TrybMieszania = TrybMieszania.RzezbaTerenu)
+    End Sub
+
+    <Fact>
+    Public Sub RegulacjeSzablonu_SuwakiCieniowaniaISzlakow()
+        Dim piesza = ZarzadcaSzablonow.RegulacjeSzablonu(ZarzadcaSzablonow.ZnajdzSzablon("piesza_gory")).Select(Function(kv) kv.Key).ToList()
+        Assert.Equal({RodzajRegulacji.Cieniowanie, RodzajRegulacji.Szlaki}, piesza.ToArray())
+        Dim dz = ZarzadcaSzablonow.RegulacjeSzablonu(ZarzadcaSzablonow.ZnajdzSzablon("dziedzictwo")).Select(Function(kv) kv.Key).ToList()
+        Assert.Equal({RodzajRegulacji.MapaTopograficzna, RodzajRegulacji.Zabytki}, dz.ToArray())
+        ' Każdy szablon z cieniowaniem albo szlakami ma odpowiedni suwak
+        For Each s In ZarzadcaSzablonow.PobierzDomyslne()
+            Dim reg = ZarzadcaSzablonow.RegulacjeSzablonu(s).Select(Function(kv) kv.Key).ToList()
+            If s.Warstwy.Skip(1).Any(Function(w) w.Warstwa = "ISOK_Cien") Then Assert.Contains(RodzajRegulacji.Cieniowanie, reg)
+            If s.Warstwy.Any(Function(w) w.Zbior = "Waymarked_Trails") Then Assert.Contains(RodzajRegulacji.Szlaki, reg)
+        Next
+    End Sub
+
+    <Fact>
+    Public Sub ZastosujRegulacje_ProporcjonalnieDoBazowego()
+        Dim s = ZarzadcaSzablonow.ZnajdzSzablon("piesza_gory")
+        Dim st100k = s.StopnieSkali.First(Function(st) st.Opis = "1:100 000") ' cieniowanie 45% przy 70% w 1:10 000
+        Dim zestaw As New ZestawWarstw()
+        For Each w In st100k.Warstwy
+            zestaw.Dodaj(w.Warstwa, w.Krycie)
+        Next
+        Dim wartosci As New Dictionary(Of RodzajRegulacji, Integer) From {{RodzajRegulacji.Cieniowanie, 35}}
+        Dim bazowe As New Dictionary(Of RodzajRegulacji, Integer) From {{RodzajRegulacji.Cieniowanie, 70}}
+        ZarzadcaSzablonow.ZastosujRegulacje(st100k.Warstwy, zestaw, wartosci, bazowe)
+        Assert.Equal(100, zestaw(0).Krycie)
+        Assert.Equal(23, zestaw(1).Krycie) ' 35 * 45 / 70
+    End Sub
+
+    <Fact>
+    Public Sub SprawdzPlan_WykrywaNakladanieILuki()
+        Dim s = ZarzadcaSzablonow.ZnajdzSzablon("piesza_gory")
+        Dim plan = ZarzadcaSzablonow.PlanStopni(s, 2.0, 50.0)
+        Assert.Equal("", ZarzadcaSzablonow.SprawdzPlan(plan))
+        Assert.Empty(ZarzadcaSzablonow.LukiPlanu(plan))
+        plan(1).PoziomMax = plan(0).PoziomMin
+        Assert.Contains("nakładają", ZarzadcaSzablonow.SprawdzPlan(plan))
+        plan(1).PoziomMax = plan(1).PoziomMin
+        ' bez skali 1:25 000 jej poziom zostaje pusty
+        Dim luka = plan(1).PoziomMin
+        plan.RemoveAt(1)
+        Assert.Equal("", ZarzadcaSzablonow.SprawdzPlan(plan))
+        Assert.Equal({luka}, ZarzadcaSzablonow.LukiPlanu(plan).ToArray())
+        plan(0).Warstwy = New List(Of WarstwaSzablonu)()
+        Assert.Contains("warstwę", ZarzadcaSzablonow.SprawdzPlan(plan))
+        Assert.Contains("co najmniej jedną skalę", ZarzadcaSzablonow.SprawdzPlan(New List(Of PlanStopnia)()))
+    End Sub
+
+    <Fact>
+    Public Sub OpcjeKorekcji_ResetujDajeObrazBezZmian()
+        Dim o As New OpcjeKorekcjiMip()
+        o.UstawWgProfilu(ProfilKorektyRastra.GarminMip)
+        o.Resetuj()
+        Assert.False(o.Wlaczona)
+        Assert.Equal(ProfilKorektyRastra.Brak, o.Profil)
+        Assert.Equal(1.0, o.Gamma)
+        Assert.Equal(1.0, o.Kontrast)
+        Assert.Equal(1.0, o.Nasycenie)
+        Assert.Equal(0.0, o.Wyostrzanie)
+    End Sub
+
+    <Fact>
+    Public Sub Dziedzictwo_MapaTopo30IGrupyZabytkow()
+        Dim d = ZarzadcaSzablonow.ZnajdzSzablon("dziedzictwo")
+        Assert.Equal(30, d.Warstwy.First(Function(w) w.Zbior = "TOPO_WMTS").Krycie)
+        Assert.Equal({"Zabytki nieruchome", "Zabytki archeologiczne"}, d.GrupyWarstw().ToArray())
+        Dim bezArcheo = SzablonMapy.BezGrup(d.Warstwy, New HashSet(Of String) From {"Zabytki archeologiczne"})
+        Assert.Equal(4, bezArcheo.Count)
+        Assert.DoesNotContain(bezArcheo, Function(w) w.Grupa = "Zabytki archeologiczne")
+        ' zabytki nieruchome: ewidencja (usługa ZEN) pod rejestrem, obie w jednej grupie
+        Dim nazwy = d.Warstwy.Select(Function(w) w.Zbior).ToList()
+        Dim iEwidencja = nazwy.IndexOf("zabytki_ewidencja_nieruchomych_NID")
+        Assert.True(iEwidencja >= 0 AndAlso iEwidencja < nazwy.IndexOf("zabytki_zasiegi_NID"))
+        Assert.Equal("Zabytki nieruchome", d.Warstwy(iEwidencja).Grupa)
+        Dim bezNieruchomych = SzablonMapy.BezGrup(d.Warstwy, New HashSet(Of String) From {"Zabytki nieruchome"})
+        Assert.DoesNotContain(bezNieruchomych, Function(w) w.Zbior = "zabytki_ewidencja_nieruchomych_NID" OrElse w.Zbior = "zabytki_zasiegi_NID")
     End Sub
 
 End Class

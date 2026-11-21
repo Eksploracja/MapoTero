@@ -364,6 +364,7 @@ Public Class ZestawWarstwTesty
     End Sub
 
     <Fact>
+    <Trait("Kategoria", "Siec")>
     Public Async Function Podglad_PobierzObrazBezRegulatoraAsync() As Task
         Dim wmsAdres = "https://mapy.geoportal.gov.pl/wss/service/PZGIK/ORTO/WMS/StandardResolution?request=GetMap&version=1.3.0&CRS=EPSG:2180&layers="
         Dim zasieg As New Zasieg(682850, 569850, 683150, 570150)

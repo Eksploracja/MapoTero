@@ -27,8 +27,8 @@ Opis każdego elementu okna głównego: mapy podglądu, list zbiorów map i wars
 
 | Nr | Element okna | Do czego służy |
 |---|---|---|
-| **1** | Pasek menu | sesja pobierania (zapis/wczytanie `conf.txt`, korytarz GPX/KML, odświeżanie), narzędzia (kreator serwerów, wyszukiwarka miejscowości i działek, konwerter Ozi, profil wysokościowy trasy, scalanie i eksport mapy, CAD, korekta obrazów), ustawienia i pomoc |
-| **2** | Mapa podglądu | podkład orientacyjny (OSM / Google / Bing), zaznaczanie obszaru prawym przyciskiem myszy, siatka segmentów z uchwytami oraz przycisk lupy 🔍 (wyszukiwarka) |
+| **1** | Pasek menu | sesja pobierania (zapis/wczytanie `conf.txt`, korytarz GPX/KML, odświeżanie), narzędzia (szybki kreator mapy, kreator serwerów, wyszukiwarka miejscowości i działek, konwerter Ozi, profil wysokościowy trasy, scalanie i eksport mapy, CAD, korekta obrazów), ustawienia i pomoc |
+| **2** | Mapa podglądu | podkład orientacyjny (OSM / Google / Bing), zaznaczanie obszaru prawym przyciskiem myszy, siatka segmentów z uchwytami oraz przyciski: lupa 🔍 (wyszukiwarka) i różdżka 🪄 (szybki kreator mapy) |
 | **3** | Drzewo *Wybierz mapy* | wszystkie zbiory i warstwy pogrupowane tematycznie, wyszukiwarka *szukaj warstwy…*, rozwijanie/zwijanie (`⊞`/`⊟`) oraz przycisk `[+]` (kreator serwerów) |
 | **4** | *Wybrane warstwy oraz ich kolejność* | „kanapka” do 12 warstw (1 = podkład), zmiana kolejności (`▲`/`▼` lub przeciąganie), usuwanie (`✕`), ustawienie `Krycie %`, przycisk `…` (*Warstwy - zaawansowane*) oraz ikona kosza |
 | **5** | Układ, segment i piksel | wybór układu współrzędnych pobierania, bok segmentu `[pix]` i rozmiar piksela `[m/pix]` (lub `[°/pix]` w WGS84) |
@@ -59,7 +59,8 @@ Tytuł okna podaje nazwę i numer wersji programu (np. `MapoTero {{ site.wersja_
 | | Obszar pobierania wzdłuż trasy (GPX, KML, KMZ)... | | [Obszar wzdłuż trasy](../obszar/korytarz/) |
 | | Usuń obszar wzdłuż trasy | | wraca do pobierania pełnego prostokąta |
 | | Odśwież mapę (pobierz ponownie wszystkie segmenty) | | [Odświeżanie mapy](../pobieranie/odswiezanie/) |
-| **Narzędzia** | Dodaj nowy serwer WMS / WMTS... | | [Kreator serwerów](../serwery/kreator/) |
+| **Narzędzia** | Szybki kreator mapy... | <kbd>Ctrl</kbd>+<kbd>K</kbd> | [Szybki kreator mapy](../narzedzia/#szybki-kreator-mapy) – przygotowanie gotowej mapy w 4 krokach |
+| | Dodaj nowy serwer WMS / WMTS... | | [Kreator serwerów](../serwery/kreator/) |
 | | Wyszukaj miejscowość lub działkę... | <kbd>Ctrl</kbd>+<kbd>F</kbd> | [Wyszukiwarka miejscowości i działek](../obszar/zaznaczanie/#wyszukiwarka-miejscowości-adresów-i-działek-katastralnych) (<kbd>Ctrl</kbd>+<kbd>D</kbd> dla działek) |
 | | Konwertuj mapę OziExplorer (.map)... | | [Konwerter map OziExplorer](../narzedzia/#konwerter-map-oziexplorer-map) |
 | | Profil wysokościowy trasy (GPX, KML)... | | [Profil wysokościowy trasy](../narzedzia/#profil-wysokościowy-trasy) |
@@ -91,6 +92,7 @@ do orientacji w terenie.
 | przesuwanie mapy | przeciągnij lewym przyciskiem myszy |
 | przybliżanie i oddalanie | kółko myszy, przyciski **+** i **-** na mapie, dwuklik lewym (przybliża) lub prawym (oddala) przyciskiem |
 | wyszukiwanie miejscowości / działki | przycisk z ikoną lupy 🔍 pod przyciskiem `-` (lub skróty <kbd>Ctrl</kbd>+<kbd>F</kbd> / <kbd>Ctrl</kbd>+<kbd>D</kbd>) |
+| szybki kreator mapy | przycisk z ikoną różdżki 🪄 pod powiększeniem mapy (lub skrót <kbd>Ctrl</kbd>+<kbd>K</kbd>) |
 | zaznaczanie obszaru | przeciągnij **prawym** przyciskiem myszy - [Zaznaczanie na mapie](../obszar/zaznaczanie/) |
 | zmiana zasięgu siatki | przeciągnij uchwyt lewym przyciskiem myszy |
 
@@ -134,9 +136,9 @@ Sąsiednie warstwy z tego samego serwera WMS o kryciu 100% serwer łączy w jedn
 
 Okno otwierane przyciskiem **…** ułatwia zestrojenie wielowarstwowej kompozycji:
 
-* Pokazuje osobny suwak krycia (5–100%), przyciski kolejności **▲** / **▼** oraz usuwania **✕** dla każdej warstwy.
+* Pokazuje osobny suwak krycia (5–100%), wybór trybu mieszania (m.in. nowy tryb *Rzeźba terenu* dla idealnego światłocienia bez szarej mgły na płaskim terenie), przyciski kolejności **▲** / **▼** oraz usuwania **✕** dla każdej warstwy.
 * Informuje o liczbie zapytań na jeden segment (ile zapytań WMS i ile warstw kafelkowych) oraz ostrzega, gdy nieprzezroczysta warstwa na górze całkowicie zasłania warstwę pod spodem.
-* Po prawej stronie wyświetla **próbkę podglądu (300 × 300 px)** ze środka zaznaczonej siatki. Każda warstwa pobierana jest z sieci tylko raz. Przesuwanie suwaków krycia i zmiana kolejności natychmiast przeliczają podgląd bez ponownego pobierania danych.
+* Po prawej stronie wyświetla **próbkę podglądu (300 × 300 px)** ze środka zaznaczonej siatki z lupą 1:1, ×2 i ×4 oraz przyciskiem *Korekta obrazu...*. Każda warstwa pobierana jest z sieci tylko raz. Przesuwanie suwaków krycia i zmiana kolejności natychmiast przeliczają podgląd bez ponownego pobierania danych.
 
 Kliknięcie **OK** przenosi ustawienia do okna głównego. Przycisk **Anuluj** odrzuca zmiany.
 

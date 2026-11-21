@@ -994,7 +994,7 @@ Partial Class Form1
         Me.btnUsunPobrane.Margin = New System.Windows.Forms.Padding(0)
         Me.btnUsunPobrane.Name = "btnUsunPobrane"
         Me.btnUsunPobrane.Size = New System.Drawing.Size(30, 30)
-        Me.btnUsunPobrane.TabIndex = 307
+        Me.btnUsunPobrane.TabIndex = 306
         Me.ToolTip1.SetToolTip(Me.btnUsunPobrane, "Usuń pobrane mapy bieżącej sesji (do Kosza)")
         Me.btnUsunPobrane.UseVisualStyleBackColor = True
         '
@@ -1007,7 +1007,7 @@ Partial Class Form1
         Me.btnZnaczniki.Margin = New System.Windows.Forms.Padding(0)
         Me.btnZnaczniki.Name = "btnZnaczniki"
         Me.btnZnaczniki.Size = New System.Drawing.Size(30, 30)
-        Me.btnZnaczniki.TabIndex = 306
+        Me.btnZnaczniki.TabIndex = 304
         Me.ToolTip1.SetToolTip(Me.btnZnaczniki, "Pokaż na mapie siatkę segmentów dla zasięgu z pól XY i wyśrodkuj na niej mapę")
         Me.btnZnaczniki.UseVisualStyleBackColor = True
         '
@@ -1015,11 +1015,11 @@ Partial Class Form1
         '
         Me.btnScalanie.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
         Me.btnScalanie.Image = Global.MapoTero.My.Resources.Resources.ico_merge
-        Me.btnScalanie.Location = New System.Drawing.Point(5, 603)
+        Me.btnScalanie.Location = New System.Drawing.Point(73, 603)
         Me.btnScalanie.Margin = New System.Windows.Forms.Padding(0)
         Me.btnScalanie.Name = "btnScalanie"
         Me.btnScalanie.Size = New System.Drawing.Size(30, 30)
-        Me.btnScalanie.TabIndex = 305
+        Me.btnScalanie.TabIndex = 307
         Me.ToolTip1.SetToolTip(Me.btnScalanie, "Scalanie segmentów - arkusz GeoTIFF, JPEG albo PNG (okno Eksport mapy, format Arkusz)")
         Me.btnScalanie.UseVisualStyleBackColor = True
         '
@@ -1027,11 +1027,11 @@ Partial Class Form1
         '
         Me.btnOtworzFolder.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
         Me.btnOtworzFolder.Image = Global.MapoTero.My.Resources.Resources.ico_folder
-        Me.btnOtworzFolder.Location = New System.Drawing.Point(5, 569)
+        Me.btnOtworzFolder.Location = New System.Drawing.Point(5, 603)
         Me.btnOtworzFolder.Margin = New System.Windows.Forms.Padding(0)
         Me.btnOtworzFolder.Name = "btnOtworzFolder"
         Me.btnOtworzFolder.Size = New System.Drawing.Size(30, 30)
-        Me.btnOtworzFolder.TabIndex = 304
+        Me.btnOtworzFolder.TabIndex = 305
         Me.ToolTip1.SetToolTip(Me.btnOtworzFolder, "Wyświetl folder z segmentami pobranej mapy")
         Me.btnOtworzFolder.UseVisualStyleBackColor = True
         '

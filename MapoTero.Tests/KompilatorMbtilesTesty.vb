@@ -1,4 +1,4 @@
-'Copyright (C) <2015>  pajakt
+﻿'Copyright (C) <2015>  pajakt
 'This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License
 'as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
@@ -78,6 +78,151 @@ Public Class KompilatorMbtilesTesty
         Assert.Contains(13, luki)
         Assert.Contains(14, luki)
     End Sub
+
+    ''' <summary>SQLiteDB wieloskalowy z kreatora: poziom przeglądowy ze źródła skali przeglądowej, szczegółowy ze swojego, poziomy spoza planu puste.</summary>
+    <Fact>
+    Public Sub SQLiteDB_WieloskalowyBierzeKazdyPoziomZeZrodlaSwojejSkali()
+        Dim folder = NowyFolder()
+        Dim obszar As New Zasieg(487000, 637000, 489000, 639000)
+        Dim uklad = UkladWspolrzednych.PL1992
+        Try
+            Dim zrodla As New List(Of ZrodloPoziomow)
+            For Each para In {(9, 60.0, Color.Blue), (15, 2.0, Color.Red)}
+                Dim sesja = Path.Combine(folder, para.Item1.ToString()) & Path.DirectorySeparatorChar
+                Directory.CreateDirectory(sesja)
+                UtworzSesje(sesja, obszar.XDol, obszar.YLewy, obszar.XGora, obszar.YPrawy, para.Item2, para.Item3)
+                Dim s As New Siatka(obszar, para.Item2, 256)
+                zrodla.Add(New ZrodloPoziomow With {.PoziomMin = para.Item1, .PoziomMax = para.Item1,
+                    .Zrodlo = New ZrodloSegmentow(sesja, "_", StylNumeracji.WierszKolumna, "png", s, przytnijDoObszaru:=True)})
+            Next
+            Dim plik = Path.Combine(folder, "wieloskalowa.sqlitedb")
+            Dim zad As New ZadanieEksportu With {.Rodzaj = RodzajEksportu.SQLiteDB, .Uklad = uklad, .Plik = plik, .Nazwa = "Test", .KaflePng = True,
+                                                 .Zrodlo = zrodla(1).Zrodlo, .PoziomMin = 9, .PoziomMax = 15}
+            zad.ZrodlaPoziomow.AddRange(zrodla)
+            EksportMapy.Eksportuj(zad, Nothing, CancellationToken.None)
+
+            Dim kolory As New Dictionary(Of Integer, Color)
+            Using pol As New SQLiteConnection("Data Source=" & plik & ";Version=3;Pooling=False;")
+                pol.Open()
+                ' RMaps: poziom zapisany jako 17 - zoom
+                Using cmd As New SQLiteCommand("SELECT z, image FROM tiles;", pol), r = cmd.ExecuteReader()
+                    While r.Read()
+                        Dim zoom = 17 - r.GetInt32(0)
+                        Using ms As New MemoryStream(DirectCast(r(1), Byte())), bmp As New Bitmap(ms)
+                            For y = 0 To bmp.Height - 1 Step 4
+                                For x = 0 To bmp.Width - 1 Step 4
+                                    Dim c = bmp.GetPixel(x, y)
+                                    If c.A > 200 Then kolory(zoom) = c
+                                Next
+                            Next
+                        End Using
+                    End While
+                End Using
+            End Using
+            Assert.Equal({9, 15}, kolory.Keys.OrderBy(Function(k) k).ToArray())
+            Assert.True(kolory(9).B > 150 AndAlso kolory(9).R < 100, $"poziom 9: {kolory(9)}")
+            Assert.True(kolory(15).R > 150 AndAlso kolory(15).B < 100, $"poziom 15: {kolory(15)}")
+        Finally
+            Usun(folder)
+        End Try
+    End Sub
+
+    ''' <summary>JNX wieloskalowy z kreatora: poziom przeglądowy ze źródła skali przeglądowej, poziom szczegółowy ze swojego.</summary>
+    <Fact>
+    Public Sub Jnx_WieloskalowyBierzeKazdyPoziomZeZrodlaSwojejSkali()
+        Dim folder = NowyFolder()
+        Dim obszar As New Zasieg(487000, 637000, 487070, 637100)
+        Dim uklad = UkladWspolrzednych.PL1992
+        Try
+            Dim zrodla As New List(Of ZrodloPoziomow)
+            For Each para In {(9, 60.0, Color.Blue), (15, 2.0, Color.Red)}
+                Dim sesja = Path.Combine(folder, para.Item1.ToString()) & Path.DirectorySeparatorChar
+                Directory.CreateDirectory(sesja)
+                UtworzSesje(sesja, obszar.XDol, obszar.YLewy, obszar.XGora, obszar.YPrawy, para.Item2, para.Item3)
+                Dim s As New Siatka(obszar, para.Item2, 256)
+                zrodla.Add(New ZrodloPoziomow With {.PoziomMin = para.Item1, .PoziomMax = para.Item1,
+                    .Zrodlo = New ZrodloSegmentow(sesja, "_", StylNumeracji.WierszKolumna, "png", s, przytnijDoObszaru:=True)})
+            Next
+            Dim plik = Path.Combine(folder, "wieloskalowa.jnx")
+            Dim zad As New ZadanieEksportu With {.Rodzaj = RodzajEksportu.Jnx, .Uklad = uklad, .Plik = plik, .Nazwa = "Test",
+                                                 .Zrodlo = zrodla(1).Zrodlo, .PoziomMin = 9, .PoziomMax = 15}
+            zad.ZrodlaPoziomow.AddRange(zrodla)
+            EksportMapy.Eksportuj(zad, Nothing, CancellationToken.None)
+
+            Dim wersja, liczbaPoziomow, zOrder, prodId As Integer, tytul As String = ""
+            Assert.True(ZapisJnx.WeryfikujJnx(plik, wersja, liczbaPoziomow, zOrder, prodId, tytul))
+            ' poziomy 10-14 są poza planem skal - nie trafiają do pliku
+            Assert.Equal(2, liczbaPoziomow)
+            Dim kolorPoziomu = Function(indeks As Integer) As Color
+                                   Using ms As New MemoryStream(ZapisJnx.OdczytajKafel(plik, indeks, 0)), bmp As New Bitmap(ms)
+                                       Return bmp.GetPixel(bmp.Width \ 2, bmp.Height \ 2)
+                                   End Using
+                               End Function
+            Dim przegladowy = kolorPoziomu(0), szczegolowy = kolorPoziomu(1)
+            Assert.True(przegladowy.B > 150 AndAlso przegladowy.R < 100, $"poziom 9: {przegladowy}")
+            Assert.True(szczegolowy.R > 150 AndAlso szczegolowy.B < 100, $"poziom 15: {szczegolowy}")
+        Finally
+            Usun(folder)
+        End Try
+    End Sub
+
+    <Fact>
+    Public Async Function KompilatorMbtiles_PrzycinaKazdaSkaleDoTegoSamegoMalegoObszaru() As Task
+        Dim folder = NowyFolder()
+        Dim obszar As New Zasieg(487000, 637000, 487070, 637100)
+        Dim uklad = UkladWspolrzednych.PL1992
+        Dim warstwy As New List(Of WarstwaWielowarstwowa)
+        Try
+            For Each poziom In {8, 15}
+                Dim sesja = Path.Combine(folder, poziom.ToString()) & Path.DirectorySeparatorChar
+                Directory.CreateDirectory(sesja)
+                Dim piksel = If(poziom = 8, 60.0, 2.0)
+                UtworzSesje(sesja, obszar.XDol, obszar.YLewy, obszar.XGora, obszar.YPrawy, piksel, Color.Red)
+                Dim s As New Siatka(obszar, piksel, 256)
+                warstwy.Add(New WarstwaWielowarstwowa With {
+                    .Folder = sesja, .PoziomMin = poziom, .PoziomMax = poziom, .Siatka = s, .Uklad = uklad,
+                    .Zrodlo = New ZrodloSegmentow(sesja, "_", StylNumeracji.WierszKolumna, "png", s, przytnijDoObszaru:=True)})
+            Next
+            Dim plik = Path.Combine(folder, "mala_mapa.mbtiles")
+            Await KompilatorMbtiles.KompilujAsync(warstwy, New OpcjeKompilatoraMbtiles With {
+                .PlikDocelowy = plik, .FormatKafli = FormatKafliMbtiles.TylkoPng, .PoziomMin = 8, .PoziomMax = 15},
+                Nothing, CancellationToken.None)
+            Using pol As New SQLiteConnection("Data Source=" & plik & ";Version=3;Pooling=False;")
+                pol.Open()
+                Using cmd As New SQLiteCommand("SELECT value FROM metadata WHERE name = 'bounds';", pol)
+                    Dim kultura = Globalization.CultureInfo.InvariantCulture
+                    Dim oczekiwany = ProstokatGeo.Opisany(uklad, obszar)
+                    Dim pola = CStr(cmd.ExecuteScalar()).Split(","c).Select(Function(v) Double.Parse(v, kultura))
+                    Assert.Equal({oczekiwany.Zachod, oczekiwany.Poludnie, oczekiwany.Wschod, oczekiwany.Polnoc}, pola.ToArray())
+                End Using
+                Using cmd As New SQLiteCommand("SELECT zoom_level, tile_column, tile_row, tile_data FROM tiles;", pol),
+                    rekordy = cmd.ExecuteReader()
+                    Dim poziomyZDanymi As New HashSet(Of Integer)
+                    While rekordy.Read()
+                        Dim z = rekordy.GetInt32(0)
+                        Dim tx = rekordy.GetInt32(1), ty = (1 << z) - 1 - rekordy.GetInt32(2)
+                        Using strumien As New MemoryStream(DirectCast(rekordy(3), Byte())), bmp As New Bitmap(strumien)
+                            For y = 0 To bmp.Height - 1
+                                For x = 0 To bmp.Width - 1
+                                    If bmp.GetPixel(x, y).A = 0 Then Continue For
+                                    poziomyZDanymi.Add(z)
+                                    Dim lat = WebMercator.Szerokosc(ty * 256.0 + y + 0.5, z)
+                                    Dim lon = WebMercator.Dlugosc(tx * 256.0 + x + 0.5, z)
+                                    Dim p = uklad.ZWgs84(lat, lon)
+                                    Dim tolerancja = WebMercator.RozmiarPiksela(lat, z)
+                                    Assert.InRange(p.X, obszar.XDol - tolerancja, obszar.XGora + tolerancja)
+                                    Assert.InRange(p.Y, obszar.YLewy - tolerancja, obszar.YPrawy + tolerancja)
+                                Next
+                            Next
+                        End Using
+                    End While
+                    Assert.Equal({8, 15}, poziomyZDanymi.OrderBy(Function(z) z).ToArray())
+                End Using
+            End Using
+        Finally
+            Usun(folder)
+        End Try
+    End Function
 
     <Fact>
     Public Sub KompilatorMbtiles_WarstwyDlaPoziomu_FiltrujeIPorzadkuje()

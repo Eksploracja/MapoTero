@@ -125,40 +125,6 @@ Public Class KreatorMapyPoprawkiTesty
     End Sub
 
     <Fact>
-    Public Sub Wig_ProfilKorektyStareMapy()
-        Sta(Sub()
-                Using f As New Global.MapoTero.Form1()
-                    Using k As New Global.MapoTero.FormKreatorMapy(f)
-                        k.Show() : Application.DoEvents()
-                        DoKroku4(k, "rbCelTelefon", "historia_wig")
-                        Dim opcje = Pole(Of OpcjeKorekcjiMip)(k, "_opcjeKorekty")
-                        Assert.Equal(ProfilKorektyRastra.StareMapyKontrast, opcje.Profil)
-                    End Using
-                End Using
-            End Sub)
-    End Sub
-
-    <Fact>
-    Public Sub ListaProfili_PozycjaStareMapyUstawiaProfilStareMapy()
-        Sta(Sub()
-                Using f As New Global.MapoTero.Form1()
-                    Using k As New Global.MapoTero.FormKreatorMapy(f)
-                        k.Show() : Application.DoEvents()
-                        DoKroku4(k, "rbCelTelefon", "piesza_gory")
-                        Dim cbo = Kt(Of ComboBox)(k, "cboProfilKorekty")
-                        Dim idx = -1
-                        For i = 0 To cbo.Items.Count - 1
-                            If cbo.Items(i).ToString() = OpcjeKorekcjiMip.NazwaProfilu(ProfilKorektyRastra.StareMapyKontrast) Then idx = i
-                        Next
-                        cbo.SelectedIndex = idx
-                        Dim opcje = Pole(Of OpcjeKorekcjiMip)(k, "_opcjeKorekty")
-                        Assert.Equal(ProfilKorektyRastra.StareMapyKontrast, opcje.Profil)
-                    End Using
-                End Using
-            End Sub)
-    End Sub
-
-    <Fact>
     Public Sub Miejscowosc_BezWyniku_NieZostawiaStaregoZasiegu()
         Sta(Sub()
                 Using f As New Global.MapoTero.Form1()
@@ -264,6 +230,146 @@ Public Class KreatorMapyPoprawkiTesty
         Finally
             IO.Directory.Delete(folder, True)
         End Try
+    End Sub
+
+    <Fact>
+    Public Sub Korekta_DomyslnieWylaczona_TakzeDlaGarminaIWig()
+        Sta(Sub()
+                For Each para In {Tuple.Create("rbCelGarmin", "piesza_gory"), Tuple.Create("rbCelTelefon", "historia_wig")}
+                    Using f As New Global.MapoTero.Form1()
+                        Using k As New Global.MapoTero.FormKreatorMapy(f)
+                            k.Show() : Application.DoEvents()
+                            DoKroku4(k, para.Item1, para.Item2)
+                            Assert.False(Kt(Of CheckBox)(k, "chkKorektaObrazu").Checked)
+                            Assert.False(Pole(Of OpcjeKorekcjiMip)(k, "_opcjeKorekty").Wlaczona)
+                            Assert.True(Kt(Of Label)(k, "lblProfilKorekty").Text.Contains("sugerowany"), para.Item2 & ": " & Kt(Of Label)(k, "lblProfilKorekty").Text)
+                        End Using
+                    End Using
+                Next
+            End Sub)
+    End Sub
+
+    <Fact>
+    Public Sub Korekta_ZaznaczeniePolaWlaczaProfilSugerowany()
+        Sta(Sub()
+                Using f As New Global.MapoTero.Form1()
+                    Using k As New Global.MapoTero.FormKreatorMapy(f)
+                        k.Show() : Application.DoEvents()
+                        DoKroku4(k, "rbCelGarmin", "piesza_gory")
+                        Kt(Of CheckBox)(k, "chkKorektaObrazu").Checked = True
+                        Dim o = Pole(Of OpcjeKorekcjiMip)(k, "_opcjeKorekty")
+                        Assert.True(o.Wlaczona)
+                        Assert.Equal(ProfilKorektyRastra.GarminMip, o.Profil)
+                    End Using
+                End Using
+            End Sub)
+    End Sub
+
+    <Fact>
+    Public Sub KolejnoscKrokow_ObszarPrzedStylem()
+        Sta(Sub()
+                Using f As New Global.MapoTero.Form1()
+                    Using k As New Global.MapoTero.FormKreatorMapy(f)
+                        k.Show() : Application.DoEvents()
+                        Kt(Of Button)(k, "btnDalej").PerformClick() : Application.DoEvents()
+                        Assert.True(Kt(Of Panel)(k, "pnlKrok3").Visible, "krok 2 to wybór obszaru")
+                        Assert.Contains("obszar", Kt(Of Label)(k, "lblTytulKroku").Text)
+                        Kt(Of Button)(k, "btnDalej").PerformClick() : Application.DoEvents()
+                        Assert.True(Kt(Of Panel)(k, "pnlKrok2").Visible, "krok 3 to wybór stylu")
+                        ' podgląd stylu pokazuje środek obszaru użytkownika, nie przykładowe miejsce stylu
+                        Dim zasieg = Pole(Of Zasieg)(k, "_wybranyZasieg")
+                        Dim mi = GetType(Global.MapoTero.FormKreatorMapy).GetMethod("PobierzParametryProbkiStylu", BindingFlags.NonPublic Or BindingFlags.Instance)
+                        Dim punkt = DirectCast(mi.Invoke(k, Nothing), Tuple(Of PunktXY, Double)).Item1
+                        Assert.Equal(zasieg.Srodek.X, punkt.X, 3)
+                        Assert.Equal(zasieg.Srodek.Y, punkt.Y, 3)
+                    End Using
+                End Using
+            End Sub)
+    End Sub
+
+    <Fact>
+    Public Sub Dziedzictwo_PolaGrupWylaczajaZabytki()
+        Sta(Sub()
+                Using f As New Global.MapoTero.Form1()
+                    Using k As New Global.MapoTero.FormKreatorMapy(f)
+                        k.Show() : Application.DoEvents()
+                        Kt(Of Button)(k, "btnDalej").PerformClick() : Application.DoEvents()
+                        Dim lst = Kt(Of ListBox)(k, "lstSzablony")
+                        For i = 0 To lst.Items.Count - 1
+                            If DirectCast(lst.Items(i), SzablonMapy).Id = "dziedzictwo" Then lst.SelectedIndex = i
+                        Next
+                        Application.DoEvents()
+                        Dim pole = Kt(Of CheckBox)(k, "chkGrupa1")
+                        Assert.Equal("Zabytki archeologiczne", pole.Text)
+                        pole.Checked = False
+                        Dim mi = GetType(Global.MapoTero.FormKreatorMapy).GetMethod("PobierzZestawStylu", BindingFlags.NonPublic Or BindingFlags.Instance)
+                        Dim zestaw = DirectCast(mi.Invoke(k, New Object() {1.0}), ZestawWarstw)
+                        Assert.DoesNotContain(zestaw.Warstwy, Function(w) w.Zbior.Contains("archeo"))
+                        Assert.Contains(zestaw.Warstwy, Function(w) w.Zbior = "zabytki_zasiegi_NID")
+                        ' wiersz stanu podglądu pod polami grup
+                        Assert.True(Kt(Of Label)(k, "lblStanPodgladuStyl").Top >= pole.Bottom)
+                    End Using
+                End Using
+            End Sub)
+    End Sub
+
+    <Fact>
+    Public Sub MapyWig_OknoWarstwPokazujeSkale25000()
+        Sta(Sub()
+                Using f As New Global.MapoTero.Form1()
+                    Using k As New Global.MapoTero.FormKreatorMapy(f)
+                        k.Show() : Application.DoEvents()
+                        Kt(Of Button)(k, "btnDalej").PerformClick() : Application.DoEvents()
+                        Kt(Of Button)(k, "btnDalej").PerformClick() : Application.DoEvents()
+                        Dim lst = Kt(Of ListBox)(k, "lstSzablony")
+                        For i = 0 To lst.Items.Count - 1
+                            If DirectCast(lst.Items(i), SzablonMapy).Id = "historia_wig" Then lst.SelectedIndex = i
+                        Next
+                        Application.DoEvents()
+                        ' podgląd automatyczny (6 m) to skala 1:100 000, a okno warstw ma pokazać najdokładniejszą 1:25 000
+                        Dim mi = GetType(Global.MapoTero.FormKreatorMapy).GetMethod("StopienOknaWarstw", BindingFlags.NonPublic Or BindingFlags.Instance)
+                        Dim st = DirectCast(mi.Invoke(k, Nothing), StopienSkali)
+                        Assert.NotNull(st)
+                        Assert.Equal("1:25 000", st.Opis)
+                        Assert.Contains(st.Warstwy, Function(w) w.Warstwa = "wig25k_2180")
+                    End Using
+                End Using
+            End Sub)
+    End Sub
+
+    <Fact>
+    Public Sub ZestawWlasny_KrycieZOknaZaawansowanegoNadrzedne()
+        Sta(Sub()
+                Using f As New Global.MapoTero.Form1()
+                    Using k As New Global.MapoTero.FormKreatorMapy(f)
+                        k.Show() : Application.DoEvents()
+                        Kt(Of Button)(k, "btnDalej").PerformClick() : Application.DoEvents()
+                        Dim lst = Kt(Of ListBox)(k, "lstSzablony")
+                        For i = 0 To lst.Items.Count - 1
+                            If DirectCast(lst.Items(i), SzablonMapy).Id = "dziedzictwo" Then lst.SelectedIndex = i
+                        Next
+                        ' jak po oknie zaawansowanym: zabytki z różnym kryciem
+                        Dim wlasny = DirectCast(GetType(Global.MapoTero.FormKreatorMapy).GetMethod("PobierzZestawStylu", BindingFlags.NonPublic Or BindingFlags.Instance).Invoke(k, New Object() {1.0}), ZestawWarstw)
+                        wlasny.UstawKrycie(3, 40)
+                        GetType(Global.MapoTero.FormKreatorMapy).GetField("_zestawNiestandardowy", BindingFlags.NonPublic Or BindingFlags.Instance).SetValue(k, wlasny)
+                        Dim pokaz = GetType(Global.MapoTero.FormKreatorMapy).GetMethod("PokazSzczegolySzablonu", BindingFlags.NonPublic Or BindingFlags.Instance)
+                        pokaz.Invoke(k, New Object() {DirectCast(lst.SelectedItem, SzablonMapy), False})
+                        Dim mi = GetType(Global.MapoTero.FormKreatorMapy).GetMethod("PobierzZestawStylu", BindingFlags.NonPublic Or BindingFlags.Instance)
+                        Dim zestaw = DirectCast(mi.Invoke(k, New Object() {1.0}), ZestawWarstw)
+                        Assert.Equal(100, zestaw(2).Krycie)
+                        Assert.Equal(40, zestaw(3).Krycie)
+                    End Using
+                End Using
+            End Sub)
+    End Sub
+
+    <Fact>
+    Public Sub PomiarPostepu_SzacujePozostalyCzas()
+        Dim pomiar As New Global.MapoTero.PomiarPostepu(1000)
+        Assert.Contains("szacowanie", pomiar.Opis(0))
+        Assert.Equal(" · pozostało ok. 10 s", Global.MapoTero.PomiarPostepu.OpisZProcentu(50, 10))
+        Assert.Equal("...", Global.MapoTero.PomiarPostepu.OpisZProcentu(1, 10))
+        Assert.Equal("2 min 5 s", Global.MapoTero.PomiarPostepu.Czas(124.2))
     End Sub
 
 End Class

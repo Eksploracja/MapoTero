@@ -68,6 +68,7 @@ Przycisk **W górę** wynosi warstwę na wierzch stosu, a **W dół** spycha ją
 | *4 Jaśniej* | wybiera jaśniejszy kolor (np. jasne linie na ciemnym podkładzie) |
 | *5 Ekran* | rozjaśnia podkład, czerń znika |
 | *6 Nakładka* | podbija kontrast (szczególnie przydatne do cieniowania rzeźby NMT nad mapą lub ortofotomapą) |
+| *7 Rzeźba terenu* | dedykowany dla cieniowania rzeźby NMT: jasność 180 (płaski teren) jest neutralna, stoki ciemnieją/jaśnieją bez szarej zasłony |
 
 ---
 
