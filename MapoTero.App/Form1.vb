@@ -339,6 +339,8 @@ Public Class Form1
 
     Private Sub Form1_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         RejestrujKodowania()
+        'silnik (MapoTero.Silnik) nie zna ustawień programu - dla sesji bez numeracji w conf.txt pyta o bieżącą
+        UstawieniaSilnika.NumeracjaDomyslna = Function() Ustawienia.Numeracja
 
         'wyświetla nazwę i wersję
         Me.Text = My.Application.Info.Title & " " & Program.Wersja

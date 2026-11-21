@@ -167,7 +167,7 @@ Public NotInheritable Class PobieranieSegmentow
         End If
         'limit czasu ustawiany osobno dla każdego zapytania (LimitCzasu) - wartość z ustawień może się zmieniać
         Dim k As New HttpClient(obsluga, disposeHandler:=handler Is Nothing) With {.Timeout = Threading.Timeout.InfiniteTimeSpan}
-        k.DefaultRequestHeaders.UserAgent.ParseAdd(Program.UserAgentProgramu & " (+https://github.com/Eksploracja/MapoTero)")
+        k.DefaultRequestHeaders.UserAgent.ParseAdd(UstawieniaSilnika.UserAgent & " (+https://github.com/Eksploracja/MapoTero)")
         Return k
     End Function
 
@@ -632,7 +632,7 @@ Public NotInheritable Class PobieranieSegmentow
     End Function
 
     ''' <summary>Czy dane są poprawnym obrazem (dekodowanie przez GDI+).</summary>
-    Friend Shared Function CzyObraz(dane() As Byte) As Boolean
+    Public Shared Function CzyObraz(dane() As Byte) As Boolean
         If dane Is Nothing OrElse dane.Length = 0 Then Return False
         Try
             Using ms As New MemoryStream(dane)

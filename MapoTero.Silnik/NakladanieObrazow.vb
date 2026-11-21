@@ -22,7 +22,7 @@ Imports MapoTero.Core
 ''' Zamiana obrazów na tablice pikseli ARGB i z powrotem - do nakładania warstw z kryciem
 ''' (obliczenia w <see cref="MapoTero.Core.NakladanieWarstw"/>).
 ''' </summary>
-Friend NotInheritable Class NakladanieObrazow
+Public NotInheritable Class NakladanieObrazow
 
     Private Sub New()
     End Sub

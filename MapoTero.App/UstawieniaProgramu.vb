@@ -379,19 +379,3 @@ Public Class UstawieniaProgramu
     End Sub
 
 End Class
-
-''' <summary>Rodzaje plików georeferencyjnych tworzonych dla obrazu.</summary>
-Public Class OpcjeGeoreferencji
-    Public Property Map As Boolean
-    Public Property Gmi As Boolean
-    Public Property WldPoints As Boolean
-    Public Property WorldFile As Boolean
-    Public Property Kml As Boolean
-    Public Property Tab As Boolean
-
-    Public ReadOnly Property Dowolna As Boolean
-        Get
-            Return Map OrElse Gmi OrElse WldPoints OrElse WorldFile OrElse Kml OrElse Tab
-        End Get
-    End Property
-End Class

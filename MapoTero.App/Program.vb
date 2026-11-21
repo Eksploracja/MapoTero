@@ -22,11 +22,6 @@ Imports System.Text
 ''' </summary>
 Public Module Program
 
-#If NETCOREAPP Then
-    ''' <summary>Strona kodowa ANSI systemu Windows (w .NET Framework zwracana przez Encoding.Default).</summary>
-    Private Declare Function GetACP Lib "kernel32" () As Integer
-#End If
-
     ''' <summary>Katalog programu (pliki warstw, moduły pomocnicze).</summary>
     Public FolderProgramu As String = ""
 
@@ -114,40 +109,6 @@ Public Module Program
         End Try
     End Function
 
-    ''' <summary>
-    ''' Kodowanie plików tekstowych programu (conf.txt, lastsettings.txt, pliki georeferencyjne): systemowa strona
-    ''' kodowa ANSI - takie samo, jakiego używały instrukcje FileOpen/Print poprzednich wersji.
-    ''' </summary>
-    Public Function KodowanieSystemowe() As Encoding
-#If NETCOREAPP Then
-        RejestrujKodowania()
-        'strona kodowa systemu (GetACP, „Język dla programów nieobsługujących Unicode”), a nie formatu regionalnego
-        '(CultureInfo.CurrentCulture): przy formacie „angielski (USA)” na polskim Windows dawało to 1252 - polskie
-        'litery w ścieżkach lastsettings.txt i conf.txt były tracone („Łukasz” -> „Lukasz”), a pliki zapisane przy
-        'formacie polskim czytane jako „£ódŸ”
-        Try
-            Dim cp As Integer = GetACP()
-            'Windows z opcją „Użyj UTF-8 dla obsługi języków na całym świecie” - UTF-8 bez znacznika BOM, jak w .NET Framework
-            If cp = 65001 Then Return New UTF8Encoding(False)
-            If cp > 0 Then Return Encoding.GetEncoding(cp)
-        Catch
-        End Try
-        Return Encoding.GetEncoding(1250)
-#Else
-        Return Encoding.Default
-#End If
-    End Function
-
-    ''' <summary>
-    ''' W .NET 8 strony kodowe Windows (np. 1250 plików warstw) są dostępne dopiero po rejestracji dostawcy kodowań -
-    ''' wywoływane na starcie programu, przed odczytem jakiegokolwiek pliku. W .NET Framework nic nie robi.
-    ''' </summary>
-    Public Sub RejestrujKodowania()
-#If NETCOREAPP Then
-        Encoding.RegisterProvider(CodePagesEncodingProvider.Instance)
-#End If
-    End Sub
-
     ''' <summary>Ustala folder zapisu danych programu (sprawdza możliwość zapisu w katalogu programu).</summary>
     Public Function UstalFolderDanych(folderProgramu As String) As String
         Try
@@ -160,39 +121,6 @@ Public Module Program
             Directory.CreateDirectory(folderUzytkownika)
             Return folderUzytkownika
         End Try
-    End Function
-
-    ''' <summary>
-    ''' Liczba wpisana przez użytkownika - akceptuje kropkę i przecinek dziesiętny (Val() przerywał odczyt na przecinku,
-    ''' więc "0,5" dawało 0). Gdy tekst nie jest liczbą - wartość domyślna.
-    ''' </summary>
-    Public Function Wartosc(tekst As String, Optional domyslna As Double = 0) As Double
-        If String.IsNullOrWhiteSpace(tekst) Then Return domyslna
-        Dim wynik As Double
-        'NaN i nieskończoność ("nan", "1e999") nie są liczbami dla użytkownika - dawniej kończyły się wyjątkiem przy zaokrąglaniu
-        If Double.TryParse(tekst.Trim().Replace(","c, "."c), NumberStyles.Float, CultureInfo.InvariantCulture, wynik) AndAlso
-           Not Double.IsNaN(wynik) AndAlso Not Double.IsInfinity(wynik) Then Return wynik
-        Return domyslna
-    End Function
-
-    ''' <summary>Liczba całkowita wpisana przez użytkownika.</summary>
-    Public Function WartoscCalkowita(tekst As String, Optional domyslna As Integer = 0) As Integer
-        Dim w As Double = Wartosc(tekst, domyslna)
-        If w > Integer.MaxValue OrElse w < Integer.MinValue Then Return domyslna
-        Return CInt(Math.Round(w))
-    End Function
-
-    ''' <summary>Liczba z kropką dziesiętną, bez zbędnych zer.</summary>
-    Public Function Liczba(wartosc As Double) As String
-        Return MapoTero.Core.Georeferencja.Liczba(wartosc)
-    End Function
-
-    ''' <summary>Polska odmiana rzeczownika po liczbie: 1 segment, 2-4 segmenty (bez 12-14), 5 segmentów.</summary>
-    Public Function Odmiana(liczba As Long, pojedyncza As String, mnoga24 As String, mnoga As String) As String
-        Dim n As Long = Math.Abs(liczba)
-        If n = 1 Then Return pojedyncza
-        If n Mod 10 >= 2 AndAlso n Mod 10 <= 4 AndAlso (n Mod 100 < 12 OrElse n Mod 100 > 14) Then Return mnoga24
-        Return mnoga
     End Function
 
     ''' <summary>Adres zgłaszania błędów programu.</summary>

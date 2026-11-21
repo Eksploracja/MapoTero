@@ -543,7 +543,7 @@ Public NotInheritable Class EksportMapy
         Return suma
     End Function
 
-    Friend Shared Function IstniejaceTomyKmz(plik As String) As IEnumerable(Of String)
+    Public Shared Function IstniejaceTomyKmz(plik As String) As IEnumerable(Of String)
         Dim folder = Path.GetDirectoryName(Path.GetFullPath(plik))
         If Not Directory.Exists(folder) Then Return Enumerable.Empty(Of String)()
         Dim prefix = System.Text.RegularExpressions.Regex.Escape(Path.GetFileNameWithoutExtension(plik))
@@ -553,7 +553,7 @@ Public NotInheritable Class EksportMapy
     End Function
 
     ''' <summary>Eksport kreatora zapisuje całą mapę i kalibrację przed podmianą dotychczasowego wyniku.</summary>
-    Friend Shared Function EksportujBezpiecznie(z As ZadanieEksportu, postep As IProgress(Of Integer),
+    Public Shared Function EksportujBezpiecznie(z As ZadanieEksportu, postep As IProgress(Of Integer),
                                                  token As CancellationToken) As String()
         Dim docelowy = z.Plik
         Dim folder = Path.GetDirectoryName(Path.GetFullPath(docelowy))
@@ -614,7 +614,7 @@ Public NotInheritable Class EksportMapy
     End Sub
 
     ''' <summary>Usuwa plik wynikowy (OruxMaps - pliki mapy w jej folderze i pusty folder).</summary>
-    Friend Shared Sub UsunWynik(z As ZadanieEksportu)
+    Public Shared Sub UsunWynik(z As ZadanieEksportu)
         If z.Rodzaj = RodzajEksportu.TrekBuddy Then
             If File.Exists(z.Plik) Then File.Delete(z.Plik)
             Dim folderMapy = FolderRoboczyTrekBuddy(z)
@@ -648,7 +648,7 @@ Public NotInheritable Class EksportMapy
     End Sub
 
     ''' <summary>Usuwa plik bazy SQLite wraz z plikami dziennika (-wal, -shm, -journal).</summary>
-    Friend Shared Sub UsunPlikBazy(plik As String)
+    Public Shared Sub UsunPlikBazy(plik As String)
         For Each p In {plik, plik & "-wal", plik & "-shm", plik & "-journal"}
             If File.Exists(p) Then File.Delete(p)
         Next
@@ -839,7 +839,7 @@ Public NotInheritable Class EksportMapy
     Private Shared ReadOnly KoderJpeg As ImageCodecInfo = ImageCodecInfo.GetImageEncoders().FirstOrDefault(Function(c) c.FormatID = ImageFormat.Jpeg.Guid)
 
     ''' <summary>Koduje bitmapę: JPEG (na białym tle) albo PNG (z przezroczystością).</summary>
-    Friend Shared Function Koduj(bmp As Bitmap, png As Boolean, jakosc As Integer) As Byte()
+    Public Shared Function Koduj(bmp As Bitmap, png As Boolean, jakosc As Integer) As Byte()
         Using ms As New MemoryStream()
             If png Then
                 bmp.Save(ms, ImageFormat.Png)
@@ -864,7 +864,7 @@ Public NotInheritable Class EksportMapy
     End Function
 
     ''' <summary>Koduje bitmapę z określonym kolorem tła dla JPEG.</summary>
-    Friend Shared Function Koduj(bmp As Bitmap, png As Boolean, jakosc As Integer, kolorTla As Color) As Byte()
+    Public Shared Function Koduj(bmp As Bitmap, png As Boolean, jakosc As Integer, kolorTla As Color) As Byte()
         Using ms As New MemoryStream()
             If png Then
                 bmp.Save(ms, ImageFormat.Png)
@@ -930,7 +930,7 @@ Public NotInheritable Class EksportMapy
     End Function
 
     ''' <summary>Prostokąt w układzie obejmujący punkty WGS84.</summary>
-    Friend Shared Function ObszarPunktow(uklad As UkladWspolrzednych, punkty As IEnumerable(Of PunktGeo)) As Zasieg
+    Public Shared Function ObszarPunktow(uklad As UkladWspolrzednych, punkty As IEnumerable(Of PunktGeo)) As Zasieg
         Dim xMin As Double = Double.MaxValue, xMax As Double = Double.MinValue, yMin As Double = Double.MaxValue, yMax As Double = Double.MinValue
         For Each g In punkty
             Dim p = uklad.ZWgs84(g)
@@ -944,7 +944,7 @@ Public NotInheritable Class EksportMapy
 
 #Region "KMZ"
 
-Friend Shared Function NazwaPlikuTomu(sciezkaBazowa As String, numerTomu As Integer, liczbaTomow As Integer) As String
+Public Shared Function NazwaPlikuTomu(sciezkaBazowa As String, numerTomu As Integer, liczbaTomow As Integer) As String
         Dim dir = Path.GetDirectoryName(sciezkaBazowa)
         Dim nazwa = Path.GetFileNameWithoutExtension(sciezkaBazowa)
         Dim ext = Path.GetExtension(sciezkaBazowa)
@@ -1255,7 +1255,7 @@ Friend Shared Function NazwaPlikuTomu(sciezkaBazowa As String, numerTomu As Inte
             'world file GeoTIFF: programy CAD szukają .tfw (ZapiszPliki tworzy rozszerzenie z pierwszej i ostatniej litery)
             Dim sciezkaTfw = Path.Combine(folderZapisu, nazwaBezRozszerzenia & ".tfw")
             If z.Georeferencja.WorldFile AndAlso rozszerzenie = "tif" AndAlso Not File.Exists(sciezkaTfw) Then
-                Georeferencja.Zapisz(sciezkaTfw, Georeferencja.WorldFile(obrazGeoref), Program.KodowanieSystemowe())
+                Georeferencja.Zapisz(sciezkaTfw, Georeferencja.WorldFile(obrazGeoref), KodowanieSystemowe())
             End If
         End If
     End Sub
@@ -1264,7 +1264,7 @@ Friend Shared Function NazwaPlikuTomu(sciezkaBazowa As String, numerTomu As Inte
 
 #Region "Kafle Web Mercator (MBTiles, SQLiteDB, OruxMaps)"
 
-    Friend Shared Function UtworzMagazyn(z As ZadanieEksportu, obszar As ProstokatGeo) As MagazynKafli
+    Public Shared Function UtworzMagazyn(z As ZadanieEksportu, obszar As ProstokatGeo) As MagazynKafli
         Select Case z.Rodzaj
             Case RodzajEksportu.SQLiteDB : Return New MagazynSQLiteDB(z)
             Case RodzajEksportu.OruxMaps : Return New MagazynOruxMaps(z, obszar)
@@ -1594,7 +1594,7 @@ End Class
 ''' Zapis piramidy kafli Web Mercator w bazie SQLite: kafle kolejnych poziomów zapisywane są w osobnych transakcjach,
 ''' a kafle poziomu wyższego odczytywane z bazy przy składaniu poziomu niższego.
 ''' </summary>
-Friend MustInherit Class MagazynKafli
+Public MustInherit Class MagazynKafli
     Implements IDisposable
 
     Protected ReadOnly Polaczenie As SQLiteConnection
@@ -1702,7 +1702,7 @@ Friend MustInherit Class MagazynKafli
 End Class
 
 ''' <summary>Opis mapy zapisywany w tabeli metadata pliku MBTiles.</summary>
-Friend Class OpisMbtiles
+Public Class OpisMbtiles
     Public Property Nazwa As String = ""
     Public Property Opis As String = ""
     Public Property Atrybucja As String = ""
@@ -1721,7 +1721,7 @@ End Class
 ''' używają go eksport mapy, MBTiles wieloskalowy (KompilatorMbtiles) i konwerter OziExplorer; dawniej każde z nich
 ''' miało własną kopię poleceń SQL, a różnice (np. tabela android_metadata tylko w jednym) wynikały z przypadku.
 ''' </summary>
-Friend Class MagazynMBTiles
+Public Class MagazynMBTiles
     Inherits MagazynKafli
 
     Public Sub New(z As ZadanieEksportu, obszar As ProstokatGeo)

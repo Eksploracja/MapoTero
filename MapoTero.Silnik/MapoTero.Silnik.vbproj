@@ -1,0 +1,57 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Silnik programu MapoTero: pobieranie segmentów WMS i kafli WMTS, nakładanie i scalanie obrazów, eksport map
+       (GeoTIFF, KMZ, JNX, MBTiles, SQLiteDB, OruxMaps, TrekBuddy). Korzysta z bitmap System.Drawing, ale nie z WinForms:
+       okna programu (MapoTero.App) tylko go wywołują, a testy sprawdzają go bez tworzenia formularzy.
+       Obliczenia bez bitmap należą do MapoTero.Core. -->
+  <PropertyGroup>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <!-- kompilacja (bez uruchamiania) możliwa także poza Windows, np. w GitHub Actions na Linuksie -->
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    <RootNamespace>MapoTero</RootNamespace>
+    <AssemblyName>MapoTero.Silnik</AssemblyName>
+    <OptionExplicit>On</OptionExplicit>
+    <OptionCompare>Binary</OptionCompare>
+    <OptionStrict>On</OptionStrict>
+    <OptionInfer>On</OptionInfer>
+    <LangVersion>latest</LangVersion>
+    <!-- 64 bity jak program: duże arkusze scalania i eksportu; natywny SQLite dla win-x64 -->
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <PlatformTarget>x64</PlatformTarget>
+    <SelfContained>false</SelfContained>
+    <DisableImplicitNamespaceImports>true</DisableImplicitNamespaceImports>
+    <!-- te same wyłączone ostrzeżenia co w MapoTero_v3.vbproj (kod przeniesiony z programu) -->
+    <NoWarn>$(NoWarn);42016;41999;42017;42018;42019;42032;42036;42020;42021;42022;42353;42354;42355;SYSLIB0014</NoWarn>
+    <Version>3.18</Version>
+    <Authors>MapoTero</Authors>
+    <Copyright>GNU GPL v3</Copyright>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Import Include="Microsoft.VisualBasic" />
+    <Import Include="System" />
+    <Import Include="System.Collections" />
+    <Import Include="System.Collections.Generic" />
+    <Import Include="System.Diagnostics" />
+    <Import Include="System.Drawing" />
+    <Import Include="System.Linq" />
+    <Import Include="System.Xml.Linq" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MapoTero.Core\MapoTero.Core.vbproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- bitmapy bez WinForms: pakiet zamiast odwołania do Microsoft.WindowsDesktop.App, które udostępniłoby
+         System.Windows.Forms (profil WindowsForms) - kompilator pilnuje, by Silnik nie korzystał z okien.
+         W programie (MapoTero.App) wersję z platformy wybiera rozstrzyganie konfliktów wersji. -->
+    <PackageReference Include="System.Drawing.Common" Version="10.0.0" />
+    <!-- SQLite dla zapisu MBTiles, SQLiteDB, OruxMaps (EksportMapy, KompilatorMbtiles; program używa go też
+         w FormImportOzi). Wpis jawny, bo wcześniej biblioteka przychodziła tylko jako zależność GMap.NET -
+         aktualizacja lub wymiana GMap.NET mogłaby po cichu zmienić albo usunąć silnik zapisu map.
+         Wersja równa tej z GMap.NET 2.1.7 (podniesienie wymaga sprawdzenia eksportów). -->
+    <PackageReference Include="System.Data.SQLite.Core" Version="1.0.115.5" />
+  </ItemGroup>
+
+</Project>

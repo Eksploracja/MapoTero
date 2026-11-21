@@ -90,7 +90,7 @@ Public Class WarstwaWielowarstwowa
                 Return False
             End If
 
-            Dim styl = Siatka.StylZTekstu(If(c.Numeracja = "", Ustawienia.Numeracja, c.Numeracja))
+            Dim styl = Siatka.StylZTekstu(If(c.Numeracja = "", UstawieniaSilnika.NumeracjaDomyslna.Invoke(), c.Numeracja))
             Dim rozszerzenie = Wms.RozszerzeniePliku(c.Format)
             Zrodlo = New ZrodloSegmentow(Folder.TrimEnd(Path.DirectorySeparatorChar) & Path.DirectorySeparatorChar,
                                          c.Prefiks, styl, rozszerzenie, Siatka)

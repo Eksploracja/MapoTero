@@ -44,7 +44,7 @@ Public Class KodowanieIRegionTesty
         Dim systemowa = GetACP()
         For Each k In {"pl-PL", "en-US", "de-DE", "en-GB"}
             Dim cp As Integer = 0
-            WKulturze(k, Sub() cp = Global.MapoTero.Program.KodowanieSystemowe().CodePage)
+            WKulturze(k, Sub() cp = Global.MapoTero.NarzedziaTekstu.KodowanieSystemowe().CodePage)
             Assert.True(cp = systemowa, $"format {k}: KodowanieSystemowe() = {cp}, strona kodowa systemu = {systemowa}")
         Next
     End Sub
@@ -82,10 +82,10 @@ Public Class KodowanieIRegionTesty
                 Sub()
                     Dim c As New KonfiguracjaSesji With {.Folder = folder, .RodzajMapy = "Ortofotomapa - źródło GUGiK", .XDol = "1", .YLewy = "1", .XGora = "2", .YPrawy = "2",
                                                          .RozmiarPiksela = "0.5", .BokSegmentuPx = "2000", .UkladEpsg = 2180, .Format = "jpeg", .Prefiks = "_", .Numeracja = "1"}
-                    c.Zapisz(plik, Global.MapoTero.Program.KodowanieSystemowe())
+                    c.Zapisz(plik, Global.MapoTero.NarzedziaTekstu.KodowanieSystemowe())
                 End Sub)
             Dim odczytana As KonfiguracjaSesji = Nothing
-            WKulturze("en-US", Sub() odczytana = KonfiguracjaSesji.Wczytaj(plik, Global.MapoTero.Program.KodowanieSystemowe()))
+            WKulturze("en-US", Sub() odczytana = KonfiguracjaSesji.Wczytaj(plik, Global.MapoTero.NarzedziaTekstu.KodowanieSystemowe()))
             Assert.Equal(folder, odczytana.Folder)
             Assert.Equal("Ortofotomapa - źródło GUGiK", odczytana.RodzajMapy)
         Finally
@@ -99,9 +99,9 @@ Public Class KodowanieIRegionTesty
         For Each k In {"pl-PL", "en-US", "de-DE", "fr-FR"}
             WKulturze(k,
                 Sub()
-                    Assert.Equal(0.5, Global.MapoTero.Program.Wartosc("0,5"))
-                    Assert.Equal(0.5, Global.MapoTero.Program.Wartosc("0.5"))
-                    Assert.Equal(1234.5, Global.MapoTero.Program.Wartosc(" 1234.5 "))
+                    Assert.Equal(0.5, Global.MapoTero.NarzedziaTekstu.Wartosc("0,5"))
+                    Assert.Equal(0.5, Global.MapoTero.NarzedziaTekstu.Wartosc("0.5"))
+                    Assert.Equal(1234.5, Global.MapoTero.NarzedziaTekstu.Wartosc(" 1234.5 "))
                 End Sub)
         Next
     End Sub

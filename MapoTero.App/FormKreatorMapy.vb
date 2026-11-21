@@ -2869,7 +2869,7 @@ Public Class FormKreatorMapy
             .Numeracja = Siatka.TekstStylu(zadanie.Numeracja), .Przezroczystosc = zadanie.Przezroczystosc,
             .DataPobrania = DateTime.Today.ToString("yyyy-MM-dd", kultura)}
         zadanie.Warstwy.CopyTo(sesja.Warstwy)
-        sesja.Zapisz(Path.Combine(folder, "conf.txt"), Program.KodowanieSystemowe())
+        sesja.Zapisz(Path.Combine(folder, "conf.txt"), KodowanieSystemowe())
         Return zadanie
     End Function
 

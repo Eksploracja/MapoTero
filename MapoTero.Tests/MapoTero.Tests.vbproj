@@ -27,6 +27,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\MapoTero.Core\MapoTero.Core.vbproj" />
+    <ProjectReference Include="..\MapoTero.Silnik\MapoTero.Silnik.vbproj" />
     <ProjectReference Include="..\MapoTero.App\MapoTero_v3.vbproj" />
   </ItemGroup>
 

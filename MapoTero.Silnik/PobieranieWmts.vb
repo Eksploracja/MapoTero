@@ -851,7 +851,7 @@ Public Class ZrodloWmts
     End Sub
 
     ''' <summary>Zapis segmentu w formacie wybranym w ustawieniach (JPEG na białym tle, PNG z przezroczystością).</summary>
-    Friend Shared Function Koduj(bmp As Bitmap, format As String, jakoscJpeg As Integer) As Byte()
+    Public Shared Function Koduj(bmp As Bitmap, format As String, jakoscJpeg As Integer) As Byte()
         Using bmp
             Select Case Wms.RozszerzeniePliku(format)
                 Case "png"
