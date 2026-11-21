@@ -82,7 +82,7 @@ Public Class KreatorMapyPrzegladTesty
         Sta(Sub()
                 Using f As New Global.MapoTero.Form1()
                     Using k As New Global.MapoTero.FormKreatorMapy(f)
-                        Dim zrodla = DirectCast(Metoda("PobierzZrodlaKreatora").Invoke(k, Nothing), Dictionary(Of String, PlikWarstw))
+                        Dim zrodla = k.Styl.ZrodlaMap()
                         For Each s In ZarzadcaSzablonow.PobierzDomyslne()
                             Dim zestawyWarstw = New List(Of Tuple(Of String, IList(Of WarstwaSzablonu))) From {Tuple.Create("podstawowe", CType(s.Warstwy, IList(Of WarstwaSzablonu)))}
                             For Each st In s.StopnieSkali
@@ -117,7 +117,7 @@ Public Class KreatorMapyPrzegladTesty
                         Assert.True(z.Wysokosc / piksel <= pic.Height, $"wysokość {z.Wysokosc / piksel:0} px > ramka {pic.Height} px")
                         ' obszar wypełnia znaczną część ramki, a nie jest kropką
                         Assert.True(Math.Max(z.Szerokosc / piksel / pic.Width, z.Wysokosc / piksel / pic.Height) > 0.5 OrElse
-                                    piksel <= DirectCast(k.GetType().GetField("_wybranySzablon", BindingFlags.NonPublic Or BindingFlags.Instance).GetValue(k), SzablonMapy).DomyslnyPiksel + 0.0001)
+                                    piksel <= k.Styl.Szablon.DomyslnyPiksel + 0.0001)
                     End Using
                 End Using
             End Sub)
@@ -200,7 +200,7 @@ Public Class KreatorMapyPrzegladTesty
                         cbo.SelectedItem = "wg granic"
                         Dim punkt As New WynikGeokodowania With {.Szerokosc = 50.06, .Dlugosc = 19.93}
                         Assert.Equal(10000, k.ZasiegWyniku(punkt).Szerokosc, 0)
-                        Dim dz As New Global.MapoTero.WynikDzialki With {.Zasieg1992 = New Zasieg(500000, 600000, 500040, 600030)}
+                        Dim dz As New WynikDzialki With {.Zasieg1992 = New Zasieg(500000, 600000, 500040, 600030)}
                         Assert.Equal(330, k.ZasiegWyniku(dz).Szerokosc, 6)
                     End Using
                 End Using

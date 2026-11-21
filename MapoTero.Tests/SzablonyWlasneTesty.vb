@@ -114,9 +114,9 @@ Public Class SzablonyWlasneTesty
                                                 If DirectCast(lst.Items(i), SzablonMapy).Id = "historia_wig" Then lst.SelectedIndex = i
                                             Next
                                             Application.DoEvents()
-                                            Dim tb = DirectCast(k.Controls.Find("tbCieniowanie", True)(0), TrackBar)
-                                            tb.Value = 20
-                                            k.GetType().GetMethod("ZmienRegulacje", BindingFlags.NonPublic Or BindingFlags.Instance).Invoke(k, New Object() {0, 20})
+                                            ' suwak cieniowania (pierwszy wiersz suwaków stylu WIG) przesunięty na 20%
+                                            Assert.Equal("Cieniowanie terenu:", DirectCast(k.Controls.Find("lblCieniowanieOpis", True)(0), Label).Text)
+                                            k.Styl.Regulacje(RodzajRegulacji.Cieniowanie) = 20
 
                                             Dim styl = k.ZapiszStylWlasny("Test WIG", Function(p) True)
                                             Assert.NotNull(styl)
