@@ -13,7 +13,6 @@ Imports System.Globalization
 Imports System.IO
 Imports System.Linq
 Imports System.Runtime.InteropServices
-Imports System.Text.RegularExpressions
 Imports System.Threading
 Imports System.Threading.Tasks
 Imports System.Windows.Forms
@@ -41,9 +40,6 @@ Public Class FormKreatorMapy
         If okno.WindowState = FormWindowState.Minimized Then ShowWindow(okno.Handle, SW_RESTORE)
     End Sub
 
-    Private Const IdWlasnegoZestawu As String = "wlasny_zestaw"
-    Private Const OpcjaGranic As String = "wg granic"
-
     ' Wybory zapamiętane między kolejnymi otwarciami kreatora w jednej sesji programu
     Private Shared _ostatniCel As CelMapy? = Nothing
     Private Shared _ostatniSzablonId As String = ""
@@ -53,9 +49,8 @@ Public Class FormKreatorMapy
     Private _biezacyKrok As Integer = 1
 
     Private _wybranyCel As CelMapy = CelMapy.TelefonTablet
-    Private _wybranySzablon As SzablonMapy
-    Private _zestawNiestandardowy As ZestawWarstw
-    Private _zmianyWygladu As New ZestawWarstw.ZmianyWygladu()
+    ' Styl z kroku 3: szablon, zestaw niestandardowy, plan skal, suwaki krycia i grupy warstw (logika w MapoTero.Core)
+    Private ReadOnly _styl As StylKreatora
     Private _stopienPodgladu As StopienSkali
     Private _zasiegObrazuStylu As Zasieg?
     Private _zasiegObrazuObszaru As Zasieg?
@@ -66,16 +61,10 @@ Public Class FormKreatorMapy
     Private _plikTrasy As String = ""
     Private btnUsunStyl As Button
     Private lblNazwaWyniku As Label
-    ' Suwaki krycia grup warstw (cieniowanie, szlaki, mapa topograficzna, zabytki): wartości i krycie bazowe szablonu
-    Private ReadOnly _regulacje As New Dictionary(Of RodzajRegulacji, Integer)()
-    Private ReadOnly _bazoweRegulacje As New Dictionary(Of RodzajRegulacji, Integer)()
+    ' Rodzaj grupy warstw regulowanej suwakiem w każdym z dwóch wierszy i pola wyboru grup warstw
     Private ReadOnly _rodzajeWierszy(1) As RodzajRegulacji
-    ' Grupy warstw wyłączone polami wyboru w kroku 3 (np. „Zabytki nieruchome”) i pola tych grup
-    Private ReadOnly _wylaczoneGrupy As New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
     Private ReadOnly _polaGrup As New List(Of CheckBox)()
     Private ReadOnly _topyWierszaStanu As New Dictionary(Of Control, Integer)()
-    ' Plan skal ustawiony w oknie „Ustawienia skal” (Nothing - plan automatyczny)
-    Private _planWlasny As List(Of PlanStopnia)
     Private _celListy As CelMapy? = Nothing
 
     Private _wybranyZasieg As Zasieg
@@ -124,8 +113,6 @@ Public Class FormKreatorMapy
     Private _bazaPodgladuObszaru As Bitmap
     Private _ostatniaProbkaBmp As Bitmap
     Private _opcjeKorekty As New OpcjeKorekcjiMip()
-    Private ReadOnly _zrodlaKreatora As New Dictionary(Of String, PlikWarstw)(StringComparer.OrdinalIgnoreCase)
-    Private ReadOnly _brakujaceZbiory As New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
     ' Plik zapisany przez kreator z brakami - ponowienie może go zastąpić uzupełnioną mapą
     Private _plikZBrakami As String = ""
     Private _sciezkaZmienionaPrzezUzytkownika As Boolean = False
@@ -179,6 +166,13 @@ Public Class FormKreatorMapy
     Private lblProfilKorekty As Label
     Private _srodekPodgladuStylu As PunktXY? = Nothing
 
+    ''' <summary>Styl wybrany w kroku 3 (testy sprawdzają przez niego zestaw warstw złożony z ustawień okna).</summary>
+    Friend ReadOnly Property Styl As StylKreatora
+        Get
+            Return _styl
+        End Get
+    End Property
+
     Friend ReadOnly Property BiezacyKrok As Integer
         Get
             Return _biezacyKrok
@@ -193,6 +187,12 @@ Public Class FormKreatorMapy
     End Property
 
     Public Sub New(form1 As Form1)
+        ' Styl przed InitializeComponent - zdarzenia kontrolek z projektanta już z niego korzystają
+        If form1 IsNot Nothing Then
+            _styl = New StylKreatora(Function() form1.ZrodlaMapSesji(), Function() form1.WybranyZestaw())
+        Else
+            _styl = New StylKreatora()
+        End If
         InitializeComponent()
         _form1 = form1
 
@@ -446,8 +446,8 @@ Public Class FormKreatorMapy
         lblPromien.Left = 194
         cboPromien.Left = 248
         cboPromien.Width = 98
-        cboPromien.Items.Add(OpcjaGranic)
-        _podpowiedzi.SetToolTip(cboPromien, "Promień wokół wybranego miejsca albo „" & OpcjaGranic & "”” - prostokąt otaczający miejscowość z wyszukiwarki (dla adresu co najmniej 1 km).")
+        cboPromien.Items.Add(ObszarKreatora.OpcjaGranic)
+        _podpowiedzi.SetToolTip(cboPromien, "Promień wokół wybranego miejsca albo „" & ObszarKreatora.OpcjaGranic & "”” - prostokąt otaczający miejscowość z wyszukiwarki (dla adresu co najmniej 1 km).")
         _podpowiedzi.SetToolTip(txtSzukajMiejsca, "Nazwa miejscowości, adres albo współrzędne punktu, np. 50.0614, 19.9366 lub 50°03'41""N 19°56'12""E (WGS84)," & vbCrLf &
                                                   "albo X Y w PL-1992 / PL-2000 (X - północ). Obszar wokół punktu wyznacza promień obok." & vbCrLf &
                                                   "Działka: identyfikator TERYT (np. 121901_1.0001.123/4) albo „działka Wieliczka 123/4”” - obszar to działka z pasem 150 m.")
@@ -469,7 +469,7 @@ Public Class FormKreatorMapy
             If z.Poprawny Then
                 _wybranyZasiegZMapy = z
                 _wybranyZasieg = _wybranyZasiegZMapy
-                lblStatusZaznaczenia.Text = "Aktualny zasięg z mapy: " & FormatujWymiaryZasiegu(_wybranyZasieg)
+                lblStatusZaznaczenia.Text = "Aktualny zasięg z mapy: " & ObszarKreatora.FormatujWymiary(_wybranyZasieg)
                 lblStatusZaznaczenia.ForeColor = Color.FromArgb(0, 120, 50)
                 rbObszarMapa.Checked = True
             End If
@@ -494,7 +494,7 @@ Public Class FormKreatorMapy
     ''' zawsze pierwszy styl i kasował warstwy dostosowane przez użytkownika).
     ''' </summary>
     Private Sub OdswiezListeSzablonow()
-        Dim idDoZaznaczenia = If(_wybranySzablon IsNot Nothing, _wybranySzablon.Id, _ostatniSzablonId)
+        Dim idDoZaznaczenia = If(_styl.Szablon IsNot Nothing, _styl.Szablon.Id, _ostatniSzablonId)
         lstSzablony.BeginUpdate()
         lstSzablony.Items.Clear()
         For Each s In ZarzadcaSzablonow.PobierzDlaCelu(_wybranyCel)
@@ -513,67 +513,23 @@ Public Class FormKreatorMapy
         lstSzablony.SelectedIndex = indeks
     End Sub
 
-    Private Function CzyWlasnyZestaw() As Boolean
-        Return _wybranySzablon IsNot Nothing AndAlso _wybranySzablon.Id = IdWlasnegoZestawu
-    End Function
-
-    Private Shared Function OpisZestawu(zestaw As ZestawWarstw) As String
-        If zestaw Is Nothing OrElse zestaw.Liczba = 0 Then Return ""
-        Return String.Join(" + ", zestaw.Warstwy.Select(Function(w) w.Nazwa & If(w.Krycie < 100, " (" & w.Krycie & "%)", "")))
-    End Function
-
     ''' <param name="zachowajUstawienia">True - ten sam styl wybrany ponownie (np. po powrocie z kroku 3): suwak cieniowania
     ''' zachowuje wartość ustawioną przez użytkownika.</param>
     Private Sub PokazSzczegolySzablonu(s As SzablonMapy, Optional zachowajUstawienia As Boolean = False)
-        _wybranySzablon = s
+        _styl.Szablon = s
         If s Is Nothing Then Exit Sub
 
         ' Bez piktogramu: etykieta (GDI) pokazywała emoji jako pusty prostokąt, lista stylów rysuje je poprawnie
         lblNazwaSzablonu.Text = s.Nazwa
         lblOpisSzablonu.Text = s.Opis
 
-        ' Suwaki krycia grup warstw: ze szablonu (krycie proporcjonalne w stopniach skali) albo z zestawu własnego
-        Dim zestawWlasny As ZestawWarstw = Nothing
-        If _zestawNiestandardowy IsNot Nothing Then
-            zestawWlasny = _zestawNiestandardowy
-            lblSkladnikiSzablonu.Text = OpisZestawu(_zestawNiestandardowy)
-        ElseIf s.Id = IdWlasnegoZestawu Then
-            zestawWlasny = If(_form1 IsNot Nothing, _form1.WybranyZestaw(), Nothing)
-            lblSkladnikiSzablonu.Text = If(zestawWlasny IsNot Nothing AndAlso zestawWlasny.Liczba > 0, OpisZestawu(zestawWlasny),
-                                           "(w oknie głównym nie wybrano jeszcze żadnej warstwy)")
-        Else
-            lblSkladnikiSzablonu.Text = s.OpisSkladnikow() & If(s.Wieloskalowy, vbCrLf & "Skale: " & s.OpisSkal(), "")
-        End If
+        lblSkladnikiSzablonu.Text = _styl.OpisSkladu()
         _podpowiedzi.SetToolTip(lblOpisSzablonu, s.Opis)
         _podpowiedzi.SetToolTip(lblSkladnikiSzablonu, lblSkladnikiSzablonu.Text)
         OdswiezSkalePodgladu()
 
-        Dim wykryte As New List(Of KeyValuePair(Of RodzajRegulacji, Integer))()
-        _bazoweRegulacje.Clear()
-        If zestawWlasny IsNot Nothing Then
-            For i = 0 To zestawWlasny.Liczba - 1
-                Dim r = ZarzadcaSzablonow.RegulacjaWarstwy(zestawWlasny(i), i)
-                If r <> RodzajRegulacji.Brak AndAlso Not wykryte.Any(Function(kv) kv.Key = r) Then
-                    wykryte.Add(New KeyValuePair(Of RodzajRegulacji, Integer)(r, zestawWlasny(i).Krycie))
-                End If
-            Next
-            ' Krycie ustawione w oknie zaawansowanym jest ostateczne: suwak startuje z krycia pierwszej warstwy grupy
-            ' i dopiero po przesunięciu zmienia wszystkie warstwy grupy proporcjonalnie (dawniej nadpisywał je jedną wartością)
-            For Each kv In wykryte
-                _bazoweRegulacje(kv.Key) = kv.Value
-            Next
-        Else
-            wykryte = ZarzadcaSzablonow.RegulacjeSzablonu(s)
-            For Each kv In wykryte
-                _bazoweRegulacje(kv.Key) = kv.Value
-            Next
-        End If
-        If Not zachowajUstawienia Then
-            _regulacje.Clear()
-            For Each kv In wykryte
-                _regulacje(kv.Key) = kv.Value
-            Next
-        End If
+        ' Suwaki krycia grup warstw: ze szablonu (krycie proporcjonalne w stopniach skali) albo z zestawu własnego
+        Dim wykryte = _styl.UstawRegulacje(zachowajUstawienia)
         Dim wiersze = {Tuple.Create(lblCieniowanieOpis, tbCieniowanie, lblCieniowanieWartosc), Tuple.Create(lblRegulacja2, tbRegulacja2, lblRegulacjaWartosc2)}
         For k = 0 To wiersze.Length - 1
             Dim widoczny = k < wykryte.Count
@@ -583,28 +539,26 @@ Public Class FormKreatorMapy
             _rodzajeWierszy(k) = If(widoczny, wykryte(k).Key, RodzajRegulacji.Brak)
             If widoczny Then
                 Dim r = wykryte(k).Key
-                If Not _regulacje.ContainsKey(r) Then _regulacje(r) = wykryte(k).Value
+                If Not _styl.Regulacje.ContainsKey(r) Then _styl.Regulacje(r) = wykryte(k).Value
                 wiersze(k).Item1.Text = ZarzadcaSzablonow.NazwaRegulacji(r) & ":"
-                wiersze(k).Item2.Value = Math.Max(0, Math.Min(100, _regulacje(r)))
-                wiersze(k).Item3.Text = _regulacje(r) & "%"
+                wiersze(k).Item2.Value = Math.Max(0, Math.Min(100, _styl.Regulacje(r)))
+                wiersze(k).Item3.Text = _styl.Regulacje(r) & "%"
             End If
         Next
 
         ' Pola wyboru grup warstw (np. zabytki archeologiczne / nieruchome) - wiersz pod suwakami
-        If Not zachowajUstawienia Then _wylaczoneGrupy.Clear()
         For Each cb In _polaGrup
             grpSzczegolySzablonu.Controls.Remove(cb)
             cb.Dispose()
         Next
         _polaGrup.Clear()
-        Dim grupy = If(zestawWlasny Is Nothing, s.GrupyWarstw(), New List(Of String)())
         Dim x = 14
-        For Each g In grupy
+        For Each g In _styl.GrupyDoWyboru()
             Dim nazwaGrupy = g
             Dim cb As New CheckBox With {.Name = "chkGrupa" & _polaGrup.Count, .Text = g, .AutoSize = True, .Location = New Point(x, 145),
-                                         .Checked = Not _wylaczoneGrupy.Contains(g)}
+                                         .Checked = Not _styl.WylaczoneGrupy.Contains(g)}
             AddHandler cb.CheckedChanged, Sub()
-                                              If cb.Checked Then _wylaczoneGrupy.Remove(nazwaGrupy) Else _wylaczoneGrupy.Add(nazwaGrupy)
+                                              If cb.Checked Then _styl.WylaczoneGrupy.Remove(nazwaGrupy) Else _styl.WylaczoneGrupy.Add(nazwaGrupy)
                                               OdswiezPodgladStyluAsync()
                                           End Sub
             grpSzczegolySzablonu.Controls.Add(cb)
@@ -620,7 +574,7 @@ Public Class FormKreatorMapy
         ' Ograniczenia pokrycia map (kroki 2-4)
         For Each uw In _uwagiPokrycia
             uw.Text = s.UwagaPokrycia
-            uw.Visible = Not String.IsNullOrEmpty(s.UwagaPokrycia) AndAlso _zestawNiestandardowy Is Nothing
+            uw.Visible = Not String.IsNullOrEmpty(s.UwagaPokrycia) AndAlso _styl.ZestawNiestandardowy Is Nothing
         Next
 
         OdswiezPodgladStyluAsync()
@@ -629,43 +583,20 @@ Public Class FormKreatorMapy
     Private Sub OdswiezSkalePodgladu()
         cboSkalaPodgladu.Items.Clear()
         cboSkalaPodgladu.Items.Add("Skala automatyczna")
-        If _wybranySzablon IsNot Nothing AndAlso _zestawNiestandardowy Is Nothing Then
-            Dim podglady = If(_planWlasny Is Nothing, _wybranySzablon.StopnieSkali.AsEnumerable(), _planWlasny.Select(Function(ps) ps.Stopien))
-            cboSkalaPodgladu.Items.AddRange(podglady.Cast(Of Object)().ToArray())
-        End If
+        cboSkalaPodgladu.Items.AddRange(_styl.StopniePodgladu().Cast(Of Object)().ToArray())
         cboSkalaPodgladu.Visible = cboSkalaPodgladu.Items.Count > 1
         cboSkalaPodgladu.SelectedIndex = Math.Max(0, If(_stopienPodgladu Is Nothing, 0, cboSkalaPodgladu.Items.IndexOf(_stopienPodgladu)))
         _stopienPodgladu = TryCast(cboSkalaPodgladu.SelectedItem, StopienSkali)
-    End Sub
-
-    ''' <summary>
-    ''' Ustawia krycie warstw zestawu według suwaków. <paramref name="warstwySzablonu"/> - warstwy szablonu, z których
-    ''' utworzono zestaw (krycie proporcjonalne do bazowego); Nothing - zestaw własny (krycie wprost z suwaka).
-    ''' </summary>
-    Private Sub ZastosujRegulacjeDoZestawu(zestaw As ZestawWarstw, warstwySzablonu As IList(Of WarstwaSzablonu))
-        If zestaw Is Nothing OrElse _regulacje.Count = 0 Then Exit Sub
-        If warstwySzablonu IsNot Nothing Then
-            ZarzadcaSzablonow.ZastosujRegulacje(warstwySzablonu, zestaw, _regulacje, _bazoweRegulacje)
-        Else
-            For i = 0 To zestaw.Liczba - 1
-                Dim r = ZarzadcaSzablonow.RegulacjaWarstwy(zestaw(i), i)
-                Dim wartosc As Integer
-                If r = RodzajRegulacji.Brak OrElse Not _regulacje.TryGetValue(r, wartosc) Then Continue For
-                Dim baza As Integer = 0
-                _bazoweRegulacje.TryGetValue(r, baza)
-                zestaw(i).Krycie = If(baza > 0, Math.Max(0, Math.Min(100, CInt(Math.Round(wartosc * zestaw(i).Krycie / CDbl(baza), MidpointRounding.AwayFromZero)))), wartosc)
-            Next
-        End If
     End Sub
 
     ''' <summary>Zmiana suwaka w wierszu <paramref name="wiersz"/> - natychmiastowe złożenie podglądu z warstw w buforze.</summary>
     Private Sub ZmienRegulacje(wiersz As Integer, wartosc As Integer)
         Dim r = _rodzajeWierszy(wiersz)
         If r = RodzajRegulacji.Brak Then Exit Sub
-        _regulacje(r) = wartosc
+        _styl.Regulacje(r) = wartosc
         If wiersz = 0 Then lblCieniowanieWartosc.Text = wartosc & "%" Else lblRegulacjaWartosc2.Text = wartosc & "%"
-        If _wybranySzablon Is Nothing Then Exit Sub
-        Dim zestaw = UtworzZestawStylu(_pikselPodgladuStylu, _stopienPodgladu)
+        If _styl.Szablon Is Nothing Then Exit Sub
+        Dim zestaw = _styl.UtworzZestaw(_pikselPodgladuStylu, _stopienPodgladu)
         Dim staraBaza = _bazaPodgladuStylu
         _bazaPodgladuStylu = _silnikPodgladuStylu.ZlozObraz(zestaw)
         staraBaza?.Dispose()
@@ -710,7 +641,7 @@ Public Class FormKreatorMapy
             Case 3
                 lblTytulKroku.Text = "Krok 3 z 4: Wybierz styl mapy"
                 lblPodtytulKroku.Text = If(CzyPominacKrokObszaru(),
-                                           "Obszar zaznaczony na mapie: " & FormatujWymiaryZasiegu(_wybranyZasieg) & ". Inny obszar wybierzesz, klikając „Obszar”” na pasku kroków.",
+                                           "Obszar zaznaczony na mapie: " & ObszarKreatora.FormatujWymiary(_wybranyZasieg) & ". Inny obszar wybierzesz, klikając „Obszar”” na pasku kroków.",
                                            If(_wybranyZasieg.Poprawny,
                                               "Gotowe zestawy warstw. Podgląd pokazuje środek Twojego obszaru - możesz go przesuwać i oddalać myszką.",
                                               "Gotowe zestawy warstw. Bez wybranego obszaru podgląd pokazuje przykładowy fragment stylu."))
@@ -765,7 +696,7 @@ Public Class FormKreatorMapy
         If _wTrakciePodsumowania Then Exit Sub
         _wTrakciePodsumowania = True
         Try
-            Dim klucz = _wybranyCel.ToString() & "|" & If(_wybranySzablon IsNot Nothing, _wybranySzablon.Id, "")
+            Dim klucz = _styl.KluczDomyslnych(_wybranyCel)
             If klucz <> _kluczDomyslnych Then
                 _kluczDomyslnych = klucz
                 ZastosujUstawieniaDomyslne()
@@ -777,14 +708,8 @@ Public Class FormKreatorMapy
     End Sub
 
     Private Sub ZastosujUstawieniaDomyslne()
-        ' Piksel z szablonu - dawniej brany tylko przy wartości <= 0, czego pole (minimum 0,1) nie dopuszcza,
-        ' więc kataster dostawał 1 m zamiast 0,25 m
-        Dim piksel = If(_wybranySzablon IsNot Nothing, _wybranySzablon.DomyslnyPiksel, 1.0)
-        If CzyWlasnyZestaw() AndAlso _form1 IsNot Nothing Then
-            Dim s = _form1.BiezacaSiatka()
-            If s IsNot Nothing AndAlso s.RozmiarPiksela > 0 Then piksel = s.RozmiarPiksela
-        End If
-        UstawPiksel(piksel)
+        Dim siatkaOkna = If(_styl.CzyWlasnyZestaw AndAlso _form1 IsNot Nothing, _form1.BiezacaSiatka(), Nothing)
+        UstawPiksel(_styl.PikselDomyslny(If(siatkaOkna IsNot Nothing, siatkaOkna.RozmiarPiksela, 0)))
 
         Dim wielo = ZarzadcaSzablonow.ZalecanyWariantWielopoziomowy(_wybranyCel)
         rbWariantWielopoziomowy.Checked = wielo
@@ -793,7 +718,7 @@ Public Class FormKreatorMapy
         chkWlasnyZoom.Checked = False
         chkWieloskalowa.Checked = True
         chkOrtofotomapa.Checked = False
-        _planWlasny = Nothing
+        _styl.PlanWlasny = Nothing
     End Sub
 
     Private Sub UstawPiksel(piksel As Double)
@@ -803,28 +728,27 @@ Public Class FormKreatorMapy
     Private Sub OdswiezPodsumowanie()
         Dim piksel = CDbl(numRozmiarPiksela.Value)
         Dim korytarz = PobierzEfektywnyKorytarz()
-        Dim wielo = rbWariantWielopoziomowy.Checked
-        _formatDocelowy = ZarzadcaSzablonow.DopasujFormatDocelowy(_wybranyCel, wielo)
-        Dim zestaw = PobierzZestawStylu(piksel)
+        _formatDocelowy = ZarzadcaSzablonow.DopasujFormatDocelowy(_wybranyCel, rbWariantWielopoziomowy.Checked)
+        Dim zestaw = _styl.UtworzZestaw(piksel)
+        Dim szerokoscGeo = ObszarKreatora.SzerokoscGeo(_wybranyZasieg)
 
         ' Mapa wieloskalowa: MBTiles (kompilator łączy osobno pobrane stopnie skali), SQLiteDB i JNX (każdy poziom ze źródła swojej skali)
-        Dim mozliwaWieloskalowa = _wybranySzablon IsNot Nothing AndAlso _wybranySzablon.Wieloskalowy AndAlso
-                                  _zestawNiestandardowy Is Nothing AndAlso FormatWieloskalowy(_formatDocelowy)
+        Dim mozliwaWieloskalowa = _styl.MozliwaWieloskalowa(_formatDocelowy)
         chkWieloskalowa.Visible = mozliwaWieloskalowa
         btnUstawieniaSkal.Visible = mozliwaWieloskalowa
         Dim wieloskalowa = CzyWieloskalowaAktywna()
         btnUstawieniaSkal.Enabled = wieloskalowa
         ' Własny plan skal ma własne piksele - pole piksela nie zmienia wtedy mapy wieloskalowej
-        numRozmiarPiksela.Enabled = Not (wieloskalowa AndAlso _planWlasny IsNot Nothing)
-        btnUstawieniaSkal.Text = If(_planWlasny IsNot Nothing, "Ustawienia skal (własne)", "Ustawienia skal...")
+        numRozmiarPiksela.Enabled = Not (wieloskalowa AndAlso _styl.PlanWlasny IsNot Nothing)
+        btnUstawieniaSkal.Text = If(_styl.PlanWlasny IsNot Nothing, "Ustawienia skal (własne)", "Ustawienia skal...")
         ' Własny plan skal sam decyduje o ortofotomapie (wiersz w oknie „Ustawienia skal”)
-        Dim opcjonalny = If(_wybranySzablon IsNot Nothing, _wybranySzablon.StopienOpcjonalny, Nothing)
+        Dim opcjonalny = If(_styl.Szablon IsNot Nothing, _styl.Szablon.StopienOpcjonalny, Nothing)
         _ortofotomapaMozliwa = mozliwaWieloskalowa AndAlso opcjonalny IsNot Nothing
         chkOrtofotomapa.Visible = _ortofotomapaMozliwa
-        chkOrtofotomapa.Enabled = wieloskalowa AndAlso _planWlasny Is Nothing
+        chkOrtofotomapa.Enabled = wieloskalowa AndAlso _styl.PlanWlasny Is Nothing
         If _ortofotomapaMozliwa Then
-            Dim zOrto = ZarzadcaSzablonow.PlanStopniaOpcjonalnego(_wybranySzablon, ZarzadcaSzablonow.PlanStopni(_wybranySzablon, CDbl(numRozmiarPiksela.Value), SzerokoscGeoObszaru()), SzerokoscGeoObszaru())
-            chkOrtofotomapa.Text = "Ortofotomapa przy zbliżeniu" & If(zOrto Is Nothing, "", If(zOrto.PoziomMin = zOrto.PoziomMax, $" (zoom {zOrto.PoziomMin})", $" (zoom {zOrto.PoziomMin}-{zOrto.PoziomMax})"))
+            Dim zOrto = ZarzadcaSzablonow.PlanStopniaOpcjonalnego(_styl.Szablon, ZarzadcaSzablonow.PlanStopni(_styl.Szablon, piksel, szerokoscGeo), szerokoscGeo)
+            chkOrtofotomapa.Text = PodsumowanieKreatora.OpisOrtofotomapy(zOrto)
             _podpowiedzi.SetToolTip(chkOrtofotomapa, "Na największych powiększeniach, na których mapa byłaby już tylko powiększonymi pikselami," & vbCrLf &
                                     "plik pokaże zdjęcie lotnicze ze szlakami (piksel " & opcjonalny.Piksel.ToString("0.##") & " m)." & vbCrLf &
                                     "Plik i czas pobierania rosną kilkakrotnie - szacunek poniżej uwzględnia ortofotomapę." &
@@ -833,20 +757,13 @@ Public Class FormKreatorMapy
         Dim plan = If(wieloskalowa, PlanBiezacy(), Nothing)
         If mozliwaWieloskalowa Then
             chkWieloskalowa.Text = "Mapa wieloskalowa - inna mapa przy oddalaniu"
-            Dim planOpis = PlanBiezacy()
-            _podpowiedzi.SetToolTip(chkWieloskalowa, String.Join(vbCrLf, planOpis.Select(Function(ps) $"{ps.Stopien.Opis}: piksel {ps.Piksel:0.##} m, powiększenia {ps.PoziomMin}-{ps.PoziomMax}")))
+            _podpowiedzi.SetToolTip(chkWieloskalowa, PodsumowanieKreatora.OpisPlanu(PlanBiezacy()))
         End If
 
         Dim szacunek = SzacujWynik(piksel, korytarz, plan, zestaw)
-        Dim siatka As New Siatka(_wybranyZasieg, piksel, ZarzadcaSzablonow.BokSegmentuKreatora(_wybranyZasieg, piksel))
+        Dim siatka = PodsumowanieKreatora.SiatkaKreatora(_wybranyZasieg, piksel)
 
-        If wieloskalowa Then
-            lblSzacunekSegmenty.Text = $"Pobieranie: {szacunek.LiczbaSegmentow:N0} {ZarzadcaSzablonow.Odmiana(szacunek.LiczbaSegmentow, "segment", "segmenty", "segmentów")} w {plan.Count} {ZarzadcaSzablonow.Odmiana(plan.Count, "skali", "skalach", "skalach")}"
-        ElseIf szacunek.CzyKorytarz Then
-            lblSzacunekSegmenty.Text = $"Korytarz trasy: {szacunek.LiczbaSegmentow:N0} {ZarzadcaSzablonow.Odmiana(szacunek.LiczbaSegmentow, "segment", "segmenty", "segmentów")} (oszczędność {szacunek.OszczednoscProcent}% względem prostokąta)"
-        Else
-            lblSzacunekSegmenty.Text = $"Segmenty do pobrania: {szacunek.SiatkaKolumny} × {szacunek.SiatkaWiersze}"
-        End If
+        lblSzacunekSegmenty.Text = PodsumowanieKreatora.OpisPobierania(szacunek, If(wieloskalowa, plan.Count, 0))
         lblSzacunekRozmiar.Text = $"Szacowany plik: {szacunek.SformatowanyPrzedzialRozmiaru()}"
         lblSzacunekCzas.Text = $"Pobieranie i zapis od ok. {szacunek.SformatowanyCzas()}"
         _podpowiedzi.SetToolTip(lblSzacunekCzas, "Czas zależy od odpowiedzi źródeł. Jeden segment może wymagać wielu zapytań o kafle.")
@@ -858,7 +775,7 @@ Public Class FormKreatorMapy
             lblSzacunekKomunikat.Text = szacunek.Ostrzezenie
             Select Case szacunek.PoziomOstrzezenia
                 Case 0
-                    lblSzacunekKomunikat.Text = $"Zasięg wyniku – {FormatujWymiaryZasiegu(_wybranyZasieg)}"
+                    lblSzacunekKomunikat.Text = $"Zasięg wyniku – {ObszarKreatora.FormatujWymiary(_wybranyZasieg)}"
                     ' Arkusz do druku: rozmiar papieru przy tej samej rozdzielczości co skala wydruku w polu piksela
                     If _formatDocelowy = RodzajEksportu.GeoTiff Then
                         lblSzacunekKomunikat.Text &= vbCrLf & ZarzadcaSzablonow.OpisArkuszaWydruku(_wybranyZasieg.Szerokosc, _wybranyZasieg.Wysokosc, piksel) &
@@ -891,14 +808,10 @@ Public Class FormKreatorMapy
                 rbWariantWielopoziomowy.Text = "Piramida kafli MBTiles (QGIS, ArcGIS)"
         End Select
 
-        ' Zakres powiększeń dopasowany do piksela (gdy użytkownik nie ustawił własnego)
+        ' Zakres powiększeń z planu skal albo dopasowany do piksela (gdy użytkownik nie ustawił własnego)
         Dim wieloFormat = ZarzadcaSzablonow.CzyFormatWielopoziomowy(_formatDocelowy)
-        If wieloskalowa AndAlso plan.Count > 0 Then
-            ' zakres powiększeń wynika z planu stopni skali
-            numZoomMax.Value = Math.Max(numZoomMax.Minimum, Math.Min(numZoomMax.Maximum, plan.Max(Function(ps) ps.PoziomMax)))
-            numZoomMin.Value = Math.Max(numZoomMin.Minimum, Math.Min(numZoomMin.Maximum, plan.Min(Function(ps) ps.PoziomMin)))
-        ElseIf Not chkWlasnyZoom.Checked Then
-            Dim zakres = ZarzadcaSzablonow.ZalecanyZakresPowiekszen(piksel, SzerokoscGeoObszaru())
+        Dim zakres = PodsumowanieKreatora.ZakresPowiekszen(plan, piksel, szerokoscGeo, chkWlasnyZoom.Checked)
+        If zakres IsNot Nothing Then
             numZoomMax.Value = Math.Max(numZoomMax.Minimum, Math.Min(numZoomMax.Maximum, zakres.Item2))
             numZoomMin.Value = Math.Max(numZoomMin.Minimum, Math.Min(numZoomMin.Maximum, zakres.Item1))
         End If
@@ -906,14 +819,12 @@ Public Class FormKreatorMapy
         numZoomMin.Enabled = wieloFormat AndAlso chkWlasnyZoom.Checked AndAlso Not wieloskalowa
         numZoomMax.Enabled = wieloFormat AndAlso chkWlasnyZoom.Checked AndAlso Not wieloskalowa
 
-        lblFormatInfo.Text = "Format: " & ZarzadcaSzablonow.NazwaFormatu(_formatDocelowy) & If(wieloskalowa, " wieloskalowy", "") &
-                             If(wieloFormat, $", powiększenia {numZoomMin.Value}-{numZoomMax.Value}", ", jeden poziom szczegółowości")
+        lblFormatInfo.Text = PodsumowanieKreatora.OpisFormatu(_formatDocelowy, wieloskalowa, CInt(numZoomMin.Value), CInt(numZoomMax.Value))
 
         ' Szczegółowość: skala wydruku, opis i ostrzeżenie przed pikselem dokładniejszym niż dane
-        lblPikselJednostka.Text = $"m/px  -  jak wydruk w skali 1:{ZarzadcaSzablonow.SkalaWydruku(piksel):N0}; {ZarzadcaSzablonow.OpisSzczegolowosci(piksel)}"
-        Dim najmniejszy = ZarzadcaSzablonow.NajmniejszyPrzydatnyPiksel(zestaw)
-        If najmniejszy > 0 AndAlso piksel < najmniejszy - 0.0001 Then
-            Dim zalecany = najmniejszy * 2
+        lblPikselJednostka.Text = PodsumowanieKreatora.OpisPiksela(piksel)
+        Dim zalecany = PodsumowanieKreatora.PikselZalecany(zestaw, piksel)
+        If zalecany > 0 Then
             lnkPikselZalecany.Text = $"Dane mają rozdzielczość ok. {zalecany:0.##} m - mniejszy piksel nie doda szczegółów, a powiększy plik. Kliknij, aby ustawić {zalecany:0.##} m."
             lnkPikselZalecany.Tag = zalecany
             lnkPikselZalecany.Visible = True
@@ -930,7 +841,7 @@ Public Class FormKreatorMapy
         btnOtworzWieloskalowy.Visible = mbtiles AndAlso Not mozliwaWieloskalowa
         lblWieloskalowyOpis.Visible = mbtiles AndAlso Not mozliwaWieloskalowa
         If mbtiles Then
-            lblWieloskalowyOpis.Text = "Warstwy: " & OpisZestawu(zestaw) & vbCrLf & "Osobne warstwy dla zakresów powiększeń i mieszanie."
+            lblWieloskalowyOpis.Text = "Warstwy: " & StylKreatora.OpisZestawu(zestaw) & vbCrLf & "Osobne warstwy dla zakresów powiększeń i mieszanie."
         End If
 
         UstawSciezkeDocelowa()
@@ -940,31 +851,21 @@ Public Class FormKreatorMapy
         If TypeOf lnkPikselZalecany.Tag Is Double Then UstawPiksel(CDbl(lnkPikselZalecany.Tag))
     End Sub
 
-    ''' <summary>Nazwa pliku z miejsca, stylu i daty (dawniej bez miejsca powstawało „Mapa_Mapa_…”).</summary>
+    ''' <summary>Nazwa pliku z nazwy trasy albo miejscowości, stylu i daty.</summary>
     Private Function ProponowanaNazwaPliku() As String
-        Dim czesci As New List(Of String) From {"Mapa"}
         Dim korytarz = PobierzEfektywnyKorytarz()
+        Dim miejsce As String = Nothing
         If korytarz IsNot Nothing AndAlso Not String.IsNullOrWhiteSpace(korytarz.Nazwa) Then
-            czesci.Add(OczyscNazwePliku(korytarz.Nazwa))
+            miejsce = korytarz.Nazwa
         ElseIf rbObszarMiejscowosc.Checked AndAlso _ostatnieMiejsce IsNot Nothing Then
-            czesci.Add(OczyscNazwePliku(_ostatnieMiejsce.KrotkaNazwa))
+            miejsce = _ostatnieMiejsce.KrotkaNazwa
         End If
-        czesci.Add(If(_wybranySzablon IsNot Nothing, _wybranySzablon.Id, "kreator"))
-        czesci.Add(DateTime.Now.ToString("yyyy-MM-dd"))
-        Return String.Join("_", czesci)
+        Return PodsumowanieKreatora.ProponowanaNazwaPliku(miejsce, _styl.Szablon?.Id, DateTime.Now)
     End Function
 
-    ''' <summary>Ścieżka, pod którą nie ma jeszcze pliku ani folderu (dopisuje _2, _3…), żeby nie nadpisać poprzedniej mapy.</summary>
+    ''' <summary>Ścieżka, pod którą nie ma jeszcze mapy (dopisuje _2, _3…), żeby nie nadpisać poprzedniej.</summary>
     Friend Shared Function UnikalnaSciezka(sciezka As String) As String
-        If Not IstniejeWynik(sciezka) Then Return sciezka
-        Dim folder = Path.GetDirectoryName(sciezka)
-        Dim nazwa = Path.GetFileNameWithoutExtension(sciezka)
-        Dim ext = Path.GetExtension(sciezka)
-        For i = 2 To Integer.MaxValue
-            Dim kandydat = Path.Combine(folder, $"{nazwa}_{i}{ext}")
-            If Not IstniejeWynik(kandydat) Then Return kandydat
-        Next
-        Throw New IOException("Nie udało się znaleźć wolnej nazwy mapy.")
+        Return PodsumowanieKreatora.UnikalnaSciezka(sciezka, AddressOf IstniejeWynik)
     End Function
 
     Private Shared Function IstniejeWynik(plik As String) As Boolean
@@ -988,22 +889,6 @@ Public Class FormKreatorMapy
     End Sub
 
 #End Region
-
-    Private Function FormatujWymiaryZasiegu(z As Zasieg) As String
-        If Not z.Poprawny Then Return "brak"
-        Dim pole = z.Szerokosc * z.Wysokosc
-        If Math.Min(z.Szerokosc, z.Wysokosc) < 1000 Then
-            Return $"{z.Szerokosc:N0} m × {z.Wysokosc:N0} m ({pole:N0} m²)"
-        End If
-        Return $"{z.Szerokosc / 1000:0.##} km × {z.Wysokosc / 1000:0.##} km ({pole / 1000000:0.##} km²)"
-    End Function
-
-    Private Shared Function OczyscNazwePliku(nazwa As String) As String
-        If String.IsNullOrWhiteSpace(nazwa) Then Return "mapa"
-        Dim niedozwolone = Path.GetInvalidFileNameChars()
-        Dim czyste = New String(nazwa.Trim().Select(Function(c) If(c = " "c, "_"c, c)).Where(Function(c) Not niedozwolone.Contains(c)).ToArray())
-        Return If(String.IsNullOrWhiteSpace(czyste), "mapa", czyste)
-    End Function
 
 #Region "Obsługa kroków i nawigacji"
 
@@ -1050,26 +935,18 @@ Public Class FormKreatorMapy
                 UstawKrok(3)
 
             Case 3
-                If _wybranySzablon Is Nothing Then
-                    MessageBox.Show("Wybierz styl mapy z listy.", "Kreator mapy", MessageBoxButtons.OK, MessageBoxIcon.Information)
-                    Exit Sub
-                End If
-                ' Pusty zestaw dawniej przechodził dalej i kończył się błędem dopiero przy generowaniu
-                If PobierzZestawStylu().Liczba = 0 Then
-                    MessageBox.Show(If(CzyWlasnyZestaw(),
-                                       "W oknie głównym nie wybrano żadnej warstwy." & vbCrLf & vbCrLf &
-                                       "Wybierz gotowy styl z listy albo dodaj warstwy w oknie głównym (drzewo „Wybierz mapy””).",
-                                       "Wybrany styl nie zawiera żadnej warstwy."),
-                                    "Kreator mapy", MessageBoxButtons.OK, MessageBoxIcon.Information)
+                Dim blad = _styl.BladWyboru()
+                If blad IsNot Nothing Then
+                    MessageBox.Show(blad, "Kreator mapy", MessageBoxButtons.OK, MessageBoxIcon.Information)
                     Exit Sub
                 End If
                 If Not _wybranyZasieg.Poprawny Then
-                    Dim wzorzec = WzorcowyZasieg()
+                    Dim wzorzec = _styl.WzorcowyZasieg()
                     If Not wzorzec.Poprawny Then Exit Sub
                     _wybranyZasieg = wzorzec
                     _wybranyZasiegZMapy = wzorzec
                     rbObszarMapa.Checked = True
-                    lblStatusZaznaczenia.Text = "Przykładowy obszar stylu: " & FormatujWymiaryZasiegu(_wybranyZasieg)
+                    lblStatusZaznaczenia.Text = "Przykładowy obszar stylu: " & ObszarKreatora.FormatujWymiary(_wybranyZasieg)
                     lblStatusZaznaczenia.ForeColor = Color.FromArgb(0, 120, 50)
                 End If
                 UstawKrok(4)
@@ -1204,11 +1081,8 @@ Public Class FormKreatorMapy
     Private Sub lstSzablony_SelectedIndexChanged(sender As Object, e As EventArgs) Handles lstSzablony.SelectedIndexChanged
         Dim s = TryCast(lstSzablony.SelectedItem, SzablonMapy)
         If s Is Nothing Then Exit Sub
-        Dim tenSam = _wybranySzablon IsNot Nothing AndAlso _wybranySzablon.Id = s.Id
+        Dim tenSam = Not _styl.Wybierz(s)
         If Not tenSam Then
-            _zestawNiestandardowy = Nothing
-            _planWlasny = Nothing
-            _zmianyWygladu = New ZestawWarstw.ZmianyWygladu()
             _stopienPodgladu = Nothing
             _wlasnyPunktStylu = Nothing
             _deltaPrzeciaganiaStylu = Point.Empty
@@ -1216,77 +1090,16 @@ Public Class FormKreatorMapy
         End If
         _ostatniSzablonId = s.Id
         btnUsunStyl.Enabled = SzablonyWlasne.CzyWlasny(s)
-        If Not tenSam Then
-            ' styl zapisany przed korektą domyślną - jej sugerowany profil zależy od stylu
-            _wybranySzablon = s
-            UstawKorekteDomyslna()
-        End If
+        ' sugerowany profil korekty domyślnej zależy od stylu
+        If Not tenSam Then UstawKorekteDomyslna()
         PokazSzczegolySzablonu(s, tenSam)
     End Sub
 
     Private Sub lstSzablony_DoubleClick(sender As Object, e As EventArgs) Handles lstSzablony.DoubleClick
-        If _wybranySzablon IsNot Nothing Then
+        If _styl.Szablon IsNot Nothing Then
             btnDalej.PerformClick()
         End If
     End Sub
-
-    Private Function PobierzZrodlaKreatora() As Dictionary(Of String, PlikWarstw)
-        If _zrodlaKreatora.Count = 0 AndAlso _form1 IsNot Nothing Then
-            For Each kv In _form1.ZrodlaMapSesji()
-                _zrodlaKreatora(kv.Key) = kv.Value
-            Next
-        End If
-        ' Pliki zbiorów map wszystkich szablonów, także warstw mniej dokładnych skal (dawniej tylko najdokładniejszej).
-        ' Brakujący plik zapamiętujemy, żeby każde złożenie zestawu nie czytało go z dysku od nowa.
-        For Each szablon In ZarzadcaSzablonow.PobierzWszystkie()
-            For Each w In szablon.Warstwy.Concat(szablon.StopnieSkali.SelectMany(Function(st) st.Warstwy))
-                If Not String.IsNullOrEmpty(w.Zbior) AndAlso Not _zrodlaKreatora.ContainsKey(w.Zbior) AndAlso Not _brakujaceZbiory.Contains(w.Zbior) Then
-                    Dim plik = ZarzadcaSzablonow.WczytajPlikZbioru(w.Zbior)
-                    If plik IsNot Nothing Then _zrodlaKreatora(w.Zbior) = plik Else _brakujaceZbiory.Add(w.Zbior)
-                End If
-            Next
-        Next
-        Return _zrodlaKreatora
-    End Function
-
-    ''' <summary>Kopia zestawu warstw wybranego stylu z kryciem cieniowania ustawionym suwakiem.</summary>
-    ''' <param name="piksel">Piksel pobierania - w stylu wieloskalowym wybiera stopień skali (0 - najdokładniejszy).</param>
-    Private Function PobierzZestawStylu(Optional piksel As Double = 0) As ZestawWarstw
-        Return UtworzZestawStylu(piksel, Nothing)
-    End Function
-
-    Private Function UtworzZestawStylu(piksel As Double, stopien As StopienSkali) As ZestawWarstw
-        Dim zestaw As ZestawWarstw
-        If _zestawNiestandardowy IsNot Nothing Then
-            zestaw = _zestawNiestandardowy.Kopia()
-        ElseIf _wybranySzablon Is Nothing Then
-            Return New ZestawWarstw()
-        ElseIf CzyWlasnyZestaw() Then
-            zestaw = If(_form1 IsNot Nothing, _form1.WybranyZestaw().Kopia(), New ZestawWarstw())
-        Else
-            Dim plan = If(stopien Is Nothing, Nothing, _planWlasny?.FirstOrDefault(Function(ps) ps.Stopien Is stopien))
-            If plan IsNot Nothing Then Return UtworzZestawStopnia(plan)
-            Dim warstwy = SzablonMapy.BezGrup(If(stopien Is Nothing, _wybranySzablon.WarstwyDlaPiksela(piksel), stopien.Warstwy), _wylaczoneGrupy)
-            zestaw = _wybranySzablon.UtworzZestaw(PobierzZrodlaKreatora(), warstwy)
-            ZastosujRegulacjeDoZestawu(zestaw, warstwy)
-            _zmianyWygladu.Zastosuj(zestaw)
-            Return zestaw
-        End If
-        ZastosujRegulacjeDoZestawu(zestaw, Nothing)
-        Return zestaw
-    End Function
-
-    ''' <summary>
-    ''' Skala, którą pokazuje okno „Warstwy - zaawansowane”, gdy podgląd ma skalę automatyczną: najdokładniejsza skala
-    ''' planu (z okna „Ustawienia skal”) albo szablonu. Nothing - okno pokazuje warstwy podglądu (skala wybrana ręcznie,
-    ''' mapa jednoskalowa, zestaw własny).
-    ''' </summary>
-    Private Function StopienOknaWarstw() As StopienSkali
-        If _stopienPodgladu IsNot Nothing OrElse _wybranySzablon Is Nothing OrElse Not _wybranySzablon.Wieloskalowy Then Return Nothing
-        If _zestawNiestandardowy IsNot Nothing OrElse CzyWlasnyZestaw() Then Return Nothing
-        If _planWlasny IsNot Nothing AndAlso _planWlasny.Count > 0 Then Return _planWlasny.OrderBy(Function(ps) ps.Piksel).First().Stopien
-        Return _wybranySzablon.StopnieSkali(0)
-    End Function
 
     Private Function PobierzParametryProbkiStylu() As Tuple(Of PunktXY, Double)
         Return PobierzParametryProbkiSkali(_stopienPodgladu)
@@ -1294,41 +1107,28 @@ Public Class FormKreatorMapy
 
     ''' <param name="stopien">Skala, dla której liczony jest piksel próbki (Nothing - piksel próbki szablonu).</param>
     Private Function PobierzParametryProbkiSkali(stopien As StopienSkali) As Tuple(Of PunktXY, Double)
-        If _wybranySzablon Is Nothing Then
+        If _styl.Szablon Is Nothing Then
             Return Tuple.Create(New PunktXY(0, 0), 1.0)
         End If
         Dim zoom = _poziomyZoomu(_indeksZoomuStylu)
         ' Podgląd pokazuje środek obszaru wybranego w kroku 2 (dawniej zawsze przykładowe miejsce stylu)
         Dim srodekObszaru As PunktXY? = If(_wybranyZasieg.Poprawny, _wybranyZasieg.Srodek, CType(Nothing, PunktXY?))
-        If CzyWlasnyZestaw() AndAlso _form1 IsNot Nothing Then
+        If _styl.CzyWlasnyZestaw AndAlso _form1 IsNot Nothing Then
             Dim pt = If(_wlasnyPunktStylu, If(srodekObszaru, UkladWspolrzednych.PL1992.ZWgs84(_form1.mapa.Position.Lat, _form1.mapa.Position.Lng)))
             Dim px = Math.Max(0.1, _form1.PikselPodgladuBezSiatki())
             Dim effPx = Math.Max(0.05, px / zoom)
             Return Tuple.Create(pt, effPx)
         End If
-        Dim p = If(_wlasnyPunktStylu, If(srodekObszaru, UkladWspolrzednych.PL1992.ZWgs84(_wybranySzablon.ProbkaLat, _wybranySzablon.ProbkaLon)))
-        Dim podgladPlanu = _planWlasny?.FirstOrDefault(Function(ps) ps.Stopien Is stopien)
-        Dim effPiksel = Math.Max(0.05, If(podgladPlanu?.Piksel, If(stopien?.Piksel, _wybranySzablon.ProbkaPiksel)) / zoom)
-        Return Tuple.Create(p, effPiksel)
+        Return Tuple.Create(_styl.PunktProbki(_wlasnyPunktStylu, _wybranyZasieg), _styl.PikselProbki(stopien, zoom))
     End Function
 
-    Private Function PobierzSkaleWyswietlaniaStylu() As Double
-        If _bazaPodgladuStylu Is Nothing Then Return 1.0
-        Dim scaledW = _bazaPodgladuStylu.Width * 1.0
-        Dim scaledH = _bazaPodgladuStylu.Height * 1.0
-        Dim celSzer = picPodgladStylu.Width
-        Dim celWys = picPodgladStylu.Height
-        If scaledW < celSzer OrElse scaledH < celWys Then
-            Return Math.Max(celSzer / Math.Max(1.0, scaledW), celWys / Math.Max(1.0, scaledH))
+    ''' <summary>Powiększenie, przy którym próbka wypełnia ramkę podglądu (1 - próbka nie mniejsza niż ramka).</summary>
+    Private Shared Function SkalaWypelnienia(probka As Bitmap, ramka As Control) As Double
+        If probka Is Nothing Then Return 1.0
+        If probka.Width < ramka.Width OrElse probka.Height < ramka.Height Then
+            Return Math.Max(ramka.Width / Math.Max(1.0, probka.Width), ramka.Height / Math.Max(1.0, probka.Height))
         End If
         Return 1.0
-    End Function
-
-    ''' <summary>Status gotowej próbki, mieszczący się obok przycisków powiększenia.</summary>
-    Private Function OpisSkaliPodgladu() As String
-        If _wybranySzablon Is Nothing OrElse Not _wybranySzablon.Wieloskalowy OrElse _zestawNiestandardowy IsNot Nothing Then Return "Podgląd gotowy"
-        Dim st = If(_stopienPodgladu, _wybranySzablon.StopienDlaPiksela(_pikselPodgladuStylu))
-        Return If(st Is Nothing, "Podgląd gotowy", "Skala " & st.Opis)
     End Function
 
     Private Sub tbCieniowanie_Scroll(sender As Object, e As EventArgs) Handles tbCieniowanie.Scroll
@@ -1336,13 +1136,13 @@ Public Class FormKreatorMapy
     End Sub
 
     Private Sub btnDostosujWarstwy_Click(sender As Object, e As EventArgs) Handles btnDostosujWarstwy.Click
-        If _wybranySzablon Is Nothing OrElse _form1 Is Nothing Then Exit Sub
+        If _styl.Szablon Is Nothing OrElse _form1 Is Nothing Then Exit Sub
 
         ' Przy automatycznej skali podglądu okno pokazuje najdokładniejszą skalę: ma najwięcej warstw (np. w mapach WIG
         ' także arkusze 1:25 000, których nie było w próbce 1:100 000). Zmiany krycia i trybu warstw wspólnych
         ' obowiązują we wszystkich skalach (ZmianyWygladu).
-        Dim stopienOkna = StopienOknaWarstw()
-        Dim zestaw = If(stopienOkna Is Nothing, UtworzZestawStylu(_pikselPodgladuStylu, _stopienPodgladu), UtworzZestawStylu(0, stopienOkna))
+        Dim stopienOkna = _styl.StopienOknaWarstw(_stopienPodgladu)
+        Dim zestaw = If(stopienOkna Is Nothing, _styl.UtworzZestaw(_pikselPodgladuStylu, _stopienPodgladu), _styl.UtworzZestaw(0, stopienOkna))
         Dim przed = zestaw.Kopia()
 
         Dim parametry = PobierzParametryProbkiSkali(If(stopienOkna, _stopienPodgladu))
@@ -1356,7 +1156,7 @@ Public Class FormKreatorMapy
             .Uklad = UkladWspolrzednych.PL1992,
             .Siatka = siatkaProbki,
             .Zbiory = zestaw.Zbiory(),
-            .ZrodlaMap = PobierzZrodlaKreatora(),
+            .ZrodlaMap = _styl.ZrodlaMap(),
             .Format = "png",
             .LimitCzasuSekundy = 15,
             .Folder = Path.Combine(Path.GetTempPath(), "MapoTero_kreator_warstwy") & "\"
@@ -1370,23 +1170,21 @@ Public Class FormKreatorMapy
                 _opcjeKorekty = okno.OpcjeKorekty
                 chkKorektaObrazu.Checked = _opcjeKorekty.Wlaczona
                 AktualizujOpisKorekty()
-                If przed.TaSamaKompozycja(zestaw) AndAlso Not CzyWlasnyZestaw() AndAlso _zestawNiestandardowy Is Nothing Then
-                    _zmianyWygladu.Zapisz(przed, zestaw)
-                    PokazSzczegolySzablonu(_wybranySzablon, True)
-                Else
-                    If _wybranySzablon.Wieloskalowy AndAlso _zestawNiestandardowy Is Nothing AndAlso
-                       MessageBox.Show("Zmieniono skład lub kolejność warstw. Użyć tego zestawu na wszystkich powiększeniach?",
-                                       "Własny zestaw warstw", MessageBoxButtons.YesNo, MessageBoxIcon.Question) <> DialogResult.Yes Then Exit Sub
-                    _zestawNiestandardowy = zestaw
-                    _stopienPodgladu = Nothing
-                    PokazSzczegolySzablonu(_wybranySzablon, False)
-                End If
+                Select Case _styl.PrzyjmijZestawOkna(przed, zestaw,
+                        Function() MessageBox.Show("Zmieniono skład lub kolejność warstw. Użyć tego zestawu na wszystkich powiększeniach?",
+                                                   "Własny zestaw warstw", MessageBoxButtons.YesNo, MessageBoxIcon.Question) = DialogResult.Yes)
+                    Case ZmianaZestawuOkna.ZmianaWygladu
+                        PokazSzczegolySzablonu(_styl.Szablon, True)
+                    Case ZmianaZestawuOkna.ZestawNiestandardowy
+                        _stopienPodgladu = Nothing
+                        PokazSzczegolySzablonu(_styl.Szablon, False)
+                End Select
             End If
         End Using
     End Sub
 
     Private Async Sub OdswiezPodgladStyluAsync(Optional wymus As Boolean = False)
-        If _wybranySzablon Is Nothing OrElse _form1 Is Nothing Then Exit Sub
+        If _styl.Szablon Is Nothing OrElse _form1 Is Nothing Then Exit Sub
 
         _ctsPodgladStylu?.Cancel()
         _ctsPodgladStylu?.Dispose()
@@ -1397,7 +1195,7 @@ Public Class FormKreatorMapy
         lblStanPodgladuStyl.ForeColor = Color.FromArgb(0, 100, 180)
 
         _pikselPodgladuStylu = PobierzParametryProbkiStylu().Item2
-        Dim zestaw = UtworzZestawStylu(_pikselPodgladuStylu, _stopienPodgladu)
+        Dim zestaw = _styl.UtworzZestaw(_pikselPodgladuStylu, _stopienPodgladu)
         If zestaw Is Nothing OrElse zestaw.Liczba = 0 Then
             Dim staraBaza = _bazaPodgladuStylu
             _bazaPodgladuStylu = Nothing
@@ -1407,7 +1205,7 @@ Public Class FormKreatorMapy
             _deltaPrzeciaganiaStylu = Point.Empty
             _bazaPrzeciaganiaStylu = Point.Empty
             ZastosujZoomStylu()
-            lblStanPodgladuStyl.Text = If(CzyWlasnyZestaw(), "Brak warstw w oknie głównym", "Brak warstw w zestawie")
+            lblStanPodgladuStyl.Text = If(_styl.CzyWlasnyZestaw, "Brak warstw w oknie głównym", "Brak warstw w zestawie")
             lblStanPodgladuStyl.ForeColor = Color.DarkOrange
             picPodgladStylu.Invalidate()
             Exit Sub
@@ -1430,7 +1228,7 @@ Public Class FormKreatorMapy
             _deltaPrzeciaganiaStylu = Point.Empty
             _bazaPrzeciaganiaStylu = Point.Empty
             ZastosujZoomStylu()
-            lblStanPodgladuStyl.Text = OpisSkaliPodgladu()
+            lblStanPodgladuStyl.Text = _styl.OpisSkaliPodgladu(_stopienPodgladu, _pikselPodgladuStylu)
             lblStanPodgladuStyl.ForeColor = Color.FromArgb(0, 130, 40)
             Exit Sub
         End If
@@ -1447,7 +1245,7 @@ Public Class FormKreatorMapy
                 .Uklad = UkladWspolrzednych.PL1992,
                 .Siatka = siatkaProbki,
                 .Zbiory = zestaw.Zbiory(),
-                .ZrodlaMap = PobierzZrodlaKreatora(),
+                .ZrodlaMap = _styl.ZrodlaMap(),
                 .Format = "png",
                 .LimitCzasuSekundy = 15,
                 .Folder = Path.Combine(Path.GetTempPath(), "MapoTero_kreator_styl") & "\"
@@ -1485,7 +1283,7 @@ Public Class FormKreatorMapy
                 lblStanPodgladuStyl.ForeColor = Color.FromArgb(180, 90, 0)
                 _podpowiedzi.SetToolTip(lblStanPodgladuStyl, String.Join(vbCrLf, wynik.Item2))
             Else
-                lblStanPodgladuStyl.Text = OpisSkaliPodgladu()
+                lblStanPodgladuStyl.Text = _styl.OpisSkaliPodgladu(_stopienPodgladu, _pikselPodgladuStylu)
                 lblStanPodgladuStyl.ForeColor = Color.FromArgb(0, 130, 40)
                 _podpowiedzi.SetToolTip(lblStanPodgladuStyl, "")
             End If
@@ -1576,7 +1374,7 @@ Public Class FormKreatorMapy
             If Math.Abs(dx) > 2 OrElse Math.Abs(dy) > 2 Then
                 Dim param = PobierzParametryProbkiStylu()
                 Dim effPiksel = param.Item2
-                Dim skalaWyswietlania = PobierzSkaleWyswietlaniaStylu()
+                Dim skalaWyswietlania = SkalaWypelnienia(_bazaPodgladuStylu, picPodgladStylu)
                 Dim effPikselEkranu = effPiksel / Math.Max(0.001, skalaWyswietlania)
                 Dim starySrodek = param.Item1
                 Dim nowyX = starySrodek.X + dy * effPikselEkranu
@@ -1616,7 +1414,7 @@ Public Class FormKreatorMapy
                              If(String.IsNullOrEmpty(lblStanPodgladuStyl.Text), "Wybierz styl z listy po lewej", lblStanPodgladuStyl.Text))
         ElseIf _zasiegObrazuStylu.HasValue AndAlso _wybranyZasieg.Poprawny AndAlso _bazaPodgladuStylu IsNot Nothing Then
             Dim z = _zasiegObrazuStylu.Value
-            Dim skala = PobierzSkaleWyswietlaniaStylu()
+            Dim skala = SkalaWypelnienia(_bazaPodgladuStylu, picPodgladStylu)
             Dim w = CInt(Math.Ceiling(_bazaPodgladuStylu.Width * skala))
             Dim h = CInt(Math.Ceiling(_bazaPodgladuStylu.Height * skala))
             Dim x = (picPodgladStylu.Width - w) \ 2 + _deltaPrzeciaganiaStylu.X
@@ -1652,12 +1450,12 @@ Public Class FormKreatorMapy
 
     ''' <summary>Okno dużego podglądu z tym samym zestawem, punktem i pikselem co mały podgląd stylu.</summary>
     Private Sub PokazDuzyPodglad()
-        If _wybranySzablon Is Nothing OrElse _form1 Is Nothing Then Exit Sub
-        Dim zestaw = UtworzZestawStylu(_pikselPodgladuStylu, _stopienPodgladu)
+        If _styl.Szablon Is Nothing OrElse _form1 Is Nothing Then Exit Sub
+        Dim zestaw = _styl.UtworzZestaw(_pikselPodgladuStylu, _stopienPodgladu)
         If zestaw.Liczba = 0 Then Exit Sub
         Dim parametry = PobierzParametryProbkiStylu()
-        Dim tytul = _wybranySzablon.Nazwa & If(_stopienPodgladu IsNot Nothing, " - skala " & _stopienPodgladu.Opis, "")
-        Using okno As New FormPodgladDuzy(tytul, zestaw, parametry.Item1, parametry.Item2, PobierzZrodlaKreatora(),
+        Dim tytul = _styl.Szablon.Nazwa & If(_stopienPodgladu IsNot Nothing, " - skala " & _stopienPodgladu.Opis, "")
+        Using okno As New FormPodgladDuzy(tytul, zestaw, parametry.Item1, parametry.Item2, _styl.ZrodlaMap(),
                                           _wybranyZasieg, PobierzEfektywnyKorytarz())
             okno.ShowDialog(Me)
         End Using
@@ -1729,16 +1527,11 @@ Public Class FormKreatorMapy
         _ctsWyszukiwania = New CancellationTokenSource()
         Dim token = _ctsWyszukiwania.Token
 
-        ' Wklejone współrzędne (Google Maps, dokumentacja geodezyjna) - punkt bez pytania serwera wyszukiwania
-        Dim punkt = WspolrzedneTekstu.Rozpoznaj(fraza)
-        If punkt IsNot Nothing Then
-            Dim kultura = CultureInfo.InvariantCulture
-            Dim wynikPunktu As New WynikGeokodowania With {
-                .Nazwa = String.Format(kultura, "Punkt {0:0.00000} {1:0.00000}", punkt.Punkt.Szerokosc, punkt.Punkt.Dlugosc),
-                .PelnaNazwa = "Punkt, współrzędne " & punkt.Uklad & ": " & fraza,
-                .Typ = "wspolrzedne", .Szerokosc = punkt.Punkt.Szerokosc, .Dlugosc = punkt.Punkt.Dlugosc}
+        ' Wklejone współrzędne - punkt bez pytania serwera wyszukiwania; działka - ULDK; reszta - wyszukiwarka miejsc
+        Dim zapytanie = ObszarKreatora.RozpoznajZapytanie(fraza)
+        If zapytanie.Punkt IsNot Nothing Then
             lstWynikiMiejscowosci.Items.Clear()
-            lstWynikiMiejscowosci.Items.Add(wynikPunktu)
+            lstWynikiMiejscowosci.Items.Add(zapytanie.Punkt)
             lstWynikiMiejscowosci.SelectedIndex = 0
             Exit Sub
         End If
@@ -1749,10 +1542,10 @@ Public Class FormKreatorMapy
 
         Try
             Dim wyniki As List(Of WynikGeokodowania)
-            Dim zapytanieDzialki = ObszarKreatora.ZapytanieDzialki(fraza)
-            If zapytanieDzialki IsNot Nothing Then
+            Dim dzialka = zapytanie.Rodzaj = RodzajZapytania.Dzialka
+            If dzialka Then
                 ' Działka ewidencyjna z ULDK GUGiK - obszar to jej zasięg z pasem sąsiedztwa
-                Dim dzialki = Await KlientUldk.SzukajDzialekAsync(zapytanieDzialki, token)
+                Dim dzialki = Await KlientUldk.SzukajDzialekAsync(zapytanie.Tekst, token)
                 wyniki = dzialki.Select(Function(d) CType(WynikDzialki.Z(d), WynikGeokodowania)).ToList()
             Else
                 wyniki = Await KlientGeokodowania.SzukajMiejscaAsync(fraza, token)
@@ -1771,7 +1564,7 @@ Public Class FormKreatorMapy
                 lstWynikiMiejscowosci.SelectedIndex = 0
             Else
                 lstWynikiMiejscowosci.EndUpdate()
-                lblWynikMiejscowosci.Text = If(zapytanieDzialki IsNot Nothing, "Usługa ULDK nie znalazła takiej działki.",
+                lblWynikMiejscowosci.Text = If(dzialka, "Usługa ULDK nie znalazła takiej działki.",
                                                "Nie znaleziono pasujących miejscowości dla podanej frazy.")
                 lblWynikMiejscowosci.ForeColor = Color.FromArgb(180, 50, 0)
             End If
@@ -1814,23 +1607,10 @@ Public Class FormKreatorMapy
 
         ' Linia 2: Ścieżka administracyjna (gmina, powiat, województwo)
         Using fLokalizacja As New Font("Segoe UI", 8.0!, FontStyle.Regular)
-            TextRenderer.DrawText(e.Graphics, SformatujLokalizacje(m), fLokalizacja, New Rectangle(e.Bounds.X + 8, e.Bounds.Y + 18, e.Bounds.Width - 12, 15),
+            TextRenderer.DrawText(e.Graphics, ObszarKreatora.SformatujLokalizacje(m), fLokalizacja, New Rectangle(e.Bounds.X + 8, e.Bounds.Y + 18, e.Bounds.Width - 12, 15),
                                   Color.FromArgb(85, 85, 85), TextFormatFlags.Left Or TextFormatFlags.EndEllipsis)
         End Using
     End Sub
-
-    Private Function SformatujLokalizacje(m As WynikGeokodowania) As String
-        If m Is Nothing OrElse String.IsNullOrWhiteSpace(m.PelnaNazwa) Then Return ""
-        Dim segmenty = m.PelnaNazwa.Split(","c).Select(Function(s) s.Trim()).ToList()
-        ' Odrzuć "Polska" i kody pocztowe na końcu
-        While segmenty.Count > 1 AndAlso (segmenty.Last().Equals("Polska", StringComparison.OrdinalIgnoreCase) OrElse
-                                          Regex.IsMatch(segmenty.Last(), "^\d{2}-\d{3}$"))
-            segmenty.RemoveAt(segmenty.Count - 1)
-        End While
-        If segmenty.Count <= 1 Then Return m.PelnaNazwa
-        ' Pomiń pierwszy człon (bo to sama miejscowość z linii 1)
-        Return String.Join(", ", segmenty.Skip(1))
-    End Function
 
     ' Każdy sposób wyboru obszaru używa wyłącznie własnego zasięgu - dawniej przełączenie na „Miejscowość” bez wyniku
     ' (albo anulowany wybór trasy) zostawiało zasięg z mapy i kreator pobierał obszar, którego użytkownik już nie wybierał
@@ -1843,7 +1623,7 @@ Public Class FormKreatorMapy
                 Dim z = ZasiegZOknaGlownego()
                 If z.Poprawny Then
                     _wybranyZasiegZMapy = z
-                    lblStatusZaznaczenia.Text = "Aktualny zasięg z mapy: " & FormatujWymiaryZasiegu(z)
+                    lblStatusZaznaczenia.Text = "Aktualny zasięg z mapy: " & ObszarKreatora.FormatujWymiary(z)
                     lblStatusZaznaczenia.ForeColor = Color.FromArgb(0, 120, 50)
                 End If
             End If
@@ -1897,8 +1677,8 @@ Public Class FormKreatorMapy
 
         _wybranyZasiegMiejscowosci = ZasiegWyniku(m)
 
-        Dim admin = SformatujLokalizacje(m)
-        lblWynikMiejscowosci.Text = "Wybrano: " & m.KrotkaNazwa & If(admin <> "", " (" & admin & ")", "") & " - obszar " & FormatujWymiaryZasiegu(_wybranyZasiegMiejscowosci)
+        Dim admin = ObszarKreatora.SformatujLokalizacje(m)
+        lblWynikMiejscowosci.Text = "Wybrano: " & m.KrotkaNazwa & If(admin <> "", " (" & admin & ")", "") & " - obszar " & ObszarKreatora.FormatujWymiary(_wybranyZasiegMiejscowosci)
         lblWynikMiejscowosci.ForeColor = Color.FromArgb(0, 120, 50)
 
         If rbObszarMiejscowosc.Checked Then
@@ -1909,23 +1689,9 @@ Public Class FormKreatorMapy
         End If
     End Sub
 
-    ''' <summary>
-    ''' Obszar wybranego wyniku: działka z pasem 150 m, prostokąt miejscowości z wyszukiwarki („wg granic”), a gdy
-    ''' wynik nie ma prostokąta albo wybrano promień - kwadrat wokół punktu.
-    ''' </summary>
+    ''' <summary>Obszar wybranego wyniku wyszukiwania przy promieniu wybranym na liście (<see cref="ObszarKreatora.ZasiegWyniku"/>).</summary>
     Friend Function ZasiegWyniku(m As WynikGeokodowania) As Zasieg
-        Dim dzialka = TryCast(m, WynikDzialki)
-        If dzialka IsNot Nothing Then Return ObszarKreatora.ZasiegDzialki(dzialka.Zasieg1992)
-        Dim opcja = TryCast(cboPromien.SelectedItem, String)
-        If opcja = OpcjaGranic AndAlso m.MaObszar Then
-            Return ObszarKreatora.ZasiegZGranic(m.MinSzerokosc, m.MaxSzerokosc, m.MinDlugosc, m.MaxDlugosc)
-        End If
-        ' promień z listy; „wg granic” bez prostokąta (np. wklejone współrzędne) - 5 km
-        Dim promienMetry As Double = 5000.0
-        Dim liczba = If(opcja Is Nothing, Nothing, Regex.Match(opcja, "\d+"))
-        If liczba IsNot Nothing AndAlso liczba.Success Then promienMetry = Math.Max(500.0, CDbl(liczba.Value) * 1000.0)
-        Dim srodek1992 = UkladWspolrzednych.PL1992.ZWgs84(m.Szerokosc, m.Dlugosc)
-        Return New Zasieg(srodek1992.X - promienMetry, srodek1992.Y - promienMetry, srodek1992.X + promienMetry, srodek1992.Y + promienMetry)
+        Return ObszarKreatora.ZasiegWyniku(m, TryCast(cboPromien.SelectedItem, String))
     End Function
 
     Private Sub lstWynikiMiejscowosci_DoubleClick(sender As Object, e As EventArgs) Handles lstWynikiMiejscowosci.DoubleClick
@@ -1968,7 +1734,7 @@ Public Class FormKreatorMapy
                                            Dim z = ZasiegZOknaGlownego()
                                            If z.Poprawny Then
                                                _wybranyZasiegZMapy = z
-                                               lblStatusZaznaczenia.Text = "Zaznaczono na mapie: " & FormatujWymiaryZasiegu(z)
+                                               lblStatusZaznaczenia.Text = "Zaznaczono na mapie: " & ObszarKreatora.FormatujWymiary(z)
                                                lblStatusZaznaczenia.ForeColor = Color.FromArgb(0, 120, 50)
                                                If rbObszarMapa.Checked Then
                                                    _wybranyZasieg = z
@@ -2091,7 +1857,7 @@ Public Class FormKreatorMapy
         If _wybranyKorytarz IsNot Nothing Then
             _wybranyKorytarz.SzerokoscMetry = CDbl(numKorytarz.Value)
             _wybranyZasiegTrasy = _wybranyKorytarz.Zasieg(UkladWspolrzednych.PL1992)
-            lblStatusTrasy.Text = $"Korytarz: pas {numKorytarz.Value} m po obu stronach trasy - zasięg {FormatujWymiaryZasiegu(_wybranyZasiegTrasy)}"
+            lblStatusTrasy.Text = $"Korytarz: pas {numKorytarz.Value} m po obu stronach trasy - zasięg {ObszarKreatora.FormatujWymiary(_wybranyZasiegTrasy)}"
             If rbObszarTrasa.Checked Then
                 _wybranyZasieg = _wybranyZasiegTrasy
                 AktualizujPodgladObszaru()
@@ -2099,23 +1865,10 @@ Public Class FormKreatorMapy
         End If
     End Sub
 
-    ''' <summary>Przykładowy obszar stylu wokół punktu próbki (1,5 km dla katastru, 8 km dla map przeglądowych, inaczej 4 km).</summary>
-    Private Function WzorcowyZasieg() As Zasieg
-        If _wybranySzablon Is Nothing Then Return New Zasieg()
-        Dim srodek = UkladWspolrzednych.PL1992.ZWgs84(_wybranySzablon.ProbkaLat, _wybranySzablon.ProbkaLon)
-        Dim szerMetry = If(_wybranySzablon.DomyslnyPiksel <= 0.5, 1500.0, If(_wybranySzablon.DomyslnyPiksel >= 4.0, 8000.0, 4000.0))
-        Dim pol = szerMetry / 2.0
-        Return New Zasieg(srodek.X - pol, srodek.Y - pol, srodek.X + pol, srodek.Y + pol)
-    End Function
-
+    ''' <summary>Obszar podglądu: wybrany przez użytkownika albo przykładowy obszar stylu (Item2 = True).</summary>
     Private Function PobierzEfektywnyZasiegObszaru() As Tuple(Of Zasieg, Boolean)
-        If _wybranyZasieg.Poprawny Then
-            Return Tuple.Create(_wybranyZasieg, False)
-        End If
-        If _wybranySzablon IsNot Nothing Then
-            Return Tuple.Create(WzorcowyZasieg(), True)
-        End If
-        Return Tuple.Create(New Zasieg(), True)
+        If _wybranyZasieg.Poprawny Then Return Tuple.Create(_wybranyZasieg, False)
+        Return Tuple.Create(_styl.WzorcowyZasieg(), True)
     End Function
 
     Private Sub AktualizujPodgladObszaru()
@@ -2124,28 +1877,9 @@ Public Class FormKreatorMapy
         Dim czyWzorcowy = infoZasiegu.Item2
 
         If zasieg.Poprawny Then
-            Dim szerKm = Math.Round(zasieg.Szerokosc / 1000.0, 1)
-            Dim wysKm = Math.Round(zasieg.Wysokosc / 1000.0, 1)
-            Dim powKm = Math.Round(szerKm * wysKm, 1)
-
-            If czyWzorcowy Then
-                lblObszarWymiary.Text = "Nie wybrano jeszcze obszaru." & vbCrLf & "Podgląd pokazuje przykład stylu."
-                lblObszarWspolrzedne.Text = $"Przykładowy fragment: {szerKm} km × {wysKm} km" & vbCrLf &
-                                            "Wybierz obszar jednym ze sposobów po lewej."
-            ElseIf _wybranyKorytarz IsNot Nothing AndAlso rbObszarTrasa.Checked Then
-                lblObszarWymiary.Text = $"Korytarz trasy: {_wybranyKorytarz.DlugoscKm:0.0} km (pas {_wybranyKorytarz.SzerokoscMetry:0} m)" & vbCrLf &
-                                        $"Powierzchnia prostokąta: {powKm} km²"
-                lblObszarWspolrzedne.Text = $"Ślad: {_wybranyKorytarz.LiczbaPunktow} punktów w {_wybranyKorytarz.Linie.Count} liniach" & vbCrLf &
-                                            $"Zasięg: {szerKm} km × {wysKm} km" & vbCrLf &
-                                            "Układ: PL-1992 (EPSG:2180)"
-            Else
-                lblObszarWymiary.Text = $"Wymiary: {szerKm} km × {wysKm} km" & vbCrLf & $"Powierzchnia: {powKm} km²"
-                Dim wgsMin = UkladWspolrzednych.PL1992.DoWgs84(zasieg.XDol, zasieg.YLewy)
-                Dim wgsMax = UkladWspolrzednych.PL1992.DoWgs84(zasieg.XGora, zasieg.YPrawy)
-                lblObszarWspolrzedne.Text = $"N: {wgsMin.Szerokosc:0.000}° - {wgsMax.Szerokosc:0.000}°" & vbCrLf &
-                                            $"E: {wgsMin.Dlugosc:0.000}° - {wgsMax.Dlugosc:0.000}°" & vbCrLf &
-                                            "Układ: PL-1992 (EPSG:2180)"
-            End If
+            Dim opis = ObszarKreatora.OpisObszaru(zasieg, czyWzorcowy, PobierzEfektywnyKorytarz())
+            lblObszarWymiary.Text = opis.Item1
+            lblObszarWspolrzedne.Text = opis.Item2
             AktualizujPodgladObszaruAsync()
         Else
             lblObszarWymiary.Text = "Wymiary: brak"
@@ -2157,30 +1891,14 @@ Public Class FormKreatorMapy
         End If
     End Sub
 
-    Private Function PobierzSkaleWyswietlaniaObszaru() As Double
-        If _bazaPodgladuObszaru Is Nothing Then Return 1.0
-        Dim scaledW = _bazaPodgladuObszaru.Width * 1.0
-        Dim scaledH = _bazaPodgladuObszaru.Height * 1.0
-        Dim celSzer = picPodgladObszaru.Width
-        Dim celWys = picPodgladObszaru.Height
-        If scaledW < celSzer OrElse scaledH < celWys Then
-            Return Math.Max(celSzer / Math.Max(1.0, scaledW), celWys / Math.Max(1.0, scaledH))
-        End If
-        Return 1.0
-    End Function
-
     ''' <summary>
     ''' Piksel podglądu obszaru: cały obszar mieści się w ramce podglądu z marginesem. Dawniej piksel wynikał z boku próbki
     ''' (512 px), a ramka ma 240 × 210 px i pokazuje próbkę w skali 1:1 - widać było tylko środek obszaru.
     ''' </summary>
     Friend Function PikselPodgladuObszaru(zasieg As Zasieg) As Double
-        Const Margines As Integer = 12
-        Dim zoom = _poziomyZoomu(_indeksZoomuObszaru)
-        Dim szer = Math.Max(1, Math.Min(picPodgladObszaru.Width, _silnikPodgladuObszaru.Bok) - 2 * Margines)
-        Dim wys = Math.Max(1, Math.Min(picPodgladObszaru.Height, _silnikPodgladuObszaru.Bok) - 2 * Margines)
-        Dim minPiksel = If(_wybranySzablon IsNot Nothing, _wybranySzablon.DomyslnyPiksel, 1.0)
-        Dim bazowyPiksel = Math.Max(minPiksel, Math.Max(zasieg.Szerokosc / szer, zasieg.Wysokosc / wys))
-        Return Math.Max(0.05, bazowyPiksel / zoom)
+        Return ObszarKreatora.PikselPodgladu(zasieg, Math.Min(picPodgladObszaru.Width, _silnikPodgladuObszaru.Bok),
+                                             Math.Min(picPodgladObszaru.Height, _silnikPodgladuObszaru.Bok),
+                                             If(_styl.Szablon IsNot Nothing, _styl.Szablon.DomyslnyPiksel, 1.0), _poziomyZoomu(_indeksZoomuObszaru))
     End Function
 
     Private Async Sub AktualizujPodgladObszaruAsync(Optional wymus As Boolean = False)
@@ -2188,7 +1906,7 @@ Public Class FormKreatorMapy
         Dim zasieg = infoZasiegu.Item1
         Dim czyWzorcowy = infoZasiegu.Item2
 
-        If Not zasieg.Poprawny OrElse _wybranySzablon Is Nothing OrElse _form1 Is Nothing Then Exit Sub
+        If Not zasieg.Poprawny OrElse _styl.Szablon Is Nothing OrElse _form1 Is Nothing Then Exit Sub
 
         _ctsPodgladObszaru?.Cancel()
         _ctsPodgladObszaru?.Dispose()
@@ -2201,7 +1919,7 @@ Public Class FormKreatorMapy
         Dim punkt = If(_wlasnyPunktObszaru, zasieg.Srodek)
         Dim piksel = PikselPodgladuObszaru(zasieg)
         ' Styl wieloskalowy: duży obszar w podglądzie pokazuje mapę w mniejszej skali, jak plik MBTiles po oddaleniu
-        Dim zestaw = PobierzZestawStylu(piksel)
+        Dim zestaw = _styl.UtworzZestaw(piksel)
         If zestaw Is Nothing OrElse zestaw.Liczba = 0 Then Exit Sub
         Dim zmieniono = _silnikPodgladuObszaru.SprawdzIZaktualizujParametry(punkt, piksel, UkladWspolrzednych.PL1992, wymus)
 
@@ -2225,7 +1943,7 @@ Public Class FormKreatorMapy
                 .Uklad = UkladWspolrzednych.PL1992,
                 .Siatka = siatkaObszaru,
                 .Zbiory = zestaw.Zbiory(),
-                .ZrodlaMap = PobierzZrodlaKreatora(),
+                .ZrodlaMap = _styl.ZrodlaMap(),
                 .Format = "png",
                 .LimitCzasuSekundy = 15,
                 .Folder = Path.Combine(Path.GetTempPath(), "MapoTero_kreator_obszar") & "\"
@@ -2326,11 +2044,11 @@ Public Class FormKreatorMapy
             Dim dx = e.X - _punktStartObszaru.X
             Dim dy = e.Y - _punktStartObszaru.Y
 
-            If (Math.Abs(dx) > 2 OrElse Math.Abs(dy) > 2) AndAlso _wybranySzablon IsNot Nothing Then
+            If (Math.Abs(dx) > 2 OrElse Math.Abs(dy) > 2) AndAlso _styl.Szablon IsNot Nothing Then
                 Dim infoZasiegu = PobierzEfektywnyZasiegObszaru()
                 Dim zasieg = infoZasiegu.Item1
                 Dim effPiksel = PikselPodgladuObszaru(zasieg)
-                Dim skalaWyswietlania = PobierzSkaleWyswietlaniaObszaru()
+                Dim skalaWyswietlania = SkalaWypelnienia(_bazaPodgladuObszaru, picPodgladObszaru)
                 Dim effPikselEkranu = effPiksel / Math.Max(0.001, skalaWyswietlania)
                 Dim starySrodek = If(_wlasnyPunktObszaru, zasieg.Srodek)
                 Dim nowyX = starySrodek.X + dy * effPikselEkranu
@@ -2396,7 +2114,7 @@ Public Class FormKreatorMapy
         ElseIf _zasiegObrazuObszaru.HasValue AndAlso _wybranyZasieg.Poprawny AndAlso _bazaPodgladuObszaru IsNot Nothing Then
             ' Obrys i ślad w tym samym przekształceniu co obraz próbki (dawniej ślad był rozciągany na całą ramkę
             ' osobno w poziomie i w pionie, więc nie leżał na mapie)
-            Dim skala = PobierzSkaleWyswietlaniaObszaru()
+            Dim skala = SkalaWypelnienia(_bazaPodgladuObszaru, picPodgladObszaru)
             Dim w = CInt(Math.Ceiling(_bazaPodgladuObszaru.Width * skala))
             Dim h = CInt(Math.Ceiling(_bazaPodgladuObszaru.Height * skala))
             Dim x = (picPodgladObszaru.Width - w) \ 2 + _deltaPrzeciaganiaObszaru.X
@@ -2496,46 +2214,14 @@ Public Class FormKreatorMapy
         End Try
     End Sub
 
-    ''' <summary>
-    ''' Styl z bieżącej kompozycji kroku 3: warstwy z kryciem i trybem mieszania po suwakach, polach grup i oknie
-    ''' „Warstwy - zaawansowane”; w mapie wieloskalowej osobno każda skala (z planu „Ustawienia skal”, jeśli jest).
-    ''' </summary>
+    ''' <summary>Styl z bieżącej kompozycji kroku 3; punkt próbki - środek wybranego obszaru.</summary>
     Friend Function UtworzStylWlasny(nazwa As String) As SzablonMapy
-        Dim baza = _wybranySzablon
-        If baza Is Nothing Then Return Nothing
-        Dim srodek = If(_wybranyZasieg.Poprawny, UkladWspolrzednych.PL1992.DoWgs84(_wybranyZasieg.Srodek),
-                        New PunktGeo(baza.ProbkaLat, baza.ProbkaLon))
-        Dim s As New SzablonMapy(SzablonyWlasne.NoweId(), nazwa, SzablonyWlasne.KategoriaWlasna,
-                                 "Mój styl na podstawie: " & baza.Nazwa & ".", "⭐", baza.DomyslnyPiksel, baza.ProfilKorekty,
-                                 baza.DozwoloneCele.ToArray()) With {
-            .ProbkaLat = srodek.Szerokosc, .ProbkaLon = srodek.Dlugosc, .ProbkaPiksel = baza.ProbkaPiksel, .UwagaPokrycia = baza.UwagaPokrycia}
-        Dim wzorce = baza.Warstwy.Concat(baza.StopnieSkali.SelectMany(Function(st) st.Warstwy)).ToList()
-        Dim konwertuj = Function(zestaw As ZestawWarstw) zestaw.Warstwy.Select(
-            Function(w) WarstwaSzablonu.ZWarstwyWybranej(w, wzorce.FirstOrDefault(Function(x) String.Equals(x.Zbior, w.Zbior, StringComparison.OrdinalIgnoreCase) AndAlso
-                                                                                               String.Equals(x.Warstwa, w.Nazwa, StringComparison.OrdinalIgnoreCase)))).ToArray()
-        If baza.Wieloskalowy AndAlso _zestawNiestandardowy Is Nothing Then
-            Dim skale = If(_planWlasny IsNot Nothing AndAlso _planWlasny.Count > 0,
-                           _planWlasny.Select(Function(ps) Tuple.Create(ps.Stopien, ps.Piksel)).ToList(),
-                           baza.StopnieSkali.Select(Function(st) Tuple.Create(st, st.Piksel)).ToList())
-            For Each sk In skale.OrderBy(Function(t) t.Item2)
-                Dim warstwy = konwertuj(UtworzZestawStylu(0, sk.Item1))
-                If warstwy.Length = 0 Then Continue For
-                'stopień opcjonalny zostaje opcjonalny - inaczej ortofotomapa (najmniejszy piksel) stałaby się główną skalą stylu
-                If sk.Item1.Opcjonalny Then
-                    s.DodajStopienOpcjonalny(sk.Item1.Opis, sk.Item2, warstwy)
-                Else
-                    s.DodajStopien(sk.Item1.Opis, sk.Item2, warstwy)
-                End If
-            Next
-        Else
-            s.Warstwy.AddRange(konwertuj(UtworzZestawStylu(baza.DomyslnyPiksel, Nothing)))
-        End If
-        Return s
+        Return _styl.UtworzStylWlasny(nazwa, _wybranyZasieg)
     End Function
 
     Private Sub btnZapiszStyl_Click(sender As Object, e As EventArgs)
-        If _wybranySzablon Is Nothing Then Exit Sub
-        Dim proponowana = If(SzablonyWlasne.CzyWlasny(_wybranySzablon), _wybranySzablon.Nazwa, "Mój styl - " & _wybranySzablon.Nazwa)
+        If _styl.Szablon Is Nothing Then Exit Sub
+        Dim proponowana = If(SzablonyWlasne.CzyWlasny(_styl.Szablon), _styl.Szablon.Nazwa, "Mój styl - " & _styl.Szablon.Nazwa)
         Dim nazwa = Microsoft.VisualBasic.Interaction.InputBox("Nazwa stylu na liście stylów kreatora:", "Zapisz jako mój styl", proponowana).Trim()
         If nazwa = "" Then Exit Sub
         ZapiszStylWlasny(nazwa, Function(pytanie) MessageBox.Show(pytanie, "Zapisz jako mój styl", MessageBoxButtons.YesNo, MessageBoxIcon.Question) = DialogResult.Yes)
@@ -2564,14 +2250,14 @@ Public Class FormKreatorMapy
         End Try
         ZarzadcaSzablonow.UstawWlasne(lista)
         ' zapisany styl zastępuje kompozycję - zaznaczamy go na liście (ustawienia są już w jego warstwach)
-        _wybranySzablon = Nothing
+        _styl.Szablon = Nothing
         _ostatniSzablonId = styl.Id
         OdswiezListeSzablonow()
         Return styl
     End Function
 
     Private Sub btnUsunStyl_Click(sender As Object, e As EventArgs)
-        Dim styl = _wybranySzablon
+        Dim styl = _styl.Szablon
         If Not SzablonyWlasne.CzyWlasny(styl) Then Exit Sub
         If MessageBox.Show("Usunąć styl „" & styl.Nazwa & "”” z listy? Tej operacji nie można cofnąć.", "Usuń mój styl",
                            MessageBoxButtons.YesNo, MessageBoxIcon.Question) <> DialogResult.Yes Then Exit Sub
@@ -2587,7 +2273,7 @@ Public Class FormKreatorMapy
             Exit Sub
         End Try
         ZarzadcaSzablonow.UstawWlasne(lista)
-        _wybranySzablon = Nothing
+        _styl.Szablon = Nothing
         _ostatniSzablonId = ""
         OdswiezListeSzablonow()
     End Sub
@@ -2664,38 +2350,17 @@ Public Class FormKreatorMapy
         AktualizujOpisKorekty()
     End Sub
 
-    ''' <summary>Profil sugerowany: Garmin MIP dla odbiorników Garmin, inaczej profil stylu.</summary>
-    Private Function ProfilSugerowany() As ProfilKorektyRastra
-        Return If(_wybranyCel = CelMapy.OdbiornikGarmin, ProfilKorektyRastra.GarminMip,
-                  If(_wybranySzablon IsNot Nothing, _wybranySzablon.ProfilKorekty, ProfilKorektyRastra.Brak))
-    End Function
-
-    ''' <summary>Opcje do okna korekty: wyłączona korekta bez profilu dostaje profil sugerowany (podgląd od razu pokazuje efekt).</summary>
     Private Function OpcjeKorektyDoOkna() As OpcjeKorekcjiMip
-        Dim o = _opcjeKorekty.Kopia()
-        If o.Profil = ProfilKorektyRastra.Brak AndAlso ProfilSugerowany() <> ProfilKorektyRastra.Brak Then
-            o.UstawWgProfilu(ProfilSugerowany())
-            o.Wlaczona = False
-        End If
-        Return o
+        Return _styl.OpcjeKorektyDoOkna(_opcjeKorekty, _wybranyCel)
     End Function
 
     Private Sub AktualizujOpisKorekty()
         If lblProfilKorekty Is Nothing Then Exit Sub
-        lblProfilKorekty.Text = If(chkKorektaObrazu.Checked AndAlso _opcjeKorekty.Profil <> ProfilKorektyRastra.Brak,
-                                   "Profil: " & OpcjeKorekcjiMip.KrotkaNazwaProfilu(_opcjeKorekty.Profil),
-                                   If(ProfilSugerowany() <> ProfilKorektyRastra.Brak,
-                                      "Wyłączona (sugerowany profil: " & OpcjeKorekcjiMip.KrotkaNazwaProfilu(ProfilSugerowany()) & ")",
-                                      "Wyłączona"))
+        lblProfilKorekty.Text = _styl.OpisKorekty(chkKorektaObrazu.Checked, _opcjeKorekty, _wybranyCel)
     End Sub
 
     Private Sub chkKorektaObrazu_CheckedChanged(sender As Object, e As EventArgs) Handles chkKorektaObrazu.CheckedChanged
-        Dim wl = chkKorektaObrazu.Checked
-        ' Zaznaczenie pola bez ustawionego profilu włącza profil sugerowany (inaczej korekta nic by nie zmieniała)
-        If wl AndAlso _opcjeKorekty.Profil = ProfilKorektyRastra.Brak Then
-            _opcjeKorekty.UstawWgProfilu(If(ProfilSugerowany() <> ProfilKorektyRastra.Brak, ProfilSugerowany(), ProfilKorektyRastra.WyostrzenieKrawedzi))
-        End If
-        _opcjeKorekty.Wlaczona = wl
+        _styl.WlaczKorekte(_opcjeKorekty, chkKorektaObrazu.Checked, _wybranyCel)
         AktualizujOpisKorekty()
     End Sub
 
@@ -2729,7 +2394,7 @@ Public Class FormKreatorMapy
     End Sub
 
     Private Sub btnOtworzWieloskalowy_Click(sender As Object, e As EventArgs) Handles btnOtworzWieloskalowy.Click
-        Dim zestaw = PobierzZestawStylu()
+        Dim zestaw = _styl.UtworzZestaw()
         Dim zMin = CInt(numZoomMin.Value)
         Dim zMax = CInt(numZoomMax.Value)
 
@@ -2744,8 +2409,8 @@ Public Class FormKreatorMapy
                     _sciezkaZmienionaPrzezUzytkownika = True
                     txtSciezkaDocelowa.Text = plikDocelowy
                 End If
-                _zestawNiestandardowy = zestaw
-                PokazSzczegolySzablonu(_wybranySzablon, False)
+                _styl.ZestawNiestandardowy = zestaw
+                PokazSzczegolySzablonu(_styl.Szablon, False)
 
                 _wTrakciePodsumowania = True
                 Try
@@ -2776,50 +2441,28 @@ Public Class FormKreatorMapy
         Catch ex As Exception
             baza = Path.GetTempPath()
         End Try
-        Dim nazwa = "Kreator_" & OczyscNazwePliku(Path.GetFileNameWithoutExtension(plikDocelowy)) & "_" & DateTime.Now.ToString("yyyyMMdd_HHmmss_fff")
-        Return Path.Combine(baza, nazwa) & "\"
+        Return Path.Combine(baza, PodsumowanieKreatora.NazwaFolderuSesji(plikDocelowy, DateTime.Now)) & "\"
     End Function
 
-    ''' <summary>Czy kreator utworzy mapę wieloskalową (osobne pobranie każdego stopnia skali i kompilacja MBTiles).</summary>
+    ''' <summary>Czy kreator utworzy mapę wieloskalową (osobne pobranie każdego stopnia skali).</summary>
     Private Function CzyWieloskalowaAktywna() As Boolean
-        Return _wybranySzablon IsNot Nothing AndAlso _wybranySzablon.Wieloskalowy AndAlso _zestawNiestandardowy Is Nothing AndAlso
-               FormatWieloskalowy(_formatDocelowy) AndAlso chkWieloskalowa.Checked
-    End Function
-
-    ''' <summary>Formaty, w których kreator łączy osobno pobrane skale: MBTiles, SQLiteDB (OsmAnd, Locus) i JNX (Garmin BirdsEye).</summary>
-    Friend Shared Function FormatWieloskalowy(format As RodzajEksportu) As Boolean
-        Return format = RodzajEksportu.MBTiles OrElse format = RodzajEksportu.SQLiteDB OrElse format = RodzajEksportu.Jnx
-    End Function
-
-    Private Function SzerokoscGeoObszaru() As Double
-        If Not _wybranyZasieg.Poprawny Then Return 52.0
-        Return UkladWspolrzednych.PL1992.DoWgs84(_wybranyZasieg.Srodek.X, _wybranyZasieg.Srodek.Y).Szerokosc
+        Return _styl.WieloskalowaAktywna(_formatDocelowy, chkWieloskalowa.Checked)
     End Function
 
     Private Function PlanAutomatyczny() As List(Of PlanStopnia)
-        Return ZarzadcaSzablonow.PlanStopni(_wybranySzablon, CDbl(numRozmiarPiksela.Value), SzerokoscGeoObszaru(),
-                                            _ortofotomapaMozliwa AndAlso chkOrtofotomapa.Checked)
+        Return _styl.PlanAutomatyczny(CDbl(numRozmiarPiksela.Value), ObszarKreatora.SzerokoscGeo(_wybranyZasieg), _ortofotomapaMozliwa AndAlso chkOrtofotomapa.Checked)
     End Function
 
-    ''' <summary>Plan skal: ustawiony w oknie „Ustawienia skal” albo automatyczny (kopia - zmiany nie psują planu własnego).</summary>
+    ''' <summary>Plan skal z okna „Ustawienia skal” albo automatyczny (kopia).</summary>
     Private Function PlanBiezacy() As List(Of PlanStopnia)
-        If _planWlasny IsNot Nothing Then Return _planWlasny.Select(Function(ps) ps.Kopia()).ToList()
-        Return PlanAutomatyczny()
-    End Function
-
-    Private Function UtworzZestawStopnia(plan As PlanStopnia) As ZestawWarstw
-        Dim warstwy = SzablonMapy.BezGrup(plan.WarstwyEfektywne, _wylaczoneGrupy)
-        Dim zestaw = _wybranySzablon.UtworzZestaw(PobierzZrodlaKreatora(), warstwy)
-        ZastosujRegulacjeDoZestawu(zestaw, warstwy)
-        _zmianyWygladu.Zastosuj(zestaw)
-        Return zestaw
+        Return _styl.PlanBiezacy(CDbl(numRozmiarPiksela.Value), ObszarKreatora.SzerokoscGeo(_wybranyZasieg), _ortofotomapaMozliwa AndAlso chkOrtofotomapa.Checked)
     End Function
 
     Private Function SzacujWynik(piksel As Double, korytarz As Korytarz, plan As List(Of PlanStopnia), zestaw As ZestawWarstw) As SzacunekKreatora
         Dim uklad = UkladWspolrzednych.PL1992
         If plan IsNot Nothing Then
             Return ZarzadcaSzablonow.SzacujWieloskalowo(plan, _wybranyZasieg, korytarz, uklad,
-                zrodlaStopni:=plan.Select(Function(p) UtworzZestawStopnia(p).GrupyZapytan().Count).ToArray())
+                zrodlaStopni:=plan.Select(Function(p) _styl.UtworzZestawStopnia(p).GrupyZapytan().Count).ToArray())
         End If
         Return ZarzadcaSzablonow.SzacujParametry(_wybranyZasieg, piksel, ZarzadcaSzablonow.BokSegmentuKreatora(_wybranyZasieg, piksel),
             korytarz, uklad, _formatDocelowy, ZarzadcaSzablonow.CzyFormatWielopoziomowy(_formatDocelowy),
@@ -2827,10 +2470,10 @@ Public Class FormKreatorMapy
     End Function
 
     Private Sub btnUstawieniaSkal_Click(sender As Object, e As EventArgs)
-        If _wybranySzablon Is Nothing OrElse Not _wybranySzablon.Wieloskalowy Then Exit Sub
-        Using okno As New FormSkaleMapy(_wybranySzablon, PlanBiezacy(), PlanAutomatyczny(), SzerokoscGeoObszaru())
+        If _styl.Szablon Is Nothing OrElse Not _styl.Szablon.Wieloskalowy Then Exit Sub
+        Using okno As New FormSkaleMapy(_styl.Szablon, PlanBiezacy(), PlanAutomatyczny(), ObszarKreatora.SzerokoscGeo(_wybranyZasieg))
             If okno.ShowDialog(Me) = DialogResult.OK Then
-                _planWlasny = okno.Wynik
+                _styl.PlanWlasny = okno.Wynik
                 OdswiezSkalePodgladu()
                 PrzygotujPodsumowanie()
             End If
@@ -2846,7 +2489,7 @@ Public Class FormKreatorMapy
             .TrybyMieszania = zestaw.TekstTrybowMieszania(),
             .Adresy = zestaw.Adresy(),
             .Zbiory = zestaw.Zbiory(),
-            .ZrodlaMap = PobierzZrodlaKreatora(),
+            .ZrodlaMap = _styl.ZrodlaMap(),
             .Uklad = UkladWspolrzednych.PL1992,
             .Siatka = siatka,
             .Format = "png",
@@ -2908,14 +2551,14 @@ Public Class FormKreatorMapy
         txtSciezkaDocelowa.Text = plikDocelowy
 
         Dim piksel = CDbl(numRozmiarPiksela.Value)
-        Dim siatka As New Siatka(_wybranyZasieg, piksel, ZarzadcaSzablonow.BokSegmentuKreatora(_wybranyZasieg, piksel))
-        If Not siatka.Poprawna OrElse siatka.ZbytDuza Then
-            MessageBox.Show("Nie można utworzyć mapy dla tego obszaru: " & If(siatka.ZbytDuza, "obszar jest zbyt duży", siatka.PowodNiepoprawnosci) & ".",
-                            "Kreator mapy", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+        Dim siatka = PodsumowanieKreatora.SiatkaKreatora(_wybranyZasieg, piksel)
+        Dim bladSiatki = PodsumowanieKreatora.BladSiatki(siatka)
+        If bladSiatki IsNot Nothing Then
+            MessageBox.Show("Nie można utworzyć mapy dla tego obszaru: " & bladSiatki & ".", "Kreator mapy", MessageBoxButtons.OK, MessageBoxIcon.Warning)
             Exit Sub
         End If
         Dim korytarz = PobierzEfektywnyKorytarz()
-        Dim zestaw = PobierzZestawStylu(piksel)
+        Dim zestaw = _styl.UtworzZestaw(piksel)
         If zestaw.Liczba = 0 Then
             MessageBox.Show("Wybrany styl nie zawiera żadnej warstwy. Wróć do kroku 3 i wybierz styl mapy.", "Kreator mapy", MessageBoxButtons.OK, MessageBoxIcon.Information)
             Exit Sub
@@ -2927,17 +2570,14 @@ Public Class FormKreatorMapy
         ' Pytanie o duży obszar - te same progi i ten sam format, co szacunek w kroku 4
         Dim szacunek = SzacujWynik(piksel, korytarz, plan, zestaw)
         If szacunek.WymagaPotwierdzenia Then
-            Dim odp = MessageBox.Show(szacunek.Ostrzezenie & vbCrLf & vbCrLf &
-                                      $"Segmenty: {szacunek.LiczbaSegmentow:N0}, plik ok. {szacunek.SformatowanyPrzedzialRozmiaru()}, czas ok. {szacunek.SformatowanyCzas()}." & vbCrLf & vbCrLf &
-                                      "Czy mimo to rozpocząć pobieranie?",
-                                      "Duży obszar mapy", MessageBoxButtons.YesNo, MessageBoxIcon.Question)
+            Dim odp = MessageBox.Show(PodsumowanieKreatora.PytanieDuzyObszar(szacunek), "Duży obszar mapy", MessageBoxButtons.YesNo, MessageBoxIcon.Question)
             If odp <> DialogResult.Yes Then Exit Sub
         End If
 
         ' Wolne miejsce: segmenty sesji i plik wynikowy zajmują razem ok. 2 razy szacowany rozmiar pliku
         Try
             Dim dysk As New DriveInfo(Path.GetPathRoot(plikDocelowy))
-            Dim potrzebneB = CLng(szacunek.SzacowanyRozmiarMbMax * 2.0 * 1024 * 1024)
+            Dim potrzebneB = PodsumowanieKreatora.PotrzebneMiejsceBajty(szacunek)
             If dysk.IsReady AndAlso dysk.AvailableFreeSpace < potrzebneB Then
                 If MessageBox.Show($"Na dysku {dysk.Name} jest {dysk.AvailableFreeSpace / 1024.0 / 1024 / 1024:0.0} GB wolnego miejsca, a mapa może potrzebować ok. {potrzebneB / 1024.0 / 1024 / 1024:0.0} GB." & vbCrLf & vbCrLf &
                                    "Czy mimo to kontynuować?", "Mało miejsca na dysku", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) <> DialogResult.Yes Then Exit Sub
@@ -2971,14 +2611,14 @@ Public Class FormKreatorMapy
             ' Każdy stopień skali to osobna sesja (najdokładniejszy w głównym folderze, pozostałe obok: _skala2, _skala3…)
             _planGenerowania = plan
             For i = 0 To plan.Count - 1
-                Dim folder = If(i = 0, folderSesji, folderSesji.TrimEnd("\"c) & "_skala" & (i + 1) & "\")
+                Dim folder = PodsumowanieKreatora.FolderStopnia(folderSesji, i)
                 Directory.CreateDirectory(folder)
-                Dim zestawStopnia = UtworzZestawStopnia(plan(i))
+                Dim zestawStopnia = _styl.UtworzZestawStopnia(plan(i))
                 If zestawStopnia.Liczba = 0 Then
                     Throw New InvalidOperationException($"Skala {plan(i).Stopien.Opis} nie ma aktywnych warstw. Sprawdź ustawienia skal.")
                 End If
-                Dim siatkaStopnia As New Siatka(siatka.Obszar, plan(i).Piksel, ZarzadcaSzablonow.BokSegmentuKreatora(siatka.Obszar, plan(i).Piksel))
-                If Not siatkaStopnia.Poprawna OrElse siatkaStopnia.ZbytDuza Then
+                Dim siatkaStopnia = PodsumowanieKreatora.SiatkaKreatora(siatka.Obszar, plan(i).Piksel)
+                If PodsumowanieKreatora.BladSiatki(siatkaStopnia) IsNot Nothing Then
                     Throw New InvalidOperationException($"Nie można wyznaczyć siatki dla skali {plan(i).Stopien.Opis}. Sprawdź rozmiar piksela.")
                 End If
                 _zadaniaPobierania.Add(UtworzZadaniePobierania(zestawStopnia, siatkaStopnia, folder, korytarz))
@@ -3000,9 +2640,8 @@ Public Class FormKreatorMapy
             _opcjeKompilacji = New OpcjeKompilatoraMbtiles With {
                 .PlikDocelowy = plikDocelowy,
                 .NazwaMapy = Path.GetFileNameWithoutExtension(plikDocelowy),
-                .OpisMapy = _wybranySzablon.Nazwa & " – " & String.Join(", ", plan.Select(Function(ps) ps.Stopien.Opis)),
-                .Atrybucja = "MapoTero – " & String.Join(", ", plan.SelectMany(Function(ps) SzablonMapy.BezGrup(ps.WarstwyEfektywne, _wylaczoneGrupy)).
-                                                         Select(Function(w) w.Etykieta).Distinct()),
+                .OpisMapy = _styl.OpisMapyWieloskalowej(plan),
+                .Atrybucja = _styl.AtrybucjaWieloskalowej(plan),
                 .PoziomMin = plan.Min(Function(ps) ps.PoziomMin),
                 .PoziomMax = plan.Max(Function(ps) ps.PoziomMax),
                 .FormatKafli = FormatKafliMbtiles.TylkoPng,
@@ -3088,7 +2727,7 @@ Public Class FormKreatorMapy
                     Exit Function
                 End If
                 If wynik.Nieudane > 0 Then
-                    Dim nazwa = If(_planGenerowania IsNot Nothing, _planGenerowania(i).Stopien.Opis, _wybranySzablon.Nazwa)
+                    Dim nazwa = If(_planGenerowania IsNot Nothing, _planGenerowania(i).Stopien.Opis, _styl.Szablon.Nazwa)
                     braki.Add($"{nazwa} ({wynik.Nieudane}/{wynik.Wszystkie})")
                     If wynik.PierwszyBlad <> "" Then szczegolyBledow.Add(nazwa & " – " & wynik.PierwszyBlad)
                 End If
@@ -3100,12 +2739,10 @@ Public Class FormKreatorMapy
                 pobranePrzed += liczbySegmentow(i)
             Next
             Dim opisBrakow = String.Join(", ", braki)
-            ' Cudzą lub wcześniejszą mapę chroni zapis tylko kompletnej, ale własny wynik z brakami tej samej sesji
-            ' ponowienie zastępuje uzupełnioną mapą (dawniej zostawał stary plik z większymi brakami)
-            Dim chronionyWynik = IstniejeWynik(plikDocelowy) AndAlso
-                                 Not String.Equals(plikDocelowy, _plikZBrakami, StringComparison.OrdinalIgnoreCase)
-            If wszystkie <= nieudane OrElse (nieudane > 0 AndAlso chronionyWynik) Then
-                lblStanPostepu.Text = If(wszystkie <= nieudane, "Nie pobrano danych mapy.", "Zachowano poprzednią mapę.")
+            ' Bez danych nie ma czego zapisać, a cudzą lub wcześniejszą mapę zastępuje tylko mapa kompletna
+            Dim wstrzymanie = PodsumowanieKreatora.PowodWstrzymaniaZapisu(wszystkie, nieudane, IstniejeWynik(plikDocelowy), plikDocelowy, _plikZBrakami)
+            If wstrzymanie IsNot Nothing Then
+                lblStanPostepu.Text = wstrzymanie
                 lblStanPostepu.ForeColor = Color.DarkOrange
                 lblSzczegolyPostepu.Text = $"Brakujące segmenty – {opisBrakow}. Użyj przycisku Ponów pobieranie."
                 _podpowiedzi.SetToolTip(lblSzczegolyPostepu, String.Join(vbCrLf, szczegolyBledow))
@@ -3132,7 +2769,7 @@ Public Class FormKreatorMapy
                     Dim z = _zadaniaPobierania(i)
                     Dim ps = _planGenerowania(i)
                     warstwy.Add(New WarstwaWielowarstwowa With {
-                        .Folder = z.Folder, .Tytul = ps.Stopien.Opis, .OpisPelny = _wybranySzablon?.Nazwa & " - " & ps.Stopien.Opis,
+                        .Folder = z.Folder, .Tytul = ps.Stopien.Opis, .OpisPelny = _styl.Szablon?.Nazwa & " - " & ps.Stopien.Opis,
                         .PoziomMin = ps.PoziomMin, .PoziomMax = ps.PoziomMax, .Kolejnosc = i, .Uklad = UkladWspolrzednych.PL1992,
                         .Siatka = z.Siatka, .Zrodlo = New ZrodloSegmentow(z.Folder, z.Prefiks, z.Numeracja, z.Rozszerzenie, z.Siatka, przytnijDoObszaru:=True, maska:=maska)})
                 Next
@@ -3183,13 +2820,13 @@ Public Class FormKreatorMapy
             pnlSukces.Visible = True
 
             Dim rozmiar = plikiWyniku.Sum(Function(p) New FileInfo(p).Length)
-            Dim rozmiarTekst = If(rozmiar >= 1024 * 1024, $"{rozmiar / (1024.0 * 1024.0):0.0} MB", $"{Math.Max(1, rozmiar / 1024.0):0} KB")
+            Dim rozmiarTekst = PodsumowanieKreatora.OpisRozmiaru(rozmiar)
             lblSukcesPlik.Text = If(plikiWyniku.Length > 1, $"Tomy ({plikiWyniku.Length}, razem {rozmiarTekst}): ",
                                   $"Mapa ({rozmiarTekst}): ") & Path.GetFileName(plikDocelowy)
             Dim wykaz = String.Join(vbCrLf, plikiWyniku)
             If _planGenerowania IsNot Nothing Then
-                lblSukcesPlik.Text &= vbCrLf & $"Skale: {_planGenerowania.Count} · Powiększenia: {_planGenerowania.Min(Function(ps) ps.PoziomMin)}–{_planGenerowania.Max(Function(ps) ps.PoziomMax)}"
-                wykaz &= vbCrLf & String.Join(vbCrLf, _planGenerowania.Select(Function(ps) $"{ps.Stopien.Opis} ({ps.PoziomMin}–{ps.PoziomMax})"))
+                lblSukcesPlik.Text &= vbCrLf & PodsumowanieKreatora.OpisSkalWyniku(_planGenerowania)
+                wykaz &= vbCrLf & PodsumowanieKreatora.WykazSkalWyniku(_planGenerowania)
             Else
                 lblSukcesPlik.Text &= vbCrLf & Path.GetDirectoryName(plikDocelowy)
             End If
@@ -3354,66 +2991,4 @@ Public Class FormKreatorMapy
         End If
     End Sub
 
-End Class
-
-''' <summary>
-''' Szacowanie pozostałego czasu pobierania z rzeczywistej prędkości: przez pierwsze sekundy tylko „szacowanie czasu…”,
-''' potem prędkość z segmentów pobranych od pierwszego odczytu (pomija segmenty już istniejące przy ponowieniu).
-''' </summary>
-Friend Class PomiarPostepu
-    Private ReadOnly _wszystkie As Long
-    Private ReadOnly _zegar As Stopwatch = Stopwatch.StartNew()
-    Private _startSek As Double = -1
-    Private _startPobrane As Long
-
-    Public Sub New(wszystkie As Long)
-        _wszystkie = Math.Max(1, wszystkie)
-    End Sub
-
-    Public ReadOnly Property Uplynelo As Double
-        Get
-            Return _zegar.Elapsed.TotalSeconds
-        End Get
-    End Property
-
-    ''' <summary>Dopisek do opisu postępu, np. „ · pozostało ok. 2 min 10 s (4,3 segm./s)”.</summary>
-    Public Function Opis(pobrane As Long) As String
-        Dim teraz = _zegar.Elapsed.TotalSeconds
-        If _startSek < 0 Then
-            _startSek = teraz
-            _startPobrane = pobrane
-        End If
-        Dim trwanie = teraz - _startSek
-        Dim przyrost = pobrane - _startPobrane
-        If trwanie < 3 OrElse przyrost < 2 Then Return " · szacowanie czasu..."
-        Dim predkosc = przyrost / trwanie
-        Dim pozostalo = Math.Max(0, _wszystkie - pobrane) / predkosc
-        Return $" · pozostało ok. {Czas(pozostalo)} ({predkosc:0.0} segm./s, łącznie {_wszystkie:N0} segm.)"
-    End Function
-
-    ''' <summary>Dopisek dla etapu z postępem w procentach (zapis pliku).</summary>
-    Public Shared Function OpisZProcentu(procent As Integer, uplynelo As Double) As String
-        If procent < 3 OrElse uplynelo < 2 Then Return "..."
-        Return " · pozostało ok. " & Czas(uplynelo * (100 - procent) / procent)
-    End Function
-
-    Public Shared Function Czas(sekundy As Double) As String
-        Return New SzacunekKreatora With {.SzacowanyCzasSekundy = CInt(Math.Min(Integer.MaxValue \ 2, Math.Ceiling(Math.Max(0, sekundy))))}.SformatowanyCzas()
-    End Function
-End Class
-
-''' <summary>Działka ewidencyjna z ULDK jako wynik wyszukiwania obszaru w kreatorze (obszar - zasięg działki z pasem).</summary>
-Friend Class WynikDzialki
-    Inherits WynikGeokodowania
-
-    Public Property Zasieg1992 As Zasieg
-
-    Public Shared Function Z(d As DzialkaKatastralna) As WynikDzialki
-        Dim srodek = UkladWspolrzednych.PL1992.DoWgs84(d.Zasieg1992.Srodek)
-        Return New WynikDzialki With {
-            .Nazwa = "Działka " & d.Numer,
-            .PelnaNazwa = "Działka " & d.Numer & ", obręb " & d.Obreb & If(d.Gmina <> "", ", gm. " & d.Gmina, "") & If(d.Powiat <> "", ", pow. " & d.Powiat, "") &
-                          If(d.Identyfikator <> "", ", " & d.Identyfikator, ""),
-            .Typ = "dzialka", .Szerokosc = srodek.Szerokosc, .Dlugosc = srodek.Dlugosc, .Zasieg1992 = d.Zasieg1992}
-    End Function
 End Class

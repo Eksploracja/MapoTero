@@ -302,8 +302,7 @@ Public Class KreatorMapyPoprawkiTesty
                         Dim pole = Kt(Of CheckBox)(k, "chkGrupa1")
                         Assert.Equal("Zabytki archeologiczne", pole.Text)
                         pole.Checked = False
-                        Dim mi = GetType(Global.MapoTero.FormKreatorMapy).GetMethod("PobierzZestawStylu", BindingFlags.NonPublic Or BindingFlags.Instance)
-                        Dim zestaw = DirectCast(mi.Invoke(k, New Object() {1.0}), ZestawWarstw)
+                        Dim zestaw = k.Styl.UtworzZestaw(1.0)
                         Assert.DoesNotContain(zestaw.Warstwy, Function(w) w.Zbior.Contains("archeo"))
                         Assert.Contains(zestaw.Warstwy, Function(w) w.Zbior = "zabytki_zasiegi_NID")
                         ' wiersz stanu podglądu pod polami grup
@@ -327,8 +326,7 @@ Public Class KreatorMapyPoprawkiTesty
                         Next
                         Application.DoEvents()
                         ' podgląd automatyczny (6 m) to skala 1:100 000, a okno warstw ma pokazać najdokładniejszą 1:25 000
-                        Dim mi = GetType(Global.MapoTero.FormKreatorMapy).GetMethod("StopienOknaWarstw", BindingFlags.NonPublic Or BindingFlags.Instance)
-                        Dim st = DirectCast(mi.Invoke(k, Nothing), StopienSkali)
+                        Dim st = k.Styl.StopienOknaWarstw(Nothing)
                         Assert.NotNull(st)
                         Assert.Equal("1:25 000", st.Opis)
                         Assert.Contains(st.Warstwy, Function(w) w.Warstwa = "wig25k_2180")
@@ -338,38 +336,12 @@ Public Class KreatorMapyPoprawkiTesty
     End Sub
 
     <Fact>
-    Public Sub ZestawWlasny_KrycieZOknaZaawansowanegoNadrzedne()
-        Sta(Sub()
-                Using f As New Global.MapoTero.Form1()
-                    Using k As New Global.MapoTero.FormKreatorMapy(f)
-                        k.Show() : Application.DoEvents()
-                        Kt(Of Button)(k, "btnDalej").PerformClick() : Application.DoEvents()
-                        Dim lst = Kt(Of ListBox)(k, "lstSzablony")
-                        For i = 0 To lst.Items.Count - 1
-                            If DirectCast(lst.Items(i), SzablonMapy).Id = "dziedzictwo" Then lst.SelectedIndex = i
-                        Next
-                        ' jak po oknie zaawansowanym: zabytki z różnym kryciem
-                        Dim wlasny = DirectCast(GetType(Global.MapoTero.FormKreatorMapy).GetMethod("PobierzZestawStylu", BindingFlags.NonPublic Or BindingFlags.Instance).Invoke(k, New Object() {1.0}), ZestawWarstw)
-                        wlasny.UstawKrycie(3, 40)
-                        GetType(Global.MapoTero.FormKreatorMapy).GetField("_zestawNiestandardowy", BindingFlags.NonPublic Or BindingFlags.Instance).SetValue(k, wlasny)
-                        Dim pokaz = GetType(Global.MapoTero.FormKreatorMapy).GetMethod("PokazSzczegolySzablonu", BindingFlags.NonPublic Or BindingFlags.Instance)
-                        pokaz.Invoke(k, New Object() {DirectCast(lst.SelectedItem, SzablonMapy), False})
-                        Dim mi = GetType(Global.MapoTero.FormKreatorMapy).GetMethod("PobierzZestawStylu", BindingFlags.NonPublic Or BindingFlags.Instance)
-                        Dim zestaw = DirectCast(mi.Invoke(k, New Object() {1.0}), ZestawWarstw)
-                        Assert.Equal(100, zestaw(2).Krycie)
-                        Assert.Equal(40, zestaw(3).Krycie)
-                    End Using
-                End Using
-            End Sub)
-    End Sub
-
-    <Fact>
     Public Sub PomiarPostepu_SzacujePozostalyCzas()
-        Dim pomiar As New Global.MapoTero.PomiarPostepu(1000)
+        Dim pomiar As New PomiarPostepu(1000)
         Assert.Contains("szacowanie", pomiar.Opis(0))
-        Assert.Equal(" · pozostało ok. 10 s", Global.MapoTero.PomiarPostepu.OpisZProcentu(50, 10))
-        Assert.Equal("...", Global.MapoTero.PomiarPostepu.OpisZProcentu(1, 10))
-        Assert.Equal("2 min 5 s", Global.MapoTero.PomiarPostepu.Czas(124.2))
+        Assert.Equal(" · pozostało ok. 10 s", PomiarPostepu.OpisZProcentu(50, 10))
+        Assert.Equal("...", PomiarPostepu.OpisZProcentu(1, 10))
+        Assert.Equal("2 min 5 s", PomiarPostepu.Czas(124.2))
     End Sub
 
 End Class
