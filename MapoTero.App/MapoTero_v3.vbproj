@@ -69,6 +69,11 @@
   <ItemGroup>
     <!-- okno mapy (podkład OpenStreetMap / Google / Bing) oraz silnik SQLite kafelków i MBTiles -->
     <PackageReference Include="GMap.NET.WinForms" Version="2.1.7" />
+    <!-- SQLite dla zapisu MBTiles, SQLiteDB, OruxMaps i odczytu w imporcie OZI (EksportMapy, KompilatorMbtiles,
+         FormImportOzi). Wpis jawny, bo wcześniej biblioteka przychodziła tylko jako zależność GMap.NET -
+         aktualizacja lub wymiana GMap.NET mogłaby po cichu zmienić albo usunąć silnik zapisu map.
+         Wersja równa tej z GMap.NET 2.1.7 (podniesienie wymaga sprawdzenia eksportów). -->
+    <PackageReference Include="System.Data.SQLite.Core" Version="1.0.115.5" />
     <!-- wykluczenie zbędnego Entity Framework 6 ciągniętego przez zależność SQLite z GMap.NET -->
     <PackageReference Include="EntityFramework" Version="6.4.4" ExcludeAssets="all" />
     <PackageReference Include="System.Data.SQLite.EF6" Version="1.0.115.5" ExcludeAssets="all" />
