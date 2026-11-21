@@ -361,13 +361,132 @@ Public Class UzytkownikInterakcjaTesty
                     Dim ekran = Screen.FromControl(f).WorkingArea
                     Assert.True(f.Height <= ekran.Height)
 
-                    ' Jeśli okno zostało zmniejszone w pionie, AutoScroll musi być aktywny z bazową wysokością 788 z projektu,
+                    ' Jeśli okno zostało zmniejszone w pionie, AutoScroll musi być aktywny z bazową wysokością 820 z projektu,
                     ' przeskalowaną tak jak okno (czcionka Segoe UI 9 już przy 100% DPI)
-                    Dim bazowa As Integer = CInt(Math.Round(788 * Global.MapoTero.PomocProgramu.SkalaProjektanta(f).Height))
+                    Dim bazowa As Integer = CInt(Math.Round(820 * Global.MapoTero.PomocProgramu.SkalaProjektanta(f).Height))
                     If f.ClientSize.Height < bazowa Then
                         Assert.True(f.AutoScroll)
                         Assert.Equal(bazowa, f.AutoScrollMinSize.Height)
                     End If
+
+                    f.Close()
+                End Using
+            End Sub)
+    End Sub
+
+    <Fact>
+    Public Sub TestUzytkownik_FormEksport_PrzyciskMip_StalyNapisIBlokada()
+        UruchomWWatkuSta(
+            Sub()
+                Using f As New Global.MapoTero.FormEksport()
+                    f.Show()
+                    Application.DoEvents()
+
+                    Dim chkKorekcjaMip = DirectCast(f.Controls.Find("chkKorekcjaMip", True)(0), CheckBox)
+                    Dim btnPodgladMip = DirectCast(f.Controls.Find("btnPodgladMip", True)(0), Button)
+
+                    ' 1. Na start przy odznaczonym chkKorekcjaMip: przycisk nieaktywny ze stałym tekstem
+                    chkKorekcjaMip.Checked = False
+                    Application.DoEvents()
+                    Assert.False(btnPodgladMip.Enabled)
+                    Assert.Equal("Korekta obrazu...", btnPodgladMip.Text)
+
+                    ' 2. Po zaznaczeniu: przycisk aktywny, ale tekst NIE zmienia się na "Profil Garmin"
+                    chkKorekcjaMip.Checked = True
+                    Application.DoEvents()
+                    Assert.True(btnPodgladMip.Enabled)
+                    Assert.Equal("Korekta obrazu...", btnPodgladMip.Text)
+
+                    ' 3. Po ponownym odznaczeniu: przycisk ponownie zablokowany ze stałym tekstem
+                    chkKorekcjaMip.Checked = False
+                    Application.DoEvents()
+                    Assert.False(btnPodgladMip.Enabled)
+                    Assert.Equal("Korekta obrazu...", btnPodgladMip.Text)
+
+                    f.Close()
+                End Using
+            End Sub)
+    End Sub
+
+    <Fact>
+    Public Sub TestUzytkownik_FormEksport_PrzyciskWieloskalowyTylkoDlaMbtiles()
+        UruchomWWatkuSta(
+            Sub()
+                Using f As New Global.MapoTero.FormEksport()
+                    f.Show()
+                    Application.DoEvents()
+
+                    Dim rbKmzGarmin = DirectCast(f.Controls.Find("rbKmzGarmin", True)(0), RadioButton)
+                    Dim rbMBTiles = DirectCast(f.Controls.Find("rbMBTiles", True)(0), RadioButton)
+                    Dim rbSQLiteDB = DirectCast(f.Controls.Find("rbSQLiteDB", True)(0), RadioButton)
+                    Dim btnWielowarstwowyMbtiles = DirectCast(f.Controls.Find("btnWielowarstwowyMbtiles", True)(0), Button)
+
+                    ' 1. Na start przy domyślnym formacie (nie MBTiles): przycisk zablokowany
+                    rbKmzGarmin.Checked = True
+                    Application.DoEvents()
+                    Assert.False(btnWielowarstwowyMbtiles.Enabled)
+
+                    ' 2. Po zaznaczeniu MBTiles: przycisk aktywny
+                    rbMBTiles.Checked = True
+                    Application.DoEvents()
+                    Assert.True(btnWielowarstwowyMbtiles.Enabled)
+
+                    ' 3. Po przełączeniu na inny format (np. SQLiteDB): przycisk ponownie zablokowany
+                    rbSQLiteDB.Checked = True
+                    Application.DoEvents()
+                    Assert.False(btnWielowarstwowyMbtiles.Enabled)
+
+                    f.Close()
+                End Using
+            End Sub)
+    End Sub
+
+    <Fact>
+    Public Sub TestUzytkownik_FormZaawansowanyMbtiles_PrzyciskKorektyIAutomatyczneWarstwy()
+        UruchomWWatkuSta(
+            Sub()
+                Using f As New Global.MapoTero.FormZaawansowanyMbtiles()
+                    f.Show()
+                    Application.DoEvents()
+
+                    Dim chkKorekta = DirectCast(f.Controls.Find("chkKorekta", True)(0), CheckBox)
+                    Dim btnKorekta = DirectCast(f.Controls.Find("btnKorekta", True)(0), Button)
+                    Dim btnRozlaczneZakresy = DirectCast(f.Controls.Find("btnRozlaczneZakresy", True)(0), Button)
+
+                    Assert.NotNull(btnRozlaczneZakresy)
+
+                    ' 1. Na start przy odznaczonym chkKorekta: przycisk zablokowany, stała nazwa
+                    chkKorekta.Checked = False
+                    Application.DoEvents()
+                    Assert.False(btnKorekta.Enabled)
+                    Assert.Equal("Korekta obrazu...", btnKorekta.Text)
+
+                    ' 2. Po zaznaczeniu: aktywny ze stałą nazwą
+                    chkKorekta.Checked = True
+                    Application.DoEvents()
+                    Assert.True(btnKorekta.Enabled)
+                    Assert.Equal("Korekta obrazu...", btnKorekta.Text)
+
+                    chkKorekta.Checked = False
+                    Application.DoEvents()
+                    Assert.False(btnKorekta.Enabled)
+
+                    ' 3. Kliknięcie przycisku rozłącznych zakresów nie rzuca błędu
+                    btnRozlaczneZakresy.PerformClick()
+                    Application.DoEvents()
+
+                    ' 4. Sprawdzenie skróconych nazw w tabeli warstw
+                    Dim dgv = DirectCast(f.Controls.Find("dgvWarstwy", True)(0), DataGridView)
+                    For Each row As DataGridViewRow In dgv.Rows
+                        Dim tytul = CStr(row.Cells("colTytul").Value)
+                        Assert.False(String.IsNullOrWhiteSpace(tytul))
+                        Assert.DoesNotContain("skany_map_topograficznych", tytul, StringComparison.OrdinalIgnoreCase)
+                    Next
+
+                    ' 5. Sprawdzenie stylu kolumny Mieszanie (rozwijalna lista z widocznym trójkącikiem/przyciskiem rozwijania)
+                    Dim colTryb = DirectCast(dgv.Columns("colTryb"), DataGridViewComboBoxColumn)
+                    Assert.Equal(DataGridViewComboBoxDisplayStyle.ComboBox, colTryb.DisplayStyle)
+                    Assert.False(colTryb.DisplayStyleForCurrentCellOnly)
 
                     f.Close()
                 End Using

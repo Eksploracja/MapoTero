@@ -81,7 +81,7 @@ jeśli arkusz ma wstawiać program CAD bez obsługi GeoTIFF.
 ## Nakładki i korekta obrazu
 
 Na arkusz można nałożyć warstwy z innych folderów sesji (grupa *Warstwy i przezroczystość*, np. granice działek na
-ortofotomapę) - także o innej siatce i w innym układzie. Pole *Korekta obrazu* z przyciskiem *Profil / Podgląd...*
+ortofotomapę) - także o innej siatce i w innym układzie. Pole *Korekta obrazu* z przyciskiem *Korekta obrazu...*
 poprawia kontrast, nasycenie i ostrość całego arkusza. Zob. [Nakładki](../eksport/nakladki/).
 
 ---

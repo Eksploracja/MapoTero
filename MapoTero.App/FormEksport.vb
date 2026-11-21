@@ -374,7 +374,8 @@ Public Class FormEksport
             c.Enabled = wolny AndAlso geotiff
         Next
         chkKorekcjaMip.Enabled = wolny
-        btnPodgladMip.Enabled = wolny
+        btnPodgladMip.Enabled = wolny AndAlso chkKorekcjaMip.Checked
+        btnWielowarstwowyMbtiles.Enabled = wolny AndAlso rbMBTiles.Checked
         grpFormat.Enabled = wolny
         grpWarstwy.Enabled = wolny
         grpRozmiar.Enabled = wolny AndAlso _sesja IsNot Nothing
@@ -730,14 +731,7 @@ Public Class FormEksport
     End Sub
 
     Private Sub btnPodgladMip_Click(sender As Object, e As EventArgs) Handles btnPodgladMip.Click
-        Dim probka As String = ""
-        If _sesja IsNot Nothing AndAlso Directory.Exists(_folder) Then
-            Dim k = _sesja.Konfiguracja
-            Dim wzorzec = If(String.IsNullOrEmpty(k.Prefiks), "*", k.Prefiks & "*") & "." & Wms.RozszerzeniePliku(k.Format)
-            Dim pliki = Directory.GetFiles(_folder, wzorzec)
-            'segment ze środka listy - pierwszy (narożny) bywa pusty lub częściowo poza mapą
-            If pliki.Length > 0 Then probka = pliki.OrderBy(Function(p) p, StringComparer.OrdinalIgnoreCase).ElementAt(pliki.Length \ 2)
-        End If
+        Dim probka As String = ZnajdzProbkeDoPodgladu()
         Using dlg As New FormPodgladMip(_opcjeMip, probka)
             If dlg.ShowDialog(Me) = DialogResult.OK Then
                 _opcjeMip = dlg.Opcje
@@ -747,12 +741,76 @@ Public Class FormEksport
         End Using
     End Sub
 
-    Private Sub AktualizujPrzyciskMip()
-        If _opcjeMip IsNot Nothing AndAlso _opcjeMip.Wlaczona Then
-            btnPodgladMip.Text = "Profil: " & OpcjeKorekcjiMip.KrotkaNazwaProfilu(_opcjeMip.Profil) & "..."
-        Else
-            btnPodgladMip.Text = "Profil / Podgląd..."
+    ''' <summary>Zwraca ścieżkę do próbki obrazu z załadowanych warstw do eksportu (nakładka, sesja bazowa lub plik z folderu).</summary>
+    Private Function ZnajdzProbkeDoPodgladu() As String
+        ' 1. Jeśli zaznaczono nakładkę na liście, spróbuj pobrać próbkę z jej sesji
+        Dim p = TryCast(lstNakladki.SelectedItem, PozycjaNakladki)
+        If p IsNot Nothing AndAlso p.Sesja IsNot Nothing Then
+            Dim plik = ProbkaZSesji(p.Sesja)
+            If Not String.IsNullOrEmpty(plik) Then Return plik
         End If
+
+        ' 2. Spróbuj pobrać próbkę z sesji bazowej
+        If _sesja IsNot Nothing Then
+            Dim plik = ProbkaZSesji(_sesja)
+            If Not String.IsNullOrEmpty(plik) Then Return plik
+        End If
+
+        ' 3. Spróbuj pobrać z którejkolwiek nakładki
+        For Each nak In lstNakladki.Items.Cast(Of PozycjaNakladki)()
+            If nak.Sesja IsNot Nothing Then
+                Dim plik = ProbkaZSesji(nak.Sesja)
+                If Not String.IsNullOrEmpty(plik) Then Return plik
+            End If
+        Next
+
+        ' 4. Przeszukaj bieżący folder pod kątem jakichkolwiek plików rastrowych
+        If Directory.Exists(_folder) Then
+            Dim plik = SzukajObrazuWFolderze(_folder)
+            If Not String.IsNullOrEmpty(plik) Then Return plik
+        End If
+
+        Return ""
+    End Function
+
+    Private Shared Function ProbkaZSesji(s As Sesja) As String
+        If s Is Nothing Then Return ""
+        If s.Zrodlo IsNot Nothing Then
+            Dim segment = s.Zrodlo.ZnajdzIstniejacySegmentSrodkowy()
+            If Not String.IsNullOrEmpty(segment) AndAlso File.Exists(segment) Then Return segment
+        End If
+        If Directory.Exists(s.Folder) Then
+            Return SzukajObrazuWFolderze(s.Folder)
+        End If
+        Return ""
+    End Function
+
+    Private Shared Function SzukajObrazuWFolderze(folder As String) As String
+        If Not Directory.Exists(folder) Then Return ""
+        Dim rozszerzenia = {"*.jpg", "*.jpeg", "*.png", "*.tif", "*.tiff", "*.bmp"}
+        Dim pliki As New List(Of String)()
+        For Each ext In rozszerzenia
+            Try
+                pliki.AddRange(Directory.GetFiles(folder, ext))
+            Catch
+            End Try
+        Next
+        If pliki.Count > 0 Then
+            Dim segmenty = pliki.Where(Function(f)
+                Dim nazwa = Path.GetFileName(f).ToLowerInvariant()
+                Return Not nazwa.StartsWith("_eksport_") AndAlso Not nazwa.StartsWith("arkusz_")
+            End Function).ToList()
+            If segmenty.Count > 0 Then
+                Return segmenty.OrderBy(Function(p) p, StringComparer.OrdinalIgnoreCase).ElementAt(segmenty.Count \ 2)
+            End If
+            Return pliki.OrderBy(Function(p) p, StringComparer.OrdinalIgnoreCase).ElementAt(pliki.Count \ 2)
+        End If
+        Return ""
+    End Function
+
+    Private Sub AktualizujPrzyciskMip()
+        btnPodgladMip.Text = "Korekta obrazu..."
+        btnPodgladMip.Enabled = (_przerwanie Is Nothing) AndAlso chkKorekcjaMip.Checked
     End Sub
 
     Private Sub btnWielowarstwowyMbtiles_Click(sender As Object, e As EventArgs) Handles btnWielowarstwowyMbtiles.Click

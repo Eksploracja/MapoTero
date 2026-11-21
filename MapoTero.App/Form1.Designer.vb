@@ -783,7 +783,7 @@ Partial Class Form1
         'btnSzukajDzialki
         '
         Me.btnSzukajDzialki.Font = New System.Drawing.Font("Segoe UI", 6.5!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
-        Me.btnSzukajDzialki.Location = New System.Drawing.Point(6, 108)
+        Me.btnSzukajDzialki.Location = New System.Drawing.Point(6, 116)
         Me.btnSzukajDzialki.Margin = New System.Windows.Forms.Padding(0)
         Me.btnSzukajDzialki.Name = "btnSzukajDzialki"
         Me.btnSzukajDzialki.Padding = New System.Windows.Forms.Padding(0)

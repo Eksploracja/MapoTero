@@ -464,6 +464,12 @@ Public NotInheritable Class NakladanieWarstw
                         mr = If(br < 0.5, 2.0 * br * lr, 1.0 - 2.0 * (1.0 - br) * (1.0 - lr))
                         mg = If(bg < 0.5, 2.0 * bg * lg, 1.0 - 2.0 * (1.0 - bg) * (1.0 - lg))
                         mb = If(bb < 0.5, 2.0 * bb * lb, 1.0 - 2.0 * (1.0 - bb) * (1.0 - lb))
+                    Case TrybMieszania.RzezbaTerenu
+                        ' 7 Rzeźba terenu: Cb * (jasność cieniowania / jasność płaskiego terenu)
+                        Dim f = TrybMieszaniaRozszerzenia.WspolczynnikRzezby((lr + lg + lb) / 3.0)
+                        mr = Math.Min(1.0, br * f)
+                        mg = Math.Min(1.0, bg * f)
+                        mb = Math.Min(1.0, bb * f)
                     Case Else
                         mr = lr
                         mg = lg

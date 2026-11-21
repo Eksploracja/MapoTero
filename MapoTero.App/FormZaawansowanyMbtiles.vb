@@ -29,6 +29,12 @@ Public Class FormZaawansowanyMbtiles
     Private _wTrakcieLadowania As Boolean = True
     Private _opcjeKorekty As New OpcjeKorekcjiMip()
 
+    Private _trybKreatora As Boolean = False
+    Private _zestawKreatora As ZestawWarstw
+    Private _silnikKreatora As PodgladWarstwSilnik = Nothing
+    Private _zasiegKreatora As Zasieg
+    Private _probkaBmpKreatora As Bitmap
+
     Private Sub FormZaawansowanyMbtiles_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         Me.CancelButton = btnZamknij
         PomocProgramu.DopasujDoEkranu(Me)
@@ -38,24 +44,31 @@ Public Class FormZaawansowanyMbtiles
         grpWarstwy.AllowDrop = True
         cmbFormat.SelectedIndex = 0 ' SmartHybrid
 
-        _opcjeKorekty = Ustawienia.OpcjeKorekty(ProfilKorektyRastra.GarminMip)
-        chkKorekta.Checked = _opcjeKorekty.Wlaczona
-        AktualizujPrzyciskKorekty()
+        If Not _trybKreatora Then
+            _opcjeKorekty = Ustawienia.OpcjeKorekty(ProfilKorektyRastra.GarminMip)
+            chkKorekta.Checked = _opcjeKorekty.Wlaczona
+            AktualizujPrzyciskKorekty()
 
-        ' Domyślna lokalizacja środka mapy
-        InicjalizujSrodekZMapyGlownej()
+            ' Domyślna ścieżka pliku wynikowego
+            Dim domyslnaNazwa As String = "mapa_wielowarstwowa_" & DateTime.Now.ToString("yyyyMMdd_HHmm") & ".mbtiles"
+            txtPlikWynikowy.Text = Path.Combine(FolderDownload, domyslnaNazwa)
+            txtNazwaMapy.Text = "Mapa wielowarstwowa"
 
-        ' Domyślna ścieżka pliku wynikowego
-        Dim domyslnaNazwa As String = "mapa_wielowarstwowa_" & DateTime.Now.ToString("yyyyMMdd_HHmm") & ".mbtiles"
-        txtPlikWynikowy.Text = Path.Combine(FolderDownload, domyslnaNazwa)
-        txtNazwaMapy.Text = "Mapa wielowarstwowa"
+            ' Na wstępie wczytaj wszystkie katalogi z mapami w download (oraz bieżącą sesję)
+            WczytajWszystkieKatalogiDownload()
 
-        ' Jeśli w programie jest aktywna sesja pobierania, dodaj ją jako pierwszą warstwę - o ile nie ma jej już w projekcie
-        ' (zamknięte okno modalne nie jest niszczone: lista warstw zostaje, a Load wykonuje się przy każdym otwarciu)
-        If Not String.IsNullOrEmpty(Form1.FolderSesji) AndAlso File.Exists(Path.Combine(Form1.FolderSesji, "conf.txt")) AndAlso
-           Not _warstwy.Any(Function(w) TenSamFolder(w.Folder, Form1.FolderSesji)) Then
-            DodajFolderSesji(Form1.FolderSesji)
+            ' Domyślna lokalizacja środka mapy (po wczytaniu warstw wyznacza środek z ich zasięgu)
+            InicjalizujSrodekZMapyGlownej()
+        Else
+            Me.Text = "MBTiles wieloskalowy - dopasowanie warstw i powiększeń kreatora"
+            btnZastosujKreator.Visible = True
+            btnZamknij.Text = "Anuluj"
+            btnKompiluj.Text = "Pobierz i kompiluj..."
+            AktualizujPrzyciskKorekty()
+            PrzeliczKolejnoscWarstw()
+            OdswiezTabeleWarstw()
         End If
+
         'sortowanie tabeli zmieniało kolejność wierszy bez zmiany kolejności warstw - przyciski Góra/Dół przesuwały złą warstwę
         For Each kolumna As DataGridViewColumn In dgvWarstwy.Columns
             kolumna.SortMode = DataGridViewColumnSortMode.NotSortable
@@ -127,6 +140,91 @@ Public Class FormZaawansowanyMbtiles
         txtLog.ScrollToCaret()
     End Sub
 
+    ''' <summary>Wczytuje bieżącą sesję programu (oraz katalogi z download tylko przy pustej liście).</summary>
+    Private Sub WczytajWszystkieKatalogiDownload()
+        ' 1. Jeśli jest aktywna sesja w oknie głównym, dodaj ją w pierwszej kolejności
+        If Not String.IsNullOrEmpty(Form1.FolderSesji) AndAlso File.Exists(Path.Combine(Form1.FolderSesji, "conf.txt")) Then
+            If Not _warstwy.Any(Function(item) TenSamFolder(item.Folder, Form1.FolderSesji)) Then
+                DodajFolderSesji(Form1.FolderSesji)
+            End If
+            Return
+        End If
+
+        ' 2. Jeśli lista warstw jest już zapełniona, nie dosypuj automatycznie starych katalogów
+        If _warstwy.Count > 0 Then Exit Sub
+
+        Dim foldery = ZnajdzWszystkieKatalogiSesji(FolderDownload)
+        If foldery.Count = 0 Then Exit Sub
+
+        For Each folder In foldery
+            If _warstwy.Any(Function(item) TenSamFolder(item.Folder, folder)) Then Continue For
+            Dim nowa As New WarstwaWielowarstwowa With {.Folder = folder}
+            Dim blad As String = ""
+            If nowa.WczytajSesje(blad) Then
+                If nowa.Konfiguracja IsNot Nothing AndAlso nowa.Konfiguracja.Przezroczystosc Then
+                    nowa.BialePrzezroczyste = True
+                End If
+                _warstwy.Add(nowa)
+            End If
+        Next
+
+        If _warstwy.Count > 0 Then
+            PosortujWarstwyIDopasujRozlaczneSkale()
+            PrzeliczKolejnoscWarstw()
+            OdswiezTabeleWarstw()
+            Loguj("Zaczytano " & _warstwy.Count & " sesji z folderu download z rozłącznymi zakresami powiększeń.", Color.DarkGreen)
+        End If
+    End Sub
+
+    ''' <summary>Sortuje listę warstw wg rozdzielczości (naturalnego zoomu) i oblicza dla nich rozłączne zakresy skal.</summary>
+    Private Sub PosortujWarstwyIDopasujRozlaczneSkale()
+        If _warstwy.Count = 0 Then Exit Sub
+        Dim posortowane = _warstwy.OrderBy(Function(x) KompilatorMbtiles.ObliczNaturalnyZoom(x)).ToList()
+        _warstwy.Clear()
+        _warstwy.AddRange(posortowane)
+        KompilatorMbtiles.PrzeliczRozlaczneZakresyZoom(_warstwy)
+    End Sub
+
+    ''' <summary>Zwraca listę wszystkich katalogów zawierających plik conf.txt w folderze download i jego podfolderach.</summary>
+    Private Function ZnajdzWszystkieKatalogiSesji(katalogDownload As String) As List(Of String)
+        Dim foldery As New List(Of String)()
+        If String.IsNullOrWhiteSpace(katalogDownload) OrElse Not Directory.Exists(katalogDownload) Then Return foldery
+
+        If File.Exists(Path.Combine(katalogDownload, "conf.txt")) Then
+            foldery.Add(katalogDownload)
+        End If
+
+        Try
+            For Each pod In Directory.GetDirectories(katalogDownload)
+                If File.Exists(Path.Combine(pod, "conf.txt")) Then
+                    foldery.Add(pod)
+                Else
+                    Try
+                        For Each pod2 In Directory.GetDirectories(pod)
+                            If File.Exists(Path.Combine(pod2, "conf.txt")) Then
+                                foldery.Add(pod2)
+                            End If
+                        Next
+                    Catch
+                    End Try
+                End If
+            Next
+        Catch
+        End Try
+
+        Return foldery
+    End Function
+
+    Private Sub btnRozlaczneZakresy_Click(sender As Object, e As EventArgs) Handles btnRozlaczneZakresy.Click
+        If _warstwy.Count = 0 Then Exit Sub
+        PosortujWarstwyIDopasujRozlaczneSkale()
+        PrzeliczKolejnoscWarstw()
+        OdswiezTabeleWarstw()
+        AktualizujZakresZoom()
+        OdswiezPodgladAsync()
+        Loguj("Dopasowano rozłączne zakresy powiększeń dla " & _warstwy.Count & " warstw.", Color.DarkGreen)
+    End Sub
+
     ''' <summary>Dodaje sesję z podanego folderu i oblicza sugerowane poziomy zoom.</summary>
     Private Sub DodajFolderSesji(folder As String)
         Dim podkatalogi As New List(Of String)
@@ -175,6 +273,9 @@ Public Class FormZaawansowanyMbtiles
         End If
 
         _warstwy.Add(w)
+        If _warstwy.Count > 1 Then
+            PosortujWarstwyIDopasujRozlaczneSkale()
+        End If
         PrzeliczKolejnoscWarstw()
         OdswiezTabeleWarstw()
         AktualizujZakresZoom()
@@ -198,7 +299,12 @@ Public Class FormZaawansowanyMbtiles
         For Each w In _warstwy
             Dim trybStr = TrybMieszaniaRozszerzenia.NazwaWyswietlana(w.TrybMieszania)
             Dim idx = dgvWarstwy.Rows.Add(w.Wlaczona, w.Tytul, w.PoziomMin, w.PoziomMax, CInt(w.Krycie * 100), trybStr, w.OdcienieSzarosci, w.BialePrzezroczyste, w.Folder)
-            dgvWarstwy.Rows(idx).Tag = w
+            Dim row = dgvWarstwy.Rows(idx)
+            row.Tag = w
+            If Not String.IsNullOrWhiteSpace(w.OpisPelny) Then
+                row.Cells(colTytul.Index).ToolTipText = w.OpisPelny
+            End If
+            row.Cells(colFolder.Index).ToolTipText = w.Folder
         Next
     End Sub
 
@@ -240,6 +346,18 @@ Public Class FormZaawansowanyMbtiles
         Dim w = TryCast(dgvWarstwy.CurrentRow.Tag, WarstwaWielowarstwowa)
         If w IsNot Nothing Then
             _warstwy.Remove(w)
+            PrzeliczKolejnoscWarstw()
+            OdswiezTabeleWarstw()
+            AktualizujZakresZoom()
+            OdswiezPodgladAsync()
+        End If
+    End Sub
+
+    Private Sub btnWyczyscSesje_Click(sender As Object, e As EventArgs) Handles btnWyczyscSesje.Click
+        If _warstwy.Count = 0 Then Exit Sub
+        If MessageBox.Show("Czy na pewno chcesz usunąć wszystkie warstwy z listy?", "Czyszczenie listy",
+                           MessageBoxButtons.YesNo, MessageBoxIcon.Question) = DialogResult.Yes Then
+            _warstwy.Clear()
             PrzeliczKolejnoscWarstw()
             OdswiezTabeleWarstw()
             AktualizujZakresZoom()
@@ -359,7 +477,11 @@ Public Class FormZaawansowanyMbtiles
         End If
 
         Dim pikselMetry = WebMercator.RozmiarPiksela(_srodekGeo.Szerokosc, z)
-        lblPodgladInfo.Text = "Poziom " & z & " (piksel ~" & pikselMetry.ToString("0.00") & " m)" & vbCrLf & opisWarstw
+        If _trybKreatora Then
+            lblPodgladInfo.Text = "Próbka stylu z kreatora (przed pobraniem)" & vbCrLf & opisWarstw
+        Else
+            lblPodgladInfo.Text = "Poziom " & z & " (piksel ~" & pikselMetry.ToString("0.00") & " m)" & vbCrLf & opisWarstw
+        End If
 
         Dim opcje = PobierzOpcjeZFormularza()
         Dim warstwy = KopiaWarstw()
@@ -367,9 +489,12 @@ Public Class FormZaawansowanyMbtiles
 
         Try
             Await Task.Delay(40, token)
-            Dim bmp As Bitmap = Await Task.Run(Function()
-                                                   Return KompilatorMbtiles.RenderujPodgladKafla(warstwy, srodek.Szerokosc, srodek.Dlugosc, z, opcje)
-                                               End Function, token)
+            Dim bmp As Bitmap = Nothing
+            If Not _trybKreatora Then
+                bmp = Await Task.Run(Function()
+                                         Return KompilatorMbtiles.RenderujPodgladKafla(warstwy, srodek.Szerokosc, srodek.Dlugosc, z, opcje)
+                                     End Function, token)
+            End If
             If token.IsCancellationRequested OrElse Zamkniete Then
                 bmp?.Dispose()
                 Exit Sub
@@ -378,19 +503,57 @@ Public Class FormZaawansowanyMbtiles
             Dim staryObraz = picPodglad.Image
             If bmp IsNot Nothing Then
                 picPodglad.Image = bmp
+            ElseIf _trybKreatora Then
+                Dim aktywneWiz = KompilatorMbtiles.WarstwyDlaPoziomu(_warstwy, z)
+                If aktywneWiz.Count > 0 AndAlso _silnikKreatora IsNot Nothing AndAlso _zestawKreatora IsNot Nothing Then
+                    Dim aktywneWarstwy As New List(Of WarstwaWybrana)()
+                    For Each wz In _zestawKreatora.Warstwy
+                        Dim pasujaca = aktywneWiz.FirstOrDefault(Function(w) String.Equals(w.Tytul, wz.Nazwa, StringComparison.OrdinalIgnoreCase))
+                        If pasujaca IsNot Nothing Then
+                            Dim kopia As New WarstwaWybrana With {
+                                .Nazwa = If(wz.Nazwa, ""),
+                                .Adres = If(wz.Adres, ""),
+                                .Zbior = If(wz.Zbior, ""),
+                                .ZalecanyPiksel = wz.ZalecanyPiksel,
+                                .TypZrodla = wz.TypZrodla,
+                                .Nakladka = wz.Nakladka,
+                                .IgnorujSsl = wz.IgnorujSsl,
+                                .Krycie = CInt(Math.Round(pasujaca.Krycie * 100)),
+                                .TrybMieszania = pasujaca.TrybMieszania
+                            }
+                            aktywneWarstwy.Add(kopia)
+                        End If
+                    Next
+                    Dim zlozony = _silnikKreatora.ZlozObrazZWarstw(aktywneWarstwy)
+                    If zlozony IsNot Nothing Then
+                        If _opcjeKorekty IsNot Nothing AndAlso _opcjeKorekty.Wlaczona AndAlso chkKorekta.Checked Then
+                            Dim pix = NakladanieObrazow.Piksele(zlozony, zlozony.Width, zlozony.Height)
+                            KorekcjaMip.Zastosuj(pix, zlozony.Width, zlozony.Height, _opcjeKorekty)
+                            Dim stara = zlozony
+                            zlozony = NakladanieObrazow.DoBitmapy(pix, stara.Width, stara.Height)
+                            stara.Dispose()
+                        End If
+                        picPodglad.Image = zlozony
+                    ElseIf _probkaBmpKreatora IsNot Nothing Then
+                        Try
+                            picPodglad.Image = New Bitmap(_probkaBmpKreatora)
+                        Catch
+                            picPodglad.Image = RysujPustyKafel("Brak danych na tym powiększeniu")
+                        End Try
+                    Else
+                        picPodglad.Image = RysujPustyKafel("Brak danych na tym powiększeniu")
+                    End If
+                ElseIf _probkaBmpKreatora IsNot Nothing AndAlso aktywneWiz.Count > 0 Then
+                    Try
+                        picPodglad.Image = New Bitmap(_probkaBmpKreatora)
+                    Catch
+                        picPodglad.Image = RysujPustyKafel("Brak danych na tym powiększeniu")
+                    End Try
+                Else
+                    picPodglad.Image = RysujPustyKafel("Wszystkie warstwy wyłączone")
+                End If
             Else
-                Dim pusta As New Bitmap(256, 256)
-                Using g = Graphics.FromImage(pusta)
-                    g.Clear(Color.WhiteSmoke)
-                    Using p As New Pen(Color.LightGray)
-                        g.DrawLine(p, 0, 0, 256, 256)
-                        g.DrawLine(p, 0, 256, 256, 0)
-                    End Using
-                    Using f As New Font("Microsoft Sans Serif", 9.0!, FontStyle.Regular)
-                        g.DrawString("Brak danych na tym powiększeniu", f, Brushes.Gray, New RectangleF(10, 110, 236, 40))
-                    End Using
-                End Using
-                picPodglad.Image = pusta
+                picPodglad.Image = RysujPustyKafel("Brak danych na tym powiększeniu")
             End If
             staryObraz?.Dispose()
         Catch ex As OperationCanceledException
@@ -409,7 +572,7 @@ Public Class FormZaawansowanyMbtiles
             .WypelnijLukiWarstwaNizsza = chkWypelnijLuki.Checked,
             .PoziomMin = tbZoom.Minimum,
             .PoziomMax = tbZoom.Maximum,
-            .Korekta = If(chkKorekta.Checked, _opcjeKorekty.Kopia(), New OpcjeKorekcjiMip With {.Wlaczona = False})
+            .Korekta = If(chkKorekta.Checked AndAlso _opcjeKorekty IsNot Nothing, _opcjeKorekty.Kopia(), New OpcjeKorekcjiMip With {.Wlaczona = False})
         }
 
         Select Case cmbFormat.SelectedIndex
@@ -443,11 +606,34 @@ Public Class FormZaawansowanyMbtiles
         btnKorekta.Enabled = False
         UseWaitCursor = True
         Try
-            probka = Await Task.Run(Function() KompilatorMbtiles.RenderujPodgladKafla(warstwy, srodek.Szerokosc, srodek.Dlugosc, z, opcje))
+            If _trybKreatora AndAlso _probkaBmpKreatora IsNot Nothing Then
+                probka = New Bitmap(_probkaBmpKreatora)
+            Else
+                probka = Await Task.Run(Function() KompilatorMbtiles.RenderujPodgladKafla(warstwy, srodek.Szerokosc, srodek.Dlugosc, z, opcje))
+            End If
+            If probka Is Nothing Then
+                For Each w In warstwy
+                    If w.Wlaczona AndAlso w.PoziomMin <= w.PoziomMax Then
+                        probka = Await Task.Run(Function() KompilatorMbtiles.RenderujPodgladKafla(warstwy, srodek.Szerokosc, srodek.Dlugosc, w.PoziomMax, opcje))
+                        If probka IsNot Nothing Then Exit For
+                    End If
+                Next
+            End If
+            If probka Is Nothing Then
+                For Each w In warstwy
+                    If w.Zrodlo IsNot Nothing Then
+                        Dim plik = w.Zrodlo.ZnajdzIstniejacySegmentSrodkowy()
+                        If Not String.IsNullOrEmpty(plik) AndAlso File.Exists(plik) Then
+                            probka = New Bitmap(plik)
+                            Exit For
+                        End If
+                    End If
+                Next
+            End If
         Catch ex As Exception
-            probka = Nothing 'bez kafla podgląd użyje próbki syntetycznej
+            probka = Nothing
         Finally
-            btnKorekta.Enabled = True
+            btnKorekta.Enabled = (_cts Is Nothing) AndAlso chkKorekta.Checked
             UseWaitCursor = False
         End Try
         If Zamkniete Then
@@ -472,8 +658,8 @@ Public Class FormZaawansowanyMbtiles
     End Function
 
     Private Sub AktualizujPrzyciskKorekty()
-        Dim nazwa = OpcjeKorekcjiMip.KrotkaNazwaProfilu(_opcjeKorekty.Profil)
-        btnKorekta.Text = "Profil: " & nazwa & "..."
+        btnKorekta.Text = "Korekta obrazu..."
+        btnKorekta.Enabled = (_cts Is Nothing) AndAlso chkKorekta.Checked
     End Sub
 
     Private Sub btnWybierzPlik_Click(sender As Object, e As EventArgs) Handles btnWybierzPlik.Click
@@ -497,6 +683,54 @@ Public Class FormZaawansowanyMbtiles
 
         Dim opcje = PobierzOpcjeZFormularza()
         Try
+            If _trybKreatora AndAlso (_zasiegKreatora.Poprawny OrElse _srodekGeo.Szerokosc <> 0) Then
+                Dim minZ As Integer = Math.Max(0, Math.Min(opcje.PoziomMin, opcje.PoziomMax))
+                Dim maxZ As Integer = Math.Min(22, Math.Max(opcje.PoziomMin, opcje.PoziomMax))
+                lvwPoziomy.Items.Clear()
+
+                Dim lacznieKafli As Long = 0
+                Dim lacznieBajtow As Long = 0
+
+                Dim pGeo As ProstokatGeo
+                If _zasiegKreatora.Poprawny Then
+                    pGeo = ProstokatGeo.Opisany(UkladWspolrzednych.PL1992, _zasiegKreatora)
+                Else
+                    pGeo = New ProstokatGeo(_srodekGeo.Szerokosc + 0.05, _srodekGeo.Szerokosc - 0.05, _srodekGeo.Dlugosc + 0.05, _srodekGeo.Dlugosc - 0.05)
+                End If
+
+                For poziom = minZ To maxZ
+                    Dim aktywne = KompilatorMbtiles.WarstwyDlaPoziomu(_warstwy, poziom)
+                    If aktywne.Count = 0 AndAlso Not opcje.WypelnijLukiWarstwaNizsza Then Continue For
+
+                    Dim liczbaKafliPoziomu = WebMercator.LiczbaKafli(pGeo, poziom)
+                    Dim rozmiarKafleSzacunek = CLng(liczbaKafliPoziomu) * 28000L ' orientacyjnie ~28 KB/kafel
+                    lacznieKafli += liczbaKafliPoziomu
+                    lacznieBajtow += rozmiarKafleSzacunek
+
+                    Dim itm As New ListViewItem("Z" & poziom)
+                    itm.SubItems.Add(liczbaKafliPoziomu.ToString("N0"))
+                    itm.SubItems.Add(SzacunekRozmiaru.Tekst(rozmiarKafleSzacunek))
+                    Dim nazwyAktywnych = If(aktywne.Count > 0, String.Join(", ", aktywne.Select(Function(w) w.Tytul)), "(wypełnienie)")
+                    itm.SubItems.Add(nazwyAktywnych)
+                    lvwPoziomy.Items.Add(itm)
+                Next
+
+                lblSzacunekPodsumowanie.Text = "Łącznie kafli: " & lacznieKafli.ToString("N0") & vbCrLf &
+                                               "Szacowany rozmiar: ~" & SzacunekRozmiaru.Tekst(lacznieBajtow) & " (zostanie pobrane w kreatorze)"
+
+                If lacznieBajtow > 4294967295L Then
+                    lblStatusFat32.ForeColor = Color.Red
+                    lblStatusFat32.Text = "UWAGA: Plik > 4 GB! Nie zmieści się na kartach SD w formacie FAT32."
+                ElseIf lacznieBajtow > 2147483648L Then
+                    lblStatusFat32.ForeColor = Color.DarkOrange
+                    lblStatusFat32.Text = "Rozmiar powyżej 2 GB. Zgodny z OruxMaps i Locus Map."
+                Else
+                    lblStatusFat32.ForeColor = Color.DarkGreen
+                    lblStatusFat32.Text = "Rozmiar optymalny dla urządzeń mobilnych (Locus Map, OruxMaps)."
+                End If
+                Exit Sub
+            End If
+
             Dim szacunek = Await KompilatorMbtiles.OszacujRozmiarAsync(KopiaWarstw(), opcje, CancellationToken.None)
             If Zamkniete Then Exit Sub
             lvwPoziomy.Items.Clear()
@@ -533,7 +767,23 @@ Public Class FormZaawansowanyMbtiles
         End Try
     End Sub
 
+    Private Sub btnZastosujKreator_Click(sender As Object, e As EventArgs) Handles btnZastosujKreator.Click
+        Me.DialogResult = DialogResult.OK
+        Me.Close()
+    End Sub
+
     Private Async Sub btnKompiluj_Click(sender As Object, e As EventArgs) Handles btnKompiluj.Click
+        If _trybKreatora AndAlso _warstwy.Any(Function(w) w.Wlaczona AndAlso (w.Zrodlo Is Nothing OrElse w.Folder.StartsWith("(Kreator", StringComparison.OrdinalIgnoreCase))) Then
+            Dim odp = MessageBox.Show("Warstwy pochodzą z szybkiego kreatora i nie zostały jeszcze pobrane z serwerów." & vbCrLf & vbCrLf &
+                                      "Czy chcesz zatwierdzić wprowadzone ustawienia i powrócić do kreatora, aby pobrać segmenty i utworzyć plik MBTiles?",
+                                      "Kreator mapy", MessageBoxButtons.YesNo, MessageBoxIcon.Question)
+            If odp = DialogResult.Yes Then
+                Me.DialogResult = DialogResult.OK
+                Me.Close()
+            End If
+            Exit Sub
+        End If
+
         Dim opcje = PobierzOpcjeZFormularza()
 
         If String.IsNullOrWhiteSpace(opcje.PlikDocelowy) Then
@@ -628,12 +878,14 @@ Public Class FormZaawansowanyMbtiles
         btnPrzerwij.Enabled = wTrakcie
         btnDodajSesje.Enabled = Not wTrakcie
         btnUsunSesje.Enabled = Not wTrakcie
+        btnRozlaczneZakresy.Enabled = Not wTrakcie AndAlso _warstwy.Count > 0
         btnGora.Enabled = Not wTrakcie
         btnDol.Enabled = Not wTrakcie
         dgvWarstwy.Enabled = Not wTrakcie
         grpUstawienia.Enabled = Not wTrakcie
         btnOszacuj.Enabled = Not wTrakcie
         btnZamknij.Enabled = Not wTrakcie
+        btnKorekta.Enabled = Not wTrakcie AndAlso chkKorekta.Checked
         If Not wTrakcie Then
             prgPostep.Value = 0
         End If
@@ -663,6 +915,11 @@ Public Class FormZaawansowanyMbtiles
             End If
         End If
         _ctsPodglad?.Cancel()
+        _probkaBmpKreatora?.Dispose()
+        _probkaBmpKreatora = Nothing
+        If Not _trybKreatora Then
+            _warstwy.Clear()
+        End If
     End Sub
 
     Private Sub btnPomoc_Click(sender As Object, e As EventArgs) Handles btnPomoc.Click
@@ -741,9 +998,8 @@ Public Class FormZaawansowanyMbtiles
                 Dim z = tbZoom.Value
                 Dim pikselX = WebMercator.PikselX(_srodekGeo.Dlugosc, z) - dx
                 Dim pikselY = WebMercator.PikselY(_srodekGeo.Szerokosc, z) - dy
-                Dim nowaDl = (pikselX / (256.0 * (1 << z))) * 360.0 - 180.0
-                Dim nowaSzRad = Math.Atan(Math.Sinh(Math.PI * (1.0 - 2.0 * pikselY / (256.0 * (1 << z)))))
-                Dim nowaSz = nowaSzRad * 180.0 / Math.PI
+                Dim nowaDl = WebMercator.Dlugosc(pikselX, z)
+                Dim nowaSz = WebMercator.Szerokosc(pikselY, z)
                 _srodekGeo = New PunktGeo(nowaSz, nowaDl)
                 OdswiezPodgladAsync()
             End If
@@ -846,5 +1102,128 @@ Public Class FormZaawansowanyMbtiles
         Catch ex As Exception
         End Try
     End Sub
+
+#Region "Integracja z szybkim kreatorem map"
+
+    ''' <summary>
+    ''' Otwiera narzędzie wieloskalowe dla zestawu warstw i parametrów przekazanych z szybkiego kreatora mapy.
+    ''' Usuwa stare sesje z pamięci i inicjalizuje tabelę warstwami wybranymi przez użytkownika w kreatorze.
+    ''' </summary>
+    Public Function OtworzDlaKreatora(kreatorZestaw As ZestawWarstw,
+                                      zasieg As Zasieg,
+                                      uklad As UkladWspolrzednych,
+                                      sciezkaDocelowa As String,
+                                      zoomMin As Integer,
+                                      zoomMax As Integer,
+                                      opcjeKorekty As OpcjeKorekcjiMip,
+                                      probkaBmp As Bitmap,
+                                      parent As IWin32Window,
+                                      Optional silnikPodgladu As PodgladWarstwSilnik = Nothing) As Boolean
+        _trybKreatora = True
+        _warstwy.Clear()
+        dgvWarstwy.Rows.Clear()
+        _zestawKreatora = kreatorZestaw
+        _zasiegKreatora = zasieg
+        _silnikKreatora = silnikPodgladu
+
+        If _probkaBmpKreatora IsNot Nothing Then
+            _probkaBmpKreatora.Dispose()
+            _probkaBmpKreatora = Nothing
+        End If
+        If probkaBmp IsNot Nothing Then
+            Try
+                _probkaBmpKreatora = New Bitmap(probkaBmp)
+            Catch
+            End Try
+        End If
+
+        _opcjeKorekty = If(opcjeKorekty IsNot Nothing, opcjeKorekty.Kopia(), New OpcjeKorekcjiMip())
+        chkKorekta.Checked = _opcjeKorekty.Wlaczona
+        txtPlikWynikowy.Text = sciezkaDocelowa
+        txtNazwaMapy.Text = If(Not String.IsNullOrEmpty(sciezkaDocelowa), Path.GetFileNameWithoutExtension(sciezkaDocelowa), "Mapa")
+
+        If zasieg.Poprawny AndAlso uklad IsNot Nothing Then
+            Dim pt = zasieg.Srodek
+            _srodekGeo = uklad.DoWgs84(pt)
+        End If
+
+        ' Załaduj warstwy z zestawu kreatora
+        If kreatorZestaw IsNot Nothing Then
+            For i = 0 To kreatorZestaw.Warstwy.Count - 1
+                Dim wz = kreatorZestaw.Warstwy(i)
+                Dim nowa As New WarstwaWielowarstwowa With {
+                    .Tytul = wz.Nazwa,
+                    .OpisPelny = If(Not String.IsNullOrEmpty(wz.Zbior), "Zbiór: " & wz.Zbior & " | " & wz.Adres, wz.Nazwa),
+                    .PoziomMin = zoomMin,
+                    .PoziomMax = zoomMax,
+                    .Krycie = Math.Max(0.0, Math.Min(1.0, wz.Krycie / 100.0)),
+                    .TrybMieszania = wz.TrybMieszania,
+                    .Wlaczona = True,
+                    .BialePrzezroczyste = (wz.Krycie < 100 OrElse wz.Nazwa.IndexOf("szlak", StringComparison.OrdinalIgnoreCase) >= 0 OrElse wz.Nazwa.IndexOf("cien", StringComparison.OrdinalIgnoreCase) >= 0 OrElse wz.Nazwa.IndexOf("granic", StringComparison.OrdinalIgnoreCase) >= 0),
+                    .OdcienieSzarosci = False,
+                    .Uklad = If(uklad, UkladWspolrzednych.PL1992),
+                    .Folder = "(Kreator: warstwa #" & (i + 1) & ")"
+                }
+                _warstwy.Add(nowa)
+            Next
+        End If
+
+        Dim res = Me.ShowDialog(parent)
+        Return (res = DialogResult.OK)
+    End Function
+
+    ''' <summary>
+    ''' Przenosi zmodyfikowane parametry warstw, zakresów zoom i korekty z powrotem do kreatora.
+    ''' </summary>
+    Public Sub PobierzUstawieniaDlaKreatora(ByRef zestaw As ZestawWarstw,
+                                           ByRef zoomMin As Integer,
+                                           ByRef zoomMax As Integer,
+                                           ByRef opcjeKorekty As OpcjeKorekcjiMip,
+                                           ByRef sciezkaDocelowa As String)
+        sciezkaDocelowa = txtPlikWynikowy.Text.Trim()
+        opcjeKorekty = _opcjeKorekty.Kopia()
+        opcjeKorekty.Wlaczona = chkKorekta.Checked
+
+        Dim aktywne = _warstwy.Where(Function(w) w.Wlaczona).ToList()
+        If aktywne.Count > 0 Then
+            zoomMin = aktywne.Min(Function(w) w.PoziomMin)
+            zoomMax = aktywne.Max(Function(w) w.PoziomMax)
+        End If
+
+        ' Zaktualizuj parametry w warstwach zestawu (kolejność, krycie, tryb mieszania)
+        If zestaw IsNot Nothing Then
+            Dim stareWarstwy = zestaw.Warstwy.ToList()
+            zestaw.Wyczysc()
+            For Each w In _warstwy
+                If w.Wlaczona Then
+                    Dim pasujaca = stareWarstwy.FirstOrDefault(Function(x) String.Equals(x.Nazwa, w.Tytul, StringComparison.OrdinalIgnoreCase))
+                    If pasujaca IsNot Nothing Then
+                        zestaw.Dodaj(pasujaca.Nazwa, CInt(Math.Round(w.Krycie * 100)), pasujaca.Adres, pasujaca.Zbior,
+                                     pasujaca.ZalecanyPiksel, pasujaca.TypZrodla, pasujaca.Nakladka, False, pasujaca.IgnorujSsl, w.TrybMieszania)
+                    Else
+                        zestaw.Dodaj(w.Tytul, CInt(Math.Round(w.Krycie * 100)), w.Folder, "", 0, TypUslugiMapowej.Nieznana, False, False, False, w.TrybMieszania)
+                    End If
+                End If
+            Next
+        End If
+    End Sub
+
+#End Region
+
+
+    Private Shared Function RysujPustyKafel(tekst As String) As Bitmap
+        Dim pusta As New Bitmap(256, 256)
+        Using g = Graphics.FromImage(pusta)
+            g.Clear(Color.WhiteSmoke)
+            Using p As New Pen(Color.LightGray)
+                g.DrawLine(p, 0, 0, 256, 256)
+                g.DrawLine(p, 0, 256, 256, 0)
+            End Using
+            Using f As New Font("Microsoft Sans Serif", 9.0!, FontStyle.Regular)
+                g.DrawString(tekst, f, Brushes.Gray, New RectangleF(10, 110, 236, 40))
+            End Using
+        End Using
+        Return pusta
+    End Function
 
 End Class

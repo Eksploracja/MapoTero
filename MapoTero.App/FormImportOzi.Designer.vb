@@ -240,7 +240,7 @@ Partial Class FormImportOzi
         Me.btnKorekta.Name = "btnKorekta"
         Me.btnKorekta.Size = New System.Drawing.Size(165, 26)
         Me.btnKorekta.TabIndex = 6
-        Me.btnKorekta.Text = "Profil / Podgląd..."
+        Me.btnKorekta.Text = "Korekta obrazu..."
         Me.btnKorekta.UseVisualStyleBackColor = True
         '
         'rbKmz

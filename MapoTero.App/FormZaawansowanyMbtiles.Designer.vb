@@ -32,8 +32,11 @@ Partial Class FormZaawansowanyMbtiles
         Me.colFolder = New System.Windows.Forms.DataGridViewTextBoxColumn()
         Me.btnDodajSesje = New System.Windows.Forms.Button()
         Me.btnUsunSesje = New System.Windows.Forms.Button()
+        Me.btnWyczyscSesje = New System.Windows.Forms.Button()
+        Me.btnRozlaczneZakresy = New System.Windows.Forms.Button()
         Me.btnGora = New System.Windows.Forms.Button()
         Me.btnDol = New System.Windows.Forms.Button()
+        Me.btnZastosujKreator = New System.Windows.Forms.Button()
         Me.grpPodglad = New System.Windows.Forms.GroupBox()
         Me.lblPodgladInfo = New System.Windows.Forms.Label()
         Me.picPodglad = New System.Windows.Forms.PictureBox()
@@ -89,6 +92,8 @@ Partial Class FormZaawansowanyMbtiles
         Me.grpWarstwy.Controls.Add(Me.dgvWarstwy)
         Me.grpWarstwy.Controls.Add(Me.btnDodajSesje)
         Me.grpWarstwy.Controls.Add(Me.btnUsunSesje)
+        Me.grpWarstwy.Controls.Add(Me.btnWyczyscSesje)
+        Me.grpWarstwy.Controls.Add(Me.btnRozlaczneZakresy)
         Me.grpWarstwy.Controls.Add(Me.btnGora)
         Me.grpWarstwy.Controls.Add(Me.btnDol)
         Me.grpWarstwy.Location = New System.Drawing.Point(12, 12)
@@ -122,7 +127,7 @@ Partial Class FormZaawansowanyMbtiles
         '
         Me.colTytul.HeaderText = "Tytuł / Mapa"
         Me.colTytul.Name = "colTytul"
-        Me.colTytul.Width = 115
+        Me.colTytul.Width = 105
         '
         'colPoziomMin
         '
@@ -144,12 +149,13 @@ Partial Class FormZaawansowanyMbtiles
         '
         'colTryb
         '
-        Me.colTryb.DisplayStyle = System.Windows.Forms.DataGridViewComboBoxDisplayStyle.Nothing
+        Me.colTryb.DisplayStyle = System.Windows.Forms.DataGridViewComboBoxDisplayStyle.ComboBox
+        Me.colTryb.DisplayStyleForCurrentCellOnly = False
         Me.colTryb.FlatStyle = System.Windows.Forms.FlatStyle.Flat
         Me.colTryb.HeaderText = "Mieszanie"
         Me.colTryb.Items.AddRange(New Object() {"1 Zwykły", "2 Mnożenie", "3 Ciemniej", "4 Jaśniej", "5 Ekran", "6 Nakładka"})
         Me.colTryb.Name = "colTryb"
-        Me.colTryb.Width = 95
+        Me.colTryb.Width = 105
         '
         'colSzare
         '
@@ -174,26 +180,45 @@ Partial Class FormZaawansowanyMbtiles
         '
         Me.btnDodajSesje.Location = New System.Drawing.Point(10, 204)
         Me.btnDodajSesje.Name = "btnDodajSesje"
-        Me.btnDodajSesje.Size = New System.Drawing.Size(120, 26)
+        Me.btnDodajSesje.Size = New System.Drawing.Size(105, 26)
         Me.btnDodajSesje.TabIndex = 1
         Me.btnDodajSesje.Text = "Dodaj warstwę..."
         Me.btnDodajSesje.UseVisualStyleBackColor = True
         '
         'btnUsunSesje
         '
-        Me.btnUsunSesje.Location = New System.Drawing.Point(136, 204)
+        Me.btnUsunSesje.Location = New System.Drawing.Point(120, 204)
         Me.btnUsunSesje.Name = "btnUsunSesje"
-        Me.btnUsunSesje.Size = New System.Drawing.Size(95, 26)
+        Me.btnUsunSesje.Size = New System.Drawing.Size(85, 26)
         Me.btnUsunSesje.TabIndex = 2
-        Me.btnUsunSesje.Text = "Usuń warstwę"
+        Me.btnUsunSesje.Text = "Usuń"
         Me.btnUsunSesje.UseVisualStyleBackColor = True
+        '
+        'btnWyczyscSesje
+        '
+        Me.btnWyczyscSesje.Location = New System.Drawing.Point(210, 204)
+        Me.btnWyczyscSesje.Name = "btnWyczyscSesje"
+        Me.btnWyczyscSesje.Size = New System.Drawing.Size(70, 26)
+        Me.btnWyczyscSesje.TabIndex = 6
+        Me.btnWyczyscSesje.Text = "Wyczyść"
+        Me.btnWyczyscSesje.UseVisualStyleBackColor = True
+        '
+        'btnRozlaczneZakresy
+        '
+        Me.btnRozlaczneZakresy.Location = New System.Drawing.Point(286, 204)
+        Me.btnRozlaczneZakresy.Name = "btnRozlaczneZakresy"
+        Me.btnRozlaczneZakresy.Size = New System.Drawing.Size(125, 26)
+        Me.btnRozlaczneZakresy.TabIndex = 3
+        Me.btnRozlaczneZakresy.Text = "Rozłączne skale"
+        Me.ToolTip1.SetToolTip(Me.btnRozlaczneZakresy, "Automatycznie dopasowuje rozłączne, niepokrywające się zakresy powiększeń (zoom) dla wszystkich warstw w oparciu o ich rozdzielczość.")
+        Me.btnRozlaczneZakresy.UseVisualStyleBackColor = True
         '
         'btnGora
         '
         Me.btnGora.Location = New System.Drawing.Point(440, 204)
         Me.btnGora.Name = "btnGora"
         Me.btnGora.Size = New System.Drawing.Size(75, 26)
-        Me.btnGora.TabIndex = 3
+        Me.btnGora.TabIndex = 4
         Me.btnGora.Text = "W górę"
         Me.btnGora.UseVisualStyleBackColor = True
         '
@@ -202,7 +227,7 @@ Partial Class FormZaawansowanyMbtiles
         Me.btnDol.Location = New System.Drawing.Point(525, 204)
         Me.btnDol.Name = "btnDol"
         Me.btnDol.Size = New System.Drawing.Size(75, 26)
-        Me.btnDol.TabIndex = 4
+        Me.btnDol.TabIndex = 5
         Me.btnDol.Text = "W dół"
         Me.btnDol.UseVisualStyleBackColor = True
         '
@@ -434,7 +459,7 @@ Partial Class FormZaawansowanyMbtiles
         Me.btnKorekta.Name = "btnKorekta"
         Me.btnKorekta.Size = New System.Drawing.Size(180, 24)
         Me.btnKorekta.TabIndex = 12
-        Me.btnKorekta.Text = "Profil / Podgląd..."
+        Me.btnKorekta.Text = "Korekta obrazu..."
         Me.btnKorekta.UseVisualStyleBackColor = True
         '
         'grpSzacunek
@@ -555,6 +580,16 @@ Partial Class FormZaawansowanyMbtiles
         Me.btnPrzerwij.Text = "Przerwij"
         Me.btnPrzerwij.UseVisualStyleBackColor = True
         '
+        'btnZastosujKreator
+        '
+        Me.btnZastosujKreator.Location = New System.Drawing.Point(375, 670)
+        Me.btnZastosujKreator.Name = "btnZastosujKreator"
+        Me.btnZastosujKreator.Size = New System.Drawing.Size(205, 28)
+        Me.btnZastosujKreator.TabIndex = 6
+        Me.btnZastosujKreator.Text = "✓ Zastosuj i wróć do kreatora"
+        Me.btnZastosujKreator.UseVisualStyleBackColor = True
+        Me.btnZastosujKreator.Visible = False
+        '
         'btnZamknij
         '
         Me.btnZamknij.Location = New System.Drawing.Point(882, 670)
@@ -569,6 +604,7 @@ Partial Class FormZaawansowanyMbtiles
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.ClientSize = New System.Drawing.Size(964, 710)
+        Me.Controls.Add(Me.btnZastosujKreator)
         Me.Controls.Add(Me.btnZamknij)
         Me.Controls.Add(Me.btnPrzerwij)
         Me.Controls.Add(Me.btnPomoc)
@@ -603,6 +639,9 @@ Partial Class FormZaawansowanyMbtiles
     Friend WithEvents dgvWarstwy As DataGridView
     Friend WithEvents btnDodajSesje As Button
     Friend WithEvents btnUsunSesje As Button
+    Friend WithEvents btnWyczyscSesje As Button
+    Friend WithEvents btnZastosujKreator As Button
+    Friend WithEvents btnRozlaczneZakresy As Button
     Friend WithEvents btnGora As Button
     Friend WithEvents btnDol As Button
     Friend WithEvents grpPodglad As GroupBox

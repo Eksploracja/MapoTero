@@ -147,8 +147,40 @@ Public Class ZrodloSegmentow
         _pokolenie += 1
     End Sub
 
-    Private Function SciezkaSegmentu(wiersz As Integer, kolumna As Integer) As String
+    Friend Function SciezkaSegmentu(wiersz As Integer, kolumna As Integer) As String
         Return _folder & _siatka.NazwaSegmentu(_prefiks, _styl, wiersz, kolumna) & "." & _rozszerzenie
+    End Function
+
+    ''' <summary>Zwraca ścieżkę do istniejącego segmentu najbliżej środka siatki (na potrzeby próbki podglądu korekty).</summary>
+    Public Function ZnajdzIstniejacySegmentSrodkowy() As String
+        If _liczbaIstniejacych = 0 Then Return ""
+        Dim srW As Integer = _siatka.LiczbaWierszy \ 2 + 1
+        Dim srK As Integer = _siatka.LiczbaKolumn \ 2 + 1
+
+        ' Najpierw sprawdź segment najbliżej środka
+        Dim sciezkaSrodek = SciezkaSegmentu(srW, srK)
+        If File.Exists(sciezkaSrodek) Then Return sciezkaSrodek
+
+        ' Szukaj istniejącego segmentu o najmniejszej odległości kwadratowej od środka
+        Dim najlepszaSciezka As String = ""
+        Dim minDystansSq As Long = Long.MaxValue
+
+        For w = 1 To _siatka.LiczbaWierszy
+            For k = 1 To _siatka.LiczbaKolumn
+                If _istnieje(w - 1, k - 1) Then
+                    Dim dw As Long = w - srW
+                    Dim dk As Long = k - srK
+                    Dim dSq As Long = dw * dw + dk * dk
+                    If dSq < minDystansSq Then
+                        minDystansSq = dSq
+                        najlepszaSciezka = SciezkaSegmentu(w, k)
+                        If dSq = 0 Then Return najlepszaSciezka
+                    End If
+                End If
+            Next
+        Next
+
+        Return najlepszaSciezka
     End Function
 
     ''' <summary>Nazwa pliku segmentu (bez folderu) - w komunikacie o brakujących segmentach arkusza.</summary>
@@ -302,25 +334,7 @@ Public Class ZrodloSegmentow
 
 End Class
 
-''' <summary>Rodzaj eksportu.</summary>
-Public Enum RodzajEksportu
-    ''' <summary>JNX dla odbiorników Garmin (BirdsEye): wielopoziomowy raster bez limitu 100 kafli.</summary>
-    Jnx
-    ''' <summary>KMZ dla odbiorników Garmin (Custom Maps): kafle JPEG do 1024 px, limit liczby kafli.</summary>
-    KmzGarmin
-    ''' <summary>KMZ bez limitu liczby kafli (Locus Map, OruxMaps, Google Earth).</summary>
-    Kmz
-    ''' <summary>MBTiles - kafle Web Mercator (Locus Map, OsmAnd, OruxMaps i inne).</summary>
-    MBTiles
-    ''' <summary>SQLiteDB (format RMaps) - kafle Web Mercator dla OsmAnd i Locus Map.</summary>
-    SQLiteDB
-    ''' <summary>Mapa offline OruxMaps: folder z bazą OruxMapsImages.db i kalibracją .otrk2.xml.</summary>
-    OruxMaps
-    ''' <summary>GeoTIFF z georeferencją (Avenza Maps, QField, GIS, CAD).</summary>
-    GeoTiff
-    ''' <summary>Mapa TrekBuddy / Locus Map: archiwum .tar z kaflami 512 px arkusza, plikiem .map i listą .set.</summary>
-    TrekBuddy
-End Enum
+' RodzajEksportu zdefiniowany jest w bibliotece MapoTero.Core (SzablonyMap.vb).
 
 ''' <summary>Warstwa mapy nakładana podczas eksportu na mapę podstawową (np. granice działek na ortofotomapie).</summary>
 Public Class WarstwaEksportu
@@ -440,8 +454,10 @@ Public NotInheritable Class EksportMapy
 
     ''' <summary>Rozmiar piksela zestawu segmentów w metrach.</summary>
     Public Shared Function PikselWMetrach(zrodlo As ZrodloSegmentow, uklad As UkladWspolrzednych) As Double
+        If zrodlo Is Nothing Then Return 1.0
         Dim s = zrodlo.Siatka
-        If Not uklad.Geograficzny Then Return s.RozmiarPiksela
+        If s Is Nothing Then Return 1.0
+        If uklad Is Nothing OrElse Not uklad.Geograficzny Then Return s.RozmiarPiksela
         Dim mSz As Double, mDl As Double
         Georeferencja.MetrowNaStopien(s.ZasiegSiatki.Srodek.X, mSz, mDl)
         Return s.RozmiarPiksela * mSz
@@ -454,7 +470,9 @@ Public NotInheritable Class EksportMapy
     Friend Shared Function LiczbaProbek(warstwy As IEnumerable(Of WarstwaEksportu), pikselKaflaMetry As Double) As Integer
         Dim n As Integer = 1
         For Each w In warstwy
-            n = Math.Max(n, CInt(Math.Ceiling(pikselKaflaMetry / PikselWMetrach(w.Zrodlo, w.Uklad) - 0.01)))
+            If w.Zrodlo IsNot Nothing Then
+                n = Math.Max(n, CInt(Math.Ceiling(pikselKaflaMetry / PikselWMetrach(w.Zrodlo, w.Uklad) - 0.01)))
+            End If
         Next
         Return Math.Min(4, n)
     End Function
@@ -659,6 +677,12 @@ Public NotInheritable Class EksportMapy
                                 mr = If(br < 0.5, 2.0 * br * lr, 1.0 - 2.0 * (1.0 - br) * (1.0 - lr))
                                 mg = If(bg < 0.5, 2.0 * bg * lg, 1.0 - 2.0 * (1.0 - bg) * (1.0 - lg))
                                 mb = If(bb < 0.5, 2.0 * bb * lb, 1.0 - 2.0 * (1.0 - bb) * (1.0 - lb))
+                            Case TrybMieszania.RzezbaTerenu
+                                ' 7 Rzeźba terenu: płaski teren (jasność 180) bez zmian, stoki w cieniu ciemniejsze
+                                Dim f = TrybMieszaniaRozszerzenia.WspolczynnikRzezby((lr + lg + lb) / 3.0)
+                                mr = Math.Min(1.0, br * f)
+                                mg = Math.Min(1.0, bg * f)
+                                mb = Math.Min(1.0, bb * f)
                             Case Else
                                 ' 1 Zwykły (Normal): Cs
                                 mr = lr
@@ -794,7 +818,7 @@ Public NotInheritable Class EksportMapy
             New PunktGeo(WebMercator.Szerokosc((ty + 1) * bok, poziom), WebMercator.Dlugosc(tx * bok, poziom)),
             New PunktGeo(WebMercator.Szerokosc((ty + 1) * bok, poziom), WebMercator.Dlugosc((tx + 1) * bok, poziom))}
         For Each w In warstwy
-            If w.Zrodlo.MaDane(ObszarPunktow(w.Uklad, narozniki)) Then Return True
+            If w.Zrodlo IsNot Nothing AndAlso w.Uklad IsNot Nothing AndAlso w.Zrodlo.MaDane(ObszarPunktow(w.Uklad, narozniki)) Then Return True
         Next
         Return False
     End Function

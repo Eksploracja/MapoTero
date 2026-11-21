@@ -157,7 +157,7 @@ Public Class FormKorektaFolderu
         Dim plikiObrazow = PlikiDoKorekty(zrodlo, pominieteArkusze)
 
         If Not _opcjeKorekty.Wlaczona OrElse _opcjeKorekty.Profil = ProfilKorektyRastra.Brak Then
-            MessageBox.Show("Wybierz profil korekty przyciskiem ""Profil / Podgląd"".", "Korekta obrazów", MessageBoxButtons.OK, MessageBoxIcon.Information)
+            MessageBox.Show("Wybierz profil korekty przyciskiem ""Korekta obrazu..."".", "Korekta obrazów", MessageBoxButtons.OK, MessageBoxIcon.Information)
             Return
         End If
 

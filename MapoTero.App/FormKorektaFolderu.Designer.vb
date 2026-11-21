@@ -116,7 +116,7 @@ Partial Class FormKorektaFolderu
         Me.btnDostosuj.Name = "btnDostosuj"
         Me.btnDostosuj.Size = New System.Drawing.Size(260, 26)
         Me.btnDostosuj.TabIndex = 1
-        Me.btnDostosuj.Text = "Profil / Podgląd..."
+        Me.btnDostosuj.Text = "Korekta obrazu..."
         Me.btnDostosuj.UseVisualStyleBackColor = True
         '
         'chkKopiujGeo

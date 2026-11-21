@@ -392,9 +392,9 @@ Public Class KonfiguracjaSesji
         Dim znacznikCzasu = data.ToString("yyyy-MM-dd_HHmmss", CultureInfo.InvariantCulture)
         Dim czystyZbior As String = ""
         If Not String.IsNullOrWhiteSpace(zbior) Then
-            Dim bezZnakow = System.Text.RegularExpressions.Regex.Replace(zbior.Trim(), "[^a-zA-Z0-9_\-]", "_")
+            Dim bezZnakow = System.Text.RegularExpressions.Regex.Replace(zbior.Trim(), "[^a-zA-Z0-9_\-+]", "_")
             bezZnakow = System.Text.RegularExpressions.Regex.Replace(bezZnakow, "_+", "_").Trim("_"c)
-            If bezZnakow.Length > 25 Then bezZnakow = bezZnakow.Substring(0, 25).TrimEnd("_"c)
+            If bezZnakow.Length > 35 Then bezZnakow = bezZnakow.Substring(0, 35).TrimEnd("_"c, "+"c)
             czystyZbior = bezZnakow
         End If
         If czystyZbior <> "" Then

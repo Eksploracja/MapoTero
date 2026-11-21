@@ -37,6 +37,9 @@ Public Class PodgladWarstwSilnik
     ''' <summary>Bok miniatury podglądu w panelu okna głównego.</summary>
     Public Const BokPanelu As Integer = 116
 
+    ''' <summary>Bok pobieranej próbki dla tej instancji silnika (domyślnie BokProbki = 300).</summary>
+    Public Property Bok As Integer = BokProbki
+
     ' Pobrane obrazy warstw próbki (piksele ARGB) - klucz to AdresSerwera|NazwaWarstwy
     Private ReadOnly _buforWarstw As New Dictionary(Of String, Integer())(StringComparer.Ordinal)
 
@@ -60,7 +63,8 @@ Public Class PodgladWarstwSilnik
 
     ''' <summary>Klucz warstwy w buforze pamięci podręcznej.</summary>
     Public Shared Function Klucz(w As WarstwaWybrana) As String
-        Return w.Adres.ToLowerInvariant() & "|" & w.Nazwa
+        If w Is Nothing Then Return ""
+        Return If(w.Adres, "").ToLowerInvariant() & "|" & If(w.Nazwa, "")
     End Function
 
     ''' <summary>Zwraca informację, czy dana warstwa znajduje się już w buforze pamięci podręcznej.</summary>
@@ -95,7 +99,7 @@ Public Class PodgladWarstwSilnik
     Public Function ZasiegProbki() As Zasieg?
         If Not _punktProbki.HasValue OrElse _ostatniPiksel <= 0 Then Return Nothing
         Dim p = _punktProbki.Value
-        Dim pol As Double = BokProbki * _ostatniPiksel / 2
+        Dim pol As Double = Bok * _ostatniPiksel / 2
         Return New Zasieg(p.X - pol, p.Y - pol, p.X + pol, p.Y + pol)
     End Function
 
@@ -127,9 +131,10 @@ Public Class PodgladWarstwSilnik
     ''' Sprawdza, czy zmieniły się parametry geograficzne (punkt, piksel, układ).
     ''' Jeśli tak, czyści bufor pamięci podręcznej i zapisuje nowe parametry.
     ''' </summary>
-    Public Function SprawdzIZaktualizujParametry(punkt As PunktXY, piksel As Double, uklad As UkladWspolrzednych) As Boolean
+    Public Function SprawdzIZaktualizujParametry(punkt As PunktXY, piksel As Double, uklad As UkladWspolrzednych,
+                                                Optional wymus As Boolean = False) As Boolean
         Dim zmieniono As Boolean = False
-        If Not _punktProbki.HasValue OrElse _ostatniEpsg <> uklad.Epsg OrElse Math.Abs(_ostatniPiksel - piksel) > 0.0001 Then
+        If wymus OrElse Not _punktProbki.HasValue OrElse _ostatniEpsg <> uklad.Epsg OrElse Math.Abs(_ostatniPiksel - piksel) > 0.0001 Then
             zmieniono = True
         Else
             Dim dx = Math.Abs(_punktProbki.Value.X - punkt.X)
@@ -176,9 +181,12 @@ Public Class PodgladWarstwSilnik
     ''' Dla powiększenia >= 1.0 stosuje NearestNeighbor i PixelOffsetMode.Half, aby użytkownik widział rzeczywiste piksele pobierania.
     ''' Dla pomniejszenia &lt; 1.0 stosuje wygładzanie HighQualityBicubic.
     ''' </summary>
-    Public Shared Function ZastosujZoom(zrodlo As Bitmap, zoom As Double, celSzer As Integer, celWys As Integer) As Bitmap
+    Public Shared Function ZastosujZoom(zrodlo As Bitmap, zoom As Double, celSzer As Integer, celWys As Integer,
+                                        Optional dopasujWypelnienie As Boolean = False,
+                                        Optional przesuniecieX As Integer = 0,
+                                        Optional przesuniecieY As Integer = 0) As Bitmap
         If zrodlo Is Nothing Then Return Nothing
-        If Math.Abs(zoom - 1.0) < 0.001 AndAlso zrodlo.Width = celSzer AndAlso zrodlo.Height = celWys Then
+        If Not dopasujWypelnienie AndAlso przesuniecieX = 0 AndAlso przesuniecieY = 0 AndAlso Math.Abs(zoom - 1.0) < 0.001 AndAlso zrodlo.Width = celSzer AndAlso zrodlo.Height = celWys Then
             Return New Bitmap(zrodlo)
         End If
 
@@ -196,8 +204,15 @@ Public Class PodgladWarstwSilnik
 
             Dim scaledW = CInt(Math.Round(zrodlo.Width * zoom))
             Dim scaledH = CInt(Math.Round(zrodlo.Height * zoom))
-            Dim destX = (celSzer - scaledW) \ 2
-            Dim destY = (celWys - scaledH) \ 2
+
+            If dopasujWypelnienie AndAlso (scaledW < celSzer OrElse scaledH < celWys) Then
+                Dim scaleMnoznik = Math.Max(celSzer / CDbl(Math.Max(1, scaledW)), celWys / CDbl(Math.Max(1, scaledH)))
+                scaledW = CInt(Math.Ceiling(scaledW * scaleMnoznik))
+                scaledH = CInt(Math.Ceiling(scaledH * scaleMnoznik))
+            End If
+
+            Dim destX = (celSzer - scaledW) \ 2 + przesuniecieX
+            Dim destY = (celWys - scaledH) \ 2 + przesuniecieY
 
             g.DrawImage(zrodlo, New Rectangle(destX, destY, scaledW, scaledH))
         End Using
@@ -210,24 +225,34 @@ Public Class PodgladWarstwSilnik
     ''' </summary>
     Public Function ZlozObraz(zestaw As ZestawWarstw) As Bitmap
         If zestaw Is Nothing OrElse zestaw.Liczba = 0 Then Return Nothing
+        Return ZlozObrazZWarstw(zestaw.Warstwy)
+    End Function
 
-        Dim piksele(BokProbki * BokProbki - 1) As Integer
+    ''' <summary>
+    ''' Składa wynikową bitmapę z podanych warstw znajdujących się w buforze, uwzględniając ich krycie i tryb mieszania.
+    ''' </summary>
+    Public Function ZlozObrazZWarstw(warstwy As IEnumerable(Of WarstwaWybrana)) As Bitmap
+        If warstwy Is Nothing Then Return Nothing
+        Dim lista = warstwy.ToList()
+        If lista.Count = 0 Then Return Nothing
+
+        Dim piksele(Bok * Bok - 1) As Integer
         ' Tło szachownicy 8x8 px dla wizualizacji przezroczystości
-        For y = 0 To BokProbki - 1
-            For x = 0 To BokProbki - 1
+        For y = 0 To Bok - 1
+            For x = 0 To Bok - 1
                 Dim jasny = ((x \ 8) + (y \ 8)) Mod 2 = 0
-                piksele(y * BokProbki + x) = If(jasny, &HFFFFFFFF, &HFFF2F2F2)
+                piksele(y * Bok + x) = If(jasny, &HFFFFFFFF, &HFFF2F2F2)
             Next
         Next
 
-        For Each w In zestaw.Warstwy
+        For Each w In lista
             Dim obraz() As Integer = Nothing
             If _buforWarstw.TryGetValue(Klucz(w), obraz) Then
                 NakladanieWarstw.Naloz(piksele, obraz, w.Krycie, w.TrybMieszania)
             End If
         Next
 
-        Return NakladanieObrazow.DoBitmapy(piksele, BokProbki, BokProbki)
+        Return NakladanieObrazow.DoBitmapy(piksele, Bok, Bok)
     End Function
 
     ''' <summary>
@@ -268,7 +293,7 @@ Public Class PodgladWarstwSilnik
                                                              typUslugi:=w.EfektywnyTyp, plikWarstw:=zrodloPliku)
                     _uslugiWmts(w.Adres) = usluga
                 End If
-                Dim wynikWmts = Await usluga.PikseleAsync({nazwa}, zasieg.Value, BokProbki, token)
+                Dim wynikWmts = Await usluga.PikseleAsync({nazwa}, zasieg.Value, Bok, token)
                 piksele = wynikWmts.Item1
                 blad = wynikWmts.Item2
             Else
@@ -277,13 +302,13 @@ Public Class PodgladWarstwSilnik
                 Dim przezroczysty As Boolean = i > 0 OrElse zadanie.Przezroczystosc
                 Dim formatWms As String = If(przezroczysty, "png", zadanie.Format)
                 Dim adres As String = Wms.ZapytanieGetMap(czystyAdres, {nazwa}, zadanie.Uklad, zasieg.Value, formatWms,
-                                                         BokProbki, BokProbki, zadanie.ZamienOsie, przezroczysty)
+                                                         Bok, Bok, zadanie.ZamienOsie, przezroczysty)
                 Dim wynik = Await PobieranieSegmentow.PobierzObrazBezRegulatoraAsync(adres, Math.Max(5, zadanie.LimitCzasuSekundy), token, ignorujSsl)
 
                 ' Jeśli serwer odrzucił przezroczyste png, fallback na jpeg
                 If wynik.Item1 Is Nothing AndAlso przezroczysty Then
                     Dim adresJpg As String = Wms.ZapytanieGetMap(czystyAdres, {nazwa}, zadanie.Uklad, zasieg.Value, "jpeg",
-                                                                 BokProbki, BokProbki, zadanie.ZamienOsie, False)
+                                                                 Bok, Bok, zadanie.ZamienOsie, False)
                     Dim wynikJpg = Await PobieranieSegmentow.PobierzObrazBezRegulatoraAsync(adresJpg, Math.Max(5, zadanie.LimitCzasuSekundy), token, ignorujSsl)
                     If wynikJpg.Item1 IsNot Nothing Then
                         wynik = wynikJpg
@@ -291,7 +316,7 @@ Public Class PodgladWarstwSilnik
                 End If
 
                 blad = wynik.Item2
-                piksele = If(blad = "", NakladanieObrazow.Piksele(wynik.Item1, BokProbki, BokProbki), Nothing)
+                piksele = If(blad = "", NakladanieObrazow.Piksele(wynik.Item1, Bok, Bok), Nothing)
             End If
 
             If pokolenie <> _pokolenie Then Throw New OperationCanceledException()

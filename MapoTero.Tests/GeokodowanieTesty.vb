@@ -71,4 +71,49 @@ Public Class GeokodowanieTesty
         Assert.Equal(19.9367818, a.Dlugosc, 5)
     End Sub
 
+    <Theory>
+    <InlineData("Gdynia, piotrkowska 12", "Gdynia, piotrkowska 12")>
+    <InlineData("Gdynia,ul. piotrkowska 12", "Gdynia, piotrkowska 12")>
+    <InlineData("Gdynia, ul. Piotrkowska 12", "Gdynia, Piotrkowska 12")>
+    <InlineData("Gdynia,ul.Piotrkowska 12", "Gdynia, Piotrkowska 12")>
+    <InlineData("Gdynia, ulica Piotrkowska 12", "Gdynia, Piotrkowska 12")>
+    <InlineData("ul. Marszałkowska 10, Warszawa", "Marszałkowska 10, Warszawa")>
+    <InlineData("Gdynia, Piotrkowska 12 m. 4", "Gdynia, Piotrkowska 12")>
+    <InlineData("Gdynia, Piotrkowska 12 lok. 5", "Gdynia, Piotrkowska 12")>
+    <InlineData("Gdynia, Piotrkowska 12/8", "Gdynia, Piotrkowska 12")>
+    <InlineData("Poznań, ul. Półwiejska 10/4", "Poznań, Półwiejska 10")>
+    Public Sub NormalizujZapytanieAdresoweTesty(wejscie As String, oczekiwane As String)
+        Dim wynik = KlientGeokodowania.NormalizujZapytanieAdresowe(wejscie)
+        Assert.Equal(oczekiwane, wynik)
+    End Sub
+
+    <Fact>
+    Public Sub ParsujOdpowiedzPhotonGeoJson()
+        Dim json = "{" &
+            """type"": ""FeatureCollection""," &
+            """features"": [{" &
+            "  ""type"": ""Feature""," &
+            "  ""geometry"": {""type"": ""Point"", ""coordinates"": [18.5259658, 54.486678]}," &
+            "  ""properties"": {" &
+            "    ""osm_key"": ""building"",""osm_value"": ""yes"",""type"": ""house""," &
+            "    ""housenumber"": ""12"",""street"": ""Piotrkowska"",""district"": ""Mały Kack""," &
+            "    ""city"": ""Gdynia"",""state"": ""województwo pomorskie"",""country"": ""Polska"",""postcode"": ""81-504""," &
+            "    ""extent"": [18.5258862, 54.4867073, 18.5261025, 54.4865969]" &
+            "  }" &
+            "}]}"
+
+        Dim lista = KlientGeokodowania.ParsujWynikiPhotonJson(json)
+        Assert.Single(lista)
+
+        Dim p = lista(0)
+        Assert.Equal("Piotrkowska 12", p.Nazwa)
+        Assert.Equal("Piotrkowska 12, Mały Kack, Gdynia, województwo pomorskie, 81-504, Polska", p.PelnaNazwa)
+        Assert.Equal(54.486678, p.Szerokosc, 5)
+        Assert.Equal(18.5259658, p.Dlugosc, 5)
+        Assert.Equal("adres / budynek", p.TypOpis)
+        Assert.True(p.MaObszar)
+        Assert.Equal(54.4865969, p.MinSzerokosc, 5)
+        Assert.Equal(54.4867073, p.MaxSzerokosc, 5)
+    End Sub
+
 End Class

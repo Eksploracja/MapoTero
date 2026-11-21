@@ -6,7 +6,7 @@ nav_order: 16
 # Narzędzia dodatkowe
 {: .no_toc }
 
-Konwerter map OziExplorer, profil wysokościowy trasy i korekta obrazów w folderze.
+Szybki kreator mapy, konwerter map OziExplorer, profil wysokościowy trasy i korekta obrazów w folderze.
 {: .fs-5 .fw-300 }
 
 **Gdzie w programie:** menu *Narzędzia*  
@@ -18,6 +18,36 @@ Konwerter map OziExplorer, profil wysokościowy trasy i korekta obrazów w folde
 - TOC
 {:toc}
 </details>
+
+## Szybki kreator mapy
+
+**Gdzie:** menu *Narzędzia > Szybki kreator mapy...*, skrót **Ctrl+K** albo przycisk z różdżką pod mapą.
+
+Kreator prowadzi początkujących w czterech krokach od pomysłu do gotowego pliku mapy - bez ręcznego ustawiania układu, siatki i eksportu.
+
+1. **Cel** - telefon lub tablet (MBTiles albo SQLiteDB), odbiornik Garmin (KMZ, który działa na każdym modelu, albo JNX), wydruk (arkusz GeoTIFF) lub podkład CAD/GIS (GeoTIFF w PL-1992).
+2. **Styl** - gotowy zestaw warstw z podglądem: turystyka piesza (mapa topograficzna GUGiK z cieniowaniem i szlakami), góry z poziomicami OpenTopoMap (także po czeskiej i słowackiej stronie), trasy rowerowe i MTB, eksploracja terenu LiDAR, plastyczna rzeźba terenu, mapy WIG 1918–1939, mapy niemieckie do 1945 (Messtischblatt, Karte des Deutschen Reiches), działki EGiB albo własne warstwy z okna głównego. Suwak reguluje siłę cieniowania, a podgląd można przesuwać myszką i oddalać - w stylu wieloskalowym pokazuje wtedy mapę w mniejszej skali.
+3. **Obszar** - miejscowość z promieniem, prostokąt zaznaczony na mapie albo pas wzdłuż trasy GPX/KML/KMZ.
+4. **Zapis** - format (zalecany jest zaznaczony), szacowany rozmiar i czas, rozmiar piksela z opisem szczegółowości. Przycisk *Generuj mapę* pobiera dane i zapisuje plik.
+
+**Mapy wieloskalowe.** Style topograficzne, historyczne, rowerowe, górskie i rzeźby terenu zapisane jako MBTiles przełączają się przy oddalaniu na mapy w mniejszej skali, zamiast pokazywać pomniejszoną, nieczytelną mapę szczegółową:
+
+| Styl | Skale (od zbliżenia do oddalenia) |
+|---|---|
+| Turystyka piesza | 1:10 000 → 1:50 000 → 1:100 000 → mapa przeglądowa |
+| Mapy WIG 1918–1939 | 1:25 000 (gdzie się zachowała, gdzie indziej 1:100 000) → 1:100 000 → 1:300 000 |
+| Mapy niemieckie do 1945 | Messtischblatt 1:25 000 (gdzie indziej Karte des Deutschen Reiches) → KdR 1:100 000 → 1:300 000 |
+| Góry z poziomicami, rower i MTB, rzeźba terenu | mapa szczegółowa → średnia → przeglądowa |
+
+Kreator pobiera każdą skalę osobno (podfoldery `_skala2`, `_skala3`… obok sesji) i sam dzieli poziomy powiększeń między skale. Pole *Mapa wieloskalowa* w kroku 4 można odznaczyć - wtedy cały plik powstaje z jednej skali.
+
+Wskazówki:
+
+- Cieniowanie rzeźby terenu w stylach używa trybu mieszania *Rzeźba terenu*: płaski teren zachowuje barwy mapy, a stoki w cieniu ciemnieją. Ten sam tryb można wybrać w oknie *Warstwy - zaawansowane*.
+- Rozmiar piksela i zakres powiększeń są dobrane do rozdzielczości danych stylu. Gdy piksel jest mniejszy niż dane, kreator to pokazuje i proponuje właściwą wartość.
+- Odbiorniki Garmin wyświetlają łącznie do 100 kafli KMZ (nowsze modele 500); przy większym obszarze kreator ostrzega.
+- Gdy części fragmentów nie uda się pobrać, *Ponów pobieranie* pobiera tylko brakujące i zapisuje plik ponownie; *Wstecz* wraca do ustawień.
+- Segmenty trafiają do folderu `download` (podfolder `Kreator_...`), a po zakończeniu kreator podpowiada, gdzie skopiować plik w telefonie lub odbiorniku.
 
 ## Konwerter map OziExplorer (.map)
 
@@ -32,7 +62,7 @@ Narzędzie przetwarza kalibrowane skany papierowych map turystycznych i archiwal
   Dzięki precyzyjnemu przeliczaniu współrzędnych arkusz nie wykazuje typowego przesunięcia o 100–200 metrów względem śladów GPS w odbiornikach.
 * **Modele kalibracji nieliniowej:** dla dużych arkuszy program stosuje model rzutowy (4–6 punktów) lub wielomian 2. stopnia (7+ punktów), redukując zniekształcenia skanera papieru. Punkty kalibracji mogą być podane w stopniach lub w siatce UTM.
 * **Piramida powiększeń:** formaty JNX, MBTiles, SQLiteDB i OruxMaps generowane są automatycznie z kompletną piramidą 5 poziomów skali.
-* **Korekta obrazu:** pole *Korekta obrazu* i przycisk *Profil / Podgląd...* działają jak w oknie eksportu (próbka ze skanu); profil jest wspólny z eksportem.
+* **Korekta obrazu:** pole *Korekta obrazu* i przycisk *Korekta obrazu...* działają jak w oknie eksportu (próbka ze skanu); profil jest wspólny z eksportem.
 * **Praca pojedyncza lub wsadowa (Batch):** możesz wskazać pojedynczy plik `.map` albo cały katalog zawierający dziesiątki arkuszy – program przetworzy je kolejno w tle.
 
 ---
@@ -56,7 +86,7 @@ Narzędzie poprawia naraz wszystkie obrazy PNG, JPEG i TIFF leżące w jednym fo
 
 1. Wskaż **folder z obrazami**. Program podpowiada folder bieżącej sesji (a z okna eksportu do CAD - folder tego eksportu).
 2. Wskaż **folder wynikowy**, inny niż źródłowy. Domyślnie to podfolder `korekta`. Oryginały zostają bez zmian.
-3. Przyciskiem **Profil / Podgląd** wybierz profil korekty i sprawdź efekt na próbce z folderu: *Garmin MIP*, *Wyostrzenie krawędzi*,
+3. Przyciskiem **Korekta obrazu...** wybierz profil korekty i sprawdź efekt na próbce z folderu: *Garmin MIP*, *Wyostrzenie krawędzi*,
    *Stare mapy i skany*, *Rozjaśnienie lasów*, *Podkład CAD*, *Skan CAD* albo własne wartości suwaków. Profilu *Brak* nie można
    tu wybrać, bo nie zmienia obrazów.
 4. Kliknij **Rozpocznij korektę**.

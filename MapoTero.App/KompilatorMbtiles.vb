@@ -36,6 +36,8 @@ End Enum
 Public Class WarstwaWielowarstwowa
     Public Property Folder As String = ""
     Public Property Tytul As String = ""
+    ''' <summary>Pełny, czytelny opis warstwy (nazwa z katalogu, serwer i warstwa źródłowa).</summary>
+    Public Property OpisPelny As String = ""
     Public Property PoziomMin As Integer = 10
     Public Property PoziomMax As Integer = 16
     Public Property Krycie As Double = 1.0
@@ -94,9 +96,13 @@ Public Class WarstwaWielowarstwowa
                                          c.Prefiks, styl, rozszerzenie, Siatka)
             Zrodlo.BialePrzezroczyste = BialePrzezroczyste
 
+            Dim kat = KatalogWarstw.Instancja
             If String.IsNullOrWhiteSpace(Tytul) Then
-                Tytul = (c.RodzajMapy & " " & If(c.Warstwy.Count > 0, c.Warstwy(0), "")).Trim()
+                Tytul = kat.SkroconaNazwaSesji(c, Folder)
                 If String.IsNullOrWhiteSpace(Tytul) Then Tytul = Path.GetFileName(Folder.TrimEnd(Path.DirectorySeparatorChar))
+            End If
+            If String.IsNullOrWhiteSpace(OpisPelny) Then
+                OpisPelny = kat.PelnyOpisSesji(c, Folder)
             End If
             Return True
         Catch ex As Exception
@@ -211,7 +217,7 @@ Public NotInheritable Class KompilatorMbtiles
 
     ''' <summary>Zwraca listę warstw aktywnych dla wskazanego poziomu powiększenia (posortowanych wg kolejności rysowania).</summary>
     Public Shared Function WarstwyDlaPoziomu(warstwy As IEnumerable(Of WarstwaWielowarstwowa), poziom As Integer) As List(Of WarstwaWielowarstwowa)
-        Dim wynik = warstwy.Where(Function(w) w.Wlaczona AndAlso w.Poprawna AndAlso w.PoziomMin <= poziom AndAlso w.PoziomMax >= poziom).
+        Dim wynik = warstwy.Where(Function(w) w.Wlaczona AndAlso (w.Poprawna OrElse (w.Folder IsNot Nothing AndAlso w.Folder.StartsWith("(Kreator:"))) AndAlso w.PoziomMin <= poziom AndAlso w.PoziomMax >= poziom).
                             OrderBy(Function(w) w.Kolejnosc).ToList()
         Return wynik
     End Function
@@ -226,6 +232,67 @@ Public NotInheritable Class KompilatorMbtiles
         Next
         Return luki
     End Function
+
+    ''' <summary>Oblicza naturalny poziom zoom Web Mercator odpowiadający rozdzielczości piksela warstwy.</summary>
+    Public Shared Function ObliczNaturalnyZoom(w As WarstwaWielowarstwowa) As Integer
+        If w Is Nothing OrElse w.Siatka Is Nothing Then Return 15
+        Dim srodek = w.ZasiegWgs84
+        Dim srodekSz As Double = If(srodek.Poprawny, (srodek.Polnoc + srodek.Poludnie) / 2.0, 52.0)
+        Dim mX As Double, mY As Double
+        Georeferencja.MetrowNaStopien(srodekSz, mX, mY)
+        Dim pikselMetry As Double = If(w.Uklad IsNot Nothing AndAlso w.Uklad.Geograficzny, w.Siatka.RozmiarPiksela * mX, w.Siatka.RozmiarPiksela)
+        Return WebMercator.PoziomDlaRozdzielczosci(pikselMetry, srodekSz)
+    End Function
+
+    ''' <summary>
+    ''' Automatycznie wyznacza rozłączne (niepokrywające się) zakresy powiększeń (zoom) dla podanych warstw,
+    ''' tak aby tworzyły spójny, ciągły stos skalowy bez konfliktów (np. 8-15 i 16-17).
+    ''' Warstwy powinny być wcześniej uporządkowane rosnąco wg poziomu szczegółowości (naturalnego zoomu).
+    ''' </summary>
+    Public Shared Sub PrzeliczRozlaczneZakresyZoom(warstwy As IList(Of WarstwaWielowarstwowa))
+        If warstwy Is Nothing OrElse warstwy.Count = 0 Then Exit Sub
+        Dim n As Integer = warstwy.Count
+        If n = 1 Then
+            Dim zNat = ObliczNaturalnyZoom(warstwy(0))
+            warstwy(0).PoziomMax = Math.Min(21, Math.Max(1, zNat))
+            warstwy(0).PoziomMin = Math.Max(1, Math.Min(8, warstwy(0).PoziomMax - 4))
+            Exit Sub
+        End If
+
+        Dim zoomy(n - 1) As Integer
+        For i = 0 To n - 1
+            zoomy(i) = ObliczNaturalnyZoom(warstwy(i))
+        Next
+
+        Dim globalMin As Integer = Math.Max(1, Math.Min(8, zoomy(0) - 4))
+        Dim globalMax As Integer = Math.Min(21, Math.Max(zoomy(n - 1) + 1, globalMin + n - 1))
+
+        Dim biezacyStart As Integer = globalMin
+        For i = 0 To n - 2
+            Dim zi = zoomy(i)
+            Dim ziNext = zoomy(i + 1)
+            Dim target As Integer
+            If ziNext - zi >= 2 Then
+                target = zi
+            ElseIf ziNext - zi = 1 Then
+                If i = 0 AndAlso n >= 3 Then
+                    target = zi - 1
+                Else
+                    target = Math.Max(biezacyStart, zi)
+                End If
+            Else
+                target = biezacyStart + Math.Max(1, (globalMax - biezacyStart) \ (n - i)) - 1
+            End If
+
+            Dim maxDlaWarstwy = Math.Max(biezacyStart, Math.Min(globalMax - (n - 1 - i), target))
+            warstwy(i).PoziomMin = biezacyStart
+            warstwy(i).PoziomMax = maxDlaWarstwy
+            biezacyStart = maxDlaWarstwy + 1
+        Next
+
+        warstwy(n - 1).PoziomMin = biezacyStart
+        warstwy(n - 1).PoziomMax = Math.Max(biezacyStart, globalMax)
+    End Sub
 
     ''' <summary>
     ''' Szybki szacunek rozmiaru pliku i liczby kafli metodą próbkowania statystycznego.
@@ -376,14 +443,15 @@ Public NotInheritable Class KompilatorMbtiles
                 End If
             Next
         End If
-        If aktywne.Count = 0 Then Return Nothing
+        If aktywne.Count = 0 OrElse aktywne.All(Function(w) w.Zrodlo Is Nothing) Then Return Nothing
 
-        Dim tx As Integer = CInt(Math.Floor(WebMercator.PikselX(dlugoscGeo, poziom) / WebMercator.RozmiarKafla))
-        Dim ty As Integer = CInt(Math.Floor(WebMercator.PikselY(szerokoscGeo, poziom) / WebMercator.RozmiarKafla))
+        ' Wycentrowanie podglądu 256x256 px dokładnie na podanym punkcie geograficznym (środek obrazu to szerokoscGeo, dlugoscGeo)
+        Dim kx As Double = WebMercator.PikselX(dlugoscGeo, poziom) - 128.0
+        Dim ky As Double = WebMercator.PikselY(szerokoscGeo, poziom) - 128.0
         Dim warstwyEksportu = aktywne.Select(Function(w) w.DoWarstwyEksportu()).ToList()
 
         Dim nadprobkowanie As Integer = EksportMapy.LiczbaProbek(warstwyEksportu, WebMercator.RozmiarPiksela(szerokoscGeo, poziom))
-        Dim przelicz = EksportMapy.PrzeliczenieKafla(tx * 256.0, ty * 256.0, poziom)
+        Dim przelicz = EksportMapy.PrzeliczenieKafla(kx, ky, poziom)
         Return EksportMapy.RenderujKafelZKorekta(warstwyEksportu, 256, 256, nadprobkowanie, przelicz, opcje?.Korekta)
     End Function
 

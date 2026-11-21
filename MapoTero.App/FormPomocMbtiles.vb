@@ -45,6 +45,7 @@ Public Enum TematPomocy
     ProfilNmt
     Ustawienia
     KorektaFolderu
+    Kreator
 End Enum
 
 ''' <summary>
@@ -116,6 +117,7 @@ Public Class FormPomocMbtiles
             Case TematPomocy.ProfilNmt : PomocProfilNmt()
             Case TematPomocy.Ustawienia : PomocUstawienia()
             Case TematPomocy.KorektaFolderu : PomocKorektaFolderu()
+            Case TematPomocy.Kreator : PomocKreator()
             Case Else : PomocMbtiles()
         End Select
     End Sub
@@ -170,7 +172,7 @@ Public Class FormPomocMbtiles
 
         DodajNaglowek1("3. Filtr MIP dla ekranów Garmin")
         DodajPunktor("Opcja korekcji MIP optymalizuje kontrast, nasycenie i ostrość splotową dla ekranów transflektywnych Garmina, zapewniając doskonałą czytelność w pełnym słońcu.")
-        DodajPunktor("Przycisk 'Profil / Podgląd...' obok pola Korekta obrazu pozwala wybrać profil i obejrzeć efekt na próbce mapy przed eksportem.")
+        DodajPunktor("Przycisk 'Korekta obrazu...' obok pola Korekta obrazu pozwala wybrać profil i obejrzeć efekt na próbce mapy przed eksportem.")
 
         DodajNaglowek1("4. Dostosowanie do ekranu")
         DodajPunktor("Okno eksportu automatycznie dopasowuje swoją wysokość do rozdzielczości ekranu, włączając w razie potrzeby pionowy pasek przewijania.")
@@ -260,7 +262,7 @@ Public Class FormPomocMbtiles
 
         DodajNaglowek1("Formaty wynikowe i korekta obrazu")
         DodajPunktor("Garmin BirdsEye (JNX), Garmin Custom Maps (KMZ), MBTiles, SQLiteDB (OsmAnd, Locus Map) i OruxMaps (folder mapy) - bazy kafli zapisuje ten sam kod co okno Eksport mapy.")
-        DodajPunktor("Pole Korekta obrazu i przycisk Profil / Podgląd działają jak w oknie eksportu (podgląd na próbce ze skanu).")
+        DodajPunktor("Pole Korekta obrazu i przycisk Korekta obrazu... działają jak w oknie eksportu (podgląd na próbce ze skanu).")
 
         DodajNaglowek1("2. Tryb pojedynczy i wsadowy (Batch)")
         DodajPunktor("Możesz wybrać pojedynczy plik .map albo cały folder zawierający dziesiątki arkuszy.")
@@ -316,7 +318,7 @@ Public Class FormPomocMbtiles
                     "Oryginały zostają bez zmian - poprawione kopie trafiają do folderu wynikowego (domyślnie podfolder ""korekta"").")
 
         DodajNaglowek1("1. Profil korekty")
-        DodajPunktor("Przycisk ""Profil / Podgląd"" otwiera podgląd na próbce z folderu. Możesz wybrać gotowy profil (np. Garmin MIP, Podkład CAD, Skan CAD) albo ustawić własne wartości suwaków.")
+        DodajPunktor("Przycisk ""Korekta obrazu..."" otwiera podgląd na próbce z folderu. Możesz wybrać gotowy profil (np. Garmin MIP, Podkład CAD, Skan CAD) albo ustawić własne wartości suwaków.")
         DodajPunktor("Profil ""Brak"" nie zmienia obrazów, więc w tym oknie nie można go wybrać.")
 
         DodajNaglowek1("2. Georeferencja")
@@ -415,6 +417,32 @@ Public Class FormPomocMbtiles
         DodajNaglowek1("7. Parametry kompresji i zapis pliku")
         DodajPunktor("Format Smart Hybrid (zalecany): kafle bez przezroczystości zapisuje jako mały JPEG, a kafle z przezroczystością (lub na krawędziach) jako PNG.")
         DodajPunktor("Szybka piramida w pasmach: generuje niższe powiększenia przez szybkie zmniejszanie (downscale 2x), skracając czas zapisu.")
+
+        DodajStopkeOnline(_urlOnline)
+    End Sub
+
+    Private Sub PomocKreator()
+        Me.Text = "Pomoc i instrukcja - Szybki kreator mapy"
+        _urlOnline = "https://eksploracja.github.io/MapoTero/pomoc/narzedzia/#szybki-kreator-mapy"
+
+        DodajTytul("Szybki kreator generowania map")
+        DodajAkapit("Kreator prowadzi krok po kroku przez cały proces przygotowania gotowej mapy: od wyboru urządzenia docelowego, " &
+                    "przez gotowy zestaw warstw i wskazanie obszaru, po automatyczne pobranie i zapisanie pliku wynikowego.")
+
+        DodajNaglowek1("1. Krok po kroku")
+        DodajPunktor("Krok 1: Cel. Wybierz, gdzie będziesz używać mapy: telefon lub tablet, odbiornik Garmin, wydruk albo projekt CAD/GIS. Program dobierze format pliku i parametry.")
+        DodajPunktor("Krok 2: Styl. Gotowe zestawy warstw z podglądem: turystyka piesza, góry z poziomicami (także za granicą), rower i MTB, eksploracja terenu LiDAR, plastyczna rzeźba terenu, mapy WIG 1918–1939, mapy niemieckie do 1945, działki EGiB albo własne warstwy z okna głównego. Suwak reguluje siłę cieniowania, a podgląd można przesuwać i oddalać myszką.")
+        DodajPunktor("Krok 3: Obszar. Wyszukaj miejscowość i wybierz promień, zaznacz prostokąt na mapie albo wskaż plik trasy GPX/KML/KMZ (program pobierze tylko pas wzdłuż trasy).")
+        DodajPunktor("Krok 4: Zapis. Wybierz format (zalecany jest zaznaczony), sprawdź szacowany rozmiar i czas, a potem kliknij Generuj mapę.")
+
+        DodajNaglowek1("2. Wskazówki")
+        DodajPunktor("Rozmiar piksela jest dobrany do rozdzielczości danych stylu. Opis obok pola podaje odpowiadającą skalę wydruku. Jeśli piksel jest mniejszy niż dane, kreator to pokaże - mniejszy piksel tylko powiększa plik.")
+        DodajPunktor("Garmin: format KMZ działa na każdym odbiorniku, ale odbiorniki wyświetlają łącznie do 100 kafli (nowsze modele 500). Przy większym obszarze kreator ostrzega - wtedy zwiększ piksel albo wybierz JNX.")
+        DodajPunktor("Mapa wieloskalowa (MBTiles): style topograficzne i historyczne przy oddalaniu przełączają się na mapy w mniejszej skali, np. 1:10 000, 1:50 000, 1:100 000. Kreator pobiera każdą skalę osobno. Pole Mapa wieloskalowa w kroku 4 można odznaczyć.")
+        DodajPunktor("Opcje zaawansowane (korekta obrazu, zakres powiększeń, ustawienia Garmin, MBTiles wieloskalowy) są zwinięte - zwykle nie trzeba ich zmieniać.")
+        DodajPunktor("Gdy części fragmentów nie uda się pobrać, przycisk Ponów pobieranie pobierze tylko brakujące i zapisze plik ponownie. Wstecz wraca do ustawień bez utraty wyborów.")
+        DodajPunktor("Pobrane segmenty kreator zapisuje w folderze download (podfolder Kreator_...). Przycisk Przejdź do mapy w oknie głównym wczytuje je jako sesję.")
+        DodajPunktor("Po zakończeniu kreator podpowiada, do którego folderu w telefonie lub odbiorniku skopiować plik.")
 
         DodajStopkeOnline(_urlOnline)
     End Sub

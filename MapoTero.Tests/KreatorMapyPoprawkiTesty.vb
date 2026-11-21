@@ -1,0 +1,269 @@
+'Copyright (C) <2015-2026> pajakt, Kazimierz Niecikowski
+'Testy poprawek kreatora mapy po przeglądzie (2026-11): każdy test odpowiada znalezionemu błędowi.
+Imports System
+Imports System.Reflection
+Imports System.Threading
+Imports System.Windows.Forms
+Imports MapoTero.Core
+Imports Xunit
+
+<Collection("OknaKreatora")>
+Public Class KreatorMapyPoprawkiTesty
+
+    Private Shared Sub Sta(akcja As Action)
+        Dim wyjatek As Exception = Nothing
+        Dim t As New Thread(Sub()
+                                Try
+                                    akcja()
+                                Catch ex As Exception
+                                    wyjatek = ex
+                                End Try
+                            End Sub)
+        t.SetApartmentState(ApartmentState.STA)
+        t.Start()
+        t.Join()
+        If wyjatek IsNot Nothing Then Throw New Exception(wyjatek.Message, wyjatek)
+    End Sub
+
+    Private Shared Function Kt(Of T As Control)(f As Form, nazwa As String) As T
+        Return DirectCast(f.Controls.Find(nazwa, True)(0), T)
+    End Function
+
+    Private Shared Function Pole(Of T)(o As Object, nazwa As String) As T
+        Return DirectCast(o.GetType().GetField(nazwa, BindingFlags.NonPublic Or BindingFlags.Instance).GetValue(o), T)
+    End Function
+
+    ''' <summary>Przechodzi do kroku 4 z wybranym celem i szablonem.</summary>
+    Private Shared Sub DoKroku4(k As Form, rbCel As String, idSzablonu As String)
+        Kt(Of RadioButton)(k, rbCel).Checked = True
+        Dim dalej = Kt(Of Button)(k, "btnDalej")
+        dalej.PerformClick() : Application.DoEvents()
+        Dim lst = Kt(Of ListBox)(k, "lstSzablony")
+        For i = 0 To lst.Items.Count - 1
+            If DirectCast(lst.Items(i), SzablonMapy).Id = idSzablonu Then lst.SelectedIndex = i
+        Next
+        dalej.PerformClick() : Application.DoEvents()
+        dalej.PerformClick() : Application.DoEvents()
+    End Sub
+
+    <Fact>
+    Public Sub Telefon_WariantPojedynczy_DajeSQLiteDB()
+        Sta(Sub()
+                Using f As New Global.MapoTero.Form1()
+                    Using k As New Global.MapoTero.FormKreatorMapy(f)
+                        k.Show() : Application.DoEvents()
+                        DoKroku4(k, "rbCelTelefon", "piesza_gory")
+                        Kt(Of RadioButton)(k, "rbWariantPojedynczy").Checked = True
+                        Application.DoEvents()
+                        Assert.Contains("SQLiteDB", Kt(Of Label)(k, "lblFormatInfo").Text)
+                    End Using
+                End Using
+            End Sub)
+    End Sub
+
+    <Fact>
+    Public Sub Wydruk_WariantWielopoziomowy_DajeMBTiles()
+        Sta(Sub()
+                Using f As New Global.MapoTero.Form1()
+                    Using k As New Global.MapoTero.FormKreatorMapy(f)
+                        k.Show() : Application.DoEvents()
+                        DoKroku4(k, "rbCelWydruk", "piesza_gory")
+                        Kt(Of RadioButton)(k, "rbWariantWielopoziomowy").Checked = True
+                        Application.DoEvents()
+                        Assert.Contains("MBTiles", Kt(Of Label)(k, "lblFormatInfo").Text)
+                    End Using
+                End Using
+            End Sub)
+    End Sub
+
+    <Fact>
+    Public Sub Kataster_PikselZSzablonu()
+        Sta(Sub()
+                Using f As New Global.MapoTero.Form1()
+                    Using k As New Global.MapoTero.FormKreatorMapy(f)
+                        k.Show() : Application.DoEvents()
+                        DoKroku4(k, "rbCelCadGis", "dzialka_kataster")
+                        Assert.Equal(0.25D, Kt(Of NumericUpDown)(k, "numRozmiarPiksela").Value)
+                    End Using
+                End Using
+            End Sub)
+    End Sub
+
+    <Fact>
+    Public Sub WsteczZKroku3_ZachowujeWybranySzablon()
+        Sta(Sub()
+                Using f As New Global.MapoTero.Form1()
+                    Using k As New Global.MapoTero.FormKreatorMapy(f)
+                        k.Show() : Application.DoEvents()
+                        Dim dalej = Kt(Of Button)(k, "btnDalej")
+                        dalej.PerformClick() : Application.DoEvents()
+                        Dim lst = Kt(Of ListBox)(k, "lstSzablony")
+                        lst.SelectedIndex = 2
+                        dalej.PerformClick() : Application.DoEvents()
+                        Kt(Of Button)(k, "btnWstecz").PerformClick() : Application.DoEvents()
+                        Assert.Equal(2, lst.SelectedIndex)
+                    End Using
+                End Using
+            End Sub)
+    End Sub
+
+    <Fact>
+    Public Sub Garmin_WylaczonaKorekta_NieWracaPoZmianiePiksela()
+        Sta(Sub()
+                Using f As New Global.MapoTero.Form1()
+                    Using k As New Global.MapoTero.FormKreatorMapy(f)
+                        k.Show() : Application.DoEvents()
+                        DoKroku4(k, "rbCelGarmin", "piesza_gory")
+                        Dim chk = Kt(Of CheckBox)(k, "chkKorektaObrazu")
+                        chk.Checked = False
+                        Kt(Of NumericUpDown)(k, "numRozmiarPiksela").Value = 2D
+                        Application.DoEvents()
+                        Assert.False(chk.Checked)
+                    End Using
+                End Using
+            End Sub)
+    End Sub
+
+    <Fact>
+    Public Sub Wig_ProfilKorektyStareMapy()
+        Sta(Sub()
+                Using f As New Global.MapoTero.Form1()
+                    Using k As New Global.MapoTero.FormKreatorMapy(f)
+                        k.Show() : Application.DoEvents()
+                        DoKroku4(k, "rbCelTelefon", "historia_wig")
+                        Dim opcje = Pole(Of OpcjeKorekcjiMip)(k, "_opcjeKorekty")
+                        Assert.Equal(ProfilKorektyRastra.StareMapyKontrast, opcje.Profil)
+                    End Using
+                End Using
+            End Sub)
+    End Sub
+
+    <Fact>
+    Public Sub ListaProfili_PozycjaStareMapyUstawiaProfilStareMapy()
+        Sta(Sub()
+                Using f As New Global.MapoTero.Form1()
+                    Using k As New Global.MapoTero.FormKreatorMapy(f)
+                        k.Show() : Application.DoEvents()
+                        DoKroku4(k, "rbCelTelefon", "piesza_gory")
+                        Dim cbo = Kt(Of ComboBox)(k, "cboProfilKorekty")
+                        Dim idx = -1
+                        For i = 0 To cbo.Items.Count - 1
+                            If cbo.Items(i).ToString() = OpcjeKorekcjiMip.NazwaProfilu(ProfilKorektyRastra.StareMapyKontrast) Then idx = i
+                        Next
+                        cbo.SelectedIndex = idx
+                        Dim opcje = Pole(Of OpcjeKorekcjiMip)(k, "_opcjeKorekty")
+                        Assert.Equal(ProfilKorektyRastra.StareMapyKontrast, opcje.Profil)
+                    End Using
+                End Using
+            End Sub)
+    End Sub
+
+    <Fact>
+    Public Sub Miejscowosc_BezWyniku_NieZostawiaStaregoZasiegu()
+        Sta(Sub()
+                Using f As New Global.MapoTero.Form1()
+                    Using k As New Global.MapoTero.FormKreatorMapy(f)
+                        k.Show() : Application.DoEvents()
+                        Dim dalej = Kt(Of Button)(k, "btnDalej")
+                        dalej.PerformClick() : Application.DoEvents()
+                        dalej.PerformClick() : Application.DoEvents()
+                        Dim zasiegMapy = Pole(Of Zasieg)(k, "_wybranyZasieg")
+                        Assert.True(zasiegMapy.Poprawny, "warunek wstępny: zasięg z mapy")
+                        Kt(Of RadioButton)(k, "rbObszarMiejscowosc").Checked = True
+                        Application.DoEvents()
+                        Dim teraz = Pole(Of Zasieg)(k, "_wybranyZasieg")
+                        Assert.False(teraz.Poprawny, "Przy wybranej 'miejscowości' bez wyniku kreator dalej używa zasięgu z mapy: " &
+                                     Kt(Of Label)(k, "lblObszarWymiary").Text)
+                    End Using
+                End Using
+            End Sub)
+    End Sub
+
+    <Fact>
+    Public Sub DuzyObszarPikselMinimalny_SzacunekSzybki()
+        Dim z As New Zasieg(450000, 600000, 550000, 700000) ' 100 x 100 km
+        Dim sw = Diagnostics.Stopwatch.StartNew()
+        Dim s = ZarzadcaSzablonow.SzacujParametry(z, 0.1, 1024)
+        sw.Stop()
+        Assert.True(s.LiczbaSegmentow > 900000)
+        Assert.True(sw.ElapsedMilliseconds < 2000, "czas " & sw.ElapsedMilliseconds)
+        ' Szacunek czasu przy 4 seg/s
+        Assert.True(s.SzacowanyCzasSekundy > 0)
+    End Sub
+
+    <Fact>
+    Public Sub FormatyRozmiaruSpojne()
+        Dim s As New SzacunekKreatora With {.SzacowanyRozmiarMb = 1536, .SzacowanyRozmiarMbMin = 1024, .SzacowanyRozmiarMbMax = 2048}
+        Dim a = s.SformatowanyRozmiar()
+        Dim b = s.SformatowanyPrzedzialRozmiaru()
+        Assert.Equal(a.Contains(","), b.Contains(","))
+    End Sub
+
+    <Fact>
+    Public Sub Garmin_WariantKmz_PonadSto_ZostajeKmzZOstrzezeniem()
+        Sta(Sub()
+                Using f As New Global.MapoTero.Form1()
+                    Using k As New Global.MapoTero.FormKreatorMapy(f)
+                        k.Show() : Application.DoEvents()
+                        DoKroku4(k, "rbCelGarmin", "piesza_gory")
+                        Kt(Of RadioButton)(k, "rbWariantPojedynczy").Checked = True
+                        Kt(Of NumericUpDown)(k, "numRozmiarPiksela").Value = 0.1D
+                        Application.DoEvents()
+                        Assert.Contains("KMZ", Kt(Of Label)(k, "lblFormatInfo").Text)
+                        Dim kom = Kt(Of Label)(k, "lblSzacunekKomunikat").Text
+                        Assert.True(kom.Contains("Garmin") OrElse kom.Contains("JNX"), kom)
+                    End Using
+                End Using
+            End Sub)
+    End Sub
+
+    <Fact>
+    Public Sub WlasnyZestaw_PustyPokazujeBrakWarstw()
+        Sta(Sub()
+                Using f As New Global.MapoTero.Form1()
+                    f.WybranyZestaw().Wyczysc()
+                    Using k As New Global.MapoTero.FormKreatorMapy(f)
+                        k.Show() : Application.DoEvents()
+                        Kt(Of Button)(k, "btnDalej").PerformClick() : Application.DoEvents()
+                        Dim lst = Kt(Of ListBox)(k, "lstSzablony")
+                        For i = 0 To lst.Items.Count - 1
+                            If DirectCast(lst.Items(i), SzablonMapy).Id = "wlasny_zestaw" Then lst.SelectedIndex = i
+                        Next
+                        Assert.Contains("nie wybrano", Kt(Of Label)(k, "lblSkladnikiSzablonu").Text)
+                    End Using
+                End Using
+            End Sub)
+    End Sub
+
+    <Fact>
+    Public Sub OpcjeZaawansowane_UkladBezNakladania()
+        Sta(Sub()
+                Using f As New Global.MapoTero.Form1()
+                    Using k As New Global.MapoTero.FormKreatorMapy(f)
+                        k.Show() : Application.DoEvents()
+                        DoKroku4(k, "rbCelTelefon", "piesza_gory")
+                        Assert.True(Kt(Of NumericUpDown)(k, "numRozmiarPiksela").Visible)
+                        Assert.True(Kt(Of GroupBox)(k, "grpSzczegolowosc").Bottom <= Kt(Of LinkLabel)(k, "lnkZaawansowane").Top)
+                        Assert.True(Kt(Of LinkLabel)(k, "lnkZaawansowane").Bottom <= Kt(Of GroupBox)(k, "grpZaawansowane").Top + 4)
+                        Assert.True(Kt(Of GroupBox)(k, "grpZaawansowane").Bottom <= Kt(Of Panel)(k, "pnlKrok4").Height)
+                        Assert.True(Kt(Of GroupBox)(k, "grpZapis").Bottom <= Kt(Of GroupBox)(k, "grpSzczegolowosc").Top)
+                    End Using
+                End Using
+            End Sub)
+    End Sub
+
+    <Fact>
+    Public Sub UnikalnaSciezka_DopisujeNumer()
+        Dim folder = IO.Path.Combine(IO.Path.GetTempPath(), "kreator_unikalna_" & Guid.NewGuid().ToString("N"))
+        IO.Directory.CreateDirectory(folder)
+        Try
+            Dim p = IO.Path.Combine(folder, "Mapa.mbtiles")
+            Assert.Equal(p, Global.MapoTero.FormKreatorMapy.UnikalnaSciezka(p))
+            IO.File.WriteAllText(p, "x")
+            Assert.Equal(IO.Path.Combine(folder, "Mapa_2.mbtiles"), Global.MapoTero.FormKreatorMapy.UnikalnaSciezka(p))
+        Finally
+            IO.Directory.Delete(folder, True)
+        End Try
+    End Sub
+
+End Class

@@ -81,7 +81,8 @@ Public Class FormImportOzi
     End Sub
 
     Private Sub AktualizujPrzyciskKorekty()
-        btnKorekta.Text = If(_opcjeKorekty.Wlaczona, "Profil: " & OpcjeKorekcjiMip.KrotkaNazwaProfilu(_opcjeKorekty.Profil) & "...", "Profil / Podgląd...")
+        btnKorekta.Text = "Korekta obrazu..."
+        btnKorekta.Enabled = (_anulowanie Is Nothing) AndAlso chkKorekta.Checked
     End Sub
 
     ''' <summary>Korekta przekazywana do konwersji (Nothing - wyłączona).</summary>

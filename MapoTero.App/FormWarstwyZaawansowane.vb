@@ -47,6 +47,7 @@ Public Class FormWarstwyZaawansowane
     Private ReadOnly _podglad As New PictureBox()
     Private ReadOnly _btnPodglad As New Button()
     Private ReadOnly _lblStan As New Label()
+    Private ReadOnly _btnDodajWarstwe As New Button()
     Private ReadOnly _lblZapytania As New Label()
     Private ReadOnly _btnZoomMinus As New Button()
     Private ReadOnly _btnZoomReset As New Button()
@@ -90,8 +91,16 @@ Public Class FormWarstwyZaawansowane
         _wiersze.BackColor = SystemColors.Window
         Controls.Add(_wiersze)
 
-        _lblZapytania.Location = New Point(10, 374)
-        _lblZapytania.Size = New Size(540, 44)
+        _btnDodajWarstwe.Location = New Point(10, 376)
+        _btnDodajWarstwe.Size = New Size(130, 26)
+        _btnDodajWarstwe.Text = "➕ Dodaj warstwę..."
+        _btnDodajWarstwe.Font = New Font(Font.FontFamily, 8.25!, FontStyle.Regular)
+        _podpowiedz.SetToolTip(_btnDodajWarstwe, "Dodaj kolejną warstwę mapy z dostępnych w programie zbiorów.")
+        AddHandler _btnDodajWarstwe.Click, AddressOf DodajWarstwe_Click
+        Controls.Add(_btnDodajWarstwe)
+
+        _lblZapytania.Location = New Point(148, 374)
+        _lblZapytania.Size = New Size(402, 44)
         Controls.Add(_lblZapytania)
 
         Dim lblPodglad As New Label With {.Location = New Point(560, 8), .AutoSize = True,
@@ -464,8 +473,7 @@ Public Class FormWarstwyZaawansowane
     End Sub
 
     Private Sub AktualizujPrzyciskKorekty()
-        Dim nazwa = If(_opcjeKorekty.Wlaczona, OpcjeKorekcjiMip.KrotkaNazwaProfilu(_opcjeKorekty.Profil), "Brak")
-        _btnKorekta.Text = "Korekta (" & nazwa & ")..."
+        _btnKorekta.Text = "Korekta obrazu..."
     End Sub
 
     Private Sub AktualizujStanPrzyciskowZoomu()
@@ -491,6 +499,51 @@ Public Class FormWarstwyZaawansowane
             _podpowiedz.Dispose()
         End If
         MyBase.Dispose(disposing)
+    End Sub
+
+
+    Private Sub DodajWarstwe_Click(sender As Object, e As EventArgs)
+        If _zestaw.Liczba >= ZestawWarstw.MaksLiczba Then
+            MessageBox.Show("Osiągnięto maksymalną liczbę " & ZestawWarstw.MaksLiczba & " warstw w kompozycji.", "Dodaj warstwę", MessageBoxButtons.OK, MessageBoxIcon.Information)
+            Exit Sub
+        End If
+
+        Dim zrodla = _zadanie?.ZrodlaMap
+        If zrodla Is Nothing OrElse zrodla.Count = 0 Then
+            MessageBox.Show("Brak dostępnych zbiorów map w bieżącej konfiguracji.", "Dodaj warstwę", MessageBoxButtons.OK, MessageBoxIcon.Information)
+            Exit Sub
+        End If
+
+        Using dlg As New FormWybierzDodatkowaWarstwe(zrodla, _zestaw)
+            If dlg.ShowDialog(Me) = DialogResult.OK AndAlso dlg.WybranaWarstwa IsNot Nothing Then
+                Dim nowa = dlg.WybranaWarstwa
+                If _zestaw.Warstwy.Any(Function(w) w.TaSama(nowa.Adres, nowa.Nazwa)) Then
+                    MessageBox.Show("Wybrana warstwa znajduje się już w bieżącym zestawie.", "Dodaj warstwę", MessageBoxButtons.OK, MessageBoxIcon.Information)
+                    Exit Sub
+                End If
+
+                Select Case _zestaw.Dodaj(nowa.Nazwa, adres:=nowa.Adres, zbior:=nowa.Zbior, zalecanyPiksel:=nowa.ZalecanyPiksel,
+                                          typZrodla:=nowa.TypZrodla, nakladka:=nowa.Nakladka, umiescPodNakladkami:=True,
+                                          ignorujSsl:=nowa.IgnorujSsl)
+                    Case WynikDodania.BrakMiejsca
+                        MessageBox.Show("Nie można dodać warstwy - brak wolnego miejsca.", "Dodaj warstwę", MessageBoxButtons.OK, MessageBoxIcon.Information)
+                        Exit Sub
+                    Case WynikDodania.JuzWybrana
+                        MessageBox.Show("Warstwa jest już na liście.", "Dodaj warstwę", MessageBoxButtons.OK, MessageBoxIcon.Information)
+                        Exit Sub
+                End Select
+
+                Dim dodana = _zestaw.Warstwy.LastOrDefault()
+                If dodana IsNot Nothing Then
+                    dodana.Krycie = nowa.Krycie
+                    dodana.TrybMieszania = nowa.TrybMieszania
+                End If
+
+                _zaznaczona = _zestaw.Liczba - 1
+                ZbudujWiersze()
+                PobierzPodglad(Nothing, EventArgs.Empty)
+            End If
+        End Using
     End Sub
 
 End Class

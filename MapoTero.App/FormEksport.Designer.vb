@@ -232,6 +232,7 @@ Partial Class FormEksport
         '
         'rbMBTiles
         '
+        Me.btnWielowarstwowyMbtiles.Enabled = False
         Me.btnWielowarstwowyMbtiles.Location = New System.Drawing.Point(345, 111)
         Me.btnWielowarstwowyMbtiles.Name = "btnWielowarstwowyMbtiles"
         Me.btnWielowarstwowyMbtiles.Size = New System.Drawing.Size(130, 23)
@@ -363,7 +364,7 @@ Partial Class FormEksport
         Me.btnPodgladMip.Name = "btnPodgladMip"
         Me.btnPodgladMip.Size = New System.Drawing.Size(165, 26)
         Me.btnPodgladMip.TabIndex = 14
-        Me.btnPodgladMip.Text = "Profil / Podgląd..."
+        Me.btnPodgladMip.Text = "Korekta obrazu..."
         Me.ToolTip1.SetToolTip(Me.btnPodgladMip, "Otwiera okno wyboru profilu i podglądu na żywo wyostrzania, kontrastu i nasycenia.")
         Me.btnPodgladMip.UseVisualStyleBackColor = True
         '

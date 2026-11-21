@@ -47,8 +47,8 @@ Public Class Form1
     ''' <summary>Katalog warstw: grupy tematyczne drzewa i nazwy wyświetlane warstw (warstwy\katalog.txt).</summary>
     Private _katalog As New KatalogWarstw()
 
-    ''' <summary>Nazwy wyświetlane i grupy warstw według serwera i nazwy warstwy (<see cref="KatalogWarstw.MapaNazw"/>).</summary>
-    Private _nazwyWarstw As New Dictionary(Of String, (Nazwa As String, Grupa As String))
+    ''' <summary>Nazwy wyświetlane i identyfikatory warstw według serwera i nazwy warstwy (<see cref="KatalogWarstw.MapaNazw"/>).</summary>
+    Private _nazwyWarstw As New Dictionary(Of String, (Nazwa As String, Grupa As String, Identyfikator As String))
 
     ''' <summary>Czytelne nazwy warstw i zbiorów zapisane w plikach zbiorów dodanych przez użytkownika.</summary>
     Private _tytulyDodanychWarstw As New Dictionary(Of String, (Nazwa As String, Grupa As String))(StringComparer.Ordinal)
@@ -402,6 +402,7 @@ Public Class Form1
         InicjalizujPrzyciskSzukaj()
         UstawNazwyDostepnosci()
         InicjalizujNowaSesje()
+        InicjalizujKreator()
         PrzygotujListeWarstw()
         AddHandler _timerPodgladu.Tick, AddressOf TimerPodgladu_Tick
 
@@ -865,30 +866,16 @@ Public Class Form1
             Return True
         End If
 
-        ' Inna siatka / warstwy - przygotowanie nowego podfolderu dla nowej sesji
-        Dim nowaNazwa = KonfiguracjaSesji.ProponowanaNazwaFolderuSesji(ZbiorMap, Date.Now)
-        Dim nowy As String = Path.Combine(FolderDownload, nowaNazwa) & "\"
-        Dim odp = MessageBox.Show("Folder bieżącej sesji " & FolderSesji & " zawiera segmenty innej mapy (" & opis & ")." & vbCrLf &
-                                  "Segmenty o tych samych nazwach zostałyby uznane za już pobrane i trafiłyby do scalonej mapy." & vbCrLf & vbCrLf &
-                                  "Tak - pobierz nową mapę do osobnego podfolderu sesji:" & vbCrLf & nowy & vbCrLf & vbCrLf &
-                                  "Nie - anuluj pobieranie (aby powrócić do poprzedniej sesji, wczytaj jej ustawienia z menu Sesja pobierania).",
-                                  "Folder innej sesji", MessageBoxButtons.YesNo, MessageBoxIcon.Warning)
-        If odp <> DialogResult.Yes Then
-            Komunikat("Anulowano pobieranie - folder " & FolderSesji & " zawiera segmenty innej sesji.", Color.Red)
-            Return False
-        End If
-        Try
-            Directory.CreateDirectory(nowy)
-            FolderSesji = nowy
-            Return True
-        Catch ex As Exception
-            Komunikat("Nie udało się utworzyć folderu " & nowy & ": " & OpisBledu.Z(ex), Color.Red)
-            Return False
-        End Try
+        ' Inna siatka lub inne warstwy przy istniejących już plikach - automatyczne utworzenie nowego podfolderu sesji,
+        ' aby nie pomieszać segmentów różnych map w jednym katalogu (Wariant 2: pełna automatyzacja bez uciążliwych pytań)
+        If Not UtworzPodfolderSesji() Then Return False
+        Komunikat("Wykryto zmianę mapy lub warstw - pobieranie do nowego folderu: " & Path.GetFileName(FolderSesji.TrimEnd("\"c, "/"c)), Color.Green)
+        Return True
     End Function
     ''' <summary>Tworzy nowy podfolder sesji w download i ustawia go jako folder sesji. False - nie udało się.</summary>
     Private Function UtworzPodfolderSesji() As Boolean
-        Dim nazwaFolderu = KonfiguracjaSesji.ProponowanaNazwaFolderuSesji(ZbiorMap, Date.Now)
+        Dim skrot = IdentyfikatorBiezacychWarstw()
+        Dim nazwaFolderu = KonfiguracjaSesji.ProponowanaNazwaFolderuSesji(If(Not String.IsNullOrWhiteSpace(skrot), skrot, ZbiorMap), Date.Now)
         Dim nowyFolder As String = Path.Combine(FolderDownload, nazwaFolderu) & "\"
         Try
             Directory.CreateDirectory(nowyFolder)
@@ -990,6 +977,7 @@ Public Class Form1
                 Komunikat("Nie udało się odczytać katalogu warstw: " & OpisBledu.Z(ex), Color.Red)
             End Try
         End If
+        KatalogWarstw.Instancja = _katalog
         Dim pliki As New Dictionary(Of String, PlikWarstw)(StringComparer.OrdinalIgnoreCase)
         _tytulyDodanychWarstw.Clear()
         For Each z In _zbiory
@@ -1013,20 +1001,50 @@ Public Class Form1
 
     ''' <summary>Nazwa warstwy kanapki do wyświetlania: z katalogu warstw albo z tytułu w pliku zbioru, inaczej nazwa na serwerze.</summary>
     Friend Function NazwaWarstwy(w As WarstwaWybrana) As String
-        Dim n As (Nazwa As String, Grupa As String) = Nothing
+        Dim n As (Nazwa As String, Grupa As String, Identyfikator As String) = Nothing
         Dim klucz = KatalogWarstw.KluczAliasu(w.Adres, w.Nazwa)
         If _nazwyWarstw.TryGetValue(klucz, n) Then Return n.Nazwa
-        If _tytulyDodanychWarstw.TryGetValue(klucz, n) Then Return n.Nazwa
+        Dim nd As (Nazwa As String, Grupa As String) = Nothing
+        If _tytulyDodanychWarstw.TryGetValue(klucz, nd) Then Return nd.Nazwa
         Return w.Nazwa
     End Function
 
     ''' <summary>Źródło warstwy kanapki do wyświetlania: grupa z katalogu warstw albo tytuł zbioru, inaczej nazwa pliku zbioru.</summary>
     Friend Function ZrodloWarstwy(w As WarstwaWybrana) As String
-        Dim n As (Nazwa As String, Grupa As String) = Nothing
+        Dim n As (Nazwa As String, Grupa As String, Identyfikator As String) = Nothing
         Dim klucz = KatalogWarstw.KluczAliasu(w.Adres, w.Nazwa)
         If _nazwyWarstw.TryGetValue(klucz, n) Then Return n.Grupa
-        If _tytulyDodanychWarstw.TryGetValue(klucz, n) Then Return n.Grupa
+        Dim nd As (Nazwa As String, Grupa As String) = Nothing
+        If _tytulyDodanychWarstw.TryGetValue(klucz, nd) Then Return nd.Grupa
         Return w.Zbior
+    End Function
+
+    ''' <summary>Zwięzły identyfikator warstwy (maksymalnie 20 znaków, np. Topo_65_10k) z katalogu warstw.</summary>
+    Friend Function IdentyfikatorWarstwy(w As WarstwaWybrana) As String
+        If w Is Nothing Then Return ""
+        Dim n As (Nazwa As String, Grupa As String, Identyfikator As String) = Nothing
+        Dim klucz = KatalogWarstw.KluczAliasu(w.Adres, w.Nazwa)
+        If _nazwyWarstw.TryGetValue(klucz, n) AndAlso Not String.IsNullOrWhiteSpace(n.Identyfikator) Then
+            Return n.Identyfikator
+        End If
+        Return w.Nazwa
+    End Function
+
+    ''' <summary>Zwięzły identyfikator bieżącej konfiguracji warstw do nazwy folderu sesji lub eksportu.</summary>
+    Friend Function IdentyfikatorBiezacychWarstw() As String
+        If _zestaw Is Nothing OrElse _zestaw.Liczba = 0 Then Return ""
+        If _zestaw.Liczba = 1 Then
+            Dim id1 = IdentyfikatorWarstwy(_zestaw.Warstwy(0))
+            Return If(Not String.IsNullOrWhiteSpace(id1), id1, ZbiorMap)
+        Else
+            Dim skroty = _zestaw.Warstwy.Select(Function(w) IdentyfikatorWarstwy(w)).Where(Function(s) Not String.IsNullOrWhiteSpace(s)).ToList()
+            If skroty.Count = 0 Then Return ZbiorMap
+            Dim polaczone = String.Join("+", skroty)
+            If polaczone.Length > 30 Then
+                Return skroty(0) & "_mix"
+            End If
+            Return polaczone
+        End If
     End Function
 
     Private Sub DodajZbioryZIndeksu(plik As String, lista As List(Of String), dodane As HashSet(Of String))
@@ -1106,8 +1124,8 @@ Public Class Form1
             If d.CzyWarstwa Then
                 Dim z = ZnajdzZbior(d.Zbior)
                 If z Is Nothing OrElse z.Plik Is Nothing Then Continue For
-                If szukanie AndAlso Not FiltrWarstw.Pasuje(nazwy & " " & z.Nazwa, d.Nazwa & " " & d.Warstwa, fraza) Then Continue For
-                wezel.Nodes.Add(WezelWarstwy(z, d.Warstwa, d.Nazwa, klucz))
+                If szukanie AndAlso Not FiltrWarstw.Pasuje(nazwy & " " & z.Nazwa, d.Nazwa & " " & d.Warstwa & If(d.Identyfikator <> "", " " & d.Identyfikator, ""), fraza) Then Continue For
+                wezel.Nodes.Add(WezelWarstwy(z, d.Warstwa, d.Nazwa, klucz, d.Identyfikator))
             Else
                 Dim podgrupa = WezelGrupy(d, klucz, nazwy, fraza, szukanie)
                 If podgrupa IsNot Nothing Then wezel.Nodes.Add(podgrupa)
@@ -1147,10 +1165,11 @@ Public Class Form1
     End Function
 
     ''' <summary>Węzeł warstwy z podpowiedzią: nazwa warstwy na serwerze, zbiór map, typ, zakres powiększeń, zalecany rozmiar piksela.</summary>
-    Private Function WezelWarstwy(z As ZbiorMapy, warstwa As String, nazwa As String, kluczRodzica As String) As TreeNode
+    Private Function WezelWarstwy(z As ZbiorMapy, warstwa As String, nazwa As String, kluczRodzica As String, Optional identyfikator As String = "") As TreeNode
         Dim wm = z.Plik.Znajdz(warstwa)
         Dim opisTechniczny As String = KafleXyz.OpisWarstwy(z.Plik.EfektywnyTyp, z.Plik.OpcjeKafli(warstwa))
-        Dim opis As String = nazwa & vbCrLf & "Warstwa " & warstwa & " zbioru map " & z.Nazwa &
+        Dim naglowek As String = If(Not String.IsNullOrWhiteSpace(identyfikator), nazwa & " [" & identyfikator & "]", nazwa)
+        Dim opis As String = naglowek & vbCrLf & "Warstwa " & warstwa & " zbioru map " & z.Nazwa &
                              If(opisTechniczny <> "", vbCrLf & opisTechniczny, "") &
                              If(wm IsNot Nothing AndAlso Wartosc(wm.RozmiarPiksela) > 0, vbCrLf & "Zalecany rozmiar piksela: " & wm.RozmiarPiksela & " m", "")
         Return New TreeNode(nazwa) With {.Name = kluczRodzica & "/" & z.Nazwa & "|" & warstwa, .ToolTipText = opis,
@@ -1630,7 +1649,7 @@ Public Class Form1
     ''' warstwy. Zalecany piksel jest w metrach - w układzie WGS84 przeliczany na stopnie; wcześniej 0,25 m traktowano
     ''' jako 0,25°, więc podgląd obejmował obszar ok. 29° x 29° i był pusty.
     ''' </summary>
-    Private Function PikselPodgladuBezSiatki() As Double
+    Friend Function PikselPodgladuBezSiatki() As Double
         Dim wpisany = Wartosc(txtRozmiarPiksela.Text)
         If wpisany > 0 Then Return wpisany
         Dim zalecany = If(_zestaw.NajdokladniejszaWarstwa() IsNot Nothing, _zestaw.NajdokladniejszaWarstwa().ZalecanyPiksel, 0)
@@ -1832,8 +1851,13 @@ Public Class Form1
 
     ''' <summary>Siatka segmentów wg pól formularza.</summary>
     Friend Function BiezacaSiatka() As Siatka
-        Dim obszar As New Zasieg(Wartosc(txtXDol.Text), Wartosc(txtYLewy.Text), Wartosc(txtXGora.Text), Wartosc(txtYPrawy.Text))
+        Dim obszar = ZasiegPolXY()
         Return New Siatka(obszar, Wartosc(txtRozmiarPiksela.Text), WartoscCalkowita(txtBokSegmentu.Text))
+    End Function
+
+    ''' <summary>Zasięg z pól współrzędnych X/Y okna głównego (niezależnie od rozmiaru piksela).</summary>
+    Friend Function ZasiegPolXY() As Zasieg
+        Return New Zasieg(Wartosc(txtXDol.Text), Wartosc(txtYLewy.Text), Wartosc(txtXGora.Text), Wartosc(txtYPrawy.Text))
     End Function
 
     ''' <summary>
@@ -2037,7 +2061,15 @@ Public Class Form1
         Next
     End Sub
 
-    Private Function ZrodlaMapSesji() As Dictionary(Of String, PlikWarstw)
+    Friend Function WybranyZestaw() As ZestawWarstw
+        Return _zestaw
+    End Function
+
+    Friend Sub ZaladujSesjeZFolderu(folder As String)
+        WczytajConfZFolderu(folder, True)
+    End Sub
+
+    Friend Function ZrodlaMapSesji() As Dictionary(Of String, PlikWarstw)
         Dim zrodla As New Dictionary(Of String, PlikWarstw)(StringComparer.OrdinalIgnoreCase)
         For Each z In _zbiory
             If z.Plik IsNot Nothing AndAlso Not zrodla.ContainsKey(z.Nazwa) Then
@@ -2114,7 +2146,7 @@ Public Class Form1
     ''' Parametry podglądu kanapki w oknie „Warstwy - zaawansowane”: serwer, układ, format i siatka jak przy pobieraniu
     ''' (siatka Nothing - niepoprawne pola zasięgu).
     ''' </summary>
-    Private Function ZadanieDoPodgladu() As ZadaniePobierania
+    Friend Function ZadanieDoPodgladu() As ZadaniePobierania
         Dim siatka = BiezacaSiatka()
         If Not siatka.Poprawna Then
             Dim srodek = If(_punktProbkiBezSiatki.HasValue, _punktProbkiBezSiatki.Value, Ustawienia.Uklad.ZWgs84(mapa.Position.Lat, mapa.Position.Lng))
@@ -2266,6 +2298,7 @@ Public Class Form1
         btnScalanie.Enabled = False
         btnUsunPobrane.Enabled = False
         _btnNowaSesja.Enabled = False
+        If _btnKreator IsNot Nothing Then _btnKreator.Enabled = False
         OdswiezToolStripMenuItem.Enabled = False
         KorytarzToolStripMenuItem.Enabled = False
         chkEdycjaXY.Enabled = False
@@ -2289,6 +2322,7 @@ Public Class Form1
             UstawDostepnoscDrzewa(True)
             btnUsunPobrane.Enabled = True
             _btnNowaSesja.Enabled = True
+            If _btnKreator IsNot Nothing Then _btnKreator.Enabled = True
             OdswiezToolStripMenuItem.Enabled = True
             KorytarzToolStripMenuItem.Enabled = True
             chkEdycjaXY.Enabled = True
@@ -2856,7 +2890,7 @@ Public Class Form1
     Private Function ZnacznikiWidoczne(warstwa As GMapOverlay) As Boolean
         Const margines As Integer = 10
         Dim zaslony As New List(Of Rectangle)
-        For Each c As Control In New Control() {btnPowieksz, btnPomniejsz, lblZoom, rbGoogle, rbBing, rbOsm,
+        For Each c As Control In New Control() {btnPowieksz, btnPomniejsz, lblZoom, btnSzukajDzialki, rbGoogle, rbBing, rbOsm,
                                                 lblKursorTytul, lblKursorUkladOpis, lblKursorUklad, lblSrodekTytul,
                                                 lblSrodekOpisSzer, lblSrodekSzer, lblSrodekOpisDlug, lblSrodekDlug}
             If c.Visible Then zaslony.Add(mapa.RectangleToClient(c.RectangleToScreen(c.ClientRectangle)))
@@ -3152,6 +3186,14 @@ Public Class Form1
         FormEksport.ShowDialog()
     End Sub
 
+    ''' <summary>Otwiera okno eksportu mapy z opcjonalnym domyślnym rodzajem eksportu.</summary>
+    Friend Sub OtworzOknoEksportu(Optional rodzaj As RodzajEksportu = RodzajEksportu.MBTiles)
+        If PobieranieTrwa("Eksport") Then Exit Sub
+        Using f As New FormEksport()
+            f.ShowDialog(Me)
+        End Using
+    End Sub
+
     Private Sub EksportCadToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles EksportCadToolStripMenuItem.Click
         Using f As New FormEksportCad()
             f.ShowDialog(Me)
@@ -3383,6 +3425,9 @@ Public Class Form1
 
     Private Sub InicjalizujPrzyciskSzukaj()
         Try
+            ' Estetyczny odstęp (12 px) pod blokiem zoomu, aby lupa stanowiła osobne narzędzie i nie zlewała się z przyciskiem pomniejszania
+            btnSzukajDzialki.Left = btnPomniejsz.Left
+            btnSzukajDzialki.Top = btnPomniejsz.Bottom + 12
             btnSzukajDzialki.Text = ""
             btnSzukajDzialki.Image = UtworzIkoneLupy()
             btnSzukajDzialki.ImageAlign = ContentAlignment.MiddleCenter
@@ -3427,7 +3472,7 @@ Public Class Form1
 
     Private Sub OtworzWyszukiwarke(Optional tryb As Integer = -1)
         If PobieranieTrwa("Wyszukiwanie") Then Exit Sub
-        Using frm As New FormSzukajDzialki(tryb)
+        Using frm As New FormSzukajDzialki(tryb, srodekLat:=mapa.Position.Lat, srodekLon:=mapa.Position.Lng)
             If frm.ShowDialog(Me) = DialogResult.OK Then
                 If frm.WybranaDzialka IsNot Nothing Then
                     UstawDzialke(frm.WybranaDzialka, frm.MarginesMetry, frm.WlaczWarstwy)
@@ -3529,6 +3574,112 @@ Public Class Form1
                 .Stroke = New Pen(Color.FromArgb(200, Color.DarkRed), 2)
             })
         Next
+    End Sub
+
+#End Region
+
+#Region "Kreator mapy"
+
+    Private _btnKreator As Button
+    Private _menuKreator As ToolStripMenuItem
+
+    Private Sub InicjalizujKreator()
+        Dim krok As Integer = btnUsunPobrane.Left - btnScalanie.Left
+        _btnKreator = New Button With {
+            .Name = "btnKreator", .Size = btnUsunPobrane.Size, .Location = New Point(btnUsunPobrane.Left + krok, btnUsunPobrane.Top),
+            .Anchor = btnUsunPobrane.Anchor, .Image = UtworzIkoneKreatora(), .ImageAlign = ContentAlignment.MiddleCenter,
+            .UseVisualStyleBackColor = True, .TabIndex = btnUsunPobrane.TabIndex + 1}
+        btnUsunPobrane.Parent.Controls.Add(_btnKreator)
+        _btnKreator.BringToFront()
+        ToolTip1.SetToolTip(_btnKreator, "Szybki kreator mapy (Ctrl+K) - prowadzi krok po kroku od celu do gotowej mapy")
+        AddHandler _btnKreator.Click, Sub() OtworzKreatorMapy()
+
+        _menuKreator = New ToolStripMenuItem("Szybki kreator mapy...", UtworzIkoneKreatora(), Sub() OtworzKreatorMapy()) With {
+            .Name = "KreatorMapyToolStripMenuItem",
+            .ShortcutKeys = Keys.Control Or Keys.K}
+        NarzedziaToolStripMenuItem.DropDownItems.Insert(0, _menuKreator)
+        NarzedziaToolStripMenuItem.DropDownItems.Insert(1, New ToolStripSeparator())
+    End Sub
+
+    ''' <summary>Ikona kreatora mapy: mapa z różdżką/gwiazdą.</summary>
+    Public Shared Function UtworzIkoneKreatora(Optional rozmiar As Integer = 16) As Bitmap
+        Dim bmp As New Bitmap(rozmiar, rozmiar, Imaging.PixelFormat.Format32bppArgb)
+        Using g = Graphics.FromImage(bmp)
+            g.SmoothingMode = Drawing2D.SmoothingMode.AntiAlias
+            g.PixelOffsetMode = Drawing2D.PixelOffsetMode.HighQuality
+            g.Clear(Color.Transparent)
+            ' Kontur mapy w tle
+            Dim rog() As PointF = {New PointF(1.5!, 2.0!), New PointF(11.5!, 2.0!), New PointF(11.5!, 13.5!), New PointF(1.5!, 13.5!)}
+            Using pedzel As New SolidBrush(Color.FromArgb(240, 245, 255))
+                g.FillPolygon(pedzel, rog)
+            End Using
+            Using pioro As New Pen(Color.FromArgb(50, 100, 180), 1.0!)
+                g.DrawPolygon(pioro, rog)
+            End Using
+            ' Magiczna różdżka / gwiazda
+            Using pedzelGwiazda As New SolidBrush(Color.FromArgb(255, 170, 0))
+                g.FillEllipse(pedzelGwiazda, 8.5!, 1.5!, 6.5!, 6.5!)
+            End Using
+            Using pioroRozdzka As New Pen(Color.FromArgb(140, 60, 200), 2.0!)
+                g.DrawLine(pioroRozdzka, 4.0!, 12.0!, 10.5!, 5.5!)
+            End Using
+            Using pioroBlask As New Pen(Color.White, 1.2!)
+                g.DrawLine(pioroBlask, 11.5!, 2.5!, 11.5!, 7.0!)
+                g.DrawLine(pioroBlask, 9.2!, 4.7!, 13.8!, 4.7!)
+            End Using
+        End Using
+        Return bmp
+    End Function
+
+    ''' <summary>Silnik podglądu zestawu warstw współdzielony z oknem kreatora.</summary>
+    Friend Function SilnikPodgladu() As PodgladWarstwSilnik
+        Return _silnikPodgladu
+    End Function
+
+    ''' <summary>Centruje mapę w oknie głównym na wskazanym zasięgu i aktualizuje znaczniki.</summary>
+    Friend Sub CentrujNaZasiegu(z As Zasieg)
+        If Not z.Poprawny Then Exit Sub
+        Dim srodek1992X = (z.XDol + z.XGora) / 2.0
+        Dim srodek1992Y = (z.YLewy + z.YPrawy) / 2.0
+        Dim wgs = UkladWspolrzednych.PL1992.DoWgs84(srodek1992X, srodek1992Y)
+        mapa.Position = New GMap.NET.PointLatLng(wgs.Szerokosc, wgs.Dlugosc)
+        txtXDol.Text = Liczba(z.XDol)
+        txtYLewy.Text = Liczba(z.YLewy)
+        txtXGora.Text = Liczba(z.XGora)
+        txtYPrawy.Text = Liczba(z.YPrawy)
+        WyczyscZnaczniki()
+        PokazZnaczniki()
+    End Sub
+
+    Private _oknoKreatora As FormKreatorMapy
+
+    ''' <summary>Otwiera okno szybkiego kreatora generowania mapy.</summary>
+    Public Sub OtworzKreatorMapy()
+        If PobieranieTrwa("Otwarcie kreatora generowania mapy") Then Exit Sub
+        If _oknoKreatora IsNot Nothing AndAlso Not _oknoKreatora.IsDisposed Then
+            If _oknoKreatora.WindowState = FormWindowState.Minimized Then
+                _oknoKreatora.WindowState = FormWindowState.Normal
+            End If
+            _oknoKreatora.Show()
+            _oknoKreatora.Activate()
+            _oknoKreatora.BringToFront()
+            Exit Sub
+        End If
+
+        _oknoKreatora = New FormKreatorMapy(Me)
+        AddHandler _oknoKreatora.FormClosed, Sub()
+                                                 _oknoKreatora = Nothing
+                                                 Enabled = True
+                                                 If WindowState = FormWindowState.Minimized Then
+                                                     WindowState = FormWindowState.Normal
+                                                 End If
+                                                 Show()
+                                                 Activate()
+                                                 BringToFront()
+                                                 FormKreatorMapy.SetForegroundWindow(Handle)
+                                             End Sub
+        _oknoKreatora.Show(Me)
+        Enabled = False
     End Sub
 
 #End Region

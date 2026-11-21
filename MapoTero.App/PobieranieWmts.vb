@@ -139,9 +139,11 @@ Public Class ZrodloWmts
         'wspólny folder kafli wszystkich usług sesji - nazwa kafla to skrót jego adresu
         Dim zrodlo As New ZrodloWmts(folderDocelowy, z.LimitCzasuSekundy, Math.Max(1, Math.Min(100, z.JakoscJpegWmts)),
                                      ignorujSsl:=czyIgnorujSsl, progWalidacjiCache:=progCache)
+        Dim zasiegDlaPlanu = If(z.Siatka IsNot Nothing AndAlso z.Siatka.Poprawna, z.Siatka.ZasiegSiatki, New Zasieg(0, 0, 1000, 1000))
+        Dim pikselDlaPlanu = If(z.Siatka IsNot Nothing AndAlso z.Siatka.Poprawna, z.Siatka.RozmiarPiksela, 1.0)
         For Each nazwa In nazwy
             If zrodlo._planyWgNazwy.ContainsKey(nazwa) Then Continue For
-            Dim plan As New PlanWmts(usluga, nazwa, z.Uklad, z.Siatka.ZasiegSiatki, z.Siatka.RozmiarPiksela, z.Format)
+            Dim plan As New PlanWmts(usluga, nazwa, z.Uklad, zasiegDlaPlanu, pikselDlaPlanu, z.Format)
             zrodlo.Plany.Add(plan)
             zrodlo._planyWgNazwy(nazwa) = plan
             If Not String.IsNullOrEmpty(plan.Warstwa?.Identyfikator) AndAlso Not zrodlo._planyWgNazwy.ContainsKey(plan.Warstwa.Identyfikator) Then
@@ -168,8 +170,10 @@ Public Class ZrodloWmts
         Dim zrodlo As New ZrodloWmts(folderDocelowy, z.LimitCzasuSekundy, Math.Max(1, Math.Min(100, z.JakoscJpegWmts)),
                                      czyKafleXyz:=True, kluczSerwera:=kluczSerwera, referer:=opcjeBazowe.Referer,
                                      ignorujSsl:=czyIgnorujSsl, progWalidacjiCache:=progCache)
+        Dim zasiegDlaPlanu = If(z.Siatka IsNot Nothing AndAlso z.Siatka.Poprawna, z.Siatka.ZasiegSiatki, New Zasieg(0, 0, 1000, 1000))
+        Dim pikselDlaPlanu = If(z.Siatka IsNot Nothing AndAlso z.Siatka.Poprawna, z.Siatka.RozmiarPiksela, 1.0)
         For Each nazwa In listaNazw
-            Dim plan As New PlanWmts(usluga, nazwa, z.Uklad, z.Siatka.ZasiegSiatki, z.Siatka.RozmiarPiksela, z.Format)
+            Dim plan As New PlanWmts(usluga, nazwa, z.Uklad, zasiegDlaPlanu, pikselDlaPlanu, z.Format)
             zrodlo.Plany.Add(plan)
             zrodlo._planyWgNazwy(nazwa) = plan
             If Not String.IsNullOrEmpty(plan.Warstwa?.Identyfikator) AndAlso Not zrodlo._planyWgNazwy.ContainsKey(plan.Warstwa.Identyfikator) Then

@@ -631,6 +631,14 @@ Public Enum TrybMieszania
     Ekran = 4
     ''' <summary>6 Nakładka (Overlay) - łączy mnożenie i ekran, podbijając kontrast (idealne dla cieniowania rzeźby terenu / hillshade).</summary>
     Nakladka = 5
+    ''' <summary>
+    ''' 7 Rzeźba terenu - dla cieniowania rzeźby (hillshade): jasność 180/255, którą cieniowanie ma na płaskim terenie
+    ''' (słońce 45° nad horyzontem), jest neutralna - płaski teren zachowuje barwy mapy, stoki w cieniu ciemnieją,
+    ''' a oświetlone lekko jaśnieją. Mnożenie kładło na całej mapie szarą zasłonę (płaski teren ma 180, nie 255),
+    ''' a przy małym kryciu rzeźba była niewidoczna; nakładka rozjaśniała płaski teren i zmieniała barwy.
+    ''' Starsze wersje programu czytają tę wartość jako tryb Zwykły.
+    ''' </summary>
+    RzezbaTerenu = 6
 End Enum
 
 Public Module TrybMieszaniaRozszerzenia
@@ -641,6 +649,7 @@ Public Module TrybMieszaniaRozszerzenia
             Case TrybMieszania.Jasniej : Return "4 Jaśniej"
             Case TrybMieszania.Ekran : Return "5 Ekran"
             Case TrybMieszania.Nakladka : Return "6 Nakładka"
+            Case TrybMieszania.RzezbaTerenu : Return "7 Rzeźba terenu"
             Case Else : Return "1 Zwykły"
         End Select
     End Function
@@ -653,6 +662,7 @@ Public Module TrybMieszaniaRozszerzenia
         If t.StartsWith("4") OrElse t.Contains("jaśn") OrElse t.Contains("jasn") OrElse t.Contains("light") Then Return TrybMieszania.Jasniej
         If t.StartsWith("5") OrElse t.Contains("ekran") OrElse t.Contains("screen") Then Return TrybMieszania.Ekran
         If t.StartsWith("6") OrElse t.Contains("nakład") OrElse t.Contains("naklad") OrElse t.Contains("overlay") Then Return TrybMieszania.Nakladka
+        If t.StartsWith("7") OrElse t.Contains("rzeźb") OrElse t.Contains("rzezb") OrElse t.Contains("hillshade") Then Return TrybMieszania.RzezbaTerenu
         Return TrybMieszania.Zwykly
     End Function
 
@@ -662,6 +672,18 @@ Public Module TrybMieszaniaRozszerzenia
         "3 Ciemniej",
         "4 Jaśniej",
         "5 Ekran",
-        "6 Nakładka"
+        "6 Nakładka",
+        "7 Rzeźba terenu"
     }
+
+    ''' <summary>Jasność cieniowania rzeźby na płaskim terenie (255 · sin 45°) - neutralna w trybie Rzeźba terenu.</summary>
+    Public Const JasnoscPlaskiegoTerenu As Double = 180.0 / 255.0
+
+    ''' <summary>Najmocniejsze rozjaśnienie oświetlonych stoków w trybie Rzeźba terenu (mocniejsze przepalało barwy).</summary>
+    Public Const MaksRozjasnienieRzezby As Double = 1.2
+
+    ''' <summary>Współczynnik jasności piksela mapy dla cieniowania o jasności <paramref name="szarosc"/> (0-1) w trybie Rzeźba terenu.</summary>
+    Public Function WspolczynnikRzezby(szarosc As Double) As Double
+        Return Math.Max(0.0, Math.Min(MaksRozjasnienieRzezby, szarosc / JasnoscPlaskiegoTerenu))
+    End Function
 End Module

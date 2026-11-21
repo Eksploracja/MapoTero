@@ -162,4 +162,59 @@ Public Class PodgladWarstwSilnikTesty
         End Using
     End Sub
 
+
+    <Fact>
+    Public Sub ZastosujZoom_ZDopasowaniemWypelnienia_WypelniaCalyDocelowyObszar()
+        ' Testujemy, że przy dopasujWypelnienie:=True pomniejszenie (0.3x) małej próbki (100x100)
+        ' do dużego okna (374x196) wypełnia cały obszar bez marginesów szachownicy
+        Using bmp As New Bitmap(100, 100)
+            Using g = Graphics.FromImage(bmp)
+                g.Clear(Color.CornflowerBlue)
+            End Using
+
+            Using wynik = PodgladWarstwSilnik.ZastosujZoom(bmp, 0.3, 374, 196, dopasujWypelnienie:=True)
+                Assert.NotNull(wynik)
+                Assert.Equal(374, wynik.Width)
+                Assert.Equal(196, wynik.Height)
+
+                ' Wszystkie rogi i krawędzie muszą być wypełnione kolorem próbki (brak pustej szachownicy)
+                Dim pNaro = wynik.GetPixel(0, 0)
+                Assert.True(pNaro.B > 200, "Lewy górny róg powinien być wypełniony treścią mapy")
+
+                Dim pPrawy = wynik.GetPixel(373, 195)
+                Assert.True(pPrawy.B > 200, "Prawy dolny róg powinien być wypełniony treścią mapy")
+            End Using
+        End Using
+    End Sub
+
+    <Fact>
+    Public Sub PodgladWarstwSilnik_BokWlasciwosc_DostosowujeZasiegIProbke()
+        Using silnik As New PodgladWarstwSilnik() With {.Bok = 512}
+            Assert.Equal(512, silnik.Bok)
+            silnik.SprawdzIZaktualizujParametry(New PunktXY(500000, 600000), 1.0, UkladWspolrzednych.PL1992)
+            Dim z = silnik.ZasiegProbki().Value
+            Assert.Equal(512.0, z.Szerokosc, 3)
+            Assert.Equal(512.0, z.Wysokosc, 3)
+        End Using
+    End Sub
+
+    <Fact>
+    Public Sub ZastosujZoom_ZPrzesunieciem_PrzesuwaTrescWMiejscuDocelowym()
+        Using zrodlo As New Bitmap(100, 100, Imaging.PixelFormat.Format32bppArgb)
+            Using g = Graphics.FromImage(zrodlo)
+                g.Clear(Color.Blue)
+            End Using
+            zrodlo.SetPixel(50, 50, Color.FromArgb(255, 255, 0, 0)) ' czerwony punkt w centrum
+
+            Using wynik = PodgladWarstwSilnik.ZastosujZoom(zrodlo, 1.0, 100, 100, dopasujWypelnienie:=False, przesuniecieX:=10, przesuniecieY:=20)
+                Assert.NotNull(wynik)
+                ' Punkt z (50,50) powinien przesunąć się o (+10, +20) na (60, 70)
+                Dim px = wynik.GetPixel(60, 70)
+                Assert.Equal(255, px.R)
+                Assert.Equal(0, px.G)
+                Assert.Equal(0, px.B)
+            End Using
+        End Using
+    End Sub
+
 End Class

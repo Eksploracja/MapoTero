@@ -2,293 +2,294 @@
 #
 #   > Grupa              grupa pierwszego poziomu
 #   >> Podgrupa          podgrupa (kolejne > - kolejne poziomy)
-#   zbiór | warstwa | nazwa
-#                        warstwa z pliku zbioru map warstwy\<zbiór>.txt (nazwa warstwy jak na serwerze)
-#                        i nazwa wyświetlana w programie; ta sama warstwa może być w kilku grupach
+#   zbiór | warstwa | nazwa | identyfikator
+#                        warstwa z pliku zbioru map warstwy\<zbiór>.txt (nazwa warstwy jak na serwerze),
+#                        nazwa wyświetlana w programie i zwięzły identyfikator (maksymalnie 20 znaków,
+#                        np. Topo_65_10k); ta sama warstwa może być w kilku grupach
 #
 # Zbiory map i warstwy, których katalog nie wymienia (np. dodane kreatorem serwerów), program pokazuje
 # w grupie „Dodane serwery”. Plik zapisuj w kodowaniu UTF-8.
 
 > Ortofotomapy
-ortofotomapa_WMTS | ORTOFOTOMAPA | Ortofotomapa standardowa 25 cm (kafle WMTS)
-ortofotomapa_HighResolution_WMTS | ORTOFOTOMAPA | Ortofotomapa wysokiej rozdzielczości do 10 cm (kafle WMTS)
-ortofotomapa | Raster | Ortofotomapa wysokiej rozdzielczości (WMS)
-ortofotomapa_TrueOrtho | PrawdziwaOrtofotomapa | Prawdziwa ortofotomapa (TrueOrtho)
+ortofotomapa_WMTS | ORTOFOTOMAPA | Ortofotomapa standardowa 25 cm (kafle WMTS) | Orto_Std_25cm
+ortofotomapa_HighResolution_WMTS | ORTOFOTOMAPA | Ortofotomapa wysokiej rozdzielczości do 10 cm (kafle WMTS) | Orto_HiRes_10cm
+ortofotomapa | Raster | Ortofotomapa wysokiej rozdzielczości (WMS) | Orto_HiRes_WMS
+ortofotomapa_TrueOrtho | PrawdziwaOrtofotomapa | Prawdziwa ortofotomapa (TrueOrtho) | Orto_True
 
 > Mapy topograficzne
-TOPO_WMTS | MAPA TOPOGRAFICZNA | Mapa topograficzna GUGiK (kafle WMTS)
-BDOT10k_WMTS | BDOT10k | Baza danych obiektów topograficznych BDOT10k (kafle WMTS)
-BDOO_WMTS | BDOOCieniowanie | Mapa ogólnogeograficzna BDOO z cieniowaniem (kafle WMTS)
-krajobrazowa | Krajobrazowa | Mapa krajobrazowa GUGiK (przeglądowa)
+TOPO_WMTS | MAPA TOPOGRAFICZNA | Mapa topograficzna GUGiK (kafle WMTS) | Topo_GUGiK
+BDOT10k_WMTS | BDOT10k | Baza danych obiektów topograficznych BDOT10k (kafle WMTS) | BDOT10k
+BDOO_WMTS | BDOOCieniowanie | Mapa ogólnogeograficzna BDOO z cieniowaniem (kafle WMTS) | BDOO_Cien
+krajobrazowa | Krajobrazowa | Mapa krajobrazowa GUGiK (przeglądowa) | Topo_Krajobraz
 >> Skany map topograficznych GUGiK
-skany_map_topograficznych | Raster_10_1942 | 1:10 000, układ 1942
-skany_map_topograficznych | Raster_10_1965 | 1:10 000, układ 1965
-skany_map_topograficznych | Raster_10_1992 | 1:10 000, układ 1992
-skany_map_topograficznych | Raster_25_1965 | 1:25 000, układ 1965
-skany_map_topograficznych | Raster_50_1942 | 1:50 000, układ 1942
-skany_map_topograficznych | Raster_50_1965 | 1:50 000, układ 1965
-skany_map_topograficznych | Raster_50_1992 | 1:50 000, układ 1992
-skany_map_topograficznych | Raster_50_UTM | 1:50 000, układ UTM
-skany_map_topograficznych | Raster_50tys_VMap | 1:50 000, VMap L2
+skany_map_topograficznych | Raster_10_1942 | 1:10 000, układ 1942 | Topo_42_10k
+skany_map_topograficznych | Raster_10_1965 | 1:10 000, układ 1965 | Topo_65_10k
+skany_map_topograficznych | Raster_10_1992 | 1:10 000, układ 1992 | Topo_92_10k
+skany_map_topograficznych | Raster_25_1965 | 1:25 000, układ 1965 | Topo_65_25k
+skany_map_topograficznych | Raster_50_1942 | 1:50 000, układ 1942 | Topo_42_50k
+skany_map_topograficznych | Raster_50_1965 | 1:50 000, układ 1965 | Topo_65_50k
+skany_map_topograficznych | Raster_50_1992 | 1:50 000, układ 1992 | Topo_92_50k
+skany_map_topograficznych | Raster_50_UTM | 1:50 000, układ UTM | Topo_UTM_50k
+skany_map_topograficznych | Raster_50tys_VMap | 1:50 000, VMap L2 | Topo_VMap_50k
 >> Mapy społecznościowe i turystyczne (kafle XYZ)
-OSMapa_PL | osmapa | OSMapa.pl – mapa topograficzno-turystyczna (OpenStreetMap)
-UMP_pcPL | ump_pcPL | UMP-pcPL – Uzupełniająca Mapa Polski
-OpenTopoMap | opentopomap | OpenTopoMap – mapa topograficzna Europy (poziomice i cieniowanie)
-Waymarked_Trails | hiking | Szlaki piesze – nakładka (Waymarked Trails)
-Waymarked_Trails | cycling | Szlaki rowerowe – nakładka (Waymarked Trails)
-Waymarked_Trails | mtb | Szlaki MTB – nakładka (Waymarked Trails)
-Waymarked_Trails | riding | Szlaki konne – nakładka (Waymarked Trails)
-Waymarked_Trails | skating | Trasy rolkowe – nakładka (Waymarked Trails)
-Waymarked_Trails | slopes | Trasy narciarskie – nakładka (Waymarked Trails)
+OSMapa_PL | osmapa | OSMapa.pl – mapa topograficzno-turystyczna (OpenStreetMap) | OSMapa
+UMP_pcPL | ump_pcPL | UMP-pcPL – Uzupełniająca Mapa Polski | UMP
+OpenTopoMap | opentopomap | OpenTopoMap – mapa topograficzna Europy (poziomice i cieniowanie) | OpenTopo
+Waymarked_Trails | hiking | Szlaki piesze – nakładka (Waymarked Trails) | Szlaki_Piesze
+Waymarked_Trails | cycling | Szlaki rowerowe – nakładka (Waymarked Trails) | Szlaki_Rowerowe
+Waymarked_Trails | mtb | Szlaki MTB – nakładka (Waymarked Trails) | Szlaki_MTB
+Waymarked_Trails | riding | Szlaki konne – nakładka (Waymarked Trails) | Szlaki_Konne
+Waymarked_Trails | skating | Trasy rolkowe – nakładka (Waymarked Trails) | Szlaki_Rolki
+Waymarked_Trails | slopes | Trasy narciarskie – nakładka (Waymarked Trails) | Szlaki_Narty
 >> OpenStreetMap (terrestris.de, ze znakiem wodnym)
-OpenStreetMap_Terrestris | OSM-WMS | Mapa ogólna OpenStreetMap
-OpenStreetMap_Terrestris | TOPO-OSM-WMS | Mapa topograficzna OpenStreetMap
-OpenStreetMap_Terrestris | HikeMap | Mapa turystyczna OpenStreetMap
-OpenStreetMap_Terrestris | OSM-Overlay-WMS | Nakładka: drogi i nazwy (przezroczysta)
+OpenStreetMap_Terrestris | OSM-WMS | Mapa ogólna OpenStreetMap | OSM_Standard
+OpenStreetMap_Terrestris | TOPO-OSM-WMS | Mapa topograficzna OpenStreetMap | OSM_Topo
+OpenStreetMap_Terrestris | HikeMap | Mapa turystyczna OpenStreetMap | OSM_Hike
+OpenStreetMap_Terrestris | OSM-Overlay-WMS | Nakładka: drogi i nazwy (przezroczysta) | OSM_Overlay
 
 > Rzeźba terenu
-numer_mod_terenu_WMTS | HipsoCien | Hipsometria z cieniowaniem NMT 1 m (kafle WMTS)
-numer_mod_terenu_cieniowanie_WMTS | ISOK_Cien | Cieniowanie rzeźby NMT 1 m (kafle WMTS)
-numer_mod_terenu_hipsometria_WMTS | Hipsometria | Hipsometria NMT 1 m – kolory wysokości (kafle WMTS)
-OpenStreetMap_Terrestris | SRTM30-Hillshade | Cieniowanie rzeźby SRTM 30 m (terrestris, ze znakiem wodnym)
-OpenStreetMap_Terrestris | SRTM30-Contour | Poziomice SRTM 30 m (terrestris, ze znakiem wodnym)
-szczyty | szczyty | Szczyty górskie i wzniesienia (GUGiK)
+numer_mod_terenu_WMTS | HipsoCien | Hipsometria z cieniowaniem NMT 1 m (kafle WMTS) | NMT_HipsoCien_1m
+numer_mod_terenu_cieniowanie_WMTS | ISOK_Cien | Cieniowanie rzeźby NMT 1 m (kafle WMTS) | NMT_Cien_1m
+numer_mod_terenu_hipsometria_WMTS | Hipsometria | Hipsometria NMT 1 m – kolory wysokości (kafle WMTS) | NMT_Hipso_1m
+OpenStreetMap_Terrestris | SRTM30-Hillshade | Cieniowanie rzeźby SRTM 30 m (terrestris, ze znakiem wodnym) | SRTM_Cien_30m
+OpenStreetMap_Terrestris | SRTM30-Contour | Poziomice SRTM 30 m (terrestris, ze znakiem wodnym) | SRTM_Poziomice
+szczyty | szczyty | Szczyty górskie i wzniesienia (GUGiK) | Szczyty_GUGiK
 
 > Mapy historyczne i zabytki
 >> Zabytki i dziedzictwo (NID)
-zabytki_zasiegi_NID | Zabytki_nieruchome_I | Rejestr zabytków nieruchomych – zasięgi i typy
-zabytki_NID | Immovable_Monuments | Rejestr zabytków nieruchomych (INSPIRE)
-zabytki_archeo_NID | Archaeological_Monuments | Rejestr zabytków archeologicznych
-zabytki_ewidencja_nieruchomych_NID | Ewidencja_zabytkow_nieruchomych_I | Ewidencja zabytków nieruchomych
-zabytki_ewidencja_archeo_NID | Ewidencja_zabytków_archeologicznych | Ewidencja zabytków archeologicznych
-zabytki_pomniki_historii_NID | Monuments_of_History | Pomniki Historii
-zabytki_unesco_NID | World_Heritage_Properties_List | Obiekty światowego dziedzictwa UNESCO
-zabytki_groby_wojenne_NID | Groby_i_cmentarze_wojenne_I | Groby i cmentarze wojenne
+zabytki_zasiegi_NID | Zabytki_nieruchome_I | Rejestr zabytków nieruchomych – zasięgi i typy | NID_Zasiegi
+zabytki_NID | Immovable_Monuments | Rejestr zabytków nieruchomych (INSPIRE) | NID_Nieruchome
+zabytki_archeo_NID | Archaeological_Monuments | Rejestr zabytków archeologicznych | NID_Archeo
+zabytki_ewidencja_nieruchomych_NID | Ewidencja_zabytkow_nieruchomych_I | Ewidencja zabytków nieruchomych | NID_EwidNieruch
+zabytki_ewidencja_archeo_NID | Ewidencja_zabytków_archeologicznych | Ewidencja zabytków archeologicznych | NID_EwidArcheo
+zabytki_pomniki_historii_NID | Monuments_of_History | Pomniki Historii | NID_PomnikiHist
+zabytki_unesco_NID | World_Heritage_Properties_List | Obiekty światowego dziedzictwa UNESCO | NID_UNESCO
+zabytki_groby_wojenne_NID | Groby_i_cmentarze_wojenne_I | Groby i cmentarze wojenne | NID_GrobyWojenne
 >> Mapy historyczne (IHPAN)
-mapy_historyczne_IHPAN | m25k_2180 | Messtischblätter 1:25 000 (1870–1945)
-mapy_historyczne_IHPAN | wig25k_2180 | Mapa szczegółowa WIG 1:25 000 (1918–1939)
-mapy_historyczne_IHPAN | wig100k_2180 | Mapa taktyczna WIG 1:100 000 (1918–1939)
-mapy_historyczne_IHPAN | wig300k_3857 | Mapa operacyjna WIG 1:300 000 (1918–1939)
-mapy_historyczne_IHPAN | wig500k_2180 | Mapa Polski i krajów ościennych WIG 1:500 000 (1947)
-mapy_historyczne_IHPAN | kdr_2180 | Karte des Deutschen Reiches 1:100 000 (ok. 1900)
-mapy_historyczne_IHPAN | kdr_gb_2180 | Karte des Deutschen Reiches 1:100 000 (ok. 1944)
-mapy_historyczne_IHPAN | kdwr_2180 | Karte des Westlichen Russlands 1:100 000 (1914–1921)
-mapy_historyczne_IHPAN | ukvme_2180 | Übersichtskarte von Mitteleuropa 1:300 000 (ok. 1900)
-mapy_historyczne_IHPAN | kummersberg_2180 | Mapa administracyjna Galicji i Lodomerii 1:115 200 (1855)
-mapy_historyczne_IHPAN | slask18w_2180 | Śląsk w końcu XVIII wieku
-mapy_historyczne_IHPAN | schroetter_3857 | Mapa Schroettera 1:150 000 (1796–1802)
-mapy_historyczne_IHPAN | gilly_3857 | Mapa Gilly'ego 1:150 000 (1802–1803)
-mapy_historyczne_IHPAN | textor_3857 | Mapa Textora-Sotzmanna 1:150 000 (1806–1808)
-mapy_historyczne_IHPAN | gaul_3857 | Mapa Gaula/Raczyńskiego 1:125 000 (1807–1812)
-mapy_historyczne_IHPAN | TKKP_126k_3857 | Topograficzna Karta Królestwa Polskiego 1:126 000 (1839–1843)
-mapy_historyczne_IHPAN | chrzanowski_3857 | Karta Dawnej Polski Chrzanowskiego 1:300 000 (1859)
-mapy_historyczne_IHPAN | reymann_3857 | Mapa Reymanna 1:200 000 (druga połowa XIX w.)
-mapy_historyczne_IHPAN | dwuwiorstowka_3857 | Dwuwiorstówka 1:84 000 (1908–1936)
-mapy_historyczne_IHPAN | wig100k_4326_extended | Mapa taktyczna WIG 1:100 000 (1918–1939) – zasięg rozszerzony
-mapy_historyczne_IHPAN | wig500k1939_3857 | Mapa Polski i krajów ościennych WIG 1:500 000 (1939)
-mapy_historyczne_IHPAN | wig_1947_1952_3857 | Mapa WIG 1:100 000 w układzie „Borowa Góra” (1947–1954)
+mapy_historyczne_IHPAN | m25k_2180 | Messtischblätter 1:25 000 (1870–1945) | Hist_Messtisch_25k
+mapy_historyczne_IHPAN | wig25k_2180 | Mapa szczegółowa WIG 1:25 000 (1918–1939) | Hist_WIG_25k
+mapy_historyczne_IHPAN | wig100k_2180 | Mapa taktyczna WIG 1:100 000 (1918–1939) | Hist_WIG_100k
+mapy_historyczne_IHPAN | wig300k_3857 | Mapa operacyjna WIG 1:300 000 (1918–1939) | Hist_WIG_300k
+mapy_historyczne_IHPAN | wig500k_2180 | Mapa Polski i krajów ościennych WIG 1:500 000 (1947) | Hist_WIG_500k_47
+mapy_historyczne_IHPAN | kdr_2180 | Karte des Deutschen Reiches 1:100 000 (ok. 1900) | Hist_KdR_1900
+mapy_historyczne_IHPAN | kdr_gb_2180 | Karte des Deutschen Reiches 1:100 000 (ok. 1944) | Hist_KdR_1944
+mapy_historyczne_IHPAN | kdwr_2180 | Karte des Westlichen Russlands 1:100 000 (1914–1921) | Hist_KdWR_100k
+mapy_historyczne_IHPAN | ukvme_2180 | Übersichtskarte von Mitteleuropa 1:300 000 (ok. 1900) | Hist_UKvME_300k
+mapy_historyczne_IHPAN | kummersberg_2180 | Mapa administracyjna Galicji i Lodomerii 1:115 200 (1855) | Hist_Kummersberg
+mapy_historyczne_IHPAN | slask18w_2180 | Śląsk w końcu XVIII wieku | Hist_Slask_XVIIIw
+mapy_historyczne_IHPAN | schroetter_3857 | Mapa Schroettera 1:150 000 (1796–1802) | Hist_Schroetter
+mapy_historyczne_IHPAN | gilly_3857 | Mapa Gilly'ego 1:150 000 (1802–1803) | Hist_Gilly
+mapy_historyczne_IHPAN | textor_3857 | Mapa Textora-Sotzmanna 1:150 000 (1806–1808) | Hist_Textor
+mapy_historyczne_IHPAN | gaul_3857 | Mapa Gaula/Raczyńskiego 1:125 000 (1807–1812) | Hist_Gaul
+mapy_historyczne_IHPAN | TKKP_126k_3857 | Topograficzna Karta Królestwa Polskiego 1:126 000 (1839–1843) | Hist_TKKP_126k
+mapy_historyczne_IHPAN | chrzanowski_3857 | Karta Dawnej Polski Chrzanowskiego 1:300 000 (1859) | Hist_Chrzanowski
+mapy_historyczne_IHPAN | reymann_3857 | Mapa Reymanna 1:200 000 (druga połowa XIX w.) | Hist_Reymann
+mapy_historyczne_IHPAN | dwuwiorstowka_3857 | Dwuwiorstówka 1:84 000 (1908–1936) | Hist_Dwuwiorstowka
+mapy_historyczne_IHPAN | wig100k_4326_extended | Mapa taktyczna WIG 1:100 000 (1918–1939) – zasięg rozszerzony | Hist_WIG_100k_ext
+mapy_historyczne_IHPAN | wig500k1939_3857 | Mapa Polski i krajów ościennych WIG 1:500 000 (1939) | Hist_WIG_500k_39
+mapy_historyczne_IHPAN | wig_1947_1952_3857 | Mapa WIG 1:100 000 w układzie „Borowa Góra” (1947–1954) | Hist_WIG_BorowaGora
 >> Ziemie polskie Korony w drugiej połowie XVI w. (IHPAN)
-mapy_historyczne_IHPAN | ahp_ziemie_polskie_3857 | Ziemie polskie Korony 1:250 000
-mapy_historyczne_IHPAN | ahp_koscielne_3857 | Podziały kościelne 1:500 000
-mapy_historyczne_IHPAN | ahp_wlasnosc_3857 | Rozmieszczenie własności ziemskiej 1:500 000
+mapy_historyczne_IHPAN | ahp_ziemie_polskie_3857 | Ziemie polskie Korony 1:250 000 | Hist_XVI_ZiemiePol
+mapy_historyczne_IHPAN | ahp_koscielne_3857 | Podziały kościelne 1:500 000 | Hist_XVI_Kosciol
+mapy_historyczne_IHPAN | ahp_wlasnosc_3857 | Rozmieszczenie własności ziemskiej 1:500 000 | Hist_XVI_Wlasnosc
 >> Plany miast (IHPAN)
-plany_miast_1944_IHPAN | bialystok_2180 | Białystok (1944)
-plany_miast_1944_IHPAN | bydgoszcz_2180 | Bydgoszcz (1944)
-plany_miast_1944_IHPAN | czestochowa_2180 | Częstochowa (1944)
-plany_miast_1944_IHPAN | gdansk_2180 | Gdańsk (1944)
-plany_miast_1944_IHPAN | grudziadz_2180 | Grudziądz (1944)
-plany_miast_1944_IHPAN | inowroclaw_2180 | Inowrocław (1943)
-plany_miast_1944_IHPAN | jaslo_2180 | Jasło (1944)
-plany_miast_1944_IHPAN | katowice_2180 | Katowice (1944)
-plany_miast_1944_IHPAN | kielce_2180 | Kielce (1944)
-plany_miast_1944_IHPAN | krakow_2180 | Kraków (1944)
-plany_miast_1944_IHPAN | lublin_2180 | Lublin (1944)
-plany_miast_1944_IHPAN | lodz_2180 | Łódź (1944)
-plany_miast_1944_IHPAN | poznan_2180 | Poznań (1944)
-plany_miast_1944_IHPAN | radom_2180 | Radom (1944)
-plany_miast_1944_IHPAN | rzeszow_2180 | Rzeszów (1944)
-plany_miast_1944_IHPAN | siedlce_2180 | Siedlce (1944)
-plany_miast_1944_IHPAN | tarnow_2180 | Tarnów (1944)
-plany_miast_1944_IHPAN | torun_2180 | Toruń (1944)
-plany_miast_1944_IHPAN | warszawa_2180 | Warszawa (1944)
-mapy_historyczne_IHPAN | warszawaOKI_2180 | Warszawa (1822)
-mapy_historyczne_IHPAN | lindley_3857 | Warszawa – plan Lindleyów 1:2500 (1897–1901)
-mapy_historyczne_IHPAN | rauch_2180 | Warszawa-Praga (1796)
-plany_miast_1944_IHPAN | wroclaw_3857 | Wrocław (1944)
+plany_miast_1944_IHPAN | bialystok_2180 | Białystok (1944) | Plan_Bialystok_44
+plany_miast_1944_IHPAN | bydgoszcz_2180 | Bydgoszcz (1944) | Plan_Bydgoszcz_44
+plany_miast_1944_IHPAN | czestochowa_2180 | Częstochowa (1944) | Plan_Czestochowa_44
+plany_miast_1944_IHPAN | gdansk_2180 | Gdańsk (1944) | Plan_Gdansk_44
+plany_miast_1944_IHPAN | grudziadz_2180 | Grudziądz (1944) | Plan_Grudziadz_44
+plany_miast_1944_IHPAN | inowroclaw_2180 | Inowrocław (1943) | Plan_Inowroclaw_43
+plany_miast_1944_IHPAN | jaslo_2180 | Jasło (1944) | Plan_Jaslo_44
+plany_miast_1944_IHPAN | katowice_2180 | Katowice (1944) | Plan_Katowice_44
+plany_miast_1944_IHPAN | kielce_2180 | Kielce (1944) | Plan_Kielce_44
+plany_miast_1944_IHPAN | krakow_2180 | Kraków (1944) | Plan_Krakow_44
+plany_miast_1944_IHPAN | lublin_2180 | Lublin (1944) | Plan_Lublin_44
+plany_miast_1944_IHPAN | lodz_2180 | Łódź (1944) | Plan_Lodz_44
+plany_miast_1944_IHPAN | poznan_2180 | Poznań (1944) | Plan_Poznan_44
+plany_miast_1944_IHPAN | radom_2180 | Radom (1944) | Plan_Radom_44
+plany_miast_1944_IHPAN | rzeszow_2180 | Rzeszów (1944) | Plan_Rzeszow_44
+plany_miast_1944_IHPAN | siedlce_2180 | Siedlce (1944) | Plan_Siedlce_44
+plany_miast_1944_IHPAN | tarnow_2180 | Tarnów (1944) | Plan_Tarnow_44
+plany_miast_1944_IHPAN | torun_2180 | Toruń (1944) | Plan_Torun_44
+plany_miast_1944_IHPAN | warszawa_2180 | Warszawa (1944) | Plan_Warszawa_44
+mapy_historyczne_IHPAN | warszawaOKI_2180 | Warszawa (1822) | Plan_Warszawa_1822
+mapy_historyczne_IHPAN | lindley_3857 | Warszawa – plan Lindleyów 1:2500 (1897–1901) | Plan_Lindley_1900
+mapy_historyczne_IHPAN | rauch_2180 | Warszawa-Praga (1796) | Plan_Praga_1796
+plany_miast_1944_IHPAN | wroclaw_3857 | Wrocław (1944) | Plan_Wroclaw_44
 
 > Ewidencja, geodezja i uzbrojenie
 >> Działki ewidencyjne (KIEG)
-dzialki_ewid_EGIB | dzialki | Działki
-dzialki_ewid_EGIB | numery_dzialek | Numery działek
-dzialki_ewid_EGIB | budynki | Budynki
-dzialki_ewid_EGIB | uzytki | Użytki gruntowe
-dzialki_ewid_EGIB | kontury | Kontury klasyfikacyjne
-dzialki_ewid_EGIB | obreby | Obręby ewidencyjne
+dzialki_ewid_EGIB | dzialki | Działki | EGiB_Dzialki
+dzialki_ewid_EGIB | numery_dzialek | Numery działek | EGiB_Numery
+dzialki_ewid_EGIB | budynki | Budynki | EGiB_Budynki
+dzialki_ewid_EGIB | uzytki | Użytki gruntowe | EGiB_Uzytki
+dzialki_ewid_EGIB | kontury | Kontury klasyfikacyjne | EGiB_KonturyKlas
+dzialki_ewid_EGIB | obreby | Obręby ewidencyjne | EGiB_Obreby
 >> Uzbrojenie terenu (KIUT)
-uzbrojenie_terenu_KIUT | przewod_wodociagowy | Sieć wodociągowa
-uzbrojenie_terenu_KIUT | przewod_kanalizacyjny | Sieć kanalizacyjna
-uzbrojenie_terenu_KIUT | przewod_elektroenergetyczny | Sieć elektroenergetyczna
-uzbrojenie_terenu_KIUT | przewod_gazowy | Sieć gazowa
-uzbrojenie_terenu_KIUT | przewod_cieplowniczy | Sieć ciepłownicza
-uzbrojenie_terenu_KIUT | przewod_telekomunikacyjny | Sieć telekomunikacyjna
-uzbrojenie_terenu_KIUT | przewod_specjalny | Sieć specjalna
-uzbrojenie_terenu_KIUT | przewod_niezidentyfikowany | Sieci niezidentyfikowane
-uzbrojenie_terenu_KIUT | przewod_urzadzenia | Urządzenia
+uzbrojenie_terenu_KIUT | przewod_wodociagowy | Sieć wodociągowa | KIUT_Woda
+uzbrojenie_terenu_KIUT | przewod_kanalizacyjny | Sieć kanalizacyjna | KIUT_Kanalizacja
+uzbrojenie_terenu_KIUT | przewod_elektroenergetyczny | Sieć elektroenergetyczna | KIUT_Prad
+uzbrojenie_terenu_KIUT | przewod_gazowy | Sieć gazowa | KIUT_Gaz
+uzbrojenie_terenu_KIUT | przewod_cieplowniczy | Sieć ciepłownicza | KIUT_Cieplo
+uzbrojenie_terenu_KIUT | przewod_telekomunikacyjny | Sieć telekomunikacyjna | KIUT_Telekom
+uzbrojenie_terenu_KIUT | przewod_specjalny | Sieć specjalna | KIUT_Specjalna
+uzbrojenie_terenu_KIUT | przewod_niezidentyfikowany | Sieci niezidentyfikowane | KIUT_Niezidentyfik
+uzbrojenie_terenu_KIUT | przewod_urzadzenia | Urządzenia | KIUT_Urzadzenia
 >> Osnowy geodezyjne
-osnowy_geodezyjne | osnowa-XY | Osnowa pozioma
-osnowy_geodezyjne | osnowa-H | Osnowa wysokościowa
-osnowy_geodezyjne | osnowa-XYH | Osnowa pozioma – etykiety punktów
+osnowy_geodezyjne | osnowa-XY | Osnowa pozioma | Osnowa_Pozioma
+osnowy_geodezyjne | osnowa-H | Osnowa wysokościowa | Osnowa_Pionowa
+osnowy_geodezyjne | osnowa-XYH | Osnowa pozioma – etykiety punktów | Osnowa_Punkty_XYH
 
 > Granice i adresy
 >> Jednostki podziału kraju (PRG)
-rejestr_granic_jednostki_teryt | A00_Granice_panstwa | Granica państwa
-rejestr_granic_jednostki_teryt | A01_Granice_wojewodztw | Granice województw
-rejestr_granic_jednostki_teryt | A02_Granice_powiatow | Granice powiatów
-rejestr_granic_jednostki_teryt | A03_Granice_gmin | Granice gmin
-rejestr_granic_jednostki_teryt | A04_Granice_miast | Granice miast
-rejestr_granic_jednostki_teryt | A05_Granice_jednostek_ewidencyjnych | Granice jednostek ewidencyjnych
-rejestr_granic_jednostki_teryt | A06_Granice_obrebow_ewidencyjnych | Granice obrębów ewidencyjnych
-rejestr_granic_jednostki_teryt | R01_Granice_rejonow_statystycznych | Granice rejonów statystycznych
-rejestr_granic_jednostki_teryt | R02_Granice_obwodow_spisowych | Granice obwodów spisowych
-administracyjna | Administracyjna | Mapa administracyjna GUGiK (przeglądowa)
+rejestr_granic_jednostki_teryt | A00_Granice_panstwa | Granica państwa | PRG_GranicaPanstwa
+rejestr_granic_jednostki_teryt | A01_Granice_wojewodztw | Granice województw | PRG_Wojewodztwa
+rejestr_granic_jednostki_teryt | A02_Granice_powiatow | Granice powiatów | PRG_Powiaty
+rejestr_granic_jednostki_teryt | A03_Granice_gmin | Granice gmin | PRG_Gminy
+rejestr_granic_jednostki_teryt | A04_Granice_miast | Granice miast | PRG_Miasta
+rejestr_granic_jednostki_teryt | A05_Granice_jednostek_ewidencyjnych | Granice jednostek ewidencyjnych | PRG_JednEwid
+rejestr_granic_jednostki_teryt | A06_Granice_obrebow_ewidencyjnych | Granice obrębów ewidencyjnych | PRG_Obreby
+rejestr_granic_jednostki_teryt | R01_Granice_rejonow_statystycznych | Granice rejonów statystycznych | PRG_RejonyStat
+rejestr_granic_jednostki_teryt | R02_Granice_obwodow_spisowych | Granice obwodów spisowych | PRG_ObwodySpis
+administracyjna | Administracyjna | Mapa administracyjna GUGiK (przeglądowa) | PRG_Administracyjna
 >> Adresy i nazwy geograficzne (GUGiK)
-rejestr_granic_punkty_adresowe | AD.Address | Punkty adresowe (INSPIRE)
-rejestr_nazw_geograficznych | M1_UrzedoweNazwyMiejscowosci | Urzędowe nazwy miejscowości (PRNG)
-rejestr_nazw_geograficznych | M2_PozostaleNazwyMiejscowosci | Pozostałe nazwy miejscowości (PRNG)
-rejestr_nazw_geograficznych | O1_UrzedoweNazwyObiektowFizjograficznych | Urzędowe nazwy obiektów fizjograficznych (PRNG)
-rejestr_nazw_geograficznych | O2_ZestandaryzowaneNazwyObiektowFizjograficznych | Zestandaryzowane nazwy obiektów fizjograficznych (PRNG)
-rejestr_nazw_geograficznych | O3_PozostaleNazwyObiektowFizjograficznych | Pozostałe nazwy obiektów fizjograficznych (PRNG)
+rejestr_granic_punkty_adresowe | AD.Address | Punkty adresowe (INSPIRE) | Adresy_INSPIRE
+rejestr_nazw_geograficznych | M1_UrzedoweNazwyMiejscowosci | Urzędowe nazwy miejscowości (PRNG) | PRNG_Miejsc_Urz
+rejestr_nazw_geograficznych | M2_PozostaleNazwyMiejscowosci | Pozostałe nazwy miejscowości (PRNG) | PRNG_Miejsc_Inne
+rejestr_nazw_geograficznych | O1_UrzedoweNazwyObiektowFizjograficznych | Urzędowe nazwy obiektów fizjograficznych (PRNG) | PRNG_Fizjo_Urz
+rejestr_nazw_geograficznych | O2_ZestandaryzowaneNazwyObiektowFizjograficznych | Zestandaryzowane nazwy obiektów fizjograficznych (PRNG) | PRNG_Fizjo_Zestand
+rejestr_nazw_geograficznych | O3_PozostaleNazwyObiektowFizjograficznych | Pozostałe nazwy obiektów fizjograficznych (PRNG) | PRNG_Fizjo_Inne
 >> Sądy i prokuratury (PRG)
-rejestr_granic_jednostki_teryt | S01_Sad_apelacyjny | Sądy apelacyjne
-rejestr_granic_jednostki_teryt | S02_Sad_okregowy | Sądy okręgowe
-rejestr_granic_jednostki_teryt | S03_Sad_rejonowy | Sądy rejonowe
-rejestr_granic_jednostki_teryt | S04_Wojewodzki_sad_administracyjny | Wojewódzkie sądy administracyjne
-rejestr_granic_jednostki_teryt | P01_Prokuratura_regionalna | Prokuratury regionalne
-rejestr_granic_jednostki_teryt | P02_Prokuratura_okregowa | Prokuratury okręgowe
-rejestr_granic_jednostki_teryt | P03_Prokuratura_rejonowa | Prokuratury rejonowe
+rejestr_granic_jednostki_teryt | S01_Sad_apelacyjny | Sądy apelacyjne | Sad_Apelacyjny
+rejestr_granic_jednostki_teryt | S02_Sad_okregowy | Sądy okręgowe | Sad_Okregowy
+rejestr_granic_jednostki_teryt | S03_Sad_rejonowy | Sądy rejonowe | Sad_Rejonowy
+rejestr_granic_jednostki_teryt | S04_Wojewodzki_sad_administracyjny | Wojewódzkie sądy administracyjne | Sad_WSA
+rejestr_granic_jednostki_teryt | P01_Prokuratura_regionalna | Prokuratury regionalne | Prok_Regionalna
+rejestr_granic_jednostki_teryt | P02_Prokuratura_okregowa | Prokuratury okręgowe | Prok_Okregowa
+rejestr_granic_jednostki_teryt | P03_Prokuratura_rejonowa | Prokuratury rejonowe | Prok_Rejonowa
 >> Policja, straże i obrona cywilna (PRG)
-rejestr_granic_jednostki_teryt | K01_Komenda_wojewodzka_policji | Komendy wojewódzkie policji
-rejestr_granic_jednostki_teryt | K03_Komenda_stoleczna_policji | Komenda stołeczna policji
-rejestr_granic_jednostki_teryt | K02_Komenda_powiatowa_policji | Komendy powiatowe policji
-rejestr_granic_jednostki_teryt | K04_Komenda_rejonowa_policji | Komendy rejonowe policji
-rejestr_granic_jednostki_teryt | K05_Komisariat_policji | Komisariaty policji
-rejestr_granic_jednostki_teryt | K06_Komenda_wojewodzka_strazy_pozarnej | Komendy wojewódzkie straży pożarnej
-rejestr_granic_jednostki_teryt | K07_Komenda_powiatowa_strazy_pozarnej | Komendy powiatowe straży pożarnej
-rejestr_granic_jednostki_teryt | K08_Oddzial_strazy_granicznej | Oddziały straży granicznej
-rejestr_granic_jednostki_teryt | K09_Placowka_strazy_granicznej | Placówki straży granicznej
-rejestr_granic_jednostki_teryt | K10_Dywizjon_strazy_granicznej | Dywizjony straży granicznej
-rejestr_granic_jednostki_teryt | K11_Obszar_dzialania_szefa_obrony_cywilnej_wojewodztwa | Obrona cywilna – województwa
-rejestr_granic_jednostki_teryt | K12_Obszar_dzialania_szefa_obrony_cywilnej_powiatu | Obrona cywilna – powiaty
-rejestr_granic_jednostki_teryt | K13_Obszar_dzialania_szefa_obrony_cywilnej_gminy | Obrona cywilna – gminy
+rejestr_granic_jednostki_teryt | K01_Komenda_wojewodzka_policji | Komendy wojewódzkie policji | Policja_Woj
+rejestr_granic_jednostki_teryt | K03_Komenda_stoleczna_policji | Komenda stołeczna policji | Policja_Stolica
+rejestr_granic_jednostki_teryt | K02_Komenda_powiatowa_policji | Komendy powiatowe policji | Policja_Pow
+rejestr_granic_jednostki_teryt | K04_Komenda_rejonowa_policji | Komendy rejonowe policji | Policja_Dzielnic
+rejestr_granic_jednostki_teryt | K05_Komisariat_policji | Komisariaty policji | Policja_Komisariat
+rejestr_granic_jednostki_teryt | K06_Komenda_wojewodzka_strazy_pozarnej | Komendy wojewódzkie straży pożarnej | Straz_Woj
+rejestr_granic_jednostki_teryt | K07_Komenda_powiatowa_strazy_pozarnej | Komendy powiatowe straży pożarnej | Straz_Pow
+rejestr_granic_jednostki_teryt | K08_Oddzial_strazy_granicznej | Oddziały straży granicznej | Straz_JRG
+rejestr_granic_jednostki_teryt | K09_Placowka_strazy_granicznej | Placówki straży granicznej | StrazGran_Placowki
+rejestr_granic_jednostki_teryt | K10_Dywizjon_strazy_granicznej | Dywizjony straży granicznej | StrazGran_Dywizj
+rejestr_granic_jednostki_teryt | K11_Obszar_dzialania_szefa_obrony_cywilnej_wojewodztwa | Obrona cywilna – województwa | Obrona_Woj
+rejestr_granic_jednostki_teryt | K12_Obszar_dzialania_szefa_obrony_cywilnej_powiatu | Obrona cywilna – powiaty | Obrona_Pow
+rejestr_granic_jednostki_teryt | K13_Obszar_dzialania_szefa_obrony_cywilnej_gminy | Obrona cywilna – gminy | Obrona_Gmina
 >> Urzędy, lasy i wody (PRG)
-rejestr_granic_jednostki_teryt | U05_Izba_administracji_skarbowej | Izby administracji skarbowej
-rejestr_granic_jednostki_teryt | U02_Urzad_skarbowy | Urzędy skarbowe
-rejestr_granic_jednostki_teryt | U03_Wyspecjalizowany_urzad_skarbowy | Wyspecjalizowane urzędy skarbowe
-rejestr_granic_jednostki_teryt | U04_Urzad_celno-skarbowy | Urzędy celno-skarbowe
-rejestr_granic_jednostki_teryt | U01_Archiwum_panstwowe | Archiwa państwowe
-rejestr_granic_jednostki_teryt | U07_Regionalna_dyrekcja_lasow_panstwowych | Regionalne dyrekcje Lasów Państwowych
-rejestr_granic_jednostki_teryt | U06_Nadlesnictwo | Nadleśnictwa
-rejestr_granic_jednostki_teryt | U09_Regionalny_zarzad_gospodarki_wodnej_PGWWP | Regionalne zarządy gospodarki wodnej
-rejestr_granic_jednostki_teryt | U08_Zarzad_zlewni_PGWWP | Zarządy zlewni (Wody Polskie)
-rejestr_granic_jednostki_teryt | U11_Urzad_zeglugi_srodladowej | Urzędy żeglugi śródlądowej
+rejestr_granic_jednostki_teryt | U05_Izba_administracji_skarbowej | Izby administracji skarbowej | PRG_RZGW
+rejestr_granic_jednostki_teryt | U02_Urzad_skarbowy | Urzędy skarbowe | Izba_Skarbowa
+rejestr_granic_jednostki_teryt | U03_Wyspecjalizowany_urzad_skarbowy | Wyspecjalizowane urzędy skarbowe | PRG_Nadlesnictwa
+rejestr_granic_jednostki_teryt | U04_Urzad_celno-skarbowy | Urzędy celno-skarbowe | PRG_RDLP
+rejestr_granic_jednostki_teryt | U01_Archiwum_panstwowe | Archiwa państwowe | Urzad_Skarbowy
+rejestr_granic_jednostki_teryt | U07_Regionalna_dyrekcja_lasow_panstwowych | Regionalne dyrekcje Lasów Państwowych | PRG_NadzorWodny
+rejestr_granic_jednostki_teryt | U06_Nadlesnictwo | Nadleśnictwa | PRG_ZarzadZlewni
+rejestr_granic_jednostki_teryt | U09_Regionalny_zarzad_gospodarki_wodnej_PGWWP | Regionalne zarządy gospodarki wodnej | PRG_WUG
+rejestr_granic_jednostki_teryt | U08_Zarzad_zlewni_PGWWP | Zarządy zlewni (Wody Polskie) | PRG_UrzadGorniczy
+rejestr_granic_jednostki_teryt | U11_Urzad_zeglugi_srodladowej | Urzędy żeglugi śródlądowej | PRG_UrzadZeglugi
 >> Obszary morskie (PRG)
-rejestr_granic_jednostki_teryt | W03_Morskie_wody_wewnetrzne | Morskie wody wewnętrzne
-rejestr_granic_jednostki_teryt | W02_Morze_terytorialne_RP | Morze terytorialne RP
-rejestr_granic_jednostki_teryt | W01_Linia_podstawowa_morza_terytorialnego | Linia podstawowa morza terytorialnego
-rejestr_granic_jednostki_teryt | W05_Strefa_przylegla | Strefa przyległa
-rejestr_granic_jednostki_teryt | W04_Wylaczna_strefa_ekonomiczna | Wyłączna strefa ekonomiczna
-rejestr_granic_jednostki_teryt | W06_Morskie_linie_brzegowe | Morska linia brzegowa
-rejestr_granic_jednostki_teryt | W09_Pas_techniczny | Pas techniczny
-rejestr_granic_jednostki_teryt | W08_Pas_ochronny | Pas ochronny
-rejestr_granic_jednostki_teryt | W07_Pas_nadbrzezny | Pas nadbrzeżny
-rejestr_granic_jednostki_teryt | U10_Urzad_morski | Urzędy morskie
-rejestr_granic_jednostki_teryt | W11_Port_morski | Porty morskie
-rejestr_granic_jednostki_teryt | W12_Przystan_morska | Przystanie morskie
-rejestr_granic_jednostki_teryt | W10_Reda | Redy
+rejestr_granic_jednostki_teryt | W03_Morskie_wody_wewnetrzne | Morskie wody wewnętrzne | Morze_Wewnetrzne
+rejestr_granic_jednostki_teryt | W02_Morze_terytorialne_RP | Morze terytorialne RP | Morze_Terytorialne
+rejestr_granic_jednostki_teryt | W01_Linia_podstawowa_morza_terytorialnego | Linia podstawowa morza terytorialnego | Morze_LiniaPodst
+rejestr_granic_jednostki_teryt | W05_Strefa_przylegla | Strefa przyległa | Morze_StrefaPrzyl
+rejestr_granic_jednostki_teryt | W04_Wylaczna_strefa_ekonomiczna | Wyłączna strefa ekonomiczna | Morze_StrefaEkonom
+rejestr_granic_jednostki_teryt | W06_Morskie_linie_brzegowe | Morska linia brzegowa | Morze_LiniaBrzegu
+rejestr_granic_jednostki_teryt | W09_Pas_techniczny | Pas techniczny | Morze_PasTechniczny
+rejestr_granic_jednostki_teryt | W08_Pas_ochronny | Pas ochronny | Morze_PasOchronny
+rejestr_granic_jednostki_teryt | W07_Pas_nadbrzezny | Pas nadbrzeżny | Morze_PasNadbrzez
+rejestr_granic_jednostki_teryt | U10_Urzad_morski | Urzędy morskie | PRG_UrzadMorski
+rejestr_granic_jednostki_teryt | W11_Port_morski | Porty morskie | Morze_Porty
+rejestr_granic_jednostki_teryt | W12_Przystan_morska | Przystanie morskie | Morze_Przystanie
+rejestr_granic_jednostki_teryt | W10_Reda | Redy | Morze_Redy
 
 > Przyroda i środowisko
 >> Formy ochrony przyrody (GDOŚ)
-obszary_chronione_GDOS | GDOS:ParkiNarodowe | Parki narodowe
-obszary_chronione_GDOS | GDOS:ParkiKrajobrazowe | Parki krajobrazowe
-obszary_chronione_GDOS | GDOS:Rezerwaty | Rezerwaty przyrody
-obszary_chronione_GDOS | GDOS:ObszarySpecjalnejOchrony | Natura 2000 – obszary ptasie (OSO)
-obszary_chronione_GDOS | GDOS:SpecjalneObszaryOchrony | Natura 2000 – obszary siedliskowe (SOO)
-obszary_chronione_GDOS | GDOS:ObszaryChronionegoKrajobrazu | Obszary chronionego krajobrazu
-obszary_chronione_GDOS | GDOS:ZespolyPrzyrodniczoKrajobrazowe | Zespoły przyrodniczo-krajobrazowe
-obszary_chronione_GDOS | GDOS:UzytkiEkologiczne | Użytki ekologiczne
-obszary_chronione_GDOS | GDOS:StanowiskaDokumentacyjne | Stanowiska dokumentacyjne
-obszary_chronione_GDOS | GDOS:PomnikiPrzyrody | Pomniki przyrody
+obszary_chronione_GDOS | GDOS:ParkiNarodowe | Parki narodowe | GDOS_ParkiNarod
+obszary_chronione_GDOS | GDOS:ParkiKrajobrazowe | Parki krajobrazowe | GDOS_ParkiKraj
+obszary_chronione_GDOS | GDOS:Rezerwaty | Rezerwaty przyrody | GDOS_Rezerwaty
+obszary_chronione_GDOS | GDOS:ObszarySpecjalnejOchrony | Natura 2000 – obszary ptasie (OSO) | GDOS_N2000_Ptaki
+obszary_chronione_GDOS | GDOS:SpecjalneObszaryOchrony | Natura 2000 – obszary siedliskowe (SOO) | GDOS_N2000_Siedl
+obszary_chronione_GDOS | GDOS:ObszaryChronionegoKrajobrazu | Obszary chronionego krajobrazu | GDOS_ObszChrKraj
+obszary_chronione_GDOS | GDOS:ZespolyPrzyrodniczoKrajobrazowe | Zespoły przyrodniczo-krajobrazowe | GDOS_ZespPrzyr
+obszary_chronione_GDOS | GDOS:UzytkiEkologiczne | Użytki ekologiczne | GDOS_UzytkiEkol
+obszary_chronione_GDOS | GDOS:StanowiskaDokumentacyjne | Stanowiska dokumentacyjne | GDOS_StanDokument
+obszary_chronione_GDOS | GDOS:PomnikiPrzyrody | Pomniki przyrody | GDOS_PomnikiPrzyr
 >> Lasy (Bank Danych o Lasach)
-Lasy_Panstwowe_BDL | 6 | Regionalne dyrekcje Lasów Państwowych (RDLP)
-Lasy_Panstwowe_BDL | 5 | Nadleśnictwa
-Lasy_Panstwowe_BDL | 4 | Leśnictwa
-Lasy_Panstwowe_BDL | 3 | Oddziały leśne (Lasy Państwowe)
-Lasy_Panstwowe_BDL | 1 | Wydzielenia leśne (Lasy Państwowe)
-Lasy_Panstwowe_BDL | 2 | Oddziały poza Lasami Państwowymi
-Lasy_Panstwowe_BDL | 0 | Wydzielenia poza Lasami Państwowymi
+Lasy_Panstwowe_BDL | 6 | Regionalne dyrekcje Lasów Państwowych (RDLP) | Lasy_RDLP
+Lasy_Panstwowe_BDL | 5 | Nadleśnictwa | Lasy_Nadlesnictwa
+Lasy_Panstwowe_BDL | 4 | Leśnictwa | Lasy_Lesnictwa
+Lasy_Panstwowe_BDL | 3 | Oddziały leśne (Lasy Państwowe) | Lasy_LP_Oddzialy
+Lasy_Panstwowe_BDL | 1 | Wydzielenia leśne (Lasy Państwowe) | Lasy_LP_Wydziel
+Lasy_Panstwowe_BDL | 2 | Oddziały poza Lasami Państwowymi | Lasy_Inne_Oddzialy
+Lasy_Panstwowe_BDL | 0 | Wydzielenia poza Lasami Państwowymi | Lasy_Inne_Wydziel
 >> Mapa hydrograficzna (GUGiK)
-hydrograficzna_50 | Raster | Mapa hydrograficzna 1:50 000
-hydrograficzna_50 | Raster_enviDMS_50k | Mapa hydrograficzna 1:50 000 (enviDMS)
+hydrograficzna_50 | Raster | Mapa hydrograficzna 1:50 000 | Hydro_50k
+hydrograficzna_50 | Raster_enviDMS_50k | Mapa hydrograficzna 1:50 000 (enviDMS) | Hydro_50k_enviDMS
 >> Mapa sozologiczna (GUGiK)
-sozologiczna_50 | 0 | Mapa sozologiczna 1:50 000 (stan i ochrona środowiska)
+sozologiczna_50 | 0 | Mapa sozologiczna 1:50 000 (stan i ochrona środowiska) | Sozo_50k
 >> Mapa glebowo-rolnicza 1:5000 (GUGiK)
-mapa_glebowo_rolnicza | 0 | Kontury glebowe
-mapa_glebowo_rolnicza | 2 | Odkrywki glebowe
+mapa_glebowo_rolnicza | 0 | Kontury glebowe | Gleby_Kontury
+mapa_glebowo_rolnicza | 2 | Odkrywki glebowe | Gleby_Odkrywki
 >> Regiony fizycznogeograficzne (PIG-PIB)
-regiony_fizycznogeograficzne | 1 | Makroregiony fizycznogeograficzne
-regiony_fizycznogeograficzne | 0 | Mezoregiony fizycznogeograficzne
+regiony_fizycznogeograficzne | 1 | Makroregiony fizycznogeograficzne | Regiony_Makro
+regiony_fizycznogeograficzne | 0 | Mezoregiony fizycznogeograficzne | Regiony_Mezo
 
 > Geologia (PIG-PIB)
-geologiczna_50_SMGP | 0 | Szczegółowa mapa geologiczna Polski 1:50 000
-geologiczna_50_litogenetyczna | 1 | Mapa litogenetyczna Polski 1:50 000
-geologiczna_500 | 0 | Mapa geologiczna Polski 1:500 000
+geologiczna_50_SMGP | 0 | Szczegółowa mapa geologiczna Polski 1:50 000 | Geol_SMGP_50k
+geologiczna_50_litogenetyczna | 1 | Mapa litogenetyczna Polski 1:50 000 | Geol_Litogen_50k
+geologiczna_500 | 0 | Mapa geologiczna Polski 1:500 000 | Geol_Polska_500k
 
 > Kraje sąsiednie i strefa przygraniczna
 >> Czechy (ČÚZK)
-czechy_topo_WMTS | ZTM_WM | Mapa topograficzna wieloskalowa (ČÚZK, kafle WMTS – każdy układ)
-czechy_ztm10_wms | 0 | Skan mapy topograficznej 1:10 000 (ZTM 10, WMS – zalecany układ WGS84/UTM)
-czechy_ztm25_wms | 0 | Skan mapy topograficznej 1:25 000 (ZTM 25, WMS – zalecany układ WGS84/UTM)
-czechy_ztm50_wms | 0 | Skan mapy topograficznej 1:50 000 (ZTM 50, WMS – zalecany układ WGS84/UTM)
-czechy_orto_WMTS | ORTOFOTO_WM | Ortofotomapa lotnicza (Ortofoto ČR, kafle WMTS – każdy układ)
+czechy_topo_WMTS | ZTM_WM | Mapa topograficzna wieloskalowa (ČÚZK, kafle WMTS – każdy układ) | CZ_Topo_ZTM
+czechy_ztm10_wms | 0 | Skan mapy topograficznej 1:10 000 (ZTM 10, WMS – zalecany układ WGS84/UTM) | CZ_Topo_10k
+czechy_ztm25_wms | 0 | Skan mapy topograficznej 1:25 000 (ZTM 25, WMS – zalecany układ WGS84/UTM) | CZ_Topo_25k
+czechy_ztm50_wms | 0 | Skan mapy topograficznej 1:50 000 (ZTM 50, WMS – zalecany układ WGS84/UTM) | CZ_Topo_50k
+czechy_orto_WMTS | ORTOFOTO_WM | Ortofotomapa lotnicza (Ortofoto ČR, kafle WMTS – każdy układ) | CZ_Ortofoto
 
 >> Słowacja (ZBGIS i Freemap)
-slowacja_freemap | outdoor | Mapa turystyczna Karpat – szlaki i rzeźba (Freemap Slovakia, kafle XYZ – każdy układ)
-slowacja_zmsr_wms | 1 | Skan mapy topograficznej 1:10 000 (ZM10, WMS – zalecany układ WGS84/UTM)
-slowacja_zmsr_wms | 5 | Skan mapy topograficznej 1:25 000 (ZM25, WMS – tylko środkowa Słowacja, przy granicy z Polską puste; zalecany układ WGS84/UTM)
-slowacja_zmsr_wms | 9 | Skan mapy topograficznej 1:50 000 (ZM50, WMS – zalecany układ WGS84/UTM)
-slowacja_zmsr_wms | 13 | Skan mapy topograficznej 1:100 000 (ZM100, WMS – zalecany układ WGS84/UTM)
-slowacja_orto_wms | 1 | Ortofotomozaika SR (ZBGIS, WMS – zalecany układ WGS84/UTM)
-slowacja_dmr_wms | 0 | Cieniowanie rzeźby terenu (DMR 5.0, WMS – zalecany układ WGS84/UTM)
+slowacja_freemap | outdoor | Mapa turystyczna Karpat – szlaki i rzeźba (Freemap Slovakia, kafle XYZ – każdy układ) | SK_Freemap_Out
+slowacja_zmsr_wms | 1 | Skan mapy topograficznej 1:10 000 (ZM10, WMS – zalecany układ WGS84/UTM) | SK_ZM10
+slowacja_zmsr_wms | 5 | Skan mapy topograficznej 1:25 000 (ZM25, WMS – tylko środkowa Słowacja, przy granicy z Polską puste; zalecany układ WGS84/UTM) | SK_ZM25
+slowacja_zmsr_wms | 9 | Skan mapy topograficznej 1:50 000 (ZM50, WMS – zalecany układ WGS84/UTM) | SK_ZM50
+slowacja_zmsr_wms | 13 | Skan mapy topograficznej 1:100 000 (ZM100, WMS – zalecany układ WGS84/UTM) | SK_ZM100
+slowacja_orto_wms | 1 | Ortofotomozaika SR (ZBGIS, WMS – zalecany układ WGS84/UTM) | SK_Ortofoto
+slowacja_dmr_wms | 0 | Cieniowanie rzeźby terenu (DMR 5.0, WMS – zalecany układ WGS84/UTM) | SK_DMR_Cien
 
 >> Niemcy – mapa ogólnokrajowa (BKG)
-niemcy_basemapde_WMTS | de_basemapde_web_raster_farbe | Mapa urzędowa basemap.de – kolorowa (BKG, kafle WMTS – każdy układ)
-niemcy_basemapde_WMTS | de_basemapde_web_raster_grau | Mapa urzędowa basemap.de – szara (BKG, kafle WMTS – każdy układ)
+niemcy_basemapde_WMTS | de_basemapde_web_raster_farbe | Mapa urzędowa basemap.de – kolorowa (BKG, kafle WMTS – każdy układ) | DE_Basemap_Kolor
+niemcy_basemapde_WMTS | de_basemapde_web_raster_grau | Mapa urzędowa basemap.de – szara (BKG, kafle WMTS – każdy układ) | DE_Basemap_Szara
 
 >> Niemcy – Brandenburgia (strefa Odry, LGB)
-niemcy_brandenburgia_dtk10_wms | bb_dtk10_farbe | Skan mapy topograficznej 1:10 000 (DTK10, WMS – tylko układ WGS84, serwer odrzuca UTM i PL-1992)
-niemcy_brandenburgia_dtk25_wms | bb_dtk25_farbe | Skan mapy topograficznej 1:25 000 (DTK25, WMS – tylko układ WGS84, serwer odrzuca UTM i PL-1992)
-niemcy_brandenburgia_dtk50_wms | bb_dtk50_farbe | Skan mapy topograficznej 1:50 000 (DTK50, WMS – tylko układ WGS84, serwer odrzuca UTM i PL-1992)
-niemcy_brandenburgia_sdop_wms | bb_sdop | Ortofotomapa lotnicza 20 cm (SDOP, WMS – tylko układ WGS84, serwer odrzuca UTM i PL-1992)
-niemcy_brandenburgia_dgm_wms | dgmshade | Cieniowanie reliefu NMT 1 m (DGMSHADE, WMS – tylko układ WGS84, serwer odrzuca UTM i PL-1992)
+niemcy_brandenburgia_dtk10_wms | bb_dtk10_farbe | Skan mapy topograficznej 1:10 000 (DTK10, WMS – tylko układ WGS84, serwer odrzuca UTM i PL-1992) | DE_BB_Topo_10k
+niemcy_brandenburgia_dtk25_wms | bb_dtk25_farbe | Skan mapy topograficznej 1:25 000 (DTK25, WMS – tylko układ WGS84, serwer odrzuca UTM i PL-1992) | DE_BB_Topo_25k
+niemcy_brandenburgia_dtk50_wms | bb_dtk50_farbe | Skan mapy topograficznej 1:50 000 (DTK50, WMS – tylko układ WGS84, serwer odrzuca UTM i PL-1992) | DE_BB_Topo_50k
+niemcy_brandenburgia_sdop_wms | bb_sdop | Ortofotomapa lotnicza 20 cm (SDOP, WMS – tylko układ WGS84, serwer odrzuca UTM i PL-1992) | DE_BB_Orto_20cm
+niemcy_brandenburgia_dgm_wms | dgmshade | Cieniowanie reliefu NMT 1 m (DGMSHADE, WMS – tylko układ WGS84, serwer odrzuca UTM i PL-1992) | DE_BB_NMT_Cien
 
 >> Niemcy – Saksonia (strefa Nysy Łużyckiej, GeoSN)
-niemcy_saksonia_dtk_wms | sn_dtk25_p_color | Skan mapy topograficznej 1:25 000 (DTK25, WMS – układ PL-1992, WGS84, UTM)
-niemcy_saksonia_dtk_wms | sn_dtk50_p_color | Skan mapy topograficznej 1:50 000 (DTK50, WMS – układ PL-1992, WGS84, UTM)
-niemcy_saksonia_dop_wms | sn_dop_020 | Ortofotomapa lotnicza 20 cm (DOP, WMS – układ PL-1992, WGS84, UTM)
-niemcy_saksonia_hoehe_wms | relief_standard | Cieniowanie rzeźby terenu (DGM, WMS – układ PL-1992, WGS84, UTM)
-niemcy_saksonia_hoehe_wms | hangneigung | Nachylenie stoków (GeoSN, WMS – układ PL-1992, WGS84, UTM)
+niemcy_saksonia_dtk_wms | sn_dtk25_p_color | Skan mapy topograficznej 1:25 000 (DTK25, WMS – układ PL-1992, WGS84, UTM) | DE_SN_Topo_25k
+niemcy_saksonia_dtk_wms | sn_dtk50_p_color | Skan mapy topograficznej 1:50 000 (DTK50, WMS – układ PL-1992, WGS84, UTM) | DE_SN_Topo_50k
+niemcy_saksonia_dop_wms | sn_dop_020 | Ortofotomapa lotnicza 20 cm (DOP, WMS – układ PL-1992, WGS84, UTM) | DE_SN_Orto_20cm
+niemcy_saksonia_hoehe_wms | relief_standard | Cieniowanie rzeźby terenu (DGM, WMS – układ PL-1992, WGS84, UTM) | DE_SN_DGM_Cien
+niemcy_saksonia_hoehe_wms | hangneigung | Nachylenie stoków (GeoSN, WMS – układ PL-1992, WGS84, UTM) | DE_SN_Nachylenie
 
 >> Litwa (INSPIRE)
-litwa_inspire_wms | cp:CP.CadastralParcel | Ewidencja gruntów – granice działek (INSPIRE, WMS – zalecany układ WGS84/UTM)
-litwa_inspire_wms | el:EL.ContourLine | Warstwice poziomicowe terenu (INSPIRE, WMS – zalecany układ WGS84/UTM)
-litwa_inspire_wms | bu:BU.Building_polygon | Budynki i zabudowa (INSPIRE, WMS – zalecany układ WGS84/UTM)
-litwa_inspire_wms | tn:TN.RoadTransportNetwork.RoadLink | Sieć dróg i szlaków komunikacyjnych (INSPIRE, WMS – zalecany układ WGS84/UTM)
+litwa_inspire_wms | cp:CP.CadastralParcel | Ewidencja gruntów – granice działek (INSPIRE, WMS – zalecany układ WGS84/UTM) | LT_Kataster
+litwa_inspire_wms | el:EL.ContourLine | Warstwice poziomicowe terenu (INSPIRE, WMS – zalecany układ WGS84/UTM) | LT_Poziomice
+litwa_inspire_wms | bu:BU.Building_polygon | Budynki i zabudowa (INSPIRE, WMS – zalecany układ WGS84/UTM) | LT_Budynki
+litwa_inspire_wms | tn:TN.RoadTransportNetwork.RoadLink | Sieć dróg i szlaków komunikacyjnych (INSPIRE, WMS – zalecany układ WGS84/UTM) | LT_Drogi
 
 >> Morze Bałtyckie (EMODnet Bathymetry)
-baltyk_batymetria_wms | emodnet:mean_atlas_land | Rzeźba i głębokości dna Bałtyku – pełne pokrycie (WMS – zalecany układ WGS84/UTM)
-baltyk_batymetria_wms | emodnet:mean_rainbowcolour | Głębokość dna morskiego – paleta barwna (WMS – zalecany układ WGS84/UTM)
-baltyk_batymetria_wms | emodnet:contours | Izobaty – poziomice głębokości morskiej (WMS – zalecany układ WGS84/UTM)
-baltyk_batymetria_wms | coastlines | Linia brzegowa Morza Bałtyckiego (WMS – zalecany układ WGS84/UTM)
+baltyk_batymetria_wms | emodnet:mean_atlas_land | Rzeźba i głębokości dna Bałtyku – pełne pokrycie (WMS – zalecany układ WGS84/UTM) | Baltyk_Dno_Pelne
+baltyk_batymetria_wms | emodnet:mean_rainbowcolour | Głębokość dna morskiego – paleta barwna (WMS – zalecany układ WGS84/UTM) | Baltyk_Glebokosci
+baltyk_batymetria_wms | emodnet:contours | Izobaty – poziomice głębokości morskiej (WMS – zalecany układ WGS84/UTM) | Baltyk_Izobaty
+baltyk_batymetria_wms | coastlines | Linia brzegowa Morza Bałtyckiego (WMS – zalecany układ WGS84/UTM) | Baltyk_LiniaBrzegu
 
 >> Europa Środkowa i Wschodnia (OpenTopoMap)
-OpenTopoMap | opentopomap | OpenTopoMap – mapa topograficzna z poziomicami i cieniowaniem (Litwa, Ukraina, Białoruś, kafle XYZ – każdy układ)
+OpenTopoMap | opentopomap | OpenTopoMap – mapa topograficzna z poziomicami i cieniowaniem (Litwa, Ukraina, Białoruś, kafle XYZ – każdy układ) | OpenTopo_Wschod

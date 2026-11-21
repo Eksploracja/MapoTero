@@ -459,4 +459,117 @@ Public Class KompilatorMbtilesTesty
         Assert.Equal(ProfilKorektyRastra.GarminMip, opcje.Korekta.Profil)
     End Sub
 
+    <Fact>
+    Public Sub PrzeliczRozlaczneZakresyZoom_DwieWarstwy_SaRozlaczneIBezLuki()
+        Dim s1 As New Siatka(New Zasieg(487000, 637000, 487512, 637512), 4.0, 256)
+        Dim s2 As New Siatka(New Zasieg(487000, 637000, 487512, 637512), 1.0, 256)
+        Dim w1 As New WarstwaWielowarstwowa With {
+            .Tytul = "Przegladowa",
+            .Uklad = UkladWspolrzednych.PL1992,
+            .Siatka = s1,
+            .Zrodlo = New ZrodloSegmentow("C:\", "_", StylNumeracji.WierszKolumna, "png", s1)
+        }
+        Dim w2 As New WarstwaWielowarstwowa With {
+            .Tytul = "Szczegolowa",
+            .Uklad = UkladWspolrzednych.PL1992,
+            .Siatka = s2,
+            .Zrodlo = New ZrodloSegmentow("C:\", "_", StylNumeracji.WierszKolumna, "png", s2)
+        }
+
+        Dim warstwy As New List(Of WarstwaWielowarstwowa) From {w1, w2}
+        KompilatorMbtiles.PrzeliczRozlaczneZakresyZoom(warstwy)
+
+        Assert.True(w1.PoziomMin <= w1.PoziomMax)
+        Assert.True(w2.PoziomMin <= w2.PoziomMax)
+        Assert.Equal(w1.PoziomMax + 1, w2.PoziomMin)
+
+        Dim luki = KompilatorMbtiles.SprawdzLukiPoziomow(warstwy, w1.PoziomMin, w2.PoziomMax)
+        Assert.Empty(luki)
+
+        For z = w1.PoziomMin To w2.PoziomMax
+            Dim aktywne = KompilatorMbtiles.WarstwyDlaPoziomu(warstwy, z)
+            Assert.Single(aktywne)
+        Next
+    End Sub
+
+    <Fact>
+    Public Sub PrzeliczRozlaczneZakresyZoom_TrzyWarstwy_SaRozlaczneIBezLuki()
+        Dim s1 As New Siatka(New Zasieg(487000, 637000, 487512, 637512), 8.0, 256)
+        Dim s2 As New Siatka(New Zasieg(487000, 637000, 487512, 637512), 2.0, 256)
+        Dim s3 As New Siatka(New Zasieg(487000, 637000, 487512, 637512), 0.5, 256)
+        Dim w1 As New WarstwaWielowarstwowa With {
+            .Tytul = "Przegladowa_50k",
+            .Uklad = UkladWspolrzednych.PL1992,
+            .Siatka = s1,
+            .Zrodlo = New ZrodloSegmentow("C:\", "_", StylNumeracji.WierszKolumna, "png", s1)
+        }
+        Dim w2 As New WarstwaWielowarstwowa With {
+            .Tytul = "Srednia_25k",
+            .Uklad = UkladWspolrzednych.PL1992,
+            .Siatka = s2,
+            .Zrodlo = New ZrodloSegmentow("C:\", "_", StylNumeracji.WierszKolumna, "png", s2)
+        }
+        Dim w3 As New WarstwaWielowarstwowa With {
+            .Tytul = "Szczegolowa_10k",
+            .Uklad = UkladWspolrzednych.PL1992,
+            .Siatka = s3,
+            .Zrodlo = New ZrodloSegmentow("C:\", "_", StylNumeracji.WierszKolumna, "png", s3)
+        }
+
+        Dim warstwy As New List(Of WarstwaWielowarstwowa) From {w1, w2, w3}
+        KompilatorMbtiles.PrzeliczRozlaczneZakresyZoom(warstwy)
+
+        Assert.True(w1.PoziomMin <= w1.PoziomMax)
+        Assert.True(w2.PoziomMin <= w2.PoziomMax)
+        Assert.True(w3.PoziomMin <= w3.PoziomMax)
+
+        ' Rozłączne i stykające się bez nachodzenia:
+        Assert.Equal(w1.PoziomMax + 1, w2.PoziomMin)
+        Assert.Equal(w2.PoziomMax + 1, w3.PoziomMin)
+
+        Dim luki = KompilatorMbtiles.SprawdzLukiPoziomow(warstwy, w1.PoziomMin, w3.PoziomMax)
+        Assert.Empty(luki)
+
+        For z = w1.PoziomMin To w3.PoziomMax
+            Dim aktywne = KompilatorMbtiles.WarstwyDlaPoziomu(warstwy, z)
+            Assert.Single(aktywne)
+        Next
+    End Sub
+
+    <Fact>
+    Public Sub WarstwaWielowarstwowa_WczytajSesje_UstawiaSkroconyTytulIOpis()
+        Dim folder = NowyFolder()
+        Try
+            Dim c As New KonfiguracjaSesji With {
+                .Folder = folder,
+                .RodzajMapy = "skany_map_topograficznych",
+                .XDol = "487000",
+                .YLewy = "637000",
+                .XGora = "487512",
+                .YPrawy = "637512",
+                .RozmiarPiksela = "1.0",
+                .BokSegmentuPx = "256",
+                .UkladEpsg = 2180,
+                .Format = "png",
+                .Prefiks = "_",
+                .Numeracja = "1",
+                .Przezroczystosc = False
+            }
+            c.Warstwy(0) = "Raster_10_1965"
+            c.LiczbaWarstw = 1
+            c.Zapisz(Path.Combine(folder, "conf.txt"), System.Text.Encoding.UTF8)
+
+            Dim w As New WarstwaWielowarstwowa With {.Folder = folder}
+            Dim blad As String = ""
+            Dim ok = w.WczytajSesje(blad)
+            Assert.True(ok, blad)
+
+            ' Tytuł powinien być skróconym identyfikatorem z katalogu warstw
+            Assert.Equal("Topo_65_10k", w.Tytul)
+            Assert.Contains("1:10 000", w.OpisPelny)
+        Finally
+            Usun(folder)
+        End Try
+    End Sub
+
 End Class
