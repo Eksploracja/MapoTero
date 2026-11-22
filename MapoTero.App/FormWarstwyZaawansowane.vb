@@ -111,8 +111,19 @@ Public Class FormWarstwyZaawansowane
         AddHandler _btnDodajWarstwe.Click, AddressOf DodajWarstwe_Click
         Controls.Add(_btnDodajWarstwe)
 
-        _lblZapytania.Location = New Point(148, 374)
-        _lblZapytania.Size = New Size(402, 44)
+        Dim btnPomoc As New Button With {
+            .Name = "btnPomoc",
+            .Text = "Pomoc",
+            .Location = New Point(146, 376),
+            .Size = New Size(75, 26),
+            .Font = New Font("Segoe UI", 9.0!, FontStyle.Regular)
+        }
+        _podpowiedz.SetToolTip(btnPomoc, "Instrukcja obsługi zaawansowanych warstw i trybów mieszania (F1)")
+        AddHandler btnPomoc.Click, Sub() FormPomocMbtiles.Pokaz(Me, TematPomocy.WarstwyZaawansowane)
+        Controls.Add(btnPomoc)
+
+        _lblZapytania.Location = New Point(228, 374)
+        _lblZapytania.Size = New Size(322, 44)
         Controls.Add(_lblZapytania)
 
         Dim lblPodglad As New Label With {.Location = New Point(560, 8), .AutoSize = True,
@@ -193,6 +204,14 @@ Public Class FormWarstwyZaawansowane
             _btnPodglad.Enabled = False
             _lblStan.Text = "Podgląd wymaga poprawnego zasięgu siatki albo widoku mapy w oknie głównym."
         End If
+
+        KeyPreview = True
+        AddHandler KeyDown, Sub(s As Object, e As KeyEventArgs)
+                                If e.KeyCode = Keys.F1 AndAlso e.Modifiers = Keys.None AndAlso Not e.Handled Then
+                                    e.Handled = True
+                                    FormPomocMbtiles.Pokaz(Me, TematPomocy.WarstwyZaawansowane)
+                                End If
+                            End Sub
 
         ZbudujWiersze()
     End Sub

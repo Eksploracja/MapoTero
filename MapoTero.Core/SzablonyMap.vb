@@ -28,6 +28,9 @@ Public Enum RodzajEksportu
     GeoTiff
     ''' <summary>Mapa TrekBuddy / Locus Map: archiwum .tar z kaflami 512 px arkusza, plikiem .map i listą .set.</summary>
     TrekBuddy
+    ''' <summary>GeoPackage (OGC GPKG): kafle Web Mercator dla QGIS, QField i Mergin Maps.
+    ''' Na końcu wyliczenia, żeby nie zmienić wartości liczbowej TrekBuddy.</summary>
+    GeoPackage
 End Enum
 
 ''' <summary>Główne przeznaczenie (urządzenie docelowe) mapy w kreatorze.</summary>
@@ -912,7 +915,7 @@ Public Module ZarzadcaSzablonow
     ''' <summary>Czy format składa się z kafli na wielu poziomach powiększenia (ma sens zakres zoom).</summary>
     Public Function CzyFormatWielopoziomowy(rodzaj As RodzajEksportu) As Boolean
         Select Case rodzaj
-            Case RodzajEksportu.MBTiles, RodzajEksportu.SQLiteDB, RodzajEksportu.OruxMaps, RodzajEksportu.Jnx
+            Case RodzajEksportu.MBTiles, RodzajEksportu.SQLiteDB, RodzajEksportu.OruxMaps, RodzajEksportu.Jnx, RodzajEksportu.GeoPackage
                 Return True
             Case Else
                 Return False
@@ -928,6 +931,7 @@ Public Module ZarzadcaSzablonow
             Case RodzajEksportu.Kmz : Return "KMZ"
             Case RodzajEksportu.Jnx : Return "Garmin JNX (BirdsEye)"
             Case RodzajEksportu.GeoTiff : Return "GeoTIFF"
+            Case RodzajEksportu.GeoPackage : Return "GeoPackage"
             Case RodzajEksportu.OruxMaps : Return "OruxMaps"
             Case RodzajEksportu.TrekBuddy : Return "TrekBuddy (TAR)"
             Case Else : Return rodzaj.ToString()
@@ -953,6 +957,8 @@ Public Module ZarzadcaSzablonow
                 Return "Podłącz odbiornik kablem USB i skopiuj plik do folderu Garmin/BirdsEye. Mapę włączysz w ustawieniach mapy odbiornika."
             Case RodzajEksportu.GeoTiff
                 Return "Plik GeoTIFF otworzysz w QGIS, AutoCAD Map 3D, Avenza Maps lub QField; obraz zawiera georeferencję w układzie PL-1992."
+            Case RodzajEksportu.GeoPackage
+                Return "Plik GeoPackage (.gpkg) otworzysz w QGIS, QField i Mergin Maps."
             Case Else
                 Return ""
         End Select
@@ -1035,6 +1041,7 @@ Public Module ZarzadcaSzablonow
             Case RodzajEksportu.Jnx : Return ".jnx"
             Case RodzajEksportu.SQLiteDB : Return ".sqlitedb"
             Case RodzajEksportu.GeoTiff : Return ".tif"
+            Case RodzajEksportu.GeoPackage : Return ".gpkg"
             Case RodzajEksportu.TrekBuddy : Return ".tar"
             Case Else : Return ".mbtiles"
         End Select

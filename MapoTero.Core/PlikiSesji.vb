@@ -291,7 +291,7 @@ Public Class KonfiguracjaSesji
         If Not RowneLiczby(a.Obszar.XDol, b.Obszar.XDol) OrElse Not RowneLiczby(a.Obszar.YLewy, b.Obszar.YLewy) Then Return False
         If UkladEpsg <> inna.UkladEpsg OrElse Przezroczystosc <> inna.Przezroczystosc Then Return False
         If Not String.Equals(Prefiks, inna.Prefiks, StringComparison.Ordinal) Then Return False
-        If MapoTero.Core.Siatka.StylZTekstu(Numeracja) <> MapoTero.Core.Siatka.StylZTekstu(inna.Numeracja) Then Return False
+        If Siatka.StylZTekstu(Numeracja) <> Siatka.StylZTekstu(inna.Numeracja) Then Return False
         If Wms.RozszerzeniePliku(Format) <> Wms.RozszerzeniePliku(inna.Format) Then Return False
         'źródło: adres serwera (w starszych plikach brak - wtedy nazwa zbioru map) i lista warstw
         If AdresSerwera <> "" AndAlso inna.AdresSerwera <> "" Then

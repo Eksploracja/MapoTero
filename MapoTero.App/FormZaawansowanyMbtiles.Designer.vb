@@ -51,6 +51,8 @@ Partial Class FormZaawansowanyMbtiles
         Me.btnPokazWFolderze = New System.Windows.Forms.Button()
         Me.lblNazwa = New System.Windows.Forms.Label()
         Me.txtNazwaMapy = New System.Windows.Forms.TextBox()
+        Me.lblTypBazy = New System.Windows.Forms.Label()
+        Me.cmbTypBazy = New System.Windows.Forms.ComboBox()
         Me.lblFormat = New System.Windows.Forms.Label()
         Me.cmbFormat = New System.Windows.Forms.ComboBox()
         Me.lblJakosc = New System.Windows.Forms.Label()
@@ -316,6 +318,8 @@ Partial Class FormZaawansowanyMbtiles
         Me.grpUstawienia.Controls.Add(Me.btnPokazWFolderze)
         Me.grpUstawienia.Controls.Add(Me.lblNazwa)
         Me.grpUstawienia.Controls.Add(Me.txtNazwaMapy)
+        Me.grpUstawienia.Controls.Add(Me.lblTypBazy)
+        Me.grpUstawienia.Controls.Add(Me.cmbTypBazy)
         Me.grpUstawienia.Controls.Add(Me.lblFormat)
         Me.grpUstawienia.Controls.Add(Me.cmbFormat)
         Me.grpUstawienia.Controls.Add(Me.lblJakosc)
@@ -329,7 +333,7 @@ Partial Class FormZaawansowanyMbtiles
         Me.grpUstawienia.Size = New System.Drawing.Size(610, 189)
         Me.grpUstawienia.TabIndex = 2
         Me.grpUstawienia.TabStop = False
-        Me.grpUstawienia.Text = "Parametry pliku MBTiles i kompresji"
+        Me.grpUstawienia.Text = "Parametry pliku wynikowego i kompresji"
         '
         'lblPlik
         '
@@ -383,13 +387,32 @@ Partial Class FormZaawansowanyMbtiles
         Me.txtNazwaMapy.TabIndex = 4
         Me.txtNazwaMapy.Text = "Mapa wielowarstwowa"
         '
+        'lblTypBazy
+        '
+        Me.lblTypBazy.AutoSize = True
+        Me.lblTypBazy.Location = New System.Drawing.Point(345, 56)
+        Me.lblTypBazy.Name = "lblTypBazy"
+        Me.lblTypBazy.Size = New System.Drawing.Size(70, 13)
+        Me.lblTypBazy.TabIndex = 5
+        Me.lblTypBazy.Text = "Format pliku:"
+        '
+        'cmbTypBazy
+        '
+        Me.cmbTypBazy.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
+        Me.cmbTypBazy.FormattingEnabled = True
+        Me.cmbTypBazy.Items.AddRange(New Object() {"MBTiles (*.mbtiles)", "GeoPackage (*.gpkg)"})
+        Me.cmbTypBazy.Location = New System.Drawing.Point(420, 53)
+        Me.cmbTypBazy.Name = "cmbTypBazy"
+        Me.cmbTypBazy.Size = New System.Drawing.Size(180, 21)
+        Me.cmbTypBazy.TabIndex = 6
+        '
         'lblFormat
         '
         Me.lblFormat.AutoSize = True
         Me.lblFormat.Location = New System.Drawing.Point(10, 88)
         Me.lblFormat.Name = "lblFormat"
         Me.lblFormat.Size = New System.Drawing.Size(69, 13)
-        Me.lblFormat.TabIndex = 5
+        Me.lblFormat.TabIndex = 7
         Me.lblFormat.Text = "Format kafli:"
         '
         'cmbFormat
@@ -658,6 +681,8 @@ Partial Class FormZaawansowanyMbtiles
     Friend WithEvents btnPokazWFolderze As Button
     Friend WithEvents lblNazwa As Label
     Friend WithEvents txtNazwaMapy As TextBox
+    Friend WithEvents lblTypBazy As Label
+    Friend WithEvents cmbTypBazy As ComboBox
     Friend WithEvents lblFormat As Label
     Friend WithEvents cmbFormat As ComboBox
     Friend WithEvents lblJakosc As Label

@@ -361,9 +361,9 @@ Public Class UzytkownikInterakcjaTesty
                     Dim ekran = Screen.FromControl(f).WorkingArea
                     Assert.True(f.Height <= ekran.Height)
 
-                    ' Jeśli okno zostało zmniejszone w pionie, AutoScroll musi być aktywny z bazową wysokością 820 z projektu,
+                    ' Jeśli okno zostało zmniejszone w pionie, AutoScroll musi być aktywny z bazową wysokością 842 z projektu (od pozycji GeoPackage),
                     ' przeskalowaną tak jak okno (czcionka Segoe UI 9 już przy 100% DPI)
-                    Dim bazowa As Integer = CInt(Math.Round(820 * Global.MapoTero.PomocProgramu.SkalaProjektanta(f).Height))
+                    Dim bazowa As Integer = CInt(Math.Round(842 * Global.MapoTero.PomocProgramu.SkalaProjektanta(f).Height))
                     If f.ClientSize.Height < bazowa Then
                         Assert.True(f.AutoScroll)
                         Assert.Equal(bazowa, f.AutoScrollMinSize.Height)

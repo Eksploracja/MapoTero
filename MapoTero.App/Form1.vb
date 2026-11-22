@@ -2949,13 +2949,29 @@ Public Class Form1
             Dim pliki = TryCast(e.Data.GetData(DataFormats.FileDrop), String())
             If pliki IsNot Nothing AndAlso pliki.Length > 0 Then
                 Dim ext = Path.GetExtension(pliki(0)).ToLowerInvariant()
-                If ext = ".gpx" OrElse ext = ".kml" OrElse ext = ".kmz" OrElse ext = ".map" OrElse Directory.Exists(pliki(0)) Then
+                If ext = ".gpx" OrElse ext = ".kml" OrElse ext = ".kmz" OrElse ext = ".map" OrElse ext = ".geojson" OrElse ext = ".json" OrElse Directory.Exists(pliki(0)) Then
                     e.Effect = DragDropEffects.Copy
                     Return
                 End If
             End If
         End If
         e.Effect = DragDropEffects.None
+    End Sub
+
+    ''' <summary>
+    ''' Pokazuje podgląd poligonu z pliku KML/GeoJSON i ustawia zasięg siatki na jego obrys w układzie sesji.
+    ''' </summary>
+    Private Sub WczytajObszarPoligonu(plik As String)
+        Dim zestaw = FormPodgladPoligonu.PokazDlaPliku(Me, plik)
+        If zestaw Is Nothing OrElse zestaw.Wielokaty.Count = 0 Then Return
+        Dim z = ZaokraglonyZasieg(zestaw.ZasiegWUkladzie(Ustawienia.Uklad))
+        txtXDol.Text = Liczba(z.XDol)
+        txtXGora.Text = Liczba(z.XGora)
+        txtYLewy.Text = Liczba(z.YLewy)
+        txtYPrawy.Text = Liczba(z.YPrawy)
+        WyczyscZnaczniki()
+        PokazZnaczniki()
+        Komunikat("Wczytano obszar poligonu: " & Path.GetFileName(plik) & " (" & zestaw.Wielokaty.Count & " obiektów).", Color.Green)
     End Sub
 
     Private Sub Form1_DragDrop(sender As Object, e As DragEventArgs) Handles Me.DragDrop, mapa.DragDrop
@@ -2987,11 +3003,34 @@ Public Class Form1
 
         Dim plik = pliki(0)
         Dim ext = Path.GetExtension(plik).ToLowerInvariant()
+        If ext = ".geojson" OrElse ext = ".json" Then
+            Try
+                WczytajObszarPoligonu(plik)
+            Catch ex As Exception
+                MsgBox("Nie udało się odczytać poligonu: " & OpisBledu.Z(ex), MsgBoxStyle.Critical, "Obszar poligonu")
+            End Try
+            Exit Sub
+        End If
+
         If ext = ".gpx" OrElse ext = ".kml" OrElse ext = ".kmz" Then
             Try
                 Dim k = Korytarz.WczytajTrase(plik)
                 If Not k.Poprawny Then
-                    MsgBox("Plik " & Path.GetFileName(plik) & " nie zawiera śladu, trasy ani linii (GPX: trk, rte, wpt; KML/KMZ: LineString, gx:Track).", MsgBoxStyle.Exclamation, "Obszar wzdłuż trasy")
+                    'Poligon czyta tylko parser KML (GPX i KMZ dałyby komunikat o nieobsługiwanym rozszerzeniu, a potem drugi)
+                    Dim maPoligon = False
+                    If ext = ".kml" Then
+                        Try
+                            maPoligon = ParserPoligonu.WczytajZPliku(plik).Wielokaty.Count > 0
+                        Catch ex As InvalidDataException
+                            'KML bez <Polygon> - zostaje komunikat poniżej
+                        End Try
+                    End If
+                    If maPoligon Then
+                        WczytajObszarPoligonu(plik)
+                        Exit Sub
+                    End If
+
+                    MsgBox("Plik " & Path.GetFileName(plik) & " nie zawiera śladu, trasy, linii ani poligonu (GPX: trk, rte, wpt; KML/KMZ: LineString, gx:Track, Polygon).", MsgBoxStyle.Exclamation, "Obszar pobierania")
                     Exit Sub
                 End If
                 Using okno As New FormKorytarz(k)
@@ -3282,6 +3321,49 @@ Public Class Form1
     Private Sub KorektaFolderuToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles KorektaFolderuToolStripMenuItem.Click
         Using dlg As New FormKorektaFolderu()
             dlg.ShowDialog(Me)
+        End Using
+    End Sub
+
+    Private Sub PrzeslijNaTelefonToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles PrzeslijNaTelefonToolStripMenuItem.Click
+        Using ofd As New OpenFileDialog()
+            ofd.Title = "Wybierz mapę do przesłania na telefon (Wi-Fi)"
+            ofd.Filter = "Mapy mobilne (*.mbtiles;*.gpkg;*.tif;*.kmz;*.sqlitedb;*.tar)|*.mbtiles;*.gpkg;*.tif;*.kmz;*.sqlitedb;*.tar|Wszystkie pliki (*.*)|*.*"
+            ofd.FilterIndex = 1
+            ofd.RestoreDirectory = True
+            If Not String.IsNullOrEmpty(FormEksport.OstatniPlik) AndAlso File.Exists(FormEksport.OstatniPlik) Then
+                ofd.InitialDirectory = Path.GetDirectoryName(FormEksport.OstatniPlik)
+                ofd.FileName = Path.GetFileName(FormEksport.OstatniPlik)
+            ElseIf Not String.IsNullOrEmpty(Program.FolderDownload) AndAlso Directory.Exists(Program.FolderDownload) Then
+                ofd.InitialDirectory = Program.FolderDownload
+            ElseIf Not String.IsNullOrEmpty(Program.FolderDanych) AndAlso Directory.Exists(Program.FolderDanych) Then
+                ofd.InitialDirectory = Program.FolderDanych
+            End If
+
+            If ofd.ShowDialog(Me) = DialogResult.OK AndAlso File.Exists(ofd.FileName) Then
+                FormWyslijNaTelefon.PokazDlaPliku(Me, ofd.FileName)
+            End If
+        End Using
+    End Sub
+
+    Private Sub KopiujNaGarminaToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles KopiujNaGarminaToolStripMenuItem.Click
+        Using ofd As New OpenFileDialog()
+            ofd.Title = "Wybierz mapę do skopiowania na Garmina (USB)"
+            ofd.Filter = "Mapy Garmin (*.kmz;*.jnx)|*.kmz;*.jnx|Wszystkie pliki (*.*)|*.*"
+            ofd.FilterIndex = 1
+            ofd.RestoreDirectory = True
+            If Not String.IsNullOrEmpty(FormEksport.OstatniPlik) AndAlso File.Exists(FormEksport.OstatniPlik) Then
+                Dim ext = Path.GetExtension(FormEksport.OstatniPlik).ToLowerInvariant()
+                If ext = ".kmz" OrElse ext = ".jnx" Then
+                    ofd.InitialDirectory = Path.GetDirectoryName(FormEksport.OstatniPlik)
+                    ofd.FileName = Path.GetFileName(FormEksport.OstatniPlik)
+                End If
+            ElseIf Not String.IsNullOrEmpty(Program.FolderDownload) AndAlso Directory.Exists(Program.FolderDownload) Then
+                ofd.InitialDirectory = Program.FolderDownload
+            End If
+
+            If ofd.ShowDialog(Me) = DialogResult.OK AndAlso File.Exists(ofd.FileName) Then
+                FormKopiujNaGarmina.PokazDlaPliku(Me, ofd.FileName)
+            End If
         End Using
     End Sub
 

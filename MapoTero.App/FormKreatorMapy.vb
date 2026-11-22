@@ -155,6 +155,7 @@ Public Class FormKreatorMapy
     Private btnPonow As Button
     Private btnNowaMapa As Button
     Private btnOtworzMape As Button
+    Private btnWyslijNaTelefon As Button
     Private lblSukcesWskazowka As Label
     Private lblSukcesUwaga As Label
     Private pnlKroki As Panel
@@ -403,24 +404,34 @@ Public Class FormKreatorMapy
         pnlKrok5.Controls.Add(btnPonow)
         _podpowiedzi.SetToolTip(btnPonow, "Pobiera tylko brakujące segmenty (już pobrane zostają) i ponownie tworzy plik mapy.")
 
-        pnlSukces.Size = New Size(694, 200)
+        pnlSukces.Size = New Size(694, 222)
         lblSukcesTytul.Location = New Point(0, 4)
-        lblSukcesPlik.Location = New Point(2, 38)
-        lblSukcesPlik.Size = New Size(690, 40)
-        lblSukcesWskazowka = New Label With {.Name = "lblSukcesWskazowka", .Location = New Point(2, 80), .Size = New Size(690, 40),
+        lblSukcesPlik.Location = New Point(2, 34)
+        lblSukcesPlik.Size = New Size(690, 36)
+        lblSukcesWskazowka = New Label With {.Name = "lblSukcesWskazowka", .Location = New Point(2, 72), .Size = New Size(690, 36),
                                              .ForeColor = Color.FromArgb(16, 44, 87), .Font = New Font("Segoe UI", 9.0!)}
-        lblSukcesUwaga = New Label With {.Name = "lblSukcesUwaga", .Location = New Point(2, 120), .Size = New Size(690, 34),
+        lblSukcesUwaga = New Label With {.Name = "lblSukcesUwaga", .Location = New Point(2, 110), .Size = New Size(690, 32),
                                          .ForeColor = Color.FromArgb(180, 90, 0), .Visible = False}
-        btnPokazWFolderze.Location = New Point(2, 158)
-        btnZaladujDoProgramu.Location = New Point(162, 158)
-        btnNowaMapa = New Button With {.Name = "btnNowaMapa", .Text = "Utwórz kolejną mapę", .Location = New Point(402, 158),
-                                       .Size = New Size(180, 34), .UseVisualStyleBackColor = True}
-        AddHandler btnNowaMapa.Click, AddressOf btnNowaMapa_Click
-        btnOtworzMape = New Button With {.Name = "btnOtworzMape", .Text = "Otwórz mapę", .Location = New Point(588, 158),
-                                         .Size = New Size(104, 34), .UseVisualStyleBackColor = True, .Visible = False}
+        btnPokazWFolderze.Location = New Point(2, 146)
+        btnPokazWFolderze.Size = New Size(140, 32)
+        btnWyslijNaTelefon = New Button With {.Name = "btnWyslijNaTelefon", .Text = "Wyślij na telefon...", .Location = New Point(148, 146),
+                                              .Size = New Size(155, 32), .UseVisualStyleBackColor = True, .Font = New Font("Segoe UI", 9.0!, FontStyle.Bold)}
+        AddHandler btnWyslijNaTelefon.Click, AddressOf btnWyslijNaTelefon_Click
+        _podpowiedzi.SetToolTip(btnWyslijNaTelefon, "Prześlij wygenerowaną mapę bezpośrednio na telefon przez lokalną sieć Wi-Fi za pomocą kodu QR.")
+
+        btnOtworzMape = New Button With {.Name = "btnOtworzMape", .Text = "Otwórz mapę", .Location = New Point(310, 146),
+                                         .Size = New Size(110, 32), .UseVisualStyleBackColor = True, .Visible = False}
         AddHandler btnOtworzMape.Click, AddressOf btnOtworzMape_Click
         _podpowiedzi.SetToolTip(btnOtworzMape, "Otwiera plik mapy w programie przypisanym w Windows (np. GeoTIFF w QGIS, KMZ w Google Earth).")
-        pnlSukces.Controls.AddRange({lblSukcesWskazowka, lblSukcesUwaga, btnNowaMapa, btnOtworzMape})
+
+        btnZaladujDoProgramu.Location = New Point(2, 182)
+        btnZaladujDoProgramu.Size = New Size(240, 32)
+
+        btnNowaMapa = New Button With {.Name = "btnNowaMapa", .Text = "Utwórz kolejną mapę", .Location = New Point(248, 182),
+                                       .Size = New Size(160, 32), .UseVisualStyleBackColor = True}
+        AddHandler btnNowaMapa.Click, AddressOf btnNowaMapa_Click
+
+        pnlSukces.Controls.AddRange({lblSukcesWskazowka, lblSukcesUwaga, btnWyslijNaTelefon, btnNowaMapa, btnOtworzMape})
 
         ' Stopka: pasek kroków (klik w ukończony krok wraca do niego)
         pnlKroki = New Panel With {.Name = "pnlKroki", .Location = New Point(112, 10), .Size = New Size(316, 30)}
@@ -2811,6 +2822,7 @@ Public Class FormKreatorMapy
                 plikDocelowy = plikiWyniku(0)
             End If
             _sciezkaWygenerowanegoPliku = plikDocelowy
+            FormEksport.OstatniPlik = plikDocelowy
 
             pbPostep.Style = ProgressBarStyle.Blocks
             pbPostep.Value = 100
@@ -2919,6 +2931,14 @@ Public Class FormKreatorMapy
         Catch ex As Exception
             MessageBox.Show("Nie udało się otworzyć mapy: " & OpisBledu.Z(ex), "Kreator mapy", MessageBoxButtons.OK, MessageBoxIcon.Warning)
         End Try
+    End Sub
+
+    Private Sub btnWyslijNaTelefon_Click(sender As Object, e As EventArgs)
+        If Not File.Exists(_sciezkaWygenerowanegoPliku) Then
+            MessageBox.Show("Brak wygenerowanego pliku mapy do przesłania.", "Brak pliku", MessageBoxButtons.OK, MessageBoxIcon.Information)
+            Return
+        End If
+        FormWyslijNaTelefon.PokazDlaPliku(Me, _sciezkaWygenerowanegoPliku)
     End Sub
 
     Private Sub btnPokazWFolderze_Click(sender As Object, e As EventArgs) Handles btnPokazWFolderze.Click

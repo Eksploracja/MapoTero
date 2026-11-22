@@ -79,6 +79,9 @@ Partial Class Form1
         Me.EksportToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.EksportCadToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.KorektaFolderuToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.NarzedziaSeparator2 = New System.Windows.Forms.ToolStripSeparator()
+        Me.PrzeslijNaTelefonToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.KopiujNaGarminaToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.UstawieniaToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.HelpToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.PomocOnlineToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
@@ -418,7 +421,7 @@ Partial Class Form1
         '
         'NarzedziaToolStripMenuItem
         '
-        Me.NarzedziaToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.DodajSerwerToolStripMenuItem, Me.ZnajdzDzialkeToolStripMenuItem, Me.KonwertujOziToolStripMenuItem, Me.ProfilNmtToolStripMenuItem, Me.NarzedziaSeparator1, Me.ScalanieToolStripMenuItem, Me.EksportToolStripMenuItem, Me.EksportCadToolStripMenuItem, Me.KorektaFolderuToolStripMenuItem})
+        Me.NarzedziaToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.DodajSerwerToolStripMenuItem, Me.ZnajdzDzialkeToolStripMenuItem, Me.KonwertujOziToolStripMenuItem, Me.ProfilNmtToolStripMenuItem, Me.NarzedziaSeparator1, Me.ScalanieToolStripMenuItem, Me.EksportToolStripMenuItem, Me.EksportCadToolStripMenuItem, Me.KorektaFolderuToolStripMenuItem, Me.NarzedziaSeparator2, Me.PrzeslijNaTelefonToolStripMenuItem, Me.KopiujNaGarminaToolStripMenuItem})
         Me.NarzedziaToolStripMenuItem.Name = "NarzedziaToolStripMenuItem"
         Me.NarzedziaToolStripMenuItem.Size = New System.Drawing.Size(70, 20)
         Me.NarzedziaToolStripMenuItem.Text = "Narzędzia"
@@ -485,6 +488,25 @@ Partial Class Form1
         Me.KorektaFolderuToolStripMenuItem.Size = New System.Drawing.Size(315, 22)
         Me.KorektaFolderuToolStripMenuItem.Text = "Korekta obrazów w folderze..."
         Me.KorektaFolderuToolStripMenuItem.ToolTipText = "Wsadowe przetwarzanie obrazów: kontrast, ostrość, rozjaśnienie lasów i profil Garmin MIP"
+        '
+        'NarzedziaSeparator2
+        '
+        Me.NarzedziaSeparator2.Name = "NarzedziaSeparator2"
+        Me.NarzedziaSeparator2.Size = New System.Drawing.Size(312, 6)
+        '
+        'PrzeslijNaTelefonToolStripMenuItem
+        '
+        Me.PrzeslijNaTelefonToolStripMenuItem.Name = "PrzeslijNaTelefonToolStripMenuItem"
+        Me.PrzeslijNaTelefonToolStripMenuItem.Size = New System.Drawing.Size(315, 22)
+        Me.PrzeslijNaTelefonToolStripMenuItem.Text = "Prześlij mapę na telefon (Wi-Fi)..."
+        Me.PrzeslijNaTelefonToolStripMenuItem.ToolTipText = "Przesyłanie wyeksportowanej mapy (MBTiles, GeoPackage, GeoTIFF, KMZ) na telefon przez sieć lokalną z kodem QR"
+        '
+        'KopiujNaGarminaToolStripMenuItem
+        '
+        Me.KopiujNaGarminaToolStripMenuItem.Name = "KopiujNaGarminaToolStripMenuItem"
+        Me.KopiujNaGarminaToolStripMenuItem.Size = New System.Drawing.Size(315, 22)
+        Me.KopiujNaGarminaToolStripMenuItem.Text = "Kopiuj mapę do Garmina (USB)..."
+        Me.KopiujNaGarminaToolStripMenuItem.ToolTipText = "Wykryj odbiornik Garmin lub kartę microSD i skopiuj plik .kmz lub .jnx do odpowiedniego folderu."
         '
         'UstawieniaToolStripMenuItem
         '
@@ -1659,6 +1681,9 @@ Partial Class Form1
     Friend WithEvents InstrukcjaObsługiToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents Label29 As System.Windows.Forms.Label
     Friend WithEvents KorektaFolderuToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
+    Friend WithEvents NarzedziaSeparator2 As System.Windows.Forms.ToolStripSeparator
+    Friend WithEvents PrzeslijNaTelefonToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
+    Friend WithEvents KopiujNaGarminaToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents txtBokSegmentu As System.Windows.Forms.TextBox
     Friend WithEvents Label1 As System.Windows.Forms.Label
     Friend WithEvents lblRozmiarPikselaOpis As System.Windows.Forms.Label

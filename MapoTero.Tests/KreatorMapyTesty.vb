@@ -826,4 +826,21 @@ Public Class KreatorMapyTesty
             End Sub)
     End Sub
 
+    <Fact>
+    Public Sub FormKreatorMapy_PosiadaPrzyciskWyslijNaTelefonWPodsumowaniu()
+        UruchomWWatkuSta(
+            Sub()
+                Using f As New Global.MapoTero.Form1()
+                    Using k As New Global.MapoTero.FormKreatorMapy(f)
+                        k.Show()
+                        Application.DoEvents()
+                        Dim btn = k.Controls.Find("btnWyslijNaTelefon", True)
+                        Assert.NotEmpty(btn)
+                        Assert.Equal("Wyślij na telefon...", btn(0).Text)
+                        k.Close()
+                    End Using
+                End Using
+            End Sub)
+    End Sub
+
 End Class

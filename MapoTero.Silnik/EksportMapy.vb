@@ -390,15 +390,22 @@ Public Class ZadanieEksportu
     ''' (kafle PNG, w MBTiles typ "overlay"). Nie dotyczy KMZ dla odbiorników Garmin (tylko JPEG).
     ''' </summary>
     Public Property Nakladka As Boolean
-    ''' <summary>
-    ''' Arkusz (RodzajEksportu.GeoTiff): format pliku - GeoTIFF bezstratny, GeoTIFF z kompresją JPEG, JPEG albo PNG.
+    ''' <summary>Arkusz (RodzajEksportu.GeoTiff): format pliku - GeoTIFF bezstratny, GeoTIFF z kompresją JPEG, JPEG albo PNG.
     ''' Arkusz zastępuje dawne okno Scalanie segmentów, więc ma wszystkie jego formaty.
     ''' </summary>
     Public Property FormatArkusza As FormatArkusza = FormatArkusza.GeoTiffJpeg
+    ''' <summary>Arkusz GeoTIFF: czy tworzyć wewnętrzne piramidy (overviews) dla szybkiego otwierania w QGIS i Avenza Maps.</summary>
+    Public Property PiramidyGeoTiff As Boolean = True
     ''' <summary>Arkusz: pliki georeferencji obok obrazu (world file i .prj, .map, .tab, .kml).</summary>
     Public Property Georeferencja As New OpcjeGeoreferencji With {.WorldFile = True}
     ''' <summary>Arkusz: segmenty mapy podstawowej, których brakowało w folderze (w arkuszu białe pola) - wypełniane eksportem.</summary>
     Public ReadOnly Property BrakujaceSegmenty As New List(Of String)
+    ''' <summary>Arkusz: opcje wektorowej siatki kilometrowej PUWG-92 / UTM nanoszonej na arkusz.</summary>
+    Public Property SiatkaKilometrowa As ParametrySiatkiKilometrowej
+    ''' <summary>Arkusz: ścieżka do pliku GPX/KML ze śladem nanoszonym na arkusz.</summary>
+    Public Property PlikSladuWydruku As String = ""
+    ''' <summary>Arkusz: styl linii śladu nanoszonego na arkusz.</summary>
+    Public Property StylSladuWydruku As New StylSladuWydruku()
     ''' <summary>Opcje korekcji obrazu pod ekrany transflektywne (Garmin MIP / pełne słońce).</summary>
     Public Property KorekcjaMip As New OpcjeKorekcjiMip()
     ''' <summary>Warstwy nakładane na mapę podstawową (od dołu do góry).</summary>
@@ -418,10 +425,10 @@ Public Class ZadanieEksportu
         End Get
     End Property
 
-    ''' <summary>Czy eksport tworzy kafle Web Mercator w piramidzie poziomów (MBTiles, SQLiteDB, OruxMaps, JNX).</summary>
+    ''' <summary>Czy eksport tworzy kafle Web Mercator w piramidzie poziomów (MBTiles, SQLiteDB, OruxMaps, JNX, GeoPackage).</summary>
     Public ReadOnly Property Piramida As Boolean
         Get
-            Return Rodzaj = RodzajEksportu.MBTiles OrElse Rodzaj = RodzajEksportu.SQLiteDB OrElse Rodzaj = RodzajEksportu.OruxMaps OrElse Rodzaj = RodzajEksportu.Jnx
+            Return Rodzaj = RodzajEksportu.MBTiles OrElse Rodzaj = RodzajEksportu.SQLiteDB OrElse Rodzaj = RodzajEksportu.OruxMaps OrElse Rodzaj = RodzajEksportu.Jnx OrElse Rodzaj = RodzajEksportu.GeoPackage
         End Get
     End Property
 
@@ -1130,6 +1137,15 @@ Public Shared Function NazwaPlikuTomu(sciezkaBazowa As String, numerTomu As Inte
             taSamaSiatka.Add(Not przycinany AndAlso TaSamaSiatkaPikseli(warstwa.Zrodlo.Siatka, warstwa.Uklad, s, z.Uklad))
         Next
 
+        'nakładki wydruku: plik śladu czytany raz przed pętlą (dawniej osobno dla każdego pasa arkusza)
+        Dim arkuszZakres As New ZakresArkusza With {
+            .SzerokoscPx = szer, .WysokoscPx = wys,
+            .LewyEastingM = zasieg.YLewy, .GornyNorthingM = zasieg.XGora, .RozmiarPikselaM = pikselX}
+        Dim segmentySladu As List(Of List(Of (Lon As Double, Lat As Double))) = Nothing
+        If Not String.IsNullOrEmpty(z.PlikSladuWydruku) Then
+            segmentySladu = RendererNakladekWydruku.WczytajSegmentySladu(z.PlikSladuWydruku)
+        End If
+
         Dim plikTymczasowy As String = z.Plik & ".tmp"
         Dim folderTb As String = If(trekBuddy, FolderRoboczyTrekBuddy(z), "")
         Dim nazwaTb As String = Path.GetFileNameWithoutExtension(z.Plik)
@@ -1137,9 +1153,16 @@ Public Shared Function NazwaPlikuTomu(sciezkaBazowa As String, numerTomu As Inte
         Dim zapisTb As ZapisRastra = Nothing
         Dim saPiksele = False
         Using zapis As ZapisRastra = If(trekBuddy, New ZapisKafliTrekBuddy(folderTb, nazwaTb, szer, wys, z.JakoscJpeg),
-                                        ZapisRastra.Utworz(format, plikTymczasowy, szer, wys, z.JakoscJpeg, z.Uklad, zasieg, kanaly = 4))
+                                        ZapisRastra.Utworz(format, plikTymczasowy, szer, wys, z.JakoscJpeg, z.Uklad, zasieg, kanaly = 4, z.PiramidyGeoTiff))
             zapisTb = zapis
             zapiszPas = Sub(b, k) zapis.ZapiszWiersze(b, k)
+            'piramidy GeoTIFF dopisywane w Zakoncz dostają ostatnie 10% paska postępu i reagują na Przerwij
+            Dim zapisGeoTiff = TryCast(zapis, ZapisGeoTiff)
+            Dim udzialPiramid As Integer = If(zapisGeoTiff IsNot Nothing AndAlso zapisGeoTiff.MaPiramidy, 10, 0)
+            If udzialPiramid > 0 Then
+                zapisGeoTiff.Przerwanie = token
+                zapisGeoTiff.PostepPiramid = Sub(p) postep?.Report(100 - udzialPiramid + p * udzialPiramid \ 100)
+            End If
             For w = 1 To wiersze
               Dim wierszeWPaskuSegmentow = Math.Min(bok, wys - (w - 1) * bok)
               For y0 = 0 To wierszeWPaskuSegmentow - 1 Step pas
@@ -1208,6 +1231,34 @@ Public Shared Function NazwaPlikuTomu(sciezkaBazowa As String, numerTomu As Inte
                     End If
                 Next
 
+                If z.SiatkaKilometrowa IsNot Nothing OrElse segmentySladu IsNot Nothing Then
+                    Dim offsetPasaY As Integer = (w - 1) * bok + y0
+                    Using bmpPas As New Bitmap(szer, n, Imaging.PixelFormat.Format32bppArgb)
+                        Dim bd = bmpPas.LockBits(New Rectangle(0, 0, szer, n), Imaging.ImageLockMode.WriteOnly, Imaging.PixelFormat.Format32bppArgb)
+                        System.Runtime.InteropServices.Marshal.Copy(pikseleArgb, 0, bd.Scan0, szer * n)
+                        bmpPas.UnlockBits(bd)
+
+                        Using g = Graphics.FromImage(bmpPas)
+                            If z.SiatkaKilometrowa IsNot Nothing Then
+                                RendererNakladekWydruku.RysujSiatkeKilometrowa(g, arkuszZakres, z.SiatkaKilometrowa, offsetPasaY)
+                            End If
+                            If segmentySladu IsNot Nothing Then
+                                Dim segs = segmentySladu
+                                Dim przelicz As Func(Of Double, Double, PointF) =
+                                    Function(lon, lat)
+                                        Dim xy = z.Uklad.ZWgs84(New PunktGeo(lat, lon))
+                                        Return arkuszZakres.MetryNaPiksel(xy.Y, xy.X)
+                                    End Function
+                                Dim styl = If(z.StylSladuWydruku, New StylSladuWydruku())
+                                RendererNakladekWydruku.RysujSladNaArkuszu(g, segs, przelicz, styl, offsetPasaY)
+                            End If
+                        End Using
+
+                        Dim bdRead = bmpPas.LockBits(New Rectangle(0, 0, szer, n), Imaging.ImageLockMode.ReadOnly, Imaging.PixelFormat.Format32bppArgb)
+                        System.Runtime.InteropServices.Marshal.Copy(bdRead.Scan0, pikseleArgb, 0, szer * n)
+                        bmpPas.UnlockBits(bdRead)
+                    End Using
+                End If
 
                 Dim iRgb As Integer = 0
                 For iPx = 0 To szer * n - 1
@@ -1229,7 +1280,7 @@ Public Shared Function NazwaPlikuTomu(sciezkaBazowa As String, numerTomu As Inte
                     zapis.ZapiszWiersze(buforRgb, n)
                 End If
               Next
-                postep?.Report(CInt(w * 100 \ wiersze))
+                postep?.Report(CInt(w * (100 - udzialPiramid) \ wiersze))
             Next
             If przycinany AndAlso Not saPiksele Then Throw New InvalidOperationException("Brak obrazu mapy w wybranym obszarze.")
             korekta?.Zakoncz(zapiszPas)
@@ -1269,6 +1320,7 @@ Public Shared Function NazwaPlikuTomu(sciezkaBazowa As String, numerTomu As Inte
             Case RodzajEksportu.SQLiteDB : Return New MagazynSQLiteDB(z)
             Case RodzajEksportu.OruxMaps : Return New MagazynOruxMaps(z, obszar)
             Case RodzajEksportu.Jnx : Return New MagazynJnx(z, obszar)
+            Case RodzajEksportu.GeoPackage : Return New MagazynGeoPackage(z, obszar)
             Case Else : Return New MagazynMBTiles(z, obszar)
         End Select
     End Function
@@ -1759,6 +1811,148 @@ Public Class MagazynMBTiles
 
     Protected Overrides Function Indeks(k As KafelXYZ) As Tuple(Of Integer, Integer, Integer)
         Return Tuple.Create(k.Z, k.X, k.WierszTms)
+    End Function
+
+End Class
+
+''' <summary>
+''' GeoPackage (OGC GPKG): kafle Web Mercator (EPSG:3857) dla QGIS, QField i Mergin Maps.
+''' Baza SQLite zgodna ze specyfikacją OGC GeoPackage 1.3 (pragmy, tabele metadanych gpkg_* oraz tabela kafli).
+''' </summary>
+Public Class MagazynGeoPackage
+    Inherits MagazynKafli
+
+    Private Const Granica3857 As Double = 20037508.342789244
+    Private Const PromienZiemi As Double = 6378137.0
+    Private Const MaksSzerokosc As Double = 85.0511287798066
+
+    Public Sub New(z As ZadanieEksportu, obszar As ProstokatGeo)
+        Me.New(z.Plik, New OpisMbtiles With {.Nazwa = z.Nazwa, .Opis = z.Metadane.Opis, .Atrybucja = z.Metadane.Atrybucja,
+                                             .Nakladka = z.Nakladka, .Png = z.Png, .PoziomMin = z.PoziomMin, .PoziomMax = z.PoziomMax,
+                                             .Obszar = obszar}, z)
+    End Sub
+
+    ''' <param name="z">Zadanie eksportu albo Nothing.</param>
+    Public Sub New(plik As String, opis As OpisMbtiles, Optional z As ZadanieEksportu = Nothing)
+        MyBase.New(plik, z)
+
+        ' 1. Nagłówki binarne SQLite wymagane przez specyfikację OGC GeoPackage (Klauzula 1.1.1.1.1)
+        Wykonaj("PRAGMA application_id = 1196444487;") ' 0x47504B47 = 'GPKG'
+        Wykonaj("PRAGMA user_version = 10300;")        ' GeoPackage 1.3.0
+
+        ' 2. Tabela gpkg_spatial_ref_sys i obowiązkowe rekordy OGC (Requirement 11) oraz EPSG:3857
+        Wykonaj("CREATE TABLE gpkg_spatial_ref_sys (" &
+                "srs_name TEXT NOT NULL, " &
+                "srs_id INTEGER NOT NULL PRIMARY KEY, " &
+                "organization TEXT NOT NULL, " &
+                "organization_coordsys_id INTEGER NOT NULL, " &
+                "definition TEXT NOT NULL, " &
+                "description TEXT);")
+
+        Wstaw("INSERT INTO gpkg_spatial_ref_sys VALUES (@0, @1, @2, @3, @4, @5);",
+              "Undefined Cartesian SRS", 0, "NONE", 0, "undefined", "undefined cartesian coordinate reference system")
+        Wstaw("INSERT INTO gpkg_spatial_ref_sys VALUES (@0, @1, @2, @3, @4, @5);",
+              "Undefined geographic SRS", -1, "NONE", -1, "undefined", "undefined geographic coordinate reference system")
+        Wstaw("INSERT INTO gpkg_spatial_ref_sys VALUES (@0, @1, @2, @3, @4, @5);",
+              "WGS 84", 4326, "EPSG", 4326,
+              "GEOGCS[""WGS 84"",DATUM[""WGS_1984"",SPHEROID[""WGS 84"",6378137,298.257223563]],PRIMEM[""Greenwich"",0],UNIT[""degree"",0.0174532925199433]]",
+              "WGS 84")
+        Wstaw("INSERT INTO gpkg_spatial_ref_sys VALUES (@0, @1, @2, @3, @4, @5);",
+              "WGS 84 / Pseudo-Mercator", 3857, "EPSG", 3857,
+              "PROJCS[""WGS 84 / Pseudo-Mercator"",GEOGCS[""WGS 84"",DATUM[""WGS_1984"",SPHEROID[""WGS 84"",6378137,298.257223563]],PRIMEM[""Greenwich"",0],UNIT[""degree"",0.0174532925199433]],PROJECTION[""Mercator_1SP""],PARAMETER[""central_meridian"",0],PARAMETER[""scale_factor"",1],PARAMETER[""false_easting"",0],PARAMETER[""false_northing"",0],UNIT[""metre"",1]]",
+              "Web Mercator")
+
+        ' 3. Tabela gpkg_contents z rzeczywistym zakresem danych w metrach EPSG:3857
+        Wykonaj("CREATE TABLE gpkg_contents (" &
+                "table_name TEXT NOT NULL PRIMARY KEY, " &
+                "data_type TEXT NOT NULL, " &
+                "identifier TEXT, " &
+                "description TEXT DEFAULT '', " &
+                "last_change DATETIME NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')), " &
+                "min_x DOUBLE, " &
+                "min_y DOUBLE, " &
+                "max_x DOUBLE, " &
+                "max_y DOUBLE, " &
+                "srs_id INTEGER, " &
+                "CONSTRAINT fk_gc_r_srs_id FOREIGN KEY (srs_id) REFERENCES gpkg_spatial_ref_sys(srs_id));")
+
+        Dim bb = DoMetrow3857(opis.Obszar)
+        'GeoPackage nie ma pola atrybucji (MBTiles ma metadane attribution), więc trafia ona do opisu warstwy
+        Dim opisWarstwy = If(opis.Opis, "")
+        If Not String.IsNullOrWhiteSpace(opis.Atrybucja) Then
+            opisWarstwy = If(opisWarstwy = "", "", opisWarstwy & " ") & "Źródło: " & opis.Atrybucja
+        End If
+        Wstaw("INSERT INTO gpkg_contents (table_name, data_type, identifier, description, min_x, min_y, max_x, max_y, srs_id) " &
+              "VALUES (@0, @1, @2, @3, @4, @5, @6, @7, @8);",
+              "tiles", "tiles", opis.Nazwa, opisWarstwy, bb.Item1, bb.Item2, bb.Item3, bb.Item4, 3857)
+
+        ' 4. Tabela gpkg_tile_matrix_set: pełna globalna siatka Web Mercator (Requirement 37)
+        Wykonaj("CREATE TABLE gpkg_tile_matrix_set (" &
+                "table_name TEXT NOT NULL PRIMARY KEY, " &
+                "srs_id INTEGER NOT NULL, " &
+                "min_x DOUBLE NOT NULL, " &
+                "min_y DOUBLE NOT NULL, " &
+                "max_x DOUBLE NOT NULL, " &
+                "max_y DOUBLE NOT NULL, " &
+                "CONSTRAINT fk_gtms_table_name FOREIGN KEY (table_name) REFERENCES gpkg_contents(table_name), " &
+                "CONSTRAINT fk_gtms_srs FOREIGN KEY (srs_id) REFERENCES gpkg_spatial_ref_sys(srs_id));")
+
+        Wstaw("INSERT INTO gpkg_tile_matrix_set VALUES (@0, @1, @2, @3, @4, @5);",
+              "tiles", 3857, -Granica3857, -Granica3857, Granica3857, Granica3857)
+
+        ' 5. Tabela gpkg_tile_matrix ze zdefiniowanymi poziomami powiększenia (Requirement 41)
+        Wykonaj("CREATE TABLE gpkg_tile_matrix (" &
+                "table_name TEXT NOT NULL, " &
+                "zoom_level INTEGER NOT NULL, " &
+                "matrix_width INTEGER NOT NULL, " &
+                "matrix_height INTEGER NOT NULL, " &
+                "tile_width INTEGER NOT NULL, " &
+                "tile_height INTEGER NOT NULL, " &
+                "pixel_x_size DOUBLE NOT NULL, " &
+                "pixel_y_size DOUBLE NOT NULL, " &
+                "PRIMARY KEY (table_name, zoom_level), " &
+                "CONSTRAINT fk_gtm_table_name FOREIGN KEY (table_name) REFERENCES gpkg_contents(table_name));")
+
+        Dim obwod = 2.0 * Granica3857
+        For zoom = opis.PoziomMin To opis.PoziomMax
+            Dim n = 1L << zoom
+            Dim piksel = obwod / (256.0 * n)
+            Wstaw("INSERT INTO gpkg_tile_matrix VALUES (@0, @1, @2, @3, @4, @5, @6, @7);",
+                  "tiles", zoom, n, n, 256, 256, piksel, piksel)
+        Next
+
+        ' 6. Tabela kafli z kluczem głównym id (Requirement 34 i 35)
+        Wykonaj("CREATE TABLE tiles (" &
+                "id INTEGER PRIMARY KEY AUTOINCREMENT, " &
+                "zoom_level INTEGER NOT NULL, " &
+                "tile_column INTEGER NOT NULL, " &
+                "tile_row INTEGER NOT NULL, " &
+                "tile_data BLOB NOT NULL, " &
+                "UNIQUE (zoom_level, tile_column, tile_row));")
+
+        ' Tabela android_metadata dla bazy SQLite otwieranej przez Androida (dodatkowe tabele są dozwolone w GeoPackage)
+        Wykonaj("CREATE TABLE android_metadata (locale text);")
+        Wykonaj("INSERT INTO android_metadata VALUES ('pl_PL');")
+
+        ' Przygotowanie poleceń zapisu i odczytu kafli
+        Przygotuj("INSERT OR REPLACE INTO tiles (zoom_level, tile_column, tile_row, tile_data) VALUES (@z, @x, @y, @d);",
+                  "SELECT tile_data FROM tiles WHERE zoom_level = @z AND tile_column = @x AND tile_row = @y;")
+    End Sub
+
+    Private Shared Function DoMetrow3857(p As ProstokatGeo) As Tuple(Of Double, Double, Double, Double)
+        If Not p.Poprawny Then Return Tuple.Create(-Granica3857, -Granica3857, Granica3857, Granica3857)
+        Dim minX = PromienZiemi * p.Zachod * Math.PI / 180.0
+        Dim maxX = PromienZiemi * p.Wschod * Math.PI / 180.0
+        Dim sPoludnie = Math.Max(-MaksSzerokosc, Math.Min(MaksSzerokosc, p.Poludnie)) * Math.PI / 180.0
+        Dim sPolnoc = Math.Max(-MaksSzerokosc, Math.Min(MaksSzerokosc, p.Polnoc)) * Math.PI / 180.0
+        Dim minY = PromienZiemi * Math.Log(Math.Tan(Math.PI / 4.0 + sPoludnie / 2.0))
+        Dim maxY = PromienZiemi * Math.Log(Math.Tan(Math.PI / 4.0 + sPolnoc / 2.0))
+        Return Tuple.Create(minX, minY, maxX, maxY)
+    End Function
+
+    Protected Overrides Function Indeks(k As KafelXYZ) As Tuple(Of Integer, Integer, Integer)
+        ' W GeoPackage origin znajduje się w lewym górnym rogu (Top-Left / XYZ), wiersze rosną w dół
+        Return Tuple.Create(k.Z, k.X, k.Y)
     End Function
 
 End Class

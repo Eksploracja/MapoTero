@@ -72,8 +72,18 @@ Public Class FormEksport
     Private _folder As String = ""
     Private _sesja As Sesja
     Private _przerwanie As CancellationTokenSource
-    Private _ostatniPlikEksportu As String = ""
+    Private Shared _ostatniPlikEksportu As String = ""
     Private _opcjeMip As New OpcjeKorekcjiMip()
+
+    ''' <summary>Ścieżka do ostatnio wyeksportowanego pliku mapy (dla wysyłki Wi-Fi / eksploratora).</summary>
+    Public Shared Property OstatniPlik As String
+        Get
+            Return _ostatniPlikEksportu
+        End Get
+        Set(value As String)
+            _ostatniPlikEksportu = value
+        End Set
+    End Property
 
     ''' <summary>
     ''' Okno otwarte poleceniem „Scalanie segmentów” (menu, przycisk okna głównego, okno CAD) - zaznaczony format Arkusz.
@@ -94,7 +104,7 @@ Public Class FormEksport
 
     ''' <summary>Rozmiar obszaru roboczego formularza w projekcie (jednostki projektanta, przed skalowaniem czcionki).</summary>
     Private Const ProjektSzerokoscKlienta As Integer = 510
-    Private Const ProjektWysokoscKlienta As Integer = 820
+    Private Const ProjektWysokoscKlienta As Integer = 842
 
     ''' <summary>
     ''' Rozmiar obszaru roboczego po skalowaniu okna do bieżącej czcionki. Dawniej używano wprost wartości z projektu,
@@ -116,7 +126,7 @@ Public Class FormEksport
     Private Sub FormEksport_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         PomocProgramu.ZamykanieKlawiszemEsc(Me)
         'okno otwarte jako scalanie segmentów - pomoc o arkuszu
-        PomocProgramu.DodajPrzyciskPomocy(Me, If(ArkuszDomyslnie, TematPomocy.Scalanie, TematPomocy.Eksport), 12, 780)
+        PomocProgramu.DodajPrzyciskPomocy(Me, If(ArkuszDomyslnie, TematPomocy.Scalanie, TematPomocy.Eksport), 12, 802)
         DopasujDoWysokosciEkranu()
         If cboKolejnoscGarmin.Items.Count > 0 AndAlso cboKolejnoscGarmin.SelectedIndex < 0 Then
             cboKolejnoscGarmin.SelectedIndex = 0
@@ -286,6 +296,7 @@ Public Class FormEksport
         Get
             If rbJnx.Checked Then Return RodzajEksportu.Jnx
             If rbMBTiles.Checked Then Return RodzajEksportu.MBTiles
+            If rbGeoPackage.Checked Then Return RodzajEksportu.GeoPackage
             If rbSQLiteDB.Checked Then Return RodzajEksportu.SQLiteDB
             If rbOruxMaps.Checked Then Return RodzajEksportu.OruxMaps
             If rbKmz.Checked Then Return RodzajEksportu.Kmz
@@ -324,6 +335,7 @@ Public Class FormEksport
         Select Case rodzaj
             Case RodzajEksportu.Jnx : rozszerzenie = ".jnx"
             Case RodzajEksportu.MBTiles : rozszerzenie = ".mbtiles"
+            Case RodzajEksportu.GeoPackage : rozszerzenie = ".gpkg"
             Case RodzajEksportu.SQLiteDB : rozszerzenie = ".sqlitedb"
             Case RodzajEksportu.OruxMaps : rozszerzenie = "_oruxmaps"
             Case RodzajEksportu.GeoTiff
@@ -353,6 +365,7 @@ Public Class FormEksport
         mip.Wlaczona = chkKorekcjaMip.Checked
         z.KorekcjaMip = mip
         z.FormatArkusza = WybranyFormatArkusza
+        z.PiramidyGeoTiff = chkGeoTiffPiramidy.Checked
         z.Georeferencja = New OpcjeGeoreferencji With {.WorldFile = chkArkuszWorldFile.Checked, .Map = chkArkuszMap.Checked,
                                                        .Tab = chkArkuszTab.Checked, .Kml = chkArkuszKml.Checked}
         z.Nazwa = z.Metadane.Nazwa
@@ -366,16 +379,16 @@ Public Class FormEksport
     Private Sub UstawWidok()
         Dim wolny As Boolean = _przerwanie Is Nothing
         Dim rodzaj = WybranyRodzaj
-        Dim piramida As Boolean = rodzaj = RodzajEksportu.MBTiles OrElse rodzaj = RodzajEksportu.SQLiteDB OrElse rodzaj = RodzajEksportu.OruxMaps OrElse rodzaj = RodzajEksportu.Jnx
+        Dim piramida As Boolean = rodzaj = RodzajEksportu.MBTiles OrElse rodzaj = RodzajEksportu.SQLiteDB OrElse rodzaj = RodzajEksportu.OruxMaps OrElse rodzaj = RodzajEksportu.Jnx OrElse rodzaj = RodzajEksportu.GeoPackage
         Dim garmin As Boolean = rodzaj = RodzajEksportu.KmzGarmin OrElse rodzaj = RodzajEksportu.Jnx
         Dim geotiff As Boolean = rodzaj = RodzajEksportu.GeoTiff
         cmbFormatArkusza.Enabled = wolny AndAlso geotiff
-        For Each c As CheckBox In {chkArkuszWorldFile, chkArkuszMap, chkArkuszTab, chkArkuszKml}
+        For Each c As CheckBox In {chkArkuszWorldFile, chkArkuszMap, chkArkuszTab, chkArkuszKml, chkGeoTiffPiramidy}
             c.Enabled = wolny AndAlso geotiff
         Next
         chkKorekcjaMip.Enabled = wolny
         btnPodgladMip.Enabled = wolny AndAlso chkKorekcjaMip.Checked
-        btnWielowarstwowyMbtiles.Enabled = wolny AndAlso rbMBTiles.Checked
+        btnWielowarstwowyMbtiles.Enabled = wolny AndAlso (rbMBTiles.Checked OrElse rbGeoPackage.Checked)
         grpFormat.Enabled = wolny
         grpWarstwy.Enabled = wolny
         grpRozmiar.Enabled = wolny AndAlso _sesja IsNot Nothing
@@ -424,7 +437,7 @@ Public Class FormEksport
         End If
     End Sub
 
-    Private Sub OpcjeZmienione(sender As Object, e As EventArgs) Handles rbKmzGarmin.CheckedChanged, rbKmz.CheckedChanged, rbMBTiles.CheckedChanged,
+    Private Sub OpcjeZmienione(sender As Object, e As EventArgs) Handles rbKmzGarmin.CheckedChanged, rbKmz.CheckedChanged, rbMBTiles.CheckedChanged, rbGeoPackage.CheckedChanged,
                                                                     rbSQLiteDB.CheckedChanged, rbOruxMaps.CheckedChanged, rbJnx.CheckedChanged, rbGeoTiff.CheckedChanged, rbTrekBuddy.CheckedChanged, cmbFormatArkusza.SelectedIndexChanged, chkArkuszWorldFile.CheckedChanged, chkArkuszMap.CheckedChanged, chkArkuszTab.CheckedChanged, chkArkuszKml.CheckedChanged, chkKorekcjaMip.CheckedChanged,
                                                                     cboKolejnoscGarmin.SelectedIndexChanged, chkPodzialNaTomy.CheckedChanged, nudMaksKafli.ValueChanged,
                                                                     nudPoziomMin.ValueChanged, nudPoziomMax.ValueChanged, chkPng.CheckedChanged,
@@ -645,6 +658,7 @@ Public Class FormEksport
                 prgEksport.Value = 100
                 _ostatniPlikEksportu = z.Plik
                 btnPokazPlik.Enabled = True
+                btnWyslijNaTelefon.Enabled = File.Exists(z.Plik)
                 Select Case z.Rodzaj
                     Case RodzajEksportu.GeoTiff
                         Dim rozmiar As Long = If(File.Exists(z.Plik), New FileInfo(z.Plik).Length, 0)
@@ -672,6 +686,9 @@ Public Class FormEksport
                     Case RodzajEksportu.MBTiles
                         Dim rozmiar As Long = If(File.Exists(z.Plik), New FileInfo(z.Plik).Length, 0)
                         Komunikat("Zapisano plik MBTiles: " & z.Plik & " (" & SzacunekRozmiaru.Tekst(rozmiar) & "). Locus Map: skopiuj do Locus/maps; OsmAnd/Orux: wskaż plik w menedżerze map.", Color.Green)
+                    Case RodzajEksportu.GeoPackage
+                        Dim rozmiar As Long = If(File.Exists(z.Plik), New FileInfo(z.Plik).Length, 0)
+                        Komunikat("Zapisano plik GeoPackage: " & z.Plik & " (" & SzacunekRozmiaru.Tekst(rozmiar) & "). Plik rastrowy OGC gotowy do użycia w QField, Mergin Maps lub QGIS.", Color.Green)
                     Case RodzajEksportu.SQLiteDB
                         Dim rozmiar As Long = If(File.Exists(z.Plik), New FileInfo(z.Plik).Length, 0)
                         Komunikat("Zapisano plik SQLiteDB: " & z.Plik & " (" & SzacunekRozmiaru.Tekst(rozmiar) & "). OsmAnd: skopiuj do osmand/tiles; Locus Map: do Locus/maps.", Color.Green)
@@ -727,6 +744,28 @@ Public Class FormEksport
             Catch ex As Exception
                 MsgBox("Nie udało się otworzyć folderu: " & OpisBledu.Z(ex), MsgBoxStyle.Exclamation, "Eksport mapy")
             End Try
+        End If
+    End Sub
+
+    Private Sub btnWyslijNaTelefon_Click(sender As Object, e As EventArgs) Handles btnWyslijNaTelefon.Click
+        If Not String.IsNullOrEmpty(_ostatniPlikEksportu) AndAlso File.Exists(_ostatniPlikEksportu) Then
+            Dim ext = Path.GetExtension(_ostatniPlikEksportu).ToLowerInvariant()
+            If ext = ".jnx" Then
+                FormKopiujNaGarmina.PokazDlaPliku(Me, _ostatniPlikEksportu)
+                Return
+            ElseIf ext = ".kmz" AndAlso MenadzerGarminUsb.WykryjDyskiGarmina().Any() Then
+                Dim odp = MessageBox.Show(Me, "Wykryto odbiornik Garmin podłączony przez USB." & vbCrLf & vbCrLf &
+                                          "Czy chcesz skopiować mapę bezpośrednio do pamięci Garmina?" & vbCrLf &
+                                          "(Wybierz 'Nie', aby wyświetlić kod QR do pobrania przez Wi-Fi)",
+                                          "Kopiowanie na urządzenie", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question)
+                If odp = DialogResult.Yes Then
+                    FormKopiujNaGarmina.PokazDlaPliku(Me, _ostatniPlikEksportu)
+                    Return
+                ElseIf odp = DialogResult.Cancel Then
+                    Return
+                End If
+            End If
+            FormWyslijNaTelefon.PokazDlaPliku(Me, _ostatniPlikEksportu)
         End If
     End Sub
 
@@ -814,6 +853,7 @@ Public Class FormEksport
     End Sub
 
     Private Sub btnWielowarstwowyMbtiles_Click(sender As Object, e As EventArgs) Handles btnWielowarstwowyMbtiles.Click
+        FormZaawansowanyMbtiles.WybranyFormat = If(rbGeoPackage.Checked, RodzajEksportu.GeoPackage, RodzajEksportu.MBTiles)
         FormZaawansowanyMbtiles.ShowDialog(Me)
     End Sub
 

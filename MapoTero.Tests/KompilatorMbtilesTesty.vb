@@ -717,4 +717,52 @@ Public Class KompilatorMbtilesTesty
         End Try
     End Sub
 
+    <Fact>
+    Public Async Function Kompilator_KompilujDoGeoPackage() As Task
+        Dim folder = NowyFolder()
+        Try
+            Dim sFolder = Path.Combine(folder, "sesja1")
+            Directory.CreateDirectory(sFolder)
+            UtworzSesje(sFolder, 487000, 637000, 487512, 637512, 1.0, Color.Green)
+
+            Dim w As New WarstwaWielowarstwowa With {.Folder = sFolder}
+            Dim blad As String = ""
+            Assert.True(w.WczytajSesje(blad), blad)
+            w.PoziomMin = 15
+            w.PoziomMax = 16
+
+            Dim plikDocelowy = Path.Combine(folder, "wielowarstwowa.gpkg")
+            Dim opcje As New OpcjeKompilatoraMbtiles With {
+                .PlikDocelowy = plikDocelowy,
+                .Format = RodzajEksportu.GeoPackage,
+                .NazwaMapy = "Test GPKG z Kompilatora",
+                .PoziomMin = 15,
+                .PoziomMax = 16
+            }
+
+            Dim wynik = Await KompilatorMbtiles.KompilujAsync(New List(Of WarstwaWielowarstwowa) From {w}, opcje, Nothing, CancellationToken.None)
+            Assert.Equal(plikDocelowy, wynik)
+            Assert.True(File.Exists(plikDocelowy))
+
+            Using conn As New SQLiteConnection("Data Source=" & plikDocelowy & ";Version=3;Pooling=False;")
+                conn.Open()
+                Using cmd = conn.CreateCommand()
+                    cmd.CommandText = "PRAGMA application_id;"
+                    Assert.Equal(1196444487L, CLng(cmd.ExecuteScalar()))
+
+                    cmd.CommandText = "PRAGMA user_version;"
+                    Assert.Equal(10300L, CLng(cmd.ExecuteScalar()))
+
+                    cmd.CommandText = "SELECT COUNT(*) FROM tiles;"
+                    Assert.True(CInt(cmd.ExecuteScalar()) > 0)
+
+                    cmd.CommandText = "SELECT COUNT(*) FROM gpkg_tile_matrix;"
+                    Assert.Equal(2, CInt(cmd.ExecuteScalar()))
+                End Using
+            End Using
+        Finally
+            Usun(folder)
+        End Try
+    End Function
+
 End Class

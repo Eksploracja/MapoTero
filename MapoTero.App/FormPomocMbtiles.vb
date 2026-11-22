@@ -46,6 +46,7 @@ Public Enum TematPomocy
     Ustawienia
     KorektaFolderu
     Kreator
+    WarstwyZaawansowane
 End Enum
 
 ''' <summary>
@@ -118,6 +119,7 @@ Public Class FormPomocMbtiles
             Case TematPomocy.Ustawienia : PomocUstawienia()
             Case TematPomocy.KorektaFolderu : PomocKorektaFolderu()
             Case TematPomocy.Kreator : PomocKreator()
+            Case TematPomocy.WarstwyZaawansowane : PomocWarstwyZaawansowane()
             Case Else : PomocMbtiles()
         End Select
     End Sub
@@ -162,12 +164,13 @@ Public Class FormPomocMbtiles
         DodajPunktor("Garmin BirdsEye (JNX v4): wielopoziomowy raster z piramidą powiększeń bez limitu 100 kafli (zalecany dla odbiorników Garmin z odblokowanym firmware). Plik .jnx kopiuje się do folderu Garmin/BirdsEye.")
         DodajPunktor("Garmin Custom Maps (KMZ): standardowy format Garmina. Posiada ograniczenie do 100 kafli na plik - w razie potrzeby włącz opcję 'automatyczny podział na tomy', a program utworzy spójne części mieszczące się w limicie urządzenia.")
         DodajPunktor("MBTiles / SQLiteDB: kafelkowa baza SQLite w standardzie Web Mercator, dedykowana dla aplikacji mobilnych (Locus Map, OsmAnd, OruxMaps).")
+        DodajPunktor("GeoPackage (.gpkg): otwarty standard OGC kafelkowej mapy rastrowej dla mobilnego GIS (QField, Mergin Maps, SW Maps) i QGIS.")
         DodajPunktor("OruxMaps: folder z bazą kafli i plikiem XML gotowy do wrzucenia do katalogu map OruxMaps.")
         DodajPunktor("Arkusz (scalanie segmentów): jeden plik GeoTIFF, JPEG albo PNG z georeferencją dla Avenza Maps, QGIS i programów CAD, z plikami world file i .prj, .map, .tab, .kml.")
         DodajPunktor("TrekBuddy / Locus Map: archiwum .tar z kaflami 512 px, plikiem .map i listą .set - z dowolnej pobranej sesji.")
 
         DodajNaglowek1("2. Piramida powiększeń (Zoom Od - Zoom Do)")
-        DodajPunktor("Dla formatów kafelkowych (JNX, MBTiles, SQLiteDB) program generuje automatyczną piramidę powiększeń od poziomu przeglądowego do szczegółowego.")
+        DodajPunktor("Dla formatów kafelkowych (JNX, MBTiles, GeoPackage, SQLiteDB) program generuje automatyczną piramidę powiększeń od poziomu przeglądowego do szczegółowego.")
         DodajPunktor("Suwakiem jakości możesz dobrać optymalny kompromis między ostrością a rozmiarem pliku (zalecane 75-85%).")
 
         DodajNaglowek1("3. Filtr MIP dla ekranów Garmin")
@@ -261,7 +264,7 @@ Public Class FormPomocMbtiles
         DodajPunktor("Współrzędne są precyzyjnie przeliczane do elipsoidy WGS84, dzięki czemu mapa nie jest przesunięta względem śladów GPS.")
 
         DodajNaglowek1("Formaty wynikowe i korekta obrazu")
-        DodajPunktor("Garmin BirdsEye (JNX), Garmin Custom Maps (KMZ), MBTiles, SQLiteDB (OsmAnd, Locus Map) i OruxMaps (folder mapy) - bazy kafli zapisuje ten sam kod co okno Eksport mapy.")
+        DodajPunktor("Garmin BirdsEye (JNX), Garmin Custom Maps (KMZ), MBTiles, GeoPackage (.gpkg), SQLiteDB (OsmAnd, Locus Map) i OruxMaps (folder mapy) - bazy kafli zapisuje ten sam kod co okno Eksport mapy.")
         DodajPunktor("Pole Korekta obrazu i przycisk Korekta obrazu... działają jak w oknie eksportu (podgląd na próbce ze skanu).")
 
         DodajNaglowek1("2. Tryb pojedynczy i wsadowy (Batch)")
@@ -431,8 +434,8 @@ Public Class FormPomocMbtiles
                     "przez gotowy zestaw warstw i wskazanie obszaru, po automatyczne pobranie i zapisanie pliku wynikowego.")
 
         DodajNaglowek1("1. Krok po kroku")
-        DodajPunktor("Krok 1: Cel. Wybierz, gdzie będziesz używać mapy: telefon lub tablet, odbiornik Garmin, wydruk albo projekt CAD/GIS. Program dobierze format pliku i parametry.")
-        DodajPunktor("Krok 2: Obszar. Gdy przed otwarciem kreatora zaznaczysz obszar na mapie prawym przyciskiem myszy, kreator pominie ten krok (wrócisz do niego, klikając Obszar na pasku kroków). Wyszukaj miejscowość i wybierz promień, zaznacz prostokąt na mapie albo wskaż plik trasy GPX/KML/KMZ (program pobierze tylko pas wzdłuż trasy). Plik trasy można przeciągnąć myszą na okno. W polu wyszukiwania można wkleić współrzędne punktu, np. 50.0614, 19.9366 (WGS84) albo X Y w PL-1992 lub PL-2000, albo działkę: identyfikator TERYT lub „działka Wieliczka 123/4”” (obszar to działka z pasem 150 m). Pozycja wg granic na liście promieni bierze prostokąt miejscowości z wyszukiwarki. Przycisk Profil... pokazuje profil wysokościowy wczytanej trasy.")
+        DodajPunktor("Krok 1: Cel. Wybierz, gdzie będziesz używać mapy: telefon lub tablet (MBTiles, SQLiteDB), odbiornik Garmin, wydruk albo projekt CAD/GIS. Program dobierze format pliku i parametry.")
+        DodajPunktor("Krok 2: Obszar. Gdy przed otwarciem kreatora zaznaczysz obszar na mapie prawym przyciskiem myszy, kreator pominie ten krok (wrócisz do niego, klikając Obszar na pasku kroków). Wyszukaj miejscowość i wybierz promień, zaznacz prostokąt na mapie albo wskaż plik trasy GPX/KML/KMZ (program pobierze tylko pas wzdłuż trasy). Plik trasy można przeciągnąć myszą na okno. W polu wyszukiwania można wkleić współrzędne punktu, np. 50.0614, 19.9366 (WGS84) albo X Y w PL-1992 lub PL-2000, albo działkę: identyfikator TERYT lub 'działka Wieliczka 123/4' (obszar to działka z pasem 150 m). Pozycja wg granic na liście promieni bierze prostokąt miejscowości z wyszukiwarki. Przycisk Profil... pokazuje profil wysokościowy wczytanej trasy.")
         DodajPunktor("Krok 3: Styl. Gotowe zestawy warstw z podglądem: turystyka piesza, góry z poziomicami (także za granicą), rower i MTB, dziedzictwo kulturowe z zabytkami NID (rejestr i ewidencja), mapy WIG 1918–1939, mapy niemieckie do 1945, działki EGiB albo własne warstwy z okna głównego. Suwaki regulują krycie cieniowania, szlaków, mapy topograficznej i zabytków (krycie z okna zaawansowanego jest nadrzędne); w dziedzictwie kulturowym pola wyboru włączają zabytki archeologiczne i nieruchome; pod treścią kroku widać ograniczenia pokrycia map historycznych. Przycisk w rogu podglądu otwiera duży podgląd w skali 1:1. Zapisz jako mój styl zapisuje bieżącą kompozycję pod własną nazwą (kategoria Moje style), Usuń mój styl ją usuwa.")
         DodajPunktor("Krok 4: Zapis. Wybierz format (zalecany jest zaznaczony), sprawdź szacowany rozmiar i czas, a potem kliknij Generuj mapę. Korekta obrazu jest domyślnie wyłączona: zaznacz pole Korekta obrazu albo kliknij Profil / Podgląd, żeby ją ustawić (okno podpowiada profil, np. Garmin MIP; przycisk Resetuj korektę przywraca obraz bez zmian).")
 
@@ -447,6 +450,31 @@ Public Class FormPomocMbtiles
         DodajPunktor("Gdy części fragmentów nie uda się pobrać, przycisk Ponów pobieranie pobierze tylko brakujące i zapisze plik ponownie. Wstecz wraca do ustawień bez utraty wyborów.")
         DodajPunktor("Pobrane segmenty kreator zapisuje w folderze download (podfolder Kreator_...). Przycisk Przejdź do mapy w oknie głównym wczytuje je jako sesję.")
         DodajPunktor("Po zakończeniu kreator podpowiada, do którego folderu w telefonie lub odbiorniku skopiować plik.")
+
+        DodajStopkeOnline(_urlOnline)
+    End Sub
+
+    Private Sub PomocWarstwyZaawansowane()
+        Me.Text = "Pomoc i instrukcja - Warstwy zaawansowane (krycie i mieszanie)"
+        _urlOnline = "https://eksploracja.github.io/MapoTero/pomoc/pobieranie/kompozycje/"
+
+        DodajTytul("Zaawansowane zarządzanie warstwami, kryciem i trybami mieszania")
+        DodajAkapit("Okno pozwala precyzyjnie dostosować parametry wielowarstwowej kompozycji mapy: kolejność nakładania warstw (od podkładu po warstwę najwyższą), " &
+                    "stopień przezroczystości (krycie od 0 do 100%) oraz algorytm łączenia pikseli (tryb mieszania).")
+
+        DodajNaglowek1("1. Tryby mieszania warstw")
+        DodajPunktor("Zwykły (Normal): standardowe nakładanie z kryciem. Warstwa przykrywa elementy leżące pod nią zgodnie z wartością suwaka.")
+        DodajPunktor("Mnożenie (Multiply): ciemne elementy warstwy przyciemniają tło, biel staje się przezroczysta. Idealny do nakładania skanów starych map (np. WIG) lub granic na ortofotomapę.")
+        DodajPunktor("Ekran (Screen): rozjaśnia podkład; czerń staje się przezroczysta. Doskonały do nakładania jasnych elementów i etykiet na ciemniejsze podkłady.")
+        DodajPunktor("Nakładka (Overlay): łączy mnożenie i ekran, zwiększając ogólny kontrast kompozycji.")
+        DodajPunktor("Rozjaśnianie (Lighten) / Ściemnianie (Darken): zachowuje jaśniejsze lub ciemniejsze piksele między warstwami.")
+        DodajPunktor("Miękkie światło (Soft Light): subtelne, plastyczne doświetlenie podkładu.")
+        DodajPunktor("Rzeźba terenu (Hillshade): specjalny tryb mnożenia z zachowaniem nasycenia kolorów (HSV). Rekomendowany do łączenia cieniowania rzeźby terenu ISOK z barwną ortofotomapą, dając spektakularny efekt trójwymiarowości.")
+
+        DodajNaglowek1("2. Podgląd na żywo i lupa rastrowa")
+        DodajPunktor("Przycisk 'Pobierz podgląd' wczytuje rzeczywisty wycinek terenu w bieżącej konfiguracji warstw.")
+        DodajPunktor("Przyciski +, - oraz 1:1 (lub kółko myszy nad podglądem) pozwalają przybliżać i oddalać próbkę w lupie rastrowej.")
+        DodajPunktor("Przycisk 'Korekta obrazu...' pozwala dodatkowo nałożyć profil korekcji kolorystycznej (np. Garmin MIP, wyostrzanie, podbicie kontrastu).")
 
         DodajStopkeOnline(_urlOnline)
     End Sub

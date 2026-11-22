@@ -169,20 +169,23 @@ Public Class ScalanieTesty
                 Dim k = klucze(1).ToShortArray()
                 Assert.Equal(CShort(2180), k(15))
 
-                ' Odczyt skanlinii sekwencyjnie (LibTiff wymaga czytania po kolei w obrebie pasow)
-                Dim wiersz(100 * 3 - 1) As Byte
-                For y = 0 To 20
-                    t.ReadScanline(wiersz, y)
-                Next
+                ' ZapisGeoTiff zapisuje zawsze kafle 256x256 (dawniej paski - stąd odczyt kafla, a nie skanlinii)
+                Assert.True(t.IsTiled())
+                Dim tw = t.GetField(TiffTag.TILEWIDTH)(0).ToInt()
+                Dim th = t.GetField(TiffTag.TILELENGTH)(0).ToInt()
+                Dim kafel(tw * th * 3 - 1) As Byte
+                t.ReadTile(kafel, 0, 0, 0, 0, 0)
                 ' Kafel (1,1) czerwony z kompresja JPEG (z tolerancja)
-                Assert.InRange(CInt(wiersz(25 * 3)), 200, 255) ' R
-                Assert.InRange(CInt(wiersz(25 * 3 + 1)), 0, 50) ' G
-                Assert.InRange(CInt(wiersz(25 * 3 + 2)), 0, 50) ' B
+                Dim off25 = (20 * tw + 25) * 3
+                Assert.InRange(CInt(kafel(off25)), 200, 255) ' R
+                Assert.InRange(CInt(kafel(off25 + 1)), 0, 50) ' G
+                Assert.InRange(CInt(kafel(off25 + 2)), 0, 50) ' B
 
                 ' Kafel (1,2) zielony z kompresja JPEG
-                Assert.InRange(CInt(wiersz(75 * 3)), 0, 50) ' R
-                Assert.InRange(CInt(wiersz(75 * 3 + 1)), 200, 255) ' G
-                Assert.InRange(CInt(wiersz(75 * 3 + 2)), 0, 50) ' B
+                Dim off75 = (20 * tw + 75) * 3
+                Assert.InRange(CInt(kafel(off75)), 0, 50) ' R
+                Assert.InRange(CInt(kafel(off75 + 1)), 200, 255) ' G
+                Assert.InRange(CInt(kafel(off75 + 2)), 0, 50) ' B
             End Using
         Finally
             If Directory.Exists(tempFolder) Then Directory.Delete(tempFolder, True)

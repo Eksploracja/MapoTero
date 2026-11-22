@@ -34,6 +34,29 @@ Public Class FormZaawansowanyMbtiles
     Private _silnikKreatora As PodgladWarstwSilnik = Nothing
     Private _zasiegKreatora As Zasieg
     Private _probkaBmpKreatora As Bitmap
+    Private _wybranyFormat As RodzajEksportu = RodzajEksportu.MBTiles
+
+    <System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)>
+    Public Property WybranyFormat As RodzajEksportu
+        Get
+            Return _wybranyFormat
+        End Get
+        Set(value As RodzajEksportu)
+            _wybranyFormat = If(value = RodzajEksportu.GeoPackage, RodzajEksportu.GeoPackage, RodzajEksportu.MBTiles)
+            If cmbTypBazy IsNot Nothing AndAlso cmbTypBazy.Items.Count >= 2 Then
+                cmbTypBazy.SelectedIndex = If(_wybranyFormat = RodzajEksportu.GeoPackage, 1, 0)
+            End If
+            AktualizujTytulOkna()
+        End Set
+    End Property
+
+    Private Sub AktualizujTytulOkna()
+        If Not _trybKreatora Then
+            Dim nazwa = If(_wybranyFormat = RodzajEksportu.GeoPackage, "GeoPackage", "MBTiles")
+            Me.Text = $"Zaawansowany eksport wielowarstwowy ({nazwa})"
+            If grpUstawienia IsNot Nothing Then grpUstawienia.Text = $"Parametry pliku {nazwa} i kompresji"
+        End If
+    End Sub
 
     Private Sub FormZaawansowanyMbtiles_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         Me.CancelButton = btnZamknij
@@ -43,6 +66,8 @@ Public Class FormZaawansowanyMbtiles
         dgvWarstwy.AllowDrop = True
         grpWarstwy.AllowDrop = True
         cmbFormat.SelectedIndex = 0 ' SmartHybrid
+        cmbTypBazy.SelectedIndex = If(_wybranyFormat = RodzajEksportu.GeoPackage, 1, 0)
+        AktualizujTytulOkna()
 
         If Not _trybKreatora Then
             _opcjeKorekty = Ustawienia.OpcjeKorekty(ProfilKorektyRastra.GarminMip)
@@ -50,7 +75,8 @@ Public Class FormZaawansowanyMbtiles
             AktualizujPrzyciskKorekty()
 
             ' Domyślna ścieżka pliku wynikowego
-            Dim domyslnaNazwa As String = "mapa_wielowarstwowa_" & DateTime.Now.ToString("yyyyMMdd_HHmm") & ".mbtiles"
+            Dim ext As String = If(_wybranyFormat = RodzajEksportu.GeoPackage, ".gpkg", ".mbtiles")
+            Dim domyslnaNazwa As String = "mapa_wielowarstwowa_" & DateTime.Now.ToString("yyyyMMdd_HHmm") & ext
             txtPlikWynikowy.Text = Path.Combine(FolderDownload, domyslnaNazwa)
             txtNazwaMapy.Text = "Mapa wielowarstwowa"
 
@@ -569,6 +595,7 @@ Public Class FormZaawansowanyMbtiles
     Private Function PobierzOpcjeZFormularza() As OpcjeKompilatoraMbtiles
         Dim opcje As New OpcjeKompilatoraMbtiles With {
             .PlikDocelowy = txtPlikWynikowy.Text.Trim(),
+            .Format = _wybranyFormat,
             .NazwaMapy = txtNazwaMapy.Text.Trim(),
             .JakoscJpeg = CInt(nudJakosc.Value),
             .SzybkaPiramidaWPasmach = chkPiramida.Checked,
@@ -665,8 +692,29 @@ Public Class FormZaawansowanyMbtiles
         btnKorekta.Enabled = (_cts Is Nothing) AndAlso chkKorekta.Checked
     End Sub
 
+    Private Sub cmbTypBazy_SelectedIndexChanged(sender As Object, e As EventArgs) Handles cmbTypBazy.SelectedIndexChanged
+        If _wTrakcieLadowania Then Exit Sub
+        Dim nowy = If(cmbTypBazy.SelectedIndex = 1, RodzajEksportu.GeoPackage, RodzajEksportu.MBTiles)
+        If nowy <> _wybranyFormat Then
+            _wybranyFormat = nowy
+            Dim stara = txtPlikWynikowy.Text.Trim()
+            If _wybranyFormat = RodzajEksportu.GeoPackage Then
+                If stara.EndsWith(".mbtiles", StringComparison.OrdinalIgnoreCase) Then
+                    txtPlikWynikowy.Text = stara.Substring(0, stara.Length - 8) & ".gpkg"
+                End If
+            Else
+                If stara.EndsWith(".gpkg", StringComparison.OrdinalIgnoreCase) Then
+                    txtPlikWynikowy.Text = stara.Substring(0, stara.Length - 5) & ".mbtiles"
+                End If
+            End If
+            AktualizujTytulOkna()
+        End If
+    End Sub
+
     Private Sub btnWybierzPlik_Click(sender As Object, e As EventArgs) Handles btnWybierzPlik.Click
-        dlgSave.Filter = "Pliki MBTiles (*.mbtiles)|*.mbtiles|Wszystkie pliki (*.*)|*.*"
+        Dim gpkg = (_wybranyFormat = RodzajEksportu.GeoPackage)
+        dlgSave.Filter = If(gpkg, "Pliki GeoPackage (*.gpkg)|*.gpkg|Wszystkie pliki (*.*)|*.*",
+                                  "Pliki MBTiles (*.mbtiles)|*.mbtiles|Wszystkie pliki (*.*)|*.*")
         dlgSave.FileName = Path.GetFileName(txtPlikWynikowy.Text)
         dlgSave.InitialDirectory = Path.GetDirectoryName(txtPlikWynikowy.Text)
         If dlgSave.ShowDialog(Me) = DialogResult.OK Then
@@ -844,7 +892,8 @@ Public Class FormZaawansowanyMbtiles
             Dim plik As String = Await KompilatorMbtiles.KompilujAsync(KopiaWarstw(), opcje, postep, token)
             st.Stop()
             If Zamkniete Then Exit Sub
-            Loguj("SUKCES: Utworzono plik MBTiles w czasie: " & CzasTrwania(st.Elapsed), Color.DarkGreen)
+            FormEksport.OstatniPlik = plik
+            Loguj("SUKCES: Utworzono plik " & If(_wybranyFormat = RodzajEksportu.GeoPackage, "GeoPackage", "MBTiles") & " w czasie: " & CzasTrwania(st.Elapsed), Color.DarkGreen)
             'plik docelowy otwarty w innym programie - wynik zapisany pod inną nazwą
             Dim innaNazwa As Boolean = Not String.Equals(plik, opcje.PlikDocelowy, StringComparison.OrdinalIgnoreCase)
             If innaNazwa Then txtPlikWynikowy.Text = plik

@@ -31,6 +31,7 @@ Public Class FormSkaleMapy
     Private ReadOnly lblWarstwy As New Label()
     Private ReadOnly lblInfo As New Label()
     Private ReadOnly btnAuto As New Button()
+    Private ReadOnly btnPomoc As New Button()
     Private ReadOnly btnOk As New Button()
     Private ReadOnly btnAnuluj As New Button()
     Private _wypelnianie As Boolean
@@ -97,6 +98,11 @@ Public Class FormSkaleMapy
         btnAuto.Size = New Size(170, 30)
         AddHandler btnAuto.Click, Sub() Wczytaj(_planAuto)
 
+        btnPomoc.Text = "Pomoc"
+        btnPomoc.Location = New Point(190, 428)
+        btnPomoc.Size = New Size(80, 30)
+        AddHandler btnPomoc.Click, Sub() FormPomocMbtiles.Pokaz(Me, TematPomocy.Kreator)
+
         btnOk.Text = "OK"
         btnOk.Location = New Point(442, 428)
         btnOk.Size = New Size(90, 30)
@@ -107,7 +113,14 @@ Public Class FormSkaleMapy
         btnAnuluj.Size = New Size(90, 30)
         btnAnuluj.DialogResult = DialogResult.Cancel
 
-        Controls.AddRange({lblInfo, dgvSkale, lblWarstwy, clbWarstwy, btnAuto, btnOk, btnAnuluj})
+        Controls.AddRange({lblInfo, dgvSkale, lblWarstwy, clbWarstwy, btnAuto, btnPomoc, btnOk, btnAnuluj})
+        KeyPreview = True
+        AddHandler KeyDown, Sub(s As Object, e As KeyEventArgs)
+                                If e.KeyCode = Keys.F1 AndAlso e.Modifiers = Keys.None AndAlso Not e.Handled Then
+                                    e.Handled = True
+                                    FormPomocMbtiles.Pokaz(Me, TematPomocy.Kreator)
+                                End If
+                            End Sub
         AcceptButton = btnOk
         CancelButton = btnAnuluj
     End Sub

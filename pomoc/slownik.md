@@ -16,7 +16,7 @@ Krótkie objaśnienia najważniejszych terminów używanych w programie MapoTero
 | **CRS / EPSG** | Oznaczenie układu współrzędnych (np. `EPSG:2180` dla układu PL-1992, `EPSG:4326` dla WGS84). |
 | **EZiUDP** | Ewidencja Zbiorów i Usług Danych Przestrzennych: oficjalny państwowy rejestr usług mapowych (krajowych, wojewódzkich, powiatowych i gminnych), przeszukiwany bezpośrednio przez kreator serwerów MapoTero. |
 | **Georeferencja (kalibracja)** | Informacja zapisana w pliku obrazu (GeoTIFF) lub w osobnym pliku obok niego (`.jpgw`, `.prj`, `.map`, `.kml`, `.tab`), pozwalająca innym programom ustalić położenie mapy w terenie. |
-| **GeoPackage (`.gpkg`)** | Otwarty międzynarodowy standard OGC jednoplikowej bazy SQLite przechowującej kafelkowe mapy rastrowe Web Mercator dla aplikacji mobilnego GIS (QField, Mergin Maps, SW Maps, QGIS) oraz Locus Map i OruxMaps. |
+| **GeoPackage (`.gpkg`)** | Otwarty międzynarodowy standard OGC jednoplikowej bazy SQLite przechowującej kafelkowe mapy rastrowe Web Mercator dla QGIS i aplikacji mobilnego GIS (QField, Mergin Maps, SW Maps). |
 | **GetCapabilities** | Dokument XML udostępniany przez serwer WMS lub WMTS z listą wszystkich dostępnych warstw, obsługiwanych układów i zakresów skal. |
 | **Kafel (tile)** | Mały fragment mapy (zwykle `256 × 256 px`) udostępniany w gotowej formie przez usługi kafelkowe (WMTS, XYZ, TMS) lub zapisywany wewnątrz baz MBTiles/SQLiteDB. |
 | **Kanapka warstw** | Kilka warstw nałożonych jedna na drugą w panelu *Wybrane warstwy oraz ich kolejność* (warstwa 1 to podkład na spodzie, wyższe numery leżą nad nią). |

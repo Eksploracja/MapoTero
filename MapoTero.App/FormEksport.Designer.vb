@@ -34,6 +34,7 @@ Partial Class FormEksport
         Me.chkPodzialNaTomy = New System.Windows.Forms.CheckBox()
         Me.rbOruxMaps = New System.Windows.Forms.RadioButton()
         Me.rbSQLiteDB = New System.Windows.Forms.RadioButton()
+        Me.rbGeoPackage = New System.Windows.Forms.RadioButton()
         Me.nudMaksKafli = New System.Windows.Forms.NumericUpDown()
         Me.rbMBTiles = New System.Windows.Forms.RadioButton()
         Me.btnWielowarstwowyMbtiles = New System.Windows.Forms.Button()
@@ -47,6 +48,7 @@ Partial Class FormEksport
         Me.chkArkuszMap = New System.Windows.Forms.CheckBox()
         Me.chkArkuszTab = New System.Windows.Forms.CheckBox()
         Me.chkArkuszKml = New System.Windows.Forms.CheckBox()
+        Me.chkGeoTiffPiramidy = New System.Windows.Forms.CheckBox()
         Me.rbTrekBuddy = New System.Windows.Forms.RadioButton()
         Me.grpMBTiles = New System.Windows.Forms.GroupBox()
         Me.chkPng = New System.Windows.Forms.CheckBox()
@@ -75,6 +77,7 @@ Partial Class FormEksport
         Me.lblPlan = New System.Windows.Forms.Label()
         Me.txtKomunikaty = New System.Windows.Forms.RichTextBox()
         Me.prgEksport = New System.Windows.Forms.ProgressBar()
+        Me.btnWyslijNaTelefon = New System.Windows.Forms.Button()
         Me.btnPokazPlik = New System.Windows.Forms.Button()
         Me.btnEksportuj = New System.Windows.Forms.Button()
         Me.btnPrzerwij = New System.Windows.Forms.Button()
@@ -133,6 +136,7 @@ Partial Class FormEksport
         Me.grpFormat.Controls.Add(Me.rbJnx)
         Me.grpFormat.Controls.Add(Me.rbOruxMaps)
         Me.grpFormat.Controls.Add(Me.rbSQLiteDB)
+        Me.grpFormat.Controls.Add(Me.rbGeoPackage)
         Me.grpFormat.Controls.Add(Me.nudMaksKafli)
         Me.grpFormat.Controls.Add(Me.btnWielowarstwowyMbtiles)
         Me.grpFormat.Controls.Add(Me.rbMBTiles)
@@ -146,10 +150,11 @@ Partial Class FormEksport
         Me.grpFormat.Controls.Add(Me.chkArkuszMap)
         Me.grpFormat.Controls.Add(Me.chkArkuszTab)
         Me.grpFormat.Controls.Add(Me.chkArkuszKml)
+        Me.grpFormat.Controls.Add(Me.chkGeoTiffPiramidy)
         Me.grpFormat.Controls.Add(Me.rbTrekBuddy)
         Me.grpFormat.Location = New System.Drawing.Point(12, 102)
         Me.grpFormat.Name = "grpFormat"
-        Me.grpFormat.Size = New System.Drawing.Size(486, 284)
+        Me.grpFormat.Size = New System.Drawing.Size(486, 306)
         Me.grpFormat.TabIndex = 4
         Me.grpFormat.TabStop = False
         Me.grpFormat.Text = "Format"
@@ -248,10 +253,21 @@ Partial Class FormEksport
         Me.rbMBTiles.Text = "MBTiles - Locus Map, OsmAnd, OruxMaps (kafle Web Mercator)"
         Me.rbMBTiles.UseVisualStyleBackColor = True
         '
+        'rbGeoPackage
+        '
+        Me.rbGeoPackage.AutoSize = True
+        Me.rbGeoPackage.Location = New System.Drawing.Point(10, 136)
+        Me.rbGeoPackage.Name = "rbGeoPackage"
+        Me.rbGeoPackage.Size = New System.Drawing.Size(430, 17)
+        Me.rbGeoPackage.TabIndex = 7
+        Me.rbGeoPackage.Text = "GeoPackage (.gpkg) - QField, Mergin Maps, QGIS (kafle Web Mercator)"
+        Me.ToolTip1.SetToolTip(Me.rbGeoPackage, "Standard OGC: kafelkowa mapa rastrowa dla mobilnego GIS (QField, Mergin Maps, SW Maps) i QGIS.")
+        Me.rbGeoPackage.UseVisualStyleBackColor = True
+        '
         'rbSQLiteDB
         '
         Me.rbSQLiteDB.AutoSize = True
-        Me.rbSQLiteDB.Location = New System.Drawing.Point(10, 136)
+        Me.rbSQLiteDB.Location = New System.Drawing.Point(10, 158)
         Me.rbSQLiteDB.Name = "rbSQLiteDB"
         Me.rbSQLiteDB.Size = New System.Drawing.Size(330, 17)
         Me.rbSQLiteDB.TabIndex = 8
@@ -262,7 +278,7 @@ Partial Class FormEksport
         'rbOruxMaps
         '
         Me.rbOruxMaps.AutoSize = True
-        Me.rbOruxMaps.Location = New System.Drawing.Point(10, 158)
+        Me.rbOruxMaps.Location = New System.Drawing.Point(10, 180)
         Me.rbOruxMaps.Name = "rbOruxMaps"
         Me.rbOruxMaps.Size = New System.Drawing.Size(400, 17)
         Me.rbOruxMaps.TabIndex = 9
@@ -273,7 +289,7 @@ Partial Class FormEksport
         'rbGeoTiff
         '
         Me.rbGeoTiff.AutoSize = True
-        Me.rbGeoTiff.Location = New System.Drawing.Point(10, 180)
+        Me.rbGeoTiff.Location = New System.Drawing.Point(10, 202)
         Me.rbGeoTiff.Name = "rbGeoTiff"
         Me.rbGeoTiff.Size = New System.Drawing.Size(215, 17)
         Me.rbGeoTiff.TabIndex = 10
@@ -286,7 +302,7 @@ Partial Class FormEksport
         Me.cmbFormatArkusza.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
         Me.cmbFormatArkusza.FormattingEnabled = True
         Me.cmbFormatArkusza.Items.AddRange(New Object() {"GeoTIFF (bezstratny)", "GeoTIFF (kompresja JPEG)", "JPEG", "PNG"})
-        Me.cmbFormatArkusza.Location = New System.Drawing.Point(230, 177)
+        Me.cmbFormatArkusza.Location = New System.Drawing.Point(230, 199)
         Me.cmbFormatArkusza.Name = "cmbFormatArkusza"
         Me.cmbFormatArkusza.Size = New System.Drawing.Size(160, 21)
         Me.cmbFormatArkusza.TabIndex = 11
@@ -295,7 +311,7 @@ Partial Class FormEksport
         'chkArkuszWorldFile
         '
         Me.chkArkuszWorldFile.AutoSize = True
-        Me.chkArkuszWorldFile.Location = New System.Drawing.Point(28, 200)
+        Me.chkArkuszWorldFile.Location = New System.Drawing.Point(28, 222)
         Me.chkArkuszWorldFile.Name = "chkArkuszWorldFile"
         Me.chkArkuszWorldFile.Size = New System.Drawing.Size(105, 17)
         Me.chkArkuszWorldFile.TabIndex = 12
@@ -306,7 +322,7 @@ Partial Class FormEksport
         'chkArkuszMap
         '
         Me.chkArkuszMap.AutoSize = True
-        Me.chkArkuszMap.Location = New System.Drawing.Point(140, 200)
+        Me.chkArkuszMap.Location = New System.Drawing.Point(140, 222)
         Me.chkArkuszMap.Name = "chkArkuszMap"
         Me.chkArkuszMap.Size = New System.Drawing.Size(46, 17)
         Me.chkArkuszMap.TabIndex = 13
@@ -317,7 +333,7 @@ Partial Class FormEksport
         'chkArkuszTab
         '
         Me.chkArkuszTab.AutoSize = True
-        Me.chkArkuszTab.Location = New System.Drawing.Point(194, 200)
+        Me.chkArkuszTab.Location = New System.Drawing.Point(194, 222)
         Me.chkArkuszTab.Name = "chkArkuszTab"
         Me.chkArkuszTab.Size = New System.Drawing.Size(44, 17)
         Me.chkArkuszTab.TabIndex = 14
@@ -328,7 +344,7 @@ Partial Class FormEksport
         'chkArkuszKml
         '
         Me.chkArkuszKml.AutoSize = True
-        Me.chkArkuszKml.Location = New System.Drawing.Point(246, 200)
+        Me.chkArkuszKml.Location = New System.Drawing.Point(246, 222)
         Me.chkArkuszKml.Name = "chkArkuszKml"
         Me.chkArkuszKml.Size = New System.Drawing.Size(45, 17)
         Me.chkArkuszKml.TabIndex = 15
@@ -336,10 +352,23 @@ Partial Class FormEksport
         Me.ToolTip1.SetToolTip(Me.chkArkuszKml, "Plik nakładki Google Earth (.kml).")
         Me.chkArkuszKml.UseVisualStyleBackColor = True
         '
+        'chkGeoTiffPiramidy
+        '
+        Me.chkGeoTiffPiramidy.AutoSize = True
+        Me.chkGeoTiffPiramidy.Checked = True
+        Me.chkGeoTiffPiramidy.CheckState = System.Windows.Forms.CheckState.Checked
+        Me.chkGeoTiffPiramidy.Location = New System.Drawing.Point(305, 222)
+        Me.chkGeoTiffPiramidy.Name = "chkGeoTiffPiramidy"
+        Me.chkGeoTiffPiramidy.Size = New System.Drawing.Size(120, 17)
+        Me.chkGeoTiffPiramidy.TabIndex = 16
+        Me.chkGeoTiffPiramidy.Text = "piramidy w GeoTIFF"
+        Me.ToolTip1.SetToolTip(Me.chkGeoTiffPiramidy, "Tworzy wewnętrzne piramidy (overviews) w pliku GeoTIFF - natychmiastowe otwieranie dużych map w QGIS i Avenza Maps.")
+        Me.chkGeoTiffPiramidy.UseVisualStyleBackColor = True
+        '
         'rbTrekBuddy
         '
         Me.rbTrekBuddy.AutoSize = True
-        Me.rbTrekBuddy.Location = New System.Drawing.Point(10, 222)
+        Me.rbTrekBuddy.Location = New System.Drawing.Point(10, 244)
         Me.rbTrekBuddy.Name = "rbTrekBuddy"
         Me.rbTrekBuddy.Size = New System.Drawing.Size(360, 17)
         Me.rbTrekBuddy.TabIndex = 16
@@ -350,7 +379,7 @@ Partial Class FormEksport
         'chkKorekcjaMip
         '
         Me.chkKorekcjaMip.AutoSize = True
-        Me.chkKorekcjaMip.Location = New System.Drawing.Point(10, 251)
+        Me.chkKorekcjaMip.Location = New System.Drawing.Point(10, 273)
         Me.chkKorekcjaMip.Name = "chkKorekcjaMip"
         Me.chkKorekcjaMip.Size = New System.Drawing.Size(275, 17)
         Me.chkKorekcjaMip.TabIndex = 13
@@ -360,7 +389,7 @@ Partial Class FormEksport
         '
         'btnPodgladMip
         '
-        Me.btnPodgladMip.Location = New System.Drawing.Point(310, 246)
+        Me.btnPodgladMip.Location = New System.Drawing.Point(310, 268)
         Me.btnPodgladMip.Name = "btnPodgladMip"
         Me.btnPodgladMip.Size = New System.Drawing.Size(165, 26)
         Me.btnPodgladMip.TabIndex = 14
@@ -375,12 +404,12 @@ Partial Class FormEksport
         Me.grpMBTiles.Controls.Add(Me.lblPoziomDo)
         Me.grpMBTiles.Controls.Add(Me.nudPoziomMin)
         Me.grpMBTiles.Controls.Add(Me.lblPoziomOd)
-        Me.grpMBTiles.Location = New System.Drawing.Point(12, 392)
+        Me.grpMBTiles.Location = New System.Drawing.Point(12, 414)
         Me.grpMBTiles.Name = "grpMBTiles"
         Me.grpMBTiles.Size = New System.Drawing.Size(486, 50)
         Me.grpMBTiles.TabIndex = 5
         Me.grpMBTiles.TabStop = False
-        Me.grpMBTiles.Text = "Kafle Web Mercator (JNX, MBTiles, SQLiteDB, OruxMaps)"
+        Me.grpMBTiles.Text = "Kafle Web Mercator (JNX, MBTiles, GeoPackage, SQLiteDB, OruxMaps)"
         '
         'chkPng
         '
@@ -439,7 +468,7 @@ Partial Class FormEksport
         Me.grpWarstwy.Controls.Add(Me.lblNakladki)
         Me.grpWarstwy.Controls.Add(Me.chkBialePodstawa)
         Me.grpWarstwy.Controls.Add(Me.chkNakladka)
-        Me.grpWarstwy.Location = New System.Drawing.Point(12, 446)
+        Me.grpWarstwy.Location = New System.Drawing.Point(12, 468)
         Me.grpWarstwy.Name = "grpWarstwy"
         Me.grpWarstwy.Size = New System.Drawing.Size(486, 172)
         Me.grpWarstwy.TabIndex = 6
@@ -545,7 +574,7 @@ Partial Class FormEksport
         Me.grpRozmiar.Controls.Add(Me.lblLimit)
         Me.grpRozmiar.Controls.Add(Me.lblRozmiar)
         Me.grpRozmiar.Controls.Add(Me.btnOszacuj)
-        Me.grpRozmiar.Location = New System.Drawing.Point(12, 622)
+        Me.grpRozmiar.Location = New System.Drawing.Point(12, 644)
         Me.grpRozmiar.Name = "grpRozmiar"
         Me.grpRozmiar.Size = New System.Drawing.Size(486, 52)
         Me.grpRozmiar.TabIndex = 7
@@ -603,7 +632,7 @@ Partial Class FormEksport
         'lblJakosc
         '
         Me.lblJakosc.AutoSize = True
-        Me.lblJakosc.Location = New System.Drawing.Point(12, 682)
+        Me.lblJakosc.Location = New System.Drawing.Point(12, 704)
         Me.lblJakosc.Name = "lblJakosc"
         Me.lblJakosc.Size = New System.Drawing.Size(70, 13)
         Me.lblJakosc.TabIndex = 8
@@ -611,7 +640,7 @@ Partial Class FormEksport
         '
         'nudJakosc
         '
-        Me.nudJakosc.Location = New System.Drawing.Point(90, 680)
+        Me.nudJakosc.Location = New System.Drawing.Point(90, 702)
         Me.nudJakosc.Minimum = New Decimal(New Integer() {10, 0, 0, 0})
         Me.nudJakosc.Name = "nudJakosc"
         Me.nudJakosc.Size = New System.Drawing.Size(50, 20)
@@ -620,54 +649,65 @@ Partial Class FormEksport
         '
         'lblPlan
         '
-        Me.lblPlan.Location = New System.Drawing.Point(150, 678)
+        Me.lblPlan.Location = New System.Drawing.Point(150, 700)
         Me.lblPlan.Name = "lblPlan"
         Me.lblPlan.Size = New System.Drawing.Size(348, 30)
         Me.lblPlan.TabIndex = 10
         '
         'txtKomunikaty
         '
-        Me.txtKomunikaty.Location = New System.Drawing.Point(12, 712)
+        Me.txtKomunikaty.Location = New System.Drawing.Point(12, 730)
         Me.txtKomunikaty.Name = "txtKomunikaty"
         Me.txtKomunikaty.ReadOnly = True
-        Me.txtKomunikaty.Size = New System.Drawing.Size(486, 60)
+        Me.txtKomunikaty.Size = New System.Drawing.Size(486, 44)
         Me.txtKomunikaty.TabIndex = 11
         Me.txtKomunikaty.Text = ""
         '
         'prgEksport
         '
-        Me.prgEksport.Location = New System.Drawing.Point(93, 782)
+        Me.prgEksport.Location = New System.Drawing.Point(12, 778)
         Me.prgEksport.Name = "prgEksport"
-        Me.prgEksport.Size = New System.Drawing.Size(134, 23)
+        Me.prgEksport.Size = New System.Drawing.Size(486, 14)
         Me.prgEksport.TabIndex = 12
         '
         'btnPokazPlik
         '
         Me.btnPokazPlik.Enabled = False
-        Me.btnPokazPlik.Location = New System.Drawing.Point(233, 778)
+        Me.btnPokazPlik.Location = New System.Drawing.Point(95, 800)
         Me.btnPokazPlik.Name = "btnPokazPlik"
-        Me.btnPokazPlik.Size = New System.Drawing.Size(100, 30)
+        Me.btnPokazPlik.Size = New System.Drawing.Size(110, 30)
         Me.btnPokazPlik.TabIndex = 13
         Me.btnPokazPlik.Text = "Pokaż w folderze"
         Me.ToolTip1.SetToolTip(Me.btnPokazPlik, "Otwiera folder z wyeksportowanym plikiem mapy w Eksploratorze Windows.")
         Me.btnPokazPlik.UseVisualStyleBackColor = True
         '
+        'btnWyslijNaTelefon
+        '
+        Me.btnWyslijNaTelefon.Enabled = False
+        Me.btnWyslijNaTelefon.Location = New System.Drawing.Point(212, 800)
+        Me.btnWyslijNaTelefon.Name = "btnWyslijNaTelefon"
+        Me.btnWyslijNaTelefon.Size = New System.Drawing.Size(120, 30)
+        Me.btnWyslijNaTelefon.TabIndex = 14
+        Me.btnWyslijNaTelefon.Text = "Wyślij na telefon..."
+        Me.ToolTip1.SetToolTip(Me.btnWyslijNaTelefon, "Prześlij wyeksportowaną mapę bezpośrednio na telefon przez domową sieć Wi-Fi (kod QR).")
+        Me.btnWyslijNaTelefon.UseVisualStyleBackColor = True
+        '
         'btnEksportuj
         '
-        Me.btnEksportuj.Location = New System.Drawing.Point(339, 778)
+        Me.btnEksportuj.Location = New System.Drawing.Point(339, 800)
         Me.btnEksportuj.Name = "btnEksportuj"
         Me.btnEksportuj.Size = New System.Drawing.Size(80, 30)
-        Me.btnEksportuj.TabIndex = 14
+        Me.btnEksportuj.TabIndex = 15
         Me.btnEksportuj.Text = "Eksportuj"
         Me.btnEksportuj.UseVisualStyleBackColor = True
         '
         'btnPrzerwij
         '
         Me.btnPrzerwij.Enabled = False
-        Me.btnPrzerwij.Location = New System.Drawing.Point(425, 778)
+        Me.btnPrzerwij.Location = New System.Drawing.Point(425, 800)
         Me.btnPrzerwij.Name = "btnPrzerwij"
         Me.btnPrzerwij.Size = New System.Drawing.Size(73, 30)
-        Me.btnPrzerwij.TabIndex = 15
+        Me.btnPrzerwij.TabIndex = 16
         Me.btnPrzerwij.Text = "Przerwij"
         Me.btnPrzerwij.UseVisualStyleBackColor = True
         '
@@ -675,7 +715,8 @@ Partial Class FormEksport
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(510, 820)
+        Me.ClientSize = New System.Drawing.Size(510, 842)
+        Me.Controls.Add(Me.btnWyslijNaTelefon)
         Me.Controls.Add(Me.btnPokazPlik)
         Me.Controls.Add(Me.btnPrzerwij)
         Me.Controls.Add(Me.btnEksportuj)
@@ -698,7 +739,7 @@ Partial Class FormEksport
         Me.Name = "FormEksport"
         Me.ShowInTaskbar = False
         Me.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent
-        Me.Text = "Eksport mapy (JNX, KMZ, MBTiles, SQLiteDB, OruxMaps, arkusz, TrekBuddy)"
+        Me.Text = "Eksport mapy (GeoPackage, MBTiles, SQLiteDB, Garmin JNX/KMZ, OruxMaps, arkusz, TrekBuddy)"
         Me.grpFormat.ResumeLayout(False)
         Me.grpFormat.PerformLayout()
         CType(Me.nudMaksKafli, System.ComponentModel.ISupportInitialize).EndInit()
@@ -725,6 +766,7 @@ Partial Class FormEksport
     Friend WithEvents grpFormat As System.Windows.Forms.GroupBox
     Friend WithEvents rbOruxMaps As System.Windows.Forms.RadioButton
     Friend WithEvents rbSQLiteDB As System.Windows.Forms.RadioButton
+    Friend WithEvents rbGeoPackage As System.Windows.Forms.RadioButton
     Friend WithEvents nudMaksKafli As System.Windows.Forms.NumericUpDown
     Friend WithEvents rbMBTiles As System.Windows.Forms.RadioButton
     Friend WithEvents btnWielowarstwowyMbtiles As System.Windows.Forms.Button
@@ -738,6 +780,7 @@ Partial Class FormEksport
     Friend WithEvents chkArkuszMap As System.Windows.Forms.CheckBox
     Friend WithEvents chkArkuszTab As System.Windows.Forms.CheckBox
     Friend WithEvents chkArkuszKml As System.Windows.Forms.CheckBox
+    Friend WithEvents chkGeoTiffPiramidy As System.Windows.Forms.CheckBox
     Friend WithEvents rbTrekBuddy As System.Windows.Forms.RadioButton
     Friend WithEvents rbJnx As System.Windows.Forms.RadioButton
     Friend WithEvents lblKolejnoscGarmin As System.Windows.Forms.Label
@@ -770,6 +813,7 @@ Partial Class FormEksport
     Friend WithEvents lblPlan As System.Windows.Forms.Label
     Friend WithEvents txtKomunikaty As System.Windows.Forms.RichTextBox
     Friend WithEvents prgEksport As System.Windows.Forms.ProgressBar
+    Friend WithEvents btnWyslijNaTelefon As System.Windows.Forms.Button
     Friend WithEvents btnPokazPlik As System.Windows.Forms.Button
     Friend WithEvents btnEksportuj As System.Windows.Forms.Button
     Friend WithEvents btnPrzerwij As System.Windows.Forms.Button

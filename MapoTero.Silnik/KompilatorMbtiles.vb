@@ -130,6 +130,8 @@ End Class
 ''' <summary>Parametry zaawansowanego zadania tworzenia wielowarstwowego MBTiles.</summary>
 Public Class OpcjeKompilatoraMbtiles
     Public Property PlikDocelowy As String = ""
+    ''' <summary>Format wynikowego pliku kafelkowego (MBTiles lub GeoPackage).</summary>
+    Public Property Format As RodzajEksportu = RodzajEksportu.MBTiles
     Public Property NazwaMapy As String = "Mapa wielowarstwowa"
     Public Property OpisMapy As String = "Mapa skompilowana z wielu warstw i poziomów zoom w MapoTero"
     Public Property Atrybucja As String = "MapoTero"
@@ -474,10 +476,11 @@ Public NotInheritable Class KompilatorMbtiles
                                   End Try
                                   'podmiana pliku poza blokiem usuwającym bazę - gotowy wynik nie może zostać skasowany
                                   Dim zapisany As String = PrzeniesWynik(plikTmp, opcje.PlikDocelowy)
+                                  Dim nazwaFormatu As String = If(opcje.Format = RodzajEksportu.GeoPackage, "GeoPackage", "MBTiles")
                                   postep?.Report(New RaportPostepuKompilacji With {
                                       .Procent = 100,
                                       .Gotowe = True,
-                                      .Komunikat = If(zapisany = opcje.PlikDocelowy, "Kompilacja MBTiles zakończona pomyślnie!",
+                                      .Komunikat = If(zapisany = opcje.PlikDocelowy, $"Kompilacja {nazwaFormatu} zakończona pomyślnie!",
                                                       "Kompilacja zakończona. Plik docelowy jest otwarty w innym programie - mapę zapisano jako " & zapisany)
                                   })
                                   Return zapisany
@@ -527,7 +530,9 @@ Public NotInheritable Class KompilatorMbtiles
         Dim opisMapy As New OpisMbtiles With {.Nazwa = opcje.NazwaMapy, .Opis = opcje.OpisMapy, .Atrybucja = opcje.Atrybucja,
                                               .Png = opcje.FormatKafli <> FormatKafliMbtiles.TylkoJpeg, .PoziomMin = minZ, .PoziomMax = maxZ,
                                               .Obszar = obszarGlobalny, .Wersja = "1.3"}
-        Using magazyn As New MagazynMBTiles(plikTmp, opisMapy)
+        Using magazyn As MagazynKafli = If(opcje.Format = RodzajEksportu.GeoPackage,
+                                           DirectCast(New MagazynGeoPackage(plikTmp, opisMapy), MagazynKafli),
+                                           DirectCast(New MagazynMBTiles(plikTmp, opisMapy), MagazynKafli))
             Dim odczytajKafel As Func(Of KafelXYZ, Byte()) = AddressOf magazyn.Odczytaj
             ' Generowanie poziomów: od najwyższego do najniższego
             ' Aby móc składać poziomy niższe z wyższych (piramida), idziemy w dół
