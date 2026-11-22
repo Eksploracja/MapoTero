@@ -24,8 +24,8 @@ Plik `conf.txt` powstaje w folderze każdej sesji pobierania. Zapisuje wartości
 wartości logiczne `#TRUE#` / `#FALSE#`, liczby z kropką dziesiętną) w ustalonej kolejności zgodnej ze starszymi wersjami:
 
 1. Folder sesji, nazwa zbioru bazowego, zasięg (`XDol`, `YLewy`, `XGora`, `YPrawy`), bok segmentu `[px]`, rozmiar piksela.
-2. 12 pól nazw warstw, liczba warstw, format obrazu, przedrostek, flaga *pobieraj powyżej ostatniego*, środek i zoom podglądu.
-3. Pola dopisane w nowszych wersjach (opcjonalne dla zgodności wstecznej): styl numeracji, kod EPSG układu (`2180`, `2176–2179`, `32633–32635`, `4326`), flaga przezroczystości, data pobrania (`RRRR-MM-DD`), adres serwera głównego, krycie warstw (np. `100;50;100`), a dla kanapek wieloserwerowych adresy serwerów oraz zbiory warstw rozdzielone znakiem `|`.
+2. 12 pól nazw warstw, liczba warstw, format obrazu, przedrostek, flaga *pobieraj powyżej ostatniego* (od wersji 3.19 zawsze wyłączona i pomijana), środek i zoom podglądu.
+3. Pola dopisane w nowszych wersjach (opcjonalne dla zgodności wstecznej): styl numeracji, kod EPSG układu (`2180`, `2176–2179`, `32633–32635`, `4326`), flaga przezroczystości, data pobrania (`RRRR-MM-DD`), adres serwera głównego, krycie warstw (np. `100;50;100`), a dla kanapek wieloserwerowych adresy serwerów oraz zbiory warstw rozdzielone znakiem `|`, tryby mieszania warstw i flaga trybu TrekBuddy / Locus Map.
 
 ---
 
@@ -83,6 +83,15 @@ Pozwala to sprawdzić aktualność kafli przy ponownym pobieraniu bez przesyłan
 * **`warstwy\warstwy.txt`**: indeks zbiorów wczytywanych do programu (jedna nazwa pliku bez `.txt` w wierszu).
 * **`warstwy\katalog.txt`** (UTF-8): buduje grupy drzewa *Wybierz mapy* i przypisuje warstwom czytelne nazwy:
   `> Grupa`, `>> Podgrupa`, `zbiór | warstwa | nazwa wyświetlana` (wiersze zaczynające się od `#` to komentarze).
+
+---
+
+## szablony_wlasne.json
+
+Plik przechowuje style użytkownika utworzone w Szybkim kreatorze mapy poleceniem *Zapisz jako mój styl...*.
+Zapisywany jest w formacie JSON (UTF-8 bez BOM) w katalogu programu lub w `%LocalAppData%\MapoTero\szablony_wlasne.json`.
+Zawiera listę własnych kompozycji wraz z nazwami warstw, stopniami krycia, trybami mieszania, profilami korekcji rastrowej
+oraz kompletnym planem stopni dla map wieloskalowych. Usunięcie stylu przyciskiem *Usuń mój styl* aktualizuje ten plik.
 
 ---
 

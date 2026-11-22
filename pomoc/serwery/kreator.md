@@ -32,6 +32,8 @@ Okno kreatora działa dwuetapowo:
 1. **Krok 1: Wybór usługi z katalogu lub wpisanie adresu URL**: domyślny widok po otwarciu.
 2. **Krok 2: Analiza usługi, wybór warstw i podgląd próbki**: widok po wybraniu usługi lub pobraniu metadanych. W lewym górnym rogu znajduje się przycisk **← Wróć do listy usług**, który pozwala wrócić do katalogu bez zamykania okna.
 
+W obu krokach w dolnej części okna dostępny jest przycisk **Pomoc** (oraz klawisz <kbd>F1</kbd>) z podręczną instrukcją konfiguracji serwerów.
+
 ---
 
 ## Krok 1: Wybór z katalogu usług lub własny URL

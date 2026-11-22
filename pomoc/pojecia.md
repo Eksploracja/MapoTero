@@ -61,7 +61,7 @@ Segment to pojedynczy kwadratowy plik graficzny (np. `_01_02.jpg`), na który pr
 
 * Bok segmentu podaje się w pikselach w polu *Segment [pix]*: od 1 do **2048** px (domyślnie 2000). Serwery Geoportalu nie generują obrazów większych niż 2048 px.
 * Niektóre serwery mają niższy limit. Gdy serwer odrzuca duże zapytania, zmniejsz bok segmentu.
-* W [trybie TrekBuddy](../ustawienia/#trekbuddy-i-locus-map) segment ma zawsze sztywny bok 512 px.
+* Mapa [TrekBuddy / Locus Map](../eksport/aplikacje/#trekbuddy) ma kafle o boku 512 px niezależnie od boku segmentu.
 
 Większe segmenty oznaczają mniej plików na dysku i mniej zapytań do serwera. Mniejsze segmenty przydają się przy wolnym łączu lub niestabilnym serwerze, bo ewentualny błąd pobrania dotyczy wtedy mniejszego fragmentu.
 

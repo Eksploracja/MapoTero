@@ -9,7 +9,7 @@ nav_order: 10
 Pliki georeferencji zapisywane obok segmentów i scalonych arkuszy: który program czyta dany format.
 {: .fs-5 .fw-300 }
 
-**Gdzie w programie:** menu *Ustawienia > Pliki kalibracji segmentów* oraz okno *Łączenie segmentów*  
+**Gdzie w programie:** menu *Ustawienia > Pliki kalibracji segmentów* oraz okno *Scalanie segmentów*  
 **Dotyczy wersji:** {{ site.wersja_programu }}
 
 <details open markdown="block">
@@ -81,7 +81,7 @@ Prosty plik tekstowy zapisujący wymiary obrazu w pikselach i dwie pary współr
 
 ## TrekBuddy i Locus Map (.tar)
 
-W trybie TrekBuddy (grupa *TrekBuddy i Locus Map* w oknie *Ustawienia*) program dzieli pobieraną mapę na segmenty `512 × 512 px` w podfolderze `set`, tworzy plik kalibracji `.map` oraz skorowidz `.set` i pakuje całość do jednego archiwum `.tar`.
+Format *TrekBuddy / Locus Map* w oknie *Eksport mapy* dzieli arkusz mapy na kafle `512 × 512 px` w podfolderze `set`, tworzy plik kalibracji `.map` oraz skorowidz `.set` i pakuje całość do jednego archiwum `.tar`.
 
 ---
 

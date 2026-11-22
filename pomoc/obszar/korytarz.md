@@ -11,7 +11,7 @@ Zamiast całego prostokąta program pobiera tylko segmenty leżące w pasie wzd�
 krętej to wielokrotnie mniej danych.
 {: .fs-5 .fw-300 }
 
-**Gdzie w programie:** menu *Sesja pobierania > obszar pobierania wzdłuż trasy (GPX, KML, KMZ)...*  
+**Gdzie w programie:** menu *Sesja pobierania > Obszar pobierania wzdłuż trasy (GPX, KML, KMZ)...*  
 **Dotyczy wersji:** {{ site.wersja_programu }}
 
 <details open markdown="block">
@@ -24,8 +24,8 @@ krętej to wielokrotnie mniej danych.
 ## Najkrótsza droga
 
 1. Ustaw zbiór map, warstwę, segment i piksel.
-2. Wybierz *Sesja pobierania > obszar pobierania wzdłuż trasy (GPX, KML, KMZ)...* albo po prostu przeciągnij plik trasy z Eksploratora Windows na okno programu lub mapę (Drag &amp; Drop).
-3. Kliknij **wybierz...** i wskaż plik trasy (jeśli nie przeciągnięto go myszą).
+2. Wybierz *Sesja pobierania > Obszar pobierania wzdłuż trasy (GPX, KML, KMZ)...* albo po prostu przeciągnij plik trasy z Eksploratora Windows na okno programu lub mapę (Drag &amp; Drop).
+3. Kliknij **Wybierz...** i wskaż plik trasy (jeśli nie przeciągnięto go myszą).
 4. Ustaw *Szerokość pasa po każdej stronie trasy [m]* i kliknij **OK**.
 5. Sprawdź na mapie przebieg trasy (czerwona linia) oraz siatkę segmentów (kolor niebieski). W komunikacie u dołu zobaczysz liczbę wyznaczonych segmentów.
 6. Kliknij **Pobierz**.
@@ -54,11 +54,12 @@ Takie pliki generują serwisy i aplikacje turystyczne (np. Mapy.com, Komoot, Loc
 
 | Pole | Opis |
 |---|---|
-| *Plik trasy (GPX, KML, KMZ)* | przycisk **wybierz...** wskazuje plik |
+| *Plik trasy (GPX, KML, KMZ)* | przycisk **Wybierz...** wskazuje plik |
 | *Szerokość pasa po każdej stronie trasy [m]* | od 10 do 50 000 m (domyślnie 1000 m). Pobrane zostaną segmenty, które choć częściowo leżą w zadanej odległości od trasy |
 
 Pas mierzony jest symetrycznie od osi trasy, więc szerokość 1000 m daje korytarz o łącznej rozpiętości 2 km.
 Ponieważ pobierane są pełne kwadratowe segmenty, rzeczywisty zasięg danych jest nieco szerszy.
+W lewym dolnym rogu okna przycisk **Pomoc** (oraz klawisz <kbd>F1</kbd>) wyświetla podręczny opis doboru szerokości pasa i formatów trasy.
 
 {: .wskazowka }
 Przy wąskim korytarzu najlepiej sprawdza się mniejszy bok segmentu (np. 500–1000 px). Do pobrania trafi wtedy mniej zbędnego terenu poza pasem. Liczba pojedynczych plików wzrośnie, ale łączna objętość danych wyraźnie spadnie.
@@ -82,7 +83,7 @@ Gdy trasa nie przecina obszaru pobierania (np. po ręcznej edycji współrzędny
 
 ## Plik korytarz.txt
 
-Korytarz stanowi integralną część sesji. Program zapisuje go w folderze sesji jako `korytarz.txt` (obok `conf.txt`) przy starcie pobierania oraz przy ręcznym zapisie sesji. Po [wczytaniu sesji](../../sesje/) trasa i segmenty wracają na mapę, a wznawianie pobierania dotyczy wyłącznie segmentów korytarza.
+Korytarz jest integralną częścią sesji. Program zapisuje go w folderze sesji jako `korytarz.txt` (obok `conf.txt`) przy starcie pobierania oraz przy ręcznym zapisie sesji. Po [wczytaniu sesji](../../sesje/) trasa i segmenty wracają na mapę, a wznawianie pobierania dotyczy wyłącznie segmentów korytarza.
 
 Narzędzia korzystające z sesji uwzględniają korytarz:
 
@@ -94,19 +95,15 @@ Narzędzia korzystające z sesji uwzględniają korytarz:
 
 ## Powrót do pobierania prostokąta
 
-* Menu *Sesja pobierania > usuń obszar wzdłuż trasy (pobieranie całego prostokąta)*: przywraca standardowy prostokąt z siatką i uchwytami.
+* Menu *Sesja pobierania > Usuń obszar wzdłuż trasy (pobieranie całego prostokąta)*: przywraca standardowy prostokąt z siatką i uchwytami.
 * Zaznaczenie nowego obszaru prawym przyciskiem myszy również usuwa korytarz trasy.
 
 ---
 
-## Profil wysokościowy i rzędne NMT / LIDAR
+## Profil wysokościowy trasy
 
-W oknie obszaru wzdłuż trasy dostępna jest funkcja analizy ukształtowania terenu i uzupełniania rzędnych wysokościowych:
-
-* **Wzbogać ślad o wysokości:** program łączy się z państwową usługą NMT GUGiK (lotniczy skaning laserowy LIDAR) i pobiera rzeczywiste wysokości terenu dla wszystkich punktów śladu w Polsce.
-* **Wykres profilu:** w oknie generowany jest interaktywny wykres profilu podłużnego trasy z czytelnym podsumowaniem przewyższeń: suma podejść (przewyższenie dodatnie liczone z bezpieczną histerezą 1,5 m zapobiegającą szumowi gęstego zapisu GPS), suma zejść, wysokość minimalna, maksymalna oraz całkowity dystans trasy.
-* **Zapisz wzbogacony GPX:** pozwala zapisać plik GPX z uzupełnionymi znacznikami `<ele>`. Taki plik można wgrać do zegarków Garmin, Suunto, Polar lub aplikacji na smartfony (Locus Map, Komoot), uzyskując dokładny profil trasy przed wyruszeniem w góry.
-* **Przycisk Pomoc:** w lewym dolnym rogu okna korytarza otwiera podręczną instrukcję z aktywnym odnośnikiem do tego rozdziału pomocy.
+Profil wysokościowy z NMT (wysokości terenu dla punktów trasy, wykres i zapis GPX z wysokościami) jest od wersji 3.19
+osobnym narzędziem: menu *Narzędzia > Profil wysokościowy trasy (GPX, KML)...* - zob. [Narzędzia dodatkowe](../../narzedzia/#profil-wysokościowy-trasy).
 
 ---
 

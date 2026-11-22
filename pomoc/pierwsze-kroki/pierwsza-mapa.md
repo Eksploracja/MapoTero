@@ -19,6 +19,9 @@ Praktyczny samouczek: pobierzesz fragment mapy topograficznej 1:25 000, a nastę
 {:toc}
 </details>
 
+{: .wskazowka }
+**Szukasz najprostszej i najszybszej drogi bez ręcznych ustawień?** Wciśnij w programie <kbd>Ctrl</kbd>+<kbd>K</kbd> (lub kliknij ikonę różdżki pod powiększeniem mapy), aby otworzyć [Szybki kreator mapy](../../narzedzia/#szybki-kreator-mapy). Kreator prowadzi w 4 krokach od wyboru urządzenia docelowego po gotowy plik. Poniższy poradnik pokazuje pełną, klasyczną ścieżkę pracy w oknie głównym programu z ręczną kontrolą wszystkich parametrów.
+
 ---
 
 ## Przed rozpoczęciem
@@ -94,8 +97,8 @@ Pobrane segmenty możesz od razu przygotować do użycia w wybranej aplikacji:
 4. Kliknij **Eksportuj**. W folderze sesji powstanie gotowy plik `_eksport_2x2.mbtiles`.
 
 ### Wariant B: Scalony arkusz do programu GIS (GeoTIFF)
-1. Wybierz menu *Narzędzia > Łączenie segmentów* (<kbd>Ctrl</kbd>+<kbd>L</kbd>).
-2. Jako format wybierz **GeoTIFF (bezstratny)** i kliknij **Złącz segmenty**.
+1. Wybierz menu *Narzędzia > Scalanie segmentów* (<kbd>Ctrl</kbd>+<kbd>L</kbd>) - otworzy się okno *Eksport mapy* z formatem *Arkusz*.
+2. Obok formatu *Arkusz* wybierz **GeoTIFF (bezstratny)** i kliknij **Eksportuj**.
 3. Powstanie plik `_scalone_segmenty_2x2.tif` (jeden arkusz 4000 × 4000 pikseli z georeferencją w układzie PL-1992), który możesz przeciągnąć wprost do okna programu QGIS lub ArcGIS.
 
 ---

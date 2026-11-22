@@ -58,7 +58,7 @@ Najczęstsze przyczyny:
 Program automatycznie maskuje w pliku `error.txt` oraz logach awarii wrażliwe parametry (takie jak klucze API, tokeny w adresach URL czy dane autoryzacji), zastępując je ciągiem `***`. Przesłanie pliku `error.txt` na forum pomocy nie ujawnia prywatnych kluczy dostępowych.
 
 {: .informacja }
-Plik `error.txt` istnieje również w trakcie trwania pobierania i znika automatycznie po zapisaniu kompletu segmentów. Dopóki plik znajduje się w folderze, okno scalania blokuje łączenie niekompletnego arkusza, a moduł eksportu ostrzega o brakujących kaflach. Jeśli brak segmentów jest zamierzony (np. po usunięciu pustych krawędzi), usuń `error.txt` ręcznie.
+Plik `error.txt` istnieje również w trakcie trwania pobierania i znika automatycznie po zapisaniu kompletu segmentów. Dopóki plik znajduje się w folderze, przycisk scalania w oknie głównym jest nieaktywny, a okno eksportu (także arkusza) ostrzega o brakujących segmentach. Jeśli brak segmentów jest zamierzony (np. po usunięciu pustych krawędzi), usuń `error.txt` ręcznie.
 
 ---
 
@@ -83,14 +83,15 @@ Segment pobrany bez błędów sieciowych, ale pozbawiony treści graficznej, wyn
 * **Obszar poza zasięgiem danych.** Mapy historyczne obejmują określone regiony, a krajowe kafelki XYZ (np. *OSMapa.pl*) obejmują terytorium Polski. Poza zasięgiem serwer zwraca biały lub przezroczysty obraz (dla wybranych zbiorów XYZ program wyświetla ostrzeżenie przed startem pobierania).
 * **Warstwa niewidoczna w danej skali.** Część warstw WMS (np. ewidencja gruntów, uzbrojenie) uaktywnia się dopiero przy dużym powiększeniu. Przy zbyt dużym pikselu serwer zwraca pusty obraz. Zmniejsz piksel do wartości zalecanej (wskazuje ją [kreator serwerów](../../serwery/kreator/)).
 * **Układ nieobsługiwany przez serwer.** Część serwerów zamiast błędu zwraca pusty obraz. Wróć wtedy do układu PL-1992.
-* **Zamieniona kolejność osi.** Serwery niezgodne ze standardem WMS 1.3.0 interpretują osie odwrotnie i generują przesunięty, często pusty wycinek. W takim wypadku pomaga opcja *zamień kolejność X i Y w zapytaniu* w oknie *Ustawienia* (grupa *Nietypowe serwery WMS*). Dla Geoportalu opcja musi pozostać wyłączona.
+* **Zamieniona kolejność osi.** Serwery niezgodne ze standardem WMS 1.3.0 interpretują osie odwrotnie i generują przesunięty, często pusty wycinek. W takim wypadku zmień w adresie serwera w pliku zbioru map parametr `VERSION=1.3.0` na `VERSION=1.1.1`: w tej wersji WMS kolejność osi nie zależy od układu, więc program i serwer rozumieją ją tak samo. Serwery Geoportalu i pozostałe zbiory map dostarczane z programem tego nie wymagają.
 
 ---
 
-## Usuwanie pustych segmentów
+## Puste segmenty
 
-Puste segmenty z krawędzi mapy zajmują miejsce na dysku i spowalniają późniejszy eksport. Narzędzie *Narzędzia > Usuwanie pustych segmentów* kasuje pliki mniejsze od zadanego progu bajtów (zob. [Narzędzia dodatkowe](../../narzedzia/)).
-Aby przy kolejnym kliknięciu *Pobierz* program nie pobierał ich ponownie, włącz opcję *przy ponownym pobieraniu pobieraj tylko segmenty o numerze wyższym niż ostatni pobrany* ([Wznawianie](../przebieg/#wznawianie)).
+Biały segment (np. poza zasięgiem danych serwera) program od razu pobiera drugi raz; drugi biały wynik przyjmuje jako
+prawdziwy obraz. Eksport do formatów kafelkowych nie zapisuje pustych kafli, a [obszar wzdłuż trasy](../../obszar/korytarz/)
+nie pobiera segmentów poza pasem. Dawne narzędzie *Usuwanie pustych segmentów* zostało usunięte w wersji 3.19.
 
 ---
 

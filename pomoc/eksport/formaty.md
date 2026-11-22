@@ -25,14 +25,16 @@ Który format wybrać dla której aplikacji lub urządzenia.
 |---|---|---|---|
 | **KMZ: Garmin Custom Maps** | odbiorniki Garmin | kafle JPEG do 1024 × 1024 px w WGS84 | opcjonalny automatyczny podział na tomy przy ponad 100 kaflach |
 | **Garmin BirdsEye (JNX)** | odbiorniki Garmin (firmware z obsługą JNX) | wielopoziomowy raster z piramidą powiększeń | brak limitu 100 kafli, kopiowany do folderu `Garmin/BirdsEye` |
-| **GeoTIFF bezpośredni** | Avenza Maps, QField, ArcGIS, CAD, QGIS | pojedynczy georeferencjonowany plik TIF | kompresja bezstratna Deflate lub JPEG, z plikami `.tfw`, `.prj`, `.map` |
+| **Arkusz** (scalanie segmentów) | Avenza Maps, QField, ArcGIS, CAD, QGIS | jeden plik GeoTIFF, JPEG albo PNG z georeferencją | pliki world file i `.prj`, `.map`, `.tab`, `.kml`; nakładki z innych folderów |
+| **TrekBuddy / Locus Map** | Locus Map, TrekBuddy | archiwum `.tar` z kaflami 512 px, `.map` i `.set` | z dowolnej pobranej sesji, z nakładkami |
 | **KMZ** | Locus Map, OruxMaps, Google Earth | kafle do 1024 × 1024 px w WGS84 | brak limitu kafli, może być nakładką (PNG) |
 | **MBTiles** | Locus Map, OsmAnd, OruxMaps i wiele innych | baza SQLite z piramidą kafli Web Mercator 256 px | najbardziej uniwersalny, z poziomami powiększenia |
+| **GeoPackage (.gpkg)** | QField, Mergin Maps, QGIS, Locus Map, OruxMaps | baza SQLite w standardzie OGC z piramidą kafli Web Mercator 256 px | standard OGC dla mobilnego GIS, natywnie czytany przez QField |
 | **SQLiteDB** | OsmAnd, Locus Map | baza w formacie RMaps, kafle Web Mercator | natywny format map rastrowych OsmAnd |
 | **OruxMaps** | OruxMaps | folder z bazą `OruxMapsImages.db` i kalibracją `.otrk2.xml` | natywny format map offline OruxMaps |
 
 {: .wskazowka }
-Nie wiesz, co wybrać? Do aplikacji w telefonie wybierz **MBTiles**, do Garmina z odblokowanym firmware **Garmin BirdsEye (JNX)** lub **KMZ dla Garmin**, do aplikacji Avenza Maps **GeoTIFF bezpośredni**, a do obejrzenia w Google Earth zwykły **KMZ**.
+Nie wiesz, co wybrać? Do aplikacji w telefonie wybierz **MBTiles**, do mobilnego GIS (QField, Mergin Maps) **GeoPackage**, do Garmina z odblokowanym firmware **Garmin BirdsEye (JNX)** lub **KMZ dla Garmin**, do aplikacji Avenza Maps **Arkusz** w formacie GeoTIFF, a do obejrzenia w Google Earth zwykły **KMZ**.
 
 ---
 
@@ -58,13 +60,14 @@ Format dedykowany dla odbiorników turystycznych Garmin (np. GPSMAP, eTrex, Mont
 
 ---
 
-## GeoTIFF bezpośredni
+## Arkusz (scalanie segmentów)
 
-Pojedynczy plik TIF z georeferencją zaszytą bezpośrednio w nagłówkach:
+Jeden plik obrazu z georeferencją w układzie sesji - ten sam format otwiera polecenie *Narzędzia > Scalanie segmentów*:
 
-* **Zastosowanie:** idealny do aplikacji mobilnych Avenza Maps i QField oraz oprogramowania GIS (QGIS, ArcGIS) i CAD bez konieczności uprzedniego scalania segmentów.
-* **Kompresja:** bezstratna Deflate lub kompresja JPEG z regulacją jakości.
-* **Pliki towarzyszące:** program może utworzyć plik kalibracji World File (`.tfw`), rzut w formacie ESRI WKT (`.prj`) oraz kalibrację punktową OziExplorer (`.map`).
+* **Formaty:** GeoTIFF bezstratny (Deflate), GeoTIFF z kompresją JPEG, JPEG (do 65 500 px na bok) albo PNG.
+* **Zastosowanie:** Avenza Maps, QField, QGIS, ArcGIS i programy CAD.
+* **Pliki towarzyszące:** world file i `.prj`, kalibracja OziExplorer `.map`, MapInfo `.tab`, Google Earth `.kml`.
+* Szczegóły: [Scalanie segmentów](../../scalanie/).
 
 ---
 
@@ -88,7 +91,19 @@ na kilku poziomach powiększenia. Obsługuje go większość aplikacji mapowych.
 * Opis mapy (nazwa, opis, atrybucja ze źródłem danych) zapisywany jest w metadanych pliku.
 
 Plik MBTiles z kilku pobranych map, każdej w innym zakresie powiększeń, tworzy
-[kreator wielowarstwowego MBTiles](../../mbtiles-wielowarstwowy/).
+[MBTiles wieloskalowy](../../mbtiles-wielowarstwowy/).
+
+---
+
+## GeoPackage (.gpkg)
+
+Międzynarodowy, otwarty standard Open Geospatial Consortium (OGC) dla danych geoprzestrzennych: jednoplikowa baza SQLite
+zawierająca piramidę kafelków rastrowych Web Mercator (256 × 256 px).
+
+* **Standard mobilnego GIS:** natywny format danych dla aplikacji terenowych **QField**, **Mergin Maps** i **SW Maps** oraz programu **QGIS**.
+* **Kompatybilność:** pliki `.gpkg` odczytują również aplikacje turystyczne **Locus Map** i **OruxMaps**.
+* **Struktura zgodna ze specyfikacją OGC:** kompletne tabele metadanych (`gpkg_contents`, `gpkg_spatial_ref_sys`, `gpkg_tile_matrix_set`, `gpkg_tile_matrix`) oraz siatka kafelków `tiles` numerowana w układzie Top-Left (XYZ).
+* **Te same opcje co MBTiles:** wybór zakresu powiększeń, przezroczyste kafle PNG lub szybkie JPEG, szacowanie rozmiaru oraz filtr MIP dla Garmina.
 
 ---
 

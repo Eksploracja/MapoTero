@@ -40,8 +40,8 @@ Objaw, najczęstsza przyczyna i sprawdzony sposób rozwiązania.
   pusty obraz bez błędu. Przełącz układ pobierania z powrotem na **PL-1992**.
 * **Przykryta nakładka w kanapce:** jeśli w panelu *Wybrane warstwy* nieprzezroczysta warstwa leży wyżej (ma wyższy numer)
   niż nakładka lub mapa pod spodem, zakryje ją w całości. Sprawdź kolejność w oknie głównym albo przyciskiem **…** (okno warstw zaawansowanych).
-* **Zamieniona kolejność osi X i Y (zewnętrzne serwery WMS):** dla serwerów niezgodnych ze standardem WMS 1.3.0 włącz
-  w *Ustawieniach* opcję *zamień kolejność X i Y w zapytaniu* (dla Geoportalu musi być **wyłączona**).
+* **Zamieniona kolejność osi X i Y (zewnętrzne serwery WMS):** dla serwera niezgodnego ze standardem WMS 1.3.0 zmień
+  w jego adresie w pliku zbioru map `VERSION=1.3.0` na `VERSION=1.1.1` (zob. [Błędy pobierania](../pobieranie/bledy/)).
 
 ---
 
@@ -89,7 +89,7 @@ Jeśli błąd się powtarza, zgłoś go na [forum](https://forum.eksploracja.pl/
 
 **Dlaczego przycisk scalania (szachownica) jest nieaktywny?**  
 Ponieważ bieżący folder sesji nie ma jeszcze `conf.txt` (nowa sesja przed pierwszym pobraniem) albo zawiera plik `error.txt`
-(pobieranie nie jest kompletne). W przypadku zamierzonych braków (np. po usunięciu pustych segmentów) usuń `error.txt` ręcznie.
+(pobieranie nie jest kompletne). W przypadku zamierzonych braków usuń `error.txt` ręcznie.
 
 **Jak pobrać nową mapę, nie nadpisując poprzedniej?**  
 Zapisz sesję w nowym folderze (<kbd>Alt</kbd>+<kbd>Z</kbd>) przed pobieraniem albo zgódź się na utworzenie nowego podfolderu
@@ -98,6 +98,9 @@ Zapisz sesję w nowym folderze (<kbd>Alt</kbd>+<kbd>Z</kbd>) przed pobieraniem a
 **Czy mogę połączyć dwie mapy z różnych serwerów?**  
 Tak, bezpośrednio w panelu *Wybrane warstwy oraz ich kolejność* w oknie głównym (z regulacją krycia i podglądem w oknie `…`)
 albo później z gotowych sesji w oknie [Eksport mapy](../eksport/nakladki/) czy [Wielowarstwowy MBTiles](../mbtiles-wielowarstwowy/).
+
+**Jak najszybciej przygotować gotową mapę bez ręcznego ustawiania siatki i układu?**  
+Wciśnij skrót <kbd>Ctrl</kbd>+<kbd>K</kbd> albo kliknij ikonę różdżki 🪄 pod suwakiem powiększenia mapy. [Szybki kreator mapy](../narzedzia/#szybki-kreator-mapy) poprowadzi Cię w 4 krokach: wybierzesz urządzenie (telefon, Garmin, wydruk, CAD), wskażesz obszar (miejscowość, działkę lub trasę), wybierzesz styl i jednym kliknięciem wygenerujesz gotowy plik.
 
 ---
 

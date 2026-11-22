@@ -10,7 +10,7 @@ Kompilacja kilku pobranych sesji do jednego pliku MBTiles: każda warstwa może 
 powiększeń albo mieszać się z warstwami leżącymi pod nią.
 {: .fs-5 .fw-300 }
 
-**Gdzie w programie:** menu *Narzędzia > Zaawansowany wielowarstwowy MBTiles...* lub przycisk *Wielowarstwowy...* w oknie eksportu  
+**Gdzie w programie:** przycisk *Wieloskalowy...* w oknie *Eksport mapy* (od wersji 3.19 bez osobnej pozycji w menu *Narzędzia*)  
 **Dotyczy wersji:** {{ site.wersja_programu }}
 
 <details open markdown="block">
@@ -68,6 +68,7 @@ Przycisk **W górę** wynosi warstwę na wierzch stosu, a **W dół** spycha ją
 | *4 Jaśniej* | wybiera jaśniejszy kolor (np. jasne linie na ciemnym podkładzie) |
 | *5 Ekran* | rozjaśnia podkład, czerń znika |
 | *6 Nakładka* | podbija kontrast (szczególnie przydatne do cieniowania rzeźby NMT nad mapą lub ortofotomapą) |
+| *7 Rzeźba terenu* | dedykowany dla cieniowania rzeźby NMT: jasność 180 (płaski teren) jest neutralna, stoki ciemnieją/jaśnieją bez szarej zasłony |
 
 ---
 
@@ -83,7 +84,7 @@ Po prawej stronie okna znajduje się panel **Symulacja i podgląd zoomu**:
 
 ## Parametry pliku
 
-* **Plik wynikowy** (domyślnie `mapa_wielowarstwowa_RRRRMMDD_GGMM.mbtiles` w `download\`) i przycisk **Pokaż...** otwierający plik w Eksploratorze.
+* **Plik wynikowy** (domyślnie `mapa_wielowarstwowa_RRRRMMDD_GGMM.mbtiles` w `download\`) i przycisk **Pokaż w folderze** otwierający plik w Eksploratorze.
 * **Nazwa mapy**: nazwa widoczna na liście map w aplikacji mobilnej.
 * **Format kafli:**
   * *Smart Hybrid (JPG + PNG przezroczyste)* *(zalecany)*: kafle pełne zapisuje jako lekki JPEG, a kafle z przezroczystością lub na brzegach jako PNG.
@@ -102,7 +103,7 @@ Przed kliknięciem **Kompiluj MBTiles** użyj przycisku **Oszacuj rozmiar i licz
 wagę każdego poziomu zoom oraz sprawdzi zgodność z limitem **4 GB** (maksymalny rozmiar pojedynczego pliku na kartach pamięci
 sformatowanych w systemie plików FAT32 w starszych telefonach i odbiornikach GPS).
 
-W oknie dostępna jest też wbudowana pomoc pod przyciskiem **Pomoc (?)** (klawisz <kbd>F1</kbd>).
+W oknie dostępna jest też wbudowana pomoc pod przyciskiem **Pomoc** (klawisz <kbd>F1</kbd>).
 
 ---
 

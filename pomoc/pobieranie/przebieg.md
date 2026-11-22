@@ -87,26 +87,22 @@ Pobieranie przerywa też zamknięcie programu. Brakujące segmenty można dopobr
 Aby dokończyć przerwane lub niepełne pobieranie:
 
 1. Jeśli program był zamknięty, uruchom go. Ostatnia sesja (z podfolderu `download\sesja_...`) wczyta się automatycznie. Sesję z innego folderu
-   wczytaj z menu *Sesja pobierania > wczytaj ustawienia sesji (conf.txt)*.
+   wczytaj z menu *Sesja pobierania > Wczytaj ustawienia sesji (conf.txt)*.
 2. Nie zmieniaj zasięgu, segmentu, piksela, układu ani warstw.
 3. Kliknij **Pobierz**.
 
 Program pominie segmenty, które już są w folderze, i pobierze tylko brakujące, także te z luk w środku mapy.
 Pozostałości po zapisie przerwanym w połowie (pliki `.tmp`) usuwa sam.
 
-**Opcja *przy ponownym pobieraniu pobieraj tylko segmenty o numerze wyższym niż ostatni pobrany***
-(okno *Ustawienia*, grupa *Sesja pobierania*): program zaczyna od segmentu następnego po ostatnim istniejącym
-i pomija luki przed nim. Przydaje się, gdy luki są zamierzone, np. po [usunięciu pustych segmentów](../../narzedzia/).
-Nie działa w trybie TrekBuddy ani przy odświeżaniu mapy.
-
 ---
 
 ## Czego nie można robić w trakcie pobierania
 
 W trakcie pobierania program blokuje zmiany, które rozjechałyby parametry sesji z pobieranymi segmentami:
-zmianę zbioru map i warstw, zaznaczanie obszaru, wczytywanie i zapis sesji, okno *Ustawienia*, scalanie,
-usuwanie map, dodawanie serwera, nakładanie map i usuwanie pustych segmentów. Przy próbie program wyświetla
-*„… będzie możliwe po zakończeniu lub przerwaniu pobierania segmentów”*.
+zmianę zbioru map i warstw, zaznaczanie obszaru, wczytywanie i zapis sesji, scalanie,
+usuwanie map i dodawanie serwera. Przy próbie program wyświetla
+*„… będzie możliwe po zakończeniu lub przerwaniu pobierania segmentów”*. Okno *Ustawienia* otwiera się, ale pozwala
+zmienić tylko widok współrzędnych i układ nowej sesji.
 
 ---
 

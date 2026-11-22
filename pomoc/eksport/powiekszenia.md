@@ -8,7 +8,7 @@ parent: Eksport mapy
 {: .no_toc }
 
 Jak dobrać zakres powiększeń, format kafli i jakość, żeby mapa była czytelna, a plik nie był za duży.
-Dotyczy MBTiles, SQLiteDB i OruxMaps.
+Dotyczy MBTiles, GeoPackage, SQLiteDB i OruxMaps.
 {: .fs-5 .fw-300 }
 
 **Dotyczy wersji:** {{ site.wersja_programu }}
@@ -80,7 +80,7 @@ Poniżej 70 widać artefakty kompresji na napisach map. Powyżej 90 plik szybko 
 
 ## Szacowanie rozmiaru
 
-Przycisk **oszacuj rozmiar** renderuje kilka próbnych kafli i na tej podstawie szacuje rozmiar pliku. Komunikat
+Przycisk **Oszacuj rozmiar** renderuje kilka próbnych kafli i na tej podstawie szacuje rozmiar pliku. Komunikat
 podaje rozmiar poszczególnych poziomów i całości. Szacunek może się różnić od wyniku o kilkadziesiąt procent,
 bo zależy od treści mapy w miejscach próbek.
 
@@ -91,7 +91,7 @@ bo zależy od treści mapy w miejscach próbek.
 Gdy plik musi się zmieścić w określonym rozmiarze (karta pamięci, limit aplikacji, przesyłanie):
 
 1. Wpisz *limit [MB]* (od 1 do 100 000, domyślnie 500).
-2. Kliknij **dopasuj**.
+2. Kliknij **Dopasuj**.
 
 Program szacuje rozmiar kolejnych poziomów i ustawia **najwyższy poziom**, przy którym mapa mieści się w limicie.
 Jeśli limit przekracza już sam najniższy poziom, program o tym informuje. Zwiększ wtedy limit, podnieś poziom

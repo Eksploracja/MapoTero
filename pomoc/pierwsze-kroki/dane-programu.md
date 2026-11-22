@@ -41,6 +41,7 @@ Folder bieżącej sesji jest widoczny na pasku stanu u dołu okna głównego.
 | `warstwy\` | folder programu | zbiory map dostarczone z programem: plik `warstwy.txt` z indeksem zbiorów, `katalog.txt` ze strukturą grup i czytelnymi nazwami oraz pliki `.txt` poszczególnych zbiorów |
 | `warstwy\` | folder danych (gdy inny niż folder programu) | zbiory map dodane [kreatorem](../../serwery/kreator/), gdy folder programu ma zablokowany zapis |
 | `lastsettings.txt` | folder danych | konfiguracja programu: opcje z okna *Ustawienia*, widok mapy, szerokość panelu i parametry eksportu do CAD. Zapisywany przy zamykaniu programu i po kliknięciu *OK* w *Ustawieniach* |
+| `szablony_wlasne.json` | folder danych | własne style kompozycji map zapisane w Szybkim kreatorze mapy (zob. [Narzędzia dodatkowe](../../narzedzia/#szybki-kreator-mapy)) |
 | `download\` | folder danych | domyślny folder sesji oraz podfoldery kolejnych pobrań (zob. [Sesje pobierania](../../sesje/)) |
 | `awarie.log` | folder danych | rejestr nieoczekiwanych błędów programu, pomocny przy zgłaszaniu usterek (zob. [Problemy](../../problemy/)) |
 

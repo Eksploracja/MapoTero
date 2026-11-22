@@ -6,10 +6,10 @@ nav_order: 11
 # Scalanie segmentów
 {: .no_toc }
 
-Złączenie pobranych segmentów w jeden duży arkusz GeoTIFF, JPEG lub PNG z plikami kalibracji.
+Złączenie pobranych segmentów w jeden duży arkusz GeoTIFF, JPEG lub PNG z plikami kalibracji - format *Arkusz* w oknie *Eksport mapy*.
 {: .fs-5 .fw-300 }
 
-**Gdzie w programie:** menu *Narzędzia > Łączenie segmentów* (<kbd>Ctrl</kbd>+<kbd>L</kbd>) lub ikona szachownicy w oknie głównym  
+**Gdzie w programie:** menu *Narzędzia > Scalanie segmentów* (<kbd>Ctrl</kbd>+<kbd>L</kbd>), ikona szachownicy w oknie głównym albo okno *Eksport mapy* z wybranym formatem *Arkusz*  
 **Dotyczy wersji:** {{ site.wersja_programu }}
 
 <details open markdown="block">
@@ -19,34 +19,34 @@ Złączenie pobranych segmentów w jeden duży arkusz GeoTIFF, JPEG lub PNG z pl
 {:toc}
 </details>
 
+{: .informacja }
+Od wersji 3.19 scalanie nie ma osobnego okna. Polecenie *Scalanie segmentów* otwiera okno [*Eksport mapy*](../eksport/)
+z zaznaczonym formatem *Arkusz*. Arkusz ma wszystkie formaty i pliki kalibracji dawnego okna scalania, a dodatkowo
+nakładki z innych folderów i korektę obrazu. W dolnym rogu okna dostępny jest przycisk **Pomoc** (klawisz <kbd>F1</kbd>)
+z podręczną instrukcją parametrów scalania.
+
 ## Najkrótsza droga
 
-1. Pobierz wszystkie segmenty mapy (w folderze nie może być pliku `error.txt`).
-2. Naciśnij <kbd>Ctrl</kbd>+<kbd>L</kbd> albo kliknij ikonę szachownicy w oknie głównym.
-3. Sprawdź wybrany *Format scalonego arkusza* (domyślnie **GeoTIFF (bezstratny)**) i zaznacz ewentualne pliki referencyjne.
-4. Kliknij **Złącz segmenty**.
+1. Pobierz wszystkie segmenty mapy.
+2. Naciśnij <kbd>Ctrl</kbd>+<kbd>L</kbd> albo kliknij ikonę szachownicy w oknie głównym - otworzy się okno *Eksport mapy* z zaznaczonym formatem *Arkusz*.
+3. Wybierz format arkusza na liście obok (domyślnie **GeoTIFF (kompresja JPEG)**) i zaznacz pliki georeferencji: *world file i .prj*, *.map*, *.tab*, *.kml*.
+4. Kliknij **Eksportuj**.
 5. Gotowy plik `_scalone_segmenty_<kol>x<wier>.tif` (lub `.jpg`/`.png`) powstanie w folderze sesji.
-
-![Okno Złączanie segmentów w jeden plik]({{ '/pomoc/obrazy/09-scalanie.png' | relative_url }})
-
-*Rysunek 1. Okno łączenia pobranych segmentów w jeden duży arkusz.*
 
 ---
 
-## Folder segmentów i conf.txt
+## Folder sesji
 
-Po otwarciu okna program automatycznie wskazuje folder bieżącej sesji pobierania (dedykowany podfolder `download\sesja_<zbior>_<timestamp>\` zawierający plik `conf.txt`)
-i wczytuje parametry siatki, format segmentów, przedrostek, styl numeracji oraz informację o przezroczystości.
-Gdy folder bieżącej sesji nie ma pliku `conf.txt` (np. po usunięciu pobranych map albo przed pierwszym pobraniem), okno otwiera
-najnowszą sesję z `download\` i pisze o tym w polu komunikatów. Tak samo działają okna eksportu mapy i eksportu do CAD.
+Okno pokazuje folder bieżącej sesji pobierania (podfolder `download\sesja_<zbior>_<timestamp>\` z plikiem `conf.txt`)
+i wczytuje z `conf.txt` siatkę, format segmentów, przedrostek, styl numeracji i układ współrzędnych. Gdy folder bieżącej
+sesji nie ma pliku `conf.txt`, okno otwiera najnowszą sesję z `download\` i pisze o tym w polu komunikatów.
+Przycisk **Zmień folder** wskazuje inną sesję.
 
-* **zmień folder**: pozwala wskazać dowolny inny katalog z wcześniej pobraną mapą.
-* **error.txt blokuje scalanie**: dopóki w folderze istnieje plik `error.txt` (oznaczający niekompletne pobranie), scalanie nie zostanie uruchomione. Należy dopobrać brakujące segmenty albo, jeśli brak jest zamierzony, usunąć plik `error.txt` ręcznie.
-* **ręczne wprowadzanie parametrów w razie braku conf.txt**: opcja aktywna tylko wtedy, gdy w folderze brakuje pliku `conf.txt`. Pozwala ręcznie podać zasięg XY, liczbę kolumn i wierszy, bok segmentu, piksel, przedrostek, format i styl numeracji.
-* **Pomoc**: przycisk w dolnej części okna (lub klawisz <kbd>F1</kbd>) otwiera podręczne okno pomocy ze skrótowym opisem opcji scalania i odnośnikiem do tego rozdziału.
+* **error.txt**: plik oznacza niedokończone pobieranie. Okno ostrzega o nim po otwarciu - w arkuszu brakujące segmenty będą białymi polami. Dopobierz je przyciskiem *Pobierz* w oknie głównym.
+* **Brakujące segmenty**: po zapisaniu arkusza okno podaje, ilu segmentów brakowało, i wymienia kilka z nich.
 
 {: .informacja }
-Jeśli sesja była pobierana wzdłuż trasy (korytarz GPX/KML), brak segmentów poza wyznaczonym pasem jest zamierzony. Scalony arkusz powstanie bez przeszkód, a teren poza korytarzem zostanie wypełniony kolorem białym (lub przezroczystością w formatach PNG i GeoTIFF).
+Jeśli sesja była pobierana wzdłuż trasy (korytarz GPX/KML), brak segmentów poza wyznaczonym pasem jest zamierzony i okno go nie zgłasza. Teren poza korytarzem zostaje biały (albo przezroczysty w formatach PNG i GeoTIFF bezstratny, gdy zaznaczono kafle PNG lub nakładkę).
 
 ---
 
@@ -54,40 +54,44 @@ Jeśli sesja była pobierana wzdłuż trasy (korytarz GPX/KML), brak segmentów 
 
 | Format | Zastosowanie | Ograniczenia i cechy |
 |---|---|---|
-| **GeoTIFF (bezstratny)** *(domyślny)* | QGIS, ArcGIS, Global Mapper, archiwum bez utraty jakości | kompresja Deflate, wbudowana georeferencja, **zachowuje przezroczyste tło** z PNG/GIF, automatyczny BigTIFF powyżej 4 GB |
-| **GeoTIFF (kompresja JPEG)** | mniejsze pliki GeoTIFF dla ortofotomap | wbudowana georeferencja, kompresja stratna z regulacją jakości, białe tło zamiast przezroczystości |
+| **GeoTIFF (bezstratny)** | QGIS, ArcGIS, Global Mapper, archiwum bez utraty jakości | kompresja Deflate, wbudowana georeferencja, może zachować przezroczyste tło, automatyczny BigTIFF powyżej 4 GB |
+| **GeoTIFF (kompresja JPEG)** *(domyślny)* | mniejsze pliki GeoTIFF dla ortofotomap, Avenza Maps | wbudowana georeferencja, kompresja stratna (pole *Jakość JPEG*), białe tło zamiast przezroczystości |
 | **JPEG** | szybki podgląd, programy CAD (z plikiem `.jpgw`), zdjęcia | maksymalny bok obrazu **65 500 px**, białe tło zamiast przezroczystości |
-| **PNG** | nakładki, mapy z przezroczystym tłem do grafiki lub CAD | bezstratny, **zachowuje przezroczystość**, wymaga pliku kalibracji obok obrazu (`.pngw`, `.map` lub `.tab`) |
+| **PNG** | nakładki, mapy z przezroczystym tłem do grafiki lub CAD | bezstratny, może zachować przezroczystość, wymaga pliku kalibracji obok obrazu (`.pngw`, `.map` lub `.tab`) |
+
+Jakość kompresji JPEG ustawia pole *Jakość JPEG* w dolnej części okna eksportu.
 
 ---
 
-## Jakość kompresji JPEG
+## Pliki georeferencji arkusza
 
-Suwak **Jakość kompresji JPEG scalonego pliku** (`0–100%`, domyślnie `75%`) jest aktywny wyłącznie wtedy, gdy wybrano
-format **JPEG** albo **GeoTIFF (kompresja JPEG)**. Wyższa wartość daje ostrzejsze napisy kosztem większego rozmiaru pliku.
+Pola pod formatem *Arkusz* są zapamiętywane między uruchomieniami programu:
 
----
-
-## Pliki referencyjne arkusza
-
-Wybrane pola są zapamiętywane między uruchomieniami programu:
-
-* *twórz plik referencyjny OziExplorer (.map)*
-* *twórz plik referencyjny GoogleEarth (.kml)*
-* *twórz plik referencyjny QGIS, ArcGis (.tifw / .jpgw / .pngw)*: program automatycznie dobiera rozszerzenie world file do wybranego formatu arkusza i dopisuje obok plik `.prj` z definicją układu.
-* *twórz plik referencyjny MapInfo (.tab)*
+* *world file i .prj* - world file z rozszerzeniem dobranym do formatu (`.tifw`, `.jpgw`, `.pngw`; przy GeoTIFF także `.tfw` dla programów CAD) i plik `.prj` z definicją układu,
+* *.map* - plik kalibracji OziExplorer,
+* *.tab* - plik MapInfo,
+* *.kml* - nakładka Google Earth.
 
 {: .wskazowka }
-Jeśli uruchamiasz scalanie bezpośrednio przyciskiem **scal teraz...** z okna *Eksport do CAD*, program automatycznie
-zaznacza tworzenie pliku world file, aby CAD mógł od razu wstawić arkusz na właściwe współrzędne.
+Przycisk **Scal segmenty...** w oknie *Eksport do CAD* otwiera okno eksportu z formatem *Arkusz* dla sesji z okna CAD.
+Po zapisaniu arkusza i zamknięciu okna eksportu okno CAD wybiera ten arkusz do wstawienia. Zaznacz *world file i .prj*,
+jeśli arkusz ma wstawiać program CAD bez obsługi GeoTIFF.
+
+---
+
+## Nakładki i korekta obrazu
+
+Na arkusz można nałożyć warstwy z innych folderów sesji (grupa *Warstwy i przezroczystość*, np. granice działek na
+ortofotomapę) - także o innej siatce i w innym układzie. Pole *Korekta obrazu* z przyciskiem *Korekta obrazu...*
+poprawia kontrast, nasycenie i ostrość całego arkusza. Zob. [Nakładki](../eksport/nakladki/).
 
 ---
 
 ## Bardzo duże arkusze
 
-MapoTero scala segmenty strumieniowo, pasami wierszy. Zużycie pamięci RAM zależy tylko od szerokości pojedynczego rzędu segmentów, a nie od całkowitej powierzchni mapy. Nawet arkusz o boku kilkudziesięciu tysięcy pikseli i wadze powyżej 4 GB (zapisywany automatycznie w standardzie BigTIFF) nie przepełni pamięci RAM, wymagając jedynie wolnego miejsca na dysku.
+MapoTero zapisuje arkusz pasami wierszy. Zużycie pamięci RAM zależy od szerokości arkusza, a nie od jego całkowitej powierzchni. Arkusz o boku kilkudziesięciu tysięcy pikseli i wadze powyżej 4 GB (zapisywany automatycznie w standardzie BigTIFF) wymaga tylko wolnego miejsca na dysku.
 
-W trakcie scalania przycisk **Złącz segmenty** zmienia się na **Przerwij**. Operację można bezpiecznie zatrzymać w dowolnej chwili.
+Program zapisuje arkusz najpierw do pliku tymczasowego. Przycisk **Przerwij** zatrzymuje zapis w dowolnej chwili, a poprzedni arkusz o tej samej nazwie zostaje na dysku.
 
 ---
 
