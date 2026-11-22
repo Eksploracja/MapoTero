@@ -30,13 +30,13 @@ Najwygodniejszym formatem dla QGIS jest scalony arkusz **GeoTIFF** (zapisuje uk�
 Jeśli chcesz w QGIS otworzyć od razu całą mozaikę kilkudziesięciu pojedynczych segmentów (z plikami `.jpgw` i `.prj`),
 użyj w QGIS narzędzia *Raster > Różne > Buduj wirtualny raster (katalog)*, zamiast przeciągać każdy plik osobno.
 
-### Przeniesienie podkładu w teren (QField)
+### Przeniesienie podkładu w teren (QField i Mergin Maps)
 
-Jeśli przygotowujesz projekt do pracy w terenie w mobilnej aplikacji **QField** (na telefonie lub tablecie):
+Jeśli przygotowujesz projekt do pracy w terenie w mobilnej aplikacji **QField** lub **Mergin Maps** (na telefonie lub tablecie):
 
-1. W oknie [Eksport mapy](../eksport/) wyeksportuj pobraną mapę do formatu **MBTiles**.
-2. Dodaj plik `.mbtiles` do projektu QGIS na komputerze jako warstwę rastrową.
-3. Zsynchronizuj projekt z urządzeniem mobilnym (przez kabel lub QFieldCloud). Podkład MBTiles działa w terenie w 100% offline i nie obciąża pamięci telefonu przy zbieraniu punktów i pomiarów. Zobacz też: [Mapa w telefonie i odbiorniku GPS: QField](../eksport/aplikacje/#qfield-android-ios).
+1. W oknie [Eksport mapy](../eksport/) wyeksportuj pobraną mapę do formatu **GeoPackage (.gpkg)** albo **MBTiles**.
+2. Dodaj plik `.gpkg` lub `.mbtiles` do projektu QGIS na komputerze jako warstwę kafelkową lub rastrową.
+3. Zsynchronizuj projekt z urządzeniem mobilnym (przez kabel, QFieldCloud lub Mergin Maps Cloud). Kafelkowy podkład działa w terenie w 100% offline i nie obciąża pamięci telefonu przy zbieraniu punktów i pomiarów. Zobacz też: [Mapa w telefonie i odbiorniku GPS: QField i Mergin Maps](../eksport/aplikacje/#qfield-i-mergin-maps-android-ios).
 
 ---
 

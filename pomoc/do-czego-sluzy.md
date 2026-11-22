@@ -34,13 +34,13 @@ To z tej potrzeby narodził się program na Pomorskim Forum Eksploracyjnym. W le
 
 ### 2. Wyprawy, turystyka i nawigacja bez internetu
 Wędrówki z plecakiem, wyprawy rowerowe, kajakowe, narciarskie i trasy offroad z dala od głównych dróg i zasięgu sieci:
-* **Mapy wieloskalowe w jednym pliku:** w formatach MBTiles, SQLiteDB oraz Garmin JNX mapa automatycznie zmienia się wraz ze stopniem przybliżenia ekranu. Z daleka widzisz ogólny zarys okolicy (np. mapa przeglądowa lub 1:100 000), a po zbliżeniu włącza się szczegółowa mapa topograficzna (1:25 000, 1:10 000), leśna lub ortofotomapa.
+* **Mapy wieloskalowe w jednym pliku:** w formatach MBTiles, GeoPackage, SQLiteDB oraz Garmin JNX mapa automatycznie zmienia się wraz ze stopniem przybliżenia ekranu. Z daleka widzisz ogólny zarys okolicy (np. mapa przeglądowa lub 1:100 000), a po zbliżeniu włącza się szczegółowa mapa topograficzna (1:25 000, 1:10 000), leśna lub ortofotomapa.
 * **Dedykowane style turystyczne:** gotowe zestawy warstw dla turystyki pieszej, *Góry z poziomicami OpenTopoMap* (z cieniowaniem rzeźby, działające również po czeskiej i słowackiej stronie granicy) oraz *Trasy rowerowe i MTB*.
 * **Pobieranie tylko wzdłuż trasy (korytarz):** narzędzie korytarza wycina z mapy pas o wybranej szerokości wzdłuż śladu GPX, KML lub KMZ. Zamiast pobierać całe województwo, dostajesz dokładnie ten fragment terenu, przez który przebiega szlak (oszczędność do 90% danych).
 * **Profil wysokościowy trasy:** narzędzie pobiera z państwowego lotniczego skaningu laserowego (LiDAR NMT GUGiK) dokładne wysokości terenu dla punktów śladu, rysuje profil z sumą podejść i zejść oraz zapisuje plik GPX wzbogacony o znaczniki wysokości `<ele>`.
 * **Współpraca ze sprzętem turystycznym:**
   * Odbiorniki Garmin: format Garmin BirdsEye (JNX v4) bez limitu kafli oraz standardowy Garmin Custom Maps (KMZ) z opcją automatycznego podziału na tomy (gdy mapa przekracza limit 100 kafli urządzenia) i filtrem MIP optymalizującym kontrast w pełnym słońcu.
-  * Smartfony i tablety: formaty MBTiles, SQLiteDB i OruxMaps dla aplikacji Locus Map, OsmAnd, Guru Maps (na iPhone, iPad i Androida), OruxMaps czy AlpineQuest.
+  * Smartfony i tablety: formaty MBTiles, GeoPackage, SQLiteDB i OruxMaps dla aplikacji Locus Map, OsmAnd, Guru Maps (na iPhone, iPad i Androida), OruxMaps czy AlpineQuest.
 
 ### 3. Podkłady do projektowania w CAD (AutoCAD, BricsCAD, ZWCAD)
 Projektanci dróg, sieci uzbrojenia terenu, architekci krajobrazu i geodeci potrzebują aktualnego tła fotograficznego lub ewidencyjnego:
@@ -54,7 +54,7 @@ Podłączanie serwerów WMS bezpośrednio w programie QGIS bywa uciążliwe przy
 * **Wyszukiwarka działek katastralnych ULDK (<kbd>Ctrl</kbd>+<kbd>D</kbd>):** błyskawicznie odnajduje działkę ewidencyjną po identyfikatorze TERYT lub nazwie obrębu i numerze, pobiera dokładną geometrię granic z rejestru EGiB GUGiK, wyznacza obszar z bezpiecznym buforem i automatycznie włącza ortofotomapę z granicami katastralnymi.
 * **Jeden duży arkusz GeoTIFF na dysku:** MapoTero pobiera wybrany obszar, scala segmenty i zapisuje plik GeoTIFF / BigTIFF z bezpośrednio zaszytą georeferencją oraz kompresją Deflate lub JPEG.
 * **Błyskawiczne działanie:** praca na lokalnym pliku z dysku jest natychmiastowa, bez czekania na dociąganie kafelków przy każdym przesunięciu czy powiększeniu widoku.
-* **Pomiary i podkłady w terenie (QField, Avenza Maps):** wyeksportowane pliki MBTiles działają w mobilnym QFieldzie na telefonie lub tablecie, służąc leśnikom, przyrodnikom i geodetom jako szybki podkład pod rejestrowane obiekty przestrzenne.
+* **Pomiary i podkłady w terenie (QField, Mergin Maps, Avenza Maps):** wyeksportowane pliki MBTiles oraz kafelkowe bazy GeoPackage (.gpkg) działają w mobilnym QFieldzie, Mergin Maps czy Locus Map na telefonie lub tablecie, służąc leśnikom, przyrodnikom i geodetom jako szybki, bezobsługowy podkład pod rejestrowane obiekty przestrzenne.
 
 ---
 

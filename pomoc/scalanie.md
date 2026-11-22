@@ -22,7 +22,8 @@ Złączenie pobranych segmentów w jeden duży arkusz GeoTIFF, JPEG lub PNG z pl
 {: .informacja }
 Od wersji 3.19 scalanie nie ma osobnego okna. Polecenie *Scalanie segmentów* otwiera okno [*Eksport mapy*](../eksport/)
 z zaznaczonym formatem *Arkusz*. Arkusz ma wszystkie formaty i pliki kalibracji dawnego okna scalania, a dodatkowo
-nakładki z innych folderów i korektę obrazu.
+nakładki z innych folderów i korektę obrazu. W dolnym rogu okna dostępny jest przycisk **Pomoc** (klawisz <kbd>F1</kbd>)
+z podręczną instrukcją parametrów scalania.
 
 ## Najkrótsza droga
 

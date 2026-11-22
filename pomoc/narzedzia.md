@@ -25,12 +25,12 @@ Szybki kreator mapy, konwerter map OziExplorer, profil wysokościowy trasy i kor
 
 Kreator prowadzi początkujących w czterech krokach od pomysłu do gotowego pliku mapy - bez ręcznego ustawiania układu, siatki i eksportu.
 
-1. **Cel** - telefon lub tablet (MBTiles albo SQLiteDB), zgodny odbiornik Garmin (KMZ dla Custom Maps albo JNX dla BirdsEye), wydruk (arkusz GeoTIFF) lub podkład CAD/GIS (GeoTIFF w PL-1992).
+1. **Cel** - telefon lub tablet (MBTiles, GeoPackage albo SQLiteDB), aplikacje terenowe GIS (GeoPackage dla QField, Mergin Maps, QGIS), zgodny odbiornik Garmin (KMZ dla Custom Maps albo JNX dla BirdsEye), wydruk (arkusz GeoTIFF) lub podkład CAD/GIS (GeoTIFF w PL-1992).
 2. **Obszar** - miejscowość z promieniem, prostokąt zaznaczony na mapie albo pas wzdłuż trasy GPX/KML/KMZ. Obszar wybiera się przed stylem, żeby podgląd stylu pokazywał Twój teren. Jeśli przed otwarciem kreatora zaznaczysz obszar na mapie prawym przyciskiem myszy (i ewentualnie dopasujesz go uchwytami), kreator pominie ten krok i przejdzie od celu do stylu - inny obszar wybierzesz, klikając *Obszar* na pasku kroków. Obszar z poprzedniego uruchomienia programu nie jest pomijany. W polu wyszukiwania można wkleić współrzędne punktu (np. `50.0614, 19.9366` z Google Maps, `50°03'41"N 19°56'12"E` albo X Y w PL-1992 lub PL-2000, X - północ) - obszar wyznacza wtedy promień wokół punktu. Zamiast promienia można wybrać *wg granic* - obszarem jest wtedy prostokąt otaczający miejscowość z wyszukiwarki (dla adresu co najmniej 1 km). Identyfikator działki TERYT (np. `121901_1.0001.123/4`) albo zapis „działka Wieliczka 123/4” wyszukuje działkę w usłudze ULDK GUGiK, a obszarem jest działka z pasem 150 m. Plik trasy można też przeciągnąć myszą na okno kreatora, a przycisk *Profil…* pokazuje profil wysokościowy wczytanej trasy. Podgląd obszaru mieści cały obszar i pokazuje jego obrys albo pas trasy.
 3. **Styl** - gotowy zestaw warstw z podglądem: turystyka piesza (mapa topograficzna GUGiK z cieniowaniem i szlakami), góry z poziomicami OpenTopoMap z cieniowaniem (także po czeskiej i słowackiej stronie), trasy rowerowe i MTB, dziedzictwo kulturowe (rzeźba terenu LiDAR z prześwitującą mapą topograficzną 1:10 000 i zabytkami NID - rejestr i ewidencja zabytków nieruchomych oraz stanowisk archeologicznych), mapy WIG 1918–1939, mapy niemieckie do 1945 (Messtischblatt, Karte des Deutschen Reiches), działki EGiB albo własne warstwy z okna głównego. Suwaki regulują krycie cieniowania, szlaków, mapy topograficznej i zabytków (krycie ustawione w oknie *Warstwy - zaawansowane* jest nadrzędne - suwak zmienia je proporcjonalnie), w dziedzictwie kulturowym pola wyboru włączają zabytki archeologiczne i nieruchome, a podgląd pokazuje środek wybranego obszaru - można go przesuwać myszką i oddalać - w stylu wieloskalowym pokazuje wtedy mapę w mniejszej skali. Przycisk w rogu podglądu (albo podwójne kliknięcie) otwiera duży podgląd w skali 1:1, w którym widać czytelność napisów. Przy mapach historycznych pod treścią kroku widać ograniczenia pokrycia arkuszami. Przycisk *Zapisz jako mój styl…* zapisuje bieżący skład warstw z kryciem, trybami mieszania i skalami pod własną nazwą - styl pojawia się na liście w kategorii *Moje style* także po ponownym uruchomieniu programu (plik `szablony_wlasne.json` w folderze programu albo w `%LocalAppData%\MapoTero`), a *Usuń mój styl* go usuwa.
 4. **Zapis** - format (zalecany jest zaznaczony), szacowany rozmiar i czas, rozmiar piksela z opisem szczegółowości. W opcjach zaawansowanych pole *Korekta obrazu* i przycisk *Profil / Podgląd…* (to samo okno korekty co w oknie warstw); korekta jest domyślnie wyłączona, a okno korekty podpowiada profil (np. Garmin MIP dla odbiorników Garmin) i ma przycisk *Resetuj korektę*. Przy wydruku (GeoTIFF) kreator podaje rozmiar arkusza w centymetrach i najmniejszy format papieru A, na którym się mieści. Przycisk *Generuj mapę* pobiera dane i zapisuje plik, a po zakończeniu *Otwórz mapę* otwiera ją w programie przypisanym w Windows (np. GeoTIFF w QGIS, KMZ w Google Earth).
 
-**Mapy wieloskalowe.** Turystyka piesza, góry z poziomicami, trasy rowerowe i MTB oraz dwa style historyczne mogą przełączać mapy zależnie od poziomu powiększenia w MBTiles, SQLiteDB (OsmAnd, Locus Map) oraz w JNX dla odbiorników Garmin (BirdsEye).
+**Mapy wieloskalowe.** Turystyka piesza, góry z poziomicami, trasy rowerowe i MTB oraz dwa style historyczne mogą przełączać mapy zależnie od poziomu powiększenia w MBTiles, GeoPackage (.gpkg), SQLiteDB (OsmAnd, Locus Map) oraz w JNX dla odbiorników Garmin (BirdsEye).
 
 | Styl | Skale (od zbliżenia do oddalenia) |
 |---|---|
@@ -43,7 +43,7 @@ Kreator pobiera każdą skalę osobno (podfoldery `_skala2`, `_skala3`… obok s
 
 **Ortofotomapa przy zbliżeniu.** W stylach *Turystyka piesza* i *Góry z poziomicami* pole *Ortofotomapa przy zbliżeniu* w kroku 4 dodaje nad najdokładniejszą mapą jeszcze jedną skalę: zdjęcie lotnicze ze szlakami na powiększeniu 17 (piksel 0,75 m). Mapa 1:10 000 jest na tym powiększeniu już tylko powiększonymi pikselami, a na zdjęciu widać polany, piargi, ścieżki i budynki. Pole jest domyślnie wyłączone, bo plik i czas pobierania rosną kilkakrotnie (szacunek w kroku 4 to uwzględnia). W turystyce pieszej ortofotomapa obejmuje tylko Polskę - za granicą zbliżenie jest czarne. Styl górski łączy ortofotomapy Polski, Czech, Słowacji i Saksonii. Przy własnym planie skal ortofotomapę włącza się w oknie *Ustawienia skal…*.
 
-Podgląd stylu pokazuje obrys zapisu oraz pozwala wybrać konkretną skalę. Zmiana samego krycia, mieszania albo korekty obrazu zachowuje plan skal. Przy zmianie składu lub kolejności warstw kreator pyta o użycie własnej kompozycji. Wszystkie powiększenia pokazują ten sam wybrany obszar. Na brzegach map MBTiles i SQLiteDB tło poza obszarem jest przezroczyste. Arkusz GeoTIFF ma dokładny zasięg w PL-1992, a kafle JPEG dla Garmina mieszczą się w prostokącie wpisanym w obszar w WGS84.
+Podgląd stylu pokazuje obrys zapisu oraz pozwala wybrać konkretną skalę. Zmiana samego krycia, mieszania albo korekty obrazu zachowuje plan skal. Przy zmianie składu lub kolejności warstw kreator pyta o użycie własnej kompozycji. Wszystkie powiększenia pokazują ten sam wybrany obszar. Na brzegach map MBTiles, GeoPackage i SQLiteDB tło poza obszarem jest przezroczyste. Arkusz GeoTIFF ma dokładny zasięg w PL-1992, a kafle JPEG dla Garmina mieszczą się w prostokącie wpisanym w obszar w WGS84.
 
 **Pokrycie map historycznych.** WIG 1:25 000 zachowała się tylko dla części II RP, Messtischblatt obejmuje ziemie dawnych Niemiec, a WIG 1:100 000 - II RP i pas sąsiednich terenów. Dlatego w szczegółowej skali stylu WIG na dole leży WIG 1:100 000, na nim Messtischblatt, a na wierzchu WIG 1:25 000. Mapy niemieckie w centralnej i wschodniej Polsce są puste.
 
@@ -73,6 +73,7 @@ Narzędzie przetwarza kalibrowane skany papierowych map turystycznych i archiwal
 * **Piramida powiększeń:** formaty JNX, MBTiles, SQLiteDB i OruxMaps generowane są automatycznie z kompletną piramidą 5 poziomów skali.
 * **Korekta obrazu:** pole *Korekta obrazu* i przycisk *Korekta obrazu...* działają jak w oknie eksportu (próbka ze skanu); profil jest wspólny z eksportem.
 * **Praca pojedyncza lub wsadowa (Batch):** możesz wskazać pojedynczy plik `.map` albo cały katalog zawierający dziesiątki arkuszy – program przetworzy je kolejno w tle.
+* **Pomoc w oknie:** przycisk **Pomoc** w lewym dolnym rogu (oraz klawisz <kbd>F1</kbd>) wyświetla podręczną instrukcję parametrów konwersji i transformacji elipsoid.
 
 ---
 
@@ -103,6 +104,7 @@ Narzędzie poprawia naraz wszystkie obrazy PNG, JPEG i TIFF leżące w jednym fo
 Opcja *Kopiuj pliki georeferencji* kopiuje obok poprawionych obrazów pliki `.jpgw`, `.pngw`, `.tifw`, `.wld`, `.prj`, `.map`,
 `.gmi`, `.tab`, `.kml` i inne oraz `conf.txt` sesji. GeoTIFF zachowuje georeferencję zapisaną w pliku, gdy program zna jego układ.
 Zamknięcie okna w trakcie pracy przerywa przetwarzanie. Pliki, których nie da się odczytać, program pomija i wymienia po zakończeniu.
+Przycisk **Pomoc** (oraz klawisz <kbd>F1</kbd>) otwiera podręczną instrukcję z opisem profili rastrowych.
 
 ---
 
@@ -117,6 +119,7 @@ Zamknięcie okna w trakcie pracy przerywa przetwarzanie. Pliki, których nie da 
 4. **Zapisz GPX z wysokościami...** zapisuje ślad ze znacznikami `<ele>` dla zegarków i odbiorników GPS. Z pliku GPX
    zostają czasy punktów, punkty `wpt` i nazwy.
 
+W dolnym rogu okna przycisk **Pomoc** (oraz klawisz <kbd>F1</kbd>) otwiera opis działania usługi wysokościowej NMT.
 Dawniej profil był częścią okna obszaru pobierania wzdłuż trasy, choć nie ma związku z wyznaczaniem obszaru.
 
 ---

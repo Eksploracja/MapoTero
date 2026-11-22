@@ -99,6 +99,9 @@ Zapisz sesję w nowym folderze (<kbd>Alt</kbd>+<kbd>Z</kbd>) przed pobieraniem a
 Tak, bezpośrednio w panelu *Wybrane warstwy oraz ich kolejność* w oknie głównym (z regulacją krycia i podglądem w oknie `…`)
 albo później z gotowych sesji w oknie [Eksport mapy](../eksport/nakladki/) czy [Wielowarstwowy MBTiles](../mbtiles-wielowarstwowy/).
 
+**Jak najszybciej przygotować gotową mapę bez ręcznego ustawiania siatki i układu?**  
+Wciśnij skrót <kbd>Ctrl</kbd>+<kbd>K</kbd> albo kliknij ikonę różdżki 🪄 pod suwakiem powiększenia mapy. [Szybki kreator mapy](../narzedzia/#szybki-kreator-mapy) poprowadzi Cię w 4 krokach: wybierzesz urządzenie (telefon, Garmin, wydruk, CAD), wskażesz obszar (miejscowość, działkę lub trasę), wybierzesz styl i jednym kliknięciem wygenerujesz gotowy plik.
+
 ---
 
 ➡️ **Kolejny krok:** [Szczegółowa struktura formatów plików →](../formaty-plikow/)

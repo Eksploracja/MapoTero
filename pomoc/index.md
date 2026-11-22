@@ -41,7 +41,7 @@ na stronie głównej oraz w samym programie (menu *Pomoc > Krótka instrukcja (b
 | mapę, która automatycznie zmienia się wraz ze stopniem przybliżenia (wieloskalową) | [MBTiles wieloskalowy](mbtiles-wielowarstwowy/) · [Szybki kreator: mapy wieloskalowe](narzedzia/#szybki-kreator-mapy) |
 | przekonwertować kalibrowaną mapę OziExplorer (.map) z transformacją do WGS84 | [Konwerter map OziExplorer](narzedzia/#konwerter-map-oziexplorer-map) |
 | poprawić czytelność lub kontrast map i skanów (profil Garmin MIP, CAD) | [Korekta obrazów w folderze](narzedzia/#korekta-obrazów-w-folderze) · [Scalanie z korektą](scalanie/#nakładki-i-korekta-obrazu) |
-| podkład pod pomiary w terenie w QField (leśnictwo, ochrona przyrody, geodezja) | [Mapa w telefonie: QField](eksport/aplikacje/#qfield-android-ios) · [Współpraca z QGIS](inne-programy/#qgis) |
+| podkład pod pomiary w terenie w QField lub Mergin Maps (GeoPackage, MBTiles) | [Mapa w telefonie: QField i Mergin Maps](eksport/aplikacje/#qfield-i-mergin-maps-android-ios) · [Współpraca z QGIS](inne-programy/#qgis) |
 | jeden arkusz GeoTIFF do QGIS lub ArcGIS | [Scalanie segmentów](scalanie/) → [Współpraca z innymi programami](inne-programy/) |
 | podkład rastrowy i siatkę do rysunku w AutoCAD, BricsCAD, ZWCAD (DXF, SCR, LISP) | [Eksport do CAD](cad/) |
 | mapy z serwera, którego nie ma na liście (albo z wykazu powiatów i gmin EZiUDP) | [Dodawanie serwerów map](serwery/) |

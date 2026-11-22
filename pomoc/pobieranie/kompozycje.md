@@ -24,7 +24,7 @@ parent: Pobieranie map
 
 W MapoTero możesz wybrać do 12 warstw jednocześnie i złożyć z nich spójną mapę już na etapie pobierania. Warstwy układają się w stos (kanapkę) w panelu *Wybrane warstwy oraz ich kolejność*:
 
-* **Warstwa nr 1 (na samym dole):** stanowi nieprzezroczysty podkład bazowy. Najczęściej jest to ortofotomapa, mapa topograficzna (np. BDOT10k lub skan 1:10 000) albo mapa archiwalna.
+* **Warstwa nr 1 (na samym dole):** to nieprzezroczysty podkład bazowy. Najczęściej jest to ortofotomapa, mapa topograficzna (np. BDOT10k lub skan 1:10 000) albo mapa archiwalna.
 * **Warstwy wyższe (2, 3…):** nakładają się na podkład. Mogą to być przezroczyste wektory (działki ewidencyjne, szlaki turystyczne) lub rastry modelujące teren (cieniowanie rzeźby NMT, hipsometria).
 * **Kolejność warstw:** zmieniasz przyciskami **▲** i **▼**, skrótem <kbd>Ctrl</kbd>+<kbd>↑</kbd>/<kbd>↓</kbd> albo przeciągając pozycję myszą.
 
@@ -34,7 +34,7 @@ Gdy wszystkie warstwy pochodzą z tego samego serwera WMS i mają krycie 100%, �
 
 ## Tryby nakładania i dobór krycia
 
-Do dokładnego zestrojenia kompozycji służy okno **Warstwy - zaawansowane**, otwierane przyciskiem **…** obok listy warstw. Znajdziesz w nim suwaki krycia dla każdej warstwy oraz podgląd na żywo na próbce terenu (300 × 300 px).
+Do dokładnego zestrojenia kompozycji służy okno **Warstwy - zaawansowane**, otwierane przyciskiem **…** obok listy warstw w oknie głównym (lub z poziomu Szybkiego kreatora mapy). Znajdziesz w nim suwaki krycia dla każdej warstwy, wybór trybu mieszania, podgląd na żywo na rzeczywistej próbce terenu (300 × 300 px) z lupą rastrową (`-`, `1:1`, `+` lub kółko myszy), przycisk *Korekta obrazu...* oraz podręczną instrukcję (przycisk **Pomoc** i klawisz <kbd>F1</kbd>).
 
 | Tryb mieszania | Jak działa | Kiedy stosować |
 |---|---|---|

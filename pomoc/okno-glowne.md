@@ -195,13 +195,17 @@ W prawym dolnym narożniku okna głównego (pod schematem siatki i polami wspó�
 
 ## Przyciski
 
+Pod listą wybranych warstw znajduje się siatka przycisków pomocniczych (górny rząd: przygotowanie mapy, dolny rząd: pobrane pliki) oraz główne przyciski sterujące:
+
 | Przycisk | Działanie |
 |---|---|
 | **Pobierz** | rozpoczyna pobieranie segmentów (zob. [Przebieg pobierania](../pobieranie/przebieg/)) |
 | **Przerwij pobieranie** | zatrzymuje pobieranie. Już pobrane pliki pozostają w folderze |
-| szachownica (*Scalanie segmentów*) | otwiera okno [Eksport mapy](../eksport/) z formatem *Arkusz* ([Scalanie segmentów](../scalanie/)). Przycisk jest nieaktywny przed pierwszym pobraniem oraz gdy w sesji wystąpiły błędy i istnieje plik `error.txt` |
-| żółty folder (*Wyświetl folder z segmentami pobranej mapy*) | otwiera w Eksploratorze Windows katalog bieżącej sesji (dedykowany podfolder sesji w `download\`, np. `download\sesja_ortofotomapa_...`) |
+| różdżka (*Szybki kreator mapy*, <kbd>Ctrl</kbd>+<kbd>K</kbd>) | otwiera [Szybki kreator mapy](../narzedzia/#szybki-kreator-mapy) – przygotowanie gotowej mapy w 4 krokach |
+| siatka (*Pokaż lub ukryj siatkę*) | włącza lub wyłącza rysowanie siatki segmentów i znaczników na mapie podglądu |
 | *nowa sesja* (kartka z zielonym plusem) | to samo co *Sesja pobierania > Nowa sesja*: czyści wybrane warstwy, zasięg, zaznaczenie i siatkę, obszar wzdłuż trasy i kontur działki, przywraca domyślny bok segmentu i piksel, zwija drzewo warstw i pokazuje całą Polskę. Pliki na dysku zostają |
+| żółty folder (*Wyświetl folder z segmentami pobranej mapy*) | otwiera w Eksploratorze Windows katalog bieżącej sesji (dedykowany podfolder sesji w `download\`, np. `download\sesja_ortofotomapa_...`) |
+| szachownica (*Scalanie segmentów*) | otwiera okno [Eksport mapy](../eksport/) z formatem *Arkusz* ([Scalanie segmentów](../scalanie/)). Przycisk jest nieaktywny przed pierwszym pobraniem oraz gdy w sesji wystąpiły błędy i istnieje plik `error.txt` |
 | *Usuń pobrane mapy bieżącej sesji* | po potwierdzeniu przenosi do Kosza systemowego mapę bieżącej sesji |
 
 {: .uwaga }

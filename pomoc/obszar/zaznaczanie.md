@@ -49,6 +49,8 @@ Oprócz ręcznego zaznaczania myszą możesz szybko zlokalizować interesujący 
   * <kbd>Ctrl</kbd>+<kbd>F</kbd> – otwiera wyszukiwarkę na zakładce *Miejscowość / Adres*,
   * <kbd>Ctrl</kbd>+<kbd>D</kbd> – otwiera wyszukiwarkę na zakładce *Działka katastralna (ULDK)*.
 
+W lewym dolnym rogu okna znajduje się przycisk **Pomoc** (oraz klawisz <kbd>F1</kbd>) z podręczną instrukcją formatów zapytań i obsługi działek.
+
 ### Zakładka 1: Miejscowość / Adres
 
 Korzysta z geokoderów Photon oraz OpenStreetMap Nominatim. Pozwala znaleźć dowolne miasto, wieś, osadę, ulicę, szczyt górski lub konkretny adres:

@@ -24,7 +24,7 @@ Zbyt intensywne pobieranie może doprowadzić do czasowego zablokowania adresu I
 Wartość *Równoczesne pobrania* (okno *Ustawienia*, grupa *Pobieranie*, od 1 do 16, domyślnie **4**) określa liczbę równoległych zapytań wysyłanych do pojedynczego serwera. Limit obejmuje wszystkie żądania w tym samym czasie, w tym pojedyncze kafle WMTS potrzebne do złożenia segmentu.
 
 * Większa liczba wątków przyspiesza pobieranie tylko do pewnej granicy, po której serwer zaczyna zwalniać lub zwracać błędy.
-* Dla serwerów Geoportalu wartość domyślna 4 stanowi optymalny kompromis.
+* Dla serwerów Geoportalu wartość domyślna 4 to najlepszy kompromis.
 * Dla wolnych serwerów (np. map historycznych) warto zmniejszyć liczbę wątków do 1 lub 2 i wydłużyć *Limit czasu odpowiedzi*.
 
 ---

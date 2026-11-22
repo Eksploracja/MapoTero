@@ -8,7 +8,7 @@ parent: Eksport mapy
 {: .no_toc }
 
 Jak dobrać zakres powiększeń, format kafli i jakość, żeby mapa była czytelna, a plik nie był za duży.
-Dotyczy MBTiles, SQLiteDB i OruxMaps.
+Dotyczy MBTiles, GeoPackage, SQLiteDB i OruxMaps.
 {: .fs-5 .fw-300 }
 
 **Dotyczy wersji:** {{ site.wersja_programu }}

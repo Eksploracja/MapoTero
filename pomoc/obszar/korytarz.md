@@ -59,6 +59,7 @@ Takie pliki generują serwisy i aplikacje turystyczne (np. Mapy.com, Komoot, Loc
 
 Pas mierzony jest symetrycznie od osi trasy, więc szerokość 1000 m daje korytarz o łącznej rozpiętości 2 km.
 Ponieważ pobierane są pełne kwadratowe segmenty, rzeczywisty zasięg danych jest nieco szerszy.
+W lewym dolnym rogu okna przycisk **Pomoc** (oraz klawisz <kbd>F1</kbd>) wyświetla podręczny opis doboru szerokości pasa i formatów trasy.
 
 {: .wskazowka }
 Przy wąskim korytarzu najlepiej sprawdza się mniejszy bok segmentu (np. 500–1000 px). Do pobrania trafi wtedy mniej zbędnego terenu poza pasem. Liczba pojedynczych plików wzrośnie, ale łączna objętość danych wyraźnie spadnie.
@@ -82,7 +83,7 @@ Gdy trasa nie przecina obszaru pobierania (np. po ręcznej edycji współrzędny
 
 ## Plik korytarz.txt
 
-Korytarz stanowi integralną część sesji. Program zapisuje go w folderze sesji jako `korytarz.txt` (obok `conf.txt`) przy starcie pobierania oraz przy ręcznym zapisie sesji. Po [wczytaniu sesji](../../sesje/) trasa i segmenty wracają na mapę, a wznawianie pobierania dotyczy wyłącznie segmentów korytarza.
+Korytarz jest integralną częścią sesji. Program zapisuje go w folderze sesji jako `korytarz.txt` (obok `conf.txt`) przy starcie pobierania oraz przy ręcznym zapisie sesji. Po [wczytaniu sesji](../../sesje/) trasa i segmenty wracają na mapę, a wznawianie pobierania dotyczy wyłącznie segmentów korytarza.
 
 Narzędzia korzystające z sesji uwzględniają korytarz:
 

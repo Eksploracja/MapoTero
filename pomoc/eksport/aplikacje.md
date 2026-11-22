@@ -38,6 +38,7 @@ Duże pliki (setki MB i więcej) lepiej kopiować kablem.
 | Format | Jak wgrać |
 |---|---|
 | **MBTiles** | otwórz plik w Locus Map albo skopiuj do folderu map Locusa (`Locus/maps`) |
+| **GeoPackage (.gpkg)** | skopiuj do folderu `Locus/maps` albo otwórz plik w aplikacji |
 | **SQLiteDB** | skopiuj do folderu `Locus/mapsOnline` albo otwórz plik w aplikacji |
 | **KMZ** | otwórz plik w aplikacji (import mapy KMZ) |
 
@@ -64,6 +65,7 @@ Mapę rastrową włącza się w ustawieniach mapy jako *mapę podkładową* albo
 |---|---|
 | **OruxMaps** (folder) | skopiuj **cały folder** `_eksport_…_oruxmaps` do folderu `oruxmaps/mapfiles` w telefonie |
 | **MBTiles** | skopiuj plik do folderu `oruxmaps/mapfiles` |
+| **GeoPackage (.gpkg)** | skopiuj plik do folderu `oruxmaps/mapfiles` |
 | **KMZ** | skopiuj do folderu map albo otwórz w aplikacji |
 
 Po skopiowaniu odśwież listę map w aplikacji.
@@ -83,15 +85,16 @@ W aplikacji mapa pojawia się w sekcji map własnych. Może działać jako mapa 
 
 ---
 
-## QField (Android, iOS)
+## QField i Mergin Maps (Android, iOS)
 
-Mobilny program terenowy połączony z QGIS-em, używany w leśnictwie, ochronie przyrody, geodezji i pracach badawczych.
+Mobilne programy terenowe współpracujące ze środowiskiem QGIS, powszechnie używane w leśnictwie, ochronie przyrody, geodezji, inspekcjach infrastruktury i pracach badawczych.
 
 | Format | Jak wgrać |
 |---|---|
-| **MBTiles** | dodaj plik `.mbtiles` do projektu QGIS na komputerze jako warstwę rastrową, a następnie przenieś folder projektu do telefonu lub zsynchronizuj przez QFieldCloud |
+| **GeoPackage (.gpkg)** | dodaj plik `.gpkg` jako warstwę kafelkową w QGIS i zsynchronizuj projekt z telefonem (kabel, QFieldCloud lub Mergin Maps Cloud), albo skopiuj plik `.gpkg` bezpośrednio do pamięci urządzenia |
+| **MBTiles** | dodaj plik `.mbtiles` do projektu QGIS na komputerze jako warstwę rastrową, a następnie przenieś folder projektu do telefonu |
 
-Podkład kafelkowy MBTiles w QFieldzie nie obciąża pamięci telefonu i pozwala płynnie zbierać punkty, linie oraz wypełniać formularze terenowe bez dostępu do sieci.
+Kafelkowe podkłady rastrowe GeoPackage i MBTiles nie obciążają pamięci telefonu i pozwalają błyskawicznie rejestrować obiekty przestrzenne oraz wypełniać formularze terenowe bez dostępu do sieci komórkowej.
 
 ---
 

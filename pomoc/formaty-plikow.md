@@ -86,6 +86,15 @@ Pozwala to sprawdzić aktualność kafli przy ponownym pobieraniu bez przesyłan
 
 ---
 
+## szablony_wlasne.json
+
+Plik przechowuje style użytkownika utworzone w Szybkim kreatorze mapy poleceniem *Zapisz jako mój styl...*.
+Zapisywany jest w formacie JSON (UTF-8 bez BOM) w katalogu programu lub w `%LocalAppData%\MapoTero\szablony_wlasne.json`.
+Zawiera listę własnych kompozycji wraz z nazwami warstw, stopniami krycia, trybami mieszania, profilami korekcji rastrowej
+oraz kompletnym planem stopni dla map wieloskalowych. Usunięcie stylu przyciskiem *Usuń mój styl* aktualizuje ten plik.
+
+---
+
 ➡️ **Kolejny krok:** [Słownik pojęć programu MapoTero →](../slownik/)
 
 *Zobacz też: [Sesje pobierania](../sesje/) · [Plik zbioru map](../serwery/plik-zbioru-map/) · [Gdzie program zapisuje dane](../pierwsze-kroki/dane-programu/)*
