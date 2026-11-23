@@ -48,10 +48,6 @@ Public Class UstawieniaProgramu
     Public Property PrzerwaMiedzyProbami As Integer = 5
     ''' <summary>Liczba segmentów pobieranych jednocześnie.</summary>
     Public Property LiczbaWatkow As Integer = 4
-    ''' <summary>Zamiana kolejności X i Y w zapytaniu (serwery niezgodne ze standardem).</summary>
-    Public Property ZamienXY As Boolean
-    ''' <summary>Przy powtórnym pobieraniu tylko segmenty o numerze wyższym niż ostatni pobrany.</summary>
-    Public Property PobierajPowyzejOstatniego As Boolean
     ''' <summary>Limit czasu oczekiwania na odpowiedź serwera [s].</summary>
     Public Property LimitCzasuSekundy As Integer = 120
     ''' <summary>Tworzenie mapy TrekBuddy / Locus Map.</summary>
@@ -108,6 +104,8 @@ Public Class UstawieniaProgramu
 
 #Region "Foldery"
     Public Property FolderSegmentow As String = ""
+    'foldery usuniętego narzędzia nakładania dwóch map PNG - zapisywane dalej, żeby lastsettings.txt miał te same
+    'wpisy co w starszych wersjach programu (wersje sprzed 3.12 czytały plik po kolei, bez nazw)
     Public Property FolderWarstwy1 As String = ""
     Public Property FolderWarstwy2 As String = ""
     Public Property FolderWynikowy As String = ""
@@ -121,6 +119,19 @@ Public Class UstawieniaProgramu
     Public Property SiatkaSegmentowNaMapie As Boolean = True
     ''' <summary>Szerokość prawego panelu ustawiona przez użytkownika w pikselach; 0 - szerokość domyślna.</summary>
     Public Property SzerokoscPanelu As Integer
+    ''' <summary>Wysokość karty „Wybrane warstwy” ustawiona uchwytem (piksele przy 96 dpi); 0 - według liczby warstw.</summary>
+    Public Property WysokoscWybranych As Integer
+    ''' <summary>Wysokość zakładek Podgląd/Komunikaty/Sesja ustawiona uchwytem (piksele przy 96 dpi); 0 - domyślna.</summary>
+    Public Property WysokoscZakladek As Integer
+    ''' <summary>Podkład mapy w oknie głównym: osm, google albo bing (dawniej po każdym uruchomieniu wracał OpenStreetMap).</summary>
+    Public Property PodkladMapy As String = "osm"
+
+    ''' <summary>Podkład z listy obsługiwanych; nieznany - osm.</summary>
+    Public Shared Function NormalizujPodklad(podklad As String) As String
+        Dim p As String = If(podklad, "").Trim().ToLowerInvariant()
+        Return If(p = "google" OrElse p = "bing", p, "osm")
+    End Function
+
     Public Property SrodekMapySzerokosc As String = "52.3"
     Public Property SrodekMapyDlugosc As String = "19.2"
     Public Property SkalaMapy As String = "6"
@@ -209,7 +220,9 @@ Public Class UstawieniaProgramu
         FolderWarstwy1 = u.Tekst("dolna", FolderWarstwy1)
         FolderWarstwy2 = u.Tekst("gorna", FolderWarstwy2)
         FolderWynikowy = u.Tekst("polaczone", FolderWynikowy)
-        ZamienXY = u.Logiczna("XYswitched", ZamienXY)
+        'XYswitched (zamiana X i Y w zapytaniu) nie jest już odczytywane - opcja działała na wszystkie serwery i pozostawiona
+        'włączona psuła pobieranie z Geoportalu; serwer niezgodny z WMS 1.3.0 obsługuje VERSION=1.1.1 w adresie
+        PodkladMapy = NormalizujPodklad(u.Tekst("podklad_mapy", PodkladMapy))
         'zapisywane jako "numeracja_" (dawny plik domyślny zawierał "numeracja")
         Numeracja = u.Tekst("numeracja_", u.Tekst("numeracja", Numeracja))
         IloscProbPobrania = u.Calkowita("iloscProbPobrania", IloscProbPobrania)
@@ -232,6 +245,8 @@ Public Class UstawieniaProgramu
         ZaznaczenieWgs84 = u.Logiczna("zaznaczenie_wgs84", ZaznaczenieWgs84)
         EdycjaXY = u.Logiczna("edycja_xy", EdycjaXY)
         SzerokoscPanelu = Math.Max(0, u.Calkowita("szerokosc_panelu", SzerokoscPanelu))
+        WysokoscWybranych = Math.Max(0, u.Calkowita("wysokosc_wybranych", WysokoscWybranych))
+        WysokoscZakladek = Math.Max(0, u.Calkowita("wysokosc_zakladek", WysokoscZakladek))
         'opcje okna eksportu do CAD
         CadObrys = u.Logiczna("cad_obrys", CadObrys)
         CadSiatka = u.Logiczna("cad_siatka", CadSiatka)
@@ -261,7 +276,7 @@ Public Class UstawieniaProgramu
     ''' <summary>
     ''' Tylko parametry nowej sesji z lastsettings.txt: przedrostek, format, przezroczystość i numeracja segmentów.
     ''' Nowa sesja wczytywała cały plik, a program zapisuje go dopiero przy zamknięciu - ustawienia zmienione od
-    ''' uruchomienia (korekta obrazu, opcje scalania i eksportu do CAD, foldery nakładania map) wracały do starych wartości.
+    ''' uruchomienia (korekta obrazu, opcje scalania i eksportu do CAD, foldery dawnego nakładania map) wracały do starych wartości.
     ''' </summary>
     Public Sub WczytajParametryNowejSesji(sciezka As String)
         Dim u = PlikUstawien.Wczytaj(sciezka, KodowanieSystemowe())
@@ -284,7 +299,9 @@ Public Class UstawieniaProgramu
         u.Ustaw("dolna", If(FolderWarstwy1 = "", FolderDownload & "dolna\", FolderWarstwy1))
         u.Ustaw("gorna", If(FolderWarstwy2 = "", FolderDownload & "gorna\", FolderWarstwy2))
         u.Ustaw("polaczone", If(FolderWynikowy = "", FolderDownload & "polaczone\", FolderWynikowy))
-        u.Ustaw("XYswitched", ZamienXY)
+        'wpis zostaje (zawsze wyłączony), żeby starsze wersje programu nie włączały zamiany z dawnej wartości
+        u.Ustaw("XYswitched", False)
+        u.Ustaw("podklad_mapy", PodkladMapy)
         u.Ustaw("numeracja_", Numeracja)
         u.Ustaw("iloscProbPobrania", IloscProbPobrania)
         u.Ustaw("przerwaMiedzyProbami", PrzerwaMiedzyProbami)
@@ -321,6 +338,8 @@ Public Class UstawieniaProgramu
         u.Ustaw("korekta_kontrast", KorektaKontrast)
         u.Ustaw("korekta_nasycenie", KorektaNasycenie)
         u.Ustaw("korekta_wyostrzanie", KorektaWyostrzanie)
+        u.Ustaw("wysokosc_wybranych", WysokoscWybranych)
+        u.Ustaw("wysokosc_zakladek", WysokoscZakladek)
         u.Zapisz(sciezka, KodowanieSystemowe())
     End Sub
 
@@ -329,7 +348,6 @@ Public Class UstawieniaProgramu
         Prefiks = "_"
         Format = "jpeg"
         Przezroczystosc = False
-        PobierajPowyzejOstatniego = False
         EdycjaXY = False
         KursorWgs84 = False
         ZaznaczenieWgs84 = False
@@ -351,7 +369,7 @@ Public Class UstawieniaProgramu
         TrekBuddy = False
         StylNazwyTrekBuddy = 0
         BokSegmentuPrzedTrekBuddy = ""
-        ZamienXY = False
+        PodkladMapy = "osm"
         'układ bieżącej sesji zmienia okno ustawień (Form1.PrzelaczUklad) - z przeliczeniem wpisanego zasięgu
         UkladDomyslny = UkladWspolrzednych.PL1992
         SrodekMapySzerokosc = "52.3"
@@ -368,20 +386,4 @@ Public Class UstawieniaProgramu
         CadLsp = False
     End Sub
 
-End Class
-
-''' <summary>Rodzaje plików georeferencyjnych tworzonych dla obrazu.</summary>
-Public Class OpcjeGeoreferencji
-    Public Property Map As Boolean
-    Public Property Gmi As Boolean
-    Public Property WldPoints As Boolean
-    Public Property WorldFile As Boolean
-    Public Property Kml As Boolean
-    Public Property Tab As Boolean
-
-    Public ReadOnly Property Dowolna As Boolean
-        Get
-            Return Map OrElse Gmi OrElse WldPoints OrElse WorldFile OrElse Kml OrElse Tab
-        End Get
-    End Property
 End Class

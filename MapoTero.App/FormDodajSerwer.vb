@@ -243,8 +243,11 @@ Public Class FormDodajSerwer
                             "Łączenie z serwerem i pobieranie opisu usługi...")
 
         Try
-            _wynikCap = Await KlientCapabilities.PobierzAsync(adres, chkIgnorujSsl.Checked, timeoutSekundy:=25, token:=token, srodekTestowy:=_srodekMapy)
+            'wynik do zmiennej lokalnej - przerwane połączenie (powrót do katalogu i wybór innej usługi) nie może
+            'nadpisać wyniku ani stanu okna połączenia, które trwa
+            Dim wynik = Await KlientCapabilities.PobierzAsync(adres, chkIgnorujSsl.Checked, timeoutSekundy:=25, token:=token, srodekTestowy:=_srodekMapy)
             If token.IsCancellationRequested OrElse IsDisposed Then Exit Function
+            _wynikCap = wynik
 
             If Not _wynikCap.Sukces Then
                 lblStatus.ForeColor = Color.Red
@@ -292,10 +295,11 @@ Public Class FormDodajSerwer
         Catch ex As Exception
             If Not IsDisposed Then
                 lblStatus.ForeColor = Color.Red
-                lblStatus.Text = "Nieoczekiwany błąd: " & MetadaneMapy.MaskujSekrety(ex.Message)
+                lblStatus.Text = "Nieoczekiwany błąd: " & MetadaneMapy.MaskujSekrety(OpisBledu.Z(ex))
             End If
         Finally
-            If Not IsDisposed Then UstawStanPolaczenia(trwa:=False)
+            'po przerwaniu przyciski ustawia nowe połączenie albo powrót do katalogu
+            If Not IsDisposed AndAlso Not token.IsCancellationRequested Then UstawStanPolaczenia(trwa:=False)
         End Try
     End Function
 
@@ -512,16 +516,20 @@ Public Class FormDodajSerwer
         btnPobierzProbke.Enabled = True
         If _wynikCap IsNot Nothing AndAlso _wynikCap.PrzykladowyKafel IsNot Nothing AndAlso _wynikCap.PrzykladowyKafel.Length > 0 Then
             Try
-                Using ms As New MemoryStream(_wynikCap.PrzykladowyKafel)
+                Using ms As New MemoryStream(_wynikCap.PrzykladowyKafel), img = Image.FromStream(ms)
                     Using staryImg = picPodglad.Image
-                        picPodglad.Image = New Bitmap(Image.FromStream(ms))
+                        picPodglad.Image = New Bitmap(img)
                     End Using
                 End Using
             Catch
-                picPodglad.Image = Nothing
+                Using staryImg = picPodglad.Image
+                    picPodglad.Image = Nothing
+                End Using
             End Try
         Else
-            picPodglad.Image = Nothing
+            Using staryImg = picPodglad.Image
+                picPodglad.Image = Nothing
+            End Using
         End If
     End Sub
 
@@ -586,8 +594,11 @@ Public Class FormDodajSerwer
         If _wynikCap Is Nothing Then Exit Sub
 
         btnPobierzProbke.Enabled = False
-        _przerwanieProbki = New CancellationTokenSource()
-        Dim token = _przerwanieProbki.Token
+        _przerwanieProbki?.Cancel()
+        _przerwanieProbki?.Dispose()
+        Dim ctsProbki As New CancellationTokenSource()
+        _przerwanieProbki = ctsProbki
+        Dim token = ctsProbki.Token
         'pobieranie próbki trwa nawet kilkadziesiąt sekund - widoczny stan zamiast samego wyszarzonego przycisku
         Dim tekstPrzycisku As String = btnPobierzProbke.Text
         btnPobierzProbke.Text = "Pobieranie próbki..."
@@ -658,9 +669,9 @@ Public Class FormDodajSerwer
                                     ostatniStatus = CInt(odp.StatusCode)
                                     Dim bajty = Await odp.Content.ReadAsByteArrayAsync(token).ConfigureAwait(True)
                                     If bajty IsNot Nothing AndAlso bajty.Length > 0 AndAlso PobieranieSegmentow.CzyObraz(bajty) Then
-                                        Using ms As New MemoryStream(bajty)
+                                        Using ms As New MemoryStream(bajty), img = Image.FromStream(ms)
                                             Using staryImg = picPodglad.Image
-                                                picPodglad.Image = New Bitmap(Image.FromStream(ms))
+                                                picPodglad.Image = New Bitmap(img)
                                             End Using
                                         End Using
                                         sukcessPobrania = True
@@ -740,9 +751,9 @@ Public Class FormDodajSerwer
                                                 End If
                                             End If
                                         End If
-                                        Using ms As New MemoryStream(bajty)
+                                        Using ms As New MemoryStream(bajty), img = Image.FromStream(ms)
                                             Using staryImg = picPodglad.Image
-                                                picPodglad.Image = New Bitmap(Image.FromStream(ms))
+                                                picPodglad.Image = New Bitmap(img)
                                             End Using
                                         End Using
                                         sukcessPobrania = True
@@ -752,6 +763,8 @@ Public Class FormDodajSerwer
                                         ostatnieBajty = bajty
                                     End If
                                 End Using
+                            Catch ex As OperationCanceledException When token.IsCancellationRequested
+                                Throw
                             Catch
                                 'błąd generowania planu dla danego poziomu - próba kolejnego
                             End Try
@@ -777,7 +790,7 @@ Public Class FormDodajSerwer
                                             "Podgląd próbki WMTS", MessageBoxButtons.OK, MessageBoxIcon.Warning)
                         End If
                     Else
-                        MessageBox.Show("Wybierz warstwę, aby pobrać próbkę.", "Informacja", MessageBoxButtons.OK, MessageBoxIcon.Information)
+                        MessageBox.Show("Wybierz warstwę, aby pobrać próbkę.", "Podgląd próbki", MessageBoxButtons.OK, MessageBoxIcon.Information)
                     End If
                 End Using
             End Using
@@ -790,12 +803,12 @@ Public Class FormDodajSerwer
             End If
         Catch ex As Exception
             If Not IsDisposed Then
-                MessageBox.Show("Nie udało się pobrać próbki kafelka: " & ex.Message, "Błąd podglądu", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+                MessageBox.Show("Nie udało się pobrać próbki kafelka: " & OpisBledu.Z(ex), "Błąd podglądu", MessageBoxButtons.OK, MessageBoxIcon.Warning)
             End If
         Finally
-            _przerwanieProbki?.Dispose()
-            _przerwanieProbki = Nothing
-            If Not IsDisposed Then
+            If _przerwanieProbki Is ctsProbki Then _przerwanieProbki = Nothing
+            ctsProbki.Dispose()
+            If Not IsDisposed AndAlso _przerwanieProbki Is Nothing Then
                 btnPobierzProbke.Text = tekstPrzycisku
                 btnPobierzProbke.Enabled = True
                 Cursor = Cursors.Default
@@ -810,6 +823,9 @@ Public Class FormDodajSerwer
         _przerwaniePolaczenia?.Cancel()
         _przerwanieProbki?.Cancel()
         pnlKatalog.AnulujAktywneZapytanie()
+        Using staryImg = picPodglad.Image
+            picPodglad.Image = Nothing
+        End Using
     End Sub
 
     Private Sub txtNazwaZbioru_KeyPress(sender As Object, e As KeyPressEventArgs) Handles txtNazwaZbioru.KeyPress
@@ -912,7 +928,7 @@ Public Class FormDodajSerwer
             Me.Close()
 
         Catch ex As Exception
-            MessageBox.Show("Błąd podczas zapisywania zbioru map: " & ex.Message, "Błąd zapisu", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            MessageBox.Show("Błąd podczas zapisywania zbioru map: " & OpisBledu.Z(ex), "Błąd zapisu", MessageBoxButtons.OK, MessageBoxIcon.Error)
         End Try
     End Sub
 

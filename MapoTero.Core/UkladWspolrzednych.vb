@@ -119,11 +119,13 @@ Public NotInheritable Class UkladWspolrzednych
     Public Shared ReadOnly Utm35N As New UkladWspolrzednych(32635, "UTM strefa 35N (EPSG:32635)", False, 27, 0.9996, 500000, 0, False)
     Public Shared ReadOnly Wgs84 As New UkladWspolrzednych(4326, "WGS84 - współrzędne geograficzne (EPSG:4326)", True, 0, 1, 0, 0, True)
 
+    Private Shared ReadOnly _wszystkie As IList(Of UkladWspolrzednych) = Array.AsReadOnly(
+        {PL1992, PL2000Strefa5, PL2000Strefa6, PL2000Strefa7, PL2000Strefa8, Utm33N, Utm34N, Utm35N, Wgs84})
+
     ''' <summary>Wszystkie układy obsługiwane przez program (kolejność wyświetlania).</summary>
     Public Shared ReadOnly Property Wszystkie As IList(Of UkladWspolrzednych)
         Get
-            Return New UkladWspolrzednych() {PL1992, PL2000Strefa5, PL2000Strefa6, PL2000Strefa7, PL2000Strefa8,
-                                             Utm33N, Utm34N, Utm35N, Wgs84}
+            Return _wszystkie
         End Get
     End Property
 
@@ -133,6 +135,22 @@ Public NotInheritable Class UkladWspolrzednych
             If u.Epsg = epsg Then Return u
         Next
         Return PL1992
+    End Function
+
+    ''' <summary>
+    ''' Sugeruje strefę układu PL-2000 (strefy 5-8, EPSG:2176-2179) na podstawie długości geograficznej środka obszaru.
+    ''' W polskiej geodezji granice stref biegną wzdłuż granic powiatów, dlatego program pozwala użytkownikowi na ręczny wybór.
+    ''' </summary>
+    Public Shared Function SugerujStrefaPl2000(dlugoscGeo As Double) As UkladWspolrzednych
+        If dlugoscGeo < 16.5 Then
+            Return PL2000Strefa5
+        ElseIf dlugoscGeo < 19.5 Then
+            Return PL2000Strefa6
+        ElseIf dlugoscGeo < 22.5 Then
+            Return PL2000Strefa7
+        Else
+            Return PL2000Strefa8
+        End If
     End Function
 
 #End Region
@@ -254,7 +272,12 @@ Public NotInheritable Class UkladWspolrzednych
         If cel Is Me Then Return z
         Dim xMin As Double = Double.MaxValue, xMax As Double = Double.MinValue
         Dim yMin As Double = Double.MaxValue, yMax As Double = Double.MinValue
-        For Each p In New PunktXY() {z.LewyDolny, z.PrawyDolny, z.PrawyGorny, z.LewyGorny}
+        Dim srodekX As Double = (z.XDol + z.XGora) / 2
+        Dim srodekY As Double = (z.YLewy + z.YPrawy) / 2
+        For Each p In New PunktXY() {
+            z.LewyDolny, z.PrawyDolny, z.PrawyGorny, z.LewyGorny,
+            New PunktXY(z.XDol, srodekY), New PunktXY(srodekX, z.YPrawy),
+            New PunktXY(z.XGora, srodekY), New PunktXY(srodekX, z.YLewy)}
             Dim q = PrzeliczDo(cel, p)
             xMin = Math.Min(xMin, q.X) : xMax = Math.Max(xMax, q.X)
             yMin = Math.Min(yMin, q.Y) : yMax = Math.Max(yMax, q.Y)

@@ -86,56 +86,32 @@ Public Module Program
         End Get
     End Property
 
-    ''' <summary>Katalog ze zbiorami map w folderze danych użytkownika (%LocalAppData%\MapoTero\warstwy).</summary>
+    ''' <summary>Katalog ze zbiorami map w folderze danych użytkownika (w trybie portable: warstwy_wlasne obok exe, w instalacyjnym: %LocalAppData%\MapoTero\warstwy).</summary>
     Public ReadOnly Property FolderWarstwDanych As String
         Get
-            Return Path.Combine(FolderDanych, "warstwy")
+            If String.Equals(FolderDanych, FolderProgramu, StringComparison.OrdinalIgnoreCase) Then
+                Return Path.Combine(FolderProgramu, "warstwy_wlasne")
+            Else
+                Return Path.Combine(FolderDanych, "warstwy")
+            End If
         End Get
     End Property
 
-    ''' <summary>Katalog zapisu nowych zbiorów map (katalog programu, a przy braku uprawnień - katalog użytkownika).</summary>
+    ''' <summary>Katalog zapisu nowych zbiorów map (zawsze katalog użytkownika, by aktualizacja programu nie nadpisywała własnych warstw).</summary>
     Public Function FolderZapisuWarstw() As String
+        Dim katDanych = FolderWarstwDanych
         Try
-            Dim katProg = FolderWarstwProgramu
-            Directory.CreateDirectory(katProg)
-            Dim test = Path.Combine(katProg, "zapis_test.tmp")
+            Directory.CreateDirectory(katDanych)
+            Dim test = Path.Combine(katDanych, "zapis_test.tmp")
             File.WriteAllText(test, "")
             File.Delete(test)
-            Return katProg
-        Catch
-            Dim katDanych = FolderWarstwDanych
-            Directory.CreateDirectory(katDanych)
             Return katDanych
-        End Try
-    End Function
-
-    ''' <summary>
-    ''' Kodowanie plików tekstowych programu (conf.txt, lastsettings.txt, pliki georeferencyjne): systemowa strona
-    ''' kodowa ANSI - takie samo, jakiego używały instrukcje FileOpen/Print poprzednich wersji.
-    ''' </summary>
-    Public Function KodowanieSystemowe() As Encoding
-#If NETCOREAPP Then
-        RejestrujKodowania()
-        Try
-            Dim cp As Integer = CultureInfo.CurrentCulture.TextInfo.ANSICodePage
-            If cp > 0 Then Return Encoding.GetEncoding(cp)
         Catch
+            Dim katProg = FolderWarstwProgramu
+            Directory.CreateDirectory(katProg)
+            Return katProg
         End Try
-        Return Encoding.GetEncoding(1250)
-#Else
-        Return Encoding.Default
-#End If
     End Function
-
-    ''' <summary>
-    ''' W .NET 8 strony kodowe Windows (np. 1250 plików warstw) są dostępne dopiero po rejestracji dostawcy kodowań -
-    ''' wywoływane na starcie programu, przed odczytem jakiegokolwiek pliku. W .NET Framework nic nie robi.
-    ''' </summary>
-    Public Sub RejestrujKodowania()
-#If NETCOREAPP Then
-        Encoding.RegisterProvider(CodePagesEncodingProvider.Instance)
-#End If
-    End Sub
 
     ''' <summary>Ustala folder zapisu danych programu (sprawdza możliwość zapisu w katalogu programu).</summary>
     Public Function UstalFolderDanych(folderProgramu As String) As String
@@ -151,41 +127,16 @@ Public Module Program
         End Try
     End Function
 
-    ''' <summary>
-    ''' Liczba wpisana przez użytkownika - akceptuje kropkę i przecinek dziesiętny (Val() przerywał odczyt na przecinku,
-    ''' więc "0,5" dawało 0). Gdy tekst nie jest liczbą - wartość domyślna.
-    ''' </summary>
-    Public Function Wartosc(tekst As String, Optional domyslna As Double = 0) As Double
-        If String.IsNullOrWhiteSpace(tekst) Then Return domyslna
-        Dim wynik As Double
-        'NaN i nieskończoność ("nan", "1e999") nie są liczbami dla użytkownika - dawniej kończyły się wyjątkiem przy zaokrąglaniu
-        If Double.TryParse(tekst.Trim().Replace(","c, "."c), NumberStyles.Float, CultureInfo.InvariantCulture, wynik) AndAlso
-           Not Double.IsNaN(wynik) AndAlso Not Double.IsInfinity(wynik) Then Return wynik
-        Return domyslna
-    End Function
-
-    ''' <summary>Liczba całkowita wpisana przez użytkownika.</summary>
-    Public Function WartoscCalkowita(tekst As String, Optional domyslna As Integer = 0) As Integer
-        Dim w As Double = Wartosc(tekst, domyslna)
-        If w > Integer.MaxValue OrElse w < Integer.MinValue Then Return domyslna
-        Return CInt(Math.Round(w))
-    End Function
-
-    ''' <summary>Liczba z kropką dziesiętną, bez zbędnych zer.</summary>
-    Public Function Liczba(wartosc As Double) As String
-        Return MapoTero.Core.Georeferencja.Liczba(wartosc)
-    End Function
-
-    ''' <summary>Polska odmiana rzeczownika po liczbie: 1 segment, 2-4 segmenty (bez 12-14), 5 segmentów.</summary>
-    Public Function Odmiana(liczba As Long, pojedyncza As String, mnoga24 As String, mnoga As String) As String
-        Dim n As Long = Math.Abs(liczba)
-        If n = 1 Then Return pojedyncza
-        If n Mod 10 >= 2 AndAlso n Mod 10 <= 4 AndAlso (n Mod 100 < 12 OrElse n Mod 100 > 14) Then Return mnoga24
-        Return mnoga
-    End Function
-
     ''' <summary>Adres zgłaszania błędów programu.</summary>
     Public Const AdresZgloszenBledow As String = "https://github.com/Eksploracja/MapoTero/issues"
+    ''' <summary>Dział MapoTero na Pomorskim Forum Eksploracyjnym (menu Pomoc - Zadaj pytanie na forum).</summary>
+    Public Const AdresForumPfe As String = "https://forum.eksploracja.pl/viewforum.php?f=205"
+
+    ''' <summary>Lista wydań programu z opisem zmian (menu Pomoc > Co nowego w programie).</summary>
+    Public Const AdresWydan As String = "https://github.com/Eksploracja/MapoTero/releases"
+
+    ''' <summary>Strona wsparcia autora programu (menu Pomoc > Wesprzyj rozwój programu, okno O programie).</summary>
+    Public Const AdresWsparcia As String = "https://buycoffee.to/mapy"
 
     ''' <summary>Plik z opisem nieobsłużonych błędów programu (w folderze danych).</summary>
     Public Const NazwaPlikuAwarii As String = "awarie.log"
@@ -226,11 +177,127 @@ Public Module Program
     End Function
 
     ''' <summary>Otwiera folder w Eksploratorze Windows.</summary>
+    <Runtime.InteropServices.StructLayout(Runtime.InteropServices.LayoutKind.Sequential, CharSet:=Runtime.InteropServices.CharSet.Unicode)>
+    Private Structure SHFILEOPSTRUCT
+        Public hwnd As IntPtr
+        Public wFunc As UInteger
+        Public pFrom As String
+        Public pTo As String
+        Public fFlags As UShort
+        Public fAnyOperationsAborted As Integer
+        Public hNameMappings As IntPtr
+        Public lpszProgressTitle As String
+    End Structure
+
+    Private Declare Unicode Function SHFileOperation Lib "shell32.dll" Alias "SHFileOperationW" (ByRef op As SHFILEOPSTRUCT) As Integer
+
+    Private Const FO_DELETE As UInteger = 3
+    Private Const FOF_SILENT As UShort = &H4
+    Private Const FOF_NOCONFIRMATION As UShort = &H10
+    Private Const FOF_ALLOWUNDO As UShort = &H40
+    Private Const FOF_NOERRORUI As UShort = &H400
+    Private Const FOF_WANTNUKEWARNING As UShort = &H4000
+
+    ''' <summary>
+    ''' Przenosi pliki do Kosza paczkami po 500 jedną operacją Windows. Dawniej każdy plik osobno
+    ''' (FileSystem.DeleteFile) - ok. 70 ms na plik, więc usunięcie 30 000 plików sesji blokowało okno na pół godziny.
+    ''' Pliki, których paczka nie dała się przenieść, przenoszone są pojedynczo; zwraca liczbę plików, których nie przeniesiono.
+    ''' Na dysku bez Kosza (np. pendrive) Windows pyta, czy usunąć pliki trwale.
+    ''' </summary>
+    Public Function PrzeniesDoKosza(pliki As IEnumerable(Of String)) As Integer
+        Dim bledy As Integer = 0
+        Dim lista = pliki.Where(Function(p) File.Exists(p)).ToList()
+        'wiele plików: Kosz i tak przenosi każdy plik osobno (ok. 18 ms) - pliki jednego folderu przenoszone są do podfolderu
+        '(zmiana nazwy, ułamek milisekundy) i do Kosza trafia ten jeden folder (30 000 plików: ok. 20 s zamiast 9 minut)
+        If lista.Count > MaksPlikowPojedynczo Then
+            Dim pozostale As New List(Of String)
+            For Each grupa In lista.GroupBy(Function(p) Path.GetDirectoryName(p), StringComparer.OrdinalIgnoreCase)
+                If Not PrzeniesDoKoszaJakoFolder(grupa.Key, grupa.ToList()) Then pozostale.AddRange(grupa)
+            Next
+            lista = pozostale.Where(Function(p) File.Exists(p)).ToList()
+        End If
+        For start = 0 To lista.Count - 1 Step 500
+            Dim paczka = lista.Skip(start).Take(500).ToList()
+            Dim op As New SHFILEOPSTRUCT With {
+                .wFunc = FO_DELETE,
+                .pFrom = String.Join(vbNullChar, paczka) & vbNullChar & vbNullChar,
+                .fFlags = FOF_ALLOWUNDO Or FOF_NOCONFIRMATION Or FOF_SILENT Or FOF_NOERRORUI Or FOF_WANTNUKEWARNING}
+            Dim wynik As Integer = -1
+            Try
+                wynik = SHFileOperation(op)
+            Catch
+            End Try
+            If wynik = 0 AndAlso op.fAnyOperationsAborted = 0 Then Continue For
+            For Each plik In paczka
+                If Not File.Exists(plik) Then Continue For
+                Try
+                    FileIO.FileSystem.DeleteFile(plik, FileIO.UIOption.OnlyErrorDialogs, FileIO.RecycleOption.SendToRecycleBin)
+                Catch
+                    bledy += 1
+                End Try
+            Next
+        Next
+        Return bledy
+    End Function
+
+    ''' <summary>Powyżej tej liczby plików Kosz dostaje jeden folder z plikami zamiast pojedynczych plików.</summary>
+    Public Const MaksPlikowPojedynczo As Integer = 50
+
+    ''' <summary>Początek nazwy folderu, w którym pliki trafiają do Kosza (data i godzina w nazwie).</summary>
+    Public Const NazwaFolderuKosza As String = "MapoTero - usunięte pliki"
+
+    ''' <summary>
+    ''' Przenosi pliki jednego folderu do nowego podfolderu i ten podfolder do Kosza. Gdy coś się nie uda, pliki wracają na
+    ''' swoje miejsce i zwracane jest False (wtedy przenoszone są zwykłym sposobem).
+    ''' </summary>
+    Private Function PrzeniesDoKoszaJakoFolder(folder As String, pliki As List(Of String)) As Boolean
+        Dim cel As String = Path.Combine(folder, NazwaFolderuKosza & " " & DateTime.Now.ToString("yyyy-MM-dd HH-mm-ss", CultureInfo.InvariantCulture))
+        Dim przeniesione As New List(Of (Zrodlowy As String, Docelowy As String))
+        Try
+            If Directory.Exists(cel) Then cel &= " " & Guid.NewGuid().ToString("N").Substring(0, 6)
+            Directory.CreateDirectory(cel)
+            Dim wszystkiePrzeniesione As Boolean = True
+            For Each p In pliki
+                Dim docelowy = Path.Combine(cel, Path.GetFileName(p))
+                Try
+                    File.Move(p, docelowy)
+                    przeniesione.Add((p, docelowy))
+                Catch
+                    wszystkiePrzeniesione = False
+                End Try
+            Next
+            If Not wszystkiePrzeniesione Then Throw New IOException("Nie wszystkie pliki udało się przenieść do Kosza grupowo.")
+            FileIO.FileSystem.DeleteDirectory(cel, FileIO.UIOption.OnlyErrorDialogs, FileIO.RecycleOption.SendToRecycleBin)
+            Return True
+        Catch
+            For Each para In przeniesione
+                Try
+                    If File.Exists(para.Docelowy) Then File.Move(para.Docelowy, para.Zrodlowy)
+                Catch
+                End Try
+            Next
+            Try
+                If Directory.Exists(cel) AndAlso Not Directory.EnumerateFileSystemEntries(cel).Any() Then Directory.Delete(cel)
+            Catch
+            End Try
+            Return False
+        End Try
+    End Function
+
+    ''' <summary>Otwiera adres w domyślnej przeglądarce internetowej; błąd pokazuje w komunikacie z podanym tytułem.</summary>
+    Public Sub OtworzStrone(adres As String, tytul As String)
+        Try
+            Process.Start(New ProcessStartInfo(adres) With {.UseShellExecute = True})
+        Catch ex As Exception
+            MsgBox("Nie można otworzyć strony " & adres & ": " & Global.MapoTero.Core.OpisBledu.Z(ex), MsgBoxStyle.Exclamation, tytul)
+        End Try
+    End Sub
+
     Public Sub OtworzFolder(folder As String)
         Try
             Process.Start(New ProcessStartInfo(folder) With {.UseShellExecute = True})
         Catch ex As Exception
-            MsgBox("Nie można otworzyć folderu " & folder & ": " & ex.Message, MsgBoxStyle.Exclamation)
+            MsgBox("Nie można otworzyć folderu " & folder & ": " & Global.MapoTero.Core.OpisBledu.Z(ex), MsgBoxStyle.Exclamation, "Otwieranie folderu")
         End Try
     End Sub
 

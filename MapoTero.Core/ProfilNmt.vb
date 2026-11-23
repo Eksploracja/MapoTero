@@ -103,10 +103,15 @@ Imports System.Threading.Tasks
                                                        wynik As Double(), token As CancellationToken) As Task
             Dim h = Await ZapytajAsync(punkty1992, offset, liczba, token).ConfigureAwait(False)
             Dim brakDanych = False
+            Dim wszystkieNaN = True
             For i = 0 To liczba - 1
-                If Double.IsNaN(h(i)) Then brakDanych = True : Exit For
+                If Double.IsNaN(h(i)) Then
+                    brakDanych = True
+                Else
+                    wszystkieNaN = False
+                End If
             Next
-            If Not brakDanych OrElse liczba = 1 Then
+            If Not brakDanych OrElse wszystkieNaN OrElse liczba = 1 Then
                 Array.Copy(h, 0, wynik, offset, liczba)
                 Return
             End If

@@ -54,14 +54,13 @@ Public Class CzytnikPlikuVb
         While _pozycja < _tekst.Length AndAlso (_tekst(_pozycja) = " "c OrElse _tekst(_pozycja) = ChrW(9))
             _pozycja += 1
         End While
-        'pomija znak końca poprzedniego wiersza
-        If _pozycja < _tekst.Length AndAlso (_tekst(_pozycja) = ChrW(13) OrElse _tekst(_pozycja) = ChrW(10)) Then
-            If _tekst(_pozycja) = ChrW(13) AndAlso _pozycja + 1 < _tekst.Length AndAlso _tekst(_pozycja + 1) = ChrW(10) Then _pozycja += 1
+        'pomija znaki końca poprzednich wierszy (wiele kolejnych CR/LF)
+        While _pozycja < _tekst.Length AndAlso (_tekst(_pozycja) = ChrW(13) OrElse _tekst(_pozycja) = ChrW(10))
             _pozycja += 1
-            While _pozycja < _tekst.Length AndAlso (_tekst(_pozycja) = " "c OrElse _tekst(_pozycja) = ChrW(9))
-                _pozycja += 1
-            End While
-        End If
+        End While
+        While _pozycja < _tekst.Length AndAlso (_tekst(_pozycja) = " "c OrElse _tekst(_pozycja) = ChrW(9))
+            _pozycja += 1
+        End While
         If _pozycja >= _tekst.Length Then Throw New EndOfStreamException("Koniec pliku")
 
         Dim wynik As String
@@ -182,6 +181,11 @@ Public Class KonfiguracjaSesji
     ''' wszystkie warstwy w trybie zwykłym).
     ''' </summary>
     Public Property TrybyMieszaniaWarstw As String = ""
+    ''' <summary>
+    ''' Tryb TrekBuddy / Locus Map (segmenty nazwane wg położenia w pikselach, paczka .tar). Nowe pole na końcu pliku;
+    ''' brak w starszych plikach - tryb wyłączony.
+    ''' </summary>
+    Public Property TrekBuddy As Boolean
 
     Public Sub New()
         For i = 0 To 11
@@ -223,6 +227,7 @@ Public Class KonfiguracjaSesji
         If Not r.KoniecPliku Then c.AdresyWarstw = r.Nastepne()
         If Not r.KoniecPliku Then c.ZbioryWarstw = r.Nastepne()
         If Not r.KoniecPliku Then c.TrybyMieszaniaWarstw = r.Nastepne()
+        If Not r.KoniecPliku Then c.TrekBuddy = r.NastepnyLogiczny()
         Return c
     End Function
 
@@ -255,6 +260,7 @@ Public Class KonfiguracjaSesji
         w.Tekst(AdresyWarstw)
         w.Tekst(ZbioryWarstw)
         w.Tekst(TrybyMieszaniaWarstw)
+        w.Logiczny(TrekBuddy)
         Return w.ToString()
     End Function
 
@@ -265,8 +271,13 @@ Public Class KonfiguracjaSesji
     ''' <summary>Siatka segmentów sesji (pola zasięgu, rozmiaru piksela i boku segmentu).</summary>
     Public Function SiatkaSesji() As Siatka
         Dim bok As Double = LiczbaZPola(BokSegmentuPx)
+        Dim bokZaokraglony As Integer = 0
+        If Double.IsFinite(bok) AndAlso bok >= Integer.MinValue AndAlso bok <= Integer.MaxValue Then
+            Dim r As Double = Math.Round(bok)
+            If r >= Integer.MinValue AndAlso r <= Integer.MaxValue Then bokZaokraglony = CInt(r)
+        End If
         Return New Siatka(New Zasieg(LiczbaZPola(XDol), LiczbaZPola(YLewy), LiczbaZPola(XGora), LiczbaZPola(YPrawy)),
-                          LiczbaZPola(RozmiarPiksela), If(Double.IsNaN(bok), 0, CInt(Math.Round(bok))))
+                          LiczbaZPola(RozmiarPiksela), bokZaokraglony)
     End Function
 
     ''' <summary>
@@ -282,9 +293,9 @@ Public Class KonfiguracjaSesji
         If a.BokSegmentuPx <> b.BokSegmentuPx OrElse Not RowneLiczby(a.RozmiarPiksela, b.RozmiarPiksela) Then Return False
         If a.LiczbaKolumn <> b.LiczbaKolumn OrElse a.LiczbaWierszy <> b.LiczbaWierszy Then Return False
         If Not RowneLiczby(a.Obszar.XDol, b.Obszar.XDol) OrElse Not RowneLiczby(a.Obszar.YLewy, b.Obszar.YLewy) Then Return False
-        If UkladEpsg <> inna.UkladEpsg OrElse Przezroczystosc <> inna.Przezroczystosc Then Return False
+        If UkladEpsg <> inna.UkladEpsg OrElse Przezroczystosc <> inna.Przezroczystosc OrElse TrekBuddy <> inna.TrekBuddy Then Return False
         If Not String.Equals(Prefiks, inna.Prefiks, StringComparison.Ordinal) Then Return False
-        If MapoTero.Core.Siatka.StylZTekstu(Numeracja) <> MapoTero.Core.Siatka.StylZTekstu(inna.Numeracja) Then Return False
+        If Siatka.StylZTekstu(Numeracja) <> Siatka.StylZTekstu(inna.Numeracja) Then Return False
         If Wms.RozszerzeniePliku(Format) <> Wms.RozszerzeniePliku(inna.Format) Then Return False
         'źródło: adres serwera (w starszych plikach brak - wtedy nazwa zbioru map) i lista warstw
         If AdresSerwera <> "" AndAlso inna.AdresSerwera <> "" Then
@@ -385,9 +396,9 @@ Public Class KonfiguracjaSesji
         Dim znacznikCzasu = data.ToString("yyyy-MM-dd_HHmmss", CultureInfo.InvariantCulture)
         Dim czystyZbior As String = ""
         If Not String.IsNullOrWhiteSpace(zbior) Then
-            Dim bezZnakow = System.Text.RegularExpressions.Regex.Replace(zbior.Trim(), "[^a-zA-Z0-9_\-]", "_")
+            Dim bezZnakow = System.Text.RegularExpressions.Regex.Replace(zbior.Trim(), "[^a-zA-Z0-9_\-+]", "_")
             bezZnakow = System.Text.RegularExpressions.Regex.Replace(bezZnakow, "_+", "_").Trim("_"c)
-            If bezZnakow.Length > 25 Then bezZnakow = bezZnakow.Substring(0, 25).TrimEnd("_"c)
+            If bezZnakow.Length > 35 Then bezZnakow = bezZnakow.Substring(0, 35).TrimEnd("_"c, "+"c)
             czystyZbior = bezZnakow
         End If
         If czystyZbior <> "" Then
@@ -467,6 +478,19 @@ End Class
 ''' Odczyt po nazwach, a nie po kolejności - brak lub dodanie ustawienia nie przesuwa pozostałych wartości.
 ''' </summary>
 Public Class PlikUstawien
+
+    ''' <summary>
+    ''' Plik ustawień z danymi binarnymi albo bez wpisu „folder segmentow” (pierwszego we wszystkich wersjach programu,
+    ''' także sprzed 3.12, które nie zapisywały np. wpisu „format”).
+    ''' </summary>
+    Public Shared Function WygladaNaUszkodzony(tekst As String) As Boolean
+        If String.IsNullOrEmpty(tekst) Then Return True
+        If tekst.IndexOf("folder segmentow", StringComparison.OrdinalIgnoreCase) < 0 Then Return True
+        For Each z As Char In tekst
+            If AscW(z) < 32 AndAlso z <> ChrW(13) AndAlso z <> ChrW(10) AndAlso z <> ChrW(9) Then Return True
+        Next
+        Return False
+    End Function
 
     Private ReadOnly _wartosci As New Dictionary(Of String, String)(StringComparer.OrdinalIgnoreCase)
     Private ReadOnly _kolejnosc As New List(Of String)

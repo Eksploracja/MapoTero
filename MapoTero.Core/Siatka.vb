@@ -124,6 +124,22 @@ Public Class Siatka
     End Property
 
     ''' <summary>Najwięcej kolumn (wierszy) siatki - liczba musi się mieścić w typie Integer.</summary>
+    ''' <summary>
+    ''' Przyczyna niepoprawnej siatki dla użytkownika (pusty tekst, gdy siatka jest poprawna) - dawniej okno główne pisało
+    ''' tylko „Niepoprawne współrzędne X, Y.” bez wskazania, co poprawić.
+    ''' </summary>
+    Public ReadOnly Property PowodNiepoprawnosci As String
+        Get
+            If Poprawna Then Return ""
+            If Double.IsNaN(RozmiarPiksela) OrElse Double.IsInfinity(RozmiarPiksela) OrElse RozmiarPiksela <= 0 Then Return "rozmiar piksela musi być większy od zera"
+            If BokSegmentuPx <= 0 Then Return "bok segmentu musi być większy od zera"
+            If Obszar.Wysokosc <= 0 AndAlso Obszar.Szerokosc <= 0 Then Return "X górne musi być większe od X dolnego, a Y prawe - od Y lewego (X - północ, Y - wschód)"
+            If Obszar.Wysokosc <= 0 Then Return "X górne (północ) musi być większe od X dolnego"
+            If Obszar.Szerokosc <= 0 Then Return "Y prawe (wschód) musi być większe od Y lewego"
+            Return "obszar jest zbyt duży w stosunku do rozmiaru segmentu"
+        End Get
+    End Property
+
     Private Const MaksKolumn As Double = 1000000000.0
 
     ''' <summary>Terenowy bok segmentu (w jednostkach układu).</summary>
@@ -137,7 +153,7 @@ Public Class Siatka
     Public ReadOnly Property LiczbaKolumn As Integer
         Get
             If Not Poprawna Then Return 0
-            Return CInt(Math.Ceiling(Math.Round(Obszar.Szerokosc / BokSegmentu, 9)))
+            Return Math.Max(1, CInt(Math.Ceiling(Math.Round(Obszar.Szerokosc / BokSegmentu, 9))))
         End Get
     End Property
 
@@ -145,7 +161,7 @@ Public Class Siatka
     Public ReadOnly Property LiczbaWierszy As Integer
         Get
             If Not Poprawna Then Return 0
-            Return CInt(Math.Ceiling(Math.Round(Obszar.Wysokosc / BokSegmentu, 9)))
+            Return Math.Max(1, CInt(Math.Ceiling(Math.Round(Obszar.Wysokosc / BokSegmentu, 9))))
         End Get
     End Property
 
@@ -218,7 +234,7 @@ Public Class Siatka
     ''' <summary>Nazwa segmentu mapy TrekBuddy: przesunięcie lewego górnego rogu w pikselach (_x_y).</summary>
     Public Function NazwaSegmentuTrekBuddy(prefiks As String, wiersz As Integer, kolumna As Integer) As String
         Dim ci = CultureInfo.InvariantCulture
-        Return prefiks & "_" & ((kolumna - 1) * BokSegmentuPx).ToString(ci) & "_" & ((wiersz - 1) * BokSegmentuPx).ToString(ci)
+        Return prefiks & "_" & (CLng(kolumna - 1) * BokSegmentuPx).ToString(ci) & "_" & (CLng(wiersz - 1) * BokSegmentuPx).ToString(ci)
     End Function
 
     ''' <summary>Styl numeracji z tekstu zapisanego w plikach ustawień.</summary>

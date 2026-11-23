@@ -67,20 +67,24 @@ Partial Class Form1
         Me.UsunKorytarzToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.SesjaSeparator2 = New System.Windows.Forms.ToolStripSeparator()
         Me.OdswiezToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.UsunPobraneToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.NarzedziaToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.DodajSerwerToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.FolderWlasnychWarstwToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.ZnajdzDzialkeToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.KonwertujOziToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.KonwertujGeoTiffToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.ProfilNmtToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.btnSzukajDzialki = New System.Windows.Forms.Button()
         Me.NarzedziaSeparator1 = New System.Windows.Forms.ToolStripSeparator()
         Me.btnDodajSerwer = New System.Windows.Forms.Button()
         Me.ScalanieToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.EksportToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.EksportCadToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
-        Me.ZaawansowanyMbtilesToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
-        Me.NakładanieWarstwNaSiebieToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
-        Me.UsuwaniePustychSegmentówToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.KorektaFolderuToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.NarzedziaSeparator2 = New System.Windows.Forms.ToolStripSeparator()
+        Me.PrzeslijNaTelefonToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.KopiujNaGarminaToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.UstawieniaToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.HelpToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.PomocOnlineToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
@@ -88,6 +92,11 @@ Partial Class Form1
         Me.PomocPomorskieForumEksploracyjneToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.HelpSeparator1 = New System.Windows.Forms.ToolStripSeparator()
         Me.AboutToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.ZglosBladToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.FolderDanychToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.HelpSeparator2 = New System.Windows.Forms.ToolStripSeparator()
+        Me.CoNowegoToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.WesprzyjToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.MenuStrip1 = New System.Windows.Forms.MenuStrip()
         Me.Label47 = New System.Windows.Forms.Label()
         Me.Label46 = New System.Windows.Forms.Label()
@@ -98,7 +107,6 @@ Partial Class Form1
         Me.txtRozmiarPiksela = New System.Windows.Forms.TextBox()
         Me.ToolTip1 = New System.Windows.Forms.ToolTip(Me.components)
         Me.grpWybraneWarstwy = New System.Windows.Forms.GroupBox()
-        Me.btnResetujWarstwy = New System.Windows.Forms.Button()
         Me.lstWybraneWarstwy = New MapoTero.ListaWarstw()
         Me.btnWarstwaWyzej = New System.Windows.Forms.Button()
         Me.btnWarstwaNizej = New System.Windows.Forms.Button()
@@ -108,8 +116,43 @@ Partial Class Form1
         Me.btnWarstwyZaawansowane = New System.Windows.Forms.Button()
         Me.btnPowieksz = New System.Windows.Forms.Button()
         Me.btnPomniejsz = New System.Windows.Forms.Button()
+        Me.pnlBelkaAkcji = New System.Windows.Forms.Panel()
+        Me.btnKreatorDolny = New System.Windows.Forms.Button()
+        Me.lblStatusSesji = New System.Windows.Forms.Label()
+        Me.lnkSzczegoly = New System.Windows.Forms.LinkLabel()
+        Me.btnOtworzFolderDolny = New System.Windows.Forms.Button()
+        Me.lblLiniaBelki = New System.Windows.Forms.Label()
+        Me.lblSeparator1 = New System.Windows.Forms.Label()
+        Me.lblSeparator2 = New System.Windows.Forms.Label()
+        Me.lblTytulObszar = New System.Windows.Forms.Label()
+        Me.lblTytulParametry = New System.Windows.Forms.Label()
+        Me.lblTytulPodglad = New System.Windows.Forms.Label()
+        Me.grpObszar = New System.Windows.Forms.Panel()
+        Me.lblOpisWymiary = New System.Windows.Forms.Label()
+        Me.lblBadgeSegmenty = New System.Windows.Forms.Label()
+        Me.lblWymiaryTerenu = New System.Windows.Forms.Label()
+        Me.lblPowierzchniaTerenu = New System.Windows.Forms.Label()
+        Me.pnlSzacunek = New System.Windows.Forms.Panel()
+        Me.lblTytulRozmiar = New System.Windows.Forms.Label()
+        Me.lblSzacowanyRozmiar = New System.Windows.Forms.Label()
+        Me.lblSeparatorSzacunku = New System.Windows.Forms.Label()
+        Me.lblTytulCzas = New System.Windows.Forms.Label()
+        Me.lblSzacowanyCzas = New System.Windows.Forms.Label()
+        Me.lblUkladZasiegSkrot = New System.Windows.Forms.Label()
+        Me.btnWpiszWspolrzedne = New System.Windows.Forms.Button()
+        Me.pnlUkrytePolaZasiegu = New System.Windows.Forms.Panel()
+        Me.grpRozdzielczoscFormat = New System.Windows.Forms.Panel()
+        Me.lblOpisPiksela = New System.Windows.Forms.Label()
+        Me.lblJednostkaPiksela = New System.Windows.Forms.Label()
+        Me.cmbRozmiarPiksela = New System.Windows.Forms.ComboBox()
+        Me.lblOpisSegmentu = New System.Windows.Forms.Label()
+        Me.lblJednostkaSegmentu = New System.Windows.Forms.Label()
+        Me.lblBokKm = New System.Windows.Forms.Label()
+        Me.lblOpisFormatu = New System.Windows.Forms.Label()
+        Me.cmbFormatDocelowy = New System.Windows.Forms.ComboBox()
+        Me.btnPrzejdzDoEksportu = New System.Windows.Forms.Button()
         Me.grpRozmiarSiatki = New System.Windows.Forms.GroupBox()
-        Me.grpPodglad = New System.Windows.Forms.GroupBox()
+        Me.grpPodglad = New System.Windows.Forms.Panel()
         Me.picPodglad = New System.Windows.Forms.PictureBox()
         Me.btnPodgladZaawansowane = New System.Windows.Forms.Button()
         Me.btnZoomPlus = New System.Windows.Forms.Button()
@@ -170,6 +213,7 @@ Partial Class Form1
         Me.txtYLewy = New System.Windows.Forms.TextBox()
         Me.txtXDol = New System.Windows.Forms.TextBox()
         Me.PictureBox2 = New System.Windows.Forms.PictureBox()
+        Me.chkEdycjaXY = New System.Windows.Forms.CheckBox()
         Me.Panel2 = New System.Windows.Forms.Panel()
         Me.splPanel = New System.Windows.Forms.Splitter()
         Me.Panel3 = New System.Windows.Forms.Panel()
@@ -178,11 +222,13 @@ Partial Class Form1
         Me.MenuStrip1.SuspendLayout()
         Me.grpWybraneWarstwy.SuspendLayout()
         CType(Me.numKrycie, System.ComponentModel.ISupportInitialize).BeginInit()
-        Me.grpRozmiarSiatki.SuspendLayout()
+        Me.grpObszar.SuspendLayout()
+        Me.pnlSzacunek.SuspendLayout()
+        Me.pnlUkrytePolaZasiegu.SuspendLayout()
+        Me.grpRozdzielczoscFormat.SuspendLayout()
         Me.grpPodglad.SuspendLayout()
         CType(Me.picPodglad, System.ComponentModel.ISupportInitialize).BeginInit()
-        Me.grpSchemat.SuspendLayout()
-        CType(Me.PictureBox2, System.ComponentModel.ISupportInitialize).BeginInit()
+        Me.pnlBelkaAkcji.SuspendLayout()
         Me.Panel2.SuspendLayout()
         Me.Panel3.SuspendLayout()
         Me.SuspendLayout()
@@ -191,14 +237,14 @@ Partial Class Form1
         '
         Me.btnPobierz.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.btnPobierz.BackColor = System.Drawing.SystemColors.ActiveBorder
-        Me.btnPobierz.Font = New System.Drawing.Font("Microsoft Sans Serif", 12.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
+        Me.btnPobierz.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
         Me.btnPobierz.Location = New System.Drawing.Point(110, 569)
         Me.btnPobierz.Name = "btnPobierz"
-        Me.btnPobierz.Size = New System.Drawing.Size(105, 36)
+        Me.btnPobierz.Size = New System.Drawing.Size(125, 36)
         Me.btnPobierz.TabIndex = 6
         Me.btnPobierz.Tag = ""
-        Me.btnPobierz.Text = "Pobierz"
-        Me.ToolTip1.SetToolTip(Me.btnPobierz, "Rozpocznij proces pobierania mapy.")
+        Me.btnPobierz.Text = "Pobierz segmenty"
+        Me.ToolTip1.SetToolTip(Me.btnPobierz, "Rozpocznij pobieranie mapy (albo wznów pobieranie bieżącej sesji)")
         Me.btnPobierz.UseVisualStyleBackColor = False
         '
         'grpDaneZrodlowe
@@ -308,6 +354,7 @@ Partial Class Form1
         '
         'StatusStrip1
         '
+        Me.StatusStrip1.ShowItemToolTips = True
         Me.StatusStrip1.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.stPostep, Me.stFormat, Me.stFolder, Me.stSegment})
         Me.StatusStrip1.Location = New System.Drawing.Point(0, 662)
         Me.StatusStrip1.Name = "StatusStrip1"
@@ -328,6 +375,9 @@ Partial Class Form1
         Me.stFormat.Name = "stFormat"
         Me.stFormat.Size = New System.Drawing.Size(70, 17)
         Me.stFormat.Text = "rozszerzenie"
+        Me.stFormat.IsLink = True
+        Me.stFormat.LinkBehavior = System.Windows.Forms.LinkBehavior.HoverUnderline
+        Me.stFormat.ToolTipText = "Format pobieranych segmentów - kliknij, aby go zmienić w oknie Ustawienia"
         '
         'stFolder
         '
@@ -351,12 +401,12 @@ Partial Class Form1
         Me.btnPrzerwij.TabIndex = 245
         Me.btnPrzerwij.Tag = ""
         Me.btnPrzerwij.Text = "Przerwij pobieranie"
-        Me.ToolTip1.SetToolTip(Me.btnPrzerwij, "Anuluj rozpoczęty proces pobierania mapy")
+        Me.ToolTip1.SetToolTip(Me.btnPrzerwij, "Przerwij pobieranie mapy - pobrane segmenty zostają w folderze")
         Me.btnPrzerwij.UseVisualStyleBackColor = True
         '
         'SesjaToolStripMenuItem
         '
-        Me.SesjaToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.ZapiszToolStripMenuItem, Me.WczytajToolStripMenuItem1, Me.SesjaSeparator1, Me.KorytarzToolStripMenuItem, Me.UsunKorytarzToolStripMenuItem, Me.SesjaSeparator2, Me.OdswiezToolStripMenuItem})
+        Me.SesjaToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.ZapiszToolStripMenuItem, Me.WczytajToolStripMenuItem1, Me.SesjaSeparator1, Me.KorytarzToolStripMenuItem, Me.UsunKorytarzToolStripMenuItem, Me.SesjaSeparator2, Me.OdswiezToolStripMenuItem, Me.UsunPobraneToolStripMenuItem})
         Me.SesjaToolStripMenuItem.Name = "SesjaToolStripMenuItem"
         Me.SesjaToolStripMenuItem.ShortcutKeys = CType((System.Windows.Forms.Keys.Alt Or System.Windows.Forms.Keys.S), System.Windows.Forms.Keys)
         Me.SesjaToolStripMenuItem.Size = New System.Drawing.Size(104, 20)
@@ -369,14 +419,14 @@ Partial Class Form1
         Me.ZapiszToolStripMenuItem.Name = "ZapiszToolStripMenuItem"
         Me.ZapiszToolStripMenuItem.ShortcutKeys = CType((System.Windows.Forms.Keys.Alt Or System.Windows.Forms.Keys.Z), System.Windows.Forms.Keys)
         Me.ZapiszToolStripMenuItem.Size = New System.Drawing.Size(290, 22)
-        Me.ZapiszToolStripMenuItem.Text = "zapisz ustawienia sesji (conf.txt)"
+        Me.ZapiszToolStripMenuItem.Text = "Zapisz ustawienia sesji (conf.txt)"
         '
         'WczytajToolStripMenuItem1
         '
         Me.WczytajToolStripMenuItem1.Name = "WczytajToolStripMenuItem1"
         Me.WczytajToolStripMenuItem1.ShortcutKeys = CType((System.Windows.Forms.Keys.Alt Or System.Windows.Forms.Keys.W), System.Windows.Forms.Keys)
         Me.WczytajToolStripMenuItem1.Size = New System.Drawing.Size(290, 22)
-        Me.WczytajToolStripMenuItem1.Text = "wczytaj ustawienia sesji (conf.txt)"
+        Me.WczytajToolStripMenuItem1.Text = "Wczytaj ustawienia sesji (conf.txt)"
         '
         'SesjaSeparator1
         '
@@ -387,7 +437,7 @@ Partial Class Form1
         '
         Me.KorytarzToolStripMenuItem.Name = "KorytarzToolStripMenuItem"
         Me.KorytarzToolStripMenuItem.Size = New System.Drawing.Size(290, 22)
-        Me.KorytarzToolStripMenuItem.Text = "obszar pobierania wzdłuż trasy (GPX, KML, KMZ)..."
+        Me.KorytarzToolStripMenuItem.Text = "Obszar pobierania wzdłuż trasy (GPX, KML, KMZ)..."
         Me.KorytarzToolStripMenuItem.ToolTipText = "Pobieranie tylko segmentów w pasie wzdłuż trasy zaplanowanej np. w Mapy.com, Komoot lub Locus Map"
         '
         'UsunKorytarzToolStripMenuItem
@@ -395,7 +445,7 @@ Partial Class Form1
         Me.UsunKorytarzToolStripMenuItem.Enabled = False
         Me.UsunKorytarzToolStripMenuItem.Name = "UsunKorytarzToolStripMenuItem"
         Me.UsunKorytarzToolStripMenuItem.Size = New System.Drawing.Size(290, 22)
-        Me.UsunKorytarzToolStripMenuItem.Text = "usuń obszar wzdłuż trasy (pobieranie całego prostokąta)"
+        Me.UsunKorytarzToolStripMenuItem.Text = "Usuń obszar wzdłuż trasy (pobieranie całego prostokąta)"
         '
         'SesjaSeparator2
         '
@@ -406,16 +456,23 @@ Partial Class Form1
         '
         Me.OdswiezToolStripMenuItem.Name = "OdswiezToolStripMenuItem"
         Me.OdswiezToolStripMenuItem.Size = New System.Drawing.Size(290, 22)
-        Me.OdswiezToolStripMenuItem.Text = "odśwież mapę - pobierz ponownie wszystkie segmenty"
+        Me.OdswiezToolStripMenuItem.Text = "Odśwież mapę (pobierz ponownie wszystkie segmenty)"
         Me.OdswiezToolStripMenuItem.ToolTipText = "Ponowne pobranie wszystkich segmentów bieżącej sesji (np. po aktualizacji ortofotomapy); stary plik segmentu jest zastępowany dopiero po udanym pobraniu nowego"
+        '
+        'UsunPobraneToolStripMenuItem
+        '
+        Me.UsunPobraneToolStripMenuItem.Name = "UsunPobraneToolStripMenuItem"
+        Me.UsunPobraneToolStripMenuItem.Size = New System.Drawing.Size(290, 22)
+        Me.UsunPobraneToolStripMenuItem.Text = "Usuń pobrane pliki bieżącej sesji... (do Kosza)"
+        Me.UsunPobraneToolStripMenuItem.ToolTipText = "Przenosi pobrane pliki bieżącej sesji do Kosza systemu Windows"
         '
         'NarzedziaToolStripMenuItem
         '
-        Me.NarzedziaToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.DodajSerwerToolStripMenuItem, Me.ZnajdzDzialkeToolStripMenuItem, Me.KonwertujOziToolStripMenuItem, Me.NarzedziaSeparator1, Me.ScalanieToolStripMenuItem, Me.EksportToolStripMenuItem, Me.EksportCadToolStripMenuItem, Me.ZaawansowanyMbtilesToolStripMenuItem, Me.NakładanieWarstwNaSiebieToolStripMenuItem, Me.UsuwaniePustychSegmentówToolStripMenuItem, Me.KorektaFolderuToolStripMenuItem})
+        Me.NarzedziaToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.DodajSerwerToolStripMenuItem, Me.FolderWlasnychWarstwToolStripMenuItem, Me.ZnajdzDzialkeToolStripMenuItem, Me.KonwertujOziToolStripMenuItem, Me.KonwertujGeoTiffToolStripMenuItem, Me.ProfilNmtToolStripMenuItem, Me.NarzedziaSeparator1, Me.ScalanieToolStripMenuItem, Me.EksportToolStripMenuItem, Me.EksportCadToolStripMenuItem, Me.KorektaFolderuToolStripMenuItem, Me.NarzedziaSeparator2, Me.PrzeslijNaTelefonToolStripMenuItem, Me.KopiujNaGarminaToolStripMenuItem})
         Me.NarzedziaToolStripMenuItem.Name = "NarzedziaToolStripMenuItem"
         Me.NarzedziaToolStripMenuItem.Size = New System.Drawing.Size(70, 20)
         Me.NarzedziaToolStripMenuItem.Text = "Narzędzia"
-        Me.NarzedziaToolStripMenuItem.ToolTipText = "Opcjonalne narzędzia wykorzystywane jedynie w szczególnych przypadkach"
+        Me.NarzedziaToolStripMenuItem.ToolTipText = "Scalanie i eksport mapy, eksport do CAD, kreator serwerów, wyszukiwarka, konwerter OziExplorer, profil wysokościowy i korekta obrazów"
         '
         '
         'DodajSerwerToolStripMenuItem
@@ -424,6 +481,13 @@ Partial Class Form1
         Me.DodajSerwerToolStripMenuItem.Size = New System.Drawing.Size(315, 22)
         Me.DodajSerwerToolStripMenuItem.Text = "Dodaj nowy serwer WMS / WMTS..."
         Me.DodajSerwerToolStripMenuItem.ToolTipText = "Kreator dodawania serwera WMS lub WMTS (analiza GetCapabilities i wybór warstw)"
+        '
+        'FolderWlasnychWarstwToolStripMenuItem
+        '
+        Me.FolderWlasnychWarstwToolStripMenuItem.Name = "FolderWlasnychWarstwToolStripMenuItem"
+        Me.FolderWlasnychWarstwToolStripMenuItem.Size = New System.Drawing.Size(315, 22)
+        Me.FolderWlasnychWarstwToolStripMenuItem.Text = "Otwórz folder własnych warstw..."
+        Me.FolderWlasnychWarstwToolStripMenuItem.ToolTipText = "Otwiera folder na własne zbiory map (*.txt), chronione przed nadpisaniem przy aktualizacji programu"
         '
         'ZnajdzDzialkeToolStripMenuItem
         '
@@ -438,7 +502,21 @@ Partial Class Form1
         Me.KonwertujOziToolStripMenuItem.Name = "KonwertujOziToolStripMenuItem"
         Me.KonwertujOziToolStripMenuItem.Size = New System.Drawing.Size(315, 22)
         Me.KonwertujOziToolStripMenuItem.Text = "Konwertuj mapę OziExplorer (.map)..."
-        Me.KonwertujOziToolStripMenuItem.ToolTipText = "Konwertuje kalibrowany skan mapy Ozi (.map) do formatu JNX, KMZ lub MBTiles"
+        Me.KonwertujOziToolStripMenuItem.ToolTipText = "Konwertuje kalibrowany skan mapy OziExplorer (.map) do JNX, KMZ, MBTiles, SQLiteDB albo OruxMaps"
+        '
+        'KonwertujGeoTiffToolStripMenuItem
+        '
+        Me.KonwertujGeoTiffToolStripMenuItem.Name = "KonwertujGeoTiffToolStripMenuItem"
+        Me.KonwertujGeoTiffToolStripMenuItem.Size = New System.Drawing.Size(315, 22)
+        Me.KonwertujGeoTiffToolStripMenuItem.Text = "Konwertuj mapę GeoTIFF..."
+        Me.KonwertujGeoTiffToolStripMenuItem.ToolTipText = "Kafelkowanie i konwersja rastra GeoTIFF do MBTiles, KMZ, JNX, SQLiteDB albo OruxMaps"
+        '
+        'ProfilNmtToolStripMenuItem
+        '
+        Me.ProfilNmtToolStripMenuItem.Name = "ProfilNmtToolStripMenuItem"
+        Me.ProfilNmtToolStripMenuItem.Size = New System.Drawing.Size(315, 22)
+        Me.ProfilNmtToolStripMenuItem.Text = "Profil wysokościowy trasy (GPX, KML)..."
+        Me.ProfilNmtToolStripMenuItem.ToolTipText = "Wysokości terenu z NMT GUGiK dla punktów trasy, wykres profilu i zapis GPX z wysokościami"
         '
         'NarzedziaSeparator1
         '
@@ -449,14 +527,14 @@ Partial Class Form1
         Me.ScalanieToolStripMenuItem.Name = "ScalanieToolStripMenuItem"
         Me.ScalanieToolStripMenuItem.ShortcutKeys = CType((System.Windows.Forms.Keys.Control Or System.Windows.Forms.Keys.L), System.Windows.Forms.Keys)
         Me.ScalanieToolStripMenuItem.Size = New System.Drawing.Size(315, 22)
-        Me.ScalanieToolStripMenuItem.Text = "Łączenie segmentów"
+        Me.ScalanieToolStripMenuItem.Text = "Scalanie segmentów"
         '
         'EksportToolStripMenuItem
         '
         Me.EksportToolStripMenuItem.Name = "EksportToolStripMenuItem"
         Me.EksportToolStripMenuItem.ShortcutKeys = CType((System.Windows.Forms.Keys.Control Or System.Windows.Forms.Keys.E), System.Windows.Forms.Keys)
         Me.EksportToolStripMenuItem.Size = New System.Drawing.Size(315, 22)
-        Me.EksportToolStripMenuItem.Text = "Eksport mapy (KMZ, JNX, MBTiles, SQLiteDB, OruxMaps, GeoTIFF)"
+        Me.EksportToolStripMenuItem.Text = "Eksport mapy (JNX, KMZ, MBTiles, SQLiteDB, OruxMaps, arkusz, TrekBuddy)"
         '
         'EksportCadToolStripMenuItem
         '
@@ -465,30 +543,31 @@ Partial Class Form1
         Me.EksportCadToolStripMenuItem.Text = "Eksport do CAD (DXF, skrypt SCR, LISP)..."
         Me.EksportCadToolStripMenuItem.ToolTipText = "Rysunek DXF i skrypt SCR dla AutoCAD, AutoCAD LT, BricsCAD, ZWCAD: rastry na właściwych współrzędnych, obrys i siatka segmentów"
         '
-        'NakładanieWarstwNaSiebieToolStripMenuItem
-        '
-        Me.ZaawansowanyMbtilesToolStripMenuItem.Name = "ZaawansowanyMbtilesToolStripMenuItem"
-        Me.ZaawansowanyMbtilesToolStripMenuItem.Size = New System.Drawing.Size(315, 22)
-        Me.ZaawansowanyMbtilesToolStripMenuItem.Text = "Zaawansowany wielowarstwowy MBTiles..."
-        Me.ZaawansowanyMbtilesToolStripMenuItem.ToolTipText = "Kompilacja pliku MBTiles z różnych warstw i poziomów zoom (np. Topo 50k -> Topo 10k -> Ortofoto)"
-                Me.NakładanieWarstwNaSiebieToolStripMenuItem.Name = "NakładanieWarstwNaSiebieToolStripMenuItem"
-        Me.NakładanieWarstwNaSiebieToolStripMenuItem.ShortcutKeys = CType((System.Windows.Forms.Keys.Control Or System.Windows.Forms.Keys.N), System.Windows.Forms.Keys)
-        Me.NakładanieWarstwNaSiebieToolStripMenuItem.Size = New System.Drawing.Size(315, 22)
-        Me.NakładanieWarstwNaSiebieToolStripMenuItem.Text = "Nakładanie dwóch map png na siebie"
-        '
-        'UsuwaniePustychSegmentówToolStripMenuItem
-        '
-        Me.UsuwaniePustychSegmentówToolStripMenuItem.Name = "UsuwaniePustychSegmentówToolStripMenuItem"
-        Me.UsuwaniePustychSegmentówToolStripMenuItem.ShortcutKeys = CType((System.Windows.Forms.Keys.Control Or System.Windows.Forms.Keys.U), System.Windows.Forms.Keys)
-        Me.UsuwaniePustychSegmentówToolStripMenuItem.Size = New System.Drawing.Size(315, 22)
-        Me.UsuwaniePustychSegmentówToolStripMenuItem.Text = "Usuwanie pustych segmentów"
-        '
         'KorektaFolderuToolStripMenuItem
         '
         Me.KorektaFolderuToolStripMenuItem.Name = "KorektaFolderuToolStripMenuItem"
         Me.KorektaFolderuToolStripMenuItem.Size = New System.Drawing.Size(315, 22)
-        Me.KorektaFolderuToolStripMenuItem.Text = "Korekta i optymalizacja obrazów w folderze..."
+        Me.KorektaFolderuToolStripMenuItem.Text = "Korekta obrazów w folderze..."
         Me.KorektaFolderuToolStripMenuItem.ToolTipText = "Wsadowe przetwarzanie obrazów: kontrast, ostrość, rozjaśnienie lasów i profil Garmin MIP"
+        '
+        'NarzedziaSeparator2
+        '
+        Me.NarzedziaSeparator2.Name = "NarzedziaSeparator2"
+        Me.NarzedziaSeparator2.Size = New System.Drawing.Size(312, 6)
+        '
+        'PrzeslijNaTelefonToolStripMenuItem
+        '
+        Me.PrzeslijNaTelefonToolStripMenuItem.Name = "PrzeslijNaTelefonToolStripMenuItem"
+        Me.PrzeslijNaTelefonToolStripMenuItem.Size = New System.Drawing.Size(315, 22)
+        Me.PrzeslijNaTelefonToolStripMenuItem.Text = "Prześlij mapę na telefon (Wi-Fi)..."
+        Me.PrzeslijNaTelefonToolStripMenuItem.ToolTipText = "Przesyłanie wyeksportowanej mapy (MBTiles, GeoPackage, GeoTIFF, KMZ) na telefon przez sieć lokalną z kodem QR"
+        '
+        'KopiujNaGarminaToolStripMenuItem
+        '
+        Me.KopiujNaGarminaToolStripMenuItem.Name = "KopiujNaGarminaToolStripMenuItem"
+        Me.KopiujNaGarminaToolStripMenuItem.Size = New System.Drawing.Size(315, 22)
+        Me.KopiujNaGarminaToolStripMenuItem.Text = "Kopiuj mapę do Garmina (USB)..."
+        Me.KopiujNaGarminaToolStripMenuItem.ToolTipText = "Wykryj odbiornik Garmin lub kartę microSD i skopiuj plik .kmz lub .jnx do odpowiedniego folderu."
         '
         'UstawieniaToolStripMenuItem
         '
@@ -499,7 +578,7 @@ Partial Class Form1
         '
         'HelpToolStripMenuItem
         '
-        Me.HelpToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.PomocOnlineToolStripMenuItem, Me.InstrukcjaObsługiToolStripMenuItem, Me.PomocPomorskieForumEksploracyjneToolStripMenuItem, Me.HelpSeparator1, Me.AboutToolStripMenuItem})
+        Me.HelpToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.PomocOnlineToolStripMenuItem, Me.InstrukcjaObsługiToolStripMenuItem, Me.HelpSeparator1, Me.PomocPomorskieForumEksploracyjneToolStripMenuItem, Me.ZglosBladToolStripMenuItem, Me.FolderDanychToolStripMenuItem, Me.HelpSeparator2, Me.CoNowegoToolStripMenuItem, Me.WesprzyjToolStripMenuItem, Me.AboutToolStripMenuItem})
         Me.HelpToolStripMenuItem.Name = "HelpToolStripMenuItem"
         Me.HelpToolStripMenuItem.Size = New System.Drawing.Size(57, 20)
         Me.HelpToolStripMenuItem.Text = "Pomoc"
@@ -509,22 +588,22 @@ Partial Class Form1
         Me.PomocOnlineToolStripMenuItem.Name = "PomocOnlineToolStripMenuItem"
         Me.PomocOnlineToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F1
         Me.PomocOnlineToolStripMenuItem.Size = New System.Drawing.Size(335, 22)
-        Me.PomocOnlineToolStripMenuItem.Text = "Podręcznik użytkownika (pomoc online)"
+        Me.PomocOnlineToolStripMenuItem.Text = "Podręcznik użytkownika (online)"
         Me.PomocOnlineToolStripMenuItem.ToolTipText = "Otwiera pełny podręcznik użytkownika i pomoc programu w przeglądarce internetowej"
         '
         'InstrukcjaObsługiToolStripMenuItem
         '
         Me.InstrukcjaObsługiToolStripMenuItem.Name = "InstrukcjaObsługiToolStripMenuItem"
-        Me.InstrukcjaObsługiToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F2
         Me.InstrukcjaObsługiToolStripMenuItem.Size = New System.Drawing.Size(335, 22)
-        Me.InstrukcjaObsługiToolStripMenuItem.Text = "Podstawowa instrukcja obsługi"
+        Me.InstrukcjaObsługiToolStripMenuItem.Text = "Krótka instrukcja (bez internetu)"
+        Me.InstrukcjaObsługiToolStripMenuItem.ToolTipText = "Otwiera wbudowaną skróconą instrukcję obsługi w oknie programu"
         '
         'PomocPomorskieForumEksploracyjneToolStripMenuItem
         '
         Me.PomocPomorskieForumEksploracyjneToolStripMenuItem.Name = "PomocPomorskieForumEksploracyjneToolStripMenuItem"
-        Me.PomocPomorskieForumEksploracyjneToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F3
         Me.PomocPomorskieForumEksploracyjneToolStripMenuItem.Size = New System.Drawing.Size(335, 22)
-        Me.PomocPomorskieForumEksploracyjneToolStripMenuItem.Text = "Pomoc na Pomorskim Forum Eksploracyjnym"
+        Me.PomocPomorskieForumEksploracyjneToolStripMenuItem.Text = "Zadaj pytanie na forum (PFE)"
+        Me.PomocPomorskieForumEksploracyjneToolStripMenuItem.ToolTipText = "Otwiera dział MapoTero na Pomorskim Forum Eksploracyjnym w przeglądarce internetowej"
         '
         'HelpSeparator1
         '
@@ -536,6 +615,39 @@ Partial Class Form1
         Me.AboutToolStripMenuItem.Name = "AboutToolStripMenuItem"
         Me.AboutToolStripMenuItem.Size = New System.Drawing.Size(335, 22)
         Me.AboutToolStripMenuItem.Text = "O programie"
+        '
+        'ZglosBladToolStripMenuItem
+        '
+        Me.ZglosBladToolStripMenuItem.Name = "ZglosBladToolStripMenuItem"
+        Me.ZglosBladToolStripMenuItem.Size = New System.Drawing.Size(335, 22)
+        Me.ZglosBladToolStripMenuItem.Text = "Zgłoś błąd lub pomysł (GitHub)"
+        Me.ZglosBladToolStripMenuItem.ToolTipText = "Otwiera stronę zgłoszeń programu na GitHubie w przeglądarce internetowej"
+        '
+        'FolderDanychToolStripMenuItem
+        '
+        Me.FolderDanychToolStripMenuItem.Name = "FolderDanychToolStripMenuItem"
+        Me.FolderDanychToolStripMenuItem.Size = New System.Drawing.Size(335, 22)
+        Me.FolderDanychToolStripMenuItem.Text = "Otwórz folder danych programu"
+        Me.FolderDanychToolStripMenuItem.ToolTipText = "Otwiera folder z ustawieniami (lastsettings.txt), pobranymi mapami (download) i plikiem awarie.log"
+        '
+        'HelpSeparator2
+        '
+        Me.HelpSeparator2.Name = "HelpSeparator2"
+        Me.HelpSeparator2.Size = New System.Drawing.Size(332, 6)
+        '
+        'CoNowegoToolStripMenuItem
+        '
+        Me.CoNowegoToolStripMenuItem.Name = "CoNowegoToolStripMenuItem"
+        Me.CoNowegoToolStripMenuItem.Size = New System.Drawing.Size(335, 22)
+        Me.CoNowegoToolStripMenuItem.Text = "Co nowego w programie"
+        Me.CoNowegoToolStripMenuItem.ToolTipText = "Otwiera listę wydań programu z opisem zmian w przeglądarce internetowej"
+        '
+        'WesprzyjToolStripMenuItem
+        '
+        Me.WesprzyjToolStripMenuItem.Name = "WesprzyjToolStripMenuItem"
+        Me.WesprzyjToolStripMenuItem.Size = New System.Drawing.Size(335, 22)
+        Me.WesprzyjToolStripMenuItem.Text = "Wesprzyj rozwój programu"
+        Me.WesprzyjToolStripMenuItem.ToolTipText = "Postaw kawę autorowi programu (buycoffee.to)"
         '
         'MenuStrip1
         '
@@ -582,9 +694,9 @@ Partial Class Form1
         '
         'txtBokSegmentu
         '
-        Me.txtBokSegmentu.Location = New System.Drawing.Point(246, 72)
+        Me.txtBokSegmentu.Location = New System.Drawing.Point(60, 44)
         Me.txtBokSegmentu.Name = "txtBokSegmentu"
-        Me.txtBokSegmentu.Size = New System.Drawing.Size(72, 20)
+        Me.txtBokSegmentu.Size = New System.Drawing.Size(38, 20)
         Me.txtBokSegmentu.TabIndex = 211
         Me.txtBokSegmentu.Text = "2000"
         Me.txtBokSegmentu.TextAlign = System.Windows.Forms.HorizontalAlignment.Center
@@ -597,8 +709,8 @@ Partial Class Form1
         Me.Label1.Size = New System.Drawing.Size(73, 13)
         Me.Label1.TabIndex = 213
         Me.Label1.Text = "Segment [pix]"
-        Me.ToolTip1.SetToolTip(Me.Label1, "Rozmiar pojedyńczego segmentu - najmniejszej komórki siatki kwadtatów, na które z" &
-        "ostanie podzielony pobierany obszar mapy.  Uwaga - maksymalna rozmiar segmentu d" &
+        Me.ToolTip1.SetToolTip(Me.Label1, "Rozmiar pojedynczego segmentu - najmniejszej komórki siatki kwadratów, na które z" &
+        "ostanie podzielony pobierany obszar mapy. Uwaga - maksymalny rozmiar segmentu d" &
         "la Geoportalu2 wynosi 2048px")
         '
         'lblRozmiarPikselaOpis
@@ -614,9 +726,9 @@ Partial Class Form1
         '
         'txtRozmiarPiksela
         '
-        Me.txtRozmiarPiksela.Location = New System.Drawing.Point(246, 36)
+        Me.txtRozmiarPiksela.Location = New System.Drawing.Point(44, 17)
         Me.txtRozmiarPiksela.Name = "txtRozmiarPiksela"
-        Me.txtRozmiarPiksela.Size = New System.Drawing.Size(72, 20)
+        Me.txtRozmiarPiksela.Size = New System.Drawing.Size(36, 20)
         Me.txtRozmiarPiksela.TabIndex = 212
         Me.txtRozmiarPiksela.Text = "1"
         Me.txtRozmiarPiksela.TextAlign = System.Windows.Forms.HorizontalAlignment.Center
@@ -634,14 +746,13 @@ Partial Class Form1
         Me.grpWybraneWarstwy.Controls.Add(Me.btnWarstwaWyzej)
         Me.grpWybraneWarstwy.Controls.Add(Me.btnWarstwaNizej)
         Me.grpWybraneWarstwy.Controls.Add(Me.btnUsunWarstwe)
-        Me.grpWybraneWarstwy.Controls.Add(Me.btnResetujWarstwy)
         Me.grpWybraneWarstwy.Controls.Add(Me.lblKrycie)
         Me.grpWybraneWarstwy.Controls.Add(Me.numKrycie)
         Me.grpWybraneWarstwy.Controls.Add(Me.btnWarstwyZaawansowane)
         Me.grpWybraneWarstwy.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.grpWybraneWarstwy.Location = New System.Drawing.Point(5, 322)
         Me.grpWybraneWarstwy.Name = "grpWybraneWarstwy"
-        Me.grpWybraneWarstwy.Size = New System.Drawing.Size(210, 170)
+        Me.grpWybraneWarstwy.Size = New System.Drawing.Size(210, 240)
         Me.grpWybraneWarstwy.TabIndex = 268
         Me.grpWybraneWarstwy.TabStop = False
         Me.grpWybraneWarstwy.Text = "Wybrane warstwy oraz ich kolejność"
@@ -651,16 +762,17 @@ Partial Class Form1
         '
         'lstWybraneWarstwy
         '
-        Me.lstWybraneWarstwy.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.lstWybraneWarstwy.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.lstWybraneWarstwy.Location = New System.Drawing.Point(4, 15)
         Me.lstWybraneWarstwy.Name = "lstWybraneWarstwy"
-        Me.lstWybraneWarstwy.Size = New System.Drawing.Size(202, 124)
+        Me.lstWybraneWarstwy.Size = New System.Drawing.Size(202, 194)
         Me.lstWybraneWarstwy.TabIndex = 300
         '
         'btnWarstwaWyzej
         '
+        Me.btnWarstwaWyzej.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
         Me.btnWarstwaWyzej.Font = New System.Drawing.Font("Segoe UI Symbol", 8.25!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
-        Me.btnWarstwaWyzej.Location = New System.Drawing.Point(4, 142)
+        Me.btnWarstwaWyzej.Location = New System.Drawing.Point(4, 212)
         Me.btnWarstwaWyzej.Margin = New System.Windows.Forms.Padding(0)
         Me.btnWarstwaWyzej.Name = "btnWarstwaWyzej"
         Me.btnWarstwaWyzej.Size = New System.Drawing.Size(20, 23)
@@ -671,8 +783,9 @@ Partial Class Form1
         '
         'btnWarstwaNizej
         '
+        Me.btnWarstwaNizej.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
         Me.btnWarstwaNizej.Font = New System.Drawing.Font("Segoe UI Symbol", 8.25!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
-        Me.btnWarstwaNizej.Location = New System.Drawing.Point(25, 142)
+        Me.btnWarstwaNizej.Location = New System.Drawing.Point(25, 212)
         Me.btnWarstwaNizej.Margin = New System.Windows.Forms.Padding(0)
         Me.btnWarstwaNizej.Name = "btnWarstwaNizej"
         Me.btnWarstwaNizej.Size = New System.Drawing.Size(20, 23)
@@ -683,8 +796,9 @@ Partial Class Form1
         '
         'btnUsunWarstwe
         '
+        Me.btnUsunWarstwe.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
         Me.btnUsunWarstwe.Font = New System.Drawing.Font("Segoe UI Symbol", 8.25!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
-        Me.btnUsunWarstwe.Location = New System.Drawing.Point(46, 142)
+        Me.btnUsunWarstwe.Location = New System.Drawing.Point(46, 212)
         Me.btnUsunWarstwe.Margin = New System.Windows.Forms.Padding(0)
         Me.btnUsunWarstwe.Name = "btnUsunWarstwe"
         Me.btnUsunWarstwe.Size = New System.Drawing.Size(20, 23)
@@ -693,22 +807,11 @@ Partial Class Form1
         Me.ToolTip1.SetToolTip(Me.btnUsunWarstwe, "Usuń zaznaczoną warstwę (Delete)")
         Me.btnUsunWarstwe.UseVisualStyleBackColor = True
         '
-        'btnResetujWarstwy
-        '
-        Me.btnResetujWarstwy.Image = Global.MapoTero.My.Resources.Resources.kosz
-        Me.btnResetujWarstwy.Location = New System.Drawing.Point(67, 142)
-        Me.btnResetujWarstwy.Margin = New System.Windows.Forms.Padding(0)
-        Me.btnResetujWarstwy.Name = "btnResetujWarstwy"
-        Me.btnResetujWarstwy.Size = New System.Drawing.Size(22, 23)
-        Me.btnResetujWarstwy.TabIndex = 304
-        Me.ToolTip1.SetToolTip(Me.btnResetujWarstwy, "Usuń zaznaczoną warstwę (Delete)")
-        Me.btnResetujWarstwy.UseVisualStyleBackColor = True
-        '
         'lblKrycie
         '
+        Me.lblKrycie.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.lblKrycie.AutoSize = True
-        Me.lblKrycie.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.lblKrycie.Location = New System.Drawing.Point(88, 147)
+        Me.lblKrycie.Location = New System.Drawing.Point(67, 217)
         Me.lblKrycie.Name = "lblKrycie"
         Me.lblKrycie.Size = New System.Drawing.Size(42, 13)
         Me.lblKrycie.TabIndex = 305
@@ -717,9 +820,9 @@ Partial Class Form1
         '
         'numKrycie
         '
+        Me.numKrycie.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.numKrycie.Increment = New Decimal(New Integer() {5, 0, 0, 0})
-        Me.numKrycie.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.numKrycie.Location = New System.Drawing.Point(132, 144)
+        Me.numKrycie.Location = New System.Drawing.Point(111, 214)
         Me.numKrycie.Minimum = New Decimal(New Integer() {5, 0, 0, 0})
         Me.numKrycie.Name = "numKrycie"
         Me.numKrycie.Size = New System.Drawing.Size(50, 20)
@@ -729,8 +832,8 @@ Partial Class Form1
         '
         'btnWarstwyZaawansowane
         '
-        Me.btnWarstwyZaawansowane.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.btnWarstwyZaawansowane.Location = New System.Drawing.Point(184, 142)
+        Me.btnWarstwyZaawansowane.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.btnWarstwyZaawansowane.Location = New System.Drawing.Point(184, 212)
         Me.btnWarstwyZaawansowane.Margin = New System.Windows.Forms.Padding(0)
         Me.btnWarstwyZaawansowane.Name = "btnWarstwyZaawansowane"
         Me.btnWarstwyZaawansowane.Size = New System.Drawing.Size(22, 23)
@@ -760,13 +863,13 @@ Partial Class Form1
         Me.btnPomniejsz.Size = New System.Drawing.Size(23, 30)
         Me.btnPomniejsz.TabIndex = 296
         Me.btnPomniejsz.Text = "-"
-        Me.ToolTip1.SetToolTip(Me.btnPomniejsz, "Powiększ")
+        Me.ToolTip1.SetToolTip(Me.btnPomniejsz, "Pomniejsz")
         Me.btnPomniejsz.UseVisualStyleBackColor = True
         '
         'btnSzukajDzialki
         '
         Me.btnSzukajDzialki.Font = New System.Drawing.Font("Segoe UI", 6.5!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
-        Me.btnSzukajDzialki.Location = New System.Drawing.Point(6, 108)
+        Me.btnSzukajDzialki.Location = New System.Drawing.Point(6, 116)
         Me.btnSzukajDzialki.Margin = New System.Windows.Forms.Padding(0)
         Me.btnSzukajDzialki.Name = "btnSzukajDzialki"
         Me.btnSzukajDzialki.Padding = New System.Windows.Forms.Padding(0)
@@ -777,37 +880,56 @@ Partial Class Form1
         Me.btnSzukajDzialki.UseCompatibleTextRendering = True
         Me.btnSzukajDzialki.UseVisualStyleBackColor = True
         '
-        'grpRozmiarSiatki
+        'pnlUkrytePolaZasiegu
         '
-        Me.grpRozmiarSiatki.Controls.Add(Me.Label22)
-        Me.grpRozmiarSiatki.Controls.Add(Me.Label19)
-        Me.grpRozmiarSiatki.Controls.Add(Me.Label18)
-        Me.grpRozmiarSiatki.Controls.Add(Me.txtLiczbaWierszy)
-        Me.grpRozmiarSiatki.Controls.Add(Me.Label21)
-        Me.grpRozmiarSiatki.Controls.Add(Me.txtLiczbaKolumn)
-        Me.grpRozmiarSiatki.Controls.Add(Me.Label20)
-        Me.grpRozmiarSiatki.Controls.Add(Me.txtWysokoscPx)
-        Me.grpRozmiarSiatki.Controls.Add(Me.txtSzerokoscPx)
-        Me.grpRozmiarSiatki.Controls.Add(Me.Label9)
-        Me.grpRozmiarSiatki.Controls.Add(Me.Label17)
-        Me.grpRozmiarSiatki.Controls.Add(Me.Label10)
-        Me.grpRozmiarSiatki.Controls.Add(Me.txtSzerokoscKm)
-        Me.grpRozmiarSiatki.Controls.Add(Me.txtWysokoscKm)
-        Me.grpRozmiarSiatki.Enabled = False
-        Me.grpRozmiarSiatki.Location = New System.Drawing.Point(434, 3)
-        Me.grpRozmiarSiatki.Name = "grpRozmiarSiatki"
-        Me.grpRozmiarSiatki.Size = New System.Drawing.Size(221, 141)
-        Me.grpRozmiarSiatki.TabIndex = 300
-        Me.grpRozmiarSiatki.TabStop = False
-        Me.grpRozmiarSiatki.Text = "Wynikowy rozmiar siatki segmentów"
-        Me.ToolTip1.SetToolTip(Me.grpRozmiarSiatki, "Informacje o wynikowym rozmiarze siatki kwadratów na które zostanie podzielony ca" &
-        "ły obszar pobieranej mapy")
+        Me.pnlUkrytePolaZasiegu.Controls.Add(Me.Label22)
+        Me.pnlUkrytePolaZasiegu.Controls.Add(Me.Label19)
+        Me.pnlUkrytePolaZasiegu.Controls.Add(Me.Label18)
+        Me.pnlUkrytePolaZasiegu.Controls.Add(Me.txtLiczbaWierszy)
+        Me.pnlUkrytePolaZasiegu.Controls.Add(Me.Label21)
+        Me.pnlUkrytePolaZasiegu.Controls.Add(Me.txtLiczbaKolumn)
+        Me.pnlUkrytePolaZasiegu.Controls.Add(Me.Label20)
+        Me.pnlUkrytePolaZasiegu.Controls.Add(Me.txtWysokoscPx)
+        Me.pnlUkrytePolaZasiegu.Controls.Add(Me.txtSzerokoscPx)
+        Me.pnlUkrytePolaZasiegu.Controls.Add(Me.Label9)
+        Me.pnlUkrytePolaZasiegu.Controls.Add(Me.Label17)
+        Me.pnlUkrytePolaZasiegu.Controls.Add(Me.Label10)
+        Me.pnlUkrytePolaZasiegu.Controls.Add(Me.txtSzerokoscKm)
+        Me.pnlUkrytePolaZasiegu.Controls.Add(Me.txtWysokoscKm)
+        Me.pnlUkrytePolaZasiegu.Controls.Add(Me.Label42)
+        Me.pnlUkrytePolaZasiegu.Controls.Add(Me.Label7)
+        Me.pnlUkrytePolaZasiegu.Controls.Add(Me.Label8)
+        Me.pnlUkrytePolaZasiegu.Controls.Add(Me.Label47)
+        Me.pnlUkrytePolaZasiegu.Controls.Add(Me.lblZaznDlugLewa)
+        Me.pnlUkrytePolaZasiegu.Controls.Add(Me.txtZasiegSegmentuKm)
+        Me.pnlUkrytePolaZasiegu.Controls.Add(Me.Label46)
+        Me.pnlUkrytePolaZasiegu.Controls.Add(Me.lblZaznSzerDol)
+        Me.pnlUkrytePolaZasiegu.Controls.Add(Me.lblZaznDlugPrawa)
+        Me.pnlUkrytePolaZasiegu.Controls.Add(Me.lblZaznSzerGora)
+        Me.pnlUkrytePolaZasiegu.Controls.Add(Me.lblRozmiarPikselaOpis)
+        Me.pnlUkrytePolaZasiegu.Controls.Add(Me.Label1)
+        Me.pnlUkrytePolaZasiegu.Controls.Add(Me.lblOpisYPrawy)
+        Me.pnlUkrytePolaZasiegu.Controls.Add(Me.lblOpisXGora)
+        Me.pnlUkrytePolaZasiegu.Controls.Add(Me.txtYPrawy)
+        Me.pnlUkrytePolaZasiegu.Controls.Add(Me.txtXGora)
+        Me.pnlUkrytePolaZasiegu.Controls.Add(Me.lblOpisYLewy)
+        Me.pnlUkrytePolaZasiegu.Controls.Add(Me.lblOpisXDol)
+        Me.pnlUkrytePolaZasiegu.Controls.Add(Me.txtYLewy)
+        Me.pnlUkrytePolaZasiegu.Controls.Add(Me.txtXDol)
+        Me.pnlUkrytePolaZasiegu.Controls.Add(Me.chkEdycjaXY)
+        Me.pnlUkrytePolaZasiegu.Controls.Add(Me.PictureBox2)
+        Me.pnlUkrytePolaZasiegu.Controls.Add(Me.grpRozmiarSiatki)
+        Me.pnlUkrytePolaZasiegu.Controls.Add(Me.grpSchemat)
+        Me.pnlUkrytePolaZasiegu.Location = New System.Drawing.Point(0, 0)
+        Me.pnlUkrytePolaZasiegu.Name = "pnlUkrytePolaZasiegu"
+        Me.pnlUkrytePolaZasiegu.Size = New System.Drawing.Size(1, 1)
+        Me.pnlUkrytePolaZasiegu.TabIndex = 99
+        Me.pnlUkrytePolaZasiegu.Visible = False
         '
         'Label22
         '
         Me.Label22.AutoSize = True
-        Me.Label22.Enabled = False
-        Me.Label22.Location = New System.Drawing.Point(105, 110)
+        Me.Label22.Location = New System.Drawing.Point(0, 0)
         Me.Label22.Name = "Label22"
         Me.Label22.Size = New System.Drawing.Size(12, 13)
         Me.Label22.TabIndex = 242
@@ -816,8 +938,7 @@ Partial Class Form1
         'Label19
         '
         Me.Label19.AutoSize = True
-        Me.Label19.Enabled = False
-        Me.Label19.Location = New System.Drawing.Point(106, 73)
+        Me.Label19.Location = New System.Drawing.Point(0, 0)
         Me.Label19.Name = "Label19"
         Me.Label19.Size = New System.Drawing.Size(12, 13)
         Me.Label19.TabIndex = 241
@@ -826,8 +947,7 @@ Partial Class Form1
         'Label18
         '
         Me.Label18.AutoSize = True
-        Me.Label18.Enabled = False
-        Me.Label18.Location = New System.Drawing.Point(106, 40)
+        Me.Label18.Location = New System.Drawing.Point(0, 0)
         Me.Label18.Name = "Label18"
         Me.Label18.Size = New System.Drawing.Size(12, 13)
         Me.Label18.TabIndex = 240
@@ -835,8 +955,7 @@ Partial Class Form1
         '
         'txtLiczbaWierszy
         '
-        Me.txtLiczbaWierszy.Enabled = False
-        Me.txtLiczbaWierszy.Location = New System.Drawing.Point(118, 108)
+        Me.txtLiczbaWierszy.Location = New System.Drawing.Point(0, 0)
         Me.txtLiczbaWierszy.Name = "txtLiczbaWierszy"
         Me.txtLiczbaWierszy.Size = New System.Drawing.Size(55, 20)
         Me.txtLiczbaWierszy.TabIndex = 239
@@ -845,7 +964,7 @@ Partial Class Form1
         'Label21
         '
         Me.Label21.AutoSize = True
-        Me.Label21.Location = New System.Drawing.Point(8, 110)
+        Me.Label21.Location = New System.Drawing.Point(0, 0)
         Me.Label21.Name = "Label21"
         Me.Label21.Size = New System.Drawing.Size(38, 13)
         Me.Label21.TabIndex = 238
@@ -853,8 +972,7 @@ Partial Class Form1
         '
         'txtLiczbaKolumn
         '
-        Me.txtLiczbaKolumn.Enabled = False
-        Me.txtLiczbaKolumn.Location = New System.Drawing.Point(49, 108)
+        Me.txtLiczbaKolumn.Location = New System.Drawing.Point(0, 0)
         Me.txtLiczbaKolumn.Name = "txtLiczbaKolumn"
         Me.txtLiczbaKolumn.Size = New System.Drawing.Size(55, 20)
         Me.txtLiczbaKolumn.TabIndex = 237
@@ -863,7 +981,7 @@ Partial Class Form1
         'Label20
         '
         Me.Label20.AutoSize = True
-        Me.Label20.Location = New System.Drawing.Point(21, 74)
+        Me.Label20.Location = New System.Drawing.Point(0, 0)
         Me.Label20.Name = "Label20"
         Me.Label20.Size = New System.Drawing.Size(26, 13)
         Me.Label20.TabIndex = 235
@@ -871,8 +989,7 @@ Partial Class Form1
         '
         'txtWysokoscPx
         '
-        Me.txtWysokoscPx.Enabled = False
-        Me.txtWysokoscPx.Location = New System.Drawing.Point(119, 71)
+        Me.txtWysokoscPx.Location = New System.Drawing.Point(0, 0)
         Me.txtWysokoscPx.Name = "txtWysokoscPx"
         Me.txtWysokoscPx.Size = New System.Drawing.Size(55, 20)
         Me.txtWysokoscPx.TabIndex = 234
@@ -880,8 +997,7 @@ Partial Class Form1
         '
         'txtSzerokoscPx
         '
-        Me.txtSzerokoscPx.Enabled = False
-        Me.txtSzerokoscPx.Location = New System.Drawing.Point(49, 71)
+        Me.txtSzerokoscPx.Location = New System.Drawing.Point(0, 0)
         Me.txtSzerokoscPx.Name = "txtSzerokoscPx"
         Me.txtSzerokoscPx.Size = New System.Drawing.Size(55, 20)
         Me.txtSzerokoscPx.TabIndex = 233
@@ -890,7 +1006,7 @@ Partial Class Form1
         'Label9
         '
         Me.Label9.AutoSize = True
-        Me.Label9.Location = New System.Drawing.Point(24, 19)
+        Me.Label9.Location = New System.Drawing.Point(0, 0)
         Me.Label9.Name = "Label9"
         Me.Label9.Size = New System.Drawing.Size(84, 13)
         Me.Label9.TabIndex = 214
@@ -899,7 +1015,7 @@ Partial Class Form1
         'Label17
         '
         Me.Label17.AutoSize = True
-        Me.Label17.Location = New System.Drawing.Point(20, 39)
+        Me.Label17.Location = New System.Drawing.Point(0, 0)
         Me.Label17.Name = "Label17"
         Me.Label17.Size = New System.Drawing.Size(27, 13)
         Me.Label17.TabIndex = 231
@@ -908,7 +1024,7 @@ Partial Class Form1
         'Label10
         '
         Me.Label10.AutoSize = True
-        Me.Label10.Location = New System.Drawing.Point(117, 19)
+        Me.Label10.Location = New System.Drawing.Point(0, 0)
         Me.Label10.Name = "Label10"
         Me.Label10.Size = New System.Drawing.Size(84, 13)
         Me.Label10.TabIndex = 215
@@ -916,8 +1032,7 @@ Partial Class Form1
         '
         'txtSzerokoscKm
         '
-        Me.txtSzerokoscKm.Enabled = False
-        Me.txtSzerokoscKm.Location = New System.Drawing.Point(49, 36)
+        Me.txtSzerokoscKm.Location = New System.Drawing.Point(0, 0)
         Me.txtSzerokoscKm.Name = "txtSzerokoscKm"
         Me.txtSzerokoscKm.Size = New System.Drawing.Size(55, 20)
         Me.txtSzerokoscKm.TabIndex = 216
@@ -925,8 +1040,7 @@ Partial Class Form1
         '
         'txtWysokoscKm
         '
-        Me.txtWysokoscKm.Enabled = False
-        Me.txtWysokoscKm.Location = New System.Drawing.Point(119, 36)
+        Me.txtWysokoscKm.Location = New System.Drawing.Point(0, 0)
         Me.txtWysokoscKm.Name = "txtWysokoscKm"
         Me.txtWysokoscKm.Size = New System.Drawing.Size(55, 20)
         Me.txtWysokoscKm.TabIndex = 217
@@ -935,39 +1049,541 @@ Partial Class Form1
         'Label42
         '
         Me.Label42.AutoSize = True
-        Me.Label42.Enabled = False
-        Me.Label42.Location = New System.Drawing.Point(321, 105)
+        Me.Label42.Location = New System.Drawing.Point(0, 0)
         Me.Label42.Name = "Label42"
         Me.Label42.Size = New System.Drawing.Size(87, 13)
         Me.Label42.TabIndex = 215
         Me.Label42.Text = "Zasięg w terenie"
-        Me.ToolTip1.SetToolTip(Me.Label42, "Rozmiar pojedyńczego segmentu - najmniejszej komórki siatki kwadtatów, na które z" &
-        "ostanie podzielony pobierany obszar mapy.  Uwaga - maksymalna rozmiar segmentu d" &
-        "la Geoportalu2 wynosi 2048px")
         '
         'Label7
         '
         Me.Label7.AutoSize = True
-        Me.Label7.Enabled = False
-        Me.Label7.Location = New System.Drawing.Point(321, 118)
+        Me.Label7.Location = New System.Drawing.Point(0, 0)
         Me.Label7.Name = "Label7"
         Me.Label7.Size = New System.Drawing.Size(77, 13)
         Me.Label7.TabIndex = 316
         Me.Label7.Text = "segmentu [km]"
-        Me.ToolTip1.SetToolTip(Me.Label7, "Rozmiar pojedyńczego segmentu - najmniejszej komórki siatki kwadtatów, na które z" &
-        "ostanie podzielony pobierany obszar mapy.  Uwaga - maksymalna rozmiar segmentu d" &
-        "la Geoportalu2 wynosi 2048px")
         '
         'Label8
         '
         Me.Label8.AutoSize = True
-        Me.Label8.Location = New System.Drawing.Point(244, 18)
+        Me.Label8.Location = New System.Drawing.Point(0, 0)
         Me.Label8.Name = "Label8"
         Me.Label8.Size = New System.Drawing.Size(166, 13)
         Me.Label8.TabIndex = 317
         Me.Label8.Text = "Rozmiar pojedynczego segmentu:"
-        Me.ToolTip1.SetToolTip(Me.Label8, "Domyślna wartość jest optymalna. Im większy rozmiar piksela, tym gorsza jakość ob" &
-        "razu, ale jednocześnie tym większy jego przestrzenny zasięg.")
+        '
+        'lblZaznDlugLewa
+        '
+        Me.lblZaznDlugLewa.AutoSize = True
+        Me.lblZaznDlugLewa.Location = New System.Drawing.Point(0, 0)
+        Me.lblZaznDlugLewa.Name = "lblZaznDlugLewa"
+        Me.lblZaznDlugLewa.Size = New System.Drawing.Size(10, 13)
+        Me.lblZaznDlugLewa.TabIndex = 315
+        Me.lblZaznDlugLewa.Text = "."
+        '
+        'lblZaznSzerDol
+        '
+        Me.lblZaznSzerDol.AutoSize = True
+        Me.lblZaznSzerDol.Location = New System.Drawing.Point(0, 0)
+        Me.lblZaznSzerDol.Name = "lblZaznSzerDol"
+        Me.lblZaznSzerDol.Size = New System.Drawing.Size(10, 13)
+        Me.lblZaznSzerDol.TabIndex = 314
+        Me.lblZaznSzerDol.Text = "."
+        '
+        'lblZaznDlugPrawa
+        '
+        Me.lblZaznDlugPrawa.AutoSize = True
+        Me.lblZaznDlugPrawa.Location = New System.Drawing.Point(0, 0)
+        Me.lblZaznDlugPrawa.Name = "lblZaznDlugPrawa"
+        Me.lblZaznDlugPrawa.Size = New System.Drawing.Size(10, 13)
+        Me.lblZaznDlugPrawa.TabIndex = 313
+        Me.lblZaznDlugPrawa.Text = "."
+        '
+        'lblZaznSzerGora
+        '
+        Me.lblZaznSzerGora.AutoSize = True
+        Me.lblZaznSzerGora.Location = New System.Drawing.Point(0, 0)
+        Me.lblZaznSzerGora.Name = "lblZaznSzerGora"
+        Me.lblZaznSzerGora.Size = New System.Drawing.Size(10, 13)
+        Me.lblZaznSzerGora.TabIndex = 312
+        Me.lblZaznSzerGora.Text = "."
+        '
+        'lblOpisYPrawy
+        '
+        Me.lblOpisYPrawy.AutoSize = True
+        Me.lblOpisYPrawy.Location = New System.Drawing.Point(0, 0)
+        Me.lblOpisYPrawy.Name = "lblOpisYPrawy"
+        Me.lblOpisYPrawy.Size = New System.Drawing.Size(12, 13)
+        Me.lblOpisYPrawy.TabIndex = 310
+        Me.lblOpisYPrawy.Text = "y"
+        '
+        'lblOpisXGora
+        '
+        Me.lblOpisXGora.AutoSize = True
+        Me.lblOpisXGora.Location = New System.Drawing.Point(0, 0)
+        Me.lblOpisXGora.Name = "lblOpisXGora"
+        Me.lblOpisXGora.Size = New System.Drawing.Size(12, 13)
+        Me.lblOpisXGora.TabIndex = 311
+        Me.lblOpisXGora.Text = "x"
+        '
+        'txtYPrawy
+        '
+        Me.txtYPrawy.Location = New System.Drawing.Point(0, 0)
+        Me.txtYPrawy.Name = "txtYPrawy"
+        Me.txtYPrawy.Size = New System.Drawing.Size(62, 20)
+        Me.txtYPrawy.TabIndex = 309
+        Me.txtYPrawy.Text = "571000"
+        '
+        'txtXGora
+        '
+        Me.txtXGora.Location = New System.Drawing.Point(0, 0)
+        Me.txtXGora.Name = "txtXGora"
+        Me.txtXGora.Size = New System.Drawing.Size(62, 20)
+        Me.txtXGora.TabIndex = 308
+        Me.txtXGora.Text = "684000"
+        '
+        'lblOpisYLewy
+        '
+        Me.lblOpisYLewy.AutoSize = True
+        Me.lblOpisYLewy.Location = New System.Drawing.Point(0, 0)
+        Me.lblOpisYLewy.Name = "lblOpisYLewy"
+        Me.lblOpisYLewy.Size = New System.Drawing.Size(12, 13)
+        Me.lblOpisYLewy.TabIndex = 307
+        Me.lblOpisYLewy.Text = "y"
+        '
+        'lblOpisXDol
+        '
+        Me.lblOpisXDol.AutoSize = True
+        Me.lblOpisXDol.Location = New System.Drawing.Point(0, 0)
+        Me.lblOpisXDol.Name = "lblOpisXDol"
+        Me.lblOpisXDol.Size = New System.Drawing.Size(12, 13)
+        Me.lblOpisXDol.TabIndex = 306
+        Me.lblOpisXDol.Text = "x"
+        '
+        'txtYLewy
+        '
+        Me.txtYLewy.Location = New System.Drawing.Point(0, 0)
+        Me.txtYLewy.Name = "txtYLewy"
+        Me.txtYLewy.Size = New System.Drawing.Size(62, 20)
+        Me.txtYLewy.TabIndex = 305
+        Me.txtYLewy.Text = "569000"
+        '
+        'txtXDol
+        '
+        Me.txtXDol.Location = New System.Drawing.Point(0, 0)
+        Me.txtXDol.Name = "txtXDol"
+        Me.txtXDol.Size = New System.Drawing.Size(62, 20)
+        Me.txtXDol.TabIndex = 304
+        Me.txtXDol.Text = "682000"
+        '
+        'chkEdycjaXY
+        '
+        Me.chkEdycjaXY.Location = New System.Drawing.Point(0, 0)
+        Me.chkEdycjaXY.Name = "chkEdycjaXY"
+        Me.chkEdycjaXY.Size = New System.Drawing.Size(14, 14)
+        Me.chkEdycjaXY.TabIndex = 307
+        Me.chkEdycjaXY.AccessibleName = "Wpisywanie zasięgu XY z klawiatury"
+        '
+        'PictureBox2
+        '
+        Me.PictureBox2.Location = New System.Drawing.Point(0, 0)
+        Me.PictureBox2.Name = "PictureBox2"
+        Me.PictureBox2.Size = New System.Drawing.Size(10, 10)
+        Me.PictureBox2.TabIndex = 303
+        Me.PictureBox2.TabStop = False
+        '
+        'grpRozmiarSiatki
+        '
+        Me.grpRozmiarSiatki.Location = New System.Drawing.Point(0, 0)
+        Me.grpRozmiarSiatki.Name = "grpRozmiarSiatki"
+        Me.grpRozmiarSiatki.Size = New System.Drawing.Size(1, 1)
+        Me.grpRozmiarSiatki.TabIndex = 300
+        Me.grpRozmiarSiatki.TabStop = False
+        '
+        'grpSchemat
+        '
+        Me.grpSchemat.Location = New System.Drawing.Point(0, 0)
+        Me.grpSchemat.Name = "grpSchemat"
+        Me.grpSchemat.Size = New System.Drawing.Size(1, 1)
+        Me.grpSchemat.TabIndex = 303
+        Me.grpSchemat.TabStop = False
+        '
+        'pnlBelkaAkcji
+        '
+        Me.pnlBelkaAkcji.Controls.Add(Me.btnKreatorDolny)
+        Me.pnlBelkaAkcji.Controls.Add(Me.lblStatusSesji)
+        Me.pnlBelkaAkcji.Controls.Add(Me.lnkSzczegoly)
+        Me.pnlBelkaAkcji.Controls.Add(Me.btnOtworzFolderDolny)
+        Me.pnlBelkaAkcji.Controls.Add(Me.btnPrzejdzDoEksportu)
+        Me.pnlBelkaAkcji.Controls.Add(Me.lblLiniaBelki)
+        Me.pnlBelkaAkcji.Dock = System.Windows.Forms.DockStyle.Top
+        Me.pnlBelkaAkcji.Location = New System.Drawing.Point(0, 0)
+        Me.pnlBelkaAkcji.Name = "pnlBelkaAkcji"
+        Me.pnlBelkaAkcji.Size = New System.Drawing.Size(857, 34)
+        Me.pnlBelkaAkcji.TabIndex = 0
+        '
+        'btnKreatorDolny
+        '
+        Me.btnKreatorDolny.BackColor = System.Drawing.Color.FromArgb(CType(CType(37, Byte), Integer), CType(CType(99, Byte), Integer), CType(CType(235, Byte), Integer))
+        Me.btnKreatorDolny.Cursor = System.Windows.Forms.Cursors.Hand
+        Me.btnKreatorDolny.FlatAppearance.BorderSize = 0
+        Me.btnKreatorDolny.FlatStyle = System.Windows.Forms.FlatStyle.Flat
+        Me.btnKreatorDolny.Font = New System.Drawing.Font("Segoe UI", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
+        Me.btnKreatorDolny.ForeColor = System.Drawing.Color.White
+        Me.btnKreatorDolny.Location = New System.Drawing.Point(4, 4)
+        Me.btnKreatorDolny.Name = "btnKreatorDolny"
+        Me.btnKreatorDolny.Size = New System.Drawing.Size(180, 26)
+        Me.btnKreatorDolny.TabIndex = 0
+        Me.btnKreatorDolny.Text = "🪄 Szybki kreator... (Ctrl+K)"
+        Me.ToolTip1.SetToolTip(Me.btnKreatorDolny, "Uruchom szybki kreator mapy krok po kroku (styl, obszar, skale i pobieranie w jednym oknie)")
+        Me.btnKreatorDolny.UseVisualStyleBackColor = False
+        '
+        'lblStatusSesji
+        '
+        Me.lblStatusSesji.AutoEllipsis = True
+        Me.lblStatusSesji.Font = New System.Drawing.Font("Segoe UI", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
+        Me.lblStatusSesji.ForeColor = System.Drawing.Color.FromArgb(CType(CType(71, Byte), Integer), CType(CType(85, Byte), Integer), CType(CType(105, Byte), Integer))
+        Me.lblStatusSesji.Location = New System.Drawing.Point(192, 4)
+        Me.lblStatusSesji.Name = "lblStatusSesji"
+        Me.lblStatusSesji.Size = New System.Drawing.Size(395, 26)
+        Me.lblStatusSesji.TabIndex = 2
+        Me.lblStatusSesji.Text = ""
+        Me.lblStatusSesji.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
+        '
+        'lnkSzczegoly
+        '
+        Me.lnkSzczegoly.AutoSize = True
+        Me.lnkSzczegoly.Font = New System.Drawing.Font("Segoe UI", 8.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
+        Me.lnkSzczegoly.Location = New System.Drawing.Point(568, 10)
+        Me.lnkSzczegoly.Name = "lnkSzczegoly"
+        Me.lnkSzczegoly.Size = New System.Drawing.Size(60, 13)
+        Me.lnkSzczegoly.TabIndex = 3
+        Me.lnkSzczegoly.TabStop = True
+        Me.lnkSzczegoly.Text = "[Szczegóły]"
+        Me.lnkSzczegoly.Visible = False
+        '
+        'btnOtworzFolderDolny
+        '
+        Me.btnOtworzFolderDolny.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.btnOtworzFolderDolny.Font = New System.Drawing.Font("Segoe UI", 8.25!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
+        Me.btnOtworzFolderDolny.Location = New System.Drawing.Point(595, 4)
+        Me.btnOtworzFolderDolny.Name = "btnOtworzFolderDolny"
+        Me.btnOtworzFolderDolny.Size = New System.Drawing.Size(95, 26)
+        Me.btnOtworzFolderDolny.TabIndex = 4
+        Me.btnOtworzFolderDolny.Text = "📁 Folder sesji"
+        Me.ToolTip1.SetToolTip(Me.btnOtworzFolderDolny, "Otwórz folder bieżącej sesji w Eksploratorze Windows")
+        Me.btnOtworzFolderDolny.UseVisualStyleBackColor = True
+        '
+        'btnPrzejdzDoEksportu
+        '
+        Me.btnPrzejdzDoEksportu.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.btnPrzejdzDoEksportu.BackColor = System.Drawing.Color.FromArgb(CType(CType(71, Byte), Integer), CType(CType(85, Byte), Integer), CType(CType(105, Byte), Integer))
+        Me.btnPrzejdzDoEksportu.Cursor = System.Windows.Forms.Cursors.Hand
+        Me.btnPrzejdzDoEksportu.FlatAppearance.BorderSize = 0
+        Me.btnPrzejdzDoEksportu.FlatStyle = System.Windows.Forms.FlatStyle.Flat
+        Me.btnPrzejdzDoEksportu.Font = New System.Drawing.Font("Segoe UI", 8.25!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
+        Me.btnPrzejdzDoEksportu.ForeColor = System.Drawing.Color.White
+        Me.btnPrzejdzDoEksportu.Location = New System.Drawing.Point(695, 4)
+        Me.btnPrzejdzDoEksportu.Name = "btnPrzejdzDoEksportu"
+        Me.btnPrzejdzDoEksportu.Size = New System.Drawing.Size(158, 26)
+        Me.btnPrzejdzDoEksportu.TabIndex = 5
+        Me.btnPrzejdzDoEksportu.Text = "Eksportuj mapę…"
+        Me.ToolTip1.SetToolTip(Me.btnPrzejdzDoEksportu, "Otwórz okno eksportu pobranej mapy dla bieżącego formatu")
+        Me.btnPrzejdzDoEksportu.UseVisualStyleBackColor = False
+        '
+        'lblLiniaBelki
+        '
+        Me.lblLiniaBelki.BackColor = System.Drawing.Color.FromArgb(CType(CType(226, Byte), Integer), CType(CType(232, Byte), Integer), CType(CType(240, Byte), Integer))
+        Me.lblLiniaBelki.Dock = System.Windows.Forms.DockStyle.Bottom
+        Me.lblLiniaBelki.Location = New System.Drawing.Point(0, 33)
+        Me.lblLiniaBelki.Name = "lblLiniaBelki"
+        Me.lblLiniaBelki.Size = New System.Drawing.Size(857, 1)
+        Me.lblLiniaBelki.TabIndex = 3
+        '
+        'pnlSzacunek
+        '
+        Me.pnlSzacunek.BackColor = System.Drawing.Color.FromArgb(CType(CType(245, Byte), Integer), CType(CType(248, Byte), Integer), CType(CType(252, Byte), Integer))
+        Me.pnlSzacunek.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
+        Me.pnlSzacunek.Controls.Add(Me.lblTytulRozmiar)
+        Me.pnlSzacunek.Controls.Add(Me.lblSzacowanyRozmiar)
+        Me.pnlSzacunek.Controls.Add(Me.lblSeparatorSzacunku)
+        Me.pnlSzacunek.Controls.Add(Me.lblTytulCzas)
+        Me.pnlSzacunek.Controls.Add(Me.lblSzacowanyCzas)
+        Me.pnlSzacunek.Location = New System.Drawing.Point(0, 50)
+        Me.pnlSzacunek.Name = "pnlSzacunek"
+        Me.pnlSzacunek.Size = New System.Drawing.Size(276, 24)
+        Me.pnlSzacunek.TabIndex = 4
+        '
+        'lblTytulRozmiar
+        '
+        Me.lblTytulRozmiar.AutoSize = True
+        Me.lblTytulRozmiar.Font = New System.Drawing.Font("Segoe UI", 7.5!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
+        Me.lblTytulRozmiar.ForeColor = System.Drawing.Color.DimGray
+        Me.lblTytulRozmiar.Location = New System.Drawing.Point(6, 5)
+        Me.lblTytulRozmiar.Name = "lblTytulRozmiar"
+        Me.lblTytulRozmiar.Size = New System.Drawing.Size(53, 12)
+        Me.lblTytulRozmiar.TabIndex = 0
+        Me.lblTytulRozmiar.Text = "Szacunek:"
+        '
+        'lblSzacowanyRozmiar
+        '
+        Me.lblSzacowanyRozmiar.AutoSize = True
+        Me.lblSzacowanyRozmiar.Font = New System.Drawing.Font("Segoe UI", 8.5!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
+        Me.lblSzacowanyRozmiar.ForeColor = System.Drawing.Color.FromArgb(CType(CType(15, Byte), Integer), CType(CType(80, Byte), Integer), CType(CType(40, Byte), Integer))
+        Me.lblSzacowanyRozmiar.Location = New System.Drawing.Point(62, 4)
+        Me.lblSzacowanyRozmiar.Name = "lblSzacowanyRozmiar"
+        Me.lblSzacowanyRozmiar.Size = New System.Drawing.Size(76, 15)
+        Me.lblSzacowanyRozmiar.TabIndex = 1
+        Me.lblSzacowanyRozmiar.Text = "~ 15–22 MB"
+        '
+        'lblSeparatorSzacunku
+        '
+        Me.lblSeparatorSzacunku.AutoSize = True
+        Me.lblSeparatorSzacunku.Font = New System.Drawing.Font("Segoe UI", 9.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
+        Me.lblSeparatorSzacunku.ForeColor = System.Drawing.Color.FromArgb(CType(CType(180, Byte), Integer), CType(CType(190, Byte), Integer), CType(CType(205, Byte), Integer))
+        Me.lblSeparatorSzacunku.Location = New System.Drawing.Point(142, 3)
+        Me.lblSeparatorSzacunku.Name = "lblSeparatorSzacunku"
+        Me.lblSeparatorSzacunku.Size = New System.Drawing.Size(12, 15)
+        Me.lblSeparatorSzacunku.TabIndex = 2
+        Me.lblSeparatorSzacunku.Text = "•"
+        '
+        'lblTytulCzas
+        '
+        Me.lblTytulCzas.Location = New System.Drawing.Point(0, 0)
+        Me.lblTytulCzas.Name = "lblTytulCzas"
+        Me.lblTytulCzas.Size = New System.Drawing.Size(1, 1)
+        Me.lblTytulCzas.TabIndex = 3
+        Me.lblTytulCzas.Visible = False
+        '
+        'lblSzacowanyCzas
+        '
+        Me.lblSzacowanyCzas.AutoSize = True
+        Me.lblSzacowanyCzas.Font = New System.Drawing.Font("Segoe UI", 8.5!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
+        Me.lblSzacowanyCzas.ForeColor = System.Drawing.Color.FromArgb(CType(CType(30, Byte), Integer), CType(CType(50, Byte), Integer), CType(CType(90, Byte), Integer))
+        Me.lblSzacowanyCzas.Location = New System.Drawing.Point(158, 4)
+        Me.lblSzacowanyCzas.Name = "lblSzacowanyCzas"
+        Me.lblSzacowanyCzas.Size = New System.Drawing.Size(49, 15)
+        Me.lblSzacowanyCzas.TabIndex = 4
+        Me.lblSzacowanyCzas.Text = "ok. 18 s"
+        '
+        'grpObszar
+        '
+        Me.grpObszar.Controls.Add(Me.pnlUkrytePolaZasiegu)
+        Me.grpObszar.Controls.Add(Me.lblOpisWymiary)
+        Me.grpObszar.Controls.Add(Me.lblBadgeSegmenty)
+        Me.grpObszar.Controls.Add(Me.lblTytulObszar)
+        Me.grpObszar.Controls.Add(Me.lblWymiaryTerenu)
+        Me.grpObszar.Controls.Add(Me.lblPowierzchniaTerenu)
+        Me.grpObszar.Controls.Add(Me.pnlSzacunek)
+        Me.grpObszar.Controls.Add(Me.lblUkladZasiegSkrot)
+        Me.grpObszar.Controls.Add(Me.btnWpiszWspolrzedne)
+        Me.grpObszar.Location = New System.Drawing.Point(4, 38)
+        Me.grpObszar.Name = "grpObszar"
+        Me.grpObszar.Size = New System.Drawing.Size(276, 104)
+        Me.grpObszar.TabIndex = 300
+        '
+        'lblTytulObszar
+        '
+        Me.lblTytulObszar.Font = New System.Drawing.Font("Segoe UI", 7.5!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
+        Me.lblTytulObszar.ForeColor = System.Drawing.Color.DimGray
+        Me.lblTytulObszar.Location = New System.Drawing.Point(0, 0)
+        Me.lblTytulObszar.Name = "lblTytulObszar"
+        Me.lblTytulObszar.Size = New System.Drawing.Size(276, 14)
+        Me.lblTytulObszar.TabIndex = 0
+        Me.lblTytulObszar.Text = "ZAZNACZONY OBSZAR"
+        '
+        'lblBadgeSegmenty
+        '
+        Me.lblBadgeSegmenty.AutoEllipsis = True
+        Me.lblBadgeSegmenty.Font = New System.Drawing.Font("Segoe UI", 9.75!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
+        Me.lblBadgeSegmenty.ForeColor = System.Drawing.Color.FromArgb(CType(CType(15, Byte), Integer), CType(CType(23, Byte), Integer), CType(CType(42, Byte), Integer))
+        Me.lblBadgeSegmenty.Location = New System.Drawing.Point(0, 15)
+        Me.lblBadgeSegmenty.Name = "lblBadgeSegmenty"
+        Me.lblBadgeSegmenty.Size = New System.Drawing.Size(276, 18)
+        Me.lblBadgeSegmenty.TabIndex = 8
+        Me.lblBadgeSegmenty.Text = "Siatka: 6 segmentów (2 × 3)"
+        Me.lblBadgeSegmenty.Visible = True
+        '
+        'lblWymiaryTerenu
+        '
+        Me.lblWymiaryTerenu.AutoSize = True
+        Me.lblWymiaryTerenu.Font = New System.Drawing.Font("Segoe UI", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
+        Me.lblWymiaryTerenu.ForeColor = System.Drawing.Color.FromArgb(CType(CType(51, Byte), Integer), CType(CType(65, Byte), Integer), CType(CType(85, Byte), Integer))
+        Me.lblWymiaryTerenu.Location = New System.Drawing.Point(0, 33)
+        Me.lblWymiaryTerenu.Name = "lblWymiaryTerenu"
+        Me.lblWymiaryTerenu.Size = New System.Drawing.Size(73, 13)
+        Me.lblWymiaryTerenu.TabIndex = 1
+        Me.lblWymiaryTerenu.Text = "6.0 × 4.0 km"
+        '
+        'lblPowierzchniaTerenu
+        '
+        Me.lblPowierzchniaTerenu.AutoSize = True
+        Me.lblPowierzchniaTerenu.Font = New System.Drawing.Font("Segoe UI", 8.25!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
+        Me.lblPowierzchniaTerenu.ForeColor = System.Drawing.Color.DimGray
+        Me.lblPowierzchniaTerenu.Location = New System.Drawing.Point(76, 33)
+        Me.lblPowierzchniaTerenu.Name = "lblPowierzchniaTerenu"
+        Me.lblPowierzchniaTerenu.Size = New System.Drawing.Size(59, 13)
+        Me.lblPowierzchniaTerenu.TabIndex = 2
+        Me.lblPowierzchniaTerenu.Text = "(24.0 km²)"
+        '
+        'lblUkladZasiegSkrot
+        '
+        Me.lblUkladZasiegSkrot.AutoEllipsis = True
+        Me.lblUkladZasiegSkrot.Font = New System.Drawing.Font("Segoe UI", 7.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
+        Me.lblUkladZasiegSkrot.ForeColor = System.Drawing.Color.DimGray
+        Me.lblUkladZasiegSkrot.Location = New System.Drawing.Point(0, 78)
+        Me.lblUkladZasiegSkrot.Name = "lblUkladZasiegSkrot"
+        Me.lblUkladZasiegSkrot.Size = New System.Drawing.Size(185, 22)
+        Me.lblUkladZasiegSkrot.TabIndex = 5
+        Me.lblUkladZasiegSkrot.Text = "PL-1992 (N: 684k, W: 569k)"
+        Me.lblUkladZasiegSkrot.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
+        '
+        'btnWpiszWspolrzedne
+        '
+        Me.btnWpiszWspolrzedne.Font = New System.Drawing.Font("Segoe UI", 7.5!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
+        Me.btnWpiszWspolrzedne.Location = New System.Drawing.Point(190, 76)
+        Me.btnWpiszWspolrzedne.Name = "btnWpiszWspolrzedne"
+        Me.btnWpiszWspolrzedne.Size = New System.Drawing.Size(86, 24)
+        Me.btnWpiszWspolrzedne.TabIndex = 6
+        Me.btnWpiszWspolrzedne.Text = "✏️ Wpisz XY"
+        Me.ToolTip1.SetToolTip(Me.btnWpiszWspolrzedne, "Otwórz okno ręcznego wpisywania współrzędnych obszaru lub zaokrąglania do pełnych kilometrów")
+        Me.btnWpiszWspolrzedne.UseVisualStyleBackColor = True
+        '
+        'lblOpisWymiary
+        '
+        Me.lblOpisWymiary.Location = New System.Drawing.Point(0, 0)
+        Me.lblOpisWymiary.Name = "lblOpisWymiary"
+        Me.lblOpisWymiary.Size = New System.Drawing.Size(1, 1)
+        Me.lblOpisWymiary.TabIndex = 7
+        Me.lblOpisWymiary.Visible = False
+        '
+        'lblSeparator1
+        '
+        Me.lblSeparator1.BackColor = System.Drawing.Color.FromArgb(CType(CType(226, Byte), Integer), CType(CType(232, Byte), Integer), CType(CType(240, Byte), Integer))
+        Me.lblSeparator1.Location = New System.Drawing.Point(286, 42)
+        Me.lblSeparator1.Name = "lblSeparator1"
+        Me.lblSeparator1.Size = New System.Drawing.Size(1, 96)
+        Me.lblSeparator1.TabIndex = 304
+        '
+        'grpRozdzielczoscFormat
+        '
+        Me.grpRozdzielczoscFormat.Controls.Add(Me.lblTytulParametry)
+        Me.grpRozdzielczoscFormat.Controls.Add(Me.lblOpisPiksela)
+        Me.grpRozdzielczoscFormat.Controls.Add(Me.txtRozmiarPiksela)
+        Me.grpRozdzielczoscFormat.Controls.Add(Me.lblJednostkaPiksela)
+        Me.grpRozdzielczoscFormat.Controls.Add(Me.cmbRozmiarPiksela)
+        Me.grpRozdzielczoscFormat.Controls.Add(Me.lblOpisSegmentu)
+        Me.grpRozdzielczoscFormat.Controls.Add(Me.txtBokSegmentu)
+        Me.grpRozdzielczoscFormat.Controls.Add(Me.lblJednostkaSegmentu)
+        Me.grpRozdzielczoscFormat.Controls.Add(Me.lblBokKm)
+        Me.grpRozdzielczoscFormat.Controls.Add(Me.lblOpisFormatu)
+        Me.grpRozdzielczoscFormat.Controls.Add(Me.cmbFormatDocelowy)
+        Me.grpRozdzielczoscFormat.Location = New System.Drawing.Point(294, 38)
+        Me.grpRozdzielczoscFormat.Name = "grpRozdzielczoscFormat"
+        Me.grpRozdzielczoscFormat.Size = New System.Drawing.Size(256, 104)
+        Me.grpRozdzielczoscFormat.TabIndex = 301
+        '
+        'lblTytulParametry
+        '
+        Me.lblTytulParametry.Font = New System.Drawing.Font("Segoe UI", 7.5!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
+        Me.lblTytulParametry.ForeColor = System.Drawing.Color.DimGray
+        Me.lblTytulParametry.Location = New System.Drawing.Point(0, 0)
+        Me.lblTytulParametry.Name = "lblTytulParametry"
+        Me.lblTytulParametry.Size = New System.Drawing.Size(256, 14)
+        Me.lblTytulParametry.TabIndex = 0
+        Me.lblTytulParametry.Text = "PARAMETRY POBRANIA"
+        '
+        'lblOpisPiksela
+        '
+        Me.lblOpisPiksela.AutoSize = True
+        Me.lblOpisPiksela.Font = New System.Drawing.Font("Segoe UI", 8.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
+        Me.lblOpisPiksela.Location = New System.Drawing.Point(0, 20)
+        Me.lblOpisPiksela.Name = "lblOpisPiksela"
+        Me.lblOpisPiksela.Size = New System.Drawing.Size(39, 13)
+        Me.lblOpisPiksela.TabIndex = 1
+        Me.lblOpisPiksela.Text = "Piksel:"
+        '
+        'lblJednostkaPiksela
+        '
+        Me.lblJednostkaPiksela.AutoSize = True
+        Me.lblJednostkaPiksela.Font = New System.Drawing.Font("Segoe UI", 7.5!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
+        Me.lblJednostkaPiksela.ForeColor = System.Drawing.SystemColors.ControlDarkDark
+        Me.lblJednostkaPiksela.Location = New System.Drawing.Point(82, 21)
+        Me.lblJednostkaPiksela.Name = "lblJednostkaPiksela"
+        Me.lblJednostkaPiksela.Size = New System.Drawing.Size(32, 12)
+        Me.lblJednostkaPiksela.TabIndex = 3
+        Me.lblJednostkaPiksela.Text = "m/px"
+        '
+        'cmbRozmiarPiksela
+        '
+        Me.cmbRozmiarPiksela.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
+        Me.cmbRozmiarPiksela.Font = New System.Drawing.Font("Segoe UI", 8.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
+        Me.cmbRozmiarPiksela.FormattingEnabled = True
+        Me.cmbRozmiarPiksela.Location = New System.Drawing.Point(118, 17)
+        Me.cmbRozmiarPiksela.Name = "cmbRozmiarPiksela"
+        Me.cmbRozmiarPiksela.Size = New System.Drawing.Size(134, 21)
+        Me.cmbRozmiarPiksela.TabIndex = 4
+        '
+        'lblOpisSegmentu
+        '
+        Me.lblOpisSegmentu.AutoSize = True
+        Me.lblOpisSegmentu.Font = New System.Drawing.Font("Segoe UI", 8.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
+        Me.lblOpisSegmentu.Location = New System.Drawing.Point(0, 48)
+        Me.lblOpisSegmentu.Name = "lblOpisSegmentu"
+        Me.lblOpisSegmentu.Size = New System.Drawing.Size(55, 13)
+        Me.lblOpisSegmentu.TabIndex = 5
+        Me.lblOpisSegmentu.Text = "Segment:"
+        '
+        'lblJednostkaSegmentu
+        '
+        Me.lblJednostkaSegmentu.AutoSize = True
+        Me.lblJednostkaSegmentu.Font = New System.Drawing.Font("Segoe UI", 7.5!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
+        Me.lblJednostkaSegmentu.ForeColor = System.Drawing.SystemColors.ControlDarkDark
+        Me.lblJednostkaSegmentu.Location = New System.Drawing.Point(100, 49)
+        Me.lblJednostkaSegmentu.Name = "lblJednostkaSegmentu"
+        Me.lblJednostkaSegmentu.Size = New System.Drawing.Size(16, 12)
+        Me.lblJednostkaSegmentu.TabIndex = 7
+        Me.lblJednostkaSegmentu.Text = "px"
+        '
+        'lblBokKm
+        '
+        Me.lblBokKm.AutoSize = True
+        Me.lblBokKm.Font = New System.Drawing.Font("Segoe UI", 7.5!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
+        Me.lblBokKm.ForeColor = System.Drawing.Color.DimGray
+        Me.lblBokKm.Location = New System.Drawing.Point(120, 49)
+        Me.lblBokKm.Name = "lblBokKm"
+        Me.lblBokKm.Size = New System.Drawing.Size(95, 12)
+        Me.lblBokKm.TabIndex = 8
+        Me.lblBokKm.Text = "= 2.0 km w terenie"
+        '
+        'lblOpisFormatu
+        '
+        Me.lblOpisFormatu.AutoSize = True
+        Me.lblOpisFormatu.Font = New System.Drawing.Font("Segoe UI", 8.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
+        Me.lblOpisFormatu.Location = New System.Drawing.Point(0, 77)
+        Me.lblOpisFormatu.Name = "lblOpisFormatu"
+        Me.lblOpisFormatu.Size = New System.Drawing.Size(46, 13)
+        Me.lblOpisFormatu.TabIndex = 9
+        Me.lblOpisFormatu.Text = "Format:"
+        '
+        'cmbFormatDocelowy
+        '
+        Me.cmbFormatDocelowy.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
+        Me.cmbFormatDocelowy.Font = New System.Drawing.Font("Segoe UI", 8.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
+        Me.cmbFormatDocelowy.FormattingEnabled = True
+        Me.cmbFormatDocelowy.Location = New System.Drawing.Point(54, 74)
+        Me.cmbFormatDocelowy.Name = "cmbFormatDocelowy"
+        Me.cmbFormatDocelowy.Size = New System.Drawing.Size(198, 21)
+        Me.cmbFormatDocelowy.TabIndex = 10
+        '
+        'lblSeparator2
+        '
+        Me.lblSeparator2.BackColor = System.Drawing.Color.FromArgb(CType(CType(226, Byte), Integer), CType(CType(232, Byte), Integer), CType(CType(240, Byte), Integer))
+        Me.lblSeparator2.Location = New System.Drawing.Point(556, 42)
+        Me.lblSeparator2.Name = "lblSeparator2"
+        Me.lblSeparator2.Size = New System.Drawing.Size(1, 96)
+        Me.lblSeparator2.TabIndex = 305
         '
         'btnUsunPobrane
         '
@@ -977,8 +1593,8 @@ Partial Class Form1
         Me.btnUsunPobrane.Margin = New System.Windows.Forms.Padding(0)
         Me.btnUsunPobrane.Name = "btnUsunPobrane"
         Me.btnUsunPobrane.Size = New System.Drawing.Size(30, 30)
-        Me.btnUsunPobrane.TabIndex = 307
-        Me.ToolTip1.SetToolTip(Me.btnUsunPobrane, "usuń pobrane mapy bieżącej sesji (do Kosza)")
+        Me.btnUsunPobrane.TabIndex = 306
+        Me.ToolTip1.SetToolTip(Me.btnUsunPobrane, "Usuń pobrane mapy bieżącej sesji (do Kosza)")
         Me.btnUsunPobrane.UseVisualStyleBackColor = True
         '
         'btnZnaczniki
@@ -990,32 +1606,32 @@ Partial Class Form1
         Me.btnZnaczniki.Margin = New System.Windows.Forms.Padding(0)
         Me.btnZnaczniki.Name = "btnZnaczniki"
         Me.btnZnaczniki.Size = New System.Drawing.Size(30, 30)
-        Me.btnZnaczniki.TabIndex = 306
-        Me.ToolTip1.SetToolTip(Me.btnZnaczniki, "pokaż na mapie siatkę segmentów dla zasięgu z pól XY i wyśrodkuj na niej mapę")
+        Me.btnZnaczniki.TabIndex = 304
+        Me.ToolTip1.SetToolTip(Me.btnZnaczniki, "Pokaż na mapie siatkę segmentów dla zasięgu z pól XY i wyśrodkuj na niej mapę")
         Me.btnZnaczniki.UseVisualStyleBackColor = True
         '
         'btnScalanie
         '
         Me.btnScalanie.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
         Me.btnScalanie.Image = Global.MapoTero.My.Resources.Resources.ico_merge
-        Me.btnScalanie.Location = New System.Drawing.Point(5, 603)
+        Me.btnScalanie.Location = New System.Drawing.Point(73, 603)
         Me.btnScalanie.Margin = New System.Windows.Forms.Padding(0)
         Me.btnScalanie.Name = "btnScalanie"
         Me.btnScalanie.Size = New System.Drawing.Size(30, 30)
-        Me.btnScalanie.TabIndex = 305
-        Me.ToolTip1.SetToolTip(Me.btnScalanie, "złącz pobrane segmenty w jeden arkusz")
+        Me.btnScalanie.TabIndex = 307
+        Me.ToolTip1.SetToolTip(Me.btnScalanie, "Scalanie segmentów - arkusz GeoTIFF, JPEG albo PNG (okno Eksport mapy, format Arkusz)")
         Me.btnScalanie.UseVisualStyleBackColor = True
         '
         'btnOtworzFolder
         '
         Me.btnOtworzFolder.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
         Me.btnOtworzFolder.Image = Global.MapoTero.My.Resources.Resources.ico_folder
-        Me.btnOtworzFolder.Location = New System.Drawing.Point(5, 569)
+        Me.btnOtworzFolder.Location = New System.Drawing.Point(5, 603)
         Me.btnOtworzFolder.Margin = New System.Windows.Forms.Padding(0)
         Me.btnOtworzFolder.Name = "btnOtworzFolder"
         Me.btnOtworzFolder.Size = New System.Drawing.Size(30, 30)
-        Me.btnOtworzFolder.TabIndex = 304
-        Me.ToolTip1.SetToolTip(Me.btnOtworzFolder, "wyświetl folder z segmentami pobranej mapy")
+        Me.btnOtworzFolder.TabIndex = 305
+        Me.ToolTip1.SetToolTip(Me.btnOtworzFolder, "Wyświetl folder z segmentami pobranej mapy")
         Me.btnOtworzFolder.UseVisualStyleBackColor = True
         '
         'mapa
@@ -1196,11 +1812,12 @@ Partial Class Form1
         Me.txtKomunikaty.BackColor = System.Drawing.SystemColors.ButtonFace
         Me.txtKomunikaty.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
         Me.txtKomunikaty.ForeColor = System.Drawing.SystemColors.WindowText
-        Me.txtKomunikaty.Location = New System.Drawing.Point(5, 500)
+        Me.txtKomunikaty.Location = New System.Drawing.Point(5, 560)
         Me.txtKomunikaty.Name = "txtKomunikaty"
-        Me.txtKomunikaty.Size = New System.Drawing.Size(210, 65)
+        Me.txtKomunikaty.Size = New System.Drawing.Size(1, 1)
         Me.txtKomunikaty.TabIndex = 301
         Me.txtKomunikaty.Text = "Komunikaty:"
+        Me.txtKomunikaty.Visible = False
         '
         'lblKursorWgs
         '
@@ -1215,6 +1832,7 @@ Partial Class Form1
         'grpPodglad
         '
         Me.grpPodglad.Controls.Add(Me.picPodglad)
+        Me.grpPodglad.Controls.Add(Me.lblTytulPodglad)
         Me.grpPodglad.Controls.Add(Me.btnPodgladZaawansowane)
         Me.grpPodglad.Controls.Add(Me.btnZoomMinus)
         Me.grpPodglad.Controls.Add(Me.btnZoomReset)
@@ -1223,47 +1841,54 @@ Partial Class Form1
         Me.grpPodglad.Controls.Add(Me.lblPodgladLiczbaWarstw)
         Me.grpPodglad.Controls.Add(Me.lblPodgladSkala)
         Me.grpPodglad.Controls.Add(Me.lblPodgladStan)
-        Me.grpPodglad.Location = New System.Drawing.Point(660, 3)
+        Me.grpPodglad.Location = New System.Drawing.Point(564, 38)
         Me.grpPodglad.Name = "grpPodglad"
-        Me.grpPodglad.Size = New System.Drawing.Size(221, 141)
-        Me.grpPodglad.TabIndex = 301
-        Me.grpPodglad.TabStop = False
-        Me.grpPodglad.Text = "Podgląd zestawu warstw"
+        Me.grpPodglad.Size = New System.Drawing.Size(286, 104)
+        Me.grpPodglad.TabIndex = 302
         '
         'picPodglad
         '
         Me.picPodglad.BackColor = System.Drawing.Color.White
         Me.picPodglad.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
         Me.picPodglad.Cursor = System.Windows.Forms.Cursors.Hand
-        Me.picPodglad.Location = New System.Drawing.Point(8, 18)
+        Me.picPodglad.Location = New System.Drawing.Point(2, 2)
         Me.picPodglad.Name = "picPodglad"
-        Me.picPodglad.Size = New System.Drawing.Size(116, 116)
+        Me.picPodglad.Size = New System.Drawing.Size(88, 98)
         Me.picPodglad.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage
         Me.picPodglad.TabIndex = 0
         Me.picPodglad.TabStop = False
-        Me.ToolTip1.SetToolTip(Me.picPodglad, "Bieżący podgląd zestawu warstw. Kółko myszy: przybliż/oddal. Kliknij, aby otworzyć okno Warstwy - zaawansowane.")
+        Me.ToolTip1.SetToolTip(Me.picPodglad, "Bieżący podgląd zestawu warstw. Kółko myszy: przybliż/oddal. Kliknij, aby otworzyć mikser warstw i krycia.")
+        '
+        'lblTytulPodglad
+        '
+        Me.lblTytulPodglad.Font = New System.Drawing.Font("Segoe UI", 7.5!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
+        Me.lblTytulPodglad.ForeColor = System.Drawing.Color.DimGray
+        Me.lblTytulPodglad.Location = New System.Drawing.Point(96, 0)
+        Me.lblTytulPodglad.Name = "lblTytulPodglad"
+        Me.lblTytulPodglad.Size = New System.Drawing.Size(186, 14)
+        Me.lblTytulPodglad.TabIndex = 1
+        Me.lblTytulPodglad.Text = "PODGLĄD WARSTW"
         '
         'btnPodgladZaawansowane
         '
-        Me.btnPodgladZaawansowane.Font = New System.Drawing.Font("Microsoft Sans Serif", 7.5!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
-        Me.btnPodgladZaawansowane.Location = New System.Drawing.Point(126, 18)
+        Me.btnPodgladZaawansowane.Font = New System.Drawing.Font("Segoe UI", 7.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
+        Me.btnPodgladZaawansowane.Location = New System.Drawing.Point(96, 17)
         Me.btnPodgladZaawansowane.Margin = New System.Windows.Forms.Padding(0)
         Me.btnPodgladZaawansowane.Name = "btnPodgladZaawansowane"
-        Me.btnPodgladZaawansowane.Padding = New System.Windows.Forms.Padding(0)
-        Me.btnPodgladZaawansowane.Size = New System.Drawing.Size(91, 23)
-        Me.btnPodgladZaawansowane.TabIndex = 1
-        Me.btnPodgladZaawansowane.Text = "Zaawansowane"
-        Me.ToolTip1.SetToolTip(Me.btnPodgladZaawansowane, "Otwórz okno zaawansowanego ustawiania krycia i trybów mieszania warstw.")
+        Me.btnPodgladZaawansowane.Size = New System.Drawing.Size(186, 23)
+        Me.btnPodgladZaawansowane.TabIndex = 2
+        Me.btnPodgladZaawansowane.Text = "Mikser warstw i krycia..."
+        Me.ToolTip1.SetToolTip(Me.btnPodgladZaawansowane, "Otwórz okno zaawansowanego miksera warstw, krycia i korekty obrazu")
         Me.btnPodgladZaawansowane.UseVisualStyleBackColor = True
         '
         'btnZoomMinus
         '
         Me.btnZoomMinus.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
-        Me.btnZoomMinus.Location = New System.Drawing.Point(126, 43)
+        Me.btnZoomMinus.Location = New System.Drawing.Point(96, 43)
         Me.btnZoomMinus.Margin = New System.Windows.Forms.Padding(0)
         Me.btnZoomMinus.Name = "btnZoomMinus"
-        Me.btnZoomMinus.Size = New System.Drawing.Size(26, 23)
-        Me.btnZoomMinus.TabIndex = 2
+        Me.btnZoomMinus.Size = New System.Drawing.Size(22, 22)
+        Me.btnZoomMinus.TabIndex = 3
         Me.btnZoomMinus.Text = "-"
         Me.ToolTip1.SetToolTip(Me.btnZoomMinus, "Oddal kadr podglądu (lupa rastrowa)")
         Me.btnZoomMinus.UseVisualStyleBackColor = True
@@ -1271,11 +1896,11 @@ Partial Class Form1
         'btnZoomReset
         '
         Me.btnZoomReset.Font = New System.Drawing.Font("Microsoft Sans Serif", 7.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
-        Me.btnZoomReset.Location = New System.Drawing.Point(154, 43)
+        Me.btnZoomReset.Location = New System.Drawing.Point(120, 43)
         Me.btnZoomReset.Margin = New System.Windows.Forms.Padding(0)
         Me.btnZoomReset.Name = "btnZoomReset"
-        Me.btnZoomReset.Size = New System.Drawing.Size(35, 23)
-        Me.btnZoomReset.TabIndex = 3
+        Me.btnZoomReset.Size = New System.Drawing.Size(26, 22)
+        Me.btnZoomReset.TabIndex = 4
         Me.btnZoomReset.Text = "1:1"
         Me.ToolTip1.SetToolTip(Me.btnZoomReset, "Przywróć skalę 1:1 podglądu (100%)")
         Me.btnZoomReset.UseVisualStyleBackColor = True
@@ -1283,218 +1908,58 @@ Partial Class Form1
         'btnZoomPlus
         '
         Me.btnZoomPlus.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
-        Me.btnZoomPlus.Location = New System.Drawing.Point(191, 43)
+        Me.btnZoomPlus.Location = New System.Drawing.Point(148, 43)
         Me.btnZoomPlus.Margin = New System.Windows.Forms.Padding(0)
         Me.btnZoomPlus.Name = "btnZoomPlus"
-        Me.btnZoomPlus.Size = New System.Drawing.Size(26, 23)
-        Me.btnZoomPlus.TabIndex = 4
+        Me.btnZoomPlus.Size = New System.Drawing.Size(22, 22)
+        Me.btnZoomPlus.TabIndex = 5
         Me.btnZoomPlus.Text = "+"
         Me.ToolTip1.SetToolTip(Me.btnZoomPlus, "Przybliż kadr podglądu (lupa rastrowa)")
         Me.btnZoomPlus.UseVisualStyleBackColor = True
         '
         'btnPodgladOdswiez
         '
-        Me.btnPodgladOdswiez.Font = New System.Drawing.Font("Microsoft Sans Serif", 7.5!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
-        Me.btnPodgladOdswiez.Location = New System.Drawing.Point(126, 68)
+        Me.btnPodgladOdswiez.Font = New System.Drawing.Font("Segoe UI", 7.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
+        Me.btnPodgladOdswiez.Location = New System.Drawing.Point(173, 43)
         Me.btnPodgladOdswiez.Margin = New System.Windows.Forms.Padding(0)
         Me.btnPodgladOdswiez.Name = "btnPodgladOdswiez"
         Me.btnPodgladOdswiez.Padding = New System.Windows.Forms.Padding(0)
-        Me.btnPodgladOdswiez.Size = New System.Drawing.Size(91, 23)
-        Me.btnPodgladOdswiez.TabIndex = 5
+        Me.btnPodgladOdswiez.Size = New System.Drawing.Size(58, 22)
+        Me.btnPodgladOdswiez.TabIndex = 6
         Me.btnPodgladOdswiez.Text = "Odśwież"
         Me.ToolTip1.SetToolTip(Me.btnPodgladOdswiez, "Wymuś ponowne pobranie próbki podglądu z serwerów.")
         Me.btnPodgladOdswiez.UseVisualStyleBackColor = True
         '
         'lblPodgladLiczbaWarstw
         '
-        Me.lblPodgladLiczbaWarstw.Font = New System.Drawing.Font("Microsoft Sans Serif", 7.5!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
+        Me.lblPodgladLiczbaWarstw.Font = New System.Drawing.Font("Segoe UI", 7.5!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
         Me.lblPodgladLiczbaWarstw.ForeColor = System.Drawing.SystemColors.ControlDarkDark
-        Me.lblPodgladLiczbaWarstw.Location = New System.Drawing.Point(126, 93)
+        Me.lblPodgladLiczbaWarstw.Location = New System.Drawing.Point(96, 68)
         Me.lblPodgladLiczbaWarstw.Name = "lblPodgladLiczbaWarstw"
-        Me.lblPodgladLiczbaWarstw.Size = New System.Drawing.Size(91, 13)
-        Me.lblPodgladLiczbaWarstw.TabIndex = 6
+        Me.lblPodgladLiczbaWarstw.Size = New System.Drawing.Size(186, 14)
+        Me.lblPodgladLiczbaWarstw.TabIndex = 7
         Me.lblPodgladLiczbaWarstw.Text = "Warstw: 0"
         '
         'lblPodgladSkala
         '
-        Me.lblPodgladSkala.Font = New System.Drawing.Font("Microsoft Sans Serif", 7.5!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
+        Me.lblPodgladSkala.Font = New System.Drawing.Font("Segoe UI", 7.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
         Me.lblPodgladSkala.ForeColor = System.Drawing.SystemColors.ControlDarkDark
-        Me.lblPodgladSkala.Location = New System.Drawing.Point(126, 107)
+        Me.lblPodgladSkala.Location = New System.Drawing.Point(96, 84)
         Me.lblPodgladSkala.Name = "lblPodgladSkala"
-        Me.lblPodgladSkala.Size = New System.Drawing.Size(91, 13)
-        Me.lblPodgladSkala.TabIndex = 7
+        Me.lblPodgladSkala.Size = New System.Drawing.Size(90, 14)
+        Me.lblPodgladSkala.TabIndex = 8
         Me.lblPodgladSkala.Text = "-"
         '
         'lblPodgladStan
         '
         Me.lblPodgladStan.AutoEllipsis = True
-        Me.lblPodgladStan.Font = New System.Drawing.Font("Microsoft Sans Serif", 7.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
+        Me.lblPodgladStan.Font = New System.Drawing.Font("Segoe UI", 7.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
         Me.lblPodgladStan.ForeColor = System.Drawing.Color.DimGray
-        Me.lblPodgladStan.Location = New System.Drawing.Point(126, 121)
+        Me.lblPodgladStan.Location = New System.Drawing.Point(188, 84)
         Me.lblPodgladStan.Name = "lblPodgladStan"
-        Me.lblPodgladStan.Size = New System.Drawing.Size(91, 16)
-        Me.lblPodgladStan.TabIndex = 8
-        '
-        'grpSchemat
-        '
-        Me.grpSchemat.Controls.Add(Me.Label8)
-        Me.grpSchemat.Controls.Add(Me.Label7)
-        Me.grpSchemat.Controls.Add(Me.Label42)
-        Me.grpSchemat.Controls.Add(Me.Label47)
-        Me.grpSchemat.Controls.Add(Me.lblZaznDlugLewa)
-        Me.grpSchemat.Controls.Add(Me.txtZasiegSegmentuKm)
-        Me.grpSchemat.Controls.Add(Me.Label46)
-        Me.grpSchemat.Controls.Add(Me.lblZaznSzerDol)
-        Me.grpSchemat.Controls.Add(Me.lblZaznDlugPrawa)
-        Me.grpSchemat.Controls.Add(Me.lblZaznSzerGora)
-        Me.grpSchemat.Controls.Add(Me.lblRozmiarPikselaOpis)
-        Me.grpSchemat.Controls.Add(Me.txtBokSegmentu)
-        Me.grpSchemat.Controls.Add(Me.txtRozmiarPiksela)
-        Me.grpSchemat.Controls.Add(Me.Label1)
-        Me.grpSchemat.Controls.Add(Me.lblOpisYPrawy)
-        Me.grpSchemat.Controls.Add(Me.lblOpisXGora)
-        Me.grpSchemat.Controls.Add(Me.txtYPrawy)
-        Me.grpSchemat.Controls.Add(Me.txtXGora)
-        Me.grpSchemat.Controls.Add(Me.lblOpisYLewy)
-        Me.grpSchemat.Controls.Add(Me.lblOpisXDol)
-        Me.grpSchemat.Controls.Add(Me.txtYLewy)
-        Me.grpSchemat.Controls.Add(Me.txtXDol)
-        Me.grpSchemat.Controls.Add(Me.PictureBox2)
-        Me.grpSchemat.Location = New System.Drawing.Point(5, 3)
-        Me.grpSchemat.Name = "grpSchemat"
-        Me.grpSchemat.Size = New System.Drawing.Size(418, 141)
-        Me.grpSchemat.TabIndex = 303
-        Me.grpSchemat.TabStop = False
-        Me.grpSchemat.Text = "Schemat siatki segmentów pobieranej mapy i zasięgu zaznaczenia"
-        '
-        'lblZaznDlugLewa
-        '
-        Me.lblZaznDlugLewa.AutoSize = True
-        Me.lblZaznDlugLewa.Font = New System.Drawing.Font("Microsoft Sans Serif", 7.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
-        Me.lblZaznDlugLewa.ForeColor = System.Drawing.Color.Navy
-        Me.lblZaznDlugLewa.Location = New System.Drawing.Point(4, 63)
-        Me.lblZaznDlugLewa.Name = "lblZaznDlugLewa"
-        Me.lblZaznDlugLewa.Size = New System.Drawing.Size(10, 13)
-        Me.lblZaznDlugLewa.TabIndex = 315
-        Me.lblZaznDlugLewa.Text = "."
-        '
-        'lblZaznSzerDol
-        '
-        Me.lblZaznSzerDol.AutoSize = True
-        Me.lblZaznSzerDol.Font = New System.Drawing.Font("Microsoft Sans Serif", 7.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
-        Me.lblZaznSzerDol.ForeColor = System.Drawing.Color.Navy
-        Me.lblZaznSzerDol.Location = New System.Drawing.Point(80, 98)
-        Me.lblZaznSzerDol.Name = "lblZaznSzerDol"
-        Me.lblZaznSzerDol.Size = New System.Drawing.Size(10, 13)
-        Me.lblZaznSzerDol.TabIndex = 314
-        Me.lblZaznSzerDol.Text = "."
-        '
-        'lblZaznDlugPrawa
-        '
-        Me.lblZaznDlugPrawa.AutoSize = True
-        Me.lblZaznDlugPrawa.Font = New System.Drawing.Font("Microsoft Sans Serif", 7.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
-        Me.lblZaznDlugPrawa.ForeColor = System.Drawing.Color.Navy
-        Me.lblZaznDlugPrawa.Location = New System.Drawing.Point(129, 64)
-        Me.lblZaznDlugPrawa.Name = "lblZaznDlugPrawa"
-        Me.lblZaznDlugPrawa.Size = New System.Drawing.Size(10, 13)
-        Me.lblZaznDlugPrawa.TabIndex = 313
-        Me.lblZaznDlugPrawa.Text = "."
-        '
-        'lblZaznSzerGora
-        '
-        Me.lblZaznSzerGora.AutoSize = True
-        Me.lblZaznSzerGora.Font = New System.Drawing.Font("Microsoft Sans Serif", 7.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
-        Me.lblZaznSzerGora.ForeColor = System.Drawing.Color.Navy
-        Me.lblZaznSzerGora.Location = New System.Drawing.Point(80, 33)
-        Me.lblZaznSzerGora.Name = "lblZaznSzerGora"
-        Me.lblZaznSzerGora.Size = New System.Drawing.Size(10, 13)
-        Me.lblZaznSzerGora.TabIndex = 312
-        Me.lblZaznSzerGora.Text = "."
-        '
-        'lblOpisYPrawy
-        '
-        Me.lblOpisYPrawy.AutoSize = True
-        Me.lblOpisYPrawy.ForeColor = System.Drawing.Color.Blue
-        Me.lblOpisYPrawy.Location = New System.Drawing.Point(129, 79)
-        Me.lblOpisYPrawy.Name = "lblOpisYPrawy"
-        Me.lblOpisYPrawy.Size = New System.Drawing.Size(12, 13)
-        Me.lblOpisYPrawy.TabIndex = 310
-        Me.lblOpisYPrawy.Text = "y"
-        '
-        'lblOpisXGora
-        '
-        Me.lblOpisXGora.AutoSize = True
-        Me.lblOpisXGora.ForeColor = System.Drawing.Color.Blue
-        Me.lblOpisXGora.Location = New System.Drawing.Point(68, 52)
-        Me.lblOpisXGora.Name = "lblOpisXGora"
-        Me.lblOpisXGora.Size = New System.Drawing.Size(12, 13)
-        Me.lblOpisXGora.TabIndex = 311
-        Me.lblOpisXGora.Text = "x"
-        '
-        'txtYPrawy
-        '
-        Me.txtYPrawy.ForeColor = System.Drawing.Color.Blue
-        Me.txtYPrawy.Location = New System.Drawing.Point(142, 76)
-        Me.txtYPrawy.Name = "txtYPrawy"
-        Me.txtYPrawy.Size = New System.Drawing.Size(62, 20)
-        Me.txtYPrawy.TabIndex = 309
-        Me.txtYPrawy.Text = "571000"
-        '
-        'txtXGora
-        '
-        Me.txtXGora.ForeColor = System.Drawing.Color.Blue
-        Me.txtXGora.Location = New System.Drawing.Point(80, 49)
-        Me.txtXGora.Name = "txtXGora"
-        Me.txtXGora.Size = New System.Drawing.Size(62, 20)
-        Me.txtXGora.TabIndex = 308
-        Me.txtXGora.Text = "684000"
-        '
-        'lblOpisYLewy
-        '
-        Me.lblOpisYLewy.AutoSize = True
-        Me.lblOpisYLewy.ForeColor = System.Drawing.Color.Blue
-        Me.lblOpisYLewy.Location = New System.Drawing.Point(4, 78)
-        Me.lblOpisYLewy.Name = "lblOpisYLewy"
-        Me.lblOpisYLewy.Size = New System.Drawing.Size(12, 13)
-        Me.lblOpisYLewy.TabIndex = 307
-        Me.lblOpisYLewy.Text = "y"
-        '
-        'lblOpisXDol
-        '
-        Me.lblOpisXDol.AutoSize = True
-        Me.lblOpisXDol.ForeColor = System.Drawing.Color.Blue
-        Me.lblOpisXDol.Location = New System.Drawing.Point(68, 114)
-        Me.lblOpisXDol.Name = "lblOpisXDol"
-        Me.lblOpisXDol.Size = New System.Drawing.Size(12, 13)
-        Me.lblOpisXDol.TabIndex = 306
-        Me.lblOpisXDol.Text = "x"
-        '
-        'txtYLewy
-        '
-        Me.txtYLewy.ForeColor = System.Drawing.Color.Blue
-        Me.txtYLewy.Location = New System.Drawing.Point(18, 75)
-        Me.txtYLewy.Name = "txtYLewy"
-        Me.txtYLewy.Size = New System.Drawing.Size(62, 20)
-        Me.txtYLewy.TabIndex = 305
-        Me.txtYLewy.Text = "569000"
-        '
-        'txtXDol
-        '
-        Me.txtXDol.ForeColor = System.Drawing.Color.Blue
-        Me.txtXDol.Location = New System.Drawing.Point(80, 111)
-        Me.txtXDol.Name = "txtXDol"
-        Me.txtXDol.Size = New System.Drawing.Size(62, 20)
-        Me.txtXDol.TabIndex = 304
-        Me.txtXDol.Text = "682000"
-        '
-        'PictureBox2
-        '
-        Me.PictureBox2.Image = Global.MapoTero.My.Resources.Resources.siatka
-        Me.PictureBox2.Location = New System.Drawing.Point(10, 16)
-        Me.PictureBox2.Name = "PictureBox2"
-        Me.PictureBox2.Size = New System.Drawing.Size(231, 120)
-        Me.PictureBox2.TabIndex = 303
-        Me.PictureBox2.TabStop = False
+        Me.lblPodgladStan.Size = New System.Drawing.Size(94, 14)
+        Me.lblPodgladStan.TabIndex = 9
+        Me.lblPodgladStan.Text = "Brak warstw"
         '
         'Panel2
         '
@@ -1525,13 +1990,17 @@ Partial Class Form1
         '
         'Panel3
         '
-        Me.Panel3.Controls.Add(Me.grpSchemat)
-        Me.Panel3.Controls.Add(Me.grpRozmiarSiatki)
+        Me.Panel3.AutoScroll = True
+        Me.Panel3.Controls.Add(Me.pnlBelkaAkcji)
+        Me.Panel3.Controls.Add(Me.grpObszar)
+        Me.Panel3.Controls.Add(Me.lblSeparator1)
+        Me.Panel3.Controls.Add(Me.grpRozdzielczoscFormat)
+        Me.Panel3.Controls.Add(Me.lblSeparator2)
         Me.Panel3.Controls.Add(Me.grpPodglad)
         Me.Panel3.Dock = System.Windows.Forms.DockStyle.Bottom
         Me.Panel3.Location = New System.Drawing.Point(0, 515)
         Me.Panel3.Name = "Panel3"
-        Me.Panel3.Size = New System.Drawing.Size(661, 147)
+        Me.Panel3.Size = New System.Drawing.Size(857, 147)
         Me.Panel3.TabIndex = 308
         '
         'Form1
@@ -1539,7 +2008,7 @@ Partial Class Form1
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.AutoScroll = False
-        Me.ClientSize = New System.Drawing.Size(884, 684)
+        Me.ClientSize = New System.Drawing.Size(1080, 684)
         Me.Controls.Add(Me.lblKursorWgs)
         Me.Controls.Add(Me.lblKursorUklad)
         Me.Controls.Add(Me.lblKursorUkladOpis)
@@ -1577,13 +2046,19 @@ Partial Class Form1
         Me.grpWybraneWarstwy.ResumeLayout(False)
         Me.grpWybraneWarstwy.PerformLayout()
         CType(Me.numKrycie, System.ComponentModel.ISupportInitialize).EndInit()
-        Me.grpRozmiarSiatki.ResumeLayout(False)
-        Me.grpRozmiarSiatki.PerformLayout()
-        CType(Me.picPodglad, System.ComponentModel.ISupportInitialize).EndInit()
+        Me.grpObszar.ResumeLayout(False)
+        Me.grpObszar.PerformLayout()
+        Me.pnlSzacunek.ResumeLayout(False)
+        Me.pnlSzacunek.PerformLayout()
+        Me.pnlUkrytePolaZasiegu.ResumeLayout(False)
+        Me.pnlUkrytePolaZasiegu.PerformLayout()
+        Me.grpRozdzielczoscFormat.ResumeLayout(False)
+        Me.grpRozdzielczoscFormat.PerformLayout()
         Me.grpPodglad.ResumeLayout(False)
-        Me.grpSchemat.ResumeLayout(False)
-        Me.grpSchemat.PerformLayout()
-        CType(Me.PictureBox2, System.ComponentModel.ISupportInitialize).EndInit()
+        Me.grpPodglad.PerformLayout()
+        CType(Me.picPodglad, System.ComponentModel.ISupportInitialize).EndInit()
+        Me.pnlBelkaAkcji.ResumeLayout(False)
+        Me.pnlBelkaAkcji.PerformLayout()
         Me.Panel2.ResumeLayout(False)
         Me.Panel3.ResumeLayout(False)
         Me.ResumeLayout(False)
@@ -1609,14 +2084,19 @@ Partial Class Form1
     Friend WithEvents OdswiezToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents NarzedziaToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents DodajSerwerToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
+    Friend WithEvents FolderWlasnychWarstwToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents NarzedziaSeparator1 As System.Windows.Forms.ToolStripSeparator
     Friend WithEvents btnDodajSerwer As System.Windows.Forms.Button
-    Friend WithEvents NakładanieWarstwNaSiebieToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents UstawieniaToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents HelpToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents PomocOnlineToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents HelpSeparator1 As System.Windows.Forms.ToolStripSeparator
     Friend WithEvents AboutToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
+    Friend WithEvents ZglosBladToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
+    Friend WithEvents FolderDanychToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
+    Friend WithEvents HelpSeparator2 As System.Windows.Forms.ToolStripSeparator
+    Friend WithEvents CoNowegoToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
+    Friend WithEvents WesprzyjToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents PomocPomorskieForumEksploracyjneToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents MenuStrip1 As System.Windows.Forms.MenuStrip
     Friend WithEvents txtSzukajWarstwy As System.Windows.Forms.TextBox
@@ -1626,8 +2106,10 @@ Partial Class Form1
     Friend WithEvents tvWarstwy As MapoTero.DrzewoWarstw
     Friend WithEvents InstrukcjaObsługiToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents Label29 As System.Windows.Forms.Label
-    Friend WithEvents UsuwaniePustychSegmentówToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents KorektaFolderuToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
+    Friend WithEvents NarzedziaSeparator2 As System.Windows.Forms.ToolStripSeparator
+    Friend WithEvents PrzeslijNaTelefonToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
+    Friend WithEvents KopiujNaGarminaToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents txtBokSegmentu As System.Windows.Forms.TextBox
     Friend WithEvents Label1 As System.Windows.Forms.Label
     Friend WithEvents lblRozmiarPikselaOpis As System.Windows.Forms.Label
@@ -1655,7 +2137,6 @@ Partial Class Form1
     Friend WithEvents ScalanieToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents EksportToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents EksportCadToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
-    Friend WithEvents ZaawansowanyMbtilesToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents grpRozmiarSiatki As System.Windows.Forms.GroupBox
     Friend WithEvents txtLiczbaWierszy As System.Windows.Forms.TextBox
     Friend WithEvents Label21 As System.Windows.Forms.Label
@@ -1690,9 +2171,9 @@ Partial Class Form1
     Friend WithEvents txtYLewy As System.Windows.Forms.TextBox
     Friend WithEvents txtXDol As System.Windows.Forms.TextBox
     Friend WithEvents PictureBox2 As System.Windows.Forms.PictureBox
+    Friend WithEvents chkEdycjaXY As System.Windows.Forms.CheckBox
     Friend WithEvents btnOtworzFolder As System.Windows.Forms.Button
     Friend WithEvents btnScalanie As System.Windows.Forms.Button
-    Friend WithEvents btnResetujWarstwy As System.Windows.Forms.Button
     Friend WithEvents lstWybraneWarstwy As MapoTero.ListaWarstw
     Friend WithEvents btnWarstwaWyzej As System.Windows.Forms.Button
     Friend WithEvents btnWarstwaNizej As System.Windows.Forms.Button
@@ -1708,7 +2189,15 @@ Partial Class Form1
     Friend WithEvents Panel3 As System.Windows.Forms.Panel
     Friend WithEvents Label8 As Label
     Friend WithEvents btnUsunPobrane As Button
-    Friend WithEvents grpPodglad As System.Windows.Forms.GroupBox
+    Friend WithEvents pnlBelkaAkcji As System.Windows.Forms.Panel
+    Friend WithEvents btnKreatorDolny As System.Windows.Forms.Button
+    Friend WithEvents lblLiniaBelki As System.Windows.Forms.Label
+    Friend WithEvents lblSeparator1 As System.Windows.Forms.Label
+    Friend WithEvents lblSeparator2 As System.Windows.Forms.Label
+    Friend WithEvents lblTytulObszar As System.Windows.Forms.Label
+    Friend WithEvents lblTytulParametry As System.Windows.Forms.Label
+    Friend WithEvents lblTytulPodglad As System.Windows.Forms.Label
+    Friend WithEvents grpPodglad As System.Windows.Forms.Panel
     Friend WithEvents picPodglad As System.Windows.Forms.PictureBox
     Friend WithEvents btnPodgladZaawansowane As System.Windows.Forms.Button
     Friend WithEvents btnZoomPlus As System.Windows.Forms.Button
@@ -1720,5 +2209,35 @@ Partial Class Form1
     Friend WithEvents lblPodgladStan As System.Windows.Forms.Label
     Friend WithEvents ZnajdzDzialkeToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents KonwertujOziToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
+    Friend WithEvents KonwertujGeoTiffToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
+    Friend WithEvents ProfilNmtToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents btnSzukajDzialki As System.Windows.Forms.Button
+    Friend WithEvents grpObszar As System.Windows.Forms.Panel
+    Friend WithEvents lblOpisWymiary As System.Windows.Forms.Label
+    Friend WithEvents lblBadgeSegmenty As System.Windows.Forms.Label
+    Friend WithEvents lblWymiaryTerenu As System.Windows.Forms.Label
+    Friend WithEvents lblPowierzchniaTerenu As System.Windows.Forms.Label
+    Friend WithEvents pnlSzacunek As System.Windows.Forms.Panel
+    Friend WithEvents lblTytulRozmiar As System.Windows.Forms.Label
+    Friend WithEvents lblSzacowanyRozmiar As System.Windows.Forms.Label
+    Friend WithEvents lblSeparatorSzacunku As System.Windows.Forms.Label
+    Friend WithEvents lblTytulCzas As System.Windows.Forms.Label
+    Friend WithEvents lblSzacowanyCzas As System.Windows.Forms.Label
+    Friend WithEvents lblUkladZasiegSkrot As System.Windows.Forms.Label
+    Friend WithEvents btnWpiszWspolrzedne As System.Windows.Forms.Button
+    Friend WithEvents pnlUkrytePolaZasiegu As System.Windows.Forms.Panel
+    Friend WithEvents grpRozdzielczoscFormat As System.Windows.Forms.Panel
+    Friend WithEvents lblOpisPiksela As System.Windows.Forms.Label
+    Friend WithEvents lblJednostkaPiksela As System.Windows.Forms.Label
+    Friend WithEvents cmbRozmiarPiksela As System.Windows.Forms.ComboBox
+    Friend WithEvents lblOpisSegmentu As System.Windows.Forms.Label
+    Friend WithEvents lblJednostkaSegmentu As System.Windows.Forms.Label
+    Friend WithEvents lblBokKm As System.Windows.Forms.Label
+    Friend WithEvents lblOpisFormatu As System.Windows.Forms.Label
+    Friend WithEvents cmbFormatDocelowy As System.Windows.Forms.ComboBox
+    Friend WithEvents btnPrzejdzDoEksportu As System.Windows.Forms.Button
+    Friend WithEvents lblStatusSesji As System.Windows.Forms.Label
+    Friend WithEvents lnkSzczegoly As System.Windows.Forms.LinkLabel
+    Friend WithEvents btnOtworzFolderDolny As System.Windows.Forms.Button
+    Friend WithEvents UsunPobraneToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
 End Class

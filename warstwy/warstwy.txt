@@ -3,6 +3,7 @@ baltyk_batymetria_wms
 BDOO_WMTS
 BDOT10k_WMTS
 czechy_orto_WMTS
+czechy_orto_wms
 czechy_topo_WMTS
 czechy_ztm10_wms
 czechy_ztm25_wms

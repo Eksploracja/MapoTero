@@ -40,6 +40,7 @@ Public Class FormKorektaFolderu
     Public Property FolderPoczatkowy As String = ""
 
     Private Sub FormKorektaFolderu_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+        Me.CancelButton = btnZamknij
         PomocProgramu.DodajPrzyciskPomocy(Me, TematPomocy.KorektaFolderu, 15, 287)
         _opcjeKorekty = Ustawienia.OpcjeKorekty(ProfilKorektyRastra.GarminMip)
         'w tym oknie korekta jest celem - zawsze włączona (profil „Brak” dałby kopie bez zmian)
@@ -102,6 +103,7 @@ Public Class FormKorektaFolderu
         Try
             If Directory.Exists(folder) Then
                 For Each plik In Directory.GetFiles(folder)
+                    If Path.GetFileName(plik).StartsWith(PrzedrostekArkusza, StringComparison.OrdinalIgnoreCase) Then Continue For
                     Dim ext = Path.GetExtension(plik).ToLowerInvariant()
                     If {".png", ".jpg", ".jpeg", ".tif", ".tiff"}.Contains(ext) Then
                         Using bmp = Image.FromFile(plik)
@@ -117,20 +119,38 @@ Public Class FormKorektaFolderu
 
     Private Sub AktualizujEtykieteProfilu()
         lblProfilOpis.Text = "Profil: " & OpcjeKorekcjiMip.NazwaProfilu(_opcjeKorekty.Profil)
-        btnDostosuj.Text = "Dostosuj (" & OpcjeKorekcjiMip.KrotkaNazwaProfilu(_opcjeKorekty.Profil) & ")..."
+        btnDostosuj.Text = "Profil: " & OpcjeKorekcjiMip.KrotkaNazwaProfilu(_opcjeKorekty.Profil) & "..."
     End Sub
+
+    ''' <summary>
+    ''' Opis błędu w folderach źródłowym i docelowym ("" - poprawne). Puste pole folderu docelowego dawało wyjątek
+    ''' Path.GetFullPath w obsłudze kliknięcia (awaria programu), a ścieżka względna wskazywała folder bieżący procesu.
+    ''' </summary>
+    Friend Shared Function BladFolderow(zrodlo As String, cel As String) As String
+        If String.IsNullOrWhiteSpace(zrodlo) OrElse Not Path.IsPathFullyQualified(zrodlo) OrElse Not Directory.Exists(zrodlo) Then
+            Return "Folder źródłowy nie istnieje: " & zrodlo
+        End If
+        If String.IsNullOrWhiteSpace(cel) Then Return "Wskaż folder docelowy, w którym zostaną zapisane poprawione obrazy."
+        If Not Path.IsPathFullyQualified(cel) Then
+            Return "Folder docelowy musi być podany pełną ścieżką (np. C:\Mapy\korekta): " & cel
+        End If
+        Try
+            If String.Equals(Path.GetFullPath(zrodlo).TrimEnd("\"c), Path.GetFullPath(cel).TrimEnd("\"c), StringComparison.OrdinalIgnoreCase) Then
+                Return "Folder docelowy musi być inny niż źródłowy, aby uniknąć nadpisania oryginalnych plików."
+            End If
+        Catch ex As Exception
+            Return "Niepoprawna ścieżka folderu docelowego " & cel & ": " & OpisBledu.Z(ex)
+        End Try
+        Return ""
+    End Function
 
     Private Async Sub btnStart_Click(sender As Object, e As EventArgs) Handles btnStart.Click
         Dim zrodlo = txtFolderZrodlo.Text.Trim()
         Dim cel = txtFolderCel.Text.Trim()
 
-        If Not Directory.Exists(zrodlo) Then
-            MessageBox.Show("Folder źródłowy nie istnieje: " & zrodlo, "Błąd", MessageBoxButtons.OK, MessageBoxIcon.Warning)
-            Return
-        End If
-
-        If String.Equals(Path.GetFullPath(zrodlo).TrimEnd("\"c), Path.GetFullPath(cel).TrimEnd("\"c), StringComparison.OrdinalIgnoreCase) Then
-            MessageBox.Show("Folder docelowy musi być inny niż źródłowy, aby uniknąć nadpisania oryginalnych plików.", "Uwaga", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+        Dim uwagaFolderow As String = BladFolderow(zrodlo, cel)
+        If uwagaFolderow <> "" Then
+            MessageBox.Show(uwagaFolderow, "Korekta obrazów", MessageBoxButtons.OK, MessageBoxIcon.Warning)
             Return
         End If
 
@@ -138,7 +158,7 @@ Public Class FormKorektaFolderu
         Dim plikiObrazow = PlikiDoKorekty(zrodlo, pominieteArkusze)
 
         If Not _opcjeKorekty.Wlaczona OrElse _opcjeKorekty.Profil = ProfilKorektyRastra.Brak Then
-            MessageBox.Show("Wybierz profil korekty przyciskiem ""Dostosuj"".", "Korekta obrazów", MessageBoxButtons.OK, MessageBoxIcon.Information)
+            MessageBox.Show("Wybierz profil korekty przyciskiem ""Korekta obrazu..."".", "Korekta obrazów", MessageBoxButtons.OK, MessageBoxIcon.Information)
             Return
         End If
 
@@ -151,7 +171,7 @@ Public Class FormKorektaFolderu
         Try
             If Not Directory.Exists(cel) Then Directory.CreateDirectory(cel)
         Catch ex As Exception
-            MessageBox.Show("Nie udało się utworzyć folderu docelowego: " & ex.Message, "Błąd", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            MessageBox.Show("Nie udało się utworzyć folderu docelowego: " & OpisBledu.Z(ex), "Korekta obrazów", MessageBoxButtons.OK, MessageBoxIcon.Error)
             Return
         End Try
 
@@ -203,9 +223,9 @@ Public Class FormKorektaFolderu
         Catch ex As OperationCanceledException
             lblStatus.Text = "Przetwarzanie zostało przerwane przez użytkownika."
         Catch ex As Exception
-            lblStatus.Text = "Błąd: " & ex.Message
+            lblStatus.Text = "Błąd: " & OpisBledu.Z(ex)
             If Not _zamknijPoZakonczeniu Then
-                MessageBox.Show("Wystąpił błąd podczas przetwarzania: " & ex.Message, "Błąd", MessageBoxButtons.OK, MessageBoxIcon.Error)
+                MessageBox.Show("Wystąpił błąd podczas przetwarzania: " & OpisBledu.Z(ex), "Korekta obrazów", MessageBoxButtons.OK, MessageBoxIcon.Error)
             End If
         Finally
             _cts.Dispose()
@@ -266,7 +286,7 @@ Public Class FormKorektaFolderu
                 Try
                     KorygujPlik(plik, sciezkaCel, opcje)
                 Catch ex As Exception When Not TypeOf ex Is OperationCanceledException
-                    bledy.Add(nazwa & ": " & ex.Message)
+                    bledy.Add(nazwa & ": " & OpisBledu.Z(ex))
                     Return
                 End Try
 
@@ -340,11 +360,11 @@ Public Class FormKorektaFolderu
         Return CInt(Math.Max(1L, Math.Min(Environment.ProcessorCount, BudzetPamieci \ (piksele * 20))))
     End Function
 
-    ''' <summary>Przedrostek scalonego arkusza zapisywanego przez okno złączania segmentów (Form3).</summary>
+    ''' <summary>Przedrostek arkusza zapisywanego przez scalanie segmentów (okno Eksport mapy, format Arkusz).</summary>
     Friend Const PrzedrostekArkusza As String = "_scalone_segmenty_"
 
     ''' <summary>
-    ''' Obrazy folderu do korekty: PNG, JPEG i TIFF bez scalonych arkuszy. Arkusz z okna złączania leży w folderze sesji
+    ''' Obrazy folderu do korekty: PNG, JPEG i TIFF bez scalonych arkuszy. Arkusz ze scalania leży w folderze sesji
     ''' obok segmentów, jest wielokrotnie większy od segmentu i był poprawiany razem z nimi (groźba braku pamięci).
     ''' </summary>
     Friend Shared Function PlikiDoKorekty(folder As String, ByRef pominieteArkusze As Integer) As List(Of String)

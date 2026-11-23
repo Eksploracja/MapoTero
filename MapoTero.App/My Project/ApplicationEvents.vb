@@ -39,7 +39,17 @@ Namespace My
         Private Const MaksAwariiWSesji As Integer = 3
 
         Private Sub MyApplication_Startup(sender As Object, e As Global.Microsoft.VisualBasic.ApplicationServices.StartupEventArgs) Handles Me.Startup
+            If SilnikCli.CzyTrybCli(e.CommandLine) Then
+                Dim args = e.CommandLine.ToArray()
+                Dim adapter As New AdapterSesjiCli()
+                Dim kod = SilnikCli.Uruchom(args, adapter)
+                Environment.ExitCode = CInt(kod)
+                e.Cancel = True
+                Return
+            End If
+
             AddHandler AppDomain.CurrentDomain.UnhandledException, AddressOf AwariaWatkuTla
+            Global.MapoTero.OknaNaEkranie.Zarejestruj()
         End Sub
 
         ''' <summary>
@@ -87,7 +97,7 @@ Namespace My
 
         Private Shared Function OpisAwarii(ex As Exception, plik As String) As String
             Return "Wystąpił nieoczekiwany błąd programu:" & vbCrLf &
-                If(ex Is Nothing, "(brak opisu)", ex.Message) & vbCrLf & vbCrLf &
+                If(ex Is Nothing, "(brak opisu)", Global.MapoTero.Core.OpisBledu.Z(ex)) & vbCrLf & vbCrLf &
                 If(plik = "", "Nie udało się zapisać opisu błędu do pliku.",
                    "Opis błędu zapisano w pliku:" & vbCrLf & plik) & vbCrLf & vbCrLf &
                 "Pomóż usunąć usterkę - prześlij ten plik i opisz, co działo się przed błędem:" & vbCrLf & AdresZgloszenBledow

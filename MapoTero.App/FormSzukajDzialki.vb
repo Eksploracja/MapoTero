@@ -13,6 +13,10 @@ Public Class FormSzukajDzialki
 
     Private Shared _ostatniaZakladka As Integer = 0
     Private ReadOnly _poczatkowyTryb As Integer = -1
+    Private ReadOnly _srodekLat As Double?
+    Private ReadOnly _srodekLon As Double?
+    Private WithEvents _timerPodpowiedzi As New Timer With {.Interval = 350}
+    Private _ctsBiezace As Threading.CancellationTokenSource
 
     Friend Shared Property OstatniaZakladka As Integer
         Get
@@ -35,13 +39,49 @@ Public Class FormSzukajDzialki
     <DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)>
     Public Property WlaczWarstwy As Boolean = True
 
+    ''' <summary>Fraza wpisana w pole wyszukiwania okna głównego - po otwarciu okna od razu wyszukiwana.</summary>
+    <DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)>
+    Public Property PoczatkowaFraza As String = ""
+
+    Protected Overrides Sub OnShown(e As EventArgs)
+        MyBase.OnShown(e)
+        If String.IsNullOrWhiteSpace(PoczatkowaFraza) Then Return
+        If tabSzukaj.SelectedIndex = 0 Then
+            txtZapytanieMiejscowosc.Text = PoczatkowaFraza
+            btnSzukajMiejscowosc.PerformClick()
+        Else
+            txtZapytanie.Text = PoczatkowaFraza
+            btnSzukaj.PerformClick()
+        End If
+    End Sub
+
+    ''' <summary>Przerwanie trwającego wyszukiwania przy zamknięciu okna.</summary>
+    Private ReadOnly _przerwanie As New Threading.CancellationTokenSource()
+
     Public Sub New()
         InitializeComponent()
     End Sub
 
-    Public Sub New(poczatkowyTryb As Integer)
+    ''' <summary>
+    ''' Zamknięcie okna przerywa wyszukiwanie - dawniej zapytanie trwało dalej (do 30 s), a jego błąd pokazywał się
+    ''' w komunikacie już po zamknięciu okna.
+    ''' </summary>
+    Protected Overrides Sub OnFormClosed(e As FormClosedEventArgs)
+        _timerPodpowiedzi.Stop()
+        _timerPodpowiedzi.Dispose()
+        _ctsBiezace?.Cancel()
+        _ctsBiezace?.Dispose()
+        _ctsBiezace = Nothing
+        _przerwanie.Cancel()
+        _przerwanie.Dispose()
+        MyBase.OnFormClosed(e)
+    End Sub
+
+    Public Sub New(poczatkowyTryb As Integer, Optional srodekLat As Double? = Nothing, Optional srodekLon As Double? = Nothing)
         InitializeComponent()
         _poczatkowyTryb = poczatkowyTryb
+        _srodekLat = srodekLat
+        _srodekLon = srodekLon
     End Sub
 
     Private Sub FormSzukajDzialki_Load(sender As Object, e As EventArgs) Handles MyBase.Load
@@ -71,48 +111,112 @@ Public Class FormSzukajDzialki
         End If
     End Sub
 
-#Region "Wyszukiwanie miejscowości i adresów (Nominatim)"
+#Region "Wyszukiwanie miejscowości i adresów (Photon + Nominatim)"
 
-    Private Async Sub btnSzukajMiejscowosc_Click(sender As Object, e As EventArgs) Handles btnSzukajMiejscowosc.Click
+    Private Sub txtZapytanieMiejscowosc_TextChanged(sender As Object, e As EventArgs) Handles txtZapytanieMiejscowosc.TextChanged
+        If tabSzukaj.SelectedIndex <> 0 Then Exit Sub
+        _timerPodpowiedzi.Stop()
+        Dim fraza = txtZapytanieMiejscowosc.Text.Trim()
+        If fraza.Length >= 3 Then
+            _timerPodpowiedzi.Start()
+        ElseIf fraza.Length = 0 Then
+            _ctsBiezace?.Cancel()
+            lvwMiejscowosci.Items.Clear()
+            lblStatusMiejscowosc.Text = "Wpisz nazwę miejscowości, ulicę lub adres..."
+            AktualizujStanPrzyciskow()
+        End If
+    End Sub
+
+    Private Sub _timerPodpowiedzi_Tick(sender As Object, e As EventArgs) Handles _timerPodpowiedzi.Tick
+        _timerPodpowiedzi.Stop()
+        Dim fraza = txtZapytanieMiejscowosc.Text.Trim()
+        If fraza.Length >= 3 Then
+            WyszukajMiejscowosciAsync(fraza, automatyczne:=True)
+        End If
+    End Sub
+
+    Private Sub txtZapytanieMiejscowosc_KeyDown(sender As Object, e As KeyEventArgs) Handles txtZapytanieMiejscowosc.KeyDown
+        If e.KeyCode = Keys.Down AndAlso lvwMiejscowosci.Items.Count > 0 Then
+            lvwMiejscowosci.Focus()
+            If lvwMiejscowosci.SelectedIndices.Count = 0 Then
+                lvwMiejscowosci.Items(0).Selected = True
+            End If
+            e.Handled = True
+        End If
+    End Sub
+
+    Private Sub lvwMiejscowosci_KeyDown(sender As Object, e As KeyEventArgs) Handles lvwMiejscowosci.KeyDown
+        If e.KeyCode = Keys.Enter AndAlso btnWybierz.Enabled Then
+            btnWybierz.PerformClick()
+            e.Handled = True
+        End If
+    End Sub
+
+    Private Sub btnSzukajMiejscowosc_Click(sender As Object, e As EventArgs) Handles btnSzukajMiejscowosc.Click
+        _timerPodpowiedzi.Stop()
         Dim fraza = txtZapytanieMiejscowosc.Text.Trim()
         If String.IsNullOrEmpty(fraza) Then
             MessageBox.Show("Wpisz nazwę miejscowości, wsi, ulicę lub adres.",
-                            "Wyszukiwarka", MessageBoxButtons.OK, MessageBoxIcon.Information)
+                            "Wyszukiwarka miejscowości", MessageBoxButtons.OK, MessageBoxIcon.Information)
             Exit Sub
         End If
+        WyszukajMiejscowosciAsync(fraza, automatyczne:=False)
+    End Sub
 
-        btnSzukajMiejscowosc.Enabled = False
+    Private Async Sub WyszukajMiejscowosciAsync(fraza As String, automatyczne As Boolean)
+        _ctsBiezace?.Cancel()
+        _ctsBiezace?.Dispose()
+        Dim cts = Threading.CancellationTokenSource.CreateLinkedTokenSource(_przerwanie.Token)
+        _ctsBiezace = cts
+        Dim token = cts.Token
+
+        If Not automatyczne Then
+            btnSzukajMiejscowosc.Enabled = False
+        End If
         prgSzukajMiejscowosc.Visible = True
-        lblStatusMiejscowosc.Text = "Trwa wyszukiwanie miejscowości / adresu..."
-        lvwMiejscowosci.Items.Clear()
-        btnWybierz.Enabled = False
+        lblStatusMiejscowosc.Text = If(automatyczne, "Szukanie podpowiedzi...", "Trwa wyszukiwanie miejscowości / adresu...")
 
         Try
-            Dim wyniki = Await KlientGeokodowania.SzukajMiejscaAsync(fraza)
-            If wyniki.Count = 0 Then
-                lblStatusMiejscowosc.Text = "Nie znaleziono pasujących miejscowości ani adresów."
-            Else
-                lblStatusMiejscowosc.Text = $"Znaleziono wyników: {wyniki.Count}"
-                For Each m In wyniki
-                    Dim item As New ListViewItem(m.PelnaNazwa)
-                    item.SubItems.Add(m.TypOpis)
-                    item.SubItems.Add(m.WspolrzedneTekst)
-                    item.Tag = m
-                    lvwMiejscowosci.Items.Add(item)
-                Next
-                If lvwMiejscowosci.Items.Count > 0 Then
-                    lvwMiejscowosci.Items(0).Selected = True
-                    lvwMiejscowosci.Select()
+            Dim wyniki = Await KlientGeokodowania.SzukajMiejscaAsync(fraza, token, _srodekLat, _srodekLon)
+            If IsDisposed OrElse token.IsCancellationRequested Then Exit Sub
+
+            lvwMiejscowosci.BeginUpdate()
+            Try
+                lvwMiejscowosci.Items.Clear()
+                If wyniki.Count = 0 Then
+                    lblStatusMiejscowosc.Text = If(automatyczne, "Brak podpowiedzi dla wpisanej frazy.", "Nie znaleziono pasujących miejscowości ani adresów.")
+                Else
+                    lblStatusMiejscowosc.Text = $"Znaleziono wyników: {wyniki.Count}"
+                    For Each m In wyniki
+                        Dim item As New ListViewItem(m.PelnaNazwa)
+                        item.SubItems.Add(m.TypOpis)
+                        item.SubItems.Add(m.WspolrzedneTekst)
+                        item.Tag = m
+                        lvwMiejscowosci.Items.Add(item)
+                    Next
+                    If lvwMiejscowosci.Items.Count > 0 Then
+                        lvwMiejscowosci.Items(0).Selected = True
+                    End If
                 End If
+            Finally
+                lvwMiejscowosci.EndUpdate()
+            End Try
+        Catch ex As OperationCanceledException When token.IsCancellationRequested
+            ' Użytkownik dopisał kolejną literę lub zamknięto okno
+        Catch ex As Exception When Not IsDisposed AndAlso Not token.IsCancellationRequested
+            If Not automatyczne Then
+                MessageBox.Show("Wystąpił błąd podczas łączenia z geokoderem: " & OpisBledu.Z(ex),
+                                "Błąd wyszukiwania", MessageBoxButtons.OK, MessageBoxIcon.Warning)
             End If
-        Catch ex As Exception
-            MessageBox.Show("Wystąpił błąd podczas łączenia z geokoderem: " & ex.Message,
-                            "Błąd wyszukiwania", MessageBoxButtons.OK, MessageBoxIcon.Warning)
             lblStatusMiejscowosc.Text = "Błąd wyszukiwania."
         Finally
-            btnSzukajMiejscowosc.Enabled = True
-            prgSzukajMiejscowosc.Visible = False
-            AktualizujStanPrzyciskow()
+            If _ctsBiezace Is cts Then _ctsBiezace = Nothing
+            cts.Dispose()
+            If Not IsDisposed AndAlso _ctsBiezace Is Nothing Then
+                btnSzukajMiejscowosc.Enabled = True
+                prgSzukajMiejscowosc.Visible = False
+                AktualizujStanPrzyciskow()
+            End If
         End Try
     End Sub
 
@@ -153,7 +257,8 @@ Public Class FormSzukajDzialki
         btnWybierz.Enabled = False
 
         Try
-            Dim wyniki = Await KlientUldk.SzukajDzialekAsync(fraza)
+            Dim wyniki = Await KlientUldk.SzukajDzialekAsync(fraza, _przerwanie.Token)
+            If IsDisposed OrElse _przerwanie.IsCancellationRequested Then Exit Sub
             If wyniki.Count = 0 Then
                 lblStatus.Text = "Nie znaleziono działek odpowiadających kryteriom."
             Else
@@ -171,14 +276,17 @@ Public Class FormSzukajDzialki
                     lvwWyniki.Select()
                 End If
             End If
-        Catch ex As Exception
-            MessageBox.Show("Wystąpił błąd podczas łączenia z usługą ULDK: " & ex.Message,
+        Catch ex As OperationCanceledException When _przerwanie.IsCancellationRequested
+        Catch ex As Exception When Not IsDisposed AndAlso Not _przerwanie.IsCancellationRequested
+            MessageBox.Show("Wystąpił błąd podczas łączenia z usługą ULDK: " & OpisBledu.Z(ex),
                             "Błąd wyszukiwania", MessageBoxButtons.OK, MessageBoxIcon.Warning)
             lblStatus.Text = "Błąd wyszukiwania."
         Finally
-            btnSzukaj.Enabled = True
-            prgSzukaj.Visible = False
-            AktualizujStanPrzyciskow()
+            If Not IsDisposed Then
+                btnSzukaj.Enabled = True
+                prgSzukaj.Visible = False
+                AktualizujStanPrzyciskow()
+            End If
         End Try
     End Sub
 

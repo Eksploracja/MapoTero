@@ -32,8 +32,11 @@ Partial Class FormZaawansowanyMbtiles
         Me.colFolder = New System.Windows.Forms.DataGridViewTextBoxColumn()
         Me.btnDodajSesje = New System.Windows.Forms.Button()
         Me.btnUsunSesje = New System.Windows.Forms.Button()
+        Me.btnWyczyscSesje = New System.Windows.Forms.Button()
+        Me.btnRozlaczneZakresy = New System.Windows.Forms.Button()
         Me.btnGora = New System.Windows.Forms.Button()
         Me.btnDol = New System.Windows.Forms.Button()
+        Me.btnZastosujKreator = New System.Windows.Forms.Button()
         Me.grpPodglad = New System.Windows.Forms.GroupBox()
         Me.lblPodgladInfo = New System.Windows.Forms.Label()
         Me.picPodglad = New System.Windows.Forms.PictureBox()
@@ -48,6 +51,8 @@ Partial Class FormZaawansowanyMbtiles
         Me.btnPokazWFolderze = New System.Windows.Forms.Button()
         Me.lblNazwa = New System.Windows.Forms.Label()
         Me.txtNazwaMapy = New System.Windows.Forms.TextBox()
+        Me.lblTypBazy = New System.Windows.Forms.Label()
+        Me.cmbTypBazy = New System.Windows.Forms.ComboBox()
         Me.lblFormat = New System.Windows.Forms.Label()
         Me.cmbFormat = New System.Windows.Forms.ComboBox()
         Me.lblJakosc = New System.Windows.Forms.Label()
@@ -89,6 +94,8 @@ Partial Class FormZaawansowanyMbtiles
         Me.grpWarstwy.Controls.Add(Me.dgvWarstwy)
         Me.grpWarstwy.Controls.Add(Me.btnDodajSesje)
         Me.grpWarstwy.Controls.Add(Me.btnUsunSesje)
+        Me.grpWarstwy.Controls.Add(Me.btnWyczyscSesje)
+        Me.grpWarstwy.Controls.Add(Me.btnRozlaczneZakresy)
         Me.grpWarstwy.Controls.Add(Me.btnGora)
         Me.grpWarstwy.Controls.Add(Me.btnDol)
         Me.grpWarstwy.Location = New System.Drawing.Point(12, 12)
@@ -122,7 +129,7 @@ Partial Class FormZaawansowanyMbtiles
         '
         Me.colTytul.HeaderText = "Tytuł / Mapa"
         Me.colTytul.Name = "colTytul"
-        Me.colTytul.Width = 115
+        Me.colTytul.Width = 105
         '
         'colPoziomMin
         '
@@ -144,12 +151,13 @@ Partial Class FormZaawansowanyMbtiles
         '
         'colTryb
         '
-        Me.colTryb.DisplayStyle = System.Windows.Forms.DataGridViewComboBoxDisplayStyle.Nothing
+        Me.colTryb.DisplayStyle = System.Windows.Forms.DataGridViewComboBoxDisplayStyle.ComboBox
+        Me.colTryb.DisplayStyleForCurrentCellOnly = False
         Me.colTryb.FlatStyle = System.Windows.Forms.FlatStyle.Flat
         Me.colTryb.HeaderText = "Mieszanie"
-        Me.colTryb.Items.AddRange(New Object() {"1 Zwykły", "2 Mnożenie", "3 Ciemniej", "4 Jaśniej", "5 Ekran", "6 Nakładka"})
+        Me.colTryb.Items.AddRange(New Object() {"1 Zwykły", "2 Mnożenie", "3 Ciemniej", "4 Jaśniej", "5 Ekran", "6 Nakładka", "7 Rzeźba terenu"})
         Me.colTryb.Name = "colTryb"
-        Me.colTryb.Width = 95
+        Me.colTryb.Width = 105
         '
         'colSzare
         '
@@ -174,26 +182,45 @@ Partial Class FormZaawansowanyMbtiles
         '
         Me.btnDodajSesje.Location = New System.Drawing.Point(10, 204)
         Me.btnDodajSesje.Name = "btnDodajSesje"
-        Me.btnDodajSesje.Size = New System.Drawing.Size(120, 26)
+        Me.btnDodajSesje.Size = New System.Drawing.Size(105, 26)
         Me.btnDodajSesje.TabIndex = 1
         Me.btnDodajSesje.Text = "Dodaj warstwę..."
         Me.btnDodajSesje.UseVisualStyleBackColor = True
         '
         'btnUsunSesje
         '
-        Me.btnUsunSesje.Location = New System.Drawing.Point(136, 204)
+        Me.btnUsunSesje.Location = New System.Drawing.Point(120, 204)
         Me.btnUsunSesje.Name = "btnUsunSesje"
-        Me.btnUsunSesje.Size = New System.Drawing.Size(95, 26)
+        Me.btnUsunSesje.Size = New System.Drawing.Size(85, 26)
         Me.btnUsunSesje.TabIndex = 2
-        Me.btnUsunSesje.Text = "Usuń warstwę"
+        Me.btnUsunSesje.Text = "Usuń"
         Me.btnUsunSesje.UseVisualStyleBackColor = True
+        '
+        'btnWyczyscSesje
+        '
+        Me.btnWyczyscSesje.Location = New System.Drawing.Point(210, 204)
+        Me.btnWyczyscSesje.Name = "btnWyczyscSesje"
+        Me.btnWyczyscSesje.Size = New System.Drawing.Size(70, 26)
+        Me.btnWyczyscSesje.TabIndex = 6
+        Me.btnWyczyscSesje.Text = "Wyczyść"
+        Me.btnWyczyscSesje.UseVisualStyleBackColor = True
+        '
+        'btnRozlaczneZakresy
+        '
+        Me.btnRozlaczneZakresy.Location = New System.Drawing.Point(286, 204)
+        Me.btnRozlaczneZakresy.Name = "btnRozlaczneZakresy"
+        Me.btnRozlaczneZakresy.Size = New System.Drawing.Size(125, 26)
+        Me.btnRozlaczneZakresy.TabIndex = 3
+        Me.btnRozlaczneZakresy.Text = "Rozłączne skale"
+        Me.ToolTip1.SetToolTip(Me.btnRozlaczneZakresy, "Automatycznie dopasowuje rozłączne, niepokrywające się zakresy powiększeń (zoom) dla wszystkich warstw w oparciu o ich rozdzielczość.")
+        Me.btnRozlaczneZakresy.UseVisualStyleBackColor = True
         '
         'btnGora
         '
         Me.btnGora.Location = New System.Drawing.Point(440, 204)
         Me.btnGora.Name = "btnGora"
         Me.btnGora.Size = New System.Drawing.Size(75, 26)
-        Me.btnGora.TabIndex = 3
+        Me.btnGora.TabIndex = 4
         Me.btnGora.Text = "W górę"
         Me.btnGora.UseVisualStyleBackColor = True
         '
@@ -202,7 +229,7 @@ Partial Class FormZaawansowanyMbtiles
         Me.btnDol.Location = New System.Drawing.Point(525, 204)
         Me.btnDol.Name = "btnDol"
         Me.btnDol.Size = New System.Drawing.Size(75, 26)
-        Me.btnDol.TabIndex = 4
+        Me.btnDol.TabIndex = 5
         Me.btnDol.Text = "W dół"
         Me.btnDol.UseVisualStyleBackColor = True
         '
@@ -291,6 +318,8 @@ Partial Class FormZaawansowanyMbtiles
         Me.grpUstawienia.Controls.Add(Me.btnPokazWFolderze)
         Me.grpUstawienia.Controls.Add(Me.lblNazwa)
         Me.grpUstawienia.Controls.Add(Me.txtNazwaMapy)
+        Me.grpUstawienia.Controls.Add(Me.lblTypBazy)
+        Me.grpUstawienia.Controls.Add(Me.cmbTypBazy)
         Me.grpUstawienia.Controls.Add(Me.lblFormat)
         Me.grpUstawienia.Controls.Add(Me.cmbFormat)
         Me.grpUstawienia.Controls.Add(Me.lblJakosc)
@@ -304,7 +333,7 @@ Partial Class FormZaawansowanyMbtiles
         Me.grpUstawienia.Size = New System.Drawing.Size(610, 189)
         Me.grpUstawienia.TabIndex = 2
         Me.grpUstawienia.TabStop = False
-        Me.grpUstawienia.Text = "Parametry pliku MBTiles i kompresji"
+        Me.grpUstawienia.Text = "Parametry pliku wynikowego i kompresji"
         '
         'lblPlik
         '
@@ -319,12 +348,12 @@ Partial Class FormZaawansowanyMbtiles
         '
         Me.txtPlikWynikowy.Location = New System.Drawing.Point(89, 22)
         Me.txtPlikWynikowy.Name = "txtPlikWynikowy"
-        Me.txtPlikWynikowy.Size = New System.Drawing.Size(345, 20)
+        Me.txtPlikWynikowy.Size = New System.Drawing.Size(325, 20)
         Me.txtPlikWynikowy.TabIndex = 1
         '
         'btnWybierzPlik
         '
-        Me.btnWybierzPlik.Location = New System.Drawing.Point(440, 20)
+        Me.btnWybierzPlik.Location = New System.Drawing.Point(420, 20)
         Me.btnWybierzPlik.Name = "btnWybierzPlik"
         Me.btnWybierzPlik.Size = New System.Drawing.Size(75, 23)
         Me.btnWybierzPlik.TabIndex = 2
@@ -333,11 +362,11 @@ Partial Class FormZaawansowanyMbtiles
         '
         'btnPokazWFolderze
         '
-        Me.btnPokazWFolderze.Location = New System.Drawing.Point(520, 20)
+        Me.btnPokazWFolderze.Location = New System.Drawing.Point(500, 20)
         Me.btnPokazWFolderze.Name = "btnPokazWFolderze"
-        Me.btnPokazWFolderze.Size = New System.Drawing.Size(80, 23)
+        Me.btnPokazWFolderze.Size = New System.Drawing.Size(100, 23)
         Me.btnPokazWFolderze.TabIndex = 3
-        Me.btnPokazWFolderze.Text = "Pokaż..."
+        Me.btnPokazWFolderze.Text = "Pokaż w folderze"
         Me.ToolTip1.SetToolTip(Me.btnPokazWFolderze, "Otwiera folder i zaznacza plik MBTiles w Eksploratorze Windows")
         Me.btnPokazWFolderze.UseVisualStyleBackColor = True
         '
@@ -358,13 +387,32 @@ Partial Class FormZaawansowanyMbtiles
         Me.txtNazwaMapy.TabIndex = 4
         Me.txtNazwaMapy.Text = "Mapa wielowarstwowa"
         '
+        'lblTypBazy
+        '
+        Me.lblTypBazy.AutoSize = True
+        Me.lblTypBazy.Location = New System.Drawing.Point(345, 56)
+        Me.lblTypBazy.Name = "lblTypBazy"
+        Me.lblTypBazy.Size = New System.Drawing.Size(70, 13)
+        Me.lblTypBazy.TabIndex = 5
+        Me.lblTypBazy.Text = "Format pliku:"
+        '
+        'cmbTypBazy
+        '
+        Me.cmbTypBazy.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
+        Me.cmbTypBazy.FormattingEnabled = True
+        Me.cmbTypBazy.Items.AddRange(New Object() {"MBTiles (*.mbtiles)", "GeoPackage (*.gpkg)"})
+        Me.cmbTypBazy.Location = New System.Drawing.Point(420, 53)
+        Me.cmbTypBazy.Name = "cmbTypBazy"
+        Me.cmbTypBazy.Size = New System.Drawing.Size(180, 21)
+        Me.cmbTypBazy.TabIndex = 6
+        '
         'lblFormat
         '
         Me.lblFormat.AutoSize = True
         Me.lblFormat.Location = New System.Drawing.Point(10, 88)
         Me.lblFormat.Name = "lblFormat"
         Me.lblFormat.Size = New System.Drawing.Size(69, 13)
-        Me.lblFormat.TabIndex = 5
+        Me.lblFormat.TabIndex = 7
         Me.lblFormat.Text = "Format kafli:"
         '
         'cmbFormat
@@ -404,7 +452,7 @@ Partial Class FormZaawansowanyMbtiles
         Me.chkPiramida.Name = "chkPiramida"
         Me.chkPiramida.Size = New System.Drawing.Size(395, 17)
         Me.chkPiramida.TabIndex = 9
-        Me.chkPiramida.Text = "Szybka piramida w pasmach warstw (downscale 2x przyspiesza zapis o ~70%)"
+        Me.chkPiramida.Text = "Szybka piramida w pasmach warstw (zapis do ~70% szybszy)"
         Me.chkPiramida.UseVisualStyleBackColor = True
         '
         'chkWypelnijLuki
@@ -424,7 +472,7 @@ Partial Class FormZaawansowanyMbtiles
         Me.chkKorekta.Name = "chkKorekta"
         Me.chkKorekta.Size = New System.Drawing.Size(175, 17)
         Me.chkKorekta.TabIndex = 11
-        Me.chkKorekta.Text = "Korekta obrazu (MIP/kontrast)"
+        Me.chkKorekta.Text = "Korekta obrazu"
         Me.ToolTip1.SetToolTip(Me.chkKorekta, "Optymalizacja rastra pod kątem czytelności w słońcu (Garmin MIP), podbicie kontrastu lub wyostrzenie krawędzi")
         Me.chkKorekta.UseVisualStyleBackColor = True
         '
@@ -434,7 +482,7 @@ Partial Class FormZaawansowanyMbtiles
         Me.btnKorekta.Name = "btnKorekta"
         Me.btnKorekta.Size = New System.Drawing.Size(180, 24)
         Me.btnKorekta.TabIndex = 12
-        Me.btnKorekta.Text = "Dostosuj..."
+        Me.btnKorekta.Text = "Korekta obrazu..."
         Me.btnKorekta.UseVisualStyleBackColor = True
         '
         'grpSzacunek
@@ -531,8 +579,8 @@ Partial Class FormZaawansowanyMbtiles
         Me.btnPomoc.Name = "btnPomoc"
         Me.btnPomoc.Size = New System.Drawing.Size(85, 28)
         Me.btnPomoc.TabIndex = 9
-        Me.btnPomoc.Text = "Pomoc (?)"
-        Me.ToolTip1.SetToolTip(Me.btnPomoc, "Instrukcja obsługi i wskazówki dotyczące wielowarstwowego MBTiles (F1)")
+        Me.btnPomoc.Text = "Pomoc"
+        Me.ToolTip1.SetToolTip(Me.btnPomoc, "Instrukcja obsługi MBTiles wieloskalowego (F1)")
         Me.btnPomoc.UseVisualStyleBackColor = True
         '
         'btnKompiluj
@@ -555,6 +603,16 @@ Partial Class FormZaawansowanyMbtiles
         Me.btnPrzerwij.Text = "Przerwij"
         Me.btnPrzerwij.UseVisualStyleBackColor = True
         '
+        'btnZastosujKreator
+        '
+        Me.btnZastosujKreator.Location = New System.Drawing.Point(375, 670)
+        Me.btnZastosujKreator.Name = "btnZastosujKreator"
+        Me.btnZastosujKreator.Size = New System.Drawing.Size(205, 28)
+        Me.btnZastosujKreator.TabIndex = 6
+        Me.btnZastosujKreator.Text = "✓ Zastosuj i wróć do kreatora"
+        Me.btnZastosujKreator.UseVisualStyleBackColor = True
+        Me.btnZastosujKreator.Visible = False
+        '
         'btnZamknij
         '
         Me.btnZamknij.Location = New System.Drawing.Point(882, 670)
@@ -569,6 +627,7 @@ Partial Class FormZaawansowanyMbtiles
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.ClientSize = New System.Drawing.Size(964, 710)
+        Me.Controls.Add(Me.btnZastosujKreator)
         Me.Controls.Add(Me.btnZamknij)
         Me.Controls.Add(Me.btnPrzerwij)
         Me.Controls.Add(Me.btnPomoc)
@@ -584,7 +643,7 @@ Partial Class FormZaawansowanyMbtiles
         Me.MaximizeBox = False
         Me.Name = "FormZaawansowanyMbtiles"
         Me.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent
-        Me.Text = "Zaawansowany kreator wielowarstwowego / wieloskalowego MBTiles"
+        Me.Text = "MBTiles wieloskalowy - różne mapy dla różnych powiększeń"
         Me.grpWarstwy.ResumeLayout(False)
         CType(Me.dgvWarstwy, System.ComponentModel.ISupportInitialize).EndInit()
         Me.grpPodglad.ResumeLayout(False)
@@ -603,6 +662,9 @@ Partial Class FormZaawansowanyMbtiles
     Friend WithEvents dgvWarstwy As DataGridView
     Friend WithEvents btnDodajSesje As Button
     Friend WithEvents btnUsunSesje As Button
+    Friend WithEvents btnWyczyscSesje As Button
+    Friend WithEvents btnZastosujKreator As Button
+    Friend WithEvents btnRozlaczneZakresy As Button
     Friend WithEvents btnGora As Button
     Friend WithEvents btnDol As Button
     Friend WithEvents grpPodglad As GroupBox
@@ -619,6 +681,8 @@ Partial Class FormZaawansowanyMbtiles
     Friend WithEvents btnPokazWFolderze As Button
     Friend WithEvents lblNazwa As Label
     Friend WithEvents txtNazwaMapy As TextBox
+    Friend WithEvents lblTypBazy As Label
+    Friend WithEvents cmbTypBazy As ComboBox
     Friend WithEvents lblFormat As Label
     Friend WithEvents cmbFormat As ComboBox
     Friend WithEvents lblJakosc As Label

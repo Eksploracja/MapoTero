@@ -8,6 +8,16 @@ Imports Xunit
 Public Class SiatkaTesty
 
     <Fact>
+    Public Sub PowodNiepoprawnosci_WskazujeCoPoprawic()
+        Assert.Equal("", New Siatka(New Zasieg(0, 0, 100, 100), 1, 10).PowodNiepoprawnosci)
+        Assert.Contains("X górne", New Siatka(New Zasieg(100, 0, 50, 100), 1, 10).PowodNiepoprawnosci)
+        Assert.Contains("Y prawe", New Siatka(New Zasieg(0, 100, 100, 50), 1, 10).PowodNiepoprawnosci)
+        Assert.Contains("rozmiar piksela", New Siatka(New Zasieg(0, 0, 100, 100), 0, 10).PowodNiepoprawnosci)
+        Assert.Contains("bok segmentu", New Siatka(New Zasieg(0, 0, 100, 100), 1, 0).PowodNiepoprawnosci)
+        Assert.Contains("zbyt duży", New Siatka(New Zasieg(0, 0, 100000000, 100000000), 0.000001, 1).PowodNiepoprawnosci)
+    End Sub
+
+    <Fact>
     Public Sub LiczbaSegmentowIZasiegi()
         'obszar 1000 m (X) x 1500 m (Y), piksel 2 m, segment 250 px = 500 m
         Dim s As New Siatka(New Zasieg(500000, 600000, 501000, 601500), 2, 250)

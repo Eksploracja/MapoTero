@@ -116,7 +116,7 @@ Partial Class FormKorektaFolderu
         Me.btnDostosuj.Name = "btnDostosuj"
         Me.btnDostosuj.Size = New System.Drawing.Size(260, 26)
         Me.btnDostosuj.TabIndex = 1
-        Me.btnDostosuj.Text = "Dostosuj parametry (kontrast, ostrość, MIP)..."
+        Me.btnDostosuj.Text = "Korekta obrazu..."
         Me.btnDostosuj.UseVisualStyleBackColor = True
         '
         'chkKopiujGeo
@@ -197,7 +197,7 @@ Partial Class FormKorektaFolderu
         Me.MinimizeBox = False
         Me.Name = "FormKorektaFolderu"
         Me.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent
-        Me.Text = "Korekta i optymalizacja obrazów w folderze"
+        Me.Text = "Korekta obrazów w folderze"
         Me.grpParametry.ResumeLayout(False)
         Me.grpParametry.PerformLayout()
         Me.ResumeLayout(False)

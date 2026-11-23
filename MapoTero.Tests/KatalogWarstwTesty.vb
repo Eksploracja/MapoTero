@@ -18,7 +18,7 @@ Public Class KatalogWarstwTesty
         "plany | warszawa_2180 | Warszawa" & vbCrLf &
         "plany | krakow_2180" & vbCrLf &
         ">> WIG" & vbCrLf &
-        "ihpan | wig25k_2180 | WIG 1:25 000" & vbCrLf &
+        "ihpan | wig25k_2180 | WIG 1:25 000 | Hist_WIG_25k" & vbCrLf &
         "> Rzeźba terenu" & vbCrLf &
         "ortofotomapa | Raster | Ta sama warstwa w drugiej grupie"
 
@@ -33,8 +33,11 @@ Public Class KatalogWarstwTesty
         Assert.Equal("Warszawa", plany.Dzieci(0).Nazwa)
         Assert.Equal("warszawa_2180", plany.Dzieci(0).Warstwa)
         Assert.Equal("plany", plany.Dzieci(0).Zbior)
+        Assert.Equal("", plany.Dzieci(0).Identyfikator)
         'bez nazwy wyświetlanej - nazwa warstwy na serwerze
         Assert.Equal("krakow_2180", plany.Dzieci(1).Nazwa)
+        Assert.Equal("Hist_WIG_25k", historyczne.Dzieci(1).Dzieci(0).Identyfikator)
+        Assert.Equal("Hist_WIG_25k", k.ZnajdzIdentyfikator("ihpan", "wig25k_2180"))
         Assert.Equal(5, k.Warstwy().Count())
         Assert.True(k.Zawiera("ORTOFOTOMAPA", "Raster"))
         Assert.False(k.Zawiera("ortofotomapa", "raster"))
@@ -95,6 +98,9 @@ Public Class KatalogWarstwTesty
         For Each w In k.Warstwy()
             Assert.True(zbiory.ContainsKey(w.Zbior), "katalog: brak zbioru " & w.Zbior & " w warstwy.txt")
             Assert.True(zbiory(w.Zbior).Znajdz(w.Warstwa) IsNot Nothing, "katalog: brak warstwy " & w.Warstwa & " w zbiorze " & w.Zbior)
+            Assert.False(String.IsNullOrWhiteSpace(w.Identyfikator), "brak identyfikatora dla warstwy: " & w.Zbior & " | " & w.Warstwa)
+            Assert.True(w.Identyfikator.Length <= 20, "identyfikator dłuższy niż 20 znaków: " & w.Identyfikator)
+            Assert.Matches("^[a-zA-Z0-9_\-+]+$", w.Identyfikator)
         Next
         For Each z In zbiory
             Assert.True(k.NiewymienioneWarstwy(z.Key, z.Value).Count = 0,
@@ -108,6 +114,12 @@ Public Class KatalogWarstwTesty
         Dim klucze = zbiory.SelectMany(Function(z) z.Value.Warstwy.Select(Function(w) (Klucz:=KatalogWarstw.KluczAliasu(z.Value.Adres, w.Nazwa), Zbior:=z.Key)))
         For Each grupa In klucze.GroupBy(Function(x) x.Klucz)
             Assert.True(grupa.Count() = 1, "warstwa w kilku zbiorach: " & String.Join(", ", grupa.Select(Function(x) x.Zbior)) & " - " & grupa.Key)
+        Next
+
+        'unikalność identyfikatorów (każdy identyfikator reprezentuje dokładnie jedną warstwę)
+        For Each grp In k.Warstwy().GroupBy(Function(w) w.Identyfikator)
+            Dim unikalneWarstwy = grp.Select(Function(w) zbiory(w.Zbior).Adres & "|" & w.Warstwa).Distinct().ToList()
+            Assert.True(unikalneWarstwy.Count = 1, "identyfikator " & grp.Key & " przypisany do różnych warstw: " & String.Join(", ", unikalneWarstwy))
         Next
 
         SprawdzNazwyWGrupach(k.Grupy)
@@ -153,6 +165,41 @@ Public Class KatalogWarstwTesty
         Assert.Equal("Ewidencja_zabytków_archeologicznych", zea.Warstwy(0).Nazwa)
         Dim urlZea = Wms.ZapytanieGetMap(zea.Adres, {zea.Warstwy(0).Nazwa}, UkladWspolrzednych.PL1992, z, "png", 512, 512, False, True)
         Assert.Contains("%C3%B3", New Uri(urlZea).AbsoluteUri)
+    End Sub
+
+    <Fact>
+    Public Sub SkroconaNazwaSesji_ZwracaKrotkiIdentyfikator()
+        Dim folder = Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "warstwy")
+        Dim k = KatalogWarstw.Wczytaj(Path.Combine(folder, KatalogWarstw.NazwaPliku))
+
+        ' Test dla skanów map topograficznych
+        Dim c10 As New KonfiguracjaSesji With {.RodzajMapy = "skany_map_topograficznych", .LiczbaWarstw = 1}
+        c10.Warstwy(0) = "Raster_10_1965"
+        Assert.Equal("Topo_65_10k", k.SkroconaNazwaSesji(c10))
+
+        Dim c25 As New KonfiguracjaSesji With {.RodzajMapy = "skany_map_topograficznych", .LiczbaWarstw = 1}
+        c25.Warstwy(0) = "Raster_25_1965"
+        Assert.Equal("Topo_65_25k", k.SkroconaNazwaSesji(c25))
+
+        Dim c50 As New KonfiguracjaSesji With {.RodzajMapy = "skany_map_topograficznych", .LiczbaWarstw = 1}
+        c50.Warstwy(0) = "Raster_50_1965"
+        Assert.Equal("Topo_65_50k", k.SkroconaNazwaSesji(c50))
+
+        ' Test dla ortofotomapy WMTS
+        Dim cOrto As New KonfiguracjaSesji With {.RodzajMapy = "ortofotomapa_WMTS", .LiczbaWarstw = 1}
+        cOrto.Warstwy(0) = "ORTOFOTOMAPA"
+        Assert.Equal("Orto_Std_25cm", k.SkroconaNazwaSesji(cOrto))
+
+        ' Test dla sesji z dwiema warstwami
+        Dim cMix As New KonfiguracjaSesji With {.RodzajMapy = "ortofotomapa_WMTS", .LiczbaWarstw = 2}
+        cMix.Warstwy(0) = "ORTOFOTOMAPA"
+        cMix.Warstwy(1) = "Raster_10_1965"
+        Assert.Equal("Orto_Std_25cm+Topo_65_10k", k.SkroconaNazwaSesji(cMix))
+
+        ' Test pełnego opisu
+        Dim opis = k.PelnyOpisSesji(c10)
+        Assert.Contains("1:10 000, układ 1965", opis)
+        Assert.Contains("skany_map_topograficznych Raster_10_1965", opis)
     End Sub
 
 End Class

@@ -92,7 +92,7 @@ Public Class FormEksportCad
         Try
             _konfiguracja = KonfiguracjaSesji.Wczytaj(plik, KodowanieSystemowe())
         Catch ex As Exception
-            Komunikat("Nie udało się odczytać pliku conf.txt: " & ex.Message, Color.Red)
+            Komunikat("Nie udało się odczytać pliku conf.txt: " & OpisBledu.Z(ex), Color.Red)
             UstawWidok()
             Exit Sub
         End Try
@@ -117,7 +117,7 @@ Public Class FormEksportCad
             Komunikat("W folderze nie ma jeszcze pobranych segmentów - można wyeksportować sam obrys i siatkę segmentów.", Color.Black)
         ElseIf istniejace > EksportCad.ZalecanaLiczbaRastrow Then
             Komunikat("Segmentów jest " & istniejace & " - program CAD może działać wolno. Rozważ scalenie segmentów w jeden arkusz " &
-                      "(Narzędzia > Łączenie segmentów) i wstawienie arkusza.", Color.Black)
+                      "(Narzędzia > Scalanie segmentów) i wstawienie arkusza.", Color.Black)
         Else
             Komunikat("Wybierz elementy mapy i kliknij Eksportuj.", Color.Black)
         End If
@@ -196,11 +196,12 @@ Public Class FormEksportCad
         WybierzArkusz(dlgArkusz.FileName)
     End Sub
 
-    ''' <summary>Scalenie segmentów sesji w arkusz (okno Łączenie segmentów) i wybranie go do wstawienia.</summary>
+    ''' <summary>Scalenie segmentów sesji w arkusz (okno Scalanie segmentów) i wybranie go do wstawienia.</summary>
     Private Sub btnScal_Click(sender As Object, e As EventArgs) Handles btnScal.Click
         If _konfiguracja Is Nothing OrElse Form1.PobieranieTrwa("Scalanie segmentów") Then Exit Sub
         Dim plik As String = ""
-        Using f As New Form3() With {.FolderPoczatkowy = _folder}
+        'okno Eksport mapy z formatem Arkusz (dawne okno scalania)
+        Using f As New FormEksport() With {.FolderPoczatkowy = _folder, .ArkuszDomyslnie = True}
             f.ShowDialog(Me)
             plik = f.PlikArkusza
         End Using
@@ -234,7 +235,7 @@ Public Class FormEksportCad
                       If(uwagi.Any(Function(u) u.StartsWith("Uwaga")), Color.Red, Color.Black))
         Catch ex As Exception
             txtArkusz.Text = ""
-            Komunikat("Nie można wstawić arkusza " & Path.GetFileName(sciezka) & ": " & ex.Message, Color.Red)
+            Komunikat("Nie można wstawić arkusza " & Path.GetFileName(sciezka) & ": " & OpisBledu.Z(ex), Color.Red)
         End Try
         UstawWidok()
     End Sub
@@ -270,7 +271,7 @@ Public Class FormEksportCad
             If istniejace > EksportCad.ZalecanaLiczbaRastrow Then
                 Dim komunikatRastrow As String = "Wybrana sesja zawiera " & istniejace & " pojedynczych segmentów rastrowych." & vbCrLf & vbCrLf &
                                                  "Wstawienie ponad 1 000 rastrów do rysunku może drastycznie spowolnić lub zawiesić program CAD." & vbCrLf &
-                                                 "Zalecane jest wcześniejsze scalenie segmentów w jeden arkusz (przycisk 'Scal teraz…')." & vbCrLf & vbCrLf &
+                                                 "Zalecane jest wcześniejsze scalenie segmentów w jeden arkusz (przycisk 'Scal segmenty…')." & vbCrLf & vbCrLf &
                                                  "Czy na pewno chcesz kontynuować eksport pojedynczych segmentów?"
                 If MessageBox.Show(komunikatRastrow, "Duża liczba rastrów w CAD", MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2) <> DialogResult.Yes Then
                     Exit Sub
@@ -315,6 +316,7 @@ Public Class FormEksportCad
                     Return zad
                 End Function)
 
+            If IsDisposed OrElse Disposing Then Exit Sub
             Dim sb As New StringBuilder()
             sb.Append("Zapisano (rastrów: ").Append(z.Rastry.Count).Append("):").Append(vbCrLf)
             If dxf Then
@@ -338,10 +340,13 @@ Public Class FormEksportCad
             _folderWyniku = Path.GetDirectoryName(plikDxf)
             btnOtworzFolder.Enabled = True
         Catch ex As Exception
-            Komunikat("Eksport nie powiódł się: " & ex.Message, Color.Red)
+            If IsDisposed OrElse Disposing Then Exit Sub
+            Komunikat("Eksport nie powiódł się: " & OpisBledu.Z(ex), Color.Red)
         Finally
-            Cursor = Cursors.Default
-            Enabled = True
+            If Not IsDisposed AndAlso Not Disposing Then
+                Cursor = Cursors.Default
+                Enabled = True
+            End If
         End Try
     End Sub
 

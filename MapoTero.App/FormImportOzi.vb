@@ -21,6 +21,8 @@ Public Enum FormatKonwersjiOzi
     Jnx
     Kmz
     Mbtiles
+    SQLiteDB
+    OruxMaps
 End Enum
 
 Public Class RaportPostepuWsadowego
@@ -46,11 +48,78 @@ Public Class FormImportOzi
     Private _anulowanie As CancellationTokenSource
     Private _plikiWsadowe As New List(Of String)()
     Private _czyTrybWsadowy As Boolean = False
+    ''' <summary>Okno zamknięte w trakcie konwersji - zamyka się po jej przerwaniu, bez komunikatów o wyniku.</summary>
+    Private _zamknijPoZakonczeniu As Boolean
+    ''' <summary>Korekta obrazu kafli - ta sama co w oknie Eksport mapy (profil zapamiętany w ustawieniach).</summary>
+    Private _opcjeKorekty As OpcjeKorekcjiMip
 
     Public Sub New()
         InitializeComponent()
         PomocProgramu.DodajPrzyciskPomocy(Me, TematPomocy.ImportOzi)
         Me.AllowDrop = True
+        _opcjeKorekty = Ustawienia.OpcjeKorekty()
+        chkKorekta.Checked = _opcjeKorekty.Wlaczona
+        AktualizujPrzyciskKorekty()
+    End Sub
+
+    Private Sub chkKorekta_CheckedChanged(sender As Object, e As EventArgs) Handles chkKorekta.CheckedChanged
+        If chkKorekta.Checked = _opcjeKorekty.Wlaczona Then Exit Sub
+        _opcjeKorekty.Wlaczona = chkKorekta.Checked
+        If chkKorekta.Checked AndAlso _opcjeKorekty.Profil = ProfilKorektyRastra.Brak Then _opcjeKorekty.UstawWgProfilu(ProfilKorektyRastra.GarminMip)
+        AktualizujPrzyciskKorekty()
+    End Sub
+
+    Private Sub btnKorekta_Click(sender As Object, e As EventArgs) Handles btnKorekta.Click
+        Dim probka As String = If(_ozi IsNot Nothing AndAlso _ozi.PlikObrazuIstnieje, _ozi.PlikObrazu, "")
+        Using dlg As New FormPodgladMip(_opcjeKorekty, probka)
+            If dlg.ShowDialog(Me) = DialogResult.OK Then
+                _opcjeKorekty = dlg.Opcje
+                chkKorekta.Checked = _opcjeKorekty.Wlaczona
+                AktualizujPrzyciskKorekty()
+            End If
+        End Using
+    End Sub
+
+    Private Sub AktualizujPrzyciskKorekty()
+        btnKorekta.Text = "Korekta obrazu..."
+        btnKorekta.Enabled = (_anulowanie Is Nothing) AndAlso chkKorekta.Checked
+    End Sub
+
+    ''' <summary>Korekta przekazywana do konwersji (Nothing - wyłączona).</summary>
+    Private Function KorektaKonwersji() As OpcjeKorekcjiMip
+        Return If(chkKorekta.Checked AndAlso _opcjeKorekty.Wlaczona, _opcjeKorekty.Kopia(), Nothing)
+    End Function
+
+    Private Function WybranyFormat() As FormatKonwersjiOzi
+        If rbJnx.Checked Then Return FormatKonwersjiOzi.Jnx
+        If rbKmz.Checked Then Return FormatKonwersjiOzi.Kmz
+        If rbSqlitedb.Checked Then Return FormatKonwersjiOzi.SQLiteDB
+        If rbOruxMaps.Checked Then Return FormatKonwersjiOzi.OruxMaps
+        Return FormatKonwersjiOzi.Mbtiles
+    End Function
+
+    ''' <summary>Rozszerzenie pliku wynikowego; OruxMaps - pusty (wynikiem jest folder mapy).</summary>
+    Friend Shared Function RozszerzenieWyniku(format As FormatKonwersjiOzi) As String
+        Select Case format
+            Case FormatKonwersjiOzi.Jnx : Return ".jnx"
+            Case FormatKonwersjiOzi.Kmz : Return ".kmz"
+            Case FormatKonwersjiOzi.SQLiteDB : Return ".sqlitedb"
+            Case FormatKonwersjiOzi.OruxMaps : Return ""
+            Case Else : Return ".mbtiles"
+        End Select
+    End Function
+
+    ''' <summary>Konwersja jednej mapy do wybranego formatu (okno i tryb wsadowy).</summary>
+    Friend Shared Sub Konwertuj(ozi As PlikKalibracjiOzi, format As FormatKonwersjiOzi, sciezka As String, kolejnosc As Integer,
+                                jakosc As Integer, podzialKmz As Boolean, korekta As OpcjeKorekcjiMip,
+                                postep As IProgress(Of Integer), token As CancellationToken)
+        Select Case format
+            Case FormatKonwersjiOzi.Kmz : KonwertujDoKmz(ozi, sciezka, kolejnosc, jakosc, podzialKmz, postep, token, korekta)
+            Case FormatKonwersjiOzi.Jnx : KonwertujDoJnx(ozi, sciezka, kolejnosc, jakosc, postep, token, korekta)
+            Case FormatKonwersjiOzi.SQLiteDB : KonwertujDoBazyKafli(ozi, RodzajEksportu.SQLiteDB, sciezka, jakosc, postep, token, korekta)
+            Case FormatKonwersjiOzi.OruxMaps : KonwertujDoBazyKafli(ozi, RodzajEksportu.OruxMaps, sciezka, jakosc, postep, token, korekta)
+            Case Else : KonwertujDoBazyKafli(ozi, RodzajEksportu.MBTiles, sciezka, jakosc, postep, token, korekta)
+        End Select
     End Sub
 
     ''' <summary>Otwiera formularz i ładuje wskazany plik .map.</summary>
@@ -111,6 +180,8 @@ Public Class FormImportOzi
 
     Protected Overrides Sub OnDragDrop(drgevent As DragEventArgs)
         MyBase.OnDragDrop(drgevent)
+        'w trakcie konwersji przyciski wyboru plików są zablokowane - upuszczenie pliku podmieniało opis konwertowanej mapy
+        If _anulowanie IsNot Nothing Then Exit Sub
         If drgevent.Data.GetDataPresent(DataFormats.FileDrop) Then
             Dim pliki = DirectCast(drgevent.Data.GetData(DataFormats.FileDrop), String())
             If pliki Is Nothing OrElse pliki.Length = 0 Then Exit Sub
@@ -220,7 +291,7 @@ Public Class FormImportOzi
             txtPlikObrazu.Text = _ozi.PlikObrazu
             OdswiezInformacje()
         Catch ex As Exception
-            MessageBox.Show("Nie udało się odczytać pliku kalibracji: " & ex.Message,
+            MessageBox.Show("Nie udało się odczytać pliku kalibracji: " & OpisBledu.Z(ex),
                             "Błąd pliku kalibracji", MessageBoxButtons.OK, MessageBoxIcon.Error)
         End Try
     End Sub
@@ -233,7 +304,7 @@ Public Class FormImportOzi
             txtPlikObrazu.Text = sciezka
             OdswiezInformacje()
         Catch ex As Exception
-            MessageBox.Show("Błąd odczytu pliku obrazu: " & ex.Message, "Błąd obrazu", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            MessageBox.Show("Błąd odczytu pliku obrazu: " & OpisBledu.Z(ex), "Błąd obrazu", MessageBoxButtons.OK, MessageBoxIcon.Error)
         End Try
     End Sub
 
@@ -293,7 +364,7 @@ Public Class FormImportOzi
         End Select
     End Function
 
-    Private Sub rbFormat_CheckedChanged(sender As Object, e As EventArgs) Handles rbKmz.CheckedChanged, rbJnx.CheckedChanged, rbMbtiles.CheckedChanged
+    Private Sub rbFormat_CheckedChanged(sender As Object, e As EventArgs) Handles rbKmz.CheckedChanged, rbJnx.CheckedChanged, rbMbtiles.CheckedChanged, rbSqlitedb.CheckedChanged, rbOruxMaps.CheckedChanged
         chkPodzialKmz.Enabled = rbKmz.Checked
     End Sub
 
@@ -303,6 +374,21 @@ Public Class FormImportOzi
         Else
             Await WykonajKonwersjePojedynczaAsync()
         End If
+    End Sub
+
+    ''' <summary>
+    ''' Zamknięcie krzyżykiem w trakcie konwersji przerywa ją, a okno zamyka się po zakończeniu zadania (jak w oknie
+    ''' korekty obrazów). Dawniej konwersja trwała w tle po zamknięciu okna, a na końcu pojawiał się jej komunikat.
+    ''' </summary>
+    Protected Overrides Sub OnFormClosing(e As FormClosingEventArgs)
+        If _anulowanie IsNot Nothing Then
+            _anulowanie.Cancel()
+            _zamknijPoZakonczeniu = True
+            lblStatus.Text = "Trwa przerywanie operacji..."
+            e.Cancel = True
+            Return
+        End If
+        MyBase.OnFormClosing(e)
     End Sub
 
     Private Sub btnZamknij_Click(sender As Object, e As EventArgs) Handles btnZamknij.Click
@@ -318,28 +404,31 @@ Public Class FormImportOzi
         If _ozi Is Nothing OrElse Not _ozi.PlikObrazuIstnieje Then Exit Function
 
         Dim domyslnaNazwa = Path.GetFileNameWithoutExtension(_ozi.SciezkaMap)
-        If rbJnx.Checked Then
-            dlgZapisz.Filter = "Garmin BirdsEye (*.jnx)|*.jnx"
-            dlgZapisz.DefaultExt = "jnx"
-            dlgZapisz.FileName = domyslnaNazwa & ".jnx"
-        ElseIf rbKmz.Checked Then
-            dlgZapisz.Filter = "Garmin Custom Maps (*.kmz)|*.kmz"
-            dlgZapisz.DefaultExt = "kmz"
-            dlgZapisz.FileName = domyslnaNazwa & ".kmz"
+        Dim format = WybranyFormat()
+        Dim sciezkaWyjsciowa As String
+        If format = FormatKonwersjiOzi.OruxMaps Then
+            'OruxMaps: wynikiem jest folder mapy (baza i kalibracja) w wybranym folderze map
+            dlgFolderWyjsciowy.SelectedPath = Path.GetDirectoryName(_ozi.SciezkaMap)
+            If dlgFolderWyjsciowy.ShowDialog(Me) <> DialogResult.OK Then Exit Function
+            sciezkaWyjsciowa = Path.Combine(dlgFolderWyjsciowy.SelectedPath, domyslnaNazwa)
         Else
-            dlgZapisz.Filter = "Baza MBTiles (*.mbtiles)|*.mbtiles"
-            dlgZapisz.DefaultExt = "mbtiles"
-            dlgZapisz.FileName = domyslnaNazwa & ".mbtiles"
+            Dim rozszerzenie = RozszerzenieWyniku(format)
+            Select Case format
+                Case FormatKonwersjiOzi.Jnx : dlgZapisz.Filter = "Garmin BirdsEye (*.jnx)|*.jnx"
+                Case FormatKonwersjiOzi.Kmz : dlgZapisz.Filter = "Garmin Custom Maps (*.kmz)|*.kmz"
+                Case FormatKonwersjiOzi.SQLiteDB : dlgZapisz.Filter = "Baza SQLiteDB (*.sqlitedb)|*.sqlitedb"
+                Case Else : dlgZapisz.Filter = "Baza MBTiles (*.mbtiles)|*.mbtiles"
+            End Select
+            dlgZapisz.DefaultExt = rozszerzenie.TrimStart("."c)
+            dlgZapisz.FileName = domyslnaNazwa & rozszerzenie
+            If dlgZapisz.ShowDialog(Me) <> DialogResult.OK Then Exit Function
+            sciezkaWyjsciowa = dlgZapisz.FileName
         End If
 
-        If dlgZapisz.ShowDialog(Me) <> DialogResult.OK Then Exit Function
-
-        Dim sciezkaWyjsciowa = dlgZapisz.FileName
-        Dim formatJnx = rbJnx.Checked
-        Dim formatKmz = rbKmz.Checked
         Dim kolejnosc = CInt(nudKolejnosc.Value)
         Dim jakosc = CInt(nudJakosc.Value)
         Dim podzial = chkPodzialKmz.Checked
+        Dim korekta = KorektaKonwersji()
 
         btnKonwertuj.Enabled = False
         btnWybierzMap.Enabled = False
@@ -348,6 +437,7 @@ Public Class FormImportOzi
         grpFormat.Enabled = False
         grpOpcje.Enabled = False
         btnZamknij.Text = "Anuluj"
+        btnZamknij.DialogResult = DialogResult.None
         prgPostep.Value = 0
 
         _anulowanie = New CancellationTokenSource()
@@ -357,28 +447,21 @@ Public Class FormImportOzi
                                               End Sub)
 
         Try
-            Await Task.Run(Sub()
-                               If formatKmz Then
-                                   KonwertujDoKmz(_ozi, sciezkaWyjsciowa, kolejnosc, jakosc, podzial, postep, _anulowanie.Token)
-                               ElseIf formatJnx Then
-                                   KonwertujDoJnx(_ozi, sciezkaWyjsciowa, kolejnosc, jakosc, postep, _anulowanie.Token)
-                               Else
-                                   KonwertujDoMbtiles(_ozi, sciezkaWyjsciowa, jakosc, postep, _anulowanie.Token)
-                               End If
-                           End Sub, _anulowanie.Token)
+            Dim token = _anulowanie.Token
+            Await Task.Run(Sub() Konwertuj(_ozi, format, sciezkaWyjsciowa, kolejnosc, jakosc, podzial, korekta, postep, token), token)
 
             lblStatus.Text = "Konwersja zakończona pomyślnie!"
             prgPostep.Value = 100
-            MessageBox.Show("Pomyślnie utworzono mapę:" & vbCrLf & sciezkaWyjsciowa,
+            If Not _zamknijPoZakonczeniu Then MessageBox.Show("Pomyślnie utworzono mapę:" & vbCrLf & sciezkaWyjsciowa,
                             "Konwersja zakończona", MessageBoxButtons.OK, MessageBoxIcon.Information)
         Catch ex As OperationCanceledException
             lblStatus.Text = "Konwersja została anulowana."
             prgPostep.Value = 0
-            MessageBox.Show("Konwersja została przerwana przez użytkownika.",
+            If Not _zamknijPoZakonczeniu Then MessageBox.Show("Konwersja została przerwana przez użytkownika.",
                             "Anulowano", MessageBoxButtons.OK, MessageBoxIcon.Information)
         Catch ex As Exception
-            lblStatus.Text = "Błąd: " & ex.Message
-            MessageBox.Show("Wystąpił błąd podczas konwersji:" & vbCrLf & ex.Message,
+            lblStatus.Text = "Błąd: " & OpisBledu.Z(ex)
+            If Not _zamknijPoZakonczeniu Then MessageBox.Show("Wystąpił błąd podczas konwersji:" & vbCrLf & OpisBledu.Z(ex),
                             "Błąd konwersji", MessageBoxButtons.OK, MessageBoxIcon.Error)
         Finally
             btnKonwertuj.Enabled = True
@@ -388,10 +471,12 @@ Public Class FormImportOzi
             grpFormat.Enabled = True
             grpOpcje.Enabled = True
             btnZamknij.Text = "Zamknij"
+            btnZamknij.DialogResult = DialogResult.Cancel
             If _anulowanie IsNot Nothing Then
                 _anulowanie.Dispose()
                 _anulowanie = Nothing
             End If
+            If _zamknijPoZakonczeniu Then Close()
         End Try
     End Function
 
@@ -404,10 +489,11 @@ Public Class FormImportOzi
         If dlgFolderWyjsciowy.ShowDialog(Me) <> DialogResult.OK Then Exit Function
 
         Dim folderWyjsciowy = dlgFolderWyjsciowy.SelectedPath
-        Dim format = If(rbJnx.Checked, FormatKonwersjiOzi.Jnx, If(rbKmz.Checked, FormatKonwersjiOzi.Kmz, FormatKonwersjiOzi.Mbtiles))
+        Dim format = WybranyFormat()
         Dim kolejnosc = CInt(nudKolejnosc.Value)
         Dim jakosc = CInt(nudJakosc.Value)
         Dim podzial = chkPodzialKmz.Checked
+        Dim korekta = KorektaKonwersji()
 
         btnKonwertuj.Enabled = False
         btnWybierzMap.Enabled = False
@@ -416,6 +502,7 @@ Public Class FormImportOzi
         grpFormat.Enabled = False
         grpOpcje.Enabled = False
         btnZamknij.Text = "Anuluj"
+        btnZamknij.DialogResult = DialogResult.None
         prgPostep.Value = 0
 
         _anulowanie = New CancellationTokenSource()
@@ -427,7 +514,7 @@ Public Class FormImportOzi
         Try
             Dim wynik As WynikKonwersjiWsadowej = Nothing
             Await Task.Run(Function()
-                               wynik = KonwertujWsadowo(_plikiWsadowe, folderWyjsciowy, format, kolejnosc, jakosc, podzial, postep, _anulowanie.Token)
+                               wynik = KonwertujWsadowo(_plikiWsadowe, folderWyjsciowy, format, kolejnosc, jakosc, podzial, postep, _anulowanie.Token, korekta)
                                Return wynik
                            End Function, _anulowanie.Token)
 
@@ -445,16 +532,16 @@ Public Class FormImportOzi
                 End If
             End If
 
-            MessageBox.Show(msg, "Konwersja wsadowa zakończona", MessageBoxButtons.OK,
+            If Not _zamknijPoZakonczeniu Then MessageBox.Show(msg, "Konwersja wsadowa zakończona", MessageBoxButtons.OK,
                             If(wynik.Bledy.Count > 0, MessageBoxIcon.Warning, MessageBoxIcon.Information))
         Catch ex As OperationCanceledException
             lblStatus.Text = "Konwersja wsadowa została anulowana."
             prgPostep.Value = 0
-            MessageBox.Show("Konwersja wsadowa została przerwana przez użytkownika.",
+            If Not _zamknijPoZakonczeniu Then MessageBox.Show("Konwersja wsadowa została przerwana przez użytkownika.",
                             "Anulowano", MessageBoxButtons.OK, MessageBoxIcon.Information)
         Catch ex As Exception
-            lblStatus.Text = "Błąd: " & ex.Message
-            MessageBox.Show("Wystąpił błąd podczas konwersji wsadowej:" & vbCrLf & ex.Message,
+            lblStatus.Text = "Błąd: " & OpisBledu.Z(ex)
+            If Not _zamknijPoZakonczeniu Then MessageBox.Show("Wystąpił błąd podczas konwersji wsadowej:" & vbCrLf & OpisBledu.Z(ex),
                             "Błąd konwersji", MessageBoxButtons.OK, MessageBoxIcon.Error)
         Finally
             btnKonwertuj.Enabled = True
@@ -464,10 +551,12 @@ Public Class FormImportOzi
             grpFormat.Enabled = True
             grpOpcje.Enabled = True
             btnZamknij.Text = "Zamknij"
+            btnZamknij.DialogResult = DialogResult.Cancel
             If _anulowanie IsNot Nothing Then
                 _anulowanie.Dispose()
                 _anulowanie = Nothing
             End If
+            If _zamknijPoZakonczeniu Then Close()
         End Try
     End Function
 
@@ -541,28 +630,40 @@ Public Class FormImportOzi
         Return True
     End Function
 
-    ''' <summary>Kafel Web Mercator 256 x 256 ze skanu; Nothing - kafel poza mapą.</summary>
+    ''' <summary>
+    ''' Kafel Web Mercator 256 x 256 ze skanu, opcjonalnie z korektą obrazu; Nothing - kafel poza mapą. Przy wyostrzaniu
+    ''' kafel rysowany jest z marginesem 1 px (wyostrzanie na brzegu korzysta z prawdziwych sąsiadów, jak w eksporcie).
+    ''' </summary>
     Friend Shared Function KafelMercatora(src As Bitmap, ozi As PlikKalibracjiOzi, x As Integer, y As Integer, z As Integer,
-                                          jakosc As Integer) As Byte()
-        Dim polnoc = WebMercator.Szerokosc(y * 256.0, z)
-        Dim poludnie = WebMercator.Szerokosc((y + 1) * 256.0, z)
-        Dim zachod = WebMercator.Dlugosc(x * 256.0, z)
-        Dim wschod = WebMercator.Dlugosc((x + 1) * 256.0, z)
+                                          jakosc As Integer, Optional korekta As OpcjeKorekcjiMip = Nothing) As Byte()
+        Dim zKorekta As Boolean = korekta IsNot Nothing AndAlso korekta.Wlaczona
+        Dim m As Integer = If(zKorekta AndAlso korekta.Wyostrza, 1, 0)
+        Dim bok As Integer = 256 + 2 * m
+        Dim polnoc = WebMercator.Szerokosc(y * 256.0 - m, z)
+        Dim poludnie = WebMercator.Szerokosc((y + 1) * 256.0 + m, z)
+        Dim zachod = WebMercator.Dlugosc(x * 256.0 - m, z)
+        Dim wschod = WebMercator.Dlugosc((x + 1) * 256.0 + m, z)
         Dim n = 256.0 * (1L << z)
         Dim geoDoUv = Function(lat As Double, lon As Double) As PointF
                           Dim fi = lat * Math.PI / 180.0
-                          Dim u = (lon + 180.0) / 360.0 * n - x * 256.0
-                          Dim v = (1.0 - Math.Log(Math.Tan(fi) + 1.0 / Math.Cos(fi)) / Math.PI) / 2.0 * n - y * 256.0
+                          Dim u = (lon + 180.0) / 360.0 * n - x * 256.0 + m
+                          Dim v = (1.0 - Math.Log(Math.Tan(fi) + 1.0 / Math.Cos(fi)) / Math.PI) / 2.0 * n - y * 256.0 + m
                           Return New PointF(CSng(u), CSng(v))
                       End Function
-        Using kafelBmp As New Bitmap(256, 256, PixelFormat.Format24bppRgb)
+        Using kafelBmp As New Bitmap(bok, bok, PixelFormat.Format24bppRgb)
             Using g = Graphics.FromImage(kafelBmp)
                 g.Clear(Color.White)
                 g.InterpolationMode = Drawing2D.InterpolationMode.HighQualityBicubic
                 g.PixelOffsetMode = Drawing2D.PixelOffsetMode.HighQuality
                 If Not RysujFragment(g, src, ozi, polnoc, poludnie, wschod, zachod, geoDoUv) Then Return Nothing
             End Using
-            Return EksportMapy.Koduj(kafelBmp, False, jakosc)
+            If Not zKorekta Then Return EksportMapy.Koduj(kafelBmp, False, jakosc)
+            Dim piksele = NakladanieObrazow.PikseleBitmapy(kafelBmp)
+            KorekcjaMip.Zastosuj(piksele, bok, bok, korekta)
+            If m > 0 Then piksele = KorekcjaMip.Wytnij(piksele, bok, bok, m)
+            Using wynik = NakladanieObrazow.DoBitmapy(piksele, 256, 256)
+                Return EksportMapy.Koduj(wynik, False, jakosc)
+            End Using
         End Using
     End Function
 
@@ -584,7 +685,8 @@ Public Class FormImportOzi
 
     Friend Shared Sub KonwertujDoKmz(ozi As PlikKalibracjiOzi, plikWyjsciowy As String,
                                       kolejnosc As Integer, jakosc As Integer, podzial As Boolean,
-                                      postep As IProgress(Of Integer), token As CancellationToken)
+                                      postep As IProgress(Of Integer), token As CancellationToken,
+                                      Optional korekta As OpcjeKorekcjiMip = Nothing)
         'KMZ: kafle w siatce szerokości i długości geograficznej (Garmin nie obraca obrazu w LatLonBox) - skan jest
         'przerysowywany do tej siatki; wcześniej prostokąty zasięgu kafli skanu przesuwały obrócone mapy
         Using srcBmp As New Bitmap(ozi.PlikObrazu)
@@ -633,6 +735,8 @@ Public Class FormImportOzi
                                 jestTresc = RysujFragment(g, srcBmp, ozi, n, s, ea, we, geoDoUv)
                             End Using
                             If jestTresc Then
+                                'kafle KMZ do 1024 px - korekta bez marginesu (styk kafli co 1024 px)
+                                If korekta IsNot Nothing AndAlso korekta.Wlaczona Then NakladanieObrazow.ZastosujKorekcjeMip(kafelBmp, korekta)
                                 Dim jpeg = EksportMapy.Koduj(kafelBmp, False, jakosc)
                                 If kafliWTomie >= maxKafliNaTom Then
                                     zapisKmz.Zakoncz()
@@ -670,7 +774,8 @@ Public Class FormImportOzi
 
     Friend Shared Sub KonwertujDoJnx(ozi As PlikKalibracjiOzi, plikWyjsciowy As String,
                                       kolejnosc As Integer, jakosc As Integer,
-                                      postep As IProgress(Of Integer), token As CancellationToken)
+                                      postep As IProgress(Of Integer), token As CancellationToken,
+                                      Optional korekta As OpcjeKorekcjiMip = Nothing)
         Using srcBmp As New Bitmap(ozi.PlikObrazu)
             Dim kafle = KafleDoWygenerowania(ozi)
             If kafle.Count > MaksKafliJnx Then
@@ -682,7 +787,7 @@ Public Class FormImportOzi
             Dim licznik = 0
             For Each k In kafle
                 token.ThrowIfCancellationRequested()
-                Dim dane = KafelMercatora(srcBmp, ozi, k.X, k.Y, k.Z, jakosc)
+                Dim dane = KafelMercatora(srcBmp, ozi, k.X, k.Y, k.Z, jakosc, korekta)
                 If dane IsNot Nothing Then
                     Dim poziom As PoziomJnx = Nothing
                     If Not poziomy.TryGetValue(k.Z, poziom) Then
@@ -711,85 +816,67 @@ Public Class FormImportOzi
     End Sub
 
     Friend Shared Sub KonwertujDoMbtiles(ozi As PlikKalibracjiOzi, plikWyjsciowy As String,
-                                          jakosc As Integer, postep As IProgress(Of Integer), token As CancellationToken)
+                                          jakosc As Integer, postep As IProgress(Of Integer), token As CancellationToken,
+                                          Optional korekta As OpcjeKorekcjiMip = Nothing)
+        KonwertujDoBazyKafli(ozi, RodzajEksportu.MBTiles, plikWyjsciowy, jakosc, postep, token, korekta)
+    End Sub
+
+    ''' <summary>
+    ''' Konwersja do bazy kafli Web Mercator (MBTiles, SQLiteDB, OruxMaps - plikWyjsciowy to wtedy folder mapy) klasami
+    ''' zapisu z okna Eksport mapy - dawniej konwerter miał własny zapis MBTiles i nie znał SQLiteDB ani OruxMaps.
+    ''' </summary>
+    Friend Shared Sub KonwertujDoBazyKafli(ozi As PlikKalibracjiOzi, rodzaj As RodzajEksportu, plikWyjsciowy As String,
+                                            jakosc As Integer, postep As IProgress(Of Integer), token As CancellationToken,
+                                            Optional korekta As OpcjeKorekcjiMip = Nothing)
         Using srcBmp As New Bitmap(ozi.PlikObrazu)
             Dim kafle = KafleDoWygenerowania(ozi)
             Dim zMax = kafle.Max(Function(k) k.Z)
             Dim zMin = kafle.Min(Function(k) k.Z)
-            Dim srodekSz = (ozi.ZasiegWgs84.Polnoc + ozi.ZasiegWgs84.Poludnie) / 2.0
-
-            EksportMapy.UsunPlikBazy(plikWyjsciowy)
+            Dim tytul = If(String.IsNullOrEmpty(ozi.Tytul), Path.GetFileNameWithoutExtension(plikWyjsciowy.TrimEnd("\"c, "/"c)), ozi.Tytul)
+            Dim z As New ZadanieEksportu With {.Rodzaj = rodzaj, .Plik = plikWyjsciowy, .Nazwa = tytul, .JakoscJpeg = jakosc,
+                                               .PoziomMin = zMin, .PoziomMax = zMax}
             Try
-            Using polaczenie As New SQLiteConnection(EksportMapy.ParametryPolaczenia(plikWyjsciowy, "Wal"))
-                polaczenie.Open()
-                Using cmdInit As New SQLiteCommand("PRAGMA synchronous = OFF; PRAGMA journal_mode = WAL; CREATE TABLE metadata (name text, value text); CREATE TABLE tiles (zoom_level integer, tile_column integer, tile_row integer, tile_data blob); CREATE UNIQUE INDEX tile_index ON tiles (zoom_level, tile_column, tile_row);", polaczenie)
-                    cmdInit.ExecuteNonQuery()
-                End Using
-
-                Dim ci = CultureInfo.InvariantCulture
-                Dim tytul = If(String.IsNullOrEmpty(ozi.Tytul), Path.GetFileNameWithoutExtension(plikWyjsciowy), ozi.Tytul)
-                Dim meta As New Dictionary(Of String, String) From {
-                    {"name", tytul},
-                    {"type", "baselayer"},
-                    {"version", "1.1"},
-                    {"description", "Konwersja z mapy OziExplorer (.map)"},
-                    {"format", "jpg"},
-                    {"minzoom", zMin.ToString(ci)},
-                    {"maxzoom", zMax.ToString(ci)},
-                    {"bounds", String.Format(ci, "{0},{1},{2},{3}", ozi.ZasiegWgs84.Zachod, ozi.ZasiegWgs84.Poludnie, ozi.ZasiegWgs84.Wschod, ozi.ZasiegWgs84.Polnoc)},
-                    {"center", String.Format(ci, "{0},{1},{2}", (ozi.ZasiegWgs84.Zachod + ozi.ZasiegWgs84.Wschod) / 2.0, srodekSz, zMax)}
-                }
-
-                Using cmdMeta As New SQLiteCommand("INSERT INTO metadata (name, value) VALUES (@n, @v);", polaczenie)
-                    Dim pN = cmdMeta.Parameters.Add("@n", DbType.String)
-                    Dim pV = cmdMeta.Parameters.Add("@v", DbType.String)
-                    For Each m In meta
-                        pN.Value = m.Key
-                        pV.Value = m.Value
-                        cmdMeta.ExecuteNonQuery()
+                Dim magazyn As MagazynKafli
+                If rodzaj = RodzajEksportu.MBTiles Then
+                    magazyn = New MagazynMBTiles(plikWyjsciowy, New OpisMbtiles With {
+                        .Nazwa = tytul, .Opis = "Konwersja z mapy OziExplorer (.map)", .PoziomMin = zMin, .PoziomMax = zMax, .Obszar = ozi.ZasiegWgs84})
+                Else
+                    magazyn = EksportMapy.UtworzMagazyn(z, ozi.ZasiegWgs84)
+                End If
+                Using magazyn
+                    Dim licznik = 0
+                    Dim zapisane = 0
+                    Dim poziom = -1
+                    For Each k In kafle
+                        token.ThrowIfCancellationRequested()
+                        'kafle uporządkowane poziomami - każdy poziom w osobnej transakcji, jak w eksporcie
+                        If k.Z <> poziom Then
+                            If poziom >= 0 Then magazyn.ZakonczPoziom()
+                            poziom = k.Z
+                            magazyn.RozpocznijPoziom(poziom)
+                        End If
+                        Dim dane = KafelMercatora(srcBmp, ozi, k.X, k.Y, k.Z, jakosc, korekta)
+                        If dane IsNot Nothing Then
+                            magazyn.Zapisz(k, dane)
+                            zapisane += 1
+                        End If
+                        licznik += 1
+                        postep?.Report(CInt(licznik * 100L / kafle.Count))
                     Next
+                    If poziom >= 0 Then magazyn.ZakonczPoziom()
+                    If zapisane = 0 Then Throw New InvalidOperationException("Nie wygenerowano żadnych kafli - kalibracja nie pokrywa obrazu mapy.")
+                    magazyn.ZakonczZapis()
                 End Using
-
-                Dim licznik = 0
-                Dim zapisane = 0
-                Using trans = polaczenie.BeginTransaction()
-                    Using cmdTile As New SQLiteCommand("INSERT OR REPLACE INTO tiles (zoom_level, tile_column, tile_row, tile_data) VALUES (@z, @x, @y, @d);", polaczenie, trans)
-                        Dim pZ = cmdTile.Parameters.Add("@z", DbType.Int32)
-                        Dim pX = cmdTile.Parameters.Add("@x", DbType.Int32)
-                        Dim pY = cmdTile.Parameters.Add("@y", DbType.Int32)
-                        Dim pD = cmdTile.Parameters.Add("@d", DbType.Binary)
-                        For Each k In kafle
-                            token.ThrowIfCancellationRequested()
-                            Dim dane = KafelMercatora(srcBmp, ozi, k.X, k.Y, k.Z, jakosc)
-                            If dane IsNot Nothing Then
-                                ' W MBTiles wiersze liczone są od dołu (TMS)
-                                pZ.Value = k.Z
-                                pX.Value = k.X
-                                pY.Value = k.WierszTms
-                                pD.Value = dane
-                                cmdTile.ExecuteNonQuery()
-                                zapisane += 1
-                            End If
-                            licznik += 1
-                            postep?.Report(CInt(licznik * 100L / kafle.Count))
-                        Next
-                        trans.Commit()
-                    End Using
-                End Using
-                If zapisane = 0 Then Throw New InvalidOperationException("Nie wygenerowano żadnych kafli - kalibracja nie pokrywa obrazu mapy.")
-
-                Using cmdDel As New SQLiteCommand("PRAGMA journal_mode = DELETE;", polaczenie)
-                    cmdDel.ExecuteNonQuery()
-                End Using
-            End Using
             Catch
-                'anulowanie lub błąd: niedokończona baza MBTiles (z plikami -wal, -shm) usuwana z dysku
+                'anulowanie lub błąd: niedokończona baza (z plikami -wal, -shm, w OruxMaps także folder) usuwana z dysku
                 SQLiteConnection.ClearAllPools()
                 Try
-                    EksportMapy.UsunPlikBazy(plikWyjsciowy)
+                    If rodzaj = RodzajEksportu.OruxMaps Then EksportMapy.UsunWynik(z) Else EksportMapy.UsunPlikBazy(plikWyjsciowy)
                 Catch
                 End Try
                 Throw
+            Finally
+                SQLiteConnection.ClearAllPools()
             End Try
         End Using
     End Sub
@@ -826,7 +913,8 @@ Public Class FormImportOzi
                                             jakosc As Integer,
                                             podzialKmz As Boolean,
                                             postep As IProgress(Of RaportPostepuWsadowego),
-                                            token As CancellationToken) As WynikKonwersjiWsadowej
+                                            token As CancellationToken,
+                                            Optional korekta As OpcjeKorekcjiMip = Nothing) As WynikKonwersjiWsadowej
         If Not Directory.Exists(folderWyjsciowy) Then
             Directory.CreateDirectory(folderWyjsciowy)
         End If
@@ -861,7 +949,7 @@ Public Class FormImportOzi
                     Continue For
                 End If
 
-                Dim rozszerzenie = If(format = FormatKonwersjiOzi.Jnx, ".jnx", If(format = FormatKonwersjiOzi.Kmz, ".kmz", ".mbtiles"))
+                Dim rozszerzenie = RozszerzenieWyniku(format)
                 Dim nazwaWyniku = UnikalnaNazwaWyniku(plikMap, uzyteNazwy)
                 Dim sciezkaDocelowa = Path.Combine(folderWyjsciowy, nazwaWyniku & rozszerzenie)
                 If ozi.DuzyBladKalibracji Then
@@ -884,13 +972,7 @@ Public Class FormImportOzi
                                                               })
                                                           End Sub)
 
-                If format = FormatKonwersjiOzi.Kmz Then
-                    KonwertujDoKmz(ozi, sciezkaDocelowa, kolejnosc, jakosc, podzialKmz, postepPliku, token)
-                ElseIf format = FormatKonwersjiOzi.Jnx Then
-                    KonwertujDoJnx(ozi, sciezkaDocelowa, kolejnosc, jakosc, postepPliku, token)
-                Else
-                    KonwertujDoMbtiles(ozi, sciezkaDocelowa, jakosc, postepPliku, token)
-                End If
+                Konwertuj(ozi, format, sciezkaDocelowa, kolejnosc, jakosc, podzialKmz, korekta, postepPliku, token)
 
                 wynik.Sukcesy += 1
                 wynik.WygenerowanePliki.Add(sciezkaDocelowa)
@@ -898,7 +980,7 @@ Public Class FormImportOzi
                 Throw
             Catch ex As Exception
                 wynik.Pominiete += 1
-                wynik.Bledy.Add($"{nazwaPliku}: {ex.Message}")
+                wynik.Bledy.Add($"{nazwaPliku}: {OpisBledu.Z(ex)}")
             End Try
         Next
 

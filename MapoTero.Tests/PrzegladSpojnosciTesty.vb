@@ -148,7 +148,7 @@ Public Class PrzegladSpojnosciTesty
         Dim bledy As New List(Of String)
         Dim t As New Thread(
             Sub()
-                For Each f As Form In {CType(New MapoTero.Form3(), Form), New MapoTero.Form2(), New MapoTero.FormKorektaFolderu()}
+                For Each f As Form In {CType(New MapoTero.FormEksport(), Form), New MapoTero.Form2(), New MapoTero.FormKorektaFolderu()}
                     Try
                         f.StartPosition = FormStartPosition.Manual
                         f.Show()

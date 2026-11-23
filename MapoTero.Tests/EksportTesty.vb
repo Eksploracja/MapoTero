@@ -63,6 +63,74 @@ Public Class EksportTesty
         Return New ZrodloSegmentow(folder, "_", StylNumeracji.WierszKolumna, rozszerzenie, Siatka2x2())
     End Function
 
+    <Fact>
+    Public Sub EksportKreatora_PrzerwanyZapisZostawiaPoprzedniPlik()
+        Dim folder = NowyFolder()
+        Try
+            Dim plik = Path.Combine(folder, "mapa.mbtiles")
+            File.WriteAllText(plik, "poprzednia mapa")
+            Dim z = Zadanie(RodzajEksportu.MBTiles, Zrodlo(folder, "png"), plik)
+            Assert.ThrowsAny(Of OperationCanceledException)(
+                Sub() EksportMapy.EksportujBezpiecznie(z, Nothing, New CancellationToken(True)))
+            Assert.Equal("poprzednia mapa", File.ReadAllText(plik))
+            Assert.Equal(plik, z.Plik)
+            Assert.Empty(Directory.GetDirectories(folder))
+        Finally
+            Usun(folder)
+        End Try
+    End Sub
+
+    <Fact>
+    Public Sub WymianaPlikow_CofaPodmianeGdyDrugiPlikNieMozeZostacZapisany()
+        Dim folder = NowyFolder()
+        Try
+            Dim roboczy = Directory.CreateDirectory(Path.Combine(folder, "roboczy")).FullName
+            File.WriteAllText(Path.Combine(folder, "mapa.tif"), "poprzednia mapa")
+            Directory.CreateDirectory(Path.Combine(folder, "mapa.tfw"))
+            Dim nowe = {Path.Combine(roboczy, "mapa.tif"), Path.Combine(roboczy, "mapa.tfw")}
+            For Each plik In nowe
+                File.WriteAllText(plik, "nowy plik")
+            Next
+            Assert.ThrowsAny(Of IOException)(Sub() WymianaPlikowMapy.Zatwierdz(nowe, folder, Path.Combine(roboczy, "kopie")))
+            Assert.Equal("poprzednia mapa", File.ReadAllText(Path.Combine(folder, "mapa.tif")))
+        Finally
+            Usun(folder)
+        End Try
+    End Sub
+
+    <Fact>
+    Public Sub EksportKreatora_MaskaKorytarzaJestWidocznaWGotowychKaflach()
+        Dim folder = NowyFolder()
+        Try
+            UtworzSegmenty(folder, "png", Sub(g, w, k) g.Clear(Color.Red))
+            Dim siatka = Siatka2x2()
+            Dim u = UkladWspolrzednych.PL1992
+            Dim naTrasie As New PunktXY(487200, 637250)
+            Dim pozaTrasa As New PunktXY(487275, 637250)
+            Dim trasa As New Korytarz With {.SzerokoscMetry = 30}
+            trasa.DodajLinie({u.DoWgs84(487200, 637100), u.DoWgs84(487200, 637400)})
+            Dim zr As New ZrodloSegmentow(folder, "_", StylNumeracji.WierszKolumna, "png", siatka,
+                                          przytnijDoObszaru:=True, maska:=trasa.UtworzMaske(siatka.Obszar, u))
+            Dim z = Zadanie(RodzajEksportu.MBTiles, zr, folder & "korytarz.mbtiles")
+            z.KaflePng = True
+            Dim wyniki = EksportMapy.EksportujBezpiecznie(z, Nothing, CancellationToken.None)
+            Assert.Equal(z.Plik, Assert.Single(wyniki))
+            Using pol = Polacz(z.Plik)
+                For Each punkt In {naTrasie, pozaTrasa}
+                    Dim p = PikselKafla(punkt, 16)
+                    Dim dane = TryCast(Zapytanie(pol, $"SELECT tile_data FROM tiles WHERE zoom_level=16 AND tile_column={p.Item1} AND tile_row={(1 << 16) - 1 - p.Item2}"), Byte())
+                    If punkt.Equals(naTrasie) Then Assert.NotNull(dane)
+                    If dane Is Nothing Then Continue For
+                    Using bmp = Obraz(dane)
+                        Assert.Equal(punkt.Equals(naTrasie), bmp.GetPixel(p.Item3, p.Item4).A > 0)
+                    End Using
+                Next
+            End Using
+        Finally
+            Usun(folder)
+        End Try
+    End Sub
+
     Private Shared Function Zadanie(rodzaj As RodzajEksportu, zrodlo As ZrodloSegmentow, plik As String) As ZadanieEksportu
         Dim m As New MetadaneMapy With {.Tytul = "Test warstwa", .DataPobrania = New Date(2026, 10, 19)}
         m.Warstwy.Add("Test warstwa")
@@ -347,6 +415,69 @@ Public Class EksportTesty
         End Try
     End Sub
 
+    ''' <summary>
+    ''' Mapa TrekBuddy / Locus Map z okna Eksport mapy: archiwum .tar z kaflami 512 px nazwanymi wg położenia, plikiem .map
+    ''' i listą .set; folder roboczy usunięty po spakowaniu.
+    ''' </summary>
+    <Fact>
+    Public Sub EksportTrekBuddy_ArchiwumZKaflamiMapISet()
+        Dim folder = NowyFolder()
+        Try
+            UtworzSegmenty(folder, "png", Sub(g, w, k) g.Clear(Color.FromArgb(255, 30 * w, 40 * k, 100)))
+            Dim plikTar = folder & "_trekbuddy.tar"
+            Dim z = Zadanie(RodzajEksportu.TrekBuddy, Zrodlo(folder, "png"), plikTar)
+            EksportMapy.Eksportuj(z, Nothing, CancellationToken.None)
+            Assert.True(File.Exists(plikTar))
+            Assert.False(Directory.Exists(folder & "_trekbuddy"))
+            Dim nazwy As New List(Of String)
+            Using fs = File.OpenRead(plikTar), r As New System.Formats.Tar.TarReader(fs)
+                Dim wpis = r.GetNextEntry()
+                While wpis IsNot Nothing
+                    nazwy.Add(wpis.Name.Replace("\"c, "/"c))
+                    wpis = r.GetNextEntry()
+                End While
+            End Using
+            Assert.Contains("_trekbuddy.map", nazwy)
+            Assert.Contains("_trekbuddy.set", nazwy)
+            'arkusz 512 x 512 px - jeden kafel
+            Assert.Contains("set/_trekbuddy_0_0.jpg", nazwy)
+        Finally
+            Usun(folder)
+        End Try
+    End Sub
+
+    ''' <summary>
+    ''' Arkusz JPEG z plikami .tab i world file (formaty dawnego okna scalania); przerwany eksport nie usuwa poprzedniego
+    ''' arkusza o tej samej nazwie (zapis przez plik tymczasowy).
+    ''' </summary>
+    <Fact>
+    Public Sub EksportArkuszJpegZGeoreferencja_PrzerwanieZostawiaPoprzedni()
+        Dim folder = NowyFolder()
+        Try
+            UtworzSegmenty(folder, "png", Sub(g, w, k) g.Clear(Color.FromArgb(255, 30 * w, 40 * k, 100)))
+            Dim plikJpg = folder & "arkusz.jpg"
+            Dim z = Zadanie(RodzajEksportu.GeoTiff, Zrodlo(folder, "png"), plikJpg)
+            z.FormatArkusza = FormatArkusza.Jpeg
+            z.Georeferencja = New OpcjeGeoreferencji With {.WorldFile = True, .Tab = True}
+            EksportMapy.Eksportuj(z, Nothing, CancellationToken.None)
+            Assert.True(File.Exists(plikJpg))
+            Assert.True(File.Exists(folder & "arkusz.tab"))
+            Assert.True(File.Exists(folder & "arkusz.jpgw"))
+            Assert.Empty(z.BrakujaceSegmenty)
+            Dim rozmiar = New FileInfo(plikJpg).Length
+
+            Using cts As New CancellationTokenSource()
+                cts.Cancel()
+                Assert.ThrowsAny(Of OperationCanceledException)(Sub() EksportMapy.Eksportuj(z, Nothing, cts.Token))
+            End Using
+            Assert.True(File.Exists(plikJpg))
+            Assert.Equal(rozmiar, New FileInfo(plikJpg).Length)
+            Assert.False(File.Exists(plikJpg & ".tmp"))
+        Finally
+            Usun(folder)
+        End Try
+    End Sub
+
     <Fact>
     Public Sub EksportGeoTiffPodstawowyIPlikiCad()
         Dim folder = NowyFolder()
@@ -354,8 +485,7 @@ Public Class EksportTesty
             UtworzSegmenty(folder, "png", Sub(g, w, k) g.Clear(Color.FromArgb(255, 30 * w, 40 * k, 100)))
             Dim plikTif = folder & "mapa.tif"
             Dim z = Zadanie(RodzajEksportu.GeoTiff, Zrodlo(folder, "png"), plikTif)
-            z.GeoTiffPlikiCad = True
-            z.GeoTiffPlikMap = True
+            z.Georeferencja = New OpcjeGeoreferencji With {.WorldFile = True, .Map = True}
 
             EksportMapy.Eksportuj(z, Nothing, CancellationToken.None)
 
@@ -403,8 +533,8 @@ Public Class EksportTesty
             UtworzSegmenty(folderNakl, "png", Sub(g, w, k) g.Clear(Color.Blue))
             Dim plikTif = folder & "mapa.tif"
             Dim z = Zadanie(RodzajEksportu.GeoTiff, Zrodlo(folder, "png"), plikTif)
-            z.GeoTiffJpeg = False
-            z.GeoTiffPlikiCad = False
+            z.FormatArkusza = FormatArkusza.GeoTiff
+            z.Georeferencja = New OpcjeGeoreferencji()
             Dim siatkaNakl As New Siatka(New Zasieg(487000, 637128, 487512, 637640), 1.0, 256)
             z.Nakladki.Add(New WarstwaEksportu With {
                 .Zrodlo = New ZrodloSegmentow(folderNakl, "_", StylNumeracji.WierszKolumna, "png", siatkaNakl),
@@ -436,7 +566,7 @@ Public Class EksportTesty
             UtworzSegmenty(folder, "jpg", Sub(g, w, k) g.Clear(Color.DarkGreen))
             Dim plikTif = folder & "mapa_mip.tif"
             Dim z = Zadanie(RodzajEksportu.GeoTiff, Zrodlo(folder, "jpg"), plikTif)
-            z.GeoTiffJpeg = True
+            z.FormatArkusza = FormatArkusza.GeoTiffJpeg
             z.KorekcjaMip = New OpcjeKorekcjiMip With {
                 .Wlaczona = True,
                 .Kontrast = 1.3F,

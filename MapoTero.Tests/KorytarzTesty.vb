@@ -11,6 +11,21 @@ Imports Xunit
 
 Public Class KorytarzTesty
 
+    <Fact>
+    Public Sub MaskaKorytarza_ZostawiaPasIOkragleKonceBezLaczeniaOddzielnychLinii()
+        Dim k As New Korytarz With {.SzerokoscMetry = 25}
+        Dim u = UkladWspolrzednych.PL1992
+        k.DodajLinie({u.DoWgs84(500000, 500000), u.DoWgs84(500100, 500200)})
+        k.DodajLinie({u.DoWgs84(500300, 500300)})
+        Dim maska = k.UtworzMaske(k.Zasieg(u), u)
+        Assert.True(maska(500050, 500100))
+        Assert.True(maska(499985, 499985))
+        Assert.False(maska(499980, 499980))
+        Assert.False(maska(500080, 500010))
+        Assert.False(maska(500200, 500250))
+        Assert.True(maska(500310, 500310))
+    End Sub
+
     Private Const Gpx As String =
         "<?xml version=""1.0"" encoding=""UTF-8""?>" &
         "<gpx version=""1.1"" creator=""test"" xmlns=""http://www.topografix.com/GPX/1/1"">" &

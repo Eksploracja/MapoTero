@@ -1,4 +1,4 @@
-'Copyright (C) <2026>  MapoTero
+﻿'Copyright (C) <2026>  MapoTero
 '
 'This program is free software: you can redistribute it and/or modify
 'it under the terms of the GNU General Public License as published by
@@ -9,6 +9,7 @@ Imports System.Collections.Generic
 Imports System.Globalization
 Imports System.Net.Http
 Imports System.Text.Json
+Imports System.Text.RegularExpressions
 Imports System.Threading
 Imports System.Threading.Tasks
 
@@ -49,6 +50,8 @@ Public Class WynikGeokodowania
                 Case "peak" : Return "szczyt górski"
                 Case "water", "lake" : Return "jezioro / woda"
                 Case "forest" : Return "las"
+                Case "wspolrzedne" : Return "współrzędne"
+                Case "dzialka" : Return "działka ewidencyjna"
                 Case Else
                     Select Case Kategoria.ToLowerInvariant()
                         Case "place" : Return "miejsce"
@@ -108,10 +111,148 @@ Public NotInheritable Class KlientGeokodowania
     End Function
 
     ''' <summary>
-    ''' Wyszukuje miejscowości, adresy lub obiekty w geokoderze OpenStreetMap Nominatim.
+    ''' Normalizuje zapytanie adresowe: rozdziela sklejone przecinki i kropki, usuwa zbędny w OSM prefiks ul.
+    ''' oraz obcina numery lokali/mieszkań, które uniemożliwiają dopasowanie w bazach geokodowania.
+    ''' </summary>
+    Public Shared Function NormalizujZapytanieAdresowe(zapytanie As String) As String
+        If String.IsNullOrWhiteSpace(zapytanie) Then Return ""
+
+        Dim s = zapytanie.Trim()
+
+        ' Rozdziel przecinek sklejony ze słowem: "Gdynia,ul." -> "Gdynia, ul."
+        s = Regex.Replace(s, ",([^\s])", ", $1")
+
+        ' Rozdziel kropkę skrótu ul. sklejoną z nazwą: "ul.Piotrkowska" -> "ul. Piotrkowska"
+        s = Regex.Replace(s, "(?i)\bul\.([^\s])", "ul. $1")
+
+        ' Usuń numery mieszkań i lokali: "12 m. 4", "12 m 4", "12 lok. 5", "12/4" -> "12"
+        s = Regex.Replace(s, "(?i)(\b\d+[a-ząćęłńóśźż]?)\s*(?:m\.|m|lok\.|lokal|mieszkania|nr)\s*\d+\b", "$1")
+        s = Regex.Replace(s, "(\b\d+[a-ząćęłńóśźż]?)\s*/\s*\d+\b", "$1")
+
+        ' Usuń prefiks ulicy (ul., ulica, ulicy)
+        s = Regex.Replace(s, "(?i)(?:^|[\s,])ulic[aey]\s+", " ")
+        s = Regex.Replace(s, "(?i)(?:^|[\s,])ul\.\s*", " ")
+        s = Regex.Replace(s, "(?i)(?:^|[\s,])ul\s+", " ")
+
+        ' Uporządkuj spacje i przecinki
+        s = Regex.Replace(s, "\s*,\s*", ", ")
+        s = Regex.Replace(s, "\s+", " ").Trim(" "c, ","c)
+
+        Return s
+    End Function
+
+    ''' <summary>
+    ''' Wyszukuje miejscowości, adresy lub obiekty geograficzne.
+    ''' W pierwszej kolejności korzysta z szybkiego geokodera Photon (darmowy silnik dla OSM oparty o Elasticsearch,
+    ''' zoptymalizowany pod podpowiedzi w trakcie pisania, tolerujący literówki i przedrostki).
+    ''' W razie problemów sieciowych lub braku wyników płynnie przełącza się na geokoder Nominatim.
     ''' </summary>
     Public Shared Async Function SzukajMiejscaAsync(zapytanie As String,
-                                                    Optional token As CancellationToken = Nothing) As Task(Of List(Of WynikGeokodowania))
+                                                    Optional token As CancellationToken = Nothing,
+                                                    Optional srodekLat As Double? = Nothing,
+                                                    Optional srodekLon As Double? = Nothing) As Task(Of List(Of WynikGeokodowania))
+        Dim wynik As New List(Of WynikGeokodowania)()
+        If String.IsNullOrWhiteSpace(zapytanie) Then Return wynik
+
+        Dim czyste = zapytanie.Trim()
+        Dim znormalizowane = NormalizujZapytanieAdresowe(czyste)
+        Dim frazaDoSzukania = If(Not String.IsNullOrWhiteSpace(znormalizowane), znormalizowane, czyste)
+        Dim udanePolaczenie As Boolean = False
+        Dim ostatniBlad As Exception = Nothing
+
+        ' 1. Próba: Photon (szybki, tolerancyjny, uwzględnia przybliżone położenie mapy jako lokalny bias)
+        Try
+            Dim wynikiPhoton = Await SzukajPhotonAsync(frazaDoSzukania, srodekLat, srodekLon, limit:=15, token:=token).ConfigureAwait(False)
+            udanePolaczenie = True
+            If wynikiPhoton IsNot Nothing AndAlso wynikiPhoton.Count > 0 Then
+                Return wynikiPhoton
+            End If
+            ' Jeśli po znormalizowaniu nic nie ma, a surowe zapytanie było inne, spróbuj surowego w Photonie
+            If Not String.Equals(frazaDoSzukania, czyste, StringComparison.OrdinalIgnoreCase) Then
+                Dim wynikiPhotonSurowe = Await SzukajPhotonAsync(czyste, srodekLat, srodekLon, limit:=15, token:=token).ConfigureAwait(False)
+                If wynikiPhotonSurowe IsNot Nothing AndAlso wynikiPhotonSurowe.Count > 0 Then
+                    Return wynikiPhotonSurowe
+                End If
+            End If
+        Catch ex As OperationCanceledException
+            Throw
+        Catch ex As Exception
+            ' Błąd sieci Photon - przechodzimy do Nominatim bez powtarzania tego samego serwera
+            ostatniBlad = ex
+        End Try
+
+        ' 2. Próba (fallback): Nominatim z oczyszczoną frazą
+        Dim bladNominatim As Boolean = False
+        Try
+            Dim wynikiNom = Await SzukajNominatimAsync(frazaDoSzukania, token).ConfigureAwait(False)
+            udanePolaczenie = True
+            If wynikiNom IsNot Nothing AndAlso wynikiNom.Count > 0 Then
+                Return wynikiNom
+            End If
+        Catch ex As OperationCanceledException
+            Throw
+        Catch ex As Exception
+            bladNominatim = True
+            ostatniBlad = ex
+        End Try
+
+        ' 3. Próba: Nominatim z surowym zapytaniem (tylko gdy Nominatim wcześniej odpowiedział)
+        If Not bladNominatim AndAlso Not String.Equals(frazaDoSzukania, czyste, StringComparison.OrdinalIgnoreCase) Then
+            Try
+                Dim wynikiNomSurowe = Await SzukajNominatimAsync(czyste, token).ConfigureAwait(False)
+                udanePolaczenie = True
+                If wynikiNomSurowe IsNot Nothing AndAlso wynikiNomSurowe.Count > 0 Then
+                    Return wynikiNomSurowe
+                End If
+            Catch ex As OperationCanceledException
+                Throw
+            Catch ex As Exception
+                ostatniBlad = ex
+            End Try
+        End If
+
+        If Not udanePolaczenie AndAlso ostatniBlad IsNot Nothing Then
+            System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(ostatniBlad).Throw()
+        End If
+
+        Return wynik
+    End Function
+
+    ''' <summary>
+    ''' Wyszukuje obiekty w geokoderze Photon (zoptymalizowanym pod wyszukiwanie w trakcie pisania).
+    ''' </summary>
+    Public Shared Async Function SzukajPhotonAsync(zapytanie As String,
+                                                   Optional lat As Double? = Nothing,
+                                                   Optional lon As Double? = Nothing,
+                                                   Optional limit As Integer = 15,
+                                                   Optional token As CancellationToken = Nothing) As Task(Of List(Of WynikGeokodowania))
+        Dim wynik As New List(Of WynikGeokodowania)()
+        If String.IsNullOrWhiteSpace(zapytanie) Then Return wynik
+
+        Dim czyste = zapytanie.Trim()
+        Dim url = "https://photon.komoot.io/api?q=" & Uri.EscapeDataString(czyste) &
+                  "&limit=" & limit.ToString(CultureInfo.InvariantCulture) & "&lang=default"
+
+        If lat.HasValue AndAlso lon.HasValue AndAlso (lat.Value <> 0.0 OrElse lon.Value <> 0.0) Then
+            url &= String.Format(CultureInfo.InvariantCulture, "&lat={0:0.000000}&lon={1:0.000000}", lat.Value, lon.Value)
+        End If
+
+        Try
+            Using odp = Await _klient.GetAsync(url, token).ConfigureAwait(False)
+                odp.EnsureSuccessStatusCode()
+                Dim jsonTekst = Await odp.Content.ReadAsStringAsync().ConfigureAwait(False)
+                Return ParsujWynikiPhotonJson(jsonTekst)
+            End Using
+        Catch ex As TaskCanceledException When Not token.IsCancellationRequested
+            Throw New TimeoutException("przekroczono czas oczekiwania na odpowiedź geokodera Photon", ex)
+        End Try
+    End Function
+
+    ''' <summary>
+    ''' Wyszukuje obiekty w geokoderze OpenStreetMap Nominatim.
+    ''' </summary>
+    Public Shared Async Function SzukajNominatimAsync(zapytanie As String,
+                                                      Optional token As CancellationToken = Nothing) As Task(Of List(Of WynikGeokodowania))
         Dim wynik As New List(Of WynikGeokodowania)()
         If String.IsNullOrWhiteSpace(zapytanie) Then Return wynik
 
@@ -192,6 +333,136 @@ Public NotInheritable Class KlientGeokodowania
         End Try
 
         Return lista
+    End Function
+
+    ''' <summary>
+    ''' Parsuje kolekcję obiektów GeoJSON zwróconą przez geokoder Photon do listy obiektów WynikGeokodowania.
+    ''' </summary>
+    Public Shared Function ParsujWynikiPhotonJson(jsonTekst As String) As List(Of WynikGeokodowania)
+        Dim lista As New List(Of WynikGeokodowania)()
+        If String.IsNullOrWhiteSpace(jsonTekst) Then Return lista
+
+        Try
+            Using doc = JsonDocument.Parse(jsonTekst)
+                If doc.RootElement.ValueKind <> JsonValueKind.Object Then Return lista
+
+                Dim featuresEl As JsonElement
+                If Not doc.RootElement.TryGetProperty("features", featuresEl) OrElse featuresEl.ValueKind <> JsonValueKind.Array Then
+                    Return lista
+                End If
+
+                For Each feat In featuresEl.EnumerateArray()
+                    If feat.ValueKind <> JsonValueKind.Object Then Continue For
+
+                    Dim geomEl As JsonElement
+                    Dim propsEl As JsonElement
+                    feat.TryGetProperty("geometry", geomEl)
+                    feat.TryGetProperty("properties", propsEl)
+
+                    Dim lon As Double = 0.0, lat As Double = 0.0
+                    Dim coordsEl As JsonElement
+                    If geomEl.ValueKind = JsonValueKind.Object AndAlso geomEl.TryGetProperty("coordinates", coordsEl) AndAlso coordsEl.ValueKind = JsonValueKind.Array AndAlso coordsEl.GetArrayLength() >= 2 Then
+                        Dim pLon = PobierzLiczbe(coordsEl(0))
+                        Dim pLat = PobierzLiczbe(coordsEl(1))
+                        If pLon.HasValue AndAlso pLat.HasValue Then
+                            lon = pLon.Value
+                            lat = pLat.Value
+                        End If
+                    End If
+
+                    If lat = 0.0 AndAlso lon = 0.0 Then Continue For
+
+                    Dim name = If(propsEl.ValueKind = JsonValueKind.Object, PobierzTekst(propsEl, "name"), "")
+                    Dim street = If(propsEl.ValueKind = JsonValueKind.Object, PobierzTekst(propsEl, "street"), "")
+                    Dim housenumber = If(propsEl.ValueKind = JsonValueKind.Object, PobierzTekst(propsEl, "housenumber"), "")
+                    Dim district = If(propsEl.ValueKind = JsonValueKind.Object, PobierzTekst(propsEl, "district"), "")
+                    Dim city = If(propsEl.ValueKind = JsonValueKind.Object, PobierzTekst(propsEl, "city"), "")
+                    If String.IsNullOrEmpty(city) AndAlso propsEl.ValueKind = JsonValueKind.Object Then city = PobierzTekst(propsEl, "town")
+                    If String.IsNullOrEmpty(city) AndAlso propsEl.ValueKind = JsonValueKind.Object Then city = PobierzTekst(propsEl, "village")
+                    If String.IsNullOrEmpty(city) AndAlso propsEl.ValueKind = JsonValueKind.Object Then city = PobierzTekst(propsEl, "hamlet")
+                    Dim county = If(propsEl.ValueKind = JsonValueKind.Object, PobierzTekst(propsEl, "county"), "")
+                    Dim state = If(propsEl.ValueKind = JsonValueKind.Object, PobierzTekst(propsEl, "state"), "")
+                    Dim postcode = If(propsEl.ValueKind = JsonValueKind.Object, PobierzTekst(propsEl, "postcode"), "")
+                    Dim country = If(propsEl.ValueKind = JsonValueKind.Object, PobierzTekst(propsEl, "country"), "")
+
+                    Dim osmKey = If(propsEl.ValueKind = JsonValueKind.Object, PobierzTekst(propsEl, "osm_key"), "")
+                    Dim osmVal = If(propsEl.ValueKind = JsonValueKind.Object, PobierzTekst(propsEl, "osm_value"), "")
+                    Dim typeVal = If(propsEl.ValueKind = JsonValueKind.Object, PobierzTekst(propsEl, "type"), "")
+
+                    Dim krotka As String
+                    If Not String.IsNullOrEmpty(street) AndAlso Not String.IsNullOrEmpty(housenumber) Then
+                        krotka = street & " " & housenumber
+                    ElseIf Not String.IsNullOrEmpty(name) Then
+                        krotka = name
+                    ElseIf Not String.IsNullOrEmpty(street) Then
+                        krotka = street
+                    ElseIf Not String.IsNullOrEmpty(city) Then
+                        krotka = city
+                    Else
+                        krotka = "Punkt"
+                    End If
+
+                    Dim czesci As New List(Of String)()
+                    czesci.Add(krotka)
+                    If Not String.IsNullOrEmpty(district) AndAlso Not String.Equals(district, krotka, StringComparison.OrdinalIgnoreCase) AndAlso Not String.Equals(district, city, StringComparison.OrdinalIgnoreCase) Then
+                        czesci.Add(district)
+                    End If
+                    If Not String.IsNullOrEmpty(city) AndAlso Not String.Equals(city, krotka, StringComparison.OrdinalIgnoreCase) Then
+                        czesci.Add(city)
+                    End If
+                    If Not String.IsNullOrEmpty(county) AndAlso Not String.Equals(county, city, StringComparison.OrdinalIgnoreCase) AndAlso Not String.Equals(county, state, StringComparison.OrdinalIgnoreCase) Then
+                        czesci.Add(county)
+                    End If
+                    If Not String.IsNullOrEmpty(state) Then czesci.Add(state)
+                    If Not String.IsNullOrEmpty(postcode) Then czesci.Add(postcode)
+                    If Not String.IsNullOrEmpty(country) Then czesci.Add(country)
+
+                    Dim pelna = String.Join(", ", czesci)
+
+                    Dim item As New WynikGeokodowania With {
+                        .Nazwa = krotka,
+                        .PelnaNazwa = pelna,
+                        .Szerokosc = lat,
+                        .Dlugosc = lon,
+                        .Kategoria = osmKey,
+                        .Typ = If(Not String.IsNullOrEmpty(typeVal) AndAlso Not String.Equals(typeVal, "other", StringComparison.OrdinalIgnoreCase), typeVal, osmVal)
+                    }
+
+                    Dim extEl As JsonElement
+                    If propsEl.ValueKind = JsonValueKind.Object AndAlso propsEl.TryGetProperty("extent", extEl) AndAlso extEl.ValueKind = JsonValueKind.Array AndAlso extEl.GetArrayLength() >= 4 Then
+                        Dim p1 = PobierzLiczbe(extEl(0))
+                        Dim p2 = PobierzLiczbe(extEl(1))
+                        Dim p3 = PobierzLiczbe(extEl(2))
+                        Dim p4 = PobierzLiczbe(extEl(3))
+                        If p1.HasValue AndAlso p2.HasValue AndAlso p3.HasValue AndAlso p4.HasValue Then
+                            item.MinDlugosc = Math.Min(p1.Value, p3.Value)
+                            item.MaxDlugosc = Math.Max(p1.Value, p3.Value)
+                            item.MinSzerokosc = Math.Min(p2.Value, p4.Value)
+                            item.MaxSzerokosc = Math.Max(p2.Value, p4.Value)
+                        End If
+                    End If
+
+                    lista.Add(item)
+                Next
+            End Using
+        Catch
+            ' Błąd parsowania JSON
+        End Try
+
+        Return lista
+    End Function
+
+    Private Shared Function PobierzLiczbe(el As JsonElement) As Double?
+        If el.ValueKind = JsonValueKind.Number Then
+            Dim d As Double
+            If el.TryGetDouble(d) Then Return d
+        ElseIf el.ValueKind = JsonValueKind.String Then
+            Dim d As Double
+            If Double.TryParse(el.GetString(), NumberStyles.Float, CultureInfo.InvariantCulture, d) Then
+                Return d
+            End If
+        End If
+        Return Nothing
     End Function
 
     Private Shared Function PobierzTekst(obj As JsonElement, nazwa As String) As String

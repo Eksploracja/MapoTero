@@ -45,6 +45,7 @@ Public Class UldkTesty
     End Sub
 
     <Fact>
+    <Trait("Kategoria", "Siec")>
     Public Async Function SzukajDzialekLiveUldkAsync() As Task
         Dim wyniki As List(Of DzialkaKatastralna) = Nothing
         For proba = 1 To 3
@@ -69,6 +70,7 @@ Public Class UldkTesty
     End Function
 
     <Fact>
+    <Trait("Kategoria", "Siec")>
     Public Async Function PobierzMapeDzialkiZPodklademOrtoAsync() As Task
         Dim wyniki = Await KlientUldk.SzukajDzialekAsync("022503_5.0003.134")
         Assert.Single(wyniki)

@@ -104,6 +104,7 @@ Public Class ProfilNmtTesty
     End Sub
 
     <Fact>
+    <Trait("Kategoria", "Siec")>
     Public Async Function PobierzWysokosciLiveIRysujWykresAsync() As Task
         ' Trasa Kuźnice (1000m) -> Kasprowy Wierch (1987m)
         Dim n = 20

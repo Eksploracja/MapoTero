@@ -8,11 +8,12 @@ Imports System.Windows.Forms
 Imports Xunit
 
 ''' <summary>Regulowana szerokość prawego panelu okna głównego (pasek splPanel).</summary>
+<Collection("OknaKreatora")>
 Public Class SzerokoscPaneluTesty
 
     ''' <summary>
     ''' Przeciągnięcie paska w zmaksymalizowanym oknie poszerza panel i zapamiętuje szerokość; w najmniejszym oknie
-    ''' panel się zwęża, a po ponownej maksymalizacji wraca do wybranej szerokości. (Błąd: obsługa zmiany rozmiaru
+    ''' panel zwęża się tylko w razie potrzeby, a po ponownej maksymalizacji wraca do wybranej szerokości. (Błąd: obsługa zmiany rozmiaru
     ''' panelu przywracała poprzednią szerokość: Splitter zgłasza MouseUp przed zmianą szerokości, a formularz
     ''' z AutoScroll pokazywał po poszerzeniu panelu poziomy pasek przewijania i jego Resize cofał szerokość.)
     ''' </summary>
@@ -29,9 +30,8 @@ Public Class SzerokoscPaneluTesty
                         f.Show()
                         Application.DoEvents()
                         Dim spl = DirectCast(f.Controls("splPanel"), Splitter)
-                        Dim panel = f.Controls("Panel2")
+                        Dim panel = DirectCast(f.Controls("Panel2"), Panel)
                         Dim najmniejsza As Integer = panel.Width
-                        Dim lewaIkonek As Integer = panel.Controls("btnOtworzFolder").Left
                         f.WindowState = FormWindowState.Maximized
                         Application.DoEvents()
                         'ekran za wąski, żeby poszerzyć panel o 100 px - nie ma czego sprawdzać
@@ -47,15 +47,15 @@ Public Class SzerokoscPaneluTesty
                         Application.DoEvents()
                         Dim poszerzona As Integer = panel.Width
                         Assert.InRange(poszerzona, najmniejsza + 90, najmniejsza + 110)
-                        Assert.InRange(poszerzona, najmniejsza + 90, najmniejsza + 110)
                         Assert.True(MapoTero.Ustawienia.SzerokoscPanelu >= najmniejsza + 90)
-                        'małe przyciski pod panelem trzymają się lewej krawędzi (były zakotwiczone do prawej i zostawały na środku)
-                        Assert.Equal(lewaIkonek, panel.Controls("btnOtworzFolder").Left)
 
                         f.WindowState = FormWindowState.Normal
                         f.Size = f.MinimumSize
                         Application.DoEvents()
-                        Assert.Equal(najmniejsza, panel.Width)
+                        Dim pasek = If(panel.Height < panel.AutoScrollMinSize.Height, SystemInformation.VerticalScrollBarWidth, 0)
+                        Dim wolne = f.ClientSize.Width - spl.MinExtra - spl.Width - pasek
+                        Dim oczekiwana = Math.Max(spl.MinSize, Math.Min(MapoTero.Ustawienia.SzerokoscPanelu, wolne)) + pasek
+                        Assert.Equal(oczekiwana, panel.Width)
 
                         f.WindowState = FormWindowState.Maximized
                         Application.DoEvents()

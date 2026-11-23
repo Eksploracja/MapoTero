@@ -182,14 +182,18 @@ Public Class UzytkownikInterakcjaTesty
 
                     Dim lstWarstwy = DirectCast(f.Controls.Find("lstWybraneWarstwy", True)(0), Global.MapoTero.ListaWarstw)
                     Dim numKrycie = DirectCast(f.Controls.Find("numKrycie", True)(0), NumericUpDown)
-                    Dim btnGora = DirectCast(f.Controls.Find("btnWarstwaWyzej", True)(0), Button)
-                    Dim btnDol = DirectCast(f.Controls.Find("btnWarstwaNizej", True)(0), Button)
-                    Dim btnUsun = DirectCast(f.Controls.Find("btnUsunWarstwe", True)(0), Button)
+                    ' Kolejność i usuwanie: przeciąganie, Ctrl+strzałka, ✕ w wierszu i menu warstwy wywołują te procedury okna
+                    ' (dawny wiersz przycisków ▲ ▼ ✕ pod listą jest ukryty).
+                    Dim przesun = GetType(Global.MapoTero.Form1).GetMethod("PrzesunZaznaczonaWarstwe", BindingFlags.NonPublic Or BindingFlags.Instance)
+                    Dim usun = GetType(Global.MapoTero.Form1).GetMethod("UsunZaznaczonaWarstwe", BindingFlags.NonPublic Or BindingFlags.Instance)
+                    Dim btnGora As Action = Sub() przesun.Invoke(f, {1})
+                    Dim btnDol As Action = Sub() przesun.Invoke(f, {-1})
+                    Dim btnUsun As Action = Sub() usun.Invoke(f, Nothing)
 
-                    ' 1. Klikanie góra/dół/usuń przy pustej liście
-                    btnGora.PerformClick()
-                    btnDol.PerformClick()
-                    btnUsun.PerformClick()
+                    ' 1. Góra/dół/usuń przy pustej liście
+                    btnGora()
+                    btnDol()
+                    btnUsun()
                     Application.DoEvents()
 
                     ' 2. Dodanie warstw testowych do zestawu Form1
@@ -213,14 +217,14 @@ Public Class UzytkownikInterakcjaTesty
                     Assert.Equal(35, lstWarstwy.Zestaw.Warstwy(1).Krycie)
 
                     ' 4. Zmiana kolejności przyciskami
-                    btnGora.PerformClick()
+                    btnGora()
                     Application.DoEvents()
 
-                    btnDol.PerformClick()
+                    btnDol()
                     Application.DoEvents()
 
                     ' 5. Usuwanie warstwy przyciskiem
-                    btnUsun.PerformClick()
+                    btnUsun()
                     Application.DoEvents()
                     Assert.Equal(2, lstWarstwy.Zestaw.Liczba)
 
@@ -244,14 +248,10 @@ Public Class UzytkownikInterakcjaTesty
                     Application.DoEvents()
 
                     Dim chkSiatka = DirectCast(f.Controls.Find("chkSiatkaSegmentow", True)(0), CheckBox)
-                    Dim chkEdycjaXY = DirectCast(f.Controls.Find("chkEdycjaXY", True)(0), CheckBox)
                     Dim chkKursorWgs = DirectCast(f.Controls.Find("chkKursorWgs", True)(0), CheckBox)
                     Dim chkZaznaczenieWgs = DirectCast(f.Controls.Find("chkZaznaczenieWgs", True)(0), CheckBox)
-                    Dim chkTrekBuddy = DirectCast(f.Controls.Find("chkTrekBuddy", True)(0), CheckBox)
                     Dim chkPrzezroczystosc = DirectCast(f.Controls.Find("chkPrzezroczystosc", True)(0), CheckBox)
-                    Dim chkPowyzejOstatniego = DirectCast(f.Controls.Find("chkPowyzejOstatniego", True)(0), CheckBox)
                     Dim chkZachowajKafle = DirectCast(f.Controls.Find("chkZachowajKafle", True)(0), CheckBox)
-                    Dim chkZamienXY = DirectCast(f.Controls.Find("chkZamienXY", True)(0), CheckBox)
 
                     Dim cmbFormat = DirectCast(f.Controls.Find("cmbFormat", True)(0), ComboBox)
                     Dim cmbNumeracja = DirectCast(f.Controls.Find("cmbNumeracja", True)(0), ComboBox)
@@ -264,21 +264,16 @@ Public Class UzytkownikInterakcjaTesty
                     Dim nudPrzerwa = DirectCast(f.Controls.Find("nudPrzerwa", True)(0), NumericUpDown)
 
                     ' 1. Przełączanie wszystkich checkboxów
-                    For Each chk In {chkSiatka, chkEdycjaXY, chkKursorWgs, chkZaznaczenieWgs,
-                                     chkPrzezroczystosc, chkPowyzejOstatniego, chkZachowajKafle, chkZamienXY}
+                    For Each chk In {chkSiatka, chkKursorWgs, chkZaznaczenieWgs,
+                                     chkPrzezroczystosc, chkZachowajKafle}
                         chk.Checked = Not chk.Checked
                         Application.DoEvents()
                         chk.Checked = Not chk.Checked
                         Application.DoEvents()
                     Next
 
-                    ' 2. Tryb TrekBuddy (włączenie i wyłączenie)
-                    chkTrekBuddy.Checked = True
-                    Application.DoEvents()
-                    Assert.True(chkTrekBuddy.Checked)
-                    chkTrekBuddy.Checked = False
-                    Application.DoEvents()
-                    Assert.False(chkTrekBuddy.Checked)
+                    'okno Ustawienia nie ma już trybu TrekBuddy - mapa TrekBuddy powstaje w oknie Eksport mapy
+                    Assert.Empty(f.Controls.Find("chkTrekBuddy", True))
 
                     ' 3. Zmiana formatu segmentów
                     For i As Integer = 0 To cmbFormat.Items.Count - 1
@@ -308,68 +303,6 @@ Public Class UzytkownikInterakcjaTesty
                     nudIloscProb.Value = 5
                     nudPrzerwa.Value = 200
                     Application.DoEvents()
-
-                    f.Close()
-                End Using
-            End Sub)
-    End Sub
-
-    <Fact>
-    Public Sub TestUzytkownik_Form3_Scalanie_ReczneParametryIFormaty()
-        UruchomWWatkuSta(
-            Sub()
-                Using f As New Global.MapoTero.Form3()
-                    f.Show()
-                    Application.DoEvents()
-
-                    Dim chkRecznie = DirectCast(f.Controls.Find("chkRecznie", True)(0), CheckBox)
-                    Dim cmbFormatArkusza = DirectCast(f.Controls.Find("cmbFormatArkusza", True)(0), ComboBox)
-                    Dim trkJakosc = DirectCast(f.Controls.Find("trkJakosc", True)(0), TrackBar)
-                    Dim txtXDol = DirectCast(f.Controls.Find("txtXDol", True)(0), TextBox)
-                    Dim txtYLewy = DirectCast(f.Controls.Find("txtYLewy", True)(0), TextBox)
-                    Dim txtXGora = DirectCast(f.Controls.Find("txtXGora", True)(0), TextBox)
-                    Dim txtYPrawy = DirectCast(f.Controls.Find("txtYPrawy", True)(0), TextBox)
-                    Dim txtBok = DirectCast(f.Controls.Find("txtBokSegmentu", True)(0), TextBox)
-                    Dim txtPiksel = DirectCast(f.Controls.Find("txtRozmiarPiksela", True)(0), TextBox)
-
-                    Dim chkWorldFile = DirectCast(f.Controls.Find("chkWorldFile", True)(0), CheckBox)
-                    Dim chkKml = DirectCast(f.Controls.Find("chkKml", True)(0), CheckBox)
-                    Dim chkMap = DirectCast(f.Controls.Find("chkMap", True)(0), CheckBox)
-                    Dim chkTab = DirectCast(f.Controls.Find("chkTab", True)(0), CheckBox)
-
-                    ' 1. Włączenie ręcznego wprowadzania parametrów
-                    chkRecznie.Enabled = True
-                    chkRecznie.Checked = True
-                    Application.DoEvents()
-
-                    ' 2. Zmiana formatu arkusza scalonego
-                    For i As Integer = 0 To cmbFormatArkusza.Items.Count - 1
-                        cmbFormatArkusza.SelectedIndex = i
-                        Application.DoEvents()
-                        ' Sprawdzenie suwaka jakości JPEG
-                        trkJakosc.Value = 75
-                        Application.DoEvents()
-                    Next
-
-                    ' 3. Przełączanie formatów georeferencji
-                    For Each chk In {chkWorldFile, chkKml, chkMap, chkTab}
-                        chk.Checked = Not chk.Checked
-                        Application.DoEvents()
-                    Next
-
-                    ' 4. Wprowadzanie poprawnych parametrów siatki 2x2
-                    txtXDol.Text = "200000"
-                    txtYLewy.Text = "500000"
-                    txtXGora.Text = "202048"
-                    txtYPrawy.Text = "502048"
-                    txtBok.Text = "1024"
-                    txtPiksel.Text = "1.0"
-                    Application.DoEvents()
-
-                    Dim txtKol = DirectCast(f.Controls.Find("txtLiczbaKolumn", True)(0), TextBox)
-                    Dim txtWie = DirectCast(f.Controls.Find("txtLiczbaWierszy", True)(0), TextBox)
-                    Assert.Equal("2", txtKol.Text)
-                    Assert.Equal("2", txtWie.Text)
 
                     f.Close()
                 End Using
@@ -432,13 +365,132 @@ Public Class UzytkownikInterakcjaTesty
                     Dim ekran = Screen.FromControl(f).WorkingArea
                     Assert.True(f.Height <= ekran.Height)
 
-                    ' Jeśli okno zostało zmniejszone w pionie, AutoScroll musi być aktywny z bazową wysokością 788 z projektu,
+                    ' Jeśli okno zostało zmniejszone w pionie, AutoScroll musi być aktywny z bazową wysokością 842 z projektu (od pozycji GeoPackage),
                     ' przeskalowaną tak jak okno (czcionka Segoe UI 9 już przy 100% DPI)
-                    Dim bazowa As Integer = CInt(Math.Round(788 * Global.MapoTero.PomocProgramu.SkalaProjektanta(f).Height))
+                    Dim bazowa As Integer = CInt(Math.Round(842 * Global.MapoTero.PomocProgramu.SkalaProjektanta(f).Height))
                     If f.ClientSize.Height < bazowa Then
                         Assert.True(f.AutoScroll)
                         Assert.Equal(bazowa, f.AutoScrollMinSize.Height)
                     End If
+
+                    f.Close()
+                End Using
+            End Sub)
+    End Sub
+
+    <Fact>
+    Public Sub TestUzytkownik_FormEksport_PrzyciskMip_StalyNapisIBlokada()
+        UruchomWWatkuSta(
+            Sub()
+                Using f As New Global.MapoTero.FormEksport()
+                    f.Show()
+                    Application.DoEvents()
+
+                    Dim chkKorekcjaMip = DirectCast(f.Controls.Find("chkKorekcjaMip", True)(0), CheckBox)
+                    Dim btnPodgladMip = DirectCast(f.Controls.Find("btnPodgladMip", True)(0), Button)
+
+                    ' 1. Na start przy odznaczonym chkKorekcjaMip: przycisk nieaktywny ze stałym tekstem
+                    chkKorekcjaMip.Checked = False
+                    Application.DoEvents()
+                    Assert.False(btnPodgladMip.Enabled)
+                    Assert.Equal("Korekta obrazu...", btnPodgladMip.Text)
+
+                    ' 2. Po zaznaczeniu: przycisk aktywny, ale tekst NIE zmienia się na "Profil Garmin"
+                    chkKorekcjaMip.Checked = True
+                    Application.DoEvents()
+                    Assert.True(btnPodgladMip.Enabled)
+                    Assert.Equal("Korekta obrazu...", btnPodgladMip.Text)
+
+                    ' 3. Po ponownym odznaczeniu: przycisk ponownie zablokowany ze stałym tekstem
+                    chkKorekcjaMip.Checked = False
+                    Application.DoEvents()
+                    Assert.False(btnPodgladMip.Enabled)
+                    Assert.Equal("Korekta obrazu...", btnPodgladMip.Text)
+
+                    f.Close()
+                End Using
+            End Sub)
+    End Sub
+
+    <Fact>
+    Public Sub TestUzytkownik_FormEksport_PrzyciskWieloskalowyTylkoDlaMbtiles()
+        UruchomWWatkuSta(
+            Sub()
+                Using f As New Global.MapoTero.FormEksport()
+                    f.Show()
+                    Application.DoEvents()
+
+                    Dim rbKmzGarmin = DirectCast(f.Controls.Find("rbKmzGarmin", True)(0), RadioButton)
+                    Dim rbMBTiles = DirectCast(f.Controls.Find("rbMBTiles", True)(0), RadioButton)
+                    Dim rbSQLiteDB = DirectCast(f.Controls.Find("rbSQLiteDB", True)(0), RadioButton)
+                    Dim btnWielowarstwowyMbtiles = DirectCast(f.Controls.Find("btnWielowarstwowyMbtiles", True)(0), Button)
+
+                    ' 1. Na start przy domyślnym formacie (nie MBTiles): przycisk zablokowany
+                    rbKmzGarmin.Checked = True
+                    Application.DoEvents()
+                    Assert.False(btnWielowarstwowyMbtiles.Enabled)
+
+                    ' 2. Po zaznaczeniu MBTiles: przycisk aktywny
+                    rbMBTiles.Checked = True
+                    Application.DoEvents()
+                    Assert.True(btnWielowarstwowyMbtiles.Enabled)
+
+                    ' 3. Po przełączeniu na inny format (np. SQLiteDB): przycisk ponownie zablokowany
+                    rbSQLiteDB.Checked = True
+                    Application.DoEvents()
+                    Assert.False(btnWielowarstwowyMbtiles.Enabled)
+
+                    f.Close()
+                End Using
+            End Sub)
+    End Sub
+
+    <Fact>
+    Public Sub TestUzytkownik_FormZaawansowanyMbtiles_PrzyciskKorektyIAutomatyczneWarstwy()
+        UruchomWWatkuSta(
+            Sub()
+                Using f As New Global.MapoTero.FormZaawansowanyMbtiles()
+                    f.Show()
+                    Application.DoEvents()
+
+                    Dim chkKorekta = DirectCast(f.Controls.Find("chkKorekta", True)(0), CheckBox)
+                    Dim btnKorekta = DirectCast(f.Controls.Find("btnKorekta", True)(0), Button)
+                    Dim btnRozlaczneZakresy = DirectCast(f.Controls.Find("btnRozlaczneZakresy", True)(0), Button)
+
+                    Assert.NotNull(btnRozlaczneZakresy)
+
+                    ' 1. Na start przy odznaczonym chkKorekta: przycisk zablokowany, stała nazwa
+                    chkKorekta.Checked = False
+                    Application.DoEvents()
+                    Assert.False(btnKorekta.Enabled)
+                    Assert.Equal("Korekta obrazu...", btnKorekta.Text)
+
+                    ' 2. Po zaznaczeniu: aktywny ze stałą nazwą
+                    chkKorekta.Checked = True
+                    Application.DoEvents()
+                    Assert.True(btnKorekta.Enabled)
+                    Assert.Equal("Korekta obrazu...", btnKorekta.Text)
+
+                    chkKorekta.Checked = False
+                    Application.DoEvents()
+                    Assert.False(btnKorekta.Enabled)
+
+                    ' 3. Kliknięcie przycisku rozłącznych zakresów nie rzuca błędu
+                    btnRozlaczneZakresy.PerformClick()
+                    Application.DoEvents()
+
+                    ' 4. Sprawdzenie skróconych nazw w tabeli warstw
+                    Dim dgv = DirectCast(f.Controls.Find("dgvWarstwy", True)(0), DataGridView)
+                    For Each row As DataGridViewRow In dgv.Rows
+                        Dim tytul = CStr(row.Cells("colTytul").Value)
+                        Assert.False(String.IsNullOrWhiteSpace(tytul))
+                        Assert.DoesNotContain("skany_map_topograficznych", tytul, StringComparison.OrdinalIgnoreCase)
+                    Next
+
+                    ' 5. Sprawdzenie stylu kolumny Mieszanie (rozwijalna lista z widocznym trójkącikiem/przyciskiem rozwijania)
+                    Dim colTryb = DirectCast(dgv.Columns("colTryb"), DataGridViewComboBoxColumn)
+                    Assert.Equal(DataGridViewComboBoxDisplayStyle.ComboBox, colTryb.DisplayStyle)
+                    Assert.False(colTryb.DisplayStyleForCurrentCellOnly)
 
                     f.Close()
                 End Using
@@ -545,81 +597,6 @@ Public Class UzytkownikInterakcjaTesty
     End Sub
 
     <Fact>
-    Public Sub TestUzytkownik_Narzedzia_UsuwaniePustychSegmentow()
-        UruchomWWatkuSta(
-            Sub()
-                Using f As New Global.MapoTero.usuwanie_p_seg()
-                    f.Show()
-                    Application.DoEvents()
-
-                    Dim txtProg = DirectCast(f.Controls.Find("txtProgKB", True)(0), TextBox)
-                    Dim cmbRozszerzenie = DirectCast(f.Controls.Find("cmbRozszerzenie", True)(0), ComboBox)
-                    Dim btnUsun = DirectCast(f.Controls.Find("btnUsun", True)(0), Button)
-
-                    ' 1. Wprowadzanie wartości progu
-                    txtProg.Text = "0"
-                    Application.DoEvents()
-                    txtProg.Text = "2.5"
-                    Application.DoEvents()
-                    txtProg.Text = "abc"
-                    Application.DoEvents()
-                    txtProg.Text = "-5"
-                    Application.DoEvents()
-                    txtProg.Text = "999999"
-                    Application.DoEvents()
-
-                    ' 2. Zmiana filtra rozszerzeń
-                    For i As Integer = 0 To cmbRozszerzenie.Items.Count - 1
-                        cmbRozszerzenie.SelectedIndex = i
-                        Application.DoEvents()
-                    Next
-
-                    ' 3. Walidacja wartości progu i kontrolek
-                    txtProg.Text = "10"
-                    Application.DoEvents()
-                    Assert.Equal("10", txtProg.Text)
-
-                    f.Close()
-                End Using
-            End Sub)
-    End Sub
-
-    <Fact>
-    Public Sub TestUzytkownik_Narzedzia_NakladanieMap_WalidacjaFolderow()
-        UruchomWWatkuSta(
-            Sub()
-                Using f As New Global.MapoTero.nakladanie_map()
-                    f.Show()
-                    Application.DoEvents()
-
-                    Dim txtDolna = DirectCast(f.Controls.Find("txtFolderDolna", True)(0), TextBox)
-                    Dim txtGorna = DirectCast(f.Controls.Find("txtFolderGorna", True)(0), TextBox)
-                    Dim txtWynik = DirectCast(f.Controls.Find("txtFolderWynik", True)(0), TextBox)
-
-                    ' 1. Te same foldery
-                    txtDolna.Text = "C:\TestFolder"
-                    txtGorna.Text = "C:\TestFolder"
-                    txtWynik.Text = "C:\TestFolder"
-                    Application.DoEvents()
-
-                    ' 2. Puste foldery
-                    txtDolna.Text = ""
-                    txtGorna.Text = ""
-                    txtWynik.Text = ""
-                    Application.DoEvents()
-
-                    ' 3. Różne nieistniejące foldery
-                    txtDolna.Text = "C:\FolderNieistniejacy_1"
-                    txtGorna.Text = "C:\FolderNieistniejacy_2"
-                    txtWynik.Text = "C:\FolderNieistniejacy_3"
-                    Application.DoEvents()
-
-                    f.Close()
-                End Using
-            End Sub)
-    End Sub
-
-    <Fact>
     Public Sub TestUzytkownik_FormDodajSerwer_KatalogIFiltry()
         UruchomWWatkuSta(
             Sub()
@@ -663,15 +640,19 @@ Public Class UzytkownikInterakcjaTesty
 
                     Dim grp = DirectCast(f.Controls.Find("grpWybraneWarstwy", True)(0), GroupBox)
                     Dim numKrycie = DirectCast(f.Controls.Find("numKrycie", True)(0), NumericUpDown)
-                    Dim lblKrycie = DirectCast(f.Controls.Find("lblKrycie", True)(0), Label)
-                    Dim btnZaaw = DirectCast(f.Controls.Find("btnWarstwyZaawansowane", True)(0), Button)
-                    Dim btnKosz = DirectCast(f.Controls.Find("btnResetujWarstwy", True)(0), Button)
+                    Dim lista = DirectCast(f.Controls.Find("lstWybraneWarstwy", True)(0), Global.MapoTero.ListaWarstw)
+                    f.WybranyZestaw().Dodaj("W1")
+                    GetType(Global.MapoTero.Form1).GetMethod("PokazWarstwy", BindingFlags.NonPublic Or BindingFlags.Instance).Invoke(f, Nothing)
+                    lista.Zaznaczona = 0
+                    Application.DoEvents()
 
                     ' Pole krycia musi mieć wystarczającą szerokość na liczbę 100 i strzałki (min 48 px)
                     Assert.True(numKrycie.Width >= 48, $"Szerokość numKrycie ({numKrycie.Width}) powinna wynosić co najmniej 48 px, aby nie przycinać liczby 100.")
-                    ' Elementy nie mogą się nakładać
-                    Assert.True(numKrycie.Left >= lblKrycie.Right - 2, $"Etykieta lblKrycie (Right={lblKrycie.Right}) nakłada się na numKrycie (Left={numKrycie.Left}).")
-                    Assert.True(btnZaaw.Left >= numKrycie.Right - 1, $"numKrycie (Right={numKrycie.Right}) nakłada się na btnWarstwyZaawansowane (Left={btnZaaw.Left}).")
+                    ' Pole krycia leży w wierszu zaznaczonej warstwy i mieści się w liście
+                    Assert.Same(lista, numKrycie.Parent)
+                    Assert.True(numKrycie.Visible)
+                    Assert.True(numKrycie.Right <= lista.ClientSize.Width, $"Pole krycia wystaje poza listę: {numKrycie.Bounds}")
+                    Assert.True(numKrycie.Bottom <= lista.WysokoscWiersza + 4, $"Pole krycia nie mieści się w wierszu: {numKrycie.Bounds}")
 
                     ' Wyrenderuj grpWybraneWarstwy do bitmapy i zapisz do artefaktów
                     Using bmp As New Bitmap(grp.Width, grp.Height)

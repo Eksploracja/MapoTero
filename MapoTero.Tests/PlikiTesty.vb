@@ -63,6 +63,23 @@ Public Class PlikiSesjiTesty
         Assert.True(d.PobierajPowyzejOstatniego)
         Assert.Equal("1_2_3", d.Numeracja)
         Assert.Equal(2178, d.UkladEpsg)
+        Assert.False(d.TrekBuddy)
+    End Sub
+
+    ''' <summary>
+    ''' Tryb TrekBuddy zapisywany na końcu conf.txt (dawniej niezapisywany - wznowione po ponownym uruchomieniu pobieranie
+    ''' sesji TrekBuddy zapisywało w niej zwykłe segmenty); plik bez tego pola (starsze wersje) - tryb wyłączony.
+    ''' </summary>
+    <Fact>
+    Public Sub ConfZapamietujeTrybTrekBuddy()
+        Dim c As New KonfiguracjaSesji With {.Folder = "D:\mapy\", .BokSegmentuPx = "512", .Format = "jpeg", .TrekBuddy = True,
+            .TrybyMieszaniaWarstw = "0"}
+        Dim tekst = c.DoTekstu()
+        Assert.EndsWith("""0""" & vbCrLf & "#TRUE#" & vbCrLf, tekst)
+        Assert.True(New CzytnikPlikuVbTest(tekst).Konfiguracja().TrekBuddy)
+        'plik ze starszej wersji kończy się na trybach mieszania warstw
+        Dim stary = tekst.Substring(0, tekst.LastIndexOf("#TRUE#", StringComparison.Ordinal))
+        Assert.False(New CzytnikPlikuVbTest(stary).Konfiguracja().TrekBuddy)
     End Sub
 
     Private Shared Function Sesja() As KonfiguracjaSesji
@@ -511,6 +528,16 @@ Public Class PlikWarstwTesty
         Finally
             If File.Exists(plik) Then File.Delete(plik)
         End Try
+    End Sub
+
+    <Fact>
+    Public Sub Lastsettings_WygladaNaUszkodzony()
+        'format sprzed 3.12 (FileOpen/Write) - bez wpisu „format”
+        Assert.False(PlikUstawien.WygladaNaUszkodzony("""folder segmentow""" & vbCrLf & """C:\Mapy\""" & vbCrLf & """chkgmi""" & vbCrLf & "#FALSE#" & vbCrLf))
+        Assert.False(PlikUstawien.WygladaNaUszkodzony("folder segmentow" & vbCrLf & "C:\Mapy\" & vbCrLf & "format" & vbCrLf & "png" & vbCrLf))
+        Assert.True(PlikUstawien.WygladaNaUszkodzony(""))
+        Assert.True(PlikUstawien.WygladaNaUszkodzony("format" & vbCrLf & "png"))
+        Assert.True(PlikUstawien.WygladaNaUszkodzony("folder segmentow" & ChrW(0) & ChrW(1) & "xyz"))
     End Sub
 
 End Class

@@ -1,4 +1,4 @@
-'Copyright (C) <2015>  pajakt
+﻿'Copyright (C) <2015>  pajakt
 '
 'This program is free software: you can redistribute it and/or modify
 'it under the terms of the GNU General Public License as published by
@@ -42,10 +42,11 @@ Public Enum TematPomocy
     Szukaj
     ImportOzi
     Korytarz
-    NakladanieMap
-    UsuwaniePustych
+    ProfilNmt
     Ustawienia
     KorektaFolderu
+    Kreator
+    WarstwyZaawansowane
 End Enum
 
 ''' <summary>
@@ -99,7 +100,7 @@ Public Class FormPomocMbtiles
         Try
             Process.Start(New ProcessStartInfo(url) With {.UseShellExecute = True})
         Catch ex As Exception
-            MessageBox.Show("Nie udało się otworzyć adresu w przeglądarce: " & ex.Message,
+            MessageBox.Show("Nie udało się otworzyć adresu w przeglądarce: " & Global.MapoTero.Core.OpisBledu.Z(ex),
                             "Pomoc online", MessageBoxButtons.OK, MessageBoxIcon.Warning)
         End Try
     End Sub
@@ -114,10 +115,11 @@ Public Class FormPomocMbtiles
             Case TematPomocy.Szukaj : PomocSzukaj()
             Case TematPomocy.ImportOzi : PomocImportOzi()
             Case TematPomocy.Korytarz : PomocKorytarz()
-            Case TematPomocy.NakladanieMap : PomocNakladanieMap()
-            Case TematPomocy.UsuwaniePustych : PomocUsuwaniePustych()
+            Case TematPomocy.ProfilNmt : PomocProfilNmt()
             Case TematPomocy.Ustawienia : PomocUstawienia()
             Case TematPomocy.KorektaFolderu : PomocKorektaFolderu()
+            Case TematPomocy.Kreator : PomocKreator()
+            Case TematPomocy.WarstwyZaawansowane : PomocWarstwyZaawansowane()
             Case Else : PomocMbtiles()
         End Select
     End Sub
@@ -125,12 +127,12 @@ Public Class FormPomocMbtiles
 #Region "Treści pomocy dla poszczególnych narzędzi"
 
     Private Sub PomocScalanie()
-        Me.Text = "Pomoc i instrukcja - Złączanie pobranych segmentów"
+        Me.Text = "Pomoc i instrukcja - Scalanie segmentów"
         _urlOnline = "https://eksploracja.github.io/MapoTero/pomoc/scalanie/"
 
-        DodajTytul("Złączanie pobranych segmentów w jeden arkusz mapy")
-        DodajAkapit("Narzędzie łączy pobrane kafelki i segmenty rastrowe z folderu sesji w jeden jednolity, wielki arkusz mapy o wysokiej rozdzielczości. " &
-                    "Wszelkie parametry zasięgu i siatki są wczytywane automatycznie z pliku konfiguracyjnego conf.txt znajdującego się w folderze segmentów.")
+        DodajTytul("Scalanie pobranych segmentów w jeden arkusz mapy")
+        DodajAkapit("Scalanie łączy segmenty z folderu sesji w jeden arkusz mapy. Polecenie Scalanie segmentów otwiera okno Eksport mapy " &
+                    "z formatem Arkusz; parametry siatki program wczytuje z pliku conf.txt w folderze sesji.")
 
         DodajNaglowek1("1. Formaty wynikowe arkusza")
         DodajPunktor("GeoTIFF / BigTIFF (bezstratny Deflate): branżowy standard GIS (QGIS, ArcGIS, CAD). Posiada bezpośrednio zaszytą georeferencję w nagłówkach pliku.")
@@ -139,14 +141,14 @@ Public Class FormPomocMbtiles
         DodajPunktor("PNG: format z obsługą pełnej przezroczystości (kanał alfa). Idealny, gdy pobrano warstwy nakładkowe (np. same granice, rzeki lub cieniowanie rzeźby).")
 
         DodajNaglowek1("2. Pliki georeferencji (kalibracji)")
-        DodajPunktor("World File (.jgw / .pgw / .tfw): uniwersalny plik współrzędnych piksela dla systemów CAD i GIS.")
+        DodajPunktor("World file i .prj (.tifw i .tfw, .jpgw, .pngw): plik współrzędnych piksela dla programów CAD i GIS.")
         DodajPunktor("KML (Google Earth): plik nakładki naziemnej do natychmiastowego wyświetlenia arkusza w trójwymiarowym globusie Google Earth.")
         DodajPunktor("MAP (OziExplorer / TrekBuddy): kalibracja punktowa dla tradycyjnych programów nawigacyjnych.")
         DodajPunktor("TAB (MapInfo Professional): plik tabeli georeferencyjnej dla środowiska MapInfo.")
 
         DodajNaglowek1("3. Wskazówki i rozwiązywanie problemów")
-        DodajPunktor("Brak pliku conf.txt: jeśli plik konfiguracyjny uległ utracie, zaznacz opcję 'ręczne wprowadzanie parametrów' i uzupełnij współrzędne zasięgu oraz rozmiar segmentu.")
-        DodajPunktor("Wykryto error.txt: obecność pliku error.txt oznacza, że nie pobrano wszystkich segmentów. Uzupełnij brakujące segmenty w oknie głównym przed scalaniem.")
+        DodajPunktor("Plik error.txt w folderze oznacza, że nie pobrano wszystkich segmentów - okno ostrzega o nim, a w arkuszu brakujące segmenty będą białymi polami. Uzupełnij je przyciskiem Pobierz w oknie głównym.")
+        DodajPunktor("Na arkusz można nałożyć warstwy z innych folderów (grupa Warstwy i przezroczystość) i poprawić obraz polem Korekta obrazu.")
 
         DodajStopkeOnline(_urlOnline)
     End Sub
@@ -162,16 +164,18 @@ Public Class FormPomocMbtiles
         DodajPunktor("Garmin BirdsEye (JNX v4): wielopoziomowy raster z piramidą powiększeń bez limitu 100 kafli (zalecany dla odbiorników Garmin z odblokowanym firmware). Plik .jnx kopiuje się do folderu Garmin/BirdsEye.")
         DodajPunktor("Garmin Custom Maps (KMZ): standardowy format Garmina. Posiada ograniczenie do 100 kafli na plik - w razie potrzeby włącz opcję 'automatyczny podział na tomy', a program utworzy spójne części mieszczące się w limicie urządzenia.")
         DodajPunktor("MBTiles / SQLiteDB: kafelkowa baza SQLite w standardzie Web Mercator, dedykowana dla aplikacji mobilnych (Locus Map, OsmAnd, OruxMaps).")
+        DodajPunktor("GeoPackage (.gpkg): otwarty standard OGC kafelkowej mapy rastrowej dla mobilnego GIS (QField, Mergin Maps, SW Maps) i QGIS.")
         DodajPunktor("OruxMaps: folder z bazą kafli i plikiem XML gotowy do wrzucenia do katalogu map OruxMaps.")
-        DodajPunktor("GeoTIFF bezpośredni: pojedynczy georeferencjonowany plik TIF dla Avenza Maps i aplikacji GIS.")
+        DodajPunktor("Arkusz (scalanie segmentów): jeden plik GeoTIFF, JPEG albo PNG z georeferencją dla Avenza Maps, QGIS i programów CAD, z plikami world file i .prj, .map, .tab, .kml.")
+        DodajPunktor("TrekBuddy / Locus Map: archiwum .tar z kaflami 512 px, plikiem .map i listą .set - z dowolnej pobranej sesji.")
 
         DodajNaglowek1("2. Piramida powiększeń (Zoom Od - Zoom Do)")
-        DodajPunktor("Dla formatów kafelkowych (JNX, MBTiles, SQLiteDB) program generuje automatyczną piramidę powiększeń od poziomu przeglądowego do szczegółowego.")
+        DodajPunktor("Dla formatów kafelkowych (JNX, MBTiles, GeoPackage, SQLiteDB) program generuje automatyczną piramidę powiększeń od poziomu przeglądowego do szczegółowego.")
         DodajPunktor("Suwakiem jakości możesz dobrać optymalny kompromis między ostrością a rozmiarem pliku (zalecane 75-85%).")
 
         DodajNaglowek1("3. Filtr MIP dla ekranów Garmin")
         DodajPunktor("Opcja korekcji MIP optymalizuje kontrast, nasycenie i ostrość splotową dla ekranów transflektywnych Garmina, zapewniając doskonałą czytelność w pełnym słońcu.")
-        DodajPunktor("Przycisk 'Podgląd MIP...' w oknie głównym pozwala obejrzeć efekt wyostrzenia i korekty na żywo na próbce mapy przed eksportem.")
+        DodajPunktor("Przycisk 'Korekta obrazu...' obok pola Korekta obrazu pozwala wybrać profil i obejrzeć efekt na próbce mapy przed eksportem.")
 
         DodajNaglowek1("4. Dostosowanie do ekranu")
         DodajPunktor("Okno eksportu automatycznie dopasowuje swoją wysokość do rozdzielczości ekranu, włączając w razie potrzeby pionowy pasek przewijania.")
@@ -225,7 +229,7 @@ Public Class FormPomocMbtiles
 
     Private Sub PomocSzukaj()
         Me.Text = "Pomoc i instrukcja - Wyszukiwarka miejscowości i działek"
-        _urlOnline = "https://eksploracja.github.io/MapoTero/pomoc/obszar/zaznaczanie/"
+        _urlOnline = "https://eksploracja.github.io/MapoTero/pomoc/obszar/zaznaczanie/#wyszukiwarka-miejscowości-adresów-i-działek-katastralnych"
 
         DodajTytul("Wyszukiwarka miejscowości, adresów i działek katastralnych")
         DodajAkapit("Narzędzie pozwala szybko zlokalizować dowolny punkt w Polsce i wycentrować na nim mapę główną, " &
@@ -246,7 +250,7 @@ Public Class FormPomocMbtiles
 
     Private Sub PomocImportOzi()
         Me.Text = "Pomoc i instrukcja - Konwerter kalibracji OziExplorer (.map)"
-        _urlOnline = "https://eksploracja.github.io/MapoTero/pomoc/narzedzia/"
+        _urlOnline = "https://eksploracja.github.io/MapoTero/pomoc/narzedzia/#konwerter-map-oziexplorer-map"
 
         DodajTytul("Konwerter skalibrowanych map OziExplorer (.map)")
         DodajAkapit("Narzędzie konwertuje kalibrowane skany papierowych map turystycznych i archiwalnych (pliki .map wraz z obrazem) " &
@@ -258,6 +262,10 @@ Public Class FormPomocMbtiles
                      "  • Potsdam / Rauenberg (mapy niemieckie Messtischblatt 1:25k i Großblatt)," & vbCrLf &
                      "  • Pulkovo 1942 / Układ 1965 / Układ 1942 (mapy topograficzne z okresu PRL).")
         DodajPunktor("Współrzędne są precyzyjnie przeliczane do elipsoidy WGS84, dzięki czemu mapa nie jest przesunięta względem śladów GPS.")
+
+        DodajNaglowek1("Formaty wynikowe i korekta obrazu")
+        DodajPunktor("Garmin BirdsEye (JNX), Garmin Custom Maps (KMZ), MBTiles, GeoPackage (.gpkg), SQLiteDB (OsmAnd, Locus Map) i OruxMaps (folder mapy) - bazy kafli zapisuje ten sam kod co okno Eksport mapy.")
+        DodajPunktor("Pole Korekta obrazu i przycisk Korekta obrazu... działają jak w oknie eksportu (podgląd na próbce ze skanu).")
 
         DodajNaglowek1("2. Tryb pojedynczy i wsadowy (Batch)")
         DodajPunktor("Możesz wybrać pojedynczy plik .map albo cały folder zawierający dziesiątki arkuszy.")
@@ -283,58 +291,37 @@ Public Class FormPomocMbtiles
         DodajPunktor("Program wyznaczy pas o tej szerokości po obu stronach śladu i wybierze tylko te segmenty siatki, przez które przebiega bufor.")
         DodajPunktor("Oszczędność czasu i pamięci: korytarz pozwala zredukować liczbę pobieranych kafelków nawet o 80-90%!")
 
-        DodajNaglowek1("3. Profil wysokościowy i rzędne NMT / LIDAR")
-        DodajPunktor("Przycisk 'Wzbogać ślad o wysokości' pobiera rzeczywiste rzędne terenu z lotniczego skaningu laserowego (NMT GUGiK) dla wszystkich punktów trasy.")
-        DodajPunktor("W oknie wyświetlany jest interaktywny wykres profilu z obliczoną sumą przewyższeń (podejścia, zejścia, min/max).")
-        DodajPunktor("Przycisk 'Zapisz wzbogacony GPX' eksportuje plik GPX z tagami <ele> dla odbiorników i zegarków turystycznych.")
+        DodajAkapit("Profil wysokościowy trasy (wysokości z NMT) jest osobnym narzędziem w menu Narzędzia.")
 
         DodajStopkeOnline(_urlOnline)
     End Sub
 
-    Private Sub PomocNakladanieMap()
-        Me.Text = "Pomoc i instrukcja - Nakładanie dwóch map na siebie"
-        _urlOnline = "https://eksploracja.github.io/MapoTero/pomoc/narzedzia/"
+    Private Sub PomocProfilNmt()
+        Me.Text = "Pomoc i instrukcja - Profil wysokościowy trasy"
+        _urlOnline = "https://eksploracja.github.io/MapoTero/pomoc/narzedzia/#profil-wysokościowy-trasy"
 
-        DodajTytul("Nakładanie dwóch warstw mapowych na siebie")
-        DodajAkapit("Narzędzie umożliwia cyfrowe zmiksowanie dwóch wcześniej pobranych zestawów segmentów o tym samym zasięgu i wymiarach w jeden wspólny zestaw.")
-
-        DodajNaglowek1("1. Warstwa dolna i górna")
-        DodajPunktor("Warstwa dolna (podkład): zazwyczaj współczesna ortofotomapa satelitarna lub mapa hipsometryczna.")
-        DodajPunktor("Warstwa górna (nakładka): mapa archiwalna, skan topograficzny lub siatka granic.")
-        DodajPunktor("Krycie suwakiem: określa stopień przezroczystości warstwy górnej (np. 50% pozwala idealnie porównać dawny przebieg dróg i lasów ze stanem obecnym).")
-
-        DodajNaglowek1("2. Wymagania")
-        DodajPunktor("Oba foldery muszą zawierać segmenty o identycznych wymiarach pikselowych i nazwach odpowiadających tej samej siatce.")
-
-        DodajStopkeOnline(_urlOnline)
-    End Sub
-
-    Private Sub PomocUsuwaniePustych()
-        Me.Text = "Pomoc i instrukcja - Usuwanie pustych segmentów"
-        _urlOnline = "https://eksploracja.github.io/MapoTero/pomoc/narzedzia/"
-
-        DodajTytul("Wykrywanie i usuwanie pustych (jednolitych) segmentów")
-        DodajAkapit("Narzędzie analizuje pliki w folderze pobierania i wykrywa segmenty jednolicie białe lub puste, " &
-                    "które serwery WMS zwracają dla obszarów leżących poza zasięgiem danych (np. poza granicami kraju lub na morzu).")
-
-        DodajNaglowek1("1. Bezpieczeństwo danych")
-        DodajPunktor("Wykryte puste pliki są bezpiecznie przenoszone do Kosza systemowego Windows, skąd w razie potrzeby można je łatwo przywrócić.")
-        DodajPunktor("Usunięcie pustych segmentów zapobiega ich scalaniu do gotowego arkusza i drastycznie zmniejsza wagę baz kafelków MBTiles.")
+        DodajTytul("Profil wysokościowy trasy (NMT / LIDAR)")
+        DodajAkapit("Narzędzie pobiera wysokości terenu z numerycznego modelu terenu GUGiK (lotniczy skaning laserowy) dla punktów trasy " &
+                    "z pliku GPX, KML lub KMZ. Dane obejmują tylko obszar Polski - punkty za granicą zostają bez wysokości.")
+        DodajPunktor("Przycisk 'Pobierz wysokości z NMT' odpytuje usługę wysokościową Geoportalu dla wszystkich punktów trasy.")
+        DodajPunktor("Wykres pokazuje profil terenu wzdłuż trasy z wysokością najniższą i najwyższą oraz sumą podejść i zejść.")
+        DodajPunktor("Przycisk 'Zapisz GPX z wysokościami' zapisuje ślad z tagami <ele> dla odbiorników i zegarków turystycznych; " &
+                     "z pliku GPX zostają czasy punktów, punkty wpt i nazwy.")
 
         DodajStopkeOnline(_urlOnline)
     End Sub
 
     Private Sub PomocKorektaFolderu()
         Me.Text = "Pomoc i instrukcja - Korekta obrazów w folderze"
-        _urlOnline = "https://eksploracja.github.io/MapoTero/pomoc/narzedzia/"
+        _urlOnline = "https://eksploracja.github.io/MapoTero/pomoc/narzedzia/#korekta-obrazów-w-folderze"
 
-        DodajTytul("Korekta i optymalizacja obrazów w folderze")
+        DodajTytul("Korekta obrazów w folderze")
         DodajAkapit("Narzędzie poprawia naraz wszystkie obrazy PNG, JPEG i TIFF z wybranego folderu (np. segmenty sesji) " &
                     "według wybranego profilu: kontrast, korekcja gamma, nasycenie barw i wyostrzanie krawędzi. " &
                     "Oryginały zostają bez zmian - poprawione kopie trafiają do folderu wynikowego (domyślnie podfolder ""korekta"").")
 
         DodajNaglowek1("1. Profil korekty")
-        DodajPunktor("Przycisk ""Dostosuj"" otwiera podgląd na próbce z folderu. Możesz wybrać gotowy profil (np. Garmin MIP, Podkład CAD, Skan CAD) albo ustawić własne wartości suwaków.")
+        DodajPunktor("Przycisk ""Korekta obrazu..."" otwiera podgląd na próbce z folderu. Możesz wybrać gotowy profil (np. Garmin MIP, Podkład CAD, Skan CAD) albo ustawić własne wartości suwaków.")
         DodajPunktor("Profil ""Brak"" nie zmienia obrazów, więc w tym oknie nie można go wybrać.")
 
         DodajNaglowek1("2. Georeferencja")
@@ -362,21 +349,27 @@ Public Class FormPomocMbtiles
 
         DodajNaglowek1("2. Widok okna głównego i kursor")
         DodajPunktor("Współrzędne kursora i środka mapy: wyświetla na bieżąco pozycję kursora myszy w układzie pobierania oraz w WGS84.")
-        DodajPunktor("Edycja pól XY: pozwala ręcznie korygować liczby w polach zasięgu z klawiatury.")
+        DodajPunktor("Wpisywanie zasięgu XY z klawiatury włącza małe pole wyboru obok pola x górnego w schemacie siatki okna głównego.")
         DodajPunktor("Siatka segmentów na mapie: włącza rysowanie siatki kafli bezpośrednio na podkładzie mapowym.")
 
         DodajNaglowek1("3. Pobieranie i serwery WMS/WMTS")
         DodajPunktor("Odstęp zapytań i ochrona serwerów: ogranicza tempo pobierania, zapobiegając blokadom IP ze strony serwerów rządowych.")
         DodajPunktor("Zachowuj pobrane kafle WMTS: pozostawia surowe kafelki w pamięci podręcznej, co umożliwia błyskawiczne ponowne generowanie mapy offline.")
+        DodajPunktor("Jakość JPEG przy składaniu: dotyczy segmentów składanych z kafli WMTS/XYZ, z kilku serwerów WMS albo z warstw o kryciu poniżej 100 %.")
+        DodajPunktor("Mapę TrekBuddy / Locus Map (.tar) tworzy okno Eksport mapy - okno Ustawienia nie ma już trybu TrekBuddy.")
+
+        DodajNaglowek1("4. Otwieranie okna")
+        DodajPunktor("Okno otwiera menu Ustawienia oraz kliknięcie formatu segmentów na pasku stanu.")
+        DodajPunktor("W trakcie pobierania można zmienić tylko widok współrzędnych i układ nowej sesji; pozostałe opcje są wyłączone do końca pobierania.")
 
         DodajStopkeOnline(_urlOnline)
     End Sub
 
     Private Sub PomocMbtiles()
-        Me.Text = "Pomoc i instrukcja - Kreator wielowarstwowego MBTiles"
+        Me.Text = "Pomoc i instrukcja - MBTiles wieloskalowy"
         _urlOnline = "https://eksploracja.github.io/MapoTero/pomoc/mbtiles-wielowarstwowy/"
 
-        DodajTytul("Kreator wielowarstwowego i wieloskalowego MBTiles")
+        DodajTytul("MBTiles wieloskalowy - różne mapy dla różnych powiększeń")
         DodajAkapit("Narzędzie umożliwia skompilowanie wielu wcześniej pobranych sesji mapowych do jednego, uniwersalnego pliku bazy kafelków MBTiles. " &
                     "Dzięki niemu w aplikacjach mobilnych (OruxMaps, Locus Map, OsmAnd i innych) możesz w zależności od skali powiększenia oglądać zupełnie inne mapy " &
                     "(np. z daleka przeglądową topo 1:100k, w zbliżeniu szczegółową topo 1:10k, a w maksymalnym powiększeniu ortofotomapę) lub łączyć je ze sobą.")
@@ -418,7 +411,8 @@ Public Class FormPomocMbtiles
                      "  • 3 Ciemniej (Darken) - wybiera ciemniejszy odcień z obu warstw." & vbCrLf &
                      "  • 4 Jaśniej (Lighten) - wybiera jaśniejszy kolor z obu warstw (np. jasne drogi/cieki wodne na ciemnym tle)." & vbCrLf &
                      "  • 5 Ekran (Screen) - rozjaśnia tło, czerń znika (odwrotność mnożenia, np. dla nocnych świateł czy radarów)." & vbCrLf &
-                     "  • 6 Nakładka (Overlay) - łączy mnożenie i ekran, podbijając kontrast (idealne dla cieniowania rzeźby terenu / hillshade).")
+                     "  • 6 Nakładka (Overlay) - łączy mnożenie i ekran, podbijając kontrast (idealne dla cieniowania rzeźby terenu / hillshade)." & vbCrLf &
+                     "  • 7 Rzeźba terenu - dedykowany dla cieniowania rzeźby NMT: jasność 180 płaskiego terenu jest neutralna, stoki ciemnieją/jaśnieją bez szarej zasłony.")
 
         DodajNaglowek1("6. Symulator podglądu na żywo")
         DodajPunktor("Przesuwaj suwak 'Poziom zoom' w prawym panelu, aby podejrzeć kafel podglądu dla każdego powiększenia.")
@@ -431,47 +425,115 @@ Public Class FormPomocMbtiles
         DodajStopkeOnline(_urlOnline)
     End Sub
 
+    Private Sub PomocKreator()
+        Me.Text = "Pomoc i instrukcja - Szybki kreator mapy"
+        _urlOnline = "https://eksploracja.github.io/MapoTero/pomoc/narzedzia/#szybki-kreator-mapy"
+
+        DodajTytul("Szybki kreator generowania map")
+        DodajAkapit("Kreator prowadzi krok po kroku przez cały proces przygotowania gotowej mapy: od wyboru urządzenia docelowego, " &
+                    "przez gotowy zestaw warstw i wskazanie obszaru, po automatyczne pobranie i zapisanie pliku wynikowego.")
+
+        DodajNaglowek1("1. Krok po kroku")
+        DodajPunktor("Krok 1: Cel. Wybierz, gdzie będziesz używać mapy: telefon lub tablet (MBTiles, SQLiteDB), odbiornik Garmin, wydruk albo projekt CAD/GIS. Program dobierze format pliku i parametry.")
+        DodajPunktor("Krok 2: Obszar. Gdy przed otwarciem kreatora zaznaczysz obszar na mapie prawym przyciskiem myszy, kreator pominie ten krok (wrócisz do niego, klikając Obszar na pasku kroków). Wyszukaj miejscowość i wybierz promień, zaznacz prostokąt na mapie albo wskaż plik trasy GPX/KML/KMZ (program pobierze tylko pas wzdłuż trasy). Plik trasy można przeciągnąć myszą na okno. W polu wyszukiwania można wkleić współrzędne punktu, np. 50.0614, 19.9366 (WGS84) albo X Y w PL-1992 lub PL-2000, albo działkę: identyfikator TERYT lub 'działka Wieliczka 123/4' (obszar to działka z pasem 150 m). Pozycja wg granic na liście promieni bierze prostokąt miejscowości z wyszukiwarki. Przycisk Profil... pokazuje profil wysokościowy wczytanej trasy.")
+        DodajPunktor("Krok 3: Styl. Gotowe zestawy warstw z podglądem: turystyka piesza, góry z poziomicami (także za granicą), rower i MTB, dziedzictwo kulturowe z zabytkami NID (rejestr i ewidencja), mapy WIG 1918–1939, mapy niemieckie do 1945, działki EGiB albo własne warstwy z okna głównego. Suwaki regulują krycie cieniowania, szlaków, mapy topograficznej i zabytków (krycie z okna zaawansowanego jest nadrzędne); w dziedzictwie kulturowym pola wyboru włączają zabytki archeologiczne i nieruchome; pod treścią kroku widać ograniczenia pokrycia map historycznych. Przycisk w rogu podglądu otwiera duży podgląd w skali 1:1. Zapisz jako mój styl zapisuje bieżącą kompozycję pod własną nazwą (kategoria Moje style), Usuń mój styl ją usuwa.")
+        DodajPunktor("Krok 4: Zapis. Wybierz format (zalecany jest zaznaczony), sprawdź szacowany rozmiar i czas, a potem kliknij Generuj mapę. Korekta obrazu jest domyślnie wyłączona: zaznacz pole Korekta obrazu albo kliknij Profil / Podgląd, żeby ją ustawić (okno podpowiada profil, np. Garmin MIP; przycisk Resetuj korektę przywraca obraz bez zmian).")
+
+        DodajNaglowek1("2. Wskazówki")
+        DodajPunktor("Rozmiar piksela jest dobrany do rozdzielczości danych stylu. Opis obok pola podaje odpowiadającą skalę wydruku. Jeśli piksel jest mniejszy niż dane, kreator to pokaże - mniejszy piksel tylko powiększa plik.")
+        DodajPunktor("Garmin: KMZ wymaga obsługi Custom Maps. Większość zgodnych urządzeń obsługuje do 100 obrazów JPEG, wybrane modele do 500. Przy większym obszarze zmniejsz rozdzielczość albo wybierz JNX, jeśli urządzenie obsługuje ten format.")
+        DodajPunktor("Każde powiększenie gotowej mapy ma ten sam wybrany zasięg. W MBTiles i SQLiteDB fragmenty kafli poza nim są przezroczyste. Kafle JPEG dla Garmina mieszczą się w prostokącie wpisanym w obszar.")
+        DodajPunktor("Wydruk: kreator podaje rozmiar arkusza GeoTIFF w centymetrach i najmniejszy format papieru A. Po zakończeniu przycisk Otwórz mapę otwiera plik w programie przypisanym w Windows.")
+        DodajPunktor("Mapa wieloskalowa (MBTiles, SQLiteDB i Garmin JNX): style topograficzne i historyczne przy oddalaniu przełączają się na mapy w mniejszej skali, np. 1:10 000, 1:50 000, 1:100 000. Kreator pobiera każdą skalę osobno. Przycisk Ustawienia skal pozwala wyłączyć skalę, zmienić jej piksel, powiększenia i warstwy.")
+        DodajPunktor("Opcje zaawansowane (korekta obrazu, zakres powiększeń, ustawienia Garmin, MBTiles wieloskalowy) są zwinięte - zwykle nie trzeba ich zmieniać.")
+        DodajPunktor("Podczas pobierania kreator pokazuje pozostały czas liczony z rzeczywistej prędkości pobierania.")
+        DodajPunktor("Gdy części fragmentów nie uda się pobrać, przycisk Ponów pobieranie pobierze tylko brakujące i zapisze plik ponownie. Wstecz wraca do ustawień bez utraty wyborów.")
+        DodajPunktor("Pobrane segmenty kreator zapisuje w folderze download (podfolder Kreator_...). Przycisk Przejdź do mapy w oknie głównym wczytuje je jako sesję.")
+        DodajPunktor("Po zakończeniu kreator podpowiada, do którego folderu w telefonie lub odbiorniku skopiować plik.")
+
+        DodajStopkeOnline(_urlOnline)
+    End Sub
+
+    Private Sub PomocWarstwyZaawansowane()
+        Me.Text = "Pomoc i instrukcja - Warstwy zaawansowane (krycie i mieszanie)"
+        _urlOnline = "https://eksploracja.github.io/MapoTero/pomoc/pobieranie/kompozycje/"
+
+        DodajTytul("Zaawansowane zarządzanie warstwami, kryciem i trybami mieszania")
+        DodajAkapit("Okno pozwala precyzyjnie dostosować parametry wielowarstwowej kompozycji mapy: kolejność nakładania warstw (od podkładu po warstwę najwyższą), " &
+                    "stopień przezroczystości (krycie od 0 do 100%) oraz algorytm łączenia pikseli (tryb mieszania).")
+
+        DodajNaglowek1("1. Tryby mieszania warstw")
+        DodajPunktor("Zwykły (Normal): standardowe nakładanie z kryciem. Warstwa przykrywa elementy leżące pod nią zgodnie z wartością suwaka.")
+        DodajPunktor("Mnożenie (Multiply): ciemne elementy warstwy przyciemniają tło, biel staje się przezroczysta. Idealny do nakładania skanów starych map (np. WIG) lub granic na ortofotomapę.")
+        DodajPunktor("Ekran (Screen): rozjaśnia podkład; czerń staje się przezroczysta. Doskonały do nakładania jasnych elementów i etykiet na ciemniejsze podkłady.")
+        DodajPunktor("Nakładka (Overlay): łączy mnożenie i ekran, zwiększając ogólny kontrast kompozycji.")
+        DodajPunktor("Rozjaśnianie (Lighten) / Ściemnianie (Darken): zachowuje jaśniejsze lub ciemniejsze piksele między warstwami.")
+        DodajPunktor("Miękkie światło (Soft Light): subtelne, plastyczne doświetlenie podkładu.")
+        DodajPunktor("Rzeźba terenu (Hillshade): specjalny tryb mnożenia z zachowaniem nasycenia kolorów (HSV). Rekomendowany do łączenia cieniowania rzeźby terenu ISOK z barwną ortofotomapą, dając spektakularny efekt trójwymiarowości.")
+
+        DodajNaglowek1("2. Podgląd na żywo i lupa rastrowa")
+        DodajPunktor("Przycisk 'Odśwież podgląd' wczytuje rzeczywisty wycinek terenu w bieżącej konfiguracji warstw.")
+        DodajPunktor("Przyciski +, - oraz 1:1 (lub kółko myszy nad podglądem) pozwalają przybliżać i oddalać próbkę w lupie rastrowej.")
+        DodajPunktor("Przycisk 'Korekta obrazu...' pozwala dodatkowo nałożyć profil korekcji kolorystycznej (np. Garmin MIP, wyostrzanie, podbicie kontrastu).")
+
+        DodajStopkeOnline(_urlOnline)
+    End Sub
+
 #End Region
 
 #Region "Formatowanie tekstu RichTextBox"
 
     Private Sub DodajTytul(tekst As String)
-        rtbTresc.SelectionFont = New Font("Segoe UI", 13.0!, FontStyle.Bold)
-        rtbTresc.SelectionColor = Color.DarkBlue
-        rtbTresc.AppendText(tekst & vbCrLf & vbCrLf)
+        Using f As New Font("Segoe UI", 13.0!, FontStyle.Bold)
+            rtbTresc.SelectionFont = f
+            rtbTresc.SelectionColor = Color.DarkBlue
+            rtbTresc.AppendText(tekst & vbCrLf & vbCrLf)
+        End Using
     End Sub
 
     Private Sub DodajNaglowek1(tekst As String)
-        rtbTresc.SelectionFont = New Font("Segoe UI", 10.5!, FontStyle.Bold)
-        rtbTresc.SelectionColor = Color.FromArgb(0, 70, 140)
-        rtbTresc.AppendText(vbCrLf & tekst & vbCrLf)
+        Using f As New Font("Segoe UI", 10.5!, FontStyle.Bold)
+            rtbTresc.SelectionFont = f
+            rtbTresc.SelectionColor = Color.FromArgb(0, 70, 140)
+            rtbTresc.AppendText(vbCrLf & tekst & vbCrLf)
+        End Using
     End Sub
 
     Private Sub DodajAkapit(tekst As String)
-        rtbTresc.SelectionFont = New Font("Segoe UI", 9.5!, FontStyle.Regular)
-        rtbTresc.SelectionColor = Color.FromArgb(30, 30, 30)
-        rtbTresc.AppendText(tekst & vbCrLf)
+        Using f As New Font("Segoe UI", 9.5!, FontStyle.Regular)
+            rtbTresc.SelectionFont = f
+            rtbTresc.SelectionColor = Color.FromArgb(30, 30, 30)
+            rtbTresc.AppendText(tekst & vbCrLf)
+        End Using
     End Sub
 
     Private Sub DodajPunktor(tekst As String)
-        rtbTresc.SelectionFont = New Font("Segoe UI", 9.5!, FontStyle.Regular)
-        rtbTresc.SelectionColor = Color.Black
-        rtbTresc.AppendText(" • " & tekst & vbCrLf)
+        Using f As New Font("Segoe UI", 9.5!, FontStyle.Regular)
+            rtbTresc.SelectionFont = f
+            rtbTresc.SelectionColor = Color.Black
+            rtbTresc.AppendText(" • " & tekst & vbCrLf)
+        End Using
     End Sub
 
     Private Sub DodajStopkeOnline(url As String)
         rtbTresc.AppendText(vbCrLf)
-        rtbTresc.SelectionFont = New Font("Segoe UI", 10.0!, FontStyle.Bold)
-        rtbTresc.SelectionColor = Color.FromArgb(0, 100, 0)
-        rtbTresc.AppendText("Szczegółowy podręcznik online:" & vbCrLf)
+        Using fNaglowek As New Font("Segoe UI", 10.0!, FontStyle.Bold)
+            rtbTresc.SelectionFont = fNaglowek
+            rtbTresc.SelectionColor = Color.FromArgb(0, 100, 0)
+            rtbTresc.AppendText("Szczegółowy podręcznik online:" & vbCrLf)
+        End Using
 
-        rtbTresc.SelectionFont = New Font("Segoe UI", 9.5!, FontStyle.Underline)
-        rtbTresc.SelectionColor = Color.Blue
-        rtbTresc.AppendText(url & vbCrLf & vbCrLf)
+        Using fLink As New Font("Segoe UI", 9.5!, FontStyle.Underline)
+            rtbTresc.SelectionFont = fLink
+            rtbTresc.SelectionColor = Color.Blue
+            rtbTresc.AppendText(url & vbCrLf & vbCrLf)
+        End Using
 
-        rtbTresc.SelectionFont = New Font("Segoe UI", 8.5!, FontStyle.Italic)
-        rtbTresc.SelectionColor = Color.Gray
-        rtbTresc.AppendText("Kliknij powyższy odnośnik lub przycisk 'Pomoc online' na dole okna, aby otworzyć rozdział w przeglądarce." & vbCrLf)
+        Using fUwaga As New Font("Segoe UI", 8.5!, FontStyle.Italic)
+            rtbTresc.SelectionFont = fUwaga
+            rtbTresc.SelectionColor = Color.Gray
+            rtbTresc.AppendText("Kliknij powyższy odnośnik lub przycisk 'Pomoc online' na dole okna, aby otworzyć rozdział w przeglądarce." & vbCrLf)
+        End Using
     End Sub
 
 #End Region
@@ -504,7 +566,7 @@ Public Module PomocProgramu
     End Function
 
     Public Function DodajPrzyciskPomocy(form As Form, temat As TematPomocy, Optional x As Integer = 12, Optional y As Integer = -1) As Button
-        'okna otwierane jako domyślna instancja (np. Form3.ShowDialog()) nie są niszczone po zamknięciu, a zdarzenie
+        'okna otwierane jako domyślna instancja (np. FormEksport.ShowDialog()) nie są niszczone po zamknięciu, a zdarzenie
         'Load zachodzi przy każdym otwarciu - bez tego sprawdzenia każde otwarcie dokładało kolejny przycisk
         Dim istniejacy = TryCast(form.Controls("btnPomoc"), Button)
         If istniejacy IsNot Nothing Then Return istniejacy
@@ -543,5 +605,49 @@ Public Module PomocProgramu
         btn.BringToFront()
         Return btn
     End Function
+
+    ''' <summary>
+    ''' Okno o stałym rozmiarze, wyższe lub szersze niż ekran roboczy (np. laptop 1366 x 768 - 728 px nad paskiem zadań),
+    ''' zmniejszane do ekranu z paskami przewijania - dawniej przyciski u dołu okna były poza ekranem.
+    ''' Tylko dla okien bez kontrolek zakotwiczonych do dołu lub prawej (przy przewijaniu przesuwałyby się na zawartość).
+    ''' </summary>
+    Public Sub DopasujDoEkranu(form As Form)
+        Dim ekran As Rectangle = Screen.FromControl(form).WorkingArea
+        If form.Height <= ekran.Height AndAlso form.Width <= ekran.Width Then Return
+        Dim klient As Size = form.ClientSize
+        form.AutoScroll = True
+        form.AutoScrollMinSize = klient
+        Dim zaWysokie As Boolean = form.Height > ekran.Height
+        Dim zaSzerokie As Boolean = form.Width > ekran.Width
+        Dim w As Integer = Math.Min(form.Width + If(zaWysokie, SystemInformation.VerticalScrollBarWidth, 0), ekran.Width)
+        Dim h As Integer = Math.Min(form.Height + If(zaSzerokie, SystemInformation.HorizontalScrollBarHeight, 0), ekran.Height)
+        form.StartPosition = FormStartPosition.Manual
+        form.Bounds = New Rectangle(ekran.Left + (ekran.Width - w) \ 2, ekran.Top + (ekran.Height - h) \ 2, w, h)
+    End Sub
+
+    Private ReadOnly _oknaZEsc As New Runtime.CompilerServices.ConditionalWeakTable(Of Form, Object)()
+
+    ''' <summary>
+    ''' Klawisz Esc zamyka okno narzędzia (jak przycisk zamykania okna) - w 8 oknach bez przycisku Anuluj/Zamknij nie działał.
+    ''' Okna z pracą w tle same pytają w FormClosing, czy przerwać. Esc przy rozwiniętej liście zwija tylko listę.
+    ''' Wywoływane w Load - okna otwierane jako domyślna instancja dostają obsługę tylko raz.
+    ''' </summary>
+    Public Sub ZamykanieKlawiszemEsc(form As Form, Optional rozmiarMinimalny As Boolean = False)
+        'tylko przy pierwszym otwarciu - dawniej rozmiar minimalny brany był przy każdym otwarciu z rozmiaru, do którego
+        'użytkownik powiększył okno poprzednio, więc okna nie dało się już zmniejszyć
+        Dim znacznik As Object = Nothing
+        If _oknaZEsc.TryGetValue(form, znacznik) Then Return
+        _oknaZEsc.Add(form, New Object())
+        If rozmiarMinimalny Then form.MinimumSize = form.Size
+        If form.CancelButton IsNot Nothing Then Return
+        form.KeyPreview = True
+        AddHandler form.KeyDown, Sub(s As Object, e As KeyEventArgs)
+                                     If e.KeyCode <> Keys.Escape OrElse e.Modifiers <> Keys.None OrElse e.Handled Then Return
+                                     Dim lista = TryCast(form.ActiveControl, ComboBox)
+                                     If lista IsNot Nothing AndAlso lista.DroppedDown Then Return
+                                     e.Handled = True
+                                     form.Close()
+                                 End Sub
+    End Sub
 
 End Module

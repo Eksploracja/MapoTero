@@ -23,14 +23,18 @@ Imports MapoTero.Core
 ''' </summary>
 Public Class Form2
 
-    ''' <summary>Opisy stylów nazwy paczki TrekBuddy (indeks = UstawieniaProgramu.StylNazwyTrekBuddy).</summary>
-    Private Shared ReadOnly StyleNazwyTB As String() = {"sam przedrostek", "nazwa zbioru map", "nazwa warstwy", "zbiór map + warstwa"}
-
     ''' <summary>Blokuje reakcję na zdarzenia kontrolek podczas ich wypełniania.</summary>
     Private _wypelnianie As Boolean
 
+    ''' <summary>
+    ''' Ustawiane przez okno główne przed otwarciem okna: trwa pobieranie segmentów (część ustawień wyłączona).
+    ''' Przekazywane z zewnątrz, a nie odczytywane z Form1, bo testy tworzą to okno bez okna głównego.
+    ''' </summary>
+    <System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)>
+    Public Property TrwaPobieranie As Boolean
+
     Private Sub Form2_Load(sender As Object, e As EventArgs) Handles MyBase.Load
-        PomocProgramu.DodajPrzyciskPomocy(Me, TematPomocy.Ustawienia, 202, 433)
+        PomocProgramu.DodajPrzyciskPomocy(Me, TematPomocy.Ustawienia, 202, 387)
     End Sub
 
     Private Sub Form2_VisibleChanged(sender As Object, e As EventArgs) Handles MyBase.VisibleChanged
@@ -42,7 +46,6 @@ Public Class Form2
         If cmbFormat.Items.Count > 0 Then Exit Sub
         cmbFormat.Items.AddRange(UstawieniaProgramu.FormatySegmentow)
         cmbNumeracja.Items.AddRange(UstawieniaProgramu.StyleNumeracji)
-        cmbNazwaTB.Items.AddRange(StyleNazwyTB)
         For Each u In UkladWspolrzednych.Wszystkie
             cmbUkladDomyslny.Items.Add(u)
         Next
@@ -60,13 +63,11 @@ Public Class Form2
             txtPrefiks.Text = u.Prefiks
             cmbNumeracja.SelectedItem = u.Numeracja
             If cmbNumeracja.SelectedIndex < 0 Then cmbNumeracja.SelectedIndex = 0
-            chkPowyzejOstatniego.Checked = u.PobierajPowyzejOstatniego
             cmbUkladDomyslny.SelectedItem = u.UkladDomyslny
             'widok okna głównego
             chkKursorISrodek.Checked = u.KursorISrodekMapy
             chkKursorWgs.Checked = u.KursorWgs84
             chkZaznaczenieWgs.Checked = u.ZaznaczenieWgs84
-            chkEdycjaXY.Checked = u.EdycjaXY
             chkSiatkaSegmentow.Checked = u.SiatkaSegmentowNaMapie
             'pliki kalibracji
             chkMap.Checked = u.PlikMap
@@ -75,9 +76,6 @@ Public Class Form2
             chkTab.Checked = u.PlikTab
             chkWldPoints.Checked = u.PlikWldPoints
             chkGmi.Checked = u.PlikGmi
-            'TrekBuddy
-            chkTrekBuddy.Checked = u.TrekBuddy
-            cmbNazwaTB.SelectedIndex = Math.Max(0, Math.Min(StyleNazwyTB.Length - 1, u.StylNazwyTrekBuddy))
             'pobieranie
             Ustaw(nudIloscProb, u.IloscProbPobrania)
             Ustaw(nudPrzerwa, u.PrzerwaMiedzyProbami)
@@ -85,12 +83,25 @@ Public Class Form2
             Ustaw(nudLimitCzasu, u.LimitCzasuSekundy)
             chkZachowajKafle.Checked = u.ZachowajKafleWmts
             Ustaw(nudJakoscWmts, u.JakoscJpegWmts)
-            chkZamienXY.Checked = u.ZamienXY
         Finally
             _wypelnianie = False
         End Try
         OdswiezDostepnosc()
-        OdswiezPodgladTB()
+        UstawBlokadePobierania()
+    End Sub
+
+    ''' <summary>
+    ''' W trakcie pobierania można zmienić tylko widok współrzędnych i układ nowej sesji. Pozostałe ustawienia zmieniają
+    ''' parametry trwającej sesji (format, przedrostek, numeracja, conf.txt) albo siatkę na mapie,
+    ''' dlatego są wyłączone; dawniej okno w ogóle nie otwierało się w trakcie pobierania.
+    ''' </summary>
+    Private Sub UstawBlokadePobierania()
+        Dim pobieranie As Boolean = TrwaPobieranie
+        For Each c As Control In New Control() {grpSesja, grpKalibracja, grpPobieranie, grpWmts,
+                                                chkSiatkaSegmentow, btnPrzywroc}
+            c.Enabled = Not pobieranie
+        Next
+        Me.Text = If(pobieranie, "Ustawienia (trwa pobieranie - część ustawień można zmienić po jego zakończeniu)", "Ustawienia")
     End Sub
 
     ''' <summary>Wartość pola liczbowego ograniczona do jego zakresu.</summary>
@@ -98,29 +109,9 @@ Public Class Form2
         pole.Value = Math.Max(pole.Minimum, Math.Min(pole.Maximum, CDec(wartosc)))
     End Sub
 
-#Region "TrekBuddy i Locus Map"
-
-    ''' <summary>
-    ''' W trybie TrekBuddy / Locus Map segmenty nazywane są wg położenia w pikselach, a kalibracja zapisywana jest w pliku .map
-    ''' paczki - numeracja, pliki kalibracji segmentów i pobieranie powyżej ostatniego segmentu nie są wtedy używane.
-    ''' Wartości tych ustawień pozostają bez zmian i wracają do użytku po wyłączeniu trybu.
-    ''' </summary>
+    ''' <summary>Przezroczyste tło tylko dla formatów, które je zapisują (PNG, GIF).</summary>
     Private Sub OdswiezDostepnosc()
-        Dim tb As Boolean = chkTrekBuddy.Checked
         chkPrzezroczystosc.Enabled = Wms.CzyFormatZPrzezroczystoscia(CStr(cmbFormat.SelectedItem))
-        grpKalibracja.Enabled = Not tb
-        cmbNumeracja.Enabled = Not tb
-        lblNumeracja.Enabled = Not tb
-        chkPowyzejOstatniego.Enabled = Not tb
-        lblNazwaTB.Enabled = tb
-        cmbNazwaTB.Enabled = tb
-        lblPodgladTB.Enabled = tb
-        lblPodgladNazwyTB.Enabled = tb
-    End Sub
-
-    Private Sub chkTrekBuddy_CheckedChanged(sender As Object, e As EventArgs) Handles chkTrekBuddy.CheckedChanged
-        If _wypelnianie Then Exit Sub
-        OdswiezDostepnosc()
     End Sub
 
     Private Sub cmbFormat_SelectedIndexChanged(sender As Object, e As EventArgs) Handles cmbFormat.SelectedIndexChanged
@@ -128,22 +119,13 @@ Public Class Form2
         OdswiezDostepnosc()
     End Sub
 
-    Private Sub cmbNazwaTB_SelectedIndexChanged(sender As Object, e As EventArgs) Handles cmbNazwaTB.SelectedIndexChanged
-        If _wypelnianie Then Exit Sub
-        OdswiezPodgladTB()
-    End Sub
+#Region "TrekBuddy (tylko wznowienie sesji z dawnych wersji)"
 
-    Private Sub txtPrefiks_TextChanged(sender As Object, e As EventArgs) Handles txtPrefiks.TextChanged
-        If _wypelnianie Then Exit Sub
-        OdswiezPodgladTB()
-    End Sub
-
-    ''' <summary>Podgląd nazwy paczki dla wartości wpisanych w oknie.</summary>
-    Private Sub OdswiezPodgladTB()
-        lblPodgladNazwyTB.Text = txtPrefiks.Text & DopisekTrekBuddy(cmbNazwaTB.SelectedIndex)
-    End Sub
-
-    ''' <summary>Dopisek do przedrostka w nazwie paczki TrekBuddy / Locus Map wg stylu.</summary>
+    ''' <summary>
+    ''' Mapę TrekBuddy / Locus Map tworzy od wersji 3.19 okno Eksport mapy z dowolnej sesji, więc okno Ustawienia nie ma
+    ''' już trybu TrekBuddy. Tryb zostaje tylko dla wznawianej sesji z dawnej wersji (pole w conf.txt) - jej segmenty
+    ''' mają nazwy i folder paczki TrekBuddy, a nazwa paczki powstaje wg zapisanego stylu (lastsettings.txt).
+    ''' </summary>
     Private Shared Function DopisekTrekBuddy(styl As Integer) As String
         Dim s As String = ""
         Select Case styl
@@ -155,12 +137,9 @@ Public Class Form2
         Return MapaTrekBuddy.BezpiecznaNazwa(s)
     End Function
 
-    ''' <summary>
-    ''' Nazwa paczki TrekBuddy / Locus Map wg zapisanego stylu - wywoływane także z okna głównego po zmianie warstw.
-    ''' </summary>
+    ''' <summary>Nazwa paczki TrekBuddy wg zapisanego stylu - wywoływane z okna głównego po zmianie warstw.</summary>
     Public Sub OdswiezNazweTrekBuddy()
         Ustawienia.NazwaTrekBuddy = DopisekTrekBuddy(Ustawienia.StylNazwyTrekBuddy)
-        If Me.Visible Then OdswiezPodgladTB()
     End Sub
 
 #End Region
@@ -186,29 +165,20 @@ Public Class Form2
         Form1.stFormat.Text = "." & u.Format
         u.Prefiks = txtPrefiks.Text
         If cmbNumeracja.SelectedItem IsNot Nothing Then u.Numeracja = CStr(cmbNumeracja.SelectedItem)
-        u.PobierajPowyzejOstatniego = chkPowyzejOstatniego.Checked
         Dim uklad = TryCast(cmbUkladDomyslny.SelectedItem, UkladWspolrzednych)
         If uklad IsNot Nothing Then u.UkladDomyslny = uklad
 
         'widok okna głównego
-        Dim bylaEdycjaXY As Boolean = u.EdycjaXY
         u.KursorISrodekMapy = chkKursorISrodek.Checked
         u.KursorWgs84 = chkKursorWgs.Checked
         u.ZaznaczenieWgs84 = chkZaznaczenieWgs.Checked
         Dim bylaSiatka As Boolean = u.SiatkaSegmentowNaMapie
-        u.EdycjaXY = chkEdycjaXY.Checked
         u.SiatkaSegmentowNaMapie = chkSiatkaSegmentow.Checked
         If bylaSiatka <> u.SiatkaSegmentowNaMapie AndAlso Form1.SiatkaWidoczna Then
             Form1.OdswiezSiatke()
         End If
         Form1.UstawWidokWspolrzednych(u.KursorISrodekMapy)
         Form1.UstawWidokZaznaczeniaWgs(u.ZaznaczenieWgs84)
-        Form1.UstawEdycjeXY(u.EdycjaXY)
-        If u.EdycjaXY AndAlso Not bylaEdycjaXY Then
-            Form1.Komunikat("Wyłączono zaznaczanie na mapie zasięgu pobierania prawym przyciskiem myszy. Określ samodzielnie współrzędne XY zasięgu mapy i wpisz je w odpowiednie pola", Color.Green)
-        ElseIf bylaEdycjaXY AndAlso Not u.EdycjaXY Then
-            Form1.Komunikat("", Color.Black)
-        End If
 
         'pliki kalibracji segmentów
         u.PlikMap = chkMap.Checked
@@ -218,17 +188,6 @@ Public Class Form2
         u.PlikWldPoints = chkWldPoints.Checked
         u.PlikGmi = chkGmi.Checked
 
-        'TrekBuddy: segment 512 px, a po wyłączeniu - bok segmentu sprzed włączenia trybu
-        Dim bylTrekBuddy As Boolean = u.TrekBuddy
-        u.TrekBuddy = chkTrekBuddy.Checked
-        If u.TrekBuddy AndAlso Not bylTrekBuddy Then
-            u.BokSegmentuPrzedTrekBuddy = Form1.BokSegmentu
-            Form1.BokSegmentu = MapaTrekBuddy.BokSegmentu.ToString()
-        ElseIf bylTrekBuddy AndAlso Not u.TrekBuddy Then
-            Form1.BokSegmentu = If(u.BokSegmentuPrzedTrekBuddy <> "", u.BokSegmentuPrzedTrekBuddy, "2000")
-            u.BokSegmentuPrzedTrekBuddy = ""
-        End If
-        u.StylNazwyTrekBuddy = Math.Max(0, cmbNazwaTB.SelectedIndex)
         OdswiezNazweTrekBuddy()
 
         'pobieranie
@@ -238,12 +197,12 @@ Public Class Form2
         u.LimitCzasuSekundy = CInt(nudLimitCzasu.Value)
         u.ZachowajKafleWmts = chkZachowajKafle.Checked
         u.JakoscJpegWmts = CInt(nudJakoscWmts.Value)
-        u.ZamienXY = chkZamienXY.Checked
+
 
         Try
             u.Zapisz(PlikLastsettings)
         Catch ex As Exception
-            MsgBox("Nie udało się zapisać ustawień: " & ex.Message, MsgBoxStyle.Exclamation)
+            MsgBox("Nie udało się zapisać ustawień: " & OpisBledu.Z(ex), MsgBoxStyle.Exclamation, "Ustawienia")
         End Try
         Me.DialogResult = DialogResult.OK
         Me.Close()
@@ -281,7 +240,7 @@ Public Class Form2
             If File.Exists(PlikLastsettings) Then File.Delete(PlikLastsettings)
             Ustawienia.Zapisz(PlikLastsettings)
         Catch ex As Exception
-            MsgBox("Nie udało się zapisać ustawień: " & ex.Message, MsgBoxStyle.Exclamation)
+            MsgBox("Nie udało się zapisać ustawień: " & OpisBledu.Z(ex), MsgBoxStyle.Exclamation, "Ustawienia")
         End Try
         Form1.Komunikat("Przywrócono ustawienia domyślne programu (lastsettings.txt)", Color.Green)
     End Sub

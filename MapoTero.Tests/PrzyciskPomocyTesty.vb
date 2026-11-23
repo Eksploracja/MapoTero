@@ -16,17 +16,15 @@ Public Class PrzyciskPomocyTesty
     Private Shared Function Okna() As List(Of (Nazwa As String, Utworz As Func(Of Form)))
         Return New List(Of (String, Func(Of Form))) From {
             ("Form2 (Ustawienia)", Function() New MapoTero.Form2()),
-            ("Form3 (złączanie segmentów)", Function() New MapoTero.Form3()),
             ("FormEksport", Function() New MapoTero.FormEksport()),
             ("FormEksportCad", Function() New MapoTero.FormEksportCad()),
             ("FormDodajSerwer - katalog", Function() New MapoTero.FormDodajSerwer()),
             ("FormDodajSerwer - warstwy", Function() New MapoTero.FormDodajSerwer("https://example.invalid/wms")),
             ("FormKorytarz", Function() New MapoTero.FormKorytarz(Nothing)),
+            ("FormProfilNmt", Function() New MapoTero.FormProfilNmt()),
             ("FormImportOzi", Function() New MapoTero.FormImportOzi()),
             ("FormSzukajDzialki - miejscowości", Function() New MapoTero.FormSzukajDzialki()),
             ("FormSzukajDzialki - działki", Function() New MapoTero.FormSzukajDzialki(1)),
-            ("nakladanie_map", Function() New MapoTero.nakladanie_map()),
-            ("usuwanie_p_seg", Function() New MapoTero.usuwanie_p_seg()),
             ("FormKorektaFolderu", Function() New MapoTero.FormKorektaFolderu())}
     End Function
 

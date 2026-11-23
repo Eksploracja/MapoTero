@@ -66,6 +66,11 @@ Public Class FormPodgladMip
     End Sub
 
     Private Sub FormPodgladMip_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+        ' Przycisk resetu: korekta wyłączona i neutralne suwaki - powrót do obrazu bez zmian
+        Dim btnResetuj As New Button With {.Name = "btnResetuj", .Text = "Resetuj korektę", .Location = New Point(150, 295),
+                                           .Size = New Size(130, 26), .UseVisualStyleBackColor = True}
+        AddHandler btnResetuj.Click, AddressOf btnResetuj_Click
+        Controls.Add(btnResetuj)
         InicjalizujProfile()
         'podgląd pokazuje wybrany profil także wtedy, gdy korekta jest w oknie wywołującym odznaczona
         _opcje.Wlaczona = (_opcje.Profil <> ProfilKorektyRastra.Brak)
@@ -214,11 +219,30 @@ Public Class FormPodgladMip
         OdswiezPodglad()
     End Sub
 
+    Private Sub btnResetuj_Click(sender As Object, e As EventArgs)
+        _opcje.Resetuj()
+        _wewnetrznaZmiana = True
+        cmbProfil.SelectedIndex = CInt(ProfilKorektyRastra.Brak)
+        UstawKontrolkiZOpcji()
+        _wewnetrznaZmiana = False
+        OdswiezPodglad()
+    End Sub
+
     Protected Overrides Sub OnFormClosing(e As FormClosingEventArgs)
         If Me.DialogResult = DialogResult.OK Then
             _opcje.Wlaczona = (_opcje.Profil <> ProfilKorektyRastra.Brak)
         End If
         MyBase.OnFormClosing(e)
+    End Sub
+
+    ''' <summary>Zwalnia próbkę i obraz podglądu (PictureBox nie zwalnia swojego obrazu) - dawniej zostawały do odśmiecania pamięci.</summary>
+    Protected Overrides Sub OnFormClosed(e As FormClosedEventArgs)
+        Dim obraz = picPodglad.Image
+        picPodglad.Image = Nothing
+        If obraz IsNot Nothing AndAlso obraz IsNot _oryginalBmp Then obraz.Dispose()
+        _oryginalBmp?.Dispose()
+        _oryginalBmp = Nothing
+        MyBase.OnFormClosed(e)
     End Sub
 
 End Class

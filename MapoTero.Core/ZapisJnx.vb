@@ -204,6 +204,7 @@ Imports System.Text
                 ' 6. Zapis surowych danych JPEG kafli
                 For Each p In poziomy
                     For Each k In p.Kafle
+                        If k.ObrazJpeg Is Nothing OrElse k.ObrazJpeg.Length = 0 Then Continue For
                         Dim pominiete = k.ObrazJpeg.Length - DlugoscDanychKafla(k.ObrazJpeg)
                         bw.Write(k.ObrazJpeg, pominiete, k.ObrazJpeg.Length - pominiete)
                     Next
@@ -234,6 +235,7 @@ Imports System.Text
                 If indeksKafla < 0 OrElse indeksKafla >= liczbaKafli Then Throw New ArgumentOutOfRangeException(NameOf(indeksKafla))
                 fs.Seek(offsetOpisow + CLng(RozmiarOpisuKafla) * indeksKafla + 20, SeekOrigin.Begin)
                 Dim rozmiar = br.ReadInt32()
+                If rozmiar < 0 OrElse rozmiar > 64 * 1024 * 1024 Then Throw New InvalidDataException("Nieprawidłowy rozmiar kafla w pliku JNX.")
                 Dim offset = br.ReadUInt32()
                 fs.Seek(offset, SeekOrigin.Begin)
                 Dim wynik(rozmiar + 1) As Byte
@@ -241,7 +243,7 @@ Imports System.Text
                 Dim odczytano = 0
                 While odczytano < rozmiar
                     Dim n = br.Read(wynik, 2 + odczytano, rozmiar - odczytano)
-                    If n <= 0 Then Exit While
+                    If n <= 0 Then Throw New EndOfStreamException("Nieoczekiwany koniec pliku JNX podczas odczytu kafla.")
                     odczytano += n
                 End While
                 Return wynik
@@ -276,25 +278,31 @@ Imports System.Text
                 Dim sigOff = br.ReadUInt32()
                 zOrder = br.ReadInt32()
 
-                If wersja < 3 OrElse wersja > 4 OrElse liczbaPoziomow <= 0 Then Return False
+                Try
+                    If wersja < 3 OrElse wersja > 4 OrElse liczbaPoziomow <= 0 Then Return False
 
-                ' Przejście do sekcji opisu
-                fs.Seek(RozmiarNaglowka + CLng(RozmiarOpisuPoziomu) * liczbaPoziomow, SeekOrigin.Begin)
-                Dim secVer = br.ReadInt32()
-                OdczytajNapisZZerem(br) ' GUID
-                tytul = OdczytajNapisZZerem(br)
-                Return True
+                    ' Przejście do sekcji opisu
+                    Dim opisOffset As Long = RozmiarNaglowka + CLng(RozmiarOpisuPoziomu) * liczbaPoziomow
+                    If opisOffset >= fs.Length Then Return False
+                    fs.Seek(opisOffset, SeekOrigin.Begin)
+                    Dim secVer = br.ReadInt32()
+                    OdczytajNapisZZerem(br) ' GUID
+                    tytul = OdczytajNapisZZerem(br)
+                    Return True
+                Catch ex As EndOfStreamException
+                    Return False
+                End Try
             End Using
         End Function
 
         Private Shared Function OdczytajNapisZZerem(br As BinaryReader) As String
-            Dim sb As New StringBuilder()
+            Dim bajty As New List(Of Byte)()
             While True
                 Dim b = br.ReadByte()
                 If b = 0 Then Exit While
-                sb.Append(ChrW(b))
+                bajty.Add(b)
             End While
-            Return sb.ToString()
+            Return Encoding.UTF8.GetString(bajty.ToArray())
         End Function
 
     End Class

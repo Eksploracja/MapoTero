@@ -256,7 +256,9 @@ Public Class UslugaWmts
     End Function
 
     Private Shared Function LiczbaD(tekst As String) As Double
-        Return Double.Parse(tekst, NumberStyles.Float, CultureInfo.InvariantCulture)
+        Dim w As Double
+        If Double.TryParse(tekst, NumberStyles.Float, CultureInfo.InvariantCulture, w) Then Return w
+        Return 0
     End Function
 
     Private Shared Function LiczbaC(tekst As String, domyslna As Integer) As Integer
@@ -267,8 +269,12 @@ Public Class UslugaWmts
 
     ''' <summary>Odczyt dokumentu GetCapabilities. Adres dokumentu służy za adres KVP, gdy dokument go nie podaje.</summary>
     Public Shared Function Wczytaj(xml As String, adresCapabilities As String) As UslugaWmts
-        Dim doc = XDocument.Parse(xml)
-        Dim korzen = doc.Root
+        Return Wczytaj(XDocument.Parse(xml), adresCapabilities)
+    End Function
+
+    ''' <summary>Odczyt dokumentu GetCapabilities z gotowego obiektu XML bez ponownej serializacji i parsowania.</summary>
+    Public Shared Function Wczytaj(doc As XDocument, adresCapabilities As String) As UslugaWmts
+        Dim korzen = If(doc Is Nothing, Nothing, doc.Root)
         If korzen Is Nothing OrElse korzen.Name.LocalName <> "Capabilities" Then
             Dim opis As String = If(korzen Is Nothing, "", korzen.Value.Trim())
             If opis.Length > 300 Then opis = opis.Substring(0, 300)
@@ -284,10 +290,14 @@ Public Class UslugaWmts
             For Each em In Dzieci(ez, "TileMatrix")
                 Dim naroz = Tekst(em, "TopLeftCorner").Split({" "c, ChrW(9), ChrW(10), ChrW(13)}, StringSplitOptions.RemoveEmptyEntries)
                 If naroz.Length < 2 Then Continue For
+                Dim mianownik As Double = LiczbaD(Tekst(em, "ScaleDenominator"))
+                Dim szerKafla As Integer = LiczbaC(Tekst(em, "TileWidth"), 256)
+                Dim wysKafla As Integer = LiczbaC(Tekst(em, "TileHeight"), 256)
+                If mianownik <= 0 OrElse szerKafla <= 0 OrElse wysKafla <= 0 Then Continue For
                 z.Macierze.Add(New MacierzKafliWmts With {
-                    .Identyfikator = Tekst(em, "Identifier"), .MianownikSkali = LiczbaD(Tekst(em, "ScaleDenominator")),
+                    .Identyfikator = Tekst(em, "Identifier"), .MianownikSkali = mianownik,
                     .NarozA = LiczbaD(naroz(0)), .NarozB = LiczbaD(naroz(1)),
-                    .SzerokoscKafla = LiczbaC(Tekst(em, "TileWidth"), 256), .WysokoscKafla = LiczbaC(Tekst(em, "TileHeight"), 256),
+                    .SzerokoscKafla = szerKafla, .WysokoscKafla = wysKafla,
                     .LiczbaKolumn = LiczbaC(Tekst(em, "MatrixWidth"), 0), .LiczbaWierszy = LiczbaC(Tekst(em, "MatrixHeight"), 0)})
             Next
             u.Zestawy.Add(z)
@@ -332,15 +342,15 @@ Public Class UslugaWmts
                 For Each eg In op.Descendants().Where(Function(x) x.Name.LocalName = "Get")
                     Dim kodowania = eg.Descendants().Where(Function(x) x.Name.LocalName = "Value").Select(Function(x) x.Value.Trim()).ToList()
                     If kodowania.Count = 0 OrElse kodowania.Any(Function(k) k.Equals("KVP", StringComparison.OrdinalIgnoreCase)) Then
-                        u.AdresKvp = Atrybut(eg, "href")
-                        If u.AdresKvp = "" Then u.AdresKvp = If(adresCapabilities, "")
+                        Dim href = Atrybut(eg, "href")
+                        u.AdresKvp = If(Not String.IsNullOrEmpty(href) AndAlso Not WmsCapabilities.JestAdresemLokalnym(href), href, If(adresCapabilities, ""))
                         Exit For
                     End If
                 Next
             Next
         End If
-        'usługa bez szablonów REST i bez zadeklarowanego KVP - próba KVP pod adresem dokumentu
-        If u.AdresKvp = "" AndAlso u.Warstwy.All(Function(w) w.Szablony.Count = 0) Then u.AdresKvp = If(adresCapabilities, "")
+        'usługa bez szablonów REST lub z brakującym KVP - próba KVP pod adresem dokumentu
+        If u.AdresKvp = "" AndAlso u.Warstwy.Any(Function(w) w.Szablony.Count = 0) Then u.AdresKvp = If(adresCapabilities, "")
         Return u
     End Function
 
@@ -382,7 +392,8 @@ Public NotInheritable Class Wmts
     ''' <summary>Typ MIME kafli: zgodny z formatem segmentów, jeśli warstwa go udostępnia, inaczej pierwszy dostępny.</summary>
     Public Shared Function WybierzFormat(dostepne As IList(Of String), formatSegmentow As String) As String
         If dostepne Is Nothing OrElse dostepne.Count = 0 Then Return "image/png"
-        Dim f As String = If(formatSegmentow, "").ToLowerInvariant()
+        Dim f As String = If(formatSegmentow, "").Trim().ToLowerInvariant()
+        If f.StartsWith("image/", StringComparison.Ordinal) Then f = f.Substring(6).Trim()
         Dim szukany As String = If(f.StartsWith("png", StringComparison.Ordinal), "image/png", If(f = "jpeg" OrElse f = "jpg", "image/jpeg", "image/" & f))
         For Each d In dostepne
             If d.Equals(szukany, StringComparison.OrdinalIgnoreCase) Then Return d
@@ -629,7 +640,7 @@ Public Class PlanWmts
     End Function
 
     Private Shared Function Zamien(tekst As String, nazwa As String, wartosc As String) As String
-        Return Regex.Replace(tekst, "\{" & Regex.Escape(nazwa) & "\}", wartosc.Replace("$", "$$"), RegexOptions.IgnoreCase)
+        Return tekst.Replace("{" & nazwa & "}", If(wartosc, ""), StringComparison.OrdinalIgnoreCase)
     End Function
 
     ''' <summary>Opis planu do komunikatów i plików z wykazem segmentów.</summary>

@@ -101,14 +101,19 @@ Public NotInheritable Class Wms
 
         Dim lista As New List(Of String)
         For Each w In warstwy
-            If Not String.IsNullOrEmpty(w) Then lista.Add(w)
+            If Not String.IsNullOrEmpty(w) Then lista.Add(Uri.EscapeDataString(w))
         Next
         Dim nowe As String = String.Join(",", lista)
         If nowe <> "" Then
-            If Regex.IsMatch(baza, "[?&]layers=", RegexOptions.IgnoreCase) Then
-                If Not baza.EndsWith("=", StringComparison.Ordinal) AndAlso Not baza.EndsWith(",", StringComparison.Ordinal) Then
-                    nowe = "," & nowe
-                End If
+            Dim mLayers = Regex.Match(baza, "([?&]layers=)([^&]*)", RegexOptions.IgnoreCase)
+            If mLayers.Success Then
+                Dim przedrostek As String = mLayers.Groups(1).Value
+                Dim istniejace As String = mLayers.Groups(2).Value
+                Dim po As String = If(istniejace = "" OrElse istniejace.EndsWith(",", StringComparison.Ordinal),
+                                      istniejace & nowe,
+                                      istniejace & "," & nowe)
+                baza = baza.Substring(0, mLayers.Index) & przedrostek & po & baza.Substring(mLayers.Index + mLayers.Length)
+                nowe = ""
             Else
                 Dim lacznik As String = If(baza.EndsWith("&", StringComparison.Ordinal) OrElse baza.EndsWith("?", StringComparison.Ordinal), "", If(baza.IndexOf("?"c) < 0, "?", "&"))
                 nowe = lacznik & "layers=" & nowe

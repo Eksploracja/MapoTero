@@ -26,6 +26,7 @@ Public Class KreatorIntegracjaTesty
     End Sub
 
     <Fact>
+    <Trait("Kategoria", "Siec")>
     Public Async Function TestujPobieranieGeoportalWmtsLive() As Task
         'Pobranie i autodetekcja rzeczywistej usługi WMTS Geoportalu
         Const url As String = "https://mapy.geoportal.gov.pl/wss/service/PZGIK/ORTO/WMTS/StandardResolution"
@@ -47,6 +48,7 @@ Public Class KreatorIntegracjaTesty
     End Function
 
     <Fact>
+    <Trait("Kategoria", "Siec")>
     Public Async Function TestujPobieranieKiegWmsLive() As Task
         'Pobranie i autodetekcja rzeczywistej usługi WMS Krajowej Integracji Ewidencji Gruntów
         Const url As String = "https://integracja.gugik.gov.pl/cgi-bin/KrajowaIntegracjaEwidencjiGruntow"
@@ -75,6 +77,7 @@ Public Class KreatorIntegracjaTesty
     End Function
 
     <Fact>
+    <Trait("Kategoria", "Siec")>
     Public Async Function TestujBladStronyWwwZamiastXml() As Task
         'Wklejenie strony HTML zamiast usługi WMS/WMTS
         Const url As String = "https://www.google.com"
@@ -85,6 +88,7 @@ Public Class KreatorIntegracjaTesty
     End Function
 
     <Fact>
+    <Trait("Kategoria", "Siec")>
     Public Async Function TestujNieistniejacyAdres() As Task
         Const url As String = "https://mapy.geoportal.gov.pl/nieistniejacy_serwis_404_xyz"
         Dim wynik = Await KlientCapabilities.PobierzAsync(url, ignorujSsl:=True, timeoutSekundy:=10)
@@ -163,6 +167,7 @@ Public Class KreatorIntegracjaTesty
     End Sub
 
     <Fact>
+    <Trait("Kategoria", "Siec")>
     Public Async Function TestujPobieranieKafliBdooWmtsLive() As Task
         'Test pobierania kafelka z usługi BDOO (baza ogólnogeograficzna w skali 1:250 000 z cieniowaniem)
         Const url As String = "https://mapy.geoportal.gov.pl/wss/service/PZGIK/BDOO/WMTS/BDOOzCieniowaniem"
@@ -203,6 +208,7 @@ Public Class KreatorIntegracjaTesty
     End Function
 
     <Fact>
+    <Trait("Kategoria", "Siec")>
     Public Async Function TestujPobieranieKafliSozoWmsLive() As Task
         'Test usługi ArcGIS Server SOZO (wymagającej numerycznego ID zamiast nazwy 'Raster')
         Const url As String = "https://mapy.geoportal.gov.pl/wss/service/img/guest/SOZO/MapServer/WMSServer"
@@ -259,6 +265,7 @@ Public Class KreatorIntegracjaTesty
     End Function
 
     <Fact>
+    <Trait("Kategoria", "Siec")>
     Public Async Function TestujPobieranieKatalogowPublicznychLive() As Task
         Dim geoportal = Await KlientKataloguSerwerow.PobierzGeoportalAsync(timeoutSekundy:=20)
         If Not geoportal.Sukces AndAlso (geoportal.KomunikatBledu.Contains("połączenie") OrElse geoportal.KomunikatBledu.Contains("timeout") OrElse geoportal.KomunikatBledu.Contains("503") OrElse geoportal.KomunikatBledu.Contains("502")) Then

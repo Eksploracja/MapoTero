@@ -16,6 +16,7 @@
 Imports System.IO
 Imports System.IO.Compression
 Imports System.Text
+Imports System.Threading
 Imports BitMiracle.LibJpeg.Classic
 Imports BitMiracle.LibTiff.Classic
 
@@ -60,6 +61,7 @@ Public MustInherit Class ZapisRastra
 
     ''' <summary>Zapisuje kolejne wiersze: bufor RGB (RGBA) o długości liczbaWierszy * Szerokosc * Kanaly, wierszami od góry.</summary>
     Public Sub ZapiszWiersze(rgb() As Byte, liczbaWierszy As Integer)
+        If liczbaWierszy < 0 Then Throw New ArgumentOutOfRangeException(NameOf(liczbaWierszy))
         If Zapisane + liczbaWierszy > Wysokosc Then Throw New InvalidOperationException("Za dużo wierszy obrazu")
         ZapiszWierszeWewn(rgb, liczbaWierszy)
         Zapisane += liczbaWierszy
@@ -91,16 +93,18 @@ Public MustInherit Class ZapisRastra
 
     ''' <summary>
     ''' Tworzy zapis obrazu w wybranym formacie. Przezroczystość (RGBA) zachowują PNG i GeoTIFF bezstratny;
-    ''' formaty z kompresją JPEG zapisują zawsze RGB.
+    ''' formaty z kompresją JPEG zapisują zawsze RGB. Dla GeoTIFF opcja piramidy tworzy wewnętrzne katalogi
+    ''' pomniejszeń (overviews) dla szybkiego wyświetlania w QGIS i Avenza Maps.
     ''' </summary>
     Public Shared Function Utworz(format As FormatArkusza, sciezka As String, szerokosc As Integer, wysokosc As Integer, jakoscJpeg As Integer,
-                                  uklad As UkladWspolrzednych, zasieg As Zasieg, Optional przezroczystosc As Boolean = False) As ZapisRastra
+                                  uklad As UkladWspolrzednych, zasieg As Zasieg, Optional przezroczystosc As Boolean = False,
+                                  Optional piramidy As Boolean = True) As ZapisRastra
         Dim kanaly As Integer = If(przezroczystosc AndAlso ObslugujePrzezroczystosc(format), 4, 3)
         Select Case format
             Case FormatArkusza.Jpeg : Return New ZapisJpeg(sciezka, szerokosc, wysokosc, jakoscJpeg)
             Case FormatArkusza.Png : Return New ZapisPng(sciezka, szerokosc, wysokosc, kanaly)
-            Case FormatArkusza.GeoTiffJpeg : Return New ZapisGeoTiff(sciezka, szerokosc, wysokosc, True, jakoscJpeg, uklad, zasieg)
-            Case Else : Return New ZapisGeoTiff(sciezka, szerokosc, wysokosc, False, jakoscJpeg, uklad, zasieg, kanaly)
+            Case FormatArkusza.GeoTiffJpeg : Return New ZapisGeoTiff(sciezka, szerokosc, wysokosc, True, jakoscJpeg, uklad, zasieg, 3, piramidy)
+            Case Else : Return New ZapisGeoTiff(sciezka, szerokosc, wysokosc, False, jakoscJpeg, uklad, zasieg, kanaly, piramidy)
         End Select
     End Function
 
@@ -122,21 +126,27 @@ Public Class ZapisPng
     Public Sub New(sciezka As String, szerokosc As Integer, wysokosc As Integer, Optional kanaly As Integer = 3)
         MyBase.New(szerokosc, wysokosc, kanaly)
         _plik = New FileStream(sciezka, FileMode.Create, FileAccess.Write, FileShare.None, 1 << 16)
-        _plik.Write(New Byte() {137, 80, 78, 71, 13, 10, 26, 10}, 0, 8)
-        Dim ihdr(12) As Byte
-        ZapiszBE(ihdr, 0, CUInt(szerokosc))
-        ZapiszBE(ihdr, 4, CUInt(wysokosc))
-        ihdr(8) = 8   'głębia bitowa
-        ihdr(9) = CByte(If(kanaly = 4, 6, 2))   'RGBA albo RGB
-        ihdr(10) = 0 : ihdr(11) = 0 : ihdr(12) = 0
-        ZapiszFragment(_plik, "IHDR", ihdr, ihdr.Length)
+        Try
+            _plik.Write(New Byte() {137, 80, 78, 71, 13, 10, 26, 10}, 0, 8)
+            Dim ihdr(12) As Byte
+            ZapiszBE(ihdr, 0, CUInt(szerokosc))
+            ZapiszBE(ihdr, 4, CUInt(wysokosc))
+            ihdr(8) = 8   'głębia bitowa
+            ihdr(9) = CByte(If(kanaly = 4, 6, 2))   'RGBA albo RGB
+            ihdr(10) = 0 : ihdr(11) = 0 : ihdr(12) = 0
+            ZapiszFragment(_plik, "IHDR", ihdr, ihdr.Length)
 
-        _idat = New StrumienFragmentow(_plik, "IDAT")
-        'nagłówek zlib (deflate, okno 32 kB)
-        _idat.Write(New Byte() {&H78, &H9C}, 0, 2)
-        _deflate = New DeflateStream(_idat, CompressionLevel.Optimal, True)
-        _poprzedni = New Byte(szerokosc * kanaly - 1) {}
-        _wiersz = New Byte(szerokosc * kanaly) {}
+            _idat = New StrumienFragmentow(_plik, "IDAT")
+            'nagłówek zlib (deflate, okno 32 kB)
+            _idat.Write(New Byte() {&H78, &H9C}, 0, 2)
+            _deflate = New DeflateStream(_idat, CompressionLevel.Optimal, True)
+            _poprzedni = New Byte(szerokosc * kanaly - 1) {}
+            _wiersz = New Byte(szerokosc * kanaly) {}
+        Catch
+            _deflate?.Dispose()
+            _plik?.Dispose()
+            Throw
+        End Try
     End Sub
 
     Protected Overrides Sub ZapiszWierszeWewn(rgb() As Byte, liczbaWierszy As Integer)
@@ -170,6 +180,7 @@ Public Class ZapisPng
     End Sub
 
     Public Overrides Sub Zakoncz()
+        If _zakonczony Then Return
         If Zapisane <> Wysokosc Then Throw New InvalidOperationException("Nie zapisano wszystkich wierszy obrazu")
         _deflate.Dispose()
         Dim adler(3) As Byte
@@ -323,6 +334,7 @@ Public Class ZapisJpeg
 
     Private ReadOnly _plik As FileStream
     Private ReadOnly _jpeg As jpeg_compress_struct
+    Private ReadOnly _wierszBufor(0)() As Byte
     Private _zakonczony As Boolean
 
     Public Sub New(sciezka As String, szerokosc As Integer, wysokosc As Integer, jakosc As Integer)
@@ -331,25 +343,30 @@ Public Class ZapisJpeg
             Throw New ArgumentException("Format JPEG pozwala na obraz o boku najwyżej 65500 pikseli - wybierz GeoTIFF lub PNG")
         End If
         _plik = New FileStream(sciezka, FileMode.Create, FileAccess.Write, FileShare.None, 1 << 16)
-        _jpeg = New jpeg_compress_struct(New jpeg_error_mgr()) With {
-            .Image_width = szerokosc, .Image_height = wysokosc, .Input_components = 3, .In_color_space = J_COLOR_SPACE.JCS_RGB}
-        _jpeg.jpeg_set_defaults()
-        _jpeg.jpeg_set_quality(Math.Max(1, Math.Min(100, jakosc)), True)
-        _jpeg.jpeg_stdio_dest(_plik)
-        _jpeg.jpeg_start_compress(True)
+        Try
+            _jpeg = New jpeg_compress_struct(New jpeg_error_mgr()) With {
+                .Image_width = szerokosc, .Image_height = wysokosc, .Input_components = 3, .In_color_space = J_COLOR_SPACE.JCS_RGB}
+            _jpeg.jpeg_set_defaults()
+            _jpeg.jpeg_set_quality(Math.Max(1, Math.Min(100, jakosc)), True)
+            _jpeg.jpeg_stdio_dest(_plik)
+            _jpeg.jpeg_start_compress(True)
+            _wierszBufor(0) = New Byte(szerokosc * 3 - 1) {}
+        Catch
+            _plik?.Dispose()
+            Throw
+        End Try
     End Sub
 
     Protected Overrides Sub ZapiszWierszeWewn(rgb() As Byte, liczbaWierszy As Integer)
         Dim dl As Integer = Szerokosc * 3
-        Dim wiersz(0)() As Byte
-        wiersz(0) = New Byte(dl - 1) {}
         For w = 0 To liczbaWierszy - 1
-            Buffer.BlockCopy(rgb, w * dl, wiersz(0), 0, dl)
-            _jpeg.jpeg_write_scanlines(wiersz, 1)
+            Buffer.BlockCopy(rgb, w * dl, _wierszBufor(0), 0, dl)
+            _jpeg.jpeg_write_scanlines(_wierszBufor, 1)
         Next
     End Sub
 
     Public Overrides Sub Zakoncz()
+        If _zakonczony Then Return
         If Zapisane <> Wysokosc Then Throw New InvalidOperationException("Nie zapisano wszystkich wierszy obrazu")
         _jpeg.jpeg_finish_compress()
         _plik.Flush()
@@ -357,25 +374,33 @@ Public Class ZapisJpeg
     End Sub
 
     Public Overrides Sub Dispose()
-        If Not _zakonczony Then
+        If Not _zakonczony AndAlso _jpeg IsNot Nothing Then
             Try
                 _jpeg.jpeg_abort_compress()
             Catch
             End Try
         End If
-        _plik.Dispose()
+        _plik?.Dispose()
     End Sub
 
 End Class
 
 ''' <summary>
-''' Zapis GeoTIFF (biblioteka LibTiff.NET): obraz z georeferencją zapisaną w samym pliku - układ współrzędnych
-''' (kod EPSG), położenie i rozmiar piksela. Dla obrazów powyżej 4 GB - format BigTIFF.
+''' Strumieniowy zapis kafelkowanego GeoTIFF (256x256) z georeferencją w pliku, automatycznym BigTIFF
+''' i wewnętrznymi piramidami (łańcuch IFD REDUCEDIMAGE).
+''' Poziomy piramidy powstają w trakcie zapisu z nieskompresowanych wierszy (każdy poziom z poprzedniego, średnia 2x2)
+''' i czekają w tymczasowych plikach TIFF z bezstratną kompresją Deflate; Zakoncz dopisuje je do pliku głównego.
+''' Dlaczego tak: pierwsza wersja po zapisie czytała z pliku poprzedni poziom, więc przy kompresji JPEG każdy poziom
+''' powstawał z już skompresowanego obrazu (strata jakości rosła z poziomem), a cały drugi przebieg szedł
+''' bez postępu i bez możliwości przerwania.
 ''' </summary>
 Public Class ZapisGeoTiff
     Inherits ZapisRastra
 
-    'znaczniki GeoTIFF
+    Private Const ROZMIAR_KAFLA As Integer = 256
+    Private Const PROG_BIGTIFF As Long = 3900000000L
+
+    ' Znaczniki GeoTIFF
     Private Const TagModelPixelScale As Integer = 33550
     Private Const TagModelTiepoint As Integer = 33922
     Private Const TagGeoKeyDirectory As Integer = 34735
@@ -386,64 +411,150 @@ Public Class ZapisGeoTiff
     Private Shared _rozszerzenieZarejestrowane As Boolean
     Private Shared _poprzednieRozszerzenie As Tiff.TiffExtendProc
 
-    Private ReadOnly _tiff As Tiff
-    Private ReadOnly _wiersz() As Byte
+    Private ReadOnly _sciezka As String
+    Private ReadOnly _kompresjaJpeg As Boolean
+    Private ReadOnly _jakosc As Integer
+    Private ReadOnly _czyBigTiff As Boolean
+
+    Private ReadOnly _pasBufor As Byte()
+    Private ReadOnly _kafelBufor As Byte()
+    Private _wierszyWPasie As Integer
+    Private _tiff As Tiff
     Private _zakonczony As Boolean
+    Private ReadOnly _poziomy As New List(Of PoziomPiramidy)
+
+    ''' <summary>Postęp dopisywania piramid w Zakoncz, w procentach (0-100).</summary>
+    Public Property PostepPiramid As Action(Of Integer)
+    ''' <summary>Przerwanie dopisywania piramid w Zakoncz.</summary>
+    Public Property Przerwanie As CancellationToken
+
+    ''' <summary>Czy plik dostanie piramidy (wybrane i obraz większy niż jeden kafel).</summary>
+    Public ReadOnly Property MaPiramidy As Boolean
+        Get
+            Return _poziomy.Count > 0
+        End Get
+    End Property
+
+    ''' <summary>Jeden poziom piramidy: zbiera wiersze poprzedniego poziomu parami i zapisuje kafle do pliku tymczasowego.</summary>
+    Private NotInheritable Class PoziomPiramidy
+        Public SrcW As Integer
+        Public SrcH As Integer
+        Public W As Integer
+        Public H As Integer
+        Public Sciezka As String
+        Public Tif As Tiff
+        Public Pas As Byte()
+        Public WierszyWPasie As Integer
+        Public Zapisane As Integer
+        Public Odebrane As Integer
+        Public Oczekujacy As Byte()
+        Public MaOczekujacy As Boolean
+        Public Wiersz As Byte()
+    End Class
 
     Public Sub New(sciezka As String, szerokosc As Integer, wysokosc As Integer, kompresjaJpeg As Boolean, jakosc As Integer,
-                   uklad As UkladWspolrzednych, zasieg As Zasieg, Optional kanaly As Integer = 3)
+                   uklad As UkladWspolrzednych, zasieg As Zasieg, Optional kanaly As Integer = 3, Optional piramidy As Boolean = True)
         MyBase.New(szerokosc, wysokosc, If(kompresjaJpeg, 3, kanaly))
+        If String.IsNullOrWhiteSpace(sciezka) Then Throw New ArgumentException("Pusta ścieżka pliku.", NameOf(sciezka))
+        If kompresjaJpeg AndAlso Me.Kanaly <> 3 Then
+            Throw New ArgumentException("Kompresja JPEG wymaga 3 kanałów (RGB).", NameOf(kompresjaJpeg))
+        End If
+
         ZarejestrujZnaczniki()
 
-        'BigTIFF, gdy nieskompresowany obraz przekracza ok. 4 GB
-        Dim duzy As Boolean = CLng(szerokosc) * wysokosc * Kanaly > 3900000000L
-        _tiff = Tiff.Open(sciezka, If(duzy, "w8", "w"))
-        If _tiff Is Nothing Then Throw New IOException("Nie można utworzyć pliku " & sciezka)
+        _sciezka = sciezka
+        _kompresjaJpeg = kompresjaJpeg
+        _jakosc = Math.Clamp(jakosc, 10, 100)
 
-        _tiff.SetField(TiffTag.IMAGEWIDTH, szerokosc)
-        _tiff.SetField(TiffTag.IMAGELENGTH, wysokosc)
-        _tiff.SetField(TiffTag.BITSPERSAMPLE, 8)
-        _tiff.SetField(TiffTag.SAMPLESPERPIXEL, Kanaly)
-        If Kanaly = 4 Then
-            'czwarty kanał - przezroczystość (alfa niezależna od kolorów)
-            _tiff.SetField(TiffTag.EXTRASAMPLES, 1, New Short() {CShort(ExtraSample.UNASSALPHA)})
-        End If
-        _tiff.SetField(TiffTag.PLANARCONFIG, PlanarConfig.CONTIG)
-        _tiff.SetField(TiffTag.ORIENTATION, BitMiracle.LibTiff.Classic.Orientation.TOPLEFT)
-        _tiff.SetField(TiffTag.ROWSPERSTRIP, 16)
-        _tiff.SetField(TiffTag.SOFTWARE, "MapoTero")
-        If kompresjaJpeg Then
-            _tiff.SetField(TiffTag.COMPRESSION, Compression.JPEG)
-            _tiff.SetField(TiffTag.PHOTOMETRIC, Photometric.YCBCR)
-            _tiff.SetField(TiffTag.JPEGQUALITY, Math.Max(1, Math.Min(100, jakosc)))
-            _tiff.SetField(TiffTag.JPEGCOLORMODE, JpegColorMode.RGB)
-        Else
-            _tiff.SetField(TiffTag.COMPRESSION, Compression.ADOBE_DEFLATE)
-            _tiff.SetField(TiffTag.PREDICTOR, Predictor.HORIZONTAL)
-            _tiff.SetField(TiffTag.PHOTOMETRIC, Photometric.RGB)
-        End If
+        ' Decyzja BigTIFF z uwzględnieniem narzutu piramidy (ok. 1,35x względem bazy)
+        Dim rozmiarBazowy As Long = CLng(szerokosc) * CLng(wysokosc) * CLng(Me.Kanaly)
+        Dim rozmiarSzacowany As Long = If(piramidy, (rozmiarBazowy * 135L) \ 100L, rozmiarBazowy)
+        _czyBigTiff = (rozmiarSzacowany > PROG_BIGTIFF)
 
-        'georeferencja: rozmiar piksela, punkt dowiązania (lewy górny narożnik obrazu), układ współrzędnych
-        Dim pikselY As Double = zasieg.Szerokosc / szerokosc
-        Dim pikselX As Double = zasieg.Wysokosc / wysokosc
-        _tiff.SetField(CType(TagModelPixelScale, TiffTag), 3, New Double() {pikselY, pikselX, 0})
-        _tiff.SetField(CType(TagModelTiepoint, TiffTag), 6, New Double() {0, 0, 0, zasieg.YLewy, zasieg.XGora, 0})
-        Dim klucze() As Short
-        If uklad.Geograficzny Then
-            klucze = {1, 1, 0, 3,
-                      1024, 0, 1, 2,              'GTModelTypeGeoKey = geograficzny
-                      1025, 0, 1, 1,              'GTRasterTypeGeoKey = PixelIsArea
-                      2048, 0, 1, JakoShort(uklad.Epsg)}  'GeographicTypeGeoKey
-        Else
-            klucze = {1, 1, 0, 3,
-                      1024, 0, 1, 1,              'GTModelTypeGeoKey = odwzorowanie
-                      1025, 0, 1, 1,              'GTRasterTypeGeoKey = PixelIsArea
-                      3072, 0, 1, JakoShort(uklad.Epsg)}  'ProjectedCSTypeGeoKey
-        End If
-        _tiff.SetField(CType(TagGeoKeyDirectory, TiffTag), klucze.Length, klucze)
+        _pasBufor = New Byte(szerokosc * ROZMIAR_KAFLA * Me.Kanaly - 1) {}
+        _kafelBufor = New Byte(ROZMIAR_KAFLA * ROZMIAR_KAFLA * Me.Kanaly - 1) {}
 
-        _wiersz = New Byte(szerokosc * Kanaly - 1) {}
+        Try
+            _tiff = Tiff.Open(_sciezka, If(_czyBigTiff, "w8", "w"))
+            If _tiff Is Nothing Then Throw New IOException("Nie można utworzyć pliku " & _sciezka)
+            KonfigurujKatalog(_tiff, szerokosc, wysokosc, Me.Kanaly, kompresjaJpeg, _jakosc, czyPiramida:=False)
+            ZapiszTagiGeoTiff(_tiff, szerokosc, wysokosc, uklad, zasieg)
+
+            If piramidy Then
+                Dim w = szerokosc, h = wysokosc, n = 1
+                While Math.Max(w, h) > ROZMIAR_KAFLA
+                    Dim p As New PoziomPiramidy With {
+                        .SrcW = w, .SrcH = h, .W = Math.Max(1, (w + 1) \ 2), .H = Math.Max(1, (h + 1) \ 2),
+                        .Sciezka = _sciezka & ".p" & n & ".tmp"}
+                    p.Pas = New Byte(p.W * ROZMIAR_KAFLA * Me.Kanaly - 1) {}
+                    p.Oczekujacy = New Byte(w * Me.Kanaly - 1) {}
+                    p.Wiersz = New Byte(p.W * Me.Kanaly - 1) {}
+                    _poziomy.Add(p)
+                    p.Tif = Tiff.Open(p.Sciezka, If(_czyBigTiff, "w8", "w"))
+                    If p.Tif Is Nothing Then Throw New IOException("Nie można utworzyć pliku tymczasowego " & p.Sciezka)
+                    KonfigurujKatalog(p.Tif, p.W, p.H, Me.Kanaly, kompresjaJpeg:=False, jakosc:=_jakosc, czyPiramida:=False)
+                    w = p.W : h = p.H : n += 1
+                End While
+            End If
+        Catch
+            Dispose()
+            Throw
+        End Try
     End Sub
+
+    Private Shared Sub KonfigurujKatalog(tif As Tiff, szer As Integer, wys As Integer, kanaly As Integer,
+                                         kompresjaJpeg As Boolean, jakosc As Integer, czyPiramida As Boolean)
+        If czyPiramida Then
+            tif.SetField(TiffTag.SUBFILETYPE, FileType.REDUCEDIMAGE)
+        End If
+        tif.SetField(TiffTag.IMAGEWIDTH, szer)
+        tif.SetField(TiffTag.IMAGELENGTH, wys)
+        tif.SetField(TiffTag.BITSPERSAMPLE, 8)
+        tif.SetField(TiffTag.SAMPLESPERPIXEL, kanaly)
+        tif.SetField(TiffTag.PLANARCONFIG, PlanarConfig.CONTIG)
+        tif.SetField(TiffTag.ORIENTATION, BitMiracle.LibTiff.Classic.Orientation.TOPLEFT)
+        tif.SetField(TiffTag.TILEWIDTH, ROZMIAR_KAFLA)
+        tif.SetField(TiffTag.TILELENGTH, ROZMIAR_KAFLA)
+        tif.SetField(TiffTag.SOFTWARE, "MapoTero")
+
+        If kompresjaJpeg Then
+            tif.SetField(TiffTag.COMPRESSION, Compression.JPEG)
+            tif.SetField(TiffTag.PHOTOMETRIC, Photometric.YCBCR)
+            tif.SetField(TiffTag.JPEGQUALITY, jakosc)
+            tif.SetField(TiffTag.JPEGCOLORMODE, JpegColorMode.RGB)
+        Else
+            tif.SetField(TiffTag.COMPRESSION, Compression.ADOBE_DEFLATE)
+            tif.SetField(TiffTag.PREDICTOR, Predictor.HORIZONTAL)
+            tif.SetField(TiffTag.PHOTOMETRIC, Photometric.RGB)
+            If kanaly = 4 Then
+                tif.SetField(TiffTag.EXTRASAMPLES, 1, New Short() {CShort(ExtraSample.UNASSALPHA)})
+            End If
+        End If
+    End Sub
+
+    Private Shared Sub ZapiszTagiGeoTiff(tif As Tiff, szer As Integer, wys As Integer, uklad As UkladWspolrzednych, zasieg As Zasieg)
+        ' Georeferencja zapisywana wyłącznie w katalogu IFD 0
+        Dim pikselY As Double = zasieg.Szerokosc / szer
+        Dim pikselX As Double = zasieg.Wysokosc / wys
+        tif.SetField(CType(TagModelPixelScale, TiffTag), 3, New Double() {pikselY, pikselX, 0.0})
+        tif.SetField(CType(TagModelTiepoint, TiffTag), 6, New Double() {0.0, 0.0, 0.0, zasieg.YLewy, zasieg.XGora, 0.0})
+        Dim klucze() As Short = PobierzKluczeGeo(uklad)
+        tif.SetField(CType(TagGeoKeyDirectory, TiffTag), klucze.Length, klucze)
+    End Sub
+
+    Private Shared Function PobierzKluczeGeo(uklad As UkladWspolrzednych) As Short()
+        If uklad.Geograficzny Then
+            Return {1, 1, 0, 3,
+                    1024, 0, 1, 2,                      'GTModelTypeGeoKey = geograficzny
+                    1025, 0, 1, 1,                      'GTRasterTypeGeoKey = PixelIsArea
+                    2048, 0, 1, JakoShort(uklad.Epsg)}  'GeographicTypeGeoKey
+        Else
+            Return {1, 1, 0, 3,
+                    1024, 0, 1, 1,                      'GTModelTypeGeoKey = odwzorowanie
+                    1025, 0, 1, 1,                      'GTRasterTypeGeoKey = PixelIsArea
+                    3072, 0, 1, JakoShort(uklad.Epsg)}  'ProjectedCSTypeGeoKey
+        End If
+    End Function
 
     Private Shared Function JakoShort(kod As Integer) As Short
         Dim u As Integer = kod And &HFFFF
@@ -471,34 +582,239 @@ Public Class ZapisGeoTiff
     End Sub
 
     Protected Overrides Sub ZapiszWierszeWewn(rgb() As Byte, liczbaWierszy As Integer)
-        Dim dl As Integer = Szerokosc * Kanaly
+        Dim bajtowWWierszu = Szerokosc * Kanaly
         For w = 0 To liczbaWierszy - 1
-            Buffer.BlockCopy(rgb, w * dl, _wiersz, 0, dl)
-            If Not _tiff.WriteScanline(_wiersz, Zapisane + w) Then Throw New IOException("Błąd zapisu pliku TIFF")
+            Buffer.BlockCopy(rgb, w * bajtowWWierszu, _pasBufor, _wierszyWPasie * bajtowWWierszu, bajtowWWierszu)
+            _wierszyWPasie += 1
+
+            If _wierszyWPasie = ROZMIAR_KAFLA OrElse (Zapisane + w + 1) = Wysokosc Then
+                Dim yPoczatekPasa = (Zapisane + w + 1) - _wierszyWPasie
+                ZapiszPasJakoKafle(_tiff, _pasBufor, Szerokosc, yPoczatekPasa, _wierszyWPasie, Kanaly, _kafelBufor)
+                _wierszyWPasie = 0
+            End If
+
+            If _poziomy.Count > 0 Then PrzekazWiersz(0, rgb, w * bajtowWWierszu)
+        Next
+    End Sub
+
+    ''' <summary>
+    ''' Przekazuje wiersz do poziomu piramidy. Co drugi wiersz (i ostatni nieparzysty) daje wiersz poziomu,
+    ''' który trafia do pasa kafli poziomu i dalej do następnego poziomu.
+    ''' </summary>
+    Private Sub PrzekazWiersz(i As Integer, zrodlo As Byte(), przesuniecie As Integer)
+        Dim p = _poziomy(i)
+        p.Odebrane += 1
+        If Not p.MaOczekujacy Then
+            Buffer.BlockCopy(zrodlo, przesuniecie, p.Oczekujacy, 0, p.SrcW * Kanaly)
+            p.MaOczekujacy = True
+            If p.Odebrane < p.SrcH Then Return
+            Pomniejsz(p, p.Oczekujacy, 0, Nothing, 0)
+        Else
+            Pomniejsz(p, p.Oczekujacy, 0, zrodlo, przesuniecie)
+        End If
+        p.MaOczekujacy = False
+
+        Dim bajtyWiersza = p.W * Kanaly
+        Buffer.BlockCopy(p.Wiersz, 0, p.Pas, p.WierszyWPasie * bajtyWiersza, bajtyWiersza)
+        p.WierszyWPasie += 1
+        p.Zapisane += 1
+        If p.WierszyWPasie = ROZMIAR_KAFLA OrElse p.Zapisane = p.H Then
+            ZapiszPasJakoKafle(p.Tif, p.Pas, p.W, p.Zapisane - p.WierszyWPasie, p.WierszyWPasie, Kanaly, _kafelBufor)
+            p.WierszyWPasie = 0
+        End If
+        If i + 1 < _poziomy.Count Then PrzekazWiersz(i + 1, p.Wiersz, 0)
+    End Sub
+
+    ''' <summary>
+    ''' Średnia 2x2 dwóch wierszy (drugi może nie istnieć) do p.Wiersz. Przy kanale alfa kolor jest ważony
+    ''' przezroczystością, żeby przezroczyste piksele nie przyciemniały krawędzi.
+    ''' </summary>
+    Private Sub Pomniejsz(p As PoziomPiramidy, wierszA As Byte(), offA As Integer, wierszB As Byte(), offB As Integer)
+        Dim k = Kanaly
+        For dx = 0 To p.W - 1
+            Dim x0 = dx * 2
+            Dim ileX = If(x0 + 1 < p.SrcW, 1, 0)
+            Dim r As Integer = 0, g As Integer = 0, b As Integer = 0, sumaA As Integer = 0, n As Integer = 0
+            For wiersz = 0 To 1
+                Dim buf = If(wiersz = 0, wierszA, wierszB)
+                If buf Is Nothing Then Continue For
+                Dim off0 = If(wiersz = 0, offA, offB) + x0 * k
+                For ox = 0 To ileX
+                    Dim o = off0 + ox * k
+                    If k = 3 Then
+                        r += buf(o) : g += buf(o + 1) : b += buf(o + 2)
+                    Else
+                        Dim a = CInt(buf(o + 3))
+                        r += buf(o) * a : g += buf(o + 1) * a : b += buf(o + 2) * a
+                        sumaA += a
+                    End If
+                    n += 1
+                Next
+            Next
+            Dim d = dx * k
+            If k = 3 Then
+                Dim pol = n \ 2
+                p.Wiersz(d) = CByte((r + pol) \ n)
+                p.Wiersz(d + 1) = CByte((g + pol) \ n)
+                p.Wiersz(d + 2) = CByte((b + pol) \ n)
+            ElseIf sumaA > 0 Then
+                Dim polA = sumaA \ 2
+                p.Wiersz(d) = CByte((r + polA) \ sumaA)
+                p.Wiersz(d + 1) = CByte((g + polA) \ sumaA)
+                p.Wiersz(d + 2) = CByte((b + polA) \ sumaA)
+                p.Wiersz(d + 3) = CByte((sumaA + n \ 2) \ n)
+            Else
+                p.Wiersz(d) = 0 : p.Wiersz(d + 1) = 0 : p.Wiersz(d + 2) = 0 : p.Wiersz(d + 3) = 0
+            End If
+        Next
+    End Sub
+
+    ''' <summary>Dzieli pas wierszy na kafle 256x256; brzegi niepełnych kafli powiela (bez ciemnych obwódek).</summary>
+    Private Shared Sub ZapiszPasJakoKafle(tif As Tiff, pas As Byte(), szerokosc As Integer, yPoczatekPasa As Integer,
+                                          wysokoscPasa As Integer, kanaly As Integer, kafel As Byte())
+        Dim wierszPasaBajty = szerokosc * kanaly
+        Dim wierszKaflaBajty = ROZMIAR_KAFLA * kanaly
+        Dim liczbaKafliX = (szerokosc + ROZMIAR_KAFLA - 1) \ ROZMIAR_KAFLA
+
+        For tx = 0 To liczbaKafliX - 1
+            Dim xStart = tx * ROZMIAR_KAFLA
+            Dim waznaSzer = Math.Min(ROZMIAR_KAFLA, szerokosc - xStart)
+            Dim wazneBajty = waznaSzer * kanaly
+
+            For ly = 0 To wysokoscPasa - 1
+                Dim dstOff = ly * wierszKaflaBajty
+                Buffer.BlockCopy(pas, (ly * wierszPasaBajty) + (xStart * kanaly), kafel, dstOff, wazneBajty)
+                If waznaSzer < ROZMIAR_KAFLA Then
+                    Dim ostPikselOff = dstOff + ((waznaSzer - 1) * kanaly)
+                    For lx = waznaSzer To ROZMIAR_KAFLA - 1
+                        Buffer.BlockCopy(kafel, ostPikselOff, kafel, dstOff + (lx * kanaly), kanaly)
+                    Next
+                End If
+            Next
+
+            If wysokoscPasa < ROZMIAR_KAFLA Then
+                Dim ostWierszOff = (wysokoscPasa - 1) * wierszKaflaBajty
+                For ly = wysokoscPasa To ROZMIAR_KAFLA - 1
+                    Buffer.BlockCopy(kafel, ostWierszOff, kafel, ly * wierszKaflaBajty, wierszKaflaBajty)
+                Next
+            End If
+
+            If tif.WriteTile(kafel, 0, xStart, yPoczatekPasa, 0, 0) < 0 Then
+                Throw New IOException($"Błąd zapisu kafelka ({tx}, {yPoczatekPasa \ ROZMIAR_KAFLA}).")
+            End If
         Next
     End Sub
 
     Public Overrides Sub Zakoncz()
-        If Zapisane <> Wysokosc Then Throw New InvalidOperationException("Nie zapisano wszystkich wierszy obrazu")
-        _tiff.FlushData()
-        _tiff.Close()
+        If _zakonczony Then Return
+        If Zapisane <> Wysokosc Then Throw New InvalidOperationException($"Nie zapisano wszystkich wierszy obrazu ({Zapisane}/{Wysokosc}).")
         _zakonczony = True
+
+        If Not _tiff.WriteDirectory() Then Throw New IOException("Błąd zapisu katalogu głównego GeoTIFF.")
+        _tiff.Close()
+        _tiff.Dispose()
+        _tiff = Nothing
+        If _poziomy.Count = 0 Then Return
+
+        For Each p In _poziomy
+            p.Tif.Close()
+            p.Tif.Dispose()
+            p.Tif = Nothing
+        Next
+        Try
+            DopiszPiramidy()
+        Finally
+            UsunPlikiPoziomow()
+        End Try
+    End Sub
+
+    ''' <summary>Dopisuje poziomy z plików tymczasowych jako kolejne katalogi IFD (kompresja jak w obrazie głównym).</summary>
+    Private Sub DopiszPiramidy()
+        Dim wszystkie As Long = 0
+        For Each p In _poziomy
+            wszystkie += CLng((p.W + ROZMIAR_KAFLA - 1) \ ROZMIAR_KAFLA) * ((p.H + ROZMIAR_KAFLA - 1) \ ROZMIAR_KAFLA)
+        Next
+        Dim zrobione As Long = 0
+        Dim ostatniProcent = -1
+
+        Dim rawBufor As Byte() = Array.Empty(Of Byte)()
+        Using fs As New FileStream(_sciezka, FileMode.Open, FileAccess.ReadWrite, FileShare.None, 65536)
+            Using writer As Tiff = Tiff.ClientOpen("GeoTiff", "a", fs, New TiffStream())
+                If writer Is Nothing Then Throw New IOException("Nie udało się otworzyć pliku GeoTIFF do dopisania piramid.")
+                For Each p In _poziomy
+                    Using reader As Tiff = Tiff.Open(p.Sciezka, "r")
+                        If reader Is Nothing Then Throw New IOException("Nie udało się odczytać pliku tymczasowego " & p.Sciezka)
+                        KonfigurujKatalog(writer, p.W, p.H, Kanaly, _kompresjaJpeg, _jakosc, czyPiramida:=True)
+                        For y = 0 To p.H - 1 Step ROZMIAR_KAFLA
+                            For x = 0 To p.W - 1 Step ROZMIAR_KAFLA
+                                Przerwanie.ThrowIfCancellationRequested()
+                                Dim skopiowanoSurowo As Boolean = False
+                                If Not _kompresjaJpeg Then
+                                    Dim srcTile As Integer = reader.ComputeTile(x, y, 0, 0)
+                                    Dim surowyRozmiarLong As Long = reader.RawTileSize(srcTile)
+                                    If surowyRozmiarLong > 0 AndAlso surowyRozmiarLong <= Integer.MaxValue Then
+                                        Dim surowyRozmiar As Integer = CInt(surowyRozmiarLong)
+                                        If surowyRozmiar > rawBufor.Length Then ReDim rawBufor(surowyRozmiar - 1)
+                                        Dim odczytano As Integer = reader.ReadRawTile(srcTile, rawBufor, 0, surowyRozmiar)
+                                        If odczytano = surowyRozmiar AndAlso writer.WriteRawTile(writer.ComputeTile(x, y, 0, 0), rawBufor, 0, odczytano) >= 0 Then
+                                            skopiowanoSurowo = True
+                                        End If
+                                    End If
+                                End If
+                                If Not skopiowanoSurowo Then
+                                    If reader.ReadTile(_kafelBufor, 0, x, y, 0, 0) < 0 Then
+                                        Throw New IOException($"Błąd odczytu kafelka piramidy ({x}, {y}).")
+                                    End If
+                                    If writer.WriteTile(_kafelBufor, 0, x, y, 0, 0) < 0 Then
+                                        Throw New IOException($"Błąd zapisu kafelka piramidy ({x}, {y}).")
+                                    End If
+                                End If
+                                zrobione += 1
+                                Dim procent = CInt(zrobione * 100 \ wszystkie)
+                                If procent <> ostatniProcent Then
+                                    ostatniProcent = procent
+                                    PostepPiramid?.Invoke(procent)
+                                End If
+                            Next
+                        Next
+                        If Not writer.WriteDirectory() Then Throw New IOException("Błąd zapisu katalogu piramidy GeoTIFF.")
+                    End Using
+                Next
+            End Using
+        End Using
+    End Sub
+
+    Private Sub UsunPlikiPoziomow()
+        For Each p In _poziomy
+            Try
+                If File.Exists(p.Sciezka) Then File.Delete(p.Sciezka)
+            Catch ex As Exception When TypeOf ex Is IOException OrElse TypeOf ex Is UnauthorizedAccessException
+                'plik tymczasowy zostaje, gdy inny program go trzyma - zapis mapy się nie przerywa
+            End Try
+        Next
     End Sub
 
     Public Overrides Sub Dispose()
-        'po Zakoncz() plik jest już zamknięty (Close zwalnia zasoby)
-        If Not _zakonczony Then
-            _zakonczony = True
-            Try
-                _tiff?.Close()
-            Catch
-            Finally
-                Try
-                    _tiff?.Dispose()
-                Catch
-                End Try
-            End Try
-        End If
+        _zakonczony = True
+        ZamknijCicho(_tiff)
+        _tiff = Nothing
+        For Each p In _poziomy
+            ZamknijCicho(p.Tif)
+            p.Tif = Nothing
+        Next
+        UsunPlikiPoziomow()
+    End Sub
+
+    Private Shared Sub ZamknijCicho(tif As Tiff)
+        If tif Is Nothing Then Return
+        Try
+            tif.Close()
+        Catch
+        End Try
+        Try
+            tif.Dispose()
+        Catch
+        End Try
     End Sub
 
 End Class

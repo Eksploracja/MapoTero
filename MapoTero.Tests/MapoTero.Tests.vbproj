@@ -11,6 +11,14 @@
     <OptionInfer>On</OptionInfer>
   </PropertyGroup>
 
+  <!-- Samo "dotnet test" (także w GitHub Actions) pomija testy łączące się z serwerami map (Kategoria=Siec)
+       i ciężkie testy na żądanie (Kategoria=Ciezkie): awaria Geoportalu nie może blokować kompilacji ani wydania.
+       Filtr podany w wierszu poleceń (opcja filter, np. "Kategoria=Siec") zastępuje ten domyślny;
+       wszystkie testy naraz: filtr "Kategoria!=Brak". -->
+  <PropertyGroup Condition="'$(VSTestTestCaseFilter)' == ''">
+    <VSTestTestCaseFilter>Kategoria!=Siec&amp;Kategoria!=Ciezkie</VSTestTestCaseFilter>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
     <PackageReference Include="xunit" Version="2.9.2" />
@@ -19,6 +27,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\MapoTero.Core\MapoTero.Core.vbproj" />
+    <ProjectReference Include="..\MapoTero.Silnik\MapoTero.Silnik.vbproj" />
     <ProjectReference Include="..\MapoTero.App\MapoTero_v3.vbproj" />
   </ItemGroup>
 

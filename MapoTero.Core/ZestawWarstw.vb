@@ -37,6 +37,8 @@ Public Class WarstwaWybrana
     Public Property IgnorujSsl As Boolean
     ''' <summary>Tryb mieszania warstwy z warstwami leżącymi poniżej (domyślnie Zwykły).</summary>
     Public Property TrybMieszania As TrybMieszania = TrybMieszania.Zwykly
+    ''' <summary>Maksymalny bezpieczny bok segmentu w pikselach (0 - brak ograniczenia).</summary>
+    Public Property MaksRozmiarSegmentu As Integer = 0
 
     Public ReadOnly Property EfektywnyTyp As TypUslugiMapowej
         Get
@@ -60,7 +62,7 @@ Public Class WarstwaWybrana
         Return New WarstwaWybrana With {
             .Nazwa = Nazwa, .Zbior = Zbior, .Adres = Adres, .Krycie = Krycie,
             .ZalecanyPiksel = ZalecanyPiksel, .TypZrodla = TypZrodla, .Nakladka = Nakladka,
-            .IgnorujSsl = IgnorujSsl, .TrybMieszania = TrybMieszania}
+            .IgnorujSsl = IgnorujSsl, .TrybMieszania = TrybMieszania, .MaksRozmiarSegmentu = MaksRozmiarSegmentu}
     End Function
 
     ''' <summary>Ta sama warstwa tego samego serwera.</summary>
@@ -166,13 +168,6 @@ Public Class ZestawWarstw
         End Get
     End Property
 
-    ''' <summary>Czy któraś warstwa ma krycie mniejsze niż 100% lub nietypowy tryb mieszania (pobieranie wymaga wtedy nakładania warstw w programie).</summary>
-    Public ReadOnly Property CzesciowoPrzezroczysty As Boolean
-        Get
-            Return _warstwy.Any(Function(w) w.Krycie < PelneKrycie OrElse w.TrybMieszania <> TrybMieszania.Zwykly)
-        End Get
-    End Property
-
     Public Function Kopia() As ZestawWarstw
         Dim z As New ZestawWarstw()
         For Each w In _warstwy
@@ -184,6 +179,60 @@ Public Class ZestawWarstw
     Public Function Zawiera(adres As String, nazwa As String) As Boolean
         Return _warstwy.Any(Function(w) w.TaSama(adres, nazwa))
     End Function
+
+    Public Function TaSamaKompozycja(inny As ZestawWarstw) As Boolean
+        If inny Is Nothing OrElse Liczba <> inny.Liczba Then Return False
+        For i = 0 To Liczba - 1
+            If Not KluczWarstwy(Me(i)).Equals(KluczWarstwy(inny(i))) Then Return False
+        Next
+        Return True
+    End Function
+
+    Private Shared Function KluczWarstwy(w As WarstwaWybrana) As (String, String, String)
+        Return (w.Zbior, w.Adres, w.Nazwa)
+    End Function
+
+    ''' <summary>Zmiany wyglądu warstw współdzielonych przez stopnie skali, z zachowaniem ich domyślnego krycia.</summary>
+    Public NotInheritable Class ZmianyWygladu
+        Private ReadOnly _krycie As New Dictionary(Of (String, String, String), Integer)
+        Private ReadOnly _ostatniaBaza As New Dictionary(Of (String, String, String), Integer)
+        Private ReadOnly _tryby As New Dictionary(Of (String, String, String), TrybMieszania)
+
+        Public Sub Zapisz(przed As ZestawWarstw, po As ZestawWarstw)
+            For i = 0 To przed.Liczba - 1
+                Dim klucz = KluczWarstwy(przed(i))
+                If przed(i).Krycie <> po(i).Krycie Then
+                    Dim delta As Integer
+                    _krycie.TryGetValue(klucz, delta)
+                    Dim baza As Integer
+                    Dim nowyDelta As Integer
+                    If _ostatniaBaza.TryGetValue(klucz, baza) AndAlso przed(i).Krycie = Math.Clamp(baza + delta, 0, PelneKrycie) Then
+                        nowyDelta = po(i).Krycie - baza
+                    Else
+                        If przed(i).Krycie = PelneKrycie AndAlso po(i).Krycie < PelneKrycie AndAlso delta > 0 Then
+                            delta = 0
+                        ElseIf przed(i).Krycie = 0 AndAlso po(i).Krycie > 0 AndAlso delta < 0 Then
+                            delta = 0
+                        End If
+                        nowyDelta = delta + po(i).Krycie - przed(i).Krycie
+                    End If
+                    _krycie(klucz) = Math.Clamp(nowyDelta, -PelneKrycie, PelneKrycie)
+                End If
+                If przed(i).TrybMieszania <> po(i).TrybMieszania Then _tryby(klucz) = po(i).TrybMieszania
+            Next
+        End Sub
+
+        Public Sub Zastosuj(zestaw As ZestawWarstw)
+            For Each w In zestaw.Warstwy
+                Dim klucz = KluczWarstwy(w)
+                Dim delta As Integer
+                Dim tryb As TrybMieszania
+                _ostatniaBaza(klucz) = w.Krycie
+                If _krycie.TryGetValue(klucz, delta) Then w.Krycie = Math.Clamp(w.Krycie + delta, 0, PelneKrycie)
+                If _tryby.TryGetValue(klucz, tryb) Then w.TrybMieszania = tryb
+            Next
+        End Sub
+    End Class
 
     Public Function Dodaj(nazwa As String, Optional krycie As Integer = PelneKrycie, Optional adres As String = "",
                           Optional zbior As String = "", Optional zalecanyPiksel As Double = 0,
@@ -269,6 +318,16 @@ Public Class ZestawWarstw
     ''' <summary>Warstwa o największym zalecanym rozmiarze piksela (Nothing - brak zalecanych rozmiarów).</summary>
     Public Function NajmniejDokladnaWarstwa() As WarstwaWybrana
         Return _warstwy.Where(Function(w) w.ZalecanyPiksel > 0).OrderByDescending(Function(w) w.ZalecanyPiksel).FirstOrDefault()
+    End Function
+
+    ''' <summary>
+    ''' Wyznacza bezpieczny maksymalny bok segmentu w pikselach dla aktywnego zestawu warstw.
+    ''' Obliczany jako Min() z limitów warstw (odrzucając limity &lt;= 0). Jeśli żadna warstwa nie ma limitu, zwraca domyślny bok.
+    ''' </summary>
+    Public Function BezpiecznyBokSegmentu(domyslnyBok As Integer) As Integer
+        Dim limity = _warstwy.Select(Function(w) w.MaksRozmiarSegmentu).Where(Function(lim) lim > 0).ToList()
+        If limity.Count = 0 Then Return domyslnyBok
+        Return Math.Min(domyslnyBok, limity.Min())
     End Function
 
     Public Sub UstawKrycie(indeks As Integer, krycie As Integer)
@@ -471,6 +530,12 @@ Public NotInheritable Class NakladanieWarstw
                         mr = If(br < 0.5, 2.0 * br * lr, 1.0 - 2.0 * (1.0 - br) * (1.0 - lr))
                         mg = If(bg < 0.5, 2.0 * bg * lg, 1.0 - 2.0 * (1.0 - bg) * (1.0 - lg))
                         mb = If(bb < 0.5, 2.0 * bb * lb, 1.0 - 2.0 * (1.0 - bb) * (1.0 - lb))
+                    Case TrybMieszania.RzezbaTerenu
+                        ' 7 Rzeźba terenu: Cb * (jasność cieniowania / jasność płaskiego terenu)
+                        Dim f = TrybMieszaniaRozszerzenia.WspolczynnikRzezby((lr + lg + lb) / 3.0)
+                        mr = Math.Min(1.0, br * f)
+                        mg = Math.Min(1.0, bg * f)
+                        mb = Math.Min(1.0, bb * f)
                     Case Else
                         mr = lr
                         mg = lg
@@ -478,9 +543,9 @@ Public NotInheritable Class NakladanieWarstw
                 End Select
 
                 Dim oa As Double = sa + da * (1.0 - sa)
-                Dim wr As Double = mr * sa + br * da * (1.0 - sa)
-                Dim wg As Double = mg * sa + bg * da * (1.0 - sa)
-                Dim wb As Double = mb * sa + bb * da * (1.0 - sa)
+                Dim wr As Double = sa * (1.0 - da) * lr + sa * da * mr + (1.0 - sa) * da * br
+                Dim wg As Double = sa * (1.0 - da) * lg + sa * da * mg + (1.0 - sa) * da * bg
+                Dim wb As Double = sa * (1.0 - da) * lb + sa * da * mb + (1.0 - sa) * da * bb
                 Dim r As Double = wr / oa * 255.0
                 Dim g As Double = wg / oa * 255.0
                 Dim b As Double = wb / oa * 255.0

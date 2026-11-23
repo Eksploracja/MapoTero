@@ -150,8 +150,8 @@ Public Class PoprawkiPrzegladuTesty
     <InlineData("-Infinity")>
     <InlineData("1e999")>
     Public Sub Wartosc_NieLiczbaToWartoscDomyslna(tekst As String)
-        Assert.Equal(7.0, MapoTero.Program.Wartosc(tekst, 7))
-        Assert.Equal(3, MapoTero.Program.WartoscCalkowita(tekst, 3))
+        Assert.Equal(7.0, MapoTero.NarzedziaTekstu.Wartosc(tekst, 7))
+        Assert.Equal(3, MapoTero.NarzedziaTekstu.WartoscCalkowita(tekst, 3))
     End Sub
 
     <Theory>

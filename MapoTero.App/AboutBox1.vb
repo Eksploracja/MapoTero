@@ -23,15 +23,48 @@ Public NotInheritable Class AboutBox1
         Else
             ApplicationTitle = System.IO.Path.GetFileNameWithoutExtension(My.Application.Info.AssemblyName)
         End If
-        Me.Text = String.Format("About {0}", ApplicationTitle)
+        'okno miało angielskie napisy szablonu Visual Studio („About”, „Version”)
+        Me.Text = "O programie " & ApplicationTitle
         ' Initialize all of the text displayed on the About Box.
         ' TODO: Customize the application's assembly information in the "Application" pane of the project 
         '    properties dialog (under the "Project" menu).
         Me.LabelProductName.Text = My.Application.Info.ProductName
-        Me.LabelVersion.Text = String.Format("Version {0}", Program.Wersja)
+        Me.LabelVersion.Text = "Wersja " & Program.Wersja
         Me.LabelCopyright.Text = My.Application.Info.Copyright
         Me.LabelCompanyName.Text = My.Application.Info.CompanyName
         Me.TextBoxDescription.Text = My.Application.Info.Description
+        DodajPrzyciskWsparcia()
+    End Sub
+
+    ''' <summary>
+    ''' Przycisk na lewo od OK, w tym samym wierszu. Leży w komórce przycisku OK, bo lewą kolumnę tabeli zasłania logo.
+    ''' Okno otwierane jest jako domyślna instancja (AboutBox1.ShowDialog()), więc Load zachodzi przy każdym
+    ''' otwarciu - bez sprawdzenia przyciski by się mnożyły.
+    ''' </summary>
+    Private Sub DodajPrzyciskWsparcia()
+        If TableLayoutPanel.Controls.ContainsKey("panelPrzyciskow") Then Return
+        Dim btn As New Button() With {
+            .Name = "btnWesprzyj",
+            .Text = "Wesprzyj rozwój programu",
+            .Margin = OKButton.Margin,
+            .UseVisualStyleBackColor = True
+        }
+        'szerokość według napisu, wysokość jak OK - przy AutoSize przycisk był o piksel niższy i nierówny z OK
+        btn.Size = New Drawing.Size(btn.PreferredSize.Width + 12, OKButton.Height)
+        AddHandler btn.Click, Sub() OtworzStrone(AdresWsparcia, "Wesprzyj rozwój programu")
+        'OK i nowy przycisk w jednym panelu od prawej - położenie nie zależy od skalowania czcionki ekranu
+        Dim panel As New FlowLayoutPanel() With {
+            .Name = "panelPrzyciskow",
+            .FlowDirection = FlowDirection.RightToLeft,
+            .AutoSize = True,
+            .WrapContents = False,
+            .Anchor = AnchorStyles.Bottom Or AnchorStyles.Right,
+            .Margin = New Padding(0)
+        }
+        TableLayoutPanel.Controls.Remove(OKButton)
+        panel.Controls.Add(OKButton)
+        panel.Controls.Add(btn)
+        TableLayoutPanel.Controls.Add(panel, 1, 5)
     End Sub
 
     Private Sub OKButton_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles OKButton.Click

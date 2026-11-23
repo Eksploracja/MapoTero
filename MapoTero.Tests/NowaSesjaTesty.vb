@@ -9,6 +9,7 @@ Imports MapoTero.Core
 Imports Xunit
 
 ''' <summary>Polecenie „Nowa sesja” okna głównego: przycisk, pozycja menu i wyczyszczenie stanu bieżącej sesji.</summary>
+<Collection("OknaKreatora")>
 Public Class NowaSesjaTesty
 
     Private Shared Sub WWatkuSta(akcja As Action)
@@ -32,22 +33,12 @@ Public Class NowaSesjaTesty
     End Function
 
     <Fact>
-    Public Sub PrzyciskIMenuNowejSesji()
+    Public Sub PolecenieNowejSesjiJestWMenuSesja()
         WWatkuSta(
             Sub()
                 Using f As New MapoTero.Form1()
                     f.Show()
                     Application.DoEvents()
-                    Dim btn = Kontrolka(Of Button)(f, "btnNowaSesja")
-                    Dim btnZnaczniki = Kontrolka(Of Button)(f, "btnZnaczniki")
-                    Dim btnPobierz = Kontrolka(Of Button)(f, "btnPobierz")
-                    Assert.NotNull(btn.Image)
-                    'trzecia kolumna górnego rzędu: ten sam rząd co przycisk siatki, przed przyciskiem Pobierz
-                    Assert.Equal(btnZnaczniki.Top, btn.Top)
-                    Assert.True(btn.Left > btnZnaczniki.Right)
-                    Assert.True(btn.Right < btnPobierz.Left, "przycisk nowej sesji zachodzi na Pobierz")
-                    Assert.Same(btnZnaczniki.Parent, btn.Parent)
-
                     Dim menu = Kontrolka(Of MenuStrip)(f, "MenuStrip1")
                     Dim sesja = menu.Items.OfType(Of ToolStripMenuItem)().First(Function(m) m.Name = "SesjaToolStripMenuItem")
                     Assert.Equal("Nowa sesja", sesja.DropDownItems(0).Text)

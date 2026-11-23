@@ -296,6 +296,30 @@ Public NotInheritable Class WmsCapabilities
             Next
         End If
 
+        'BoundingBox w EPSG:2180 (przed podwarstwami, aby dzieci mogły odziedziczyć zasięg rodzica)
+        Dim czy13 As Boolean = wersja.StartsWith("1.3", StringComparison.Ordinal)
+        For Each ebb In Dzieci(el, "BoundingBox")
+            Dim crs = Atrybut(ebb, "CRS")
+            If String.IsNullOrEmpty(crs) Then crs = Atrybut(ebb, "SRS")
+            If crs.IndexOf("2180", StringComparison.OrdinalIgnoreCase) >= 0 Then
+                Dim minx = LiczbaD(Atrybut(ebb, "minx"), 0)
+                Dim miny = LiczbaD(Atrybut(ebb, "miny"), 0)
+                Dim maxx = LiczbaD(Atrybut(ebb, "maxx"), 0)
+                Dim maxy = LiczbaD(Atrybut(ebb, "maxy"), 0)
+                Dim x1 = Math.Min(minx, maxx)
+                Dim x2 = Math.Max(minx, maxx)
+                Dim y1 = Math.Min(miny, maxy)
+                Dim y2 = Math.Max(miny, maxy)
+                If x2 > x1 AndAlso y2 > y1 Then
+                    ' WMS 1.3.0 (EPSG:2180): osie N, E; WMS 1.1.1: osie E, N
+                    w.Zasieg2180 = If(czy13, New Zasieg(x1, y1, x2, y2), New Zasieg(y1, x1, y2, x2))
+                End If
+            End If
+        Next
+        If Not w.Zasieg2180.HasValue AndAlso rodzic IsNot Nothing Then
+            w.Zasieg2180 = rodzic.Zasieg2180
+        End If
+
         'podwarstwy
         For Each ed In Dzieci(el, "Layer")
             Dim dziecko = ParsujWarstwe(ed, w, wersja)
@@ -317,28 +341,6 @@ Public NotInheritable Class WmsCapabilities
                     End If
                 End If
             End If
-        End If
-
-        'BoundingBox w EPSG:2180
-        For Each ebb In Dzieci(el, "BoundingBox")
-            Dim crs = Atrybut(ebb, "CRS")
-            If String.IsNullOrEmpty(crs) Then crs = Atrybut(ebb, "SRS")
-            If crs.IndexOf("2180", StringComparison.OrdinalIgnoreCase) >= 0 Then
-                Dim minx = LiczbaD(Atrybut(ebb, "minx"), 0)
-                Dim miny = LiczbaD(Atrybut(ebb, "miny"), 0)
-                Dim maxx = LiczbaD(Atrybut(ebb, "maxx"), 0)
-                Dim maxy = LiczbaD(Atrybut(ebb, "maxy"), 0)
-                Dim x1 = Math.Min(minx, maxx)
-                Dim x2 = Math.Max(minx, maxx)
-                Dim y1 = Math.Min(miny, maxy)
-                Dim y2 = Math.Max(miny, maxy)
-                If x2 > x1 AndAlso y2 > y1 Then
-                    w.Zasieg2180 = New Zasieg(x1, y1, x2, y2)
-                End If
-            End If
-        Next
-        If Not w.Zasieg2180.HasValue AndAlso rodzic IsNot Nothing Then
-            w.Zasieg2180 = rodzic.Zasieg2180
         End If
 
         Return w
