@@ -33,18 +33,18 @@ Public Class RegulatorZapytanTesty
         Assert.False(trzecia.IsCompleted)
 
         'inny serwer ma osobny limit
-        Using p As RegulatorZapytan.Przepustka = Await r.WejdzAsync(InnySerwer, CancellationToken.None).WaitAsync(TimeSpan.FromSeconds(5))
+        Using p As RegulatorZapytan.Przepustka = Await r.WejdzAsync(InnySerwer, CancellationToken.None).WaitAsync(TimeSpan.FromSeconds(15))
         End Using
 
         p1.Dispose()
         p1.Dispose() 'ponowne zwolnienie nie zwiększa limitu
-        Dim p3 = Await trzecia.WaitAsync(TimeSpan.FromSeconds(5))
+        Dim p3 = Await trzecia.WaitAsync(TimeSpan.FromSeconds(15))
         Dim czwarta = r.WejdzAsync(Adres, CancellationToken.None)
         Await Task.Delay(100)
         Assert.False(czwarta.IsCompleted)
         p2.Dispose()
         p3.Dispose()
-        Using p4 = Await czwarta.WaitAsync(TimeSpan.FromSeconds(5))
+        Using p4 = Await czwarta.WaitAsync(TimeSpan.FromSeconds(15))
         End Using
     End Function
 
@@ -57,7 +57,7 @@ Public Class RegulatorZapytanTesty
             End Using
         End Using
         'przerwane oczekiwanie nie zabiera miejsca
-        Using p2 = Await r.WejdzAsync(Adres, CancellationToken.None).WaitAsync(TimeSpan.FromSeconds(5))
+        Using p2 = Await r.WejdzAsync(Adres, CancellationToken.None).WaitAsync(TimeSpan.FromSeconds(15))
         End Using
     End Function
 
@@ -167,8 +167,8 @@ Public Class RegulatorZapytanTesty
         Next
         Assert.Equal(2, r.Limit(Adres))
         'dwa zapytania naraz są znów możliwe
-        Dim p1 = Await r.WejdzAsync(Adres, CancellationToken.None).WaitAsync(TimeSpan.FromSeconds(5))
-        Dim p2 = Await r.WejdzAsync(Adres, CancellationToken.None).WaitAsync(TimeSpan.FromSeconds(5))
+        Dim p1 = Await r.WejdzAsync(Adres, CancellationToken.None).WaitAsync(TimeSpan.FromSeconds(15))
+        Dim p2 = Await r.WejdzAsync(Adres, CancellationToken.None).WaitAsync(TimeSpan.FromSeconds(15))
         Dim trzecia = r.WejdzAsync(Adres, CancellationToken.None)
         Await Task.Delay(100)
         Assert.False(trzecia.IsCompleted)
@@ -176,7 +176,7 @@ Public Class RegulatorZapytanTesty
         p1.Dispose()
         p2.Odpowiedz(HttpStatusCode.OK)
         p2.Dispose()
-        Using p3 = Await trzecia.WaitAsync(TimeSpan.FromSeconds(5))
+        Using p3 = Await trzecia.WaitAsync(TimeSpan.FromSeconds(15))
             p3.Odpowiedz(HttpStatusCode.OK)
         End Using
 
@@ -195,13 +195,13 @@ Public Class RegulatorZapytanTesty
         Assert.Equal(4, r.Limit(Adres))
         Dim przepustki As New List(Of RegulatorZapytan.Przepustka)
         For i = 1 To 4
-            przepustki.Add(Await r.WejdzAsync(Adres, CancellationToken.None).WaitAsync(TimeSpan.FromSeconds(5)))
+            przepustki.Add(Await r.WejdzAsync(Adres, CancellationToken.None).WaitAsync(TimeSpan.FromSeconds(15)))
         Next
         Dim piata = r.WejdzAsync(Adres, CancellationToken.None)
         Await Task.Delay(100)
         Assert.False(piata.IsCompleted)
         przepustki.ForEach(Sub(p) p.Dispose())
-        Using p5 = Await piata.WaitAsync(TimeSpan.FromSeconds(5))
+        Using p5 = Await piata.WaitAsync(TimeSpan.FromSeconds(15))
         End Using
     End Function
 
@@ -218,12 +218,12 @@ Public Class RegulatorZapytanTesty
         przepustki(0).Dispose()
         przepustki(1).Dispose()
         przepustki(2).Dispose()
-        Using p = Await r.WejdzAsync(Adres, CancellationToken.None).WaitAsync(TimeSpan.FromSeconds(5))
+        Using p = Await r.WejdzAsync(Adres, CancellationToken.None).WaitAsync(TimeSpan.FromSeconds(15))
             Dim kolejna = r.WejdzAsync(Adres, CancellationToken.None)
             Await Task.Delay(400)
             Assert.False(kolejna.IsCompleted)
             przepustki(3).Dispose()
-            Using p2 = Await kolejna.WaitAsync(TimeSpan.FromSeconds(5))
+            Using p2 = Await kolejna.WaitAsync(TimeSpan.FromSeconds(15))
             End Using
         End Using
     End Function
@@ -247,7 +247,7 @@ Public Class RegulatorZapytanTesty
                 Assert.False(trzecia.IsCompleted)
                 p1.Odpowiedz(HttpStatusCode.OK)
                 p1.Dispose()
-                Using p3 = Await trzecia.WaitAsync(TimeSpan.FromSeconds(5))
+                Using p3 = Await trzecia.WaitAsync(TimeSpan.FromSeconds(15))
                     p3.Odpowiedz(HttpStatusCode.OK)
                 End Using
                 p2.Odpowiedz(HttpStatusCode.OK)

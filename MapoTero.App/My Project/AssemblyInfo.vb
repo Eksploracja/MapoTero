@@ -36,9 +36,9 @@ Imports System.Runtime.InteropServices
 
 'CLR zawsze przechowuje 4 składowe wersji zestawu (dopisywane zera ucina MapoTero.Core.WersjaProgramu);
 'AssemblyFileVersion i AssemblyInformationalVersion odpowiadają za krótką wersję we właściwościach pliku exe.
-<Assembly: AssemblyVersion("3.18")>
-<Assembly: AssemblyFileVersion("3.18")>
-<Assembly: AssemblyInformationalVersion("3.18")>
+<Assembly: AssemblyVersion("3.19")>
+<Assembly: AssemblyFileVersion("3.19")>
+<Assembly: AssemblyInformationalVersion("3.19")>
 
 <Assembly: NeutralResourcesLanguageAttribute("pl-PL")>
 <Assembly: System.CLSCompliant(true)>

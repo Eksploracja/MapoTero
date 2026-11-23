@@ -1,15 +1,52 @@
-MapoTero 3.18 - wyszukiwarka działek ULDK, profil wysokościowy NMT LIDAR, konwerter OziExplorer do JNX/KMZ/MBTiles, eksport GeoTIFF, post-processing MIP dla Garmina i bieżący podgląd warstw.
+MapoTero 3.19 - szybki kreator map (Ctrl+K), transfer Wi-Fi z kodem QR, OGC GeoPackage (.gpkg), Cloud-Optimized GeoTIFF, kopiowanie USB Garmin i nowy układ okna głównego.
 
 ## Instalacja
 
-1. Pobierz plik **[MapoTero_v3.18.zip](https://github.com/Eksploracja/MapoTero/releases/download/v3.18/MapoTero_v3.18.zip)** (bezpośrednie pobranie lub poniżej w sekcji *Assets*).
+1. Pobierz plik **[MapoTero_v3.19.zip](https://github.com/Eksploracja/MapoTero/releases/download/v3.19/MapoTero_v3.19.zip)** (bezpośrednie pobranie lub poniżej w sekcji *Assets*).
 2. Przed rozpakowaniem kliknij plik prawym przyciskiem myszy, wybierz *Właściwości*, zaznacz **Odblokuj** i kliknij *OK* - wtedy Windows nie będzie blokował uruchomienia programu (program nie ma podpisu cyfrowego, więc filtr SmartScreen traktuje go jako nierozpoznaną aplikację; można też w oknie SmartScreen kliknąć *Więcej informacji* > *Uruchom mimo to*). Sumy kontrolne plików i wynik skanu antywirusowego - niżej, w sekcji *Sumy kontrolne SHA-256*.
 
    ![Okno SmartScreen: najpierw „Więcej informacji”, potem „Uruchom mimo to”](https://raw.githubusercontent.com/Eksploracja/MapoTero/master/obrazy/smartscreen.png)
 3. Rozpakuj archiwum do dowolnego folderu i uruchom **MapoTero.exe** - program to jeden plik, obok którego musi leżeć folder `warstwy` (zbiory map).
 4. Program wymaga środowiska [.NET Desktop Runtime 10 (x64)](https://dotnet.microsoft.com/download/dotnet/10.0) - jeśli nie jest zainstalowane, Windows zaproponuje jego pobranie przy pierwszym uruchomieniu.
 
-Ustawienia i zbiory map z poprzednich wersji (plik `lastsettings.txt`, folder `warstwy`) są w pełni zgodne z wersją 3.18.
+Ustawienia i zbiory map z poprzednich wersji (plik `lastsettings.txt`, folder `warstwy`) są w pełni zgodne z wersją 3.19.
+
+## Zmiany w wersji 3.19
+
+* **Szybki kreator generowania map (skrót Ctrl+K, przycisk z różdżką na pasku):**
+  * Prowadzi użytkownika krok po kroku przez cały proces przygotowania gotowej mapy w 4 prostych krokach: wybór urządzenia docelowego, wybór stylu mapy z podglądem na żywo, wskazanie obszaru oraz podsumowanie z kalkulacją parametrów i automatycznym wygenerowaniem pliku.
+  * Obsługiwane platformy docelowe: smartfon (MBTiles, OGC GeoPackage, SQLiteDB dla Locus Map, OsmAnd, QField, OruxMaps), odbiornik turystyczny Garmin (Garmin Custom Maps KMZ oraz BirdsEye JNX v4), wydruk wielkoformatowy (arkusz GeoTIFF / JPEG / PNG w formatach A4–A0) oraz podkład CAD/GIS (georeferencjonowany GeoTIFF).
+  * Gotowe style z automatycznym doborem warstw, krycia i trybów mieszania: turystyka piesza (mapa topograficzna GUGiK BDOT10k/BDOO), góry z poziomicami (OpenTopoMap z hipsometrią dla Polski, Czech i Słowacji), trasy rowerowe i MTB, dziedzictwo kulturowe (rzeźba terenu LiDAR z prześwitującą mapą i rejestrem zabytków NID oraz stanowiskami archeologicznymi), mapy historyczne WIG (1918–1939) z Messtischblattami na ziemiach zachodnich, archiwalne mapy niemieckie do 1945 r., działki katastralne EGiB oraz styl własny z warstw zdefiniowanych w oknie głównym.
+  * **Mapy wieloskalowe:** automatyczne generowanie piramid skalowych w formatach MBTiles, GeoPackage, SQLiteDB i JNX — przy oddalaniu widoku mapa automatycznie przełącza się na mniejszą skalę (np. 1:10 000 → 1:25 000 → 1:50 000 → 1:100 000) zamiast pokazywać nieczytelną pomniejszoną mozaikę.
+  * Opcjonalna warstwa zdjęć lotniczych (ortofotomapa przy zbliżeniu, zoom 17, piksel 0,75 m) dla największych powiększeń w stylach turystycznych.
+  * Zaawansowany kalkulator: precyzyjne szacowanie liczby segmentów, rozmiaru pliku i czasu generowania z podziałem na serwery, ostrzeganie o limicie 100 kafli Garmina i braku miejsca na dysku, wskaźnik rzeczywistego postępu i pozostałego czasu pobierania.
+  * Możliwość zapisu własnej kompozycji jako *Mój styl* do wielokrotnego wykorzystania.
+* **Bezpośredni transfer map na telefon przez Wi-Fi i kod QR:**
+  * W oknie *Eksport mapy*, oknie zaawansowanego MBTiles oraz w menu *Narzędzia -> Prześlij mapę na telefon (Wi-Fi)...* przycisk *Wyślij na telefon...* uruchamia wbudowany, lekki serwer HTTP w sieci lokalnej i wyświetla na ekranie duży, czytelny kod QR (natywny generator bez zewnętrznych zależności).
+  * Zeskanowanie kodu aparatem smartfona natychmiast otwiera stronę pobierania i przesyła plik (`.mbtiles`, `.gpkg`, `.tif`, `.kmz`, `.sqlitedb`, `.tar`) bezpośrednio do pamięci telefonu (Locus Map, QField, OsmAnd, OruxMaps, Avenza Maps) bez użycia kabla USB i bez wysyłania map do zewnętrznych chmur.
+  * Pełne wsparcie wznawiania transferów (nagłówek HTTP `Range`), automatyczny wybór aktywnej karty sieciowej Wi-Fi/Ethernet oraz zabezpieczenie każdej sesji jednorazowym tokenem kryptograficznym.
+* **Bezpośrednie kopiowanie na odbiornik Garmin (USB):**
+  * W oknie eksportu program automatycznie wykrywa podłączone urządzenia GPS Garmin oraz czytniki kart pamięci microSD, prezentując dedykowaną opcję zapisu bezpośrednio do katalogu `Garmin/CustomMaps` (dla plików KMZ) lub `Garmin/BirdsEye` (dla plików JNX) z weryfikacją wolnego miejsca na dysku.
+* **Obsługa formatu OGC GeoPackage (.gpkg):**
+  * Eksport kafelków rastrowych w standardzie OGC GeoPackage 1.3 (układ Web Mercator EPSG:3857) dla nowoczesnych aplikacji terenowych GIS (QField, Mergin Maps, QGIS) oraz Locus Map i OruxMaps.
+  * Wczytywanie poligonów i tras wektorowych z warstw GeoPackage (.gpkg) do definiowania obszaru pobierania (prostokąt otaczający z podglądem lub pas korytarza wzdłuż linii) z automatyczną transformacją układów współrzędnych (PL-1992, PL-2000, UTM, WGS84, Web Mercator).
+* **Kafelkowany Cloud-Optimized GeoTIFF (256×256) z wewnętrzną piramidą pomniejszeń:**
+  * Eksport arkuszy GeoTIFF i scalanie segmentów tworzy teraz zoptymalizowaną strukturę kafelkowaną z wewnętrznymi poziomami pomniejszeń (IFD reduced overview images).
+  * Błyskawiczne otwieranie i płynne przeglądanie wielogigabajtowych map w Avenza Maps, QGIS, ArcGIS oraz oprogramowaniu CAD (AutoCAD, MicroStation) z dekompresją z dysku wyłącznie widocznych fragmentów rastra.
+* **Nowy, ergonomiczny układ okna głównego i kart narzędziowych:**
+  * Zintegrowany pasek wyszukiwania nad mapą (*Szukaj miejsca lub działki...*, skrót Ctrl+F) z podpowiedziami w trakcie pisania, obsługą adresów, miejscowości (geokoder Nominatim), identyfikatorów TERYT / numerów działek (ULDK) oraz bezpośrednim wklejaniem współrzędnych (WGS84, PL-1992, PL-2000).
+  * Nowy podział na karty pod mapą z czytelnymi ikonami i obramowaniem: karta *Zasięg obszaru* z rozwijanym menu *Zmień ▾* (dostęp do współrzędnych, korytarza GPX, poligonu KML/GeoPackage), karta *Parametry segmentów* z bezpośrednim linkiem do edycji oraz karta *Stan sesji* zawierająca wyróżniony przycisk *Pobierz segmenty* wraz z łukiem postępu i statusem.
+  * Prawy panel boczny z regulacją wysokości sekcji za pomocą uchwytu, zoptymalizowana lista wybranych warstw z bezpośrednią edycją krycia w wierszu warstwy i usuwaniem przyciskiem ✕.
+  * Odświeżony dolny pasek stanu z precyzyjną informacją o układzie współrzędnych sesji, aktualnych współrzędnych kursora (X, Y), przybliżonej skali mapy na ekranie oraz statusie sesji pobierania.
+* **Nowy tryb mieszania „7 Rzeźba terenu”:**
+  * Specjalistyczny algorytm mieszania warstw dla cieniowania NMT LiDAR traktujący kolor neutralnej szarości płaskich powierzchni jako przezroczysty, dzięki czemu cieniowanie nie przyciemnia mapy na równinach, a stoki i wzniesienia zyskują plastyczną, naturalną głębię (automatycznie aktywowany przy dodawaniu warstw cieniowania rzeźby).
+* **Uporządkowanie architektury i usunięcie archaicznych modułów:**
+  * Funkcja scalania segmentów została całkowicie zintegrowana w oknie *Eksport mapy* (format *Arkusz: GeoTIFF / JPEG / PNG*), zapewniając dostęp do nakładek, wielowątkowości i profili korekty obrazu; dawne osobne okno scalania usunięto.
+  * Usunięto przestarzałe narzędzia *Nakładanie dwóch map png na siebie* oraz *Usuwanie pustych segmentów* (zastąpione przez automatyczną detekcję pustych segmentów WMS i zaawansowane nakładki w eksporcie).
+  * Bezpieczne usuwanie plików sesji do systemowego Kosza (w przypadku dużej liczby plików trafiają one do jednego wspólnego folderu z datą i godziną).
+  * Pełna obsługa polskich znaków diakrytycznych w ścieżkach przy dowolnych regionalnych ustawieniach systemowych (np. Windows z językiem angielskim).
+* **Stabilność i jakość kodu:**
+  * **1229 testów jednostkowych i integracyjnych** (.NET 10 x64) weryfikujących wszystkie operacje matematyczne, układy współrzędnych, silnik rastrowy, eksport i interfejs programu.
 
 ## Zmiany w wersji 3.18
 

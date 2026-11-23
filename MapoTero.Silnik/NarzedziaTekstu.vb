@@ -108,7 +108,7 @@ Public NotInheritable Class UstawieniaSilnika
     End Sub
 
     ''' <summary>
-    ''' Nagłówek User-Agent zapytań HTTP pobierania (np. „MapoTero/3.18”). Domyślnie z wersji uruchomionego programu
+    ''' Nagłówek User-Agent zapytań HTTP pobierania (np. „MapoTero/3.19”). Domyślnie z wersji uruchomionego programu
     ''' (zestaw startowy MapoTero.exe) - tak samo jak Program.UserAgentProgramu. Klient HTTP pobierania powstaje przy
     ''' pierwszym użyciu PobieranieSegmentow, więc późniejsza zmiana nie dotyczy już utworzonego klienta.
     ''' </summary>

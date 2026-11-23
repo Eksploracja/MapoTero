@@ -22,7 +22,7 @@
     <DisableImplicitNamespaceImports>true</DisableImplicitNamespaceImports>
     <!-- te same wyłączone ostrzeżenia co w MapoTero_v3.vbproj (kod przeniesiony z programu) -->
     <NoWarn>$(NoWarn);42016;41999;42017;42018;42019;42032;42036;42020;42021;42022;42353;42354;42355;SYSLIB0014</NoWarn>
-    <Version>3.18</Version>
+    <Version>3.19</Version>
     <Authors>MapoTero</Authors>
     <Copyright>GNU GPL v3</Copyright>
   </PropertyGroup>
