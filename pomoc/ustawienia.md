@@ -9,7 +9,7 @@ nav_order: 9
 Wszystkie opcje okna *Ustawienia*: co robi każda, jaka jest wartość domyślna i kiedy warto ją zmienić.
 {: .fs-5 .fw-300 }
 
-**Gdzie w programie:** menu *Ustawienia* albo kliknięcie formatu segmentów (np. `.jpeg`) na pasku stanu u dołu okna głównego  
+**Gdzie w programie:** menu *Narzędzia > Ustawienia* albo kliknięcie formatu segmentów na pasku stanu u dołu okna głównego  
 **Dotyczy wersji:** {{ site.wersja_programu }}
 
 <details open markdown="block">
@@ -23,26 +23,27 @@ Wszystkie opcje okna *Ustawienia*: co robi każda, jaka jest wartość domyślna
 
 ![Okno Ustawienia z ponumerowanymi grupami opcji]({{ '/pomoc/obrazy/07-ustawienia.png' | relative_url }})
 
-*Rysunek 1. Okno Ustawienia z ponumerowanymi grupami opcji.*
+*Rysunek 1. Okno Ustawienia programu MapoTero z ponumerowanymi grupami opcji.*
 
 | Nr | Sekcja okna | Zawartość |
 |---|---|---|
 | **1** | [Sesja pobierania](#sesja-pobierania) | format, przezroczyste tło, przedrostek i numeracja segmentów (`conf.txt`) |
-| **2** | [Nowa sesja](#nowa-sesja) | domyślny układ współrzędnych dla czystego startu programu |
-| **3** | [Widok okna głównego](#widok-okna-głównego) | etykiety współrzędnych i wyświetlanie siatki |
-| **4** | [Pliki kalibracji segmentów](#pliki-kalibracji-segmentów) | dodatkowe pliki `.map`, `.kml`, world file, `.tab`, `.wld`, `.gmi` |
+| **2** | [Nowa sesja](#nowa-sesja) | domyślny układ współrzędnych dla czystego startu programu (`lastsettings.txt`) |
+| **3** | [Widok okna głównego](#widok-okna-głównego) | etykiety współrzędnych, skala i wyświetlanie siatki na mapie |
+| **4** | [Pliki kalibracji segmentów](#pliki-kalibracji-segmentów) | dodatkowe pliki georeferencji: `.map`, `.kml`, world file + `.prj`, `.tab`, `.wld` + `.points`, `.gmi` |
 | **5** | [Pobieranie](#pobieranie) | liczba prób, przerwy, równoczesne pobrania, limit czasu i jakość JPEG składanych segmentów |
-| **6** | [Usługi kafelkowe](#usługi-kafelkowe) | zachowywanie kafli w `_kafle_wmts` |
+| **6** | [Usługi kafelkowe](#usługi-kafelkowe) | zachowywanie kafli w podfolderze `_kafle_wmts` |
+| **7** | [Nietypowe serwery WMS](#nietypowe-serwery-wms) | obsługa starszych serwerów z nieaktualnymi certyfikatami SSL |
 
 Okienko grupuje zarówno parametry zapisywane dla konkretnej sesji pobierania (`conf.txt`), jak i ogólne opcje pracy programu (`lastsettings.txt`).
 
-* **OK**: zatwierdza przedrostek nazw segmentów, stosuje zmiany od razu i zapisuje je w `lastsettings.txt`.
-* **Anuluj** (lub zamknięcie okna krzyżykiem): odrzuca wszystkie zmiany wprowadzone od otwarcia okna.
-* **Przywróć domyślne...**: po potwierdzeniu przywraca ustawienia fabryczne (widok mapy w oknie głównym, domyślny zbiór *skany_map_topograficznych*, bok `2000 px`, piksel `2` oraz układ `PL-1992`). Tej operacji nie można cofnąć przyciskiem **Anuluj**.
+* **OK**: zatwierdza parametry, stosuje zmiany od razu i zapisuje je w plikach konfiguracyjnych.
+* **Anuluj** (lub naciśnięcie klawisza <kbd>Esc</kbd>): odrzuca wszystkie zmiany wprowadzone od otwarcia okna.
+* **Przywróć domyślne...**: po potwierdzeniu przywraca ustawienia fabryczne (widok mapy, domyślny zbiór *skany_map_topograficznych*, bok `2000 px`, piksel `2,00 m/pix` oraz układ `PL-1992`). Tej operacji nie można cofnąć przyciskiem **Anuluj**.
 * **Pomoc** (oraz klawisz <kbd>F1</kbd>): otwiera okno podręcznej pomocy ze zwięzłym opisem wszystkich sekcji i bezpośrednim odnośnikiem do tego rozdziału.
 
 {: .informacja }
-W trakcie pobierania okno *Ustawienia* pozwala zmienić tylko współrzędne kursora, środka mapy i zaznaczenia oraz domyślny układ nowej sesji. Pozostałe opcje są wyłączone, aby nie zmienić formatu, numeracji ani siatki w trakcie trwania sesji.
+W trakcie pobierania okno *Ustawienia* pozwala zmienić tylko opcje widoku współrzędnych oraz domyślny układ nowej sesji. Pozostałe opcje są zablokowane, aby nie zmienić formatu, numeracji ani siatki w trakcie trwania aktywnej sesji.
 
 ---
 
@@ -52,7 +53,7 @@ Te ustawienia opisują sposób zapisu segmentów bieżącej sesji i trafiają do
 
 | Opcja | Domyślnie | Zakres / wartości | Co robi i kiedy zmienić |
 |---|---|---|---|
-| *Format segmentów* | `jpeg` | `jpeg`, `png`, `png8`, `png24`, `png32`, `gif`, `tiff` | Format zapisywanych plików. Wybierz `png` lub `png32`, gdy potrzebujesz przezroczystego tła albo bezstratnej jakości (np. granice działek). |
+| *Format segmentów* | `jpeg` | `jpeg`, `png`, `png8`, `png24`, `png32`, `gif`, `tiff` | Format zapisywanych plików segmentów. Wybierz `png` lub `png32`, gdy potrzebujesz przezroczystego tła albo bezstratnej jakości (np. granice działek lub szlaki). |
 | *przezroczyste tło (tylko PNG i GIF)* | wyłączone | PNG / GIF | Przesyła do serwera parametr `TRANSPARENT=TRUE` i zapisuje przezroczysty kanał alfa. Aktywne tylko dla formatów `png*` i `gif`. |
 | *Przedrostek nazw segmentów* | `_` | do 50 znaków (może być pusty) | Początek nazwy każdego pliku segmentu (np. `_01_02.jpg`). Niedozwolone są znaki systemowe (`\ / : * ? " < > |`). |
 | *Numeracja segmentów* | `NrWiersza_NrKolumny` | `NrWiersza_NrKolumny`, `01_02_03`, `1_2_3` | Styl numerowania segmentów w nazwach plików. Szczegóły i przykłady opisuje rozdział [Sesje pobierania](../sesje/#nazwy-segmentów). |
@@ -63,7 +64,7 @@ Te ustawienia opisują sposób zapisu segmentów bieżącej sesji i trafiają do
 
 | Opcja | Domyślnie | Zakres / wartości | Co robi |
 |---|---|---|---|
-| *Domyślny układ współrzędnych* | `PL-1992` | `PL-1992`, `PL-2000` (5–8), `UTM` (33N–35N), `WGS84` | Układ wybierany automatycznie przy starcie czystego programu (gdy w `download\` nie ma pliku `conf.txt`). |
+| *Domyślny układ współrzędnych* | `PL-1992` | `PL-1992`, `PL-2000` (5–8), `UTM` (33N–35N), `WGS84` | Układ wybierany automatycznie przy starcie czystego programu oraz po kliknięciu ikony nowej sesji. |
 
 ---
 
@@ -71,28 +72,18 @@ Te ustawienia opisują sposób zapisu segmentów bieżącej sesji i trafiają do
 
 | Opcja | Domyślnie | Co robi |
 |---|---|---|
-| *współrzędne kursora i środka mapy* | włączone | Pokazuje pod mapą bieżącą pozycję kursora w układzie pobierania oraz współrzędne WGS84 i zoom środka mapy. |
-| *współrzędne kursora w WGS84* | wyłączone | Wyświetla małą etykietę z długością i szerokością geograficzną tuż przy kursorze na mapie. |
-| *współrzędne zaznaczenia w WGS84* | wyłączone | Pokazuje pod polami XY granice zaznaczonego obszaru w stopniach WGS84. |
+| *współrzędne kursora i środka mapy* | włączone | Pokazuje na pasku stanu bieżącą pozycję kursora w wybranym układzie sesji (`x=` północ, `y=` wschód) oraz współrzędne środka mapy. |
+| *współrzędne kursora w WGS84* | wyłączone | Wyświetla dodatkowo stopnie geograficzne bezpośrednio przy wskaźniku myszy. |
+| *współrzędne zaznaczenia w WGS84* | wyłączone | Pokazuje granice zaznaczonego obszaru w stopniach WGS84. |
 | *siatka segmentów na mapie* | włączone | Rysuje niebieską siatkę poszczególnych segmentów na mapie (do 3000 segmentów). Po wyłączeniu widać same znaczniki narożników. |
-
-Wpisywanie zasięgu XY z klawiatury włącza małe pole wyboru obok pola `x` górnego w schemacie siatki okna głównego (zob. [Wpisywanie współrzędnych](../obszar/wspolrzedne/)).
 
 ---
 
 ## Pliki kalibracji segmentów
 
 Domyślnie **wszystkie pola są wyłączone**, ponieważ wbudowane scalanie i eksport korzystają bezpośrednio z pliku `conf.txt`.
-Włącz wybrane formaty tylko wtedy, gdy chcesz otwierać pojedyncze pobrane segmenty w zewnętrznym programie (QGIS, ArcGIS,
+Włącz wybrane formaty tylko wtedy, gdy chcesz otwierać pojedyncze, niescalone segmenty w zewnętrznym oprogramowaniu (QGIS, ArcGIS,
 OziExplorer, MapInfo, Google Earth, GPS Tuner). Opis każdego formatu znajdziesz w rozdziale [Pliki kalibracji](../pliki-kalibracji/).
-
----
-
-## TrekBuddy i Locus Map
-
-Od wersji 3.19 okno *Ustawienia* nie ma trybu TrekBuddy. Mapę TrekBuddy / Locus Map (`.tar`) tworzy okno
-[Eksport mapy](../eksport/aplikacje/#trekbuddy) z dowolnej pobranej sesji. Sesję TrekBuddy z poprzednich wersji (tryb
-zapisany w `conf.txt`) program nadal wznawia w tym trybie.
 
 ---
 
@@ -101,21 +92,37 @@ zapisany w `conf.txt`) program nadal wznawia w tym trybie.
 | Opcja | Domyślnie | Zakres | Co robi i kiedy zmienić |
 |---|---|---|---|
 | *Liczba prób pobrania* | `3` | `1–20` | Łączna liczba rund pobierania. W każdej kolejnej rundzie program ponawia tylko brakujące segmenty. Zwiększ przy niestabilnym łączu lub wolnym serwerze. |
-| *Przerwa między próbami [s]* | `5` | `0–300` | Czas oczekiwania między kolejnymi rundami prób. Przy błędach przeciążenia serwera warto wydłużyć np. do `30–60 s`. |
+| *Przerwa między próbami [s]* | `5` | `0–300` | Czas oczekiwania między kolejnymi rundami prób. Przy błędach przeciążenia serwera (HTTP 429/503) warto wydłużyć np. do `30–60 s`. |
 | *Równoczesne pobrania* | `4` | `1–16` | Maksymalna liczba jednoczesnych zapytań do jednego serwera (obejmuje też pojedyncze kafle WMTS/XYZ/TMS). Dla wolnych serwerów (np. map historycznych IHPAN) zmniejsz do `1–2`. |
 | *Limit czasu odpowiedzi [s]* | `120` | `10–600` (krok 10) | Maksymalny czas oczekiwania na odpowiedź na pojedyncze zapytanie. Zwiększ np. do `240–300 s`, jeśli serwer długo generuje duże segmenty. |
-| *Jakość JPEG przy składaniu* | `90` | `50–100` | Jakość kompresji segmentów JPEG, które program składa z kilku obrazów: z kafli WMTS/XYZ/TMS, z kilku serwerów WMS albo z warstw o kryciu poniżej 100 % lub z innym trybem mieszania. Segment z jednego zapytania WMS program zapisuje bez ponownej kompresji. |
+| *Jakość JPEG przy składaniu* | `90` | `50–100` | Jakość kompresji segmentów JPEG, które program składa z kilku obrazów: z kafli WMTS/XYZ/TMS, z kilku serwerów WMS albo z warstw o kryciu poniżej 100% lub z innym trybem mieszania. Segment z jednego zapytania WMS program zapisuje bez ponownej kompresji. |
 
 ---
 
 ## Usługi kafelkowe
 
-W oknie grupa nosi tytuł *Usługi kafelkowe (WMTS / XYZ)* i dotyczy wszystkich usług kafelkowych (WMTS, XYZ i TMS):
+Dotyczy usług kafelkowych (WMTS, XYZ i TMS):
 
 | Opcja | Domyślnie | Zakres | Co robi |
 |---|---|---|---|
 | *zachowuj pobrane kafle w folderze sesji* | wyłączone | brak | Pozostawia podfolder `_kafle_wmts` po zakończeniu pobierania. Ułatwia powtórne złożenie tego samego obszaru z innym bokiem segmentu bez ponownego pobierania z sieci, ale zajmuje miejsce na dysku. |
 
+---
+
+## Nietypowe serwery WMS
+
+| Opcja | Domyślnie | Co robi |
+|---|---|---|
+| *ignoruj błędy certyfikatów SSL* | wyłączone | Umożliwia pobieranie danych ze starszych serwerów gminnych i uczelnianych, które posiadają nieaktualne, samopodpisane lub niekompletne łańcuchy certyfikatów SSL/TLS. |
+
+---
+
+## Usunięte opcje
+
+W nowoczesnych wersjach programu uporządkowano okno ustawień, usuwając zbędne i mylące opcje:
+* **Tryb TrekBuddy**: paczki `.tar` generuje bezpośrednio okno [Eksport mapy](../eksport/aplikacje/#trekbuddy) z dowolnej sesji (stare sesje z trybem w `conf.txt` nadal wznawiają się poprawnie).
+* **Zamień kolejność X i Y w zapytaniu**: usunięta, ponieważ żaden ze współczesnych serwerów jej nie wymaga (a pozostawiona włączona psuła pobieranie z Geoportalu).
+* **Pobieraj tylko segmenty o numerze wyższym niż ostatni**: usunięta, ponieważ program automatycznie pomija istniejące już pliki na dysku i bezbłędnie uzupełnia brakujące luki.
 
 ---
 

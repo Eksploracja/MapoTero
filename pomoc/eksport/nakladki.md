@@ -92,7 +92,7 @@ wszystkie warstwy i ich źródła.
 
 {: .informacja }
 Kilka warstw z jednego albo z **różnych** serwerów (WMS, WMTS, XYZ/TMS) możesz też połączyć od razu **podczas pobierania**
-w oknie głównym ([Wybrane warstwy i ich kolejność](../../okno-glowne/#zbiory-map-i-warstwy), okno warstw zaawansowanych oraz poradnik [Kompozycje warstw i plastyczna rzeźba](../../pobieranie/kompozycje/)).
+w oknie głównym ([Katalog map i lista warstw](../../okno-glowne/#katalog-map-i-lista-warstw), okno warstw zaawansowanych oraz poradnik [Kompozycje warstw i plastyczna rzeźba](../../pobieranie/kompozycje/)).
 Łączenie w oknie eksportu przydaje się wtedy, gdy sesje były już pobrane osobno, powstały w różnych układach
 współrzędnych albo wymagają usunięcia białego tła z gotowych segmentów JPEG.
 Mapę, która przy różnych przybliżeniach pokazuje różne warstwy, tworzy

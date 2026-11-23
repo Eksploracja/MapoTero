@@ -45,9 +45,8 @@ Zaznaczony prostokąt jest prostokątem na mapie podglądu (w stopniach geografi
 
 Oprócz ręcznego zaznaczania myszą możesz szybko zlokalizować interesujący punkt w Polsce i wyznaczyć obszar pobierania za pomocą wbudowanej wyszukiwarki:
 
-* **Jak uruchomić:** kliknij przycisk z ikoną lupy 🔍 na pasku pod powiększeniem mapy (pod przyciskiem `-`), wybierz polecenie *Narzędzia > Wyszukaj miejscowość lub działkę...* albo użyj skrótów klawiaturowych:
-  * <kbd>Ctrl</kbd>+<kbd>F</kbd> – otwiera wyszukiwarkę na zakładce *Miejscowość / Adres*,
-  * <kbd>Ctrl</kbd>+<kbd>D</kbd> – otwiera wyszukiwarkę na zakładce *Działka katastralna (ULDK)*.
+* **Zintegrowane pole na górnym pasku narzędzi:** pole tekstowe *Szukaj miejsca lub działki…* z ikoną lupy pozwala natychmiast wpisać poszukiwaną nazwę miejscowości, adres, działkę (np. `działka Wieliczka 123/4` lub kod TERYT) albo wkleić współrzędne. Skrót <kbd>Ctrl</kbd>+<kbd>F</kbd> natychmiast przenosi kursor do tego pola. Podpowiedzi pojawiają się w trakcie pisania, strzałki zmieniają wybór, a <kbd>Enter</kbd> centruje mapę.
+* **Pełne okno wyszukiwarki (<kbd>Ctrl</kbd>+<kbd>D</kbd>):** menu *Narzędzia > Wyszukaj miejscowość lub działkę...* otwiera dwuzakładkowe okno wyszukiwania ze szczegółową listą wyników, buforem marginesu i automatycznym włączaniem warstw katastralnych.
 
 W lewym dolnym rogu okna znajduje się przycisk **Pomoc** (oraz klawisz <kbd>F1</kbd>) z podręczną instrukcją formatów zapytań i obsługi działek.
 
@@ -74,7 +73,21 @@ Program automatycznie przesunie mapę podglądu i ustawi optymalny poziom powię
 4. Opcja **Włącz warstwy: Ortofotomapa i Działki ewidencyjne (EGiB GUGiK)** automatycznie zaznacza w drzewie map fotomapę lotniczą oraz urzędowe granice i numery działek.
 5. Kliknij **Zaznacz na mapie**.
 
+![Okno wyszukiwania działki katastralnej ULDK]({{ '/pomoc/obrazy/16-szukaj-dzialki.png' | relative_url }})
+
+*Rysunek 1. Wyszukiwarka działek katastralnych ULDK: wyszukiwanie parceli po numerze i obrębie z automatycznym marginesem.*
+
 Program pobierze geometrię granic działki z państwowego rejestru, wycentruje widok, narysuje żółto-czerwony kontur działki z wierzchołkami oraz automatycznie wyznaczy siatkę segmentów pobierania obejmującą działkę wraz z zadanym marginesem.
+
+---
+
+## Obszar z poligonu (KML, GeoJSON, GeoPackage)
+
+Możesz wyznaczyć obszar pobierania na podstawie istniejącego pliku wektorowego z granicami (np. granica gminy, obrębu, nadleśnictwa, parku narodowego lub działki narysowanej w programie GIS):
+
+1. Wybierz polecenie *Sesja pobierania > Obszar pobierania z poligonu (KML, GeoJSON)...* albo kliknij odnośnik **Zmień ▾** w karcie *Obszar* pod mapą i wybierz *Obszar z poligonu...*. Możesz także po prostu **przeciągnąć plik** `.kml`, `.geojson`, `.json` lub `.gpkg` z Eksploratora Windows na mapę (Drag & Drop).
+2. Jeśli plik **GeoPackage (.gpkg)** zawiera kilka warstw wektorowych, program wyświetli okno wyboru warstwy.
+3. Program wczyta geometrię wielokąta, wyznaczy prostokątny obszar opisany na granicach poligonu, wyświetli żółty obrys na mapie i automatycznie obliczy optymalną siatkę segmentów.
 
 ---
 
@@ -102,7 +115,7 @@ Uchwyty zmieniają zasięg o **pełne segmenty**, co pozwala łatwo dodać braku
 
 ![Siatka segmentów na mapie z uchwytami narożników, boków i środka]({{ '/pomoc/obrazy/04-uchwyty-siatki.png' | relative_url }})
 
-*Rysunek 1. Uchwyty siatki segmentów: narożniki, środki boków oraz uchwyt centralny do przesuwania całego obszaru.*
+*Rysunek 2. Uchwyty siatki segmentów: narożniki, środki boków oraz uchwyt centralny do przesuwania całego obszaru.*
 
 | Uchwyt | Przeciągnięcie lewym przyciskiem myszy |
 |---|---|

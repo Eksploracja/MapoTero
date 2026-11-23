@@ -20,7 +20,7 @@ Praktyczny samouczek: pobierzesz fragment mapy topograficznej 1:25 000, a nastę
 </details>
 
 {: .wskazowka }
-**Szukasz najprostszej i najszybszej drogi bez ręcznych ustawień?** Wciśnij w programie <kbd>Ctrl</kbd>+<kbd>K</kbd> (lub kliknij ikonę różdżki pod powiększeniem mapy), aby otworzyć [Szybki kreator mapy](../../narzedzia/#szybki-kreator-mapy). Kreator prowadzi w 4 krokach od wyboru urządzenia docelowego po gotowy plik. Poniższy poradnik pokazuje pełną, klasyczną ścieżkę pracy w oknie głównym programu z ręczną kontrolą wszystkich parametrów.
+**Szukasz najprostszej i najszybszej drogi bez ręcznych ustawień?** Wciśnij w programie <kbd>Ctrl</kbd>+<kbd>K</kbd> (lub kliknij przycisk **🪄 Szybki kreator...** na pasku nad mapą), aby otworzyć [Szybki kreator mapy](../../narzedzia/#szybki-kreator-mapy). Kreator prowadzi w 4 krokach od wyboru urządzenia docelowego po gotowy plik. Poniższy poradnik pokazuje pełną, klasyczną ścieżkę pracy w oknie głównym programu z ręczną kontrolą wszystkich parametrów.
 
 ---
 
@@ -30,7 +30,7 @@ Upewnij się, że masz przygotowane:
 * uruchomiony program MapoTero i aktywne połączenie z internetem,
 * domyślne ustawienia programu (nie zmieniaj jeszcze żadnych opcji w oknie *Ustawienia*).
 
-W tym samouczku pobierzemy obszar o wymiarach około 6 × 6 km, złożony z siatki 2 × 2 segmenty.
+W tym samouczku pobierzemy obszar o wymiarach około 8 × 8 km, złożony z siatki 2 × 2 segmenty.
 
 ---
 
@@ -39,67 +39,72 @@ W tym samouczku pobierzemy obszar o wymiarach około 6 × 6 km, złożony z siat
 1. W prawym panelu, w drzewie **Wybierz mapy**, rozwiń grupę:  
    **Mapy topograficzne** > **Skany map topograficznych GUGiK**.
 2. Zaznacz pole wyboru przy pozycji **1:25 000, układ 1965** (nazwa techniczna na serwerze: *Raster_25_1965*).
-3. Wybrana warstwa pojawi się na liście *Wybrane warstwy oraz ich kolejność* z numerem `1)`. W polu *Piksel [m/pix]* program automatycznie podpowie optymalną wartość: **2**.
+3. Wybrana warstwa pojawi się na liście *Wybrane warstwy oraz ich kolejność* z numerem `1)`. W karcie *Parametry segmentów* program automatycznie podpowie optymalną wartość piksela: **2,00 m/pix**.
 
 {: .wskazowka }
-Jeśli przez pomyłkę zaznaczysz dodatkową warstwę, odznacz ją w drzewie albo zaznacz na liście *Wybrane warstwy* i kliknij przycisk **✕** (lub naciśnij klawisz <kbd>Delete</kbd>).
+Jeśli przez pomyłkę zaznaczysz dodatkową warstwę, odznacz ją w drzewie albo kliknij czerwony krzyżyk **✕** na końcu jej wiersza na liście *Wybrane warstwy* (lub naciśnij klawisz <kbd>Delete</kbd>).
 
 ---
 
-## Krok 2: Ustalenie parametrów siatki
+## Krok 2: Sprawdzenie parametrów w karcie pod mapą
 
-Na górnym pasku pozostaw wartości domyślne:
-* **Segment [pix]:** `2000` (jeden segment to plik o boku 2000 pikseli),
-* **Piksel [m/pix]:** `2` (jeden piksel w obrazie odpowiada 2 metrom w terenie, czyli pojedynczy segment pokrywa 4 × 4 km),
-* **Układ współrzędnych:** `PL-1992`.
+W karcie **Parametry segmentów** pod mapą sprawdź wartości (są ustawione domyślnie):
+* **Układ:** `PL-1992` (państwowy układ współrzędnych dla całej Polski),
+* **Bok segmentu:** `2000 px` (jeden segment to plik kwadratowy o boku 2000 pikseli),
+* **Piksel:** `2,00 m/pix` (jeden piksel obrazu odpowiada 2 metrom w terenie; pojedynczy segment pokrywa 4 × 4 km terenu).
+
+Jeśli chcesz zmienić te wartości, wystarczy kliknąć odnośnik **Zmień…** w tej karcie.
 
 ---
 
 ## Krok 3: Zaznaczenie obszaru na podglądzie
 
-1. Odszukaj interesujący Cię teren na mapie podglądu (przesuwaj widok lewym przyciskiem myszy, przybliżaj kółkiem).
+1. Odszukaj interesujący Cię teren na mapie podglądu (przesuwaj widok lewym przyciskiem myszy, przybliżaj kółkiem myszy lub przyciskami **+** / **-**). Możesz też wpisać miejscowość w polu **🔍 Szukaj miejsca lub działki...** nad mapą i wcisnąć <kbd>Enter</kbd>.
 2. Wciśnij **prawy przycisk myszy** w jednym narożniku planowanego obszaru, przeciągnij prostokąt i puść przycisk.
-3. Na mapie pojawi się niebieska siatka z uchwytami w narożnikach i na bokach. W polu *Wynikowy rozmiar siatki* zobaczysz wymiar `2 x 2`.
+3. Na mapie pojawi się siatka segmentów z uchwytami regulacji. W karcie *Obszar* pod mapą zobaczysz wymiar `8,0 × 8,0 km` oraz siatkę `2 × 2` (4 segmenty).
 
 ![Okno główne po wybraniu warstwy i zaznaczeniu obszaru]({{ '/pomoc/obrazy/01-pierwsza-mapa-wybor.png' | relative_url }})
 
-*Rysunek 1. Okno główne po wybraniu warstwy i wyznaczeniu siatki 2 × 2 segmenty.*
+*Rysunek 1. Okno główne po wybraniu warstwy i wyznaczeniu siatki segmentów na mapie.*
 
 {: .informacja }
 Siatka zaokrągla zasięg do pełnych segmentów, więc może być nieco większa od narysowanego prostokąta. Jej granice możesz precyzyjnie dopasować, przeciągając niebieskie uchwyty lewym przyciskiem myszy.
 
 ![Szczegół siatki segmentów z widocznymi uchwytami regulacji]({{ '/pomoc/obrazy/01-pierwsza-mapa-siatka.png' | relative_url }})
 
-*Rysunek 2. Niebieskie uchwyty pozwalają przesuwać krawędzie i narożniki siatki.*
+*Rysunek 2. Uchwyty pozwalają przesuwać krawędzie, narożniki i całą siatkę.*
 
 ---
 
-## Krok 4: Pobranie mapy
+## Krok 4: Pobranie segmentów
 
-1. Kliknij zielony przycisk **Pobierz** na górnym pasku.
-2. Na dolnym pasku stanu obserwuj postęp pobierania kolejnych segmentów.
-3. Po kilkunastu sekundach w polu *Komunikaty* pojawi się zielona informacja o zakończeniu pobierania.
-4. Kliknij żółtą ikonę folderu obok przycisku pobierania. W otwartym folderze sesji (`download\`) zobaczysz cztery pliki segmentów `_01_01.jpg` do `_02_02.jpg`, plik parametrów sesji `conf.txt` oraz wykaz współrzędnych `koordynaty.txt`.
+1. W karcie **Stan sesji** pod mapą kliknij wyróżniony kolorem przycisk **Pobierz segmenty**.
+2. Obserwuj postęp: ikona stanu pokazuje animowany łuk postępu, a pasek stanu na dole wyświetla pobierane pliki.
+3. Po kilkunastu sekundach ikona zmieni się w zielony znak ✓, a przycisk zmieni napis na **Eksportuj pobraną mapę…**.
+4. W prawym dolnym rogu na zakładce **Podgląd** możesz obejrzeć rzeczywistą próbkę pobranej mapy w skali 1:1 lub w powiększeniu lupą.
 
 {: .uwaga }
-Gdy komunikat wyświetli się na czerwono (*Nie udało się ściągnąć wszystkich segmentów…*), przyczyny znajdziesz w pliku `error.txt`. Zwykle wystarczy odczekać chwilę i kliknąć **Pobierz** jeszcze raz: program uzupełni tylko brakujące segmenty.
+Gdy na ikonie stanu pojawi się czerwony wykrzyknik (*Nie udało się ściągnąć wszystkich segmentów…*), kliknięcie diody stanu przełączy do zakładki **Komunikaty**, gdzie widać szczegóły błędu. Wystarczy odczekać chwilę i kliknąć **Pobierz segmenty** jeszcze raz: program bez problemu uzupełni tylko brakujące segmenty.
 
 ---
 
 ## Krok 5: Przygotowanie pliku wynikowego
 
-Pobrane segmenty możesz od razu przygotować do użycia w wybranej aplikacji:
+Pobrane segmenty możesz od razu wyeksportować i przesłać do wybranej aplikacji:
 
-### Wariant A: Mapa do telefonu lub nawigacji GPS (MBTiles)
-1. Wybierz menu *Narzędzia > Eksport mapy (KMZ, JNX, MBTiles, SQLiteDB, OruxMaps, GeoTIFF)* (<kbd>Ctrl</kbd>+<kbd>E</kbd>).
-2. Program otworzy okno z automatycznie wczytaną sesją.
-3. W sekcji formatów zaznacz **MBTiles** (dla Locus Map, OsmAnd lub OruxMaps).
-4. Kliknij **Eksportuj**. W folderze sesji powstanie gotowy plik `_eksport_2x2.mbtiles`.
+### Wariant A: Mapa do telefonu (MBTiles lub GeoPackage) z transferem przez Wi-Fi
+1. Kliknij przycisk **Eksportuj pobraną mapę…** w karcie stanu (lub wciśnij <kbd>Ctrl</kbd>+<kbd>E</kbd>).
+2. W oknie *Eksport mapy* w sekcji formatów wybierz **MBTiles** (dla Locus Map, OsmAnd, OruxMaps) lub **GeoPackage (.gpkg)** (dla QField, Locus Map, QGIS).
+3. Kliknij **Eksportuj**. Po wygenerowaniu pliku kliknij przycisk **Wyślij na telefon...**.
+4. Na ekranie pojawi się kod QR wygenerowany przez wbudowany serwer Wi-Fi. Zeskanuj go aparatem smartfona, aby bezpośrednio pobrać mapę do pamięci telefonu bez kabla USB i bez chmury!
 
-### Wariant B: Scalony arkusz do programu GIS (GeoTIFF)
-1. Wybierz menu *Narzędzia > Scalanie segmentów* (<kbd>Ctrl</kbd>+<kbd>L</kbd>) - otworzy się okno *Eksport mapy* z formatem *Arkusz*.
-2. Obok formatu *Arkusz* wybierz **GeoTIFF (bezstratny)** i kliknij **Eksportuj**.
-3. Powstanie plik `_scalone_segmenty_2x2.tif` (jeden arkusz 4000 × 4000 pikseli z georeferencją w układzie PL-1992), który możesz przeciągnąć wprost do okna programu QGIS lub ArcGIS.
+### Wariant B: Kopia do odbiornika Garmin (KMZ lub JNX)
+1. W oknie *Eksport mapy* wybierz **KMZ (Garmin Custom Maps)** lub wielopoziomowy **JNX (Garmin BirdsEye)**.
+2. Po wygenerowaniu pliku kliknij przycisk **Kopiuj na Garmina...** – program sam wykryje podłączone urządzenie USB i skopiuje plik do właściwego katalogu (`Garmin/CustomMaps` lub `Garmin/BirdsEye`).
+
+### Wariant C: Kafelkowany arkusz do programu GIS (GeoTIFF)
+1. W oknie *Eksport mapy* wybierz format **Arkusz**, a obok format **GeoTIFF (bezstratny)**.
+2. Kliknij **Eksportuj**. Program utworzy kafelkowany plik GeoTIFF 256×256 z wewnętrznymi piramidami pomniejszeń, który natychmiast otwiera się w programach QGIS, ArcGIS czy Avenza Maps.
 
 ---
 
@@ -109,7 +114,8 @@ Pobrane segmenty możesz od razu przygotować do użycia w wybranej aplikacji:
 |---|---|
 | dowiedzieć się, gdzie bezpiecznie przechowywać pobrane sesje | [Gdzie program zapisuje dane](../dane-programu/) |
 | poznać zasady doboru rozdzielczości i piksela | [Pojęcia podstawowe](../../pojecia/) |
-| poznać wszystkie przyciski i pola okna głównego | [Okno główne](../../okno-glowne/) |
+| poznać wszystkie elementy i menu okna głównego | [Okno główne](../../okno-glowne/) |
+| wygenerować mapę turystyczną lub historyczną w 4 krokach | [Szybki kreator mapy](../../narzedzia/#szybki-kreator-mapy) |
 | pobrać mapę wzdłuż trasy wycieczki GPX | [Obszar wzdłuż trasy](../../obszar/korytarz/) |
 | przenieść plik do aplikacji w telefonie | [Mapa w telefonie i odbiorniku GPS](../../eksport/aplikacje/) |
 | wstawić podkład do rysunku CAD | [Eksport do CAD](../../cad/) |

@@ -31,13 +31,15 @@ na stronie głównej oraz w samym programie (menu *Pomoc > Krótka instrukcja (b
 |---|---|
 | najszybciej przygotować gotową mapę w 4 krokach (smartfon, Garmin, wydruk, CAD) | [Szybki kreator mapy](narzedzia/#szybki-kreator-mapy) |
 | dowiedzieć się, do czego służy program i co potrafi | [Do czego służy MapoTero](do-czego-sluzy/) |
+| przesłać wyeksportowaną mapę prosto na telefon przez Wi-Fi i kod QR | [Przesyłanie przez Wi-Fi](narzedzia/#przesyłanie-mapy-na-telefon-przez-wi-fi-i-kod-qr) · [Mapa w telefonie](eksport/aplikacje/#przeniesienie-pliku-do-telefonu) |
+| skopiować mapę bezpośrednio na Garmina przez USB jednym kliknięciem | [Kopiowanie na Garmina przez USB](narzedzia/#kopiowanie-mapy-do-odbiornika-garmin-usb) · [Garmin](eksport/aplikacje/#garmin) |
 | mapę offline w telefonie z Androidem (Locus Map, OsmAnd, OruxMaps, AlpineQuest) | [Wybór obszaru](obszar/) → [Pobieranie](pobieranie/) → [Eksport mapy](eksport/) → [Mapa w telefonie](eksport/aplikacje/) |
 | mapę offline na iPhone lub iPada (Guru Maps) | [Mapa w telefonie i odbiorniku GPS: Guru Maps](eksport/aplikacje/#guru-maps-iphone-ipad-android) |
 | mapę w odbiorniku Garmin (JNX BirdsEye bez limitu lub KMZ z podziałem na tomy) | [Eksport mapy](eksport/) → [Formaty: JNX, KMZ](eksport/formaty/) |
 | szybko znaleźć miejscowość, adres lub działkę katastralną (ULDK GUGiK) | [Wyszukiwarka miejscowości i działek](obszar/zaznaczanie/#wyszukiwarka-miejscowości-adresów-i-działek-katastralnych) |
 | mapę tylko wzdłuż trasy wycieczki (bufor wzdłuż śladu GPX/KML/KMZ) | [Obszar wzdłuż trasy](obszar/korytarz/) |
 | profil wysokościowy trasy GPX/KML z państwowego LIDAR NMT | [Profil wysokościowy trasy](narzedzia/#profil-wysokościowy-trasy) |
-| nałożyć cieniowanie rzeźby lub mapę historyczną na ortofotomapę (tryb *Rzeźba terenu*) | [Kompozycje warstw i plastyczna rzeźba](pobieranie/kompozycje/) · [Okno główne: kanapka warstw](okno-glowne/#zbiory-map-i-warstwy) · [Nakładki i łączenie warstw](eksport/nakladki/) |
+| nałożyć cieniowanie rzeźby lub mapę historyczną na ortofotomapę (tryb *Rzeźba terenu*) | [Kompozycje warstw i plastyczna rzeźba](pobieranie/kompozycje/) · [Okno główne: kanapka warstw](okno-glowne/#katalog-map-i-lista-warstw) · [Nakładki i łączenie warstw](eksport/nakladki/) |
 | mapę, która automatycznie zmienia się wraz ze stopniem przybliżenia (wieloskalową) | [MBTiles wieloskalowy](mbtiles-wielowarstwowy/) · [Szybki kreator: mapy wieloskalowe](narzedzia/#szybki-kreator-mapy) |
 | przekonwertować kalibrowaną mapę OziExplorer (.map) z transformacją do WGS84 | [Konwerter map OziExplorer](narzedzia/#konwerter-map-oziexplorer-map) |
 | poprawić czytelność lub kontrast map i skanów (profil Garmin MIP, CAD) | [Korekta obrazów w folderze](narzedzia/#korekta-obrazów-w-folderze) · [Scalanie z korektą](scalanie/#nakładki-i-korekta-obrazu) |

@@ -10,7 +10,7 @@ parent: Pobieranie map
 Łączenie wielu warstw w jeden gotowy arkusz: plastyczne cieniowanie NMT, dynamiczna hipsometria, ortofotomapa 3D oraz granice działek katastralnych.
 {: .fs-5 .fw-300 }
 
-**Gdzie w programie:** panel *Wybrane warstwy oraz ich kolejność* oraz okno *Warstwy - zaawansowane* (przycisk `…`) w oknie głównym  
+**Gdzie w programie:** karta *Wybrane warstwy* w prawym panelu oraz okno miksera warstw (przycisk **Mikser…** w nagłówku karty lub kliknięcie próbki w zakładce *Podgląd*)  
 **Dotyczy wersji:** {{ site.wersja_programu }}
 
 <details open markdown="block">
@@ -26,7 +26,8 @@ W MapoTero możesz wybrać do 12 warstw jednocześnie i złożyć z nich spójn�
 
 * **Warstwa nr 1 (na samym dole):** to nieprzezroczysty podkład bazowy. Najczęściej jest to ortofotomapa, mapa topograficzna (np. BDOT10k lub skan 1:10 000) albo mapa archiwalna.
 * **Warstwy wyższe (2, 3…):** nakładają się na podkład. Mogą to być przezroczyste wektory (działki ewidencyjne, szlaki turystyczne) lub rastry modelujące teren (cieniowanie rzeźby NMT, hipsometria).
-* **Kolejność warstw:** zmieniasz przyciskami **▲** i **▼**, skrótem <kbd>Ctrl</kbd>+<kbd>↑</kbd>/<kbd>↓</kbd> albo przeciągając pozycję myszą.
+* **Kolejność warstw:** zmieniasz przeciągając pozycję myszą, skrótem <kbd>Ctrl</kbd>+<kbd>↑</kbd>/<kbd>↓</kbd> albo z menu kontekstowego prawego przycisku myszy. Górna warstwa na liście leży na wierzchu stosu.
+* **Krycie bezpośrednio na liście:** zaznaczona warstwa na liście wyświetla miniaturowy suwak krycia bezpośrednio w swoim wierszu, a krzyżyk ✕ na końcu wiersza natychmiast ją usuwa.
 
 Gdy wszystkie warstwy pochodzą z tego samego serwera WMS i mają krycie 100%, łączy je bezpośrednio serwer w jednym zapytaniu. Jeśli warstwy pochodzą z różnych źródeł (np. podkład z kafelków WMTS, a nakładka z serwera WMS) lub mają zmniejszone krycie, program pobiera każdą warstwę osobno z przezroczystym tłem i precyzyjnie nakłada je w segment wynikowy.
 
@@ -34,7 +35,7 @@ Gdy wszystkie warstwy pochodzą z tego samego serwera WMS i mają krycie 100%, �
 
 ## Tryby nakładania i dobór krycia
 
-Do dokładnego zestrojenia kompozycji służy okno **Warstwy - zaawansowane**, otwierane przyciskiem **…** obok listy warstw w oknie głównym (lub z poziomu Szybkiego kreatora mapy). Znajdziesz w nim suwaki krycia dla każdej warstwy, wybór trybu mieszania, podgląd na żywo na rzeczywistej próbce terenu (300 × 300 px) z lupą rastrową (`-`, `1:1`, `+` lub kółko myszy), przycisk *Korekta obrazu...* oraz podręczną instrukcję (przycisk **Pomoc** i klawisz <kbd>F1</kbd>).
+Do dokładnego zestrojenia kompozycji służy okno **Warstwy - zaawansowane** (mikser warstw), otwierane przyciskiem **Mikser…** w nagłówku karty *Wybrane warstwy* (albo kliknięciem próbki podglądu). Znajdziesz w nim suwaki krycia dla każdej warstwy, wybór trybu mieszania, podgląd na żywo na rzeczywistej próbce terenu (300 × 300 px) z lupą rastrową (`-`, `1:1`, `+` lub kółko myszy), przycisk *Korekta obrazu...* oraz podręczną instrukcję (przycisk **Pomoc** i klawisz <kbd>F1</kbd>).
 
 | Tryb mieszania | Jak działa | Kiedy stosować |
 |---|---|---|

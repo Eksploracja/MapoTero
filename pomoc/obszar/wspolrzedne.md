@@ -20,15 +20,29 @@ Dokładny zasięg można wpisać z klawiatury, np. narożniki arkusza mapy, dzia
 {:toc}
 </details>
 
-## Włączenie wpisywania z klawiatury
+## Okno precyzyjnego wpisywania współrzędnych
 
-1. W schemacie siatki okna głównego zaznacz małe pole wyboru obok pola `x` górnego (dymek: *wpisywanie współrzędnych
-   XY z klawiatury*).
-2. Wpisz współrzędne w pola `x` i `y`.
+Najwygodniejszym sposobem wpisania dokładnych granic obszaru jest dedykowane okno współrzędnych:
 
-Pola zasięgu stają się edytowalne, a zaznaczanie prawym przyciskiem myszy i uchwyty na mapie są wyłączone
-(żeby przypadkowe kliknięcie nie zmieniło wpisanych wartości). Aby wrócić do zaznaczania myszą, odznacz to pole.
-Program zapamiętuje jego stan do następnego uruchomienia. W trakcie pobierania pola nie można przełączyć.
+1. W karcie **Obszar** pod mapą kliknij odnośnik **Zmień ▾** i wybierz **Wpisz współrzędne…** (polecenie dostępne także w menu *Sesja pobierania*).
+2. W oknie wpisz wartości krawędzi:
+   * **x dolne** (południowa granica) i **x górne** (północna granica),
+   * **y lewe** (zachodnia granica) i **y prawe** (wschodnia granica).
+3. Dla układów w metrach (PL-1992, PL-2000, UTM) możesz użyć przycisku **Zaokrąglij do km** — program automatycznie rozszerzy krawędzie na zewnątrz do pełnych kilometrów, co ułatwia wpasowanie siatki w równe moduły kilometrowe.
+4. Kliknij **OK**.
+
+Program automatycznie wyznaczy siatkę segmentów, zaktualizuje pola i wycentruje widok mapy na podanym obszarze.
+
+---
+
+## Wklejanie współrzędnych w wyszukiwarce
+
+Współrzędne pojedynczego punktu możesz także wkleić wprost do pola **Szukaj miejsca lub działki…** na górnym pasku narzędzi (<kbd>Ctrl</kbd>+<kbd>F</kbd>):
+* stopnie dziesiętne WGS84: np. `50.0614, 19.9366`,
+* stopnie, minuty i sekundy: np. `50°03'41"N 19°56'12"E`,
+* współrzędne płaskie X, Y w metrach (np. z operatu geodezyjnego w układzie PL-1992 lub PL-2000).
+
+Po naciśnięciu <kbd>Enter</kbd> mapa natychmiast przesuwa się w zadane miejsce.
 
 ---
 

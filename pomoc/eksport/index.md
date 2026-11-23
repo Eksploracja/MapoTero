@@ -7,11 +7,10 @@ has_children: true
 # Eksport mapy
 {: .no_toc }
 
-Zapis pobranej mapy w formatach dla odbiorników GPS i aplikacji mobilnych, także jako przezroczystej nakładki
-albo z kilkoma mapami nałożonymi na siebie.
+Zapis pobranej mapy w formatach dla odbiorników GPS i aplikacji mobilnych, kafelkowanego GeoTIFF, a także bezpośredni transfer przez Wi-Fi z kodem QR lub USB.
 {: .fs-5 .fw-300 }
 
-**Gdzie w programie:** menu *Narzędzia > Eksport mapy (KMZ, JNX, MBTiles, SQLiteDB, OruxMaps, GeoTIFF)* (<kbd>Ctrl</kbd>+<kbd>E</kbd>)  
+**Gdzie w programie:** menu *Narzędzia > Eksport mapy (KMZ, JNX, MBTiles, GeoPackage, SQLiteDB, OruxMaps, GeoTIFF)* (<kbd>Ctrl</kbd>+<kbd>E</kbd>) albo przycisk **Eksportuj pobraną mapę…** w karcie stanu okna głównego  
 **Dotyczy wersji:** {{ site.wersja_programu }}
 
 <details open markdown="block">
@@ -23,86 +22,72 @@ albo z kilkoma mapami nałożonymi na siebie.
 
 ## Najkrótsza droga
 
-1. Pobierz mapę (sesja musi mieć plik `conf.txt`).
-2. Naciśnij <kbd>Ctrl</kbd>+<kbd>E</kbd>. Okno otworzy się z folderem bieżącej sesji.
-3. Wybierz format (zob. [Wybór formatu](formaty/)).
+1. Pobierz segmenty mapy (sesja musi mieć plik `conf.txt`).
+2. Naciśnij <kbd>Ctrl</kbd>+<kbd>E</kbd> (lub kliknij przycisk **Eksportuj pobraną mapę…**). Okno otworzy się z automatycznie wczytaną sesją.
+3. Wybierz format docelowy (zob. [Wybór formatu](formaty/)).
 4. Kliknij **Eksportuj**.
-5. Plik pojawi się w folderze sesji. Skopiuj go do telefonu lub odbiornika
-   ([Mapa w telefonie i odbiorniku GPS](aplikacje/)).
+5. Po zakończeniu kliknij **Wyślij na telefon...** (aby zeskanować kod QR przez Wi-Fi) albo **Kopiuj na Garmina...** (kopiowanie na dysk USB).
 
 ![Okno eksportu mapy z ponumerowanymi sekcjami]({{ '/pomoc/obrazy/10-eksport-mapy.png' | relative_url }})
 
-*Rysunek 1. Okno eksportu mapy z ponumerowanymi sekcjami parametrów.*
+*Rysunek 1. Okno eksportu mapy programu MapoTero z ponumerowanymi sekcjami parametrów.*
 
 | Nr | Sekcja okna | Opis |
 |---|---|---|
-| **1** | *Folder sesji* | folder sesji (`conf.txt`) oraz podsumowanie: liczba segmentów, piksel, układ, opis mapy i data |
-| **2** | *Format* | wybór formatu: Garmin BirdsEye (JNX), KMZ dla Garmin (z opcją podziału na tomy), KMZ, MBTiles, GeoPackage (.gpkg), SQLiteDB, OruxMaps, *Arkusz* (scalanie segmentów: GeoTIFF, JPEG, PNG z plikami georeferencji), TrekBuddy / Locus Map (`.tar`) lub *Wieloskalowy...* |
-| **3** | *Kafle Web Mercator* | zakres poziomów powiększenia i opcja przezroczystych kafli PNG |
-| **4** | *Warstwy, przezroczystość i filtr MIP* | nakładka, przezroczyste białe tło, nakładanie warstw z innych sesji oraz korekcja MIP dla ekranów Garmin |
-| **5** | *Rozmiar pliku* i *Jakość JPEG* | szacowanie wagi pliku, dopasowanie do limitu MB oraz stopień kompresji JPEG |
-| **6** | Plan eksportu i przyciski | podgląd liczby kafli i poziomów, przycisk **Pomoc** oraz przyciski **Eksportuj** / **Przerwij** |
+| **1** | *Folder sesji* | folder eksportowanej sesji (`conf.txt`) oraz zestawienie: liczba segmentów, rozdzielczość piksela, układ, opis mapy i data pobrania |
+| **2** | *Format* | wybór formatu: **Garmin BirdsEye (JNX)**, **KMZ dla Garmin** (z automatycznym podziałem na tomy), uniwersalny **KMZ**, **MBTiles**, nowoczesny **GeoPackage (.gpkg)**, **SQLiteDB**, **OruxMaps**, **Arkusz** (scalanie: kafelkowany GeoTIFF z piramidami, JPEG, PNG) oraz **TrekBuddy / Locus Map (.tar)** |
+| **3** | *Kafle Web Mercator* | zakres poziomów powiększenia (zoom min–max) oraz opcja przezroczystych kafli PNG |
+| **4** | *Warstwy, przezroczystość i filtr MIP* | nakładka, zamiana białego tła na przezroczyste, łączenie z warstwami innych sesji oraz profil korekty obrazu / filtr MIP dla ekranów Garmin |
+| **5** | *Rozmiar pliku* i *Jakość JPEG* | dynamiczne szacowanie wagi pliku w MB, dopasowanie poziomu do zadanego limitu oraz suwak jakości kompresji JPEG |
+| **6** | Plan eksportu i przyciski | podsumowanie liczby generowanych kafelków, przycisk **Pomoc** (<kbd>F1</kbd>), **Eksportuj**, a po zakończeniu: **Pokaż w folderze**, **Wyślij na telefon...** i **Kopiuj na Garmina...** |
 
 ---
 
-## Okno eksportu krok po kroku
+## Nowe funkcje eksportu
 
-| Grupa | Zawartość |
-|---|---|
-| *Folder sesji (segmenty i plik conf.txt)* | folder eksportowanej sesji. Opcja **Zmień folder** wskazuje inną sesję. Pod spodem: liczba segmentów (i ile z nich istnieje), piksel, układ, opis mapy, źródło danych i data pobrania |
-| *Format* | Garmin BirdsEye (JNX), KMZ dla Garmin (z podziałem na tomy), KMZ, MBTiles, GeoPackage (.gpkg), SQLiteDB, OruxMaps, *Arkusz* ([Scalanie segmentów](../scalanie/): format arkusza i pliki world file i `.prj`, `.map`, `.tab`, `.kml`), [TrekBuddy / Locus Map](aplikacje/#trekbuddy). Pole *Korekta obrazu* z przyciskiem *Korekta obrazu...* poprawia obraz. Przycisk **Wieloskalowy...** otwiera [MBTiles wieloskalowy](../mbtiles-wielowarstwowy/) |
-| *Kafle Web Mercator (MBTiles, GeoPackage, SQLiteDB, OruxMaps, JNX)* | zakres poziomów powiększenia, kafle PNG. Zobacz: [Poziomy powiększenia i rozmiar pliku](powiekszenia/) |
-| *Warstwy i przezroczystość* | nakładka, białe tło przezroczyste, warstwy z innych folderów z kryciem oraz filtr MIP dla Garmina. Zobacz: [Nakładki i łączenie warstw](nakladki/) |
-| *Rozmiar pliku* | szacowanie rozmiaru, limit MB i dopasowanie poziomu |
-| *Jakość JPEG* | 10-100, domyślnie 85 |
-| przyciski | **Eksportuj**, **Przerwij**, **Pomoc** (oraz klawisz <kbd>F1</kbd> – podręczna pomoc dedykowana) |
-
-{: .wskazowka }
-**Dostosowanie do wysokości ekranu:** Okno eksportu automatycznie dopasowuje swoją wysokość do rozdzielczości roboczej ekranu. Na mniejszych wyświetlaczach laptopów pojawia się pionowy pasek przewijania, dzięki czemu żaden przycisk ani opcja nie zostają ucięte.
-
-Pod opcjami program na bieżąco pokazuje **plan eksportu**: liczbę kafli i poziomy powiększenia, a dla formatu KMZ siatkę
-kafli i informację, czy rozdzielczość trzeba zmniejszyć ze względu na limit kafli.
+* **Bezpośredni transfer Wi-Fi z kodem QR:** po wygenerowaniu mapy przycisk **Wyślij na telefon...** uruchamia wbudowany serwer lokalny i wyświetla kod QR. Wystarczy skierować aparat smartfona na ekran, aby pobrać mapę do telefonu bez podłączania kabla USB i bez wysyłania plików do chmury internetowej.
+* **Wykrywanie odbiorników Garmin przez USB:** przycisk **Kopiuj na Garmina...** automatycznie wykrywa podłączony odbiornik w trybie pamięci masowej USB i kopiuje plik do odpowiedniego folderu (`Garmin/CustomMaps` dla KMZ lub `Garmin/BirdsEye` dla JNX).
+* **Format OGC GeoPackage (.gpkg):** standard otwartej bazy danych kafelków Web Mercator (EPSG:3857), bezpośrednio obsługiwany przez aplikacje mobilne GIS (QField, Mergin Maps) oraz turystyczne (Locus Map, OruxMaps, QGIS).
+* **Kafelkowany GeoTIFF z piramidami (Cloud-Optimized GeoTIFF):** format *Arkusz > GeoTIFF* tworzy kafelkowanie 256×256 i wewnętrzny łańcuch pomniejszeń (IFD reduced overviews), dzięki czemu wielogigabajtowe arkusze otwierają się w programach QGIS, ArcGIS czy Avenza Maps natychmiastowo.
+* **Automatyczny podział KMZ na tomy:** przy eksporcie map przekraczających limit 100 kafli odbiornika Garmin program oferuje inteligentny podział na tomy (`_tom1.kmz`, `_tom2.kmz`) bez konieczności sztucznego obniżania rozdzielczości.
+* **Płynne skalowanie okna:** na mniejszych ekranach laptopów okno eksportu wyświetla pionowy pasek przewijania, gwarantując pełny dostęp do wszystkich opcji i przycisków.
 
 ---
 
 ## Komunikaty przy otwieraniu sesji
 
-* *Segmenty gotowe do eksportu.* Wszystko w porządku.
-* *W folderze jest plik error.txt: zestaw segmentów jest niekompletny…* Brakujące segmenty będą pustymi miejscami
-  na mapie. Najpierw [dopobierz je](../pobieranie/przebieg/#wznawianie).
-* *Segmenty pobrane wzdłuż trasy (korytarz)…* Poza korytarzem mapa będzie pusta (przezroczysta w kaflach PNG).
+* *Segmenty gotowe do eksportu.* Wszystkie pliki sesji są kompletne.
+* *W folderze jest plik error.txt: zestaw segmentów jest niekompletny…* Brakujące segmenty będą pustymi miejscami na mapie. Warto najpierw [dopobrać je w oknie głównym](../pobieranie/przebieg/#wznawianie).
+* *Segmenty pobrane wzdłuż trasy (korytarz)…* Poza korytarzem trasy mapa będzie pusta (przezroczysta w kaflach PNG lub biała w JPEG).
 
 ---
 
-## Plik wynikowy
+## Pliki wynikowe
 
-Wynik zapisywany jest **w folderze sesji**. Nazwa zawiera rozmiar siatki segmentów:
+Plik mapy zapisywany jest bezpośrednio **w folderze bieżącej sesji**:
 
-| Format | Plik |
+| Format | Przykładowa nazwa pliku |
 |---|---|
-| KMZ dla Garmin | `_eksport_10x8_garmin.kmz` |
+| KMZ dla Garmin | `_eksport_10x8_garmin.kmz` (lub `..._tom1.kmz`) |
 | KMZ | `_eksport_10x8.kmz` |
+| Garmin BirdsEye | `_eksport_10x8.jnx` |
 | MBTiles | `_eksport_10x8.mbtiles` |
-| GeoPackage | `_eksport_10x8.gpkg` |
+| OGC GeoPackage | `_eksport_10x8.gpkg` |
 | SQLiteDB | `_eksport_10x8.sqlitedb` |
 | OruxMaps | folder `_eksport_10x8_oruxmaps` |
+| Arkusz GeoTIFF | `_scalone_segmenty_10x8.tif` |
+| Paczka TrekBuddy | `_eksport_10x8.tar` |
 
-Kolejny eksport tego samego formatu **zastępuje** poprzedni plik. Jeśli chcesz zachować kilka wersji (np. z różnymi
-poziomami), zmień nazwę pliku po eksporcie.
-
-Mapa w aplikacji ma nazwę złożoną z opisu mapy (zbiór map i warstwa) i daty pobrania. MBTiles i KMZ zawierają też
-opis ze źródłem danych (atrybucję).
+Kolejny eksport tego samego formatu w tym samym folderze **zastępuje** poprzedni plik. Jeśli chcesz zachować kilka wariantów, zmień nazwę pliku po zakończeniu eksportu.
 
 ---
 
-## Czas eksportu
+## Czas trwania eksportu
 
-Eksport może trwać od kilku sekund do wielu godzin, zależnie od liczby kafli. Gdy plan przekracza 2 mln kafli,
-program pyta, czy kontynuować. Kafle bez danych (np. poza korytarzem) nie są zapisywane. Przerwany lub nieudany
-eksport nie zostawia niedokończonego pliku.
+Eksport trwa zazwyczaj od kilkunastu sekund do kilku minut, w zależności od liczby generowanych kafelków i wybranego formatu kompresji. Gdy plan przekracza 2 miliony kafli, program wyświetla ostrzeżenie z pytaniem o potwierdzenie. Puste kafle (np. poza wyznaczonym korytarzem trasy) są automatycznie pomijane, co drastycznie oszczędza czas i miejsce na dysku.
 
 ---
 
-➡️ **Kolejny krok:** [Wybór formatu eksportu →](formaty/)
+➡️ **Kolejny krok:** [Szczegółowy przegląd formatów eksportu →](formaty/)
 
-*Zobacz też: [Wielowarstwowy MBTiles](../mbtiles-wielowarstwowy/) · [Eksport do CAD](../cad/) · [Scalanie segmentów](../scalanie/)*
+*Zobacz też: [Wieloskalowy MBTiles](../mbtiles-wielowarstwowy/) · [Eksport do CAD](../cad/) · [Scalanie segmentów w arkusz](../scalanie/)*

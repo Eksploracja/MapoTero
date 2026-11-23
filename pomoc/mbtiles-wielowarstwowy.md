@@ -6,7 +6,7 @@ nav_order: 13
 # Wielowarstwowy MBTiles
 {: .no_toc }
 
-Kompilacja kilku pobranych sesji do jednego pliku MBTiles: każda warstwa może być widoczna w swoim zakresie
+Kompilacja kilku pobranych sesji do jednego pliku MBTiles lub OGC GeoPackage (.gpkg): każda warstwa może być widoczna w swoim zakresie
 powiększeń albo mieszać się z warstwami leżącymi pod nią.
 {: .fs-5 .fw-300 }
 
@@ -84,7 +84,10 @@ Po prawej stronie okna znajduje się panel **Symulacja i podgląd zoomu**:
 
 ## Parametry pliku
 
-* **Plik wynikowy** (domyślnie `mapa_wielowarstwowa_RRRRMMDD_GGMM.mbtiles` w `download\`) i przycisk **Pokaż w folderze** otwierający plik w Eksploratorze.
+* **Format bazy (Typ):**
+  * **MBTiles (`.mbtiles`):** klasyczna baza kafelkowa dla Locus Map, OsmAnd, OruxMaps, Guru Maps,
+  * **OGC GeoPackage (`.gpkg`):** nowoczesna otwarta baza kafelkowa OGC, standard dla programów mobilnego GIS (QField, Mergin Maps, SW Maps) i QGIS.
+* **Plik wynikowy** (domyślnie `mapa_wielowarstwowa_RRRRMMDD_GGMM.mbtiles` lub `.gpkg` w `download\`) i przycisk **Pokaż w folderze** otwierający plik w Eksploratorze.
 * **Nazwa mapy**: nazwa widoczna na liście map w aplikacji mobilnej.
 * **Format kafli:**
   * *Smart Hybrid (JPG + PNG przezroczyste)* *(zalecany)*: kafle pełne zapisuje jako lekki JPEG, a kafle z przezroczystością lub na brzegach jako PNG.
@@ -94,6 +97,7 @@ Po prawej stronie okna znajduje się panel **Symulacja i podgląd zoomu**:
 * **Szybka piramida w pasmach warstw** *(domyślnie włączone)*: przyspiesza zapis nawet o ok. 70%, generując mniejsze poziomy
   przez szybkie dwukrotne zmniejszanie tam, gdzie aktywna jest ta sama warstwa.
 * **Wypełnij brakujące poziomy powiększeń przeskalowaną warstwą niższą**: zapobiega „dziurom” w zoomie, jeśli między zakresami warstw została luka.
+* **Przycisk Rozłączne zakresy:** automatycznie dzieli poziomy powiększeń pomiędzy dodane warstwy, by przełączały się płynnie bez nakładania.
 
 ---
 

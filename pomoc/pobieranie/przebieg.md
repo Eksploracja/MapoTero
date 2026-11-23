@@ -11,7 +11,7 @@ Program pobiera kilka segmentów jednocześnie i zapisuje je w folderze sesji. P
 przerwać i później wznowić.
 {: .fs-5 .fw-300 }
 
-**Gdzie w programie:** przyciski *Pobierz* i *Przerwij pobieranie* w oknie głównym  
+**Gdzie w programie:** przycisk **Pobierz segmenty** (w trakcie pobierania: **Przerwij pobieranie**) w karcie *Stan sesji* pod mapą  
 **Dotyczy wersji:** {{ site.wersja_programu }}
 
 <details open markdown="block">

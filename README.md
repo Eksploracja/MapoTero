@@ -212,17 +212,19 @@ Program to jeden plik **MapoTero.exe** (wersja 64-bitowa dla systemu Windows), d
    * Opcjonalnie wyeksportuj mapę do JNX, KMZ, MBTiles, SQLiteDB, OruxMaps albo paczki TrekBuddy / Locus Map (*Narzędzia > Eksport mapy*), aby wgrać ją do odbiornika GPS lub aplikacji mobilnej.
    * Opcjonalnie wyeksportuj mapę do programu CAD (*Narzędzia > Eksport do CAD*): rysunek DXF otwórz w programie CAD, a skrypt SCR uruchom poleceniem `SCRIPT` w otwartym rysunku (jednostki: metry). Program LISP (AutoCAD, BricsCAD, ZWCAD, AutoCAD LT od wersji 2024) wczytaj poleceniem `APPLOAD` - wstawia też numery segmentów i opis, a po zakończeniu przywraca ustawienia rysunku. Oś X rysunku to wschód, oś Y - północ; mapa trafia na warstwy `MAPOTERO_...`. Przy setkach segmentów wygodniej wstawić scalony arkusz (GeoTIFF albo JPEG z plikiem world file) - przycisk *Scal segmenty...* w oknie eksportu do CAD.
 
-![Uproszczona instrukcja obsługi](obrazy/instrukcja.jpg)
-
----
-
 ## Wygląd okien programu
 
 ### Główne okno programu
-![Główne okno programu](obrazy/przod.jpg)
+![Główne okno programu](pomoc/obrazy/03-okno-glowne.png)
+
+### Szybki kreator mapy
+![Szybki kreator mapy](pomoc/obrazy/16-szybki-kreator.png)
 
 ### Okno ustawień
-![Okno ustawień](obrazy/tyl.jpg)
+![Okno ustawień](pomoc/obrazy/07-ustawienia.png)
+
+### Eksport mapy (formaty mobilne, arkusze GeoTIFF, transfer Wi-Fi)
+![Okno eksportu mapy](pomoc/obrazy/10-eksport-mapy.png)
 
 ---
 

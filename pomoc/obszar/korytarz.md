@@ -11,7 +11,7 @@ Zamiast całego prostokąta program pobiera tylko segmenty leżące w pasie wzd�
 krętej to wielokrotnie mniej danych.
 {: .fs-5 .fw-300 }
 
-**Gdzie w programie:** menu *Sesja pobierania > Obszar pobierania wzdłuż trasy (GPX, KML, KMZ)...*  
+**Gdzie w programie:** menu *Sesja pobierania > Obszar pobierania wzdłuż trasy (GPX, KML, KMZ)...*, odnośnik **Zmień ▾** w karcie *Obszar* pod mapą albo przeciągnięcie pliku trasy na mapę (Drag & Drop)  
 **Dotyczy wersji:** {{ site.wersja_programu }}
 
 <details open markdown="block">
@@ -41,6 +41,7 @@ Program odczytuje następujące formaty:
 | **GPX** | ślady (*track*) i trasy (*route*). Gdy plik zawiera tylko punkty (*waypoint*), program łączy je kolejno linią |
 | **KML** | linie (również w grupach), ślady `gx:Track`. Obrys wielokąta traktowany jest jak linia |
 | **KMZ** | pierwszy dokument KML znaleziony w archiwum |
+| **GeoPackage (.gpkg)** | warstwy wektorowe zawierające linie (`LineString`, `MultiLineString`), np. trasy lub warianty dróg wyrysowane w QGIS (gdy plik ma kilka warstw, program pyta o wybór) |
 
 Takie pliki generują serwisy i aplikacje turystyczne (np. Mapy.com, Komoot, Locus Map, OsmAnd i Google Earth). Plik może zawierać wiele odcinków. Program uwzględni je wszystkie.
 

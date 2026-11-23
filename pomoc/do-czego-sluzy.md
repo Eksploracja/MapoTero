@@ -60,9 +60,12 @@ Podłączanie serwerów WMS bezpośrednio w programie QGIS bywa uciążliwe przy
 
 ## Udogodnienia ułatwiające pracę
 
+* **Bezpośredni transfer map na telefon przez Wi-Fi i kod QR:** błyskawiczne przesyłanie wyeksportowanej mapy (.mbtiles, .gpkg, .tif, .kmz, .sqlitedb, .tar) prosto do pamięci telefonu przez domowe Wi-Fi — bez szukania kabla USB, bez logowania i bez chmury (zob. [Przesyłanie przez Wi-Fi](../narzedzia/#przesyłanie-mapy-na-telefon-przez-wi-fi-i-kod-qr)).
+* **Bezpośrednie kopiowanie na odbiornik Garmin przez USB:** program automatycznie wykrywa podłączony odbiornik Garmin oraz karty microSD, sprawdza wolną pamięć i jednym kliknięciem kopiuje pliki KMZ lub JNX do właściwych folderów (`Garmin/CustomMaps` lub `Garmin/BirdsEye`).
 * **Wyszukiwarka z autouzupełnianiem (<kbd>Ctrl</kbd>+<kbd>F</kbd>):** podpowiedzi miejscowości i adresów w trakcie pisania (geokodery Photon i OSM Nominatim) z priorytetem odległości od centrum mapy. Obsługuje także bezpośrednie wklejanie współrzędnych (WGS84, PL-1992, PL-2000).
-* **Podgląd zestawu warstw na żywo:** miniatura w prawym dolnym narożniku okna głównego renderuje próbkę miksowania warstw ze środka siatki w skali 1:1, z lupą ×2 i widokiem oddalonym ×½, od razu uwzględniając krycie i tryby mieszania.
+* **Podgląd zestawu warstw na żywo:** zakładka *Podgląd* w prawym panelu renderuje próbkę miksowania warstw ze środka siatki w skali 1:1, z lupą ×2 i widokiem oddalonym ×½, od razu uwzględniając krycie i tryby mieszania.
 * **Korekta obrazów w folderze:** narzędzie do wsadowej optymalizacji kontrastu, ostrości i nasycenia dla całych folderów map lub skanów z zachowaniem plików georeferencji.
+* **Konwerter kafelkowanego GeoTIFF:** automatyczne kafelkowanie 256×256 i piramida podkatalogów pomniejszeń (Cloud-Optimized GeoTIFF) dla natychmiastowego otwierania wielkich arkuszy.
 * **Dedykowany przycisk „Pomoc” w każdym oknie:** każde niezależne narzędzie programu posiada przycisk *Pomoc* (oraz skrót klawiszowy <kbd>F1</kbd>), który otwiera podręczną instrukcję z bezpośrednim odnośnikiem do odpowiedniego rozdziału podręcznika.
 
 ---

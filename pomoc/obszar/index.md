@@ -14,9 +14,11 @@ Obszar pobierania można zaznaczyć na mapie, wpisać współrzędnymi albo wyzn
 
 | Sposób | Kiedy | Opis |
 |---|---|---|
-| zaznaczenie prawym przyciskiem myszy | najczęściej: szybki wybór okolicy na podglądzie | [Zaznaczanie na mapie](zaznaczanie/) |
-| wpisanie współrzędnych | dokładny zasięg: arkusz mapy, działka, obszar z projektu | [Wpisywanie współrzędnych](wspolrzedne/) |
-| pas wzdłuż trasy | wycieczka, spływ, trasa rowerowa bez pobierania zbędnego otoczenia | [Obszar wzdłuż trasy](korytarz/) |
+| zaznaczenie na mapie (przycisk na pasku lub prawy przycisk myszy) | najczęściej: szybki wybór okolicy na podglądzie z regulacją siatki uchwytami | [Zaznaczanie na mapie](zaznaczanie/) |
+| wyszukiwarka miejscowości, adresów i działek katastralnych ULDK | lokalizacja parceli po numerze TERYT lub nazwie miejscowości i obrębu | [Wyszukiwarka i działki ULDK](zaznaczanie/#wyszukiwarka-miejscowości-adresów-i-działek-katastralnych) |
+| wpisanie współrzędnych z klawiatury | dokładny zasięg w metrach (arkusz mapy, projekt CAD, zaokrąglenie do km) | [Wpisywanie współrzędnych](wspolrzedne/) |
+| obszar wzdłuż trasy (korytarz GPX, KML, KMZ, GPKG) | wycieczka, spływ, trasa rowerowa bez pobierania zbędnego otoczenia | [Obszar wzdłuż trasy](korytarz/) |
+| obszar z poligonu (KML, GeoJSON, GeoPackage .gpkg) | granice administracyjne gminy, lasu lub rezerwatu z pliku wektorowego | [Zaznaczanie na mapie](zaznaczanie/) |
 
 Przed kliknięciem *Pobierz* sprawdź liczbę segmentów i objętość danych: [Jak duży obszar pobrać](wielkosc/).
 

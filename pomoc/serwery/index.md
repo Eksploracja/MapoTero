@@ -10,7 +10,7 @@ has_children: true
 Własne zbiory map z dowolnych serwerów WMS, WMTS oraz kafelkowych XYZ i TMS: przez kreator z katalogiem usług albo ręczną edycję pliku.
 {: .fs-5 .fw-300 }
 
-**Gdzie w programie:** menu *Narzędzia > Dodaj nowy serwer WMS / WMTS...* lub przycisk **`[+]`** nad listą map  
+**Gdzie w programie:** przycisk **+ Serwer…** w nagłówku karty katalogu map lub menu *Narzędzia > Dodaj nowy serwer WMS / WMTS...*  
 **Dotyczy wersji:** {{ site.wersja_programu }}
 
 Dodane zbiory trafiają do drzewa *Wybierz mapy* w gałęzi **Dodane serwery** (chyba że dopiszesz je ręcznie do `warstwy\katalog.txt`).

@@ -471,4 +471,4 @@ Mapy pochodzą z publicznych rejestrów i projektów społecznościowych (GUGiK,
 
 ➡️ **Kolejny krok:** [Współpraca z innymi programami GIS i CAD →](../inne-programy/)
 
-*Zobacz też: [Dodawanie serwerów map](../serwery/) · [Ochrona serwerów map](../pobieranie/serwery/) · [Okno główne](../okno-glowne/#zbiory-map-i-warstwy)*
+*Zobacz też: [Dodawanie serwerów map](../serwery/) · [Ochrona serwerów map](../pobieranie/serwery/) · [Okno główne](../okno-glowne/#katalog-map-i-lista-warstw)*

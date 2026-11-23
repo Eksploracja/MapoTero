@@ -23,11 +23,11 @@ Który format wybrać dla której aplikacji lub urządzenia.
 
 | Format | Dla | Budowa | Uwagi |
 |---|---|---|---|
-| **KMZ: Garmin Custom Maps** | odbiorniki Garmin | kafle JPEG do 1024 × 1024 px w WGS84 | opcjonalny automatyczny podział na tomy przy ponad 100 kaflach |
-| **Garmin BirdsEye (JNX)** | odbiorniki Garmin (firmware z obsługą JNX) | wielopoziomowy raster z piramidą powiększeń | brak limitu 100 kafli, kopiowany do folderu `Garmin/BirdsEye` |
-| **Arkusz** (scalanie segmentów) | Avenza Maps, QField, ArcGIS, CAD, QGIS | jeden plik GeoTIFF, JPEG albo PNG z georeferencją | pliki world file i `.prj`, `.map`, `.tab`, `.kml`; nakładki z innych folderów |
-| **TrekBuddy / Locus Map** | Locus Map, TrekBuddy | archiwum `.tar` z kaflami 512 px, `.map` i `.set` | z dowolnej pobranej sesji, z nakładkami |
-| **KMZ** | Locus Map, OruxMaps, Google Earth | kafle do 1024 × 1024 px w WGS84 | brak limitu kafli, może być nakładką (PNG) |
+| **KMZ: Garmin Custom Maps** | odbiorniki Garmin | kafle JPEG do 1024 × 1024 px w WGS84 | opcjonalny automatyczny podział na tomy przy ponad 100 kaflach; obsługa kolejności rysowania (z-order) |
+| **Garmin BirdsEye (JNX)** | odbiorniki Garmin (firmware z obsługą JNX) | wielopoziomowy raster z piramidą powiększeń | brak limitu 100 kafli, kopiowany bezpośrednio do folderu `Garmin/BirdsEye` |
+| **Arkusz** (scalanie segmentów) | Avenza Maps, QField, ArcGIS, CAD, QGIS | kafelkowany GeoTIFF (256×256) z piramidami, JPEG albo PNG z georeferencją | pliki world file i `.prj`, `.map`, `.tab`, `.kml`; natychmiastowe otwieranie w aplikacjach GIS |
+| **TrekBuddy / Locus Map** | Locus Map, TrekBuddy | archiwum `.tar` z kaflami 512 px, `.map` i `.set` | z dowolnej pobranej sesji, z nakładkami i korektą |
+| **KMZ** | Locus Map, OruxMaps, Google Earth | kafle do 1024 × 1024 px w WGS84 | brak limitu kafli, może być przezroczystą nakładką (PNG) |
 | **MBTiles** | Locus Map, OsmAnd, OruxMaps i wiele innych | baza SQLite z piramidą kafli Web Mercator 256 px | najbardziej uniwersalny, z poziomami powiększenia |
 | **GeoPackage (.gpkg)** | QField, Mergin Maps, QGIS, Locus Map, OruxMaps | baza SQLite w standardzie OGC z piramidą kafli Web Mercator 256 px | standard OGC dla mobilnego GIS, natywnie czytany przez QField |
 | **SQLiteDB** | OsmAnd, Locus Map | baza w formacie RMaps, kafle Web Mercator | natywny format map rastrowych OsmAnd |
@@ -47,6 +47,7 @@ kafle JPEG o boku najwyżej 1024 px i ograniczoną liczbę kafli (zazwyczaj do 1
 * **Automatyczny podział na tomy:** jeśli mapa w pełnej rozdzielczości wymaga więcej niż 100 kafli, włącz opcję podziału na tomy. Program utworzy spójne części (`_tom1.kmz`, `_tom2.kmz` itd.) bez konieczności sztucznego obniżania rozdzielczości czy obcinania terenu.
 * **Kolejność rysowania (z-order):** możesz określić warstwę wyświetlania mapy w odbiorniku (np. pod wektorową siatką dróg lub na wierzchu).
 * **Filtr MIP dla Garmina:** opcja korekcji kontrastu, nasycenia i ostrości splotowej Laplaciana 3×3, specjalnie zoptymalizowana pod kątem ekranów Memory-In-Pixel, dzięki czemu mapa zachowuje maksymalną czytelność w ostrym słońcu.
+* **Kopiowanie przez USB:** przycisk **Kopiuj na Garmina...** po zakończeniu eksportu automatycznie wykrywa podłączony dysk odbiornika i przenosi plik do folderu `Garmin/CustomMaps`.
 
 ---
 
@@ -54,20 +55,21 @@ kafle JPEG o boku najwyżej 1024 px i ograniczoną liczbę kafli (zazwyczaj do 1
 
 Format dedykowany dla odbiorników turystycznych Garmin (np. GPSMAP, eTrex, Montana, Oregon) z odblokowaną obsługą BirdsEye (tzw. patchowany firmware):
 
-* **Brak limitu 100 kafli:** pozwala wyeksportować mapę obejmującą całe pasma górskie lub województwa w jednym pliku.
+* **Brak limitu 100 kafli:** pozwala wyeksportować mapę obejmującą całe pasma górskie lub województwa w jednym pliku (do 50 000 kafli na plik).
 * **Wielopoziomowa piramida:** zawiera automatycznie wyliczone poziomy powiększenia od przeglądowego do szczegółowego.
-* Gotowy plik `.jnx` wystarczy skopiować bezpośrednio do katalogu `Garmin/BirdsEye` w pamięci urządzenia lub na karcie microSD.
+* Przycisk **Kopiuj na Garmina...** automatycznie umieszcza plik `.jnx` w katalogu `Garmin/BirdsEye` w pamięci urządzenia lub na karcie microSD.
 
 ---
 
-## Arkusz (scalanie segmentów)
+## Arkusz (scalanie segmentów i kafelkowany GeoTIFF)
 
-Jeden plik obrazu z georeferencją w układzie sesji - ten sam format otwiera polecenie *Narzędzia > Scalanie segmentów*:
+Jeden plik obrazu z georeferencją w układzie sesji – ten sam format otwiera polecenie *Narzędzia > Scalanie segmentów*:
 
-* **Formaty:** GeoTIFF bezstratny (Deflate), GeoTIFF z kompresją JPEG, JPEG (do 65 500 px na bok) albo PNG.
-* **Zastosowanie:** Avenza Maps, QField, QGIS, ArcGIS i programy CAD.
+* **Kafelkowany GeoTIFF z piramidami (Cloud-Optimized GeoTIFF):** pliki tworzone są z kafelkowaniem wewnętrznym 256×256 px i łańcuchem podkatalogów pomniejszeń (IFD reduced overviews). Dzięki temu wielogigabajtowe arkusze otwierają się w aplikacjach mobilnych (Avenza Maps) i stacjonarnych (QGIS, ArcGIS) natychmiastowo, bez wczytywania całego pliku do pamięci RAM.
+* **Formaty zapisu:** GeoTIFF bezstratny (kompresja Deflate), GeoTIFF z kompresją JPEG, tradycyjny JPEG (do 65 500 px na bok) albo PNG z przezroczystością.
+* **Zastosowanie:** Avenza Maps, QField, QGIS, ArcGIS i programy CAD (AutoCAD, MicroStation, BricsCAD, ZWCAD).
 * **Pliki towarzyszące:** world file i `.prj`, kalibracja OziExplorer `.map`, MapInfo `.tab`, Google Earth `.kml`.
-* Szczegóły: [Scalanie segmentów](../../scalanie/).
+* Szczegóły: [Scalanie segmentów w jeden arkusz](../../scalanie/).
 
 ---
 
@@ -89,6 +91,7 @@ na kilku poziomach powiększenia. Obsługuje go większość aplikacji mapowych.
 * Zakres poziomów ustawia się w grupie *Kafle Web Mercator*. Szczegóły: [Poziomy powiększenia i rozmiar pliku](../powiekszenia/).
 * Nakładka zapisuje typ mapy `overlay`, więc aplikacja wyświetla ją nad swoją mapą podkładową.
 * Opis mapy (nazwa, opis, atrybucja ze źródłem danych) zapisywany jest w metadanych pliku.
+* Po wygenerowaniu pliku możesz kliknąć **Wyślij na telefon...**, aby pobrać go bezprzewodowo przez kod QR i Wi-Fi.
 
 Plik MBTiles z kilku pobranych map, każdej w innym zakresie powiększeń, tworzy
 [MBTiles wieloskalowy](../../mbtiles-wielowarstwowy/).
@@ -117,10 +120,10 @@ Wybierz SQLiteDB, gdy aplikacja nie obsługuje MBTiles albo gdy wolisz natywny f
 ## OruxMaps: mapa offline
 
 Natywny format OruxMaps: **folder** z bazą kafli `OruxMapsImages.db` i plikiem kalibracji `.otrk2.xml`.
-Cały folder kopiuje się do telefonu. Te same opcje co MBTiles.
+Cały folder kopiuje się do telefonu (do katalogu `oruxmaps/mapfiles`). Te same opcje co MBTiles.
 
 ---
 
 ➡️ **Kolejny krok:** [Poziomy powiększenia i rozmiar pliku →](../powiekszenia/)
 
-*Zobacz też: [Mapa w telefonie i odbiorniku GPS](../aplikacje/) · [Nakładki i łączenie warstw](../nakladki/) · [Zaawansowany MBTiles](../../mbtiles-wielowarstwowy/)*
+*Zobacz też: [Nakładki i łączenie warstw](../nakladki/) · [Mapa w telefonie i odbiorniku GPS](../aplikacje/)*

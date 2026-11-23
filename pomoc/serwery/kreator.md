@@ -11,7 +11,7 @@ Kreator pobiera opis usługi (`GetCapabilities`, `TileJSON`, `tilemapresource.xm
 próbkę obrazu i zapisuje nowy zbiór map na liście programu.
 {: .fs-5 .fw-300 }
 
-**Gdzie w programie:** menu *Narzędzia > Dodaj nowy serwer WMS / WMTS...* lub przycisk **`[+]`** w oknie głównym  
+**Gdzie w programie:** przycisk **+ Serwer…** w nagłówku karty katalogu map (prawy panel) lub menu *Narzędzia > Dodaj nowy serwer WMS / WMTS...*  
 **Dotyczy wersji:** {{ site.wersja_programu }}
 
 <details open markdown="block">
