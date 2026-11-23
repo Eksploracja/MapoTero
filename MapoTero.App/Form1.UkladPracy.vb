@@ -407,11 +407,12 @@ Partial Public Class Form1
         uklad.ColumnStyles.Add(New ColumnStyle(SizeType.Percent, 100))
         uklad.RowStyles.Add(New RowStyle(SizeType.Absolute, Px(34)))
         uklad.RowStyles.Add(New RowStyle(SizeType.Percent, 100))
-        Dim filtr As New TableLayoutPanel With {.ColumnCount = 2, .RowCount = 1, .Margin = Padding.Empty}
+        Dim filtr As New TableLayoutPanel With {.ColumnCount = 3, .RowCount = 1, .Margin = Padding.Empty}
         filtr.ColumnStyles.Add(New ColumnStyle(SizeType.Percent, 100))
         ' Przyciski z napisami zamiast samych symboli „⊟” i „+”, których znaczenia nie było widać bez podpowiedzi.
         ' „+ Serwer…” jest akcją karty w jej nagłówku, więc pole filtru zyskuje szerokość.
         filtr.ColumnStyles.Add(New ColumnStyle(SizeType.Absolute, Px(62)))
+        filtr.ColumnStyles.Add(New ColumnStyle(SizeType.Absolute, Px(34)))
         filtr.RowStyles.Add(New RowStyle(SizeType.Percent, 100))
         btnDodajSerwer.Text = "+ Serwer…"
 
@@ -489,8 +490,13 @@ Partial Public Class Form1
         btnZwinRozwin.MinimumSize = New Size(0, Px(28))
         btnZwinRozwin.Padding = New Padding(Px(2), 0, Px(2), 0)
         btnZwinRozwin.Margin = New Padding(Px(4), 0, 0, Px(6))
+        StylPrzycisku(btnGaleriaWarstw)
+        btnGaleriaWarstw.MinimumSize = New Size(0, Px(28))
+        btnGaleriaWarstw.Padding = Padding.Empty
+        btnGaleriaWarstw.Margin = New Padding(Px(4), 0, 0, Px(6))
         DolozKomorke(filtr, pnlSzukaj, 0, 0)
         DolozKomorke(filtr, btnZwinRozwin, 1, 0)
+        DolozKomorke(filtr, btnGaleriaWarstw, 2, 0)
         DolozKomorke(uklad, filtr, 0, 0)
         DolozKomorke(uklad, tvWarstwy, 0, 1)
         filtr.Margin = Padding.Empty
