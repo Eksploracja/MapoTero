@@ -88,6 +88,7 @@ Partial Class Form1
         Me.UstawieniaToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.HelpToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.PomocOnlineToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.GaleriaWarstwToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.InstrukcjaObsługiToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.PomocPomorskieForumEksploracyjneToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.HelpSeparator1 = New System.Windows.Forms.ToolStripSeparator()
@@ -578,7 +579,7 @@ Partial Class Form1
         '
         'HelpToolStripMenuItem
         '
-        Me.HelpToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.PomocOnlineToolStripMenuItem, Me.InstrukcjaObsługiToolStripMenuItem, Me.HelpSeparator1, Me.PomocPomorskieForumEksploracyjneToolStripMenuItem, Me.ZglosBladToolStripMenuItem, Me.FolderDanychToolStripMenuItem, Me.HelpSeparator2, Me.CoNowegoToolStripMenuItem, Me.WesprzyjToolStripMenuItem, Me.AboutToolStripMenuItem})
+        Me.HelpToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.PomocOnlineToolStripMenuItem, Me.GaleriaWarstwToolStripMenuItem, Me.InstrukcjaObsługiToolStripMenuItem, Me.HelpSeparator1, Me.PomocPomorskieForumEksploracyjneToolStripMenuItem, Me.ZglosBladToolStripMenuItem, Me.FolderDanychToolStripMenuItem, Me.HelpSeparator2, Me.CoNowegoToolStripMenuItem, Me.WesprzyjToolStripMenuItem, Me.AboutToolStripMenuItem})
         Me.HelpToolStripMenuItem.Name = "HelpToolStripMenuItem"
         Me.HelpToolStripMenuItem.Size = New System.Drawing.Size(57, 20)
         Me.HelpToolStripMenuItem.Text = "Pomoc"
@@ -590,6 +591,13 @@ Partial Class Form1
         Me.PomocOnlineToolStripMenuItem.Size = New System.Drawing.Size(335, 22)
         Me.PomocOnlineToolStripMenuItem.Text = "Podręcznik użytkownika (online)"
         Me.PomocOnlineToolStripMenuItem.ToolTipText = "Otwiera pełny podręcznik użytkownika i pomoc programu w przeglądarce internetowej"
+        '
+        'GaleriaWarstwToolStripMenuItem
+        '
+        Me.GaleriaWarstwToolStripMenuItem.Name = "GaleriaWarstwToolStripMenuItem"
+        Me.GaleriaWarstwToolStripMenuItem.Size = New System.Drawing.Size(335, 22)
+        Me.GaleriaWarstwToolStripMenuItem.Text = "Galeria warstw map (podgląd online)"
+        Me.GaleriaWarstwToolStripMenuItem.ToolTipText = "Otwiera galerię podglądów warstw WMS/WMTS/XYZ w przeglądarce z możliwością dodania wybranej warstwy do programu"
         '
         'InstrukcjaObsługiToolStripMenuItem
         '
@@ -2104,6 +2112,7 @@ Partial Class Form1
     Friend WithEvents lblUklad As System.Windows.Forms.Label
     Friend WithEvents cmbUklad As System.Windows.Forms.ComboBox
     Friend WithEvents tvWarstwy As MapoTero.DrzewoWarstw
+    Friend WithEvents GaleriaWarstwToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents InstrukcjaObsługiToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents Label29 As System.Windows.Forms.Label
     Friend WithEvents KorektaFolderuToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem

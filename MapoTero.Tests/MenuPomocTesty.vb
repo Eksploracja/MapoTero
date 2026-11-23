@@ -36,7 +36,7 @@ Public Class MenuPomocTesty
                       Using f As New MapoTero.Form1()
                           Dim pozycje = f.HelpToolStripMenuItem.DropDownItems.Cast(Of ToolStripItem)().
                               Select(Function(p) If(TypeOf p Is ToolStripSeparator, "-", p.Text)).ToArray()
-                          Assert.Equal({"Podręcznik użytkownika (online)", "Krótka instrukcja (bez internetu)", "-",
+                          Assert.Equal({"Podręcznik użytkownika (online)", "Galeria warstw map (podgląd online)", "Krótka instrukcja (bez internetu)", "-",
                                         "Zadaj pytanie na forum (PFE)", "Zgłoś błąd lub pomysł (GitHub)",
                                         "Otwórz folder danych programu", "-",
                                         "Co nowego w programie", "Wesprzyj rozwój programu", "O programie"}, pozycje)

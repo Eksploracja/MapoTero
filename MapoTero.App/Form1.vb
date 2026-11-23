@@ -63,6 +63,8 @@ Public Class Form1
 
     ''' <summary>Zbiory map z warstwy.txt w kolejności drzewa warstw.</summary>
     Private ReadOnly _zbiory As New List(Of ZbiorMapy)
+    ''' <summary>Lokalny nasłuch HTTP pozwalający stronie galerii warstw dodać wybraną warstwę do programu.</summary>
+    Private _mostekGalerii As MostekGalerii
 
     ''' <summary>
     ''' Ostatnio wskazany zbiór map (kliknięty w drzewie, z conf.txt) - nazwa sesji, gdy kanapka jest pusta
@@ -506,6 +508,8 @@ Public Class Form1
         _bazaPodgladu?.Dispose()
         _bazaPodgladu = Nothing
         _silnikPodgladu.Dispose()
+        _mostekGalerii?.Dispose()
+        _mostekGalerii = Nothing
         WyczyscZnaczniki()
         _pedzelZewnetrzny.Dispose()
         _pioroZewnetrzne.Dispose()
@@ -4015,6 +4019,78 @@ Public Class Form1
 
     Private Sub PomocOnlineToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles PomocOnlineToolStripMenuItem.Click
         OtworzPomocOnline()
+    End Sub
+
+    Private Sub GaleriaWarstwToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles GaleriaWarstwToolStripMenuItem.Click
+        OtworzGalerieWarstw()
+    End Sub
+
+    ''' <summary>
+    ''' Uruchamia lokalny nasłuch MostekGalerii (jeśli nie działa) i otwiera stronę galerii warstw w przeglądarce
+    ''' z parametrami połączenia (port i token), aby użytkownik mógł jednym kliknięciem dodać warstwę do programu.
+    ''' Zmienna środowiskowa MAPOTERO_GALERIA_URL pozwala wskazać lokalny serwer podglądu podczas testów.
+    ''' </summary>
+    Public Sub OtworzGalerieWarstw()
+        Try
+            If _mostekGalerii Is Nothing Then
+                _mostekGalerii = New MostekGalerii(AddressOf ObsluzWarstweZGalerii)
+            End If
+        Catch ex As Exception
+            Komunikat("Nie udało się uruchomić połączenia z galerią warstw: " & OpisBledu.Z(ex), Color.DarkOrange)
+        End Try
+
+        Dim adresBazowy = Environment.GetEnvironmentVariable("MAPOTERO_GALERIA_URL")
+        If String.IsNullOrWhiteSpace(adresBazowy) Then
+            adresBazowy = UrlPomocyOnline.TrimEnd("/"c) & "/galeria-warstw/"
+        End If
+        Dim url = If(_mostekGalerii IsNot Nothing, _mostekGalerii.ZbudujAdresGalerii(adresBazowy), adresBazowy)
+        Try
+            Process.Start(New ProcessStartInfo(url) With {.UseShellExecute = True})
+        Catch ex As Exception
+            MsgBox("Nie można otworzyć galerii warstw: " & OpisBledu.Z(ex), MsgBoxStyle.Exclamation, "Galeria warstw")
+        End Try
+    End Sub
+
+    Private Function ObsluzWarstweZGalerii(zbiorNazwa As String, warstwaNazwa As String) As WynikMostkaGalerii
+        If Me.IsDisposed Then Return WynikMostkaGalerii.Blad("blad", "Okno programu zostało zamknięte.")
+        If Me.InvokeRequired Then
+            Return DirectCast(Me.Invoke(New Func(Of String, String, WynikMostkaGalerii)(AddressOf ObsluzWarstweZGalerii), zbiorNazwa, warstwaNazwa), WynikMostkaGalerii)
+        End If
+
+        If _przerwanie IsNot Nothing Then
+            Return WynikMostkaGalerii.Blad("zajety", "Trwa pobieranie mapy – zatrzymaj je przed zmianą listy warstw.")
+        End If
+
+        Dim zbior = _zbiory.FirstOrDefault(Function(z) String.Equals(z.Nazwa, zbiorNazwa, StringComparison.OrdinalIgnoreCase))
+        If zbior Is Nothing Then
+            Return WynikMostkaGalerii.Blad("nie_znaleziono", $"Nie znaleziono zbioru map '{zbiorNazwa}' w tym programie.")
+        End If
+        Dim zWarstwy = zbior.Plik.Znajdz(warstwaNazwa)
+        If zWarstwy Is Nothing Then
+            Return WynikMostkaGalerii.Blad("nie_znaleziono", $"Nie znaleziono warstwy '{warstwaNazwa}' w zbiorze '{zbiorNazwa}'.")
+        End If
+
+        If _zestaw.Zawiera(zbior.Plik.Adres, zWarstwy.Nazwa) Then
+            PrzywrocOknoNaWierzch()
+            Return WynikMostkaGalerii.JuzWybrana($"Warstwa '{zWarstwy.Nazwa}' jest już wybrana.")
+        End If
+
+        Dim nazwaWyswietlana = If(_katalog IsNot Nothing, _katalog.ZnajdzNazwe(zbior.Nazwa, zWarstwy.Nazwa), "")
+        If String.IsNullOrWhiteSpace(nazwaWyswietlana) Then nazwaWyswietlana = zWarstwy.ToString()
+
+        Dim w As New WarstwaWDrzewie With {
+            .Zbior = zbior,
+            .Warstwa = zWarstwy.Nazwa,
+            .Nazwa = nazwaWyswietlana
+        }
+        DodajWarstwe(w)
+        PrzywrocOknoNaWierzch()
+        Return WynikMostkaGalerii.Dodano($"Dodano warstwę '{nazwaWyswietlana}'.")
+    End Function
+
+    Private Sub PrzywrocOknoNaWierzch()
+        If Me.WindowState = FormWindowState.Minimized Then Me.WindowState = FormWindowState.Normal
+        Me.Activate()
     End Sub
 
     ''' <summary>Otwiera podręcznik użytkownika programu w domyślnej przeglądarce internetowej.</summary>
