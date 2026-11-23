@@ -99,10 +99,16 @@ Public Class MapaTrekBuddy
     Public Sub UtworzArchiwumTar()
         Dim nazwaTar As String = NazwaMapy & ".tar"
         Dim plikTar As String = Path.Combine(_z.Folder, nazwaTar)
+        Dim plikTmp As String = plikTar & ".tmp"
         Try
-            If File.Exists(plikTar) Then File.Delete(plikTar)
-            TarFile.CreateFromDirectory(FolderMapy, plikTar, includeBaseDirectory:=False)
+            If File.Exists(plikTmp) Then File.Delete(plikTmp)
+            TarFile.CreateFromDirectory(FolderMapy, plikTmp, includeBaseDirectory:=False)
+            File.Move(plikTmp, plikTar, overwrite:=True)
         Catch ex As Exception
+            Try
+                If File.Exists(plikTmp) Then File.Delete(plikTmp)
+            Catch
+            End Try
             Throw New IOException("Nie udało się utworzyć archiwum TAR (" & plikTar & "): " & OpisBledu.Z(ex), ex)
         End Try
     End Sub
@@ -133,7 +139,11 @@ Public Class ZapisKafliTrekBuddy
         _nazwa = nazwa
         _jakosc = jakosc
         Directory.CreateDirectory(_folderSet)
-        ReDim _pas(MapaTrekBuddy.BokSegmentu * szerokosc * 3 - 1)
+        Dim rozmiarPas As Long = CLng(MapaTrekBuddy.BokSegmentu) * CLng(szerokosc) * 3L
+        If rozmiarPas <= 0 OrElse rozmiarPas > Integer.MaxValue Then
+            Throw New ArgumentOutOfRangeException(NameOf(szerokosc), "Szerokość mapy TrekBuddy przekracza dopuszczalny rozmiar bufora.")
+        End If
+        ReDim _pas(CInt(rozmiarPas) - 1)
     End Sub
 
     ''' <summary>Nazwy plików kafli (w kolejności wierszy) - zawartość pliku .set.</summary>
@@ -207,8 +217,18 @@ Public Class ZapisKafliTrekBuddy
         Dim obraz = ZapisGeoreferencji.Obraz(uklad, zasieg, szerokosc, wysokosc, folderMapy, nazwa & ".jpg")
         Georeferencja.Zapisz(Path.Combine(folderMapy, nazwa & ".map"), Georeferencja.MapOzi(obraz), KodowanieSystemowe())
         File.WriteAllLines(Path.Combine(folderMapy, nazwa & ".set"), pliki, KodowanieSystemowe())
-        If File.Exists(plikTar) Then File.Delete(plikTar)
-        TarFile.CreateFromDirectory(folderMapy, plikTar, includeBaseDirectory:=False)
+        Dim plikTmp As String = plikTar & ".tmp"
+        Try
+            If File.Exists(plikTmp) Then File.Delete(plikTmp)
+            TarFile.CreateFromDirectory(folderMapy, plikTmp, includeBaseDirectory:=False)
+            File.Move(plikTmp, plikTar, overwrite:=True)
+        Catch
+            Try
+                If File.Exists(plikTmp) Then File.Delete(plikTmp)
+            Catch
+            End Try
+            Throw
+        End Try
         Directory.Delete(folderMapy, True)
     End Sub
 End Class

@@ -185,11 +185,13 @@ Public Class KatalogWarstw
         End If
 
         If liczba > 0 Then
+            Dim zbiory = ZestawWarstw.Rozdziel(c.ZbioryWarstw, liczba, c.RodzajMapy)
             Dim skroty As New List(Of String)()
             For i = 0 To liczba - 1
                 Dim wName = warstwy(i)
                 If String.IsNullOrWhiteSpace(wName) Then Continue For
-                Dim id = ZnajdzIdentyfikator(c.RodzajMapy, wName)
+                Dim zbiorWarstwy = If(i < zbiory.Count AndAlso Not String.IsNullOrWhiteSpace(zbiory(i)), zbiory(i), c.RodzajMapy)
+                Dim id = ZnajdzIdentyfikator(zbiorWarstwy, wName)
                 If String.IsNullOrWhiteSpace(id) Then id = ZnajdzIdentyfikatorWgWarstwy(wName)
                 If String.IsNullOrWhiteSpace(id) Then id = wName
                 skroty.Add(id)

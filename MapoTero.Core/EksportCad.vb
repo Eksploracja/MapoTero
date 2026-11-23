@@ -154,7 +154,7 @@ Public NotInheritable Class EksportCad
                     End If
                     'wymiary z nagłówka pliku: rysunek CAD musi podać rzeczywistą liczbę pikseli obrazu, a plik uszkodzony
                     '(np. odpowiedź serwera z błędem zapisana jako obraz) zostałby w programie CAD pokazany jako brakujący
-                    Dim sciezka As String = folder & nazwa
+                    Dim sciezka As String = Path.Combine(folder, nazwa)
                     Dim naglowek As NaglowekObrazu
                     Try
                         naglowek = NaglowekObrazu.Odczytaj(sciezka)
@@ -180,6 +180,7 @@ Public NotInheritable Class EksportCad
     ''' Pliki zapisywane są bez znacznika BOM, którego programy CAD nie rozpoznają w pierwszym wierszu pliku.
     ''' </summary>
     Public Shared Function KodowanieRysunku(systemowe As Encoding) As Encoding
+        Encoding.RegisterProvider(CodePagesEncodingProvider.Instance)
         Dim strona As Integer = If(systemowe Is Nothing, 1250, systemowe.CodePage)
         Select Case strona
             Case 874, 932, 936, 949, 950, 1250 To 1258 : Return Encoding.GetEncoding(strona)
@@ -320,9 +321,17 @@ Public NotInheritable Class EksportCad
     ''' <summary>Segmenty siatki (wiersz, kolumna) - wszystkie albo tylko segmenty korytarza.</summary>
     Private Shared Iterator Function SegmentySiatki(z As ZadanieCad) As IEnumerable(Of Tuple(Of Integer, Integer))
         Dim s = z.Siatka
+        If z.SegmentyKorytarza IsNot Nothing Then
+            Dim kolumny As Integer = Math.Max(1, s.LiczbaKolumn)
+            For Each klucz In z.SegmentyKorytarza
+                Dim w As Integer = (klucz \ kolumny) + 1
+                Dim k As Integer = (klucz Mod kolumny) + 1
+                Yield Tuple.Create(w, k)
+            Next
+            Exit Function
+        End If
         For w = 1 To s.LiczbaWierszy
             For k = 1 To s.LiczbaKolumn
-                If z.SegmentyKorytarza IsNot Nothing AndAlso Not z.SegmentyKorytarza.Contains(s.NumerKolejny(w, k) - 1) Then Continue For
                 Yield Tuple.Create(w, k)
             Next
         Next
@@ -755,7 +764,7 @@ Public NotInheritable Class EksportCad
                 Dim r = z.Rastry(i)
                 w("_-IMAGE")
                 w("_ATTACH")
-                w(nazwy(i) & "=""" & r.SciezkaPliku & """")
+                w(nazwy(i) & "=""" & SciezkaWRysunku(z, r.SciezkaPliku) & """")
                 w("_non")
                 w(PunktCad(r.Zasieg.LewyDolny))
                 w(L(r.Zasieg.Szerokosc))

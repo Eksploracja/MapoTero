@@ -41,8 +41,10 @@ Public Enum CelMapy
     OdbiornikGarmin
     ''' <summary>Arkusz graficzny do druku, plakatu lub przeglądania na komputerze.</summary>
     WydrukKomputer
-    ''' <summary>Podkład do programów projektowych CAD (AutoCAD, MicroStation) i systemów GIS (QGIS).</summary>
+    ''' <summary>Systemy GIS (QGIS, ArcGIS, QField, Avenza Maps - plik GeoTIFF).</summary>
     ProjektCadGis
+    ''' <summary>Projekt CAD: AutoCAD, ZWCAD, BricsCAD (raster i skrypt wpasowania .scr w wybranym układzie PL-2000 lub PL-1992).</summary>
+    ProjektCad
 End Enum
 
 ''' <summary>Grupa warstw, których krycie reguluje jeden suwak w kreatorze (krok 2).</summary>
@@ -66,6 +68,7 @@ Public Class WarstwaSzablonu
     ''' <summary>Nazwa warstwy na serwerze (np. MAPA TOPOGRAFICZNA, ISOK_Cien, hiking).</summary>
     Public Property Warstwa As String = ""
     ''' <summary>Krycie warstwy w procentach (0-100).</summary>
+    <System.Text.Json.Serialization.JsonIgnore(Condition:=System.Text.Json.Serialization.JsonIgnoreCondition.Never)>
     Public Property Krycie As Integer = 100
     ''' <summary>Tryb mieszania pikseli z podkładem.</summary>
     Public Property TrybMieszania As TrybMieszania = TrybMieszania.Zwykly
@@ -253,7 +256,7 @@ Public Class SzablonMapy
     Public Function DodajStopien(opis As String, piksel As Double, ParamArray warstwy() As WarstwaSzablonu) As StopienSkali
         Dim st As New StopienSkali With {.Opis = opis, .Piksel = piksel}
         st.Warstwy.AddRange(warstwy)
-        If StopnieSkali.Count = 0 Then
+        If StopnieGlowne.Count = 0 Then
             Me.Warstwy.Clear()
             Me.Warstwy.AddRange(warstwy)
         End If
@@ -439,20 +442,27 @@ Public Module ZarzadcaSzablonow
     End Function
 
     Private ReadOnly _wlasneSzablony As New List(Of SzablonMapy)()
+    Private ReadOnly _blokadaWlasnych As New Object()
 
     ''' <summary>Style zapisane przez użytkownika (<see cref="SzablonyWlasne"/>).</summary>
     Public Function PobierzWlasne() As IReadOnlyList(Of SzablonMapy)
-        Return _wlasneSzablony.AsReadOnly()
+        SyncLock _blokadaWlasnych
+            Return _wlasneSzablony.ToList().AsReadOnly()
+        End SyncLock
     End Function
 
     Public Sub UstawWlasne(style As IEnumerable(Of SzablonMapy))
-        _wlasneSzablony.Clear()
-        If style IsNot Nothing Then _wlasneSzablony.AddRange(style)
+        SyncLock _blokadaWlasnych
+            _wlasneSzablony.Clear()
+            If style IsNot Nothing Then _wlasneSzablony.AddRange(style)
+        End SyncLock
     End Sub
 
     ''' <summary>Gotowe style i style użytkownika.</summary>
     Public Function PobierzWszystkie() As List(Of SzablonMapy)
-        Return _domyslneSzablony.Concat(_wlasneSzablony).ToList()
+        SyncLock _blokadaWlasnych
+            Return _domyslneSzablony.Concat(_wlasneSzablony).ToList()
+        End SyncLock
     End Function
 
     ''' <summary>
@@ -461,7 +471,10 @@ Public Module ZarzadcaSzablonow
     Public Function PobierzDlaCelu(cel As CelMapy) As List(Of SzablonMapy)
         Dim gotowe = _domyslneSzablony.Where(Function(s) s.PasujeDoCelu(cel)).ToList()
         Dim indeksWarstwOkna = gotowe.FindIndex(Function(s) s.Id = "wlasny_zestaw")
-        Dim wlasne = _wlasneSzablony.Where(Function(s) s.PasujeDoCelu(cel))
+        Dim wlasne As List(Of SzablonMapy)
+        SyncLock _blokadaWlasnych
+            wlasne = _wlasneSzablony.Where(Function(s) s.PasujeDoCelu(cel)).ToList()
+        End SyncLock
         If indeksWarstwOkna < 0 Then indeksWarstwOkna = gotowe.Count
         gotowe.InsertRange(indeksWarstwOkna, wlasne)
         Return gotowe
@@ -754,6 +767,7 @@ Public Module ZarzadcaSzablonow
             korytarz, uklad, RodzajEksportu.MBTiles, True, If(zrodlaStopni Is Nothing, liczbaZrodel, zrodlaStopni(i)),
             przyciety:=zrodlaStopni IsNot Nothing)
         Dim wynik = szacuj(0)
+        Dim lacznyCzas As Long = wynik.SzacowanyCzasSekundy
         For i = 1 To plan.Count - 1
             Dim s = szacuj(i)
             wynik.LiczbaSegmentow += s.LiczbaSegmentow
@@ -761,12 +775,20 @@ Public Module ZarzadcaSzablonow
             wynik.SzacowanyRozmiarMbMin += s.SzacowanyRozmiarMbMin
             wynik.SzacowanyRozmiarMbMax += s.SzacowanyRozmiarMbMax
             wynik.SzacowanyRozmiarMb += s.SzacowanyRozmiarMb
-            wynik.SzacowanyCzasSekundy += s.SzacowanyCzasSekundy
+            lacznyCzas += CLng(s.SzacowanyCzasSekundy)
             If s.PoziomOstrzezenia > wynik.PoziomOstrzezenia Then
                 wynik.PoziomOstrzezenia = s.PoziomOstrzezenia
                 wynik.Ostrzezenie = s.Ostrzezenie
             End If
         Next
+        wynik.SzacowanyCzasSekundy = CInt(Math.Min(Integer.MaxValue, lacznyCzas))
+        If wynik.LiczbaSegmentow > 6000 AndAlso wynik.PoziomOstrzezenia < 2 Then
+            wynik.PoziomOstrzezenia = 2
+            wynik.Ostrzezenie = "Bardzo duży obszar (ponad 6 000 segmentów): pobieranie potrwa długo. Zwiększ rozmiar piksela albo zmniejsz obszar."
+        ElseIf wynik.LiczbaSegmentow > 2500 AndAlso wynik.PoziomOstrzezenia < 1 Then
+            wynik.PoziomOstrzezenia = 1
+            wynik.Ostrzezenie = "Duży obszar: potrzebne stabilne łącze i wolne miejsce na dysku. Większy rozmiar piksela zmniejszy plik."
+        End If
         Return wynik
     End Function
 
@@ -811,7 +833,7 @@ Public Module ZarzadcaSzablonow
         Dim mbMax As Double
 
         Select Case formatDocelowy
-            Case RodzajEksportu.MBTiles, RodzajEksportu.SQLiteDB, RodzajEksportu.OruxMaps
+            Case RodzajEksportu.MBTiles, RodzajEksportu.SQLiteDB, RodzajEksportu.OruxMaps, RodzajEksportu.GeoPackage
                 If przyciety Then
                     ' Kafle PNG z alfą, nawet dla mapy o pełnym kryciu wewnątrz obszaru.
                     mbMin = 1.0
@@ -854,15 +876,16 @@ Public Module ZarzadcaSzablonow
 
         ' Czas: pobieranie 4-wątkowe (ok. 4 zapytania/s), każde źródło zestawu to osobne zapytanie na segment
         Dim zapytania = wynik.LiczbaSegmentow * Math.Max(1, liczbaZrodel)
-        Dim czasPobierania = CInt(Math.Min(Integer.MaxValue \ 2, Math.Max(1L, CLng(Math.Ceiling(zapytania / 4.0)))))
-        Dim czasKompilacji = 0
+        Dim czasPobierania As Integer = CInt(Math.Min(Integer.MaxValue \ 2, Math.Max(1L, CLng(Math.Ceiling(zapytania / 4.0)))))
+        Dim czasKompilacjiSurowy As Long = 0
         Select Case formatDocelowy
-            Case RodzajEksportu.MBTiles, RodzajEksportu.SQLiteDB, RodzajEksportu.Jnx
-                czasKompilacji = CInt(Math.Ceiling(wynik.LiczbaSegmentow / 15.0))
+            Case RodzajEksportu.MBTiles, RodzajEksportu.SQLiteDB, RodzajEksportu.Jnx, RodzajEksportu.GeoPackage
+                czasKompilacjiSurowy = CLng(Math.Ceiling(wynik.LiczbaSegmentow / 15.0))
             Case RodzajEksportu.GeoTiff, RodzajEksportu.KmzGarmin
-                czasKompilacji = CInt(Math.Ceiling(wynik.LiczbaSegmentow / 25.0))
+                czasKompilacjiSurowy = CLng(Math.Ceiling(wynik.LiczbaSegmentow / 25.0))
         End Select
-        wynik.SzacowanyCzasSekundy = czasPobierania + czasKompilacji + If(przyciety, Math.Max(1, liczbaZrodel) * 2, 0)
+        Dim czasKompilacji As Integer = CInt(Math.Min(Integer.MaxValue \ 2, czasKompilacjiSurowy))
+        wynik.SzacowanyCzasSekundy = CInt(Math.Min(CLng(Integer.MaxValue), CLng(czasPobierania) + czasKompilacji + If(przyciety, CLng(Math.Max(1, liczbaZrodel)) * 2L, 0L)))
 
         ' Progi ostrzeżeń są te same, co próg pytania przed generowaniem (WymagaPotwierdzenia = poziom >= 1)
         If formatDocelowy = RodzajEksportu.KmzGarmin AndAlso wynik.LiczbaSegmentow > LimitKafliGarmin Then
@@ -898,11 +921,32 @@ Public Module ZarzadcaSzablonow
                 Return If(wielopoziomowy, RodzajEksportu.MBTiles, RodzajEksportu.SQLiteDB)
             Case CelMapy.OdbiornikGarmin
                 Return If(wielopoziomowy, RodzajEksportu.Jnx, RodzajEksportu.KmzGarmin)
-            Case CelMapy.WydrukKomputer, CelMapy.ProjektCadGis
+            Case CelMapy.WydrukKomputer, CelMapy.ProjektCadGis, CelMapy.ProjektCad
                 Return If(wielopoziomowy, RodzajEksportu.MBTiles, RodzajEksportu.GeoTiff)
             Case Else
                 Return RodzajEksportu.MBTiles
         End Select
+    End Function
+
+    ''' <summary>
+    ''' Sprawdza, czy warstwy zestawu mogą być pobrane w wybranym układzie współrzędnych.
+    ''' Dla układu PL-2000 (EPSG:2176-2179) usługi kafelkowe WMTS (np. Geoportal WMTS w EPSG:2180) oraz XYZ/TMS w Web Mercator
+    ''' nie udostępniają natywnych kafli w tych strefach.
+    ''' Zwraca tekst ostrzeżenia / błędu lub pusty ciąg, gdy warstwy są zgodne.
+    ''' </summary>
+    Public Function SprawdzZgodnoscUkladu(zestaw As ZestawWarstw, uklad As UkladWspolrzednych) As String
+        If zestaw Is Nothing OrElse uklad Is Nothing Then Return ""
+        Dim czyPl2000 = (uklad.Epsg >= 2176 AndAlso uklad.Epsg <= 2179)
+        If Not czyPl2000 Then Return ""
+        For i = 0 To zestaw.Liczba - 1
+            Dim w = zestaw(i)
+            If w.EfektywnyTyp = TypUslugiMapowej.Wmts Then
+                Return "Warstwa '" & w.Nazwa & "' korzysta z usługi kafelkowej WMTS serwowanej w układzie PL-1992, która nie obsługuje stref PL-2000. Dla projektów w PL-2000 wybierz warstwę WMS (np. WMS Ortofotomapy) lub zmień układ na PL-1992."
+            ElseIf w.EfektywnyTyp = TypUslugiMapowej.Xyz OrElse w.EfektywnyTyp = TypUslugiMapowej.Tms Then
+                Return "Warstwa '" & w.Nazwa & "' korzysta z usługi kafelkowej w układzie Web Mercator (EPSG:3857), która nie obsługuje układu PL-2000. Wybierz warstwę WMS lub zmień układ na PL-1992."
+            End If
+        Next
+        Return ""
     End Function
 
     ''' <summary>Wariant zalecany początkującym dla danego celu (True - wielopoziomowy).</summary>
@@ -1134,7 +1178,7 @@ Public Module ZarzadcaSzablonow
         Dim sDziedzictwo As New SzablonMapy(
             "dziedzictwo", "Dziedzictwo kulturowe", "Teren",
             "Rzeźba terenu LiDAR z prześwitującą mapą topograficzną 1:10 000 oraz zabytkami NID: zabytki nieruchome z rejestru i ewidencji, rejestr i ewidencja stanowisk archeologicznych (grodziska, kurhany, osady).",
-            "🏛️", 1.0, ProfilKorektyRastra.Brak, CelMapy.TelefonTablet, CelMapy.OdbiornikGarmin, CelMapy.WydrukKomputer, CelMapy.ProjektCadGis) With {
+            "🏛️", 1.0, ProfilKorektyRastra.Brak, CelMapy.TelefonTablet, CelMapy.OdbiornikGarmin, CelMapy.WydrukKomputer, CelMapy.ProjektCadGis, CelMapy.ProjektCad) With {
             .ProbkaLat = 50.205, .ProbkaLon = 19.828, .ProbkaPiksel = 1.5,
             .UwagaPokrycia = "Zabytki pokazują dane Narodowego Instytutu Dziedzictwa: zasięgi obiektów z rejestru i ewidencji oraz stanowiska archeologiczne. Ewidencje w usługach NID nie są kompletne (gminne ewidencje zabytków bywają szersze), a część obiektów ma tylko punkt bez zasięgu."}
         sDziedzictwo.Warstwy.Add(New WarstwaSzablonu(ZbiorCieniowania, "ISOK_Cien", 100, False, TrybMieszania.Zwykly, "Rzeźba terenu LiDAR"))
@@ -1191,11 +1235,22 @@ Public Module ZarzadcaSzablonow
         sDzialka.Warstwy.Add(New WarstwaSzablonu("dzialki_ewid_EGIB", "numery_dzialek", 100, True, TrybMieszania.Zwykly, "Numery działek"))
         lista.Add(sDzialka)
 
-        ' 9. Własny zestaw z okna głównego
+        ' 9. Podkład CAD: Działki i ortofotomapa (WMS) - natywna obsługa układu PL-2000 i PL-1992
+        Dim sCadDzialka As New SzablonMapy(
+            "cad_dzialka", "Podkład CAD: działki i ortofotomapa (WMS)", "Geodezja i CAD",
+            "Ortofotomapa z granicami i numerami działek ewidencyjnych (WMS EGiB / KIEG). Obsługuje układ PL-2000 (strefy 5-8) oraz PL-1992, generuje raster oraz skrypt wpasowania .scr dla programów AutoCAD i ZWCAD.",
+            "📐", 0.25, ProfilKorektyRastra.Brak, CelMapy.ProjektCad, CelMapy.ProjektCadGis) With {
+            .ProbkaLat = 49.987, .ProbkaLon = 20.065}
+        sCadDzialka.Warstwy.Add(New WarstwaSzablonu("ortofotomapa", "Raster", 100, False, TrybMieszania.Zwykly, "Ortofotomapa (WMS)"))
+        sCadDzialka.Warstwy.Add(New WarstwaSzablonu("dzialki_ewid_EGIB", "dzialki", 100, True, TrybMieszania.Zwykly, "Granice działek"))
+        sCadDzialka.Warstwy.Add(New WarstwaSzablonu("dzialki_ewid_EGIB", "numery_dzialek", 100, True, TrybMieszania.Zwykly, "Numery działek"))
+        lista.Add(sCadDzialka)
+
+        ' 10. Własny zestaw z okna głównego
         Dim sWlasny As New SzablonMapy(
             "wlasny_zestaw", "Moje warstwy z okna głównego", "Zaawansowane",
             "Mapa z warstw, krycia i trybów mieszania wybranych w oknie głównym programu (lista „Wybrane warstwy””).",
-            "⚙️", 1.0, ProfilKorektyRastra.Brak, CelMapy.TelefonTablet, CelMapy.OdbiornikGarmin, CelMapy.WydrukKomputer, CelMapy.ProjektCadGis)
+            "⚙️", 1.0, ProfilKorektyRastra.Brak, CelMapy.TelefonTablet, CelMapy.OdbiornikGarmin, CelMapy.WydrukKomputer, CelMapy.ProjektCadGis, CelMapy.ProjektCad)
         lista.Add(sWlasny)
 
         Return lista

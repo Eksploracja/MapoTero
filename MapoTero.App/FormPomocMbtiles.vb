@@ -1,4 +1,4 @@
-'Copyright (C) <2015>  pajakt
+﻿'Copyright (C) <2015>  pajakt
 '
 'This program is free software: you can redistribute it and/or modify
 'it under the terms of the GNU General Public License as published by
@@ -472,7 +472,7 @@ Public Class FormPomocMbtiles
         DodajPunktor("Rzeźba terenu (Hillshade): specjalny tryb mnożenia z zachowaniem nasycenia kolorów (HSV). Rekomendowany do łączenia cieniowania rzeźby terenu ISOK z barwną ortofotomapą, dając spektakularny efekt trójwymiarowości.")
 
         DodajNaglowek1("2. Podgląd na żywo i lupa rastrowa")
-        DodajPunktor("Przycisk 'Pobierz podgląd' wczytuje rzeczywisty wycinek terenu w bieżącej konfiguracji warstw.")
+        DodajPunktor("Przycisk 'Odśwież podgląd' wczytuje rzeczywisty wycinek terenu w bieżącej konfiguracji warstw.")
         DodajPunktor("Przyciski +, - oraz 1:1 (lub kółko myszy nad podglądem) pozwalają przybliżać i oddalać próbkę w lupie rastrowej.")
         DodajPunktor("Przycisk 'Korekta obrazu...' pozwala dodatkowo nałożyć profil korekcji kolorystycznej (np. Garmin MIP, wyostrzanie, podbicie kontrastu).")
 
@@ -484,42 +484,56 @@ Public Class FormPomocMbtiles
 #Region "Formatowanie tekstu RichTextBox"
 
     Private Sub DodajTytul(tekst As String)
-        rtbTresc.SelectionFont = New Font("Segoe UI", 13.0!, FontStyle.Bold)
-        rtbTresc.SelectionColor = Color.DarkBlue
-        rtbTresc.AppendText(tekst & vbCrLf & vbCrLf)
+        Using f As New Font("Segoe UI", 13.0!, FontStyle.Bold)
+            rtbTresc.SelectionFont = f
+            rtbTresc.SelectionColor = Color.DarkBlue
+            rtbTresc.AppendText(tekst & vbCrLf & vbCrLf)
+        End Using
     End Sub
 
     Private Sub DodajNaglowek1(tekst As String)
-        rtbTresc.SelectionFont = New Font("Segoe UI", 10.5!, FontStyle.Bold)
-        rtbTresc.SelectionColor = Color.FromArgb(0, 70, 140)
-        rtbTresc.AppendText(vbCrLf & tekst & vbCrLf)
+        Using f As New Font("Segoe UI", 10.5!, FontStyle.Bold)
+            rtbTresc.SelectionFont = f
+            rtbTresc.SelectionColor = Color.FromArgb(0, 70, 140)
+            rtbTresc.AppendText(vbCrLf & tekst & vbCrLf)
+        End Using
     End Sub
 
     Private Sub DodajAkapit(tekst As String)
-        rtbTresc.SelectionFont = New Font("Segoe UI", 9.5!, FontStyle.Regular)
-        rtbTresc.SelectionColor = Color.FromArgb(30, 30, 30)
-        rtbTresc.AppendText(tekst & vbCrLf)
+        Using f As New Font("Segoe UI", 9.5!, FontStyle.Regular)
+            rtbTresc.SelectionFont = f
+            rtbTresc.SelectionColor = Color.FromArgb(30, 30, 30)
+            rtbTresc.AppendText(tekst & vbCrLf)
+        End Using
     End Sub
 
     Private Sub DodajPunktor(tekst As String)
-        rtbTresc.SelectionFont = New Font("Segoe UI", 9.5!, FontStyle.Regular)
-        rtbTresc.SelectionColor = Color.Black
-        rtbTresc.AppendText(" • " & tekst & vbCrLf)
+        Using f As New Font("Segoe UI", 9.5!, FontStyle.Regular)
+            rtbTresc.SelectionFont = f
+            rtbTresc.SelectionColor = Color.Black
+            rtbTresc.AppendText(" • " & tekst & vbCrLf)
+        End Using
     End Sub
 
     Private Sub DodajStopkeOnline(url As String)
         rtbTresc.AppendText(vbCrLf)
-        rtbTresc.SelectionFont = New Font("Segoe UI", 10.0!, FontStyle.Bold)
-        rtbTresc.SelectionColor = Color.FromArgb(0, 100, 0)
-        rtbTresc.AppendText("Szczegółowy podręcznik online:" & vbCrLf)
+        Using fNaglowek As New Font("Segoe UI", 10.0!, FontStyle.Bold)
+            rtbTresc.SelectionFont = fNaglowek
+            rtbTresc.SelectionColor = Color.FromArgb(0, 100, 0)
+            rtbTresc.AppendText("Szczegółowy podręcznik online:" & vbCrLf)
+        End Using
 
-        rtbTresc.SelectionFont = New Font("Segoe UI", 9.5!, FontStyle.Underline)
-        rtbTresc.SelectionColor = Color.Blue
-        rtbTresc.AppendText(url & vbCrLf & vbCrLf)
+        Using fLink As New Font("Segoe UI", 9.5!, FontStyle.Underline)
+            rtbTresc.SelectionFont = fLink
+            rtbTresc.SelectionColor = Color.Blue
+            rtbTresc.AppendText(url & vbCrLf & vbCrLf)
+        End Using
 
-        rtbTresc.SelectionFont = New Font("Segoe UI", 8.5!, FontStyle.Italic)
-        rtbTresc.SelectionColor = Color.Gray
-        rtbTresc.AppendText("Kliknij powyższy odnośnik lub przycisk 'Pomoc online' na dole okna, aby otworzyć rozdział w przeglądarce." & vbCrLf)
+        Using fUwaga As New Font("Segoe UI", 8.5!, FontStyle.Italic)
+            rtbTresc.SelectionFont = fUwaga
+            rtbTresc.SelectionColor = Color.Gray
+            rtbTresc.AppendText("Kliknij powyższy odnośnik lub przycisk 'Pomoc online' na dole okna, aby otworzyć rozdział w przeglądarce." & vbCrLf)
+        End Using
     End Sub
 
 #End Region

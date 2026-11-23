@@ -65,6 +65,7 @@ Public Class TransformacjaAfiniczna2D
             Case ModelKalibracji.Rzutowy
                 Dim u = (px - _sx) / _skala, v = (py - _sy) / _skala
                 Dim m = _wLon(6) * u + _wLon(7) * v + 1.0
+                If Math.Abs(m) <= 0.000000000001 Then Return New PunktGeo(Double.NaN, Double.NaN)
                 Return New PunktGeo((_wLon(3) * u + _wLon(4) * v + _wLon(5)) / m, (_wLon(0) * u + _wLon(1) * v + _wLon(2)) / m)
             Case ModelKalibracji.Wielomian2
                 Dim u = (px - _sx) / _skala, v = (py - _sy) / _skala
@@ -393,10 +394,16 @@ Public Class PlikKalibracjiOzi
                 Dim c = t.Split(","c)
                 Dim w As New List(Of Double)
                 For i = 1 To Math.Min(5, c.Length - 1)
+                    Dim pole = c(i).Trim()
                     Dim v As Double
-                    w.Add(If(Double.TryParse(c(i).Trim(), NumberStyles.Float, ci, v), v, Double.NaN))
+                    If pole = "" AndAlso i = 1 Then
+                        w.Add(0.0)
+                    Else
+                        w.Add(If(Double.TryParse(pole, NumberStyles.Float, ci, v), v, Double.NaN))
+                    End If
                 Next
-                If w.Count = 5 Then ozi._ustawieniaProjekcji = w.ToArray()
+                If w.Count = 4 Then w.Add(0.0)
+                If w.Count >= 5 Then ozi._ustawieniaProjekcji = w.ToArray()
             ElseIf (ozi.SzerokoscPx <= 0 OrElse ozi.WysokoscPx <= 0) AndAlso t.StartsWith("IWH", StringComparison.OrdinalIgnoreCase) Then
                 'IWH,Map Image Width/Height,szer,wys - wymiary obrazu zapisane przez OziExplorer
                 Dim c = t.Split(","c)
@@ -566,11 +573,12 @@ Public Class PlikKalibracjiOzi
             End If
             lat0 = 0 : lon0 = strefa * 6 - 183 : k0 = 0.9996 : fe = 500000 : fn = If(poludniowa, 10000000, 0)
         ElseIf proj.Contains("TRANSVERSE MERCATOR") AndAlso _ustawieniaProjekcji IsNot Nothing AndAlso
-               Not Double.IsNaN(_ustawieniaProjekcji(0)) AndAlso Not Double.IsNaN(_ustawieniaProjekcji(1)) Then
-            lat0 = _ustawieniaProjekcji(0) : lon0 = _ustawieniaProjekcji(1)
+               _ustawieniaProjekcji.Length >= 4 AndAlso Not Double.IsNaN(_ustawieniaProjekcji(1)) Then
+            lat0 = If(Double.IsNaN(_ustawieniaProjekcji(0)), 0.0, _ustawieniaProjekcji(0))
+            lon0 = _ustawieniaProjekcji(1)
             k0 = If(Double.IsNaN(_ustawieniaProjekcji(2)) OrElse _ustawieniaProjekcji(2) <= 0, 1.0, _ustawieniaProjekcji(2))
             fe = If(Double.IsNaN(_ustawieniaProjekcji(3)), 0, _ustawieniaProjekcji(3))
-            fn = If(Double.IsNaN(_ustawieniaProjekcji(4)), 0, _ustawieniaProjekcji(4))
+            fn = If(_ustawieniaProjekcji.Length < 5 OrElse Double.IsNaN(_ustawieniaProjekcji(4)), 0, _ustawieniaProjekcji(4))
         Else
             _siatkaNieobslugiwana = True
             Return Nothing
@@ -636,10 +644,10 @@ Public Class PlikKalibracjiOzi
         Next
 
         If liczby.Count = 0 Then Return Double.NaN
-        Dim wynik As Double = liczby(0)
-        If liczby.Count >= 2 Then wynik += liczby(1) / 60.0
-        If liczby.Count >= 3 Then wynik += liczby(2) / 3600.0
-        Return If(ujemna, -wynik, wynik)
+        Dim wynik As Double = Math.Abs(liczby(0))
+        If liczby.Count >= 2 Then wynik += Math.Abs(liczby(1)) / 60.0
+        If liczby.Count >= 3 Then wynik += Math.Abs(liczby(2)) / 3600.0
+        Return If(ujemna OrElse liczby(0) < 0, -wynik, wynik)
     End Function
 
     ''' <summary>

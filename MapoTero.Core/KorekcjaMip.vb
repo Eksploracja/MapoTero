@@ -235,36 +235,42 @@ Public NotInheritable Class KorekcjaMip
         If piksele Is Nothing OrElse piksele.Length = 0 OrElse opcje Is Nothing OrElse Not opcje.Wlaczona Then Exit Sub
         If szerokosc <= 0 OrElse wysokosc <= 0 OrElse piksele.Length < szerokosc * wysokosc Then Exit Sub
 
-        ' Tablica przeglądowa (LUT) dla kombinacji Gamma + Kontrast (błyskawiczne obliczenia)
-        Dim lut = TablicaTonow(opcje)
-
+        Dim gammaNorm As Double = Math.Max(0.2, Math.Min(3.0, opcje.Gamma))
+        Dim czyTon As Boolean = Math.Abs(gammaNorm - 1.0) > 0.01 OrElse Math.Abs(opcje.Kontrast - 1.0) > 0.01
         Dim sat As Double = Math.Max(0.0, Math.Min(3.0, opcje.Nasycenie))
         Dim czyNasycenie As Boolean = Math.Abs(sat - 1.0) > 0.01
 
-        ' Krok 1: Przetworzenie kolorów (nasycenie + gamma + kontrast)
-        For i = 0 To piksele.Length - 1
-            Dim c As Integer = piksele(i)
-            Dim a As Integer = (c >> 24) And &HFF
-            If a = 0 Then Continue For
+        ' Krok 1: Przetworzenie kolorów (nasycenie + gamma + kontrast) - pomijany przy samym wyostrzaniu
+        If czyTon OrElse czyNasycenie Then
+            Dim lut As Byte() = If(czyTon, TablicaTonow(opcje), Nothing)
+            Dim liczbaPikseli As Integer = szerokosc * wysokosc
+            For i = 0 To liczbaPikseli - 1
+                Dim c As Integer = piksele(i)
+                Dim a As Integer = (c >> 24) And &HFF
+                If a = 0 Then Continue For
 
-            Dim r As Double = (c >> 16) And &HFF
-            Dim g As Double = (c >> 8) And &HFF
-            Dim b As Double = c And &HFF
+                Dim r As Double = (c >> 16) And &HFF
+                Dim g As Double = (c >> 8) And &HFF
+                Dim b As Double = c And &HFF
 
-            If czyNasycenie Then
-                ' Jasność luminancji Rec. 709
-                Dim lum As Double = 0.2126 * r + 0.7152 * g + 0.0722 * b
-                r = lum + (r - lum) * sat
-                g = lum + (g - lum) * sat
-                b = lum + (b - lum) * sat
-            End If
+                If czyNasycenie Then
+                    ' Jasność luminancji Rec. 709
+                    Dim lum As Double = 0.2126 * r + 0.7152 * g + 0.0722 * b
+                    r = lum + (r - lum) * sat
+                    g = lum + (g - lum) * sat
+                    b = lum + (b - lum) * sat
+                End If
 
-            Dim ir As Integer = CInt(Math.Max(0, Math.Min(255, Math.Round(r))))
-            Dim ig As Integer = CInt(Math.Max(0, Math.Min(255, Math.Round(g))))
-            Dim ib As Integer = CInt(Math.Max(0, Math.Min(255, Math.Round(b))))
+                Dim ir As Integer = CInt(Math.Max(0, Math.Min(255, Math.Round(r))))
+                Dim ig As Integer = CInt(Math.Max(0, Math.Min(255, Math.Round(g))))
+                Dim ib As Integer = CInt(Math.Max(0, Math.Min(255, Math.Round(b))))
 
-            piksele(i) = (a << 24) Or (CInt(lut(ir)) << 16) Or (CInt(lut(ig)) << 8) Or CInt(lut(ib))
-        Next
+                If lut IsNot Nothing Then
+                    ir = lut(ir) : ig = lut(ig) : ib = lut(ib)
+                End If
+                piksele(i) = (a << 24) Or (ir << 16) Or (ig << 8) Or ib
+            Next
+        End If
 
         ' Krok 2: Filtr wyostrzający krawędzie (Laplacian 3x3)
         Dim wSila As Double = Math.Max(0.0, Math.Min(2.0, opcje.Wyostrzanie))
@@ -280,8 +286,9 @@ Public NotInheritable Class KorekcjaMip
     ''' (KorekcjaPasow, Wytnij). Sąsiad przezroczysty jest zastępowany pikselem środkowym (bez jasnej obwódki nakładki).
     ''' </summary>
     Private Shared Sub WyostrzLaplacian(piksele As Integer(), szer As Integer, wys As Integer, sila As Double)
-        Dim kopia(piksele.Length - 1) As Integer
-        Array.Copy(piksele, kopia, piksele.Length)
+        Dim dlugosc As Integer = szer * wys
+        Dim kopia(dlugosc - 1) As Integer
+        Array.Copy(piksele, kopia, dlugosc)
 
         For y = 0 To wys - 1
             Dim wierszGora = Math.Max(0, y - 1) * szer
@@ -327,39 +334,47 @@ Public NotInheritable Class KorekcjaMip
         If bufor Is Nothing OrElse bufor.Length = 0 OrElse opcje Is Nothing OrElse Not opcje.Wlaczona Then Exit Sub
         If szerokosc <= 0 OrElse wysokosc <= 0 OrElse kanaly < 3 OrElse bufor.Length < szerokosc * wysokosc * kanaly Then Exit Sub
 
-        ' 1. Tablica przeglądowa LUT dla Gamma + Kontrast
-        Dim lut = TablicaTonow(opcje)
-
+        Dim gammaNorm As Double = Math.Max(0.2, Math.Min(3.0, opcje.Gamma))
+        Dim czyTon As Boolean = Math.Abs(gammaNorm - 1.0) > 0.01 OrElse Math.Abs(opcje.Kontrast - 1.0) > 0.01
         Dim sat As Double = Math.Max(0.0, Math.Min(3.0, opcje.Nasycenie))
         Dim czyNasycenie As Boolean = Math.Abs(sat - 1.0) > 0.01
 
-        ' Krok 1: Przetworzenie kolorów (nasycenie + gamma + kontrast)
-        For y = 0 To wysokosc - 1
-            Dim wierszStart = y * szerokosc * kanaly
-            For x = 0 To szerokosc - 1
-                Dim idx = wierszStart + x * kanaly
-                If kanaly = 4 AndAlso bufor(idx + 3) = 0 Then Continue For
+        ' Krok 1: Przetworzenie kolorów (nasycenie + gamma + kontrast) - pomijany przy samym wyostrzaniu
+        If czyTon OrElse czyNasycenie Then
+            Dim lut As Byte() = If(czyTon, TablicaTonow(opcje), Nothing)
+            For y = 0 To wysokosc - 1
+                Dim wierszStart = y * szerokosc * kanaly
+                For x = 0 To szerokosc - 1
+                    Dim idx = wierszStart + x * kanaly
+                    If kanaly = 4 AndAlso bufor(idx + 3) = 0 Then Continue For
 
-                Dim r As Double = bufor(idx)
-                Dim g As Double = bufor(idx + 1)
-                Dim b As Double = bufor(idx + 2)
+                    Dim r As Double = bufor(idx)
+                    Dim g As Double = bufor(idx + 1)
+                    Dim b As Double = bufor(idx + 2)
 
-                If czyNasycenie Then
-                    Dim lum As Double = 0.2126 * r + 0.7152 * g + 0.0722 * b
-                    r = lum + (r - lum) * sat
-                    g = lum + (g - lum) * sat
-                    b = lum + (b - lum) * sat
-                End If
+                    If czyNasycenie Then
+                        Dim lum As Double = 0.2126 * r + 0.7152 * g + 0.0722 * b
+                        r = lum + (r - lum) * sat
+                        g = lum + (g - lum) * sat
+                        b = lum + (b - lum) * sat
+                    End If
 
-                Dim ir = CInt(Math.Max(0, Math.Min(255, Math.Round(r))))
-                Dim ig = CInt(Math.Max(0, Math.Min(255, Math.Round(g))))
-                Dim ib = CInt(Math.Max(0, Math.Min(255, Math.Round(b))))
+                    Dim ir = CInt(Math.Max(0, Math.Min(255, Math.Round(r))))
+                    Dim ig = CInt(Math.Max(0, Math.Min(255, Math.Round(g))))
+                    Dim ib = CInt(Math.Max(0, Math.Min(255, Math.Round(b))))
 
-                bufor(idx) = lut(ir)
-                bufor(idx + 1) = lut(ig)
-                bufor(idx + 2) = lut(ib)
+                    If lut IsNot Nothing Then
+                        bufor(idx) = lut(ir)
+                        bufor(idx + 1) = lut(ig)
+                        bufor(idx + 2) = lut(ib)
+                    Else
+                        bufor(idx) = CByte(ir)
+                        bufor(idx + 1) = CByte(ig)
+                        bufor(idx + 2) = CByte(ib)
+                    End If
+                Next
             Next
-        Next
+        End If
 
         ' Krok 2: Filtr wyostrzający krawędzie (Laplacian 3x3)
         Dim wSila As Double = Math.Max(0.0, Math.Min(2.0, opcje.Wyostrzanie))
@@ -369,8 +384,9 @@ Public NotInheritable Class KorekcjaMip
     End Sub
 
     Private Shared Sub WyostrzLaplacianRgb(bufor As Byte(), szer As Integer, wys As Integer, kanaly As Integer, sila As Double)
-        Dim kopia(bufor.Length - 1) As Byte
-        Array.Copy(bufor, kopia, bufor.Length)
+        Dim dlugosc As Integer = szer * wys * kanaly
+        Dim kopia(dlugosc - 1) As Byte
+        Array.Copy(bufor, kopia, dlugosc)
 
         For y = 0 To wys - 1
             Dim wierszGora = Math.Max(0, y - 1) * szer * kanaly
@@ -422,7 +438,7 @@ Public NotInheritable Class KorekcjaMip
     ''' </summary>
     Public Shared Function Wytnij(piksele As Integer(), szerokosc As Integer, wysokosc As Integer, margines As Integer) As Integer()
         Dim szer As Integer = szerokosc - 2 * margines, wys As Integer = wysokosc - 2 * margines
-        If piksele Is Nothing OrElse szer <= 0 OrElse wys <= 0 OrElse piksele.Length < szerokosc * wysokosc Then Return Nothing
+        If piksele Is Nothing OrElse margines < 0 OrElse szer <= 0 OrElse wys <= 0 OrElse piksele.Length < szerokosc * wysokosc Then Return Nothing
         Dim wynik(szer * wys - 1) As Integer
         For y = 0 To wys - 1
             Array.Copy(piksele, (y + margines) * szerokosc + margines, wynik, y * szer, szer)

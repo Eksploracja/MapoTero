@@ -41,7 +41,13 @@ Public Structure ProstokatGeo
 
     ''' <summary>Prostokąt opisany na zasięgu z innego układu (obejmuje cały obraz, z marginesami w narożnikach).</summary>
     Public Shared Function Opisany(uklad As UkladWspolrzednych, z As Zasieg) As ProstokatGeo
-        Dim n() As PunktGeo = {uklad.DoWgs84(z.LewyGorny), uklad.DoWgs84(z.PrawyGorny), uklad.DoWgs84(z.PrawyDolny), uklad.DoWgs84(z.LewyDolny)}
+        Dim srodekX As Double = (z.XDol + z.XGora) / 2
+        Dim srodekY As Double = (z.YLewy + z.YPrawy) / 2
+        Dim n() As PunktGeo = {
+            uklad.DoWgs84(z.LewyGorny), uklad.DoWgs84(z.PrawyGorny),
+            uklad.DoWgs84(z.PrawyDolny), uklad.DoWgs84(z.LewyDolny),
+            uklad.DoWgs84(New PunktXY(z.XGora, srodekY)), uklad.DoWgs84(New PunktXY(z.XDol, srodekY)),
+            uklad.DoWgs84(New PunktXY(srodekX, z.YLewy)), uklad.DoWgs84(New PunktXY(srodekX, z.YPrawy))}
         Dim p As New ProstokatGeo(Double.MinValue, Double.MaxValue, Double.MinValue, Double.MaxValue)
         For Each g In n
             p.Polnoc = Math.Max(p.Polnoc, g.Szerokosc)
@@ -126,10 +132,10 @@ Public NotInheritable Class WebMercator
     ''' <summary>Kafle pokrywające prostokąt na danym poziomie: (xMin, yMin, xMax, yMax).</summary>
     Public Shared Function ZakresKafli(p As ProstokatGeo, z As Integer) As Tuple(Of Integer, Integer, Integer, Integer)
         Dim maks As Integer = (1 << z) - 1
-        Dim x0 As Integer = Math.Max(0, CInt(Math.Floor(PikselX(p.Zachod, z) / RozmiarKafla)))
-        Dim x1 As Integer = Math.Min(maks, CInt(Math.Floor((PikselX(p.Wschod, z) - 0.000001) / RozmiarKafla)))
-        Dim y0 As Integer = Math.Max(0, CInt(Math.Floor(PikselY(p.Polnoc, z) / RozmiarKafla)))
-        Dim y1 As Integer = Math.Min(maks, CInt(Math.Floor((PikselY(p.Poludnie, z) - 0.000001) / RozmiarKafla)))
+        Dim x0 As Integer = Math.Clamp(CInt(Math.Floor(PikselX(p.Zachod, z) / RozmiarKafla)), 0, maks)
+        Dim x1 As Integer = Math.Clamp(CInt(Math.Floor((PikselX(p.Wschod, z) - 0.000001) / RozmiarKafla)), x0, maks)
+        Dim y0 As Integer = Math.Clamp(CInt(Math.Floor(PikselY(p.Polnoc, z) / RozmiarKafla)), 0, maks)
+        Dim y1 As Integer = Math.Clamp(CInt(Math.Floor((PikselY(p.Poludnie, z) - 0.000001) / RozmiarKafla)), y0, maks)
         Return Tuple.Create(x0, y0, x1, y1)
     End Function
 
@@ -314,6 +320,9 @@ Public Class PlanKmz
     ''' <param name="filtrKafli">Opcjonalny filtr sprawdzający, czy kafel o podanym zasięgu zawiera dane (dla korytarza lub rzadkich segmentów).</param>
     Public Sub New(obszar As ProstokatGeo, pikselMetry As Double, bokKafla As Integer, maksKafli As Integer,
                    Optional filtrKafli As Func(Of ProstokatGeo, Boolean) = Nothing)
+        If pikselMetry <= 0 OrElse bokKafla <= 0 Then
+            Throw New ArgumentOutOfRangeException(If(pikselMetry <= 0, NameOf(pikselMetry), NameOf(bokKafla)), "Parametry planu KMZ muszą być dodatnie.")
+        End If
         Me.Obszar = obszar
         Me.BokKafla = bokKafla
         Dim mSz As Double, mDl As Double
@@ -323,12 +332,25 @@ Public Class PlanKmz
         Do
             Dim pSz As Double = pikselMetry * skala / mSz
             Dim pDl As Double = pikselMetry * skala / mDl
-            Dim w As Integer = Math.Max(1, CInt(Math.Ceiling((obszar.Wschod - obszar.Zachod) / pDl - 0.000001)))
-            Dim h As Integer = Math.Max(1, CInt(Math.Ceiling((obszar.Polnoc - obszar.Poludnie) / pSz - 0.000001)))
-            Dim k As Integer = CInt(Math.Ceiling(w / CDbl(bokKafla)))
-            Dim r As Integer = CInt(Math.Ceiling(h / CDbl(bokKafla)))
+            Dim wLong As Long = Math.Max(1L, CLng(Math.Ceiling((obszar.Wschod - obszar.Zachod) / pDl - 0.000001)))
+            Dim hLong As Long = Math.Max(1L, CLng(Math.Ceiling((obszar.Polnoc - obszar.Poludnie) / pSz - 0.000001)))
+            Dim kLong As Long = CLng(Math.Ceiling(wLong / CDbl(bokKafla)))
+            Dim rLong As Long = CLng(Math.Ceiling(hLong / CDbl(bokKafla)))
 
-            Dim liczbaKafli As Integer = k * r
+            Dim miesciSie As Boolean = wLong <= Integer.MaxValue AndAlso hLong <= Integer.MaxValue AndAlso
+                                       kLong <= Integer.MaxValue AndAlso rLong <= Integer.MaxValue AndAlso
+                                       (kLong * rLong) <= Integer.MaxValue
+            If Not miesciSie Then
+                If maksKafli <= 0 Then Throw New InvalidOperationException("Rozmiar planu KMZ przekracza dopuszczalną liczbę pikseli lub kafli.")
+                skala *= 1.25
+                Continue Do
+            End If
+
+            Dim w As Integer = CInt(wLong)
+            Dim h As Integer = CInt(hLong)
+            Dim k As Integer = CInt(kLong)
+            Dim r As Integer = CInt(rLong)
+            Dim liczbaKafli As Integer = CInt(kLong * rLong)
             If filtrKafli IsNot Nothing AndAlso maksKafli > 0 AndAlso liczbaKafli > maksKafli Then
                 liczbaKafli = 0
                 Dim pDlugosc = (obszar.Wschod - obszar.Zachod) / w
@@ -408,40 +430,37 @@ Public Class PlanKmz
 
         While True
             Dim pasuje As Boolean = True
-            Dim kandydaci As New List(Of List(Of Tuple(Of Integer, Integer)))()
-
-            For bw = 0 To blokWiersze - 1
-                Dim w0 = CInt(CLng(Wiersze) * bw \ blokWiersze)
-                Dim w1 = CInt(CLng(Wiersze) * (bw + 1) \ blokWiersze)
-                For bk = 0 To blokKolumny - 1
-                    Dim k0 = CInt(CLng(Kolumny) * bk \ blokKolumny)
-                    Dim k1 = CInt(CLng(Kolumny) * (bk + 1) \ blokKolumny)
-
-                    Dim kafleBloku As New List(Of Tuple(Of Integer, Integer))()
-                    For Each kfl In aktywne
-                        If kfl.Item1 >= w0 AndAlso kfl.Item1 < w1 AndAlso kfl.Item2 >= k0 AndAlso kfl.Item2 < k1 Then
-                            kafleBloku.Add(kfl)
-                        End If
-                    Next
-
-                    If kafleBloku.Count > maksKafliNaTom Then
-                        pasuje = False
-                        Exit For
-                    End If
-                    If kafleBloku.Count > 0 Then
-                        kandydaci.Add(kafleBloku)
-                    End If
-                Next
-                If Not pasuje Then Exit For
+            Dim liczbaBlokow As Integer = blokWiersze * blokKolumny
+            Dim liczniki(liczbaBlokow - 1) As Integer
+            Dim bloki(liczbaBlokow - 1) As List(Of Tuple(Of Integer, Integer))
+            For Each kfl In aktywne
+                Dim bw As Integer = Math.Clamp(CInt(((CLng(kfl.Item1) + 1L) * blokWiersze - 1L) \ Wiersze), 0, blokWiersze - 1)
+                Dim bk As Integer = Math.Clamp(CInt(((CLng(kfl.Item2) + 1L) * blokKolumny - 1L) \ Kolumny), 0, blokKolumny - 1)
+                Dim idxBloku As Integer = bw * blokKolumny + bk
+                liczniki(idxBloku) += 1
+                If liczniki(idxBloku) > maksKafliNaTom Then
+                    pasuje = False
+                    Exit For
+                End If
+                If bloki(idxBloku) Is Nothing Then bloki(idxBloku) = New List(Of Tuple(Of Integer, Integer))()
+                bloki(idxBloku).Add(kfl)
             Next
 
-            If pasuje AndAlso kandydaci.Count >= minTomow Then
-                Dim wynik As New List(Of TomKmz)()
-                For i = 0 To kandydaci.Count - 1
-                    Dim obszarTomu = ObszarKafli(kandydaci(i))
-                    wynik.Add(New TomKmz(i + 1, kandydaci.Count, obszarTomu, kandydaci(i)))
+            If pasuje Then
+                Dim niepuste As Integer = 0
+                For Each b In bloki
+                    If b IsNot Nothing Then niepuste += 1
                 Next
-                Return wynik
+                If niepuste >= minTomow Then
+                    Dim wynik As New List(Of TomKmz)(niepuste)
+                    Dim numerTomu As Integer = 0
+                    For Each b In bloki
+                        If b Is Nothing Then Continue For
+                        numerTomu += 1
+                        wynik.Add(New TomKmz(numerTomu, niepuste, ObszarKafli(b), b))
+                    Next
+                    Return wynik
+                End If
             End If
 
             If (Wiersze / CDbl(blokWiersze)) >= (Kolumny / CDbl(blokKolumny)) Then

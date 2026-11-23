@@ -316,6 +316,7 @@ Public Class FormEksportCad
                     Return zad
                 End Function)
 
+            If IsDisposed OrElse Disposing Then Exit Sub
             Dim sb As New StringBuilder()
             sb.Append("Zapisano (rastrów: ").Append(z.Rastry.Count).Append("):").Append(vbCrLf)
             If dxf Then
@@ -339,10 +340,13 @@ Public Class FormEksportCad
             _folderWyniku = Path.GetDirectoryName(plikDxf)
             btnOtworzFolder.Enabled = True
         Catch ex As Exception
+            If IsDisposed OrElse Disposing Then Exit Sub
             Komunikat("Eksport nie powiódł się: " & OpisBledu.Z(ex), Color.Red)
         Finally
-            Cursor = Cursors.Default
-            Enabled = True
+            If Not IsDisposed AndAlso Not Disposing Then
+                Cursor = Cursors.Default
+                Enabled = True
+            End If
         End Try
     End Sub
 

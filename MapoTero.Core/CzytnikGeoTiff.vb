@@ -54,6 +54,8 @@ Public NotInheritable Class CzytnikGeoTiff
 
     Private Const KeyGeographicType As Integer = 2048
     Private Const KeyProjectedCSType As Integer = 3072
+    Private Const KeyRasterType As Integer = 1025
+    Private Const RasterPixelIsPoint As Integer = 2
 
     Private Shared ReadOnly _lockExtender As New Object()
     Private Shared _extenderZarejestrowany As Boolean = False
@@ -107,9 +109,12 @@ Public NotInheritable Class CzytnikGeoTiff
             If CzyKafelkowany Then
                 SzerokoscKafla = PobierzIntTag(TiffTag.TILEWIDTH, 256)
                 WysokoscKafla = PobierzIntTag(TiffTag.TILELENGTH, 256)
+                If SzerokoscKafla <= 0 OrElse WysokoscKafla <= 0 Then
+                    Throw New InvalidDataException("Plik GeoTIFF ma nieprawidłowe wymiary kafli.")
+                End If
             Else
                 WierszyWPasie = PobierzIntTag(TiffTag.ROWSPERSTRIP, Wysokosc)
-                If WierszyWPasie <= 0 Then WierszyWPasie = Wysokosc
+                WierszyWPasie = Math.Min(Wysokosc, If(WierszyWPasie <= 0, Wysokosc, WierszyWPasie))
             End If
 
             Georeferencja = OdczytajGeoreferencje(sciezkaPliku)
@@ -158,11 +163,17 @@ Public NotInheritable Class CzytnikGeoTiff
     End Sub
 
     Public Function WytnijFragmentBgra(x As Integer, y As Integer, szer As Integer, wys As Integer) As Byte()
+        If _disposed Then Throw New ObjectDisposedException(NameOf(CzytnikGeoTiff))
         If szer <= 0 OrElse wys <= 0 Then
             Return Array.Empty(Of Byte)()
         End If
 
-        Dim wynik((szer * wys * 4) - 1) As Byte
+        Dim rozmiarBajty As Long = CLng(szer) * CLng(wys) * 4L
+        If rozmiarBajty > Integer.MaxValue Then
+            Throw New ArgumentOutOfRangeException(NameOf(szer), "Żądany fragment GeoTIFF przekracza dopuszczalny rozmiar bufora.")
+        End If
+
+        Dim wynik(CInt(rozmiarBajty) - 1) As Byte
 
         SyncLock _lockOdczyt
             For dy As Integer = 0 To wys - 1
@@ -180,6 +191,37 @@ Public NotInheritable Class CzytnikGeoTiff
         End SyncLock
 
         Return wynik
+    End Function
+
+    ''' <summary>Odczytuje pojedynczy piksel BGRA z wykorzystaniem pamięci podręcznej LRU bez alokacji tablicy pośredniej.</summary>
+    Public Function PobierzPikselBgra(px As Integer, py As Integer, ByRef b As Byte, ByRef g As Byte, ByRef r As Byte, ByRef a As Byte) As Boolean
+        If _disposed Then Throw New ObjectDisposedException(NameOf(CzytnikGeoTiff))
+        If px < 0 OrElse px >= Szerokosc OrElse py < 0 OrElse py >= Wysokosc Then Return False
+
+        SyncLock _lockOdczyt
+            Dim abgr As Integer
+            If CzyKafelkowany Then
+                Dim kafelStartX As Integer = (px \ SzerokoscKafla) * SzerokoscKafla
+                Dim kafelStartY As Integer = (py \ WysokoscKafla) * WysokoscKafla
+                Dim blok As WpisBloku = PobierzKafelZLru(kafelStartX, kafelStartY)
+                Dim lokalneX As Integer = px - kafelStartX
+                Dim lokalneY As Integer = py - kafelStartY
+                Dim odwroconeY As Integer = WysokoscKafla - 1 - lokalneY
+                abgr = blok.BuforAbgr((odwroconeY * SzerokoscKafla) + lokalneX)
+            Else
+                Dim pasStartY As Integer = (py \ WierszyWPasie) * WierszyWPasie
+                Dim blok As WpisBloku = PobierzPasZLru(pasStartY)
+                Dim lokalneY As Integer = py - pasStartY
+                Dim odwroconeY As Integer = blok.RealnaWysokosc - 1 - lokalneY
+                abgr = blok.BuforAbgr((odwroconeY * Szerokosc) + px)
+            End If
+            b = CByte(Tiff.GetB(abgr))
+            g = CByte(Tiff.GetG(abgr))
+            r = CByte(Tiff.GetR(abgr))
+            a = CByte(Tiff.GetA(abgr))
+        End SyncLock
+
+        Return True
     End Function
 
     Private Sub KopiujWierszZPasa(currY As Integer, startX As Integer, szer As Integer, dst As Byte(), bazaDst As Integer)
@@ -248,7 +290,11 @@ Public NotInheritable Class CzytnikGeoTiff
         End If
 
         Dim realnaWys As Integer = Math.Min(WierszyWPasie, Wysokosc - pasStartY)
-        Dim bufor((Szerokosc * WierszyWPasie) - 1) As Integer
+        Dim liczbaPikseli As Long = CLng(Szerokosc) * CLng(realnaWys)
+        If liczbaPikseli <= 0 OrElse liczbaPikseli > (Integer.MaxValue \ 4) Then
+            Throw New IOException("Rozmiar pasa GeoTIFF przekracza dopuszczalną pojemność bufora.")
+        End If
+        Dim bufor(CInt(liczbaPikseli) - 1) As Integer
         If Not _tiff.ReadRGBAStrip(pasStartY, bufor) Then
             Throw New IOException(String.Format("Błąd dekodowania pasa GeoTIFF (wiersz {0}).", pasStartY))
         End If
@@ -307,7 +353,8 @@ Public NotInheritable Class CzytnikGeoTiff
         Else
             Dim skala As Double() = PobierzDoubleArrayTag(TagModelPixelScale)
             Dim punkty As Double() = PobierzDoubleArrayTag(TagModelTiepoint)
-            If skala IsNot Nothing AndAlso skala.Length >= 2 AndAlso punkty IsNot Nothing AndAlso punkty.Length >= 6 Then
+            If skala IsNot Nothing AndAlso skala.Length >= 2 AndAlso punkty IsNot Nothing AndAlso punkty.Length >= 6 AndAlso
+               skala(0) <> 0 AndAlso skala(1) <> 0 Then
                 Dim iPx As Double = punkty(0)
                 Dim jPy As Double = punkty(1)
                 Dim xMap As Double = punkty(3)
@@ -318,6 +365,11 @@ Public NotInheritable Class CzytnikGeoTiff
                 geo.D = 0.0
                 geo.E = -Math.Abs(skala(1))
                 geo.F = yMap + (jPy * Math.Abs(skala(1)))
+                Dim rasterType As Integer? = OdczytajGeoKeyWartosc(KeyRasterType)
+                If rasterType.HasValue AndAlso rasterType.Value = RasterPixelIsPoint Then
+                    geo.C -= 0.5 * geo.A
+                    geo.F -= 0.5 * geo.E
+                End If
                 geo.ZrodloGeoreferencji = "GeoTIFF (ModelPixelScale + ModelTiepoint)"
             Else
                 WczytajWorldFile(sciezkaTiff, geo)
@@ -342,11 +394,30 @@ Public NotInheritable Class CzytnikGeoTiff
         Return geo
     End Function
 
+    Private Function OdczytajGeoKeyWartosc(szukanyKeyId As Integer) As Integer?
+        Dim pole As FieldValue() = _tiff.GetField(TagGeoKeyDirectory)
+        If pole Is Nothing OrElse pole.Length < 2 Then Return Nothing
+
+        Dim klucze As Short() = pole(1).ToShortArray()
+        If klucze Is Nothing OrElse klucze.Length < 4 Then Return Nothing
+
+        Dim liczbaKluczy As Integer = CInt(klucze(3)) And &HFFFF
+        For i As Integer = 0 To liczbaKluczy - 1
+            Dim baza As Integer = 4 + (i * 4)
+            If baza + 3 >= klucze.Length Then Exit For
+            Dim keyId As Integer = CInt(klucze(baza)) And &HFFFF
+            Dim tiffTagLoc As Integer = CInt(klucze(baza + 1)) And &HFFFF
+            Dim wartosc As Integer = CInt(klucze(baza + 3)) And &HFFFF
+            If keyId = szukanyKeyId AndAlso tiffTagLoc = 0 Then Return wartosc
+        Next
+        Return Nothing
+    End Function
+
     Private Function OdczytajEpsgZGeoKeys() As Integer?
         Dim pole As FieldValue() = _tiff.GetField(TagGeoKeyDirectory)
         If pole Is Nothing OrElse pole.Length < 2 Then Return Nothing
 
-        Dim klucze As Short() = TryCast(pole(1).Value, Short())
+        Dim klucze As Short() = pole(1).ToShortArray()
         If klucze Is Nothing OrElse klucze.Length < 4 Then Return Nothing
 
         ' Bezalokacyjne rzutowanie bez znaku (obsługuje kody EPSG >= 32768, np. UTM 32633-32635)
@@ -410,12 +481,22 @@ Public NotInheritable Class CzytnikGeoTiff
     Public Shared Function RozpoznajEpsgZPlikuPrj(wkt As String) As Integer?
         If String.IsNullOrWhiteSpace(wkt) Then Return Nothing
 
-        Dim dopasowania As MatchCollection = Regex.Matches(wkt, "AUTHORITY\s*\[\s*""EPSG""\s*,\s*""(\d{4,5})""\s*\]", RegexOptions.IgnoreCase)
-        If dopasowania.Count > 0 Then
-            Return Integer.Parse(dopasowania(dopasowania.Count - 1).Groups(1).Value, CultureInfo.InvariantCulture)
-        End If
-
         Dim u As String = wkt.ToUpperInvariant()
+        Dim czyProjekcja As Boolean = u.Contains("PROJCS") OrElse u.Contains("PROJCRS")
+        Dim idxProj As Integer = Math.Max(u.IndexOf("PROJECTION", StringComparison.Ordinal),
+                                          u.IndexOf("CONVERSION", StringComparison.Ordinal))
+        Dim dopasowania As MatchCollection = Regex.Matches(wkt, "(?:AUTHORITY|ID)\s*\[\s*""EPSG""\s*,\s*""?(\d{4,5})""?\s*\]", RegexOptions.IgnoreCase)
+        For i As Integer = dopasowania.Count - 1 To 0 Step -1
+            Dim m As Match = dopasowania(i)
+            Dim kod As Integer
+            If Not Integer.TryParse(m.Groups(1).Value, NumberStyles.Integer, CultureInfo.InvariantCulture, kod) Then Continue For
+            ' Pomijamy kody jednostek, elipsoid, datumów i parametrów (zakresy 6000-9999)
+            If kod >= 6000 AndAlso kod <= 9999 Then Continue For
+            ' W układzie odwzorowanym pomijamy EPSG zagnieżdżonego GEOGCS przed PROJECTION/CONVERSION
+            If czyProjekcja AndAlso idxProj >= 0 AndAlso m.Index < idxProj Then Continue For
+            Return kod
+        Next
+
         If u.Contains("POLAND_CS92") OrElse u.Contains("PUWG_92") OrElse u.Contains("ETRF2000_PL_CS92") Then Return 2180
         If u.Contains("CS2000_ZONE_5") OrElse u.Contains("2000_STREF_5") OrElse u.Contains("POLAND_CS2000_ZONE_5") Then Return 2176
         If u.Contains("CS2000_ZONE_6") OrElse u.Contains("2000_STREF_6") OrElse u.Contains("POLAND_CS2000_ZONE_6") Then Return 2177
@@ -426,19 +507,26 @@ Public NotInheritable Class CzytnikGeoTiff
         If u.Contains("UTM_ZONE_35N") Then Return 32635
         If u.Contains("WEB_MERCATOR") OrElse u.Contains("PSEUDO_MERCATOR") Then Return 3857
 
-        Dim mCm As Match = Regex.Match(wkt, "Central_Meridian""\s*,\s*([0-9\.\-]+)", RegexOptions.IgnoreCase)
-        Dim mFe As Match = Regex.Match(wkt, "False_Easting""\s*,\s*([0-9\.\-]+)", RegexOptions.IgnoreCase)
+        Dim mCm As Match = Regex.Match(wkt, "Central_Meridian""?\s*,\s*([0-9\.\-]+)", RegexOptions.IgnoreCase)
+        Dim mFe As Match = Regex.Match(wkt, "False_Easting""?\s*,\s*([0-9\.\-]+)", RegexOptions.IgnoreCase)
         If mCm.Success AndAlso mFe.Success Then
-            Dim cm As Double = Double.Parse(mCm.Groups(1).Value, CultureInfo.InvariantCulture)
-            Dim fe As Double = Double.Parse(mFe.Groups(1).Value, CultureInfo.InvariantCulture)
-            If Math.Abs(cm - 19.0) < 0.01 AndAlso Math.Abs(fe - 500000.0) < 1.0 Then Return 2180
-            If Math.Abs(cm - 15.0) < 0.01 AndAlso Math.Abs(fe - 5500000.0) < 1.0 Then Return 2176
-            If Math.Abs(cm - 18.0) < 0.01 AndAlso Math.Abs(fe - 6500000.0) < 1.0 Then Return 2177
-            If Math.Abs(cm - 21.0) < 0.01 AndAlso Math.Abs(fe - 7500000.0) < 1.0 Then Return 2178
-            If Math.Abs(cm - 24.0) < 0.01 AndAlso Math.Abs(fe - 8500000.0) < 1.0 Then Return 2179
-            If Math.Abs(cm - 15.0) < 0.01 AndAlso Math.Abs(fe - 500000.0) < 1.0 Then Return 32633
-            If Math.Abs(cm - 21.0) < 0.01 AndAlso Math.Abs(fe - 500000.0) < 1.0 Then Return 32634
-            If Math.Abs(cm - 27.0) < 0.01 AndAlso Math.Abs(fe - 500000.0) < 1.0 Then Return 32635
+            Dim cm As Double, fe As Double
+            If Double.TryParse(mCm.Groups(1).Value, NumberStyles.Float, CultureInfo.InvariantCulture, cm) AndAlso
+               Double.TryParse(mFe.Groups(1).Value, NumberStyles.Float, CultureInfo.InvariantCulture, fe) Then
+                Dim mFn As Match = Regex.Match(wkt, "False_Northing""?\s*,\s*([0-9\.\-]+)", RegexOptions.IgnoreCase)
+                Dim fn As Double = 0.0
+                If mFn.Success Then Double.TryParse(mFn.Groups(1).Value, NumberStyles.Float, CultureInfo.InvariantCulture, fn)
+                If Math.Abs(fn) < 1.0 Then
+                    If Math.Abs(cm - 19.0) < 0.01 AndAlso Math.Abs(fe - 500000.0) < 1.0 Then Return 2180
+                    If Math.Abs(cm - 15.0) < 0.01 AndAlso Math.Abs(fe - 5500000.0) < 1.0 Then Return 2176
+                    If Math.Abs(cm - 18.0) < 0.01 AndAlso Math.Abs(fe - 6500000.0) < 1.0 Then Return 2177
+                    If Math.Abs(cm - 21.0) < 0.01 AndAlso Math.Abs(fe - 7500000.0) < 1.0 Then Return 2178
+                    If Math.Abs(cm - 24.0) < 0.01 AndAlso Math.Abs(fe - 8500000.0) < 1.0 Then Return 2179
+                    If Math.Abs(cm - 15.0) < 0.01 AndAlso Math.Abs(fe - 500000.0) < 1.0 Then Return 32633
+                    If Math.Abs(cm - 21.0) < 0.01 AndAlso Math.Abs(fe - 500000.0) < 1.0 Then Return 32634
+                    If Math.Abs(cm - 27.0) < 0.01 AndAlso Math.Abs(fe - 500000.0) < 1.0 Then Return 32635
+                End If
+            End If
         End If
 
         If u.StartsWith("GEOGCS") AndAlso (u.Contains("WGS_1984") OrElse u.Contains("WGS 84")) Then Return 4326
@@ -454,7 +542,7 @@ Public NotInheritable Class CzytnikGeoTiff
     Private Function PobierzDoubleArrayTag(tag As TiffTag) As Double()
         Dim pole As FieldValue() = _tiff.GetField(tag)
         If pole Is Nothing OrElse pole.Length < 2 Then Return Nothing
-        Return TryCast(pole(1).Value, Double())
+        Return pole(1).ToDoubleArray()
     End Function
 
     Public Sub Dispose() Implements IDisposable.Dispose

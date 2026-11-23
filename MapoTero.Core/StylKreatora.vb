@@ -26,6 +26,9 @@ Public Class StylKreatora
     Private ReadOnly _zestawOknaGlownego As Func(Of ZestawWarstw)
     Private ReadOnly _zrodla As New Dictionary(Of String, PlikWarstw)(StringComparer.OrdinalIgnoreCase)
     Private ReadOnly _brakujaceZbiory As New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
+    Private ReadOnly _blokadaZrodel As New Object()
+    Private _zrodlaSzablonowZaladowane As Boolean
+    Private _migawkaZrodel As Dictionary(Of String, PlikWarstw)
 
     ''' <param name="zrodlaSesji">Pliki zbiorów map wczytane w oknie głównym (Nothing - tylko pliki z folderu warstwy).</param>
     ''' <param name="zestawOknaGlownego">Warstwy wybrane w oknie głównym - styl <see cref="IdWlasnegoZestawu"/>.</param>
@@ -79,20 +82,35 @@ Public Class StylKreatora
     ''' najdokładniejszej). Brakujący plik jest zapamiętywany, żeby każde złożenie zestawu nie czytało go z dysku od nowa.
     ''' </summary>
     Public Function ZrodlaMap() As Dictionary(Of String, PlikWarstw)
-        If _zrodla.Count = 0 AndAlso _zrodlaSesji IsNot Nothing Then
-            For Each kv In _zrodlaSesji()
-                _zrodla(kv.Key) = kv.Value
-            Next
-        End If
-        For Each sz In ZarzadcaSzablonow.PobierzWszystkie()
-            For Each w In sz.Warstwy.Concat(sz.StopnieSkali.SelectMany(Function(st) st.Warstwy))
-                If Not String.IsNullOrEmpty(w.Zbior) AndAlso Not _zrodla.ContainsKey(w.Zbior) AndAlso Not _brakujaceZbiory.Contains(w.Zbior) Then
-                    Dim plik = ZarzadcaSzablonow.WczytajPlikZbioru(w.Zbior)
-                    If plik IsNot Nothing Then _zrodla(w.Zbior) = plik Else _brakujaceZbiory.Add(w.Zbior)
-                End If
-            Next
-        Next
-        Return _zrodla
+        SyncLock _blokadaZrodel
+            Dim zmieniono As Boolean = False
+            If _zrodla.Count = 0 AndAlso _zrodlaSesji IsNot Nothing Then
+                For Each kv In _zrodlaSesji()
+                    _zrodla(kv.Key) = kv.Value
+                    zmieniono = True
+                Next
+            End If
+            If Not _zrodlaSzablonowZaladowane Then
+                For Each sz In ZarzadcaSzablonow.PobierzWszystkie()
+                    For Each w In sz.Warstwy.Concat(sz.StopnieSkali.SelectMany(Function(st) st.Warstwy))
+                        If Not String.IsNullOrEmpty(w.Zbior) AndAlso Not _zrodla.ContainsKey(w.Zbior) AndAlso Not _brakujaceZbiory.Contains(w.Zbior) Then
+                            Dim plik = ZarzadcaSzablonow.WczytajPlikZbioru(w.Zbior)
+                            If plik IsNot Nothing Then
+                                _zrodla(w.Zbior) = plik
+                                zmieniono = True
+                            Else
+                                _brakujaceZbiory.Add(w.Zbior)
+                            End If
+                        End If
+                    Next
+                Next
+                If ZarzadcaSzablonow.PobierzWszystkie().Count > 0 Then _zrodlaSzablonowZaladowane = True
+            End If
+            If _migawkaZrodel Is Nothing OrElse zmieniono Then
+                _migawkaZrodel = New Dictionary(Of String, PlikWarstw)(_zrodla, StringComparer.OrdinalIgnoreCase)
+            End If
+            Return _migawkaZrodel
+        End SyncLock
     End Function
 
 #Region "Zestawy warstw"
@@ -293,7 +311,7 @@ Public Class StylKreatora
         If stopienPodgladu IsNot Nothing OrElse Szablon Is Nothing OrElse Not Szablon.Wieloskalowy Then Return Nothing
         If ZestawNiestandardowy IsNot Nothing OrElse CzyWlasnyZestaw Then Return Nothing
         If PlanWlasny IsNot Nothing AndAlso PlanWlasny.Count > 0 Then Return PlanWlasny.OrderBy(Function(ps) ps.Piksel).First().Stopien
-        Return Szablon.StopnieSkali(0)
+        Return If(Szablon.StopnieGlowne.FirstOrDefault(), Szablon.StopnieSkali.FirstOrDefault())
     End Function
 
     ''' <summary>Status gotowej próbki stylu: skala pokazywana w podglądzie stylu wieloskalowego.</summary>
@@ -408,7 +426,7 @@ Public Class StylKreatora
             Dim skale = If(PlanWlasny IsNot Nothing AndAlso PlanWlasny.Count > 0,
                            PlanWlasny.Select(Function(ps) Tuple.Create(ps.Stopien, ps.Piksel)).ToList(),
                            baza.StopnieSkali.Select(Function(st) Tuple.Create(st, st.Piksel)).ToList())
-            For Each sk In skale.OrderBy(Function(t) t.Item2)
+            For Each sk In skale.OrderBy(Function(t) If(t.Item1.Opcjonalny, 1, 0)).ThenBy(Function(t) t.Item2)
                 Dim warstwy = konwertuj(UtworzZestaw(0, sk.Item1))
                 If warstwy.Length = 0 Then Continue For
                 'stopień opcjonalny zostaje opcjonalny - inaczej ortofotomapa (najmniejszy piksel) stałaby się główną skalą stylu

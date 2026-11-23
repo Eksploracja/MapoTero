@@ -144,10 +144,10 @@ Imports System.Text.RegularExpressions
         End Sub
 
         Private Function IndeksPasa(x As Double) As Integer
-            Dim idx As Integer = CInt(Math.Floor((x - Aabb.MinWschod) / _szerokoscPasa))
-            If idx < 0 Then Return 0
-            If idx >= _liczbaPasow Then Return _liczbaPasow - 1
-            Return idx
+            Dim d As Double = Math.Floor((x - Aabb.MinWschod) / _szerokoscPasa)
+            If Not Double.IsFinite(d) OrElse d <= 0 Then Return 0
+            If d >= _liczbaPasow - 1 Then Return _liczbaPasow - 1
+            Return CInt(d)
         End Function
 
         Public Function CzyKrawedzLubWierzcholekDotykaProstokata(seg As ZakresAABB) As Boolean
@@ -475,7 +475,8 @@ Imports System.Text.RegularExpressions
                 Dim lon As Double
                 Dim lat As Double
                 If Double.TryParse(czesci(0), NumberStyles.Float, CultureInfo.InvariantCulture, lon) AndAlso
-                   Double.TryParse(czesci(1), NumberStyles.Float, CultureInfo.InvariantCulture, lat) Then
+                   Double.TryParse(czesci(1), NumberStyles.Float, CultureInfo.InvariantCulture, lat) AndAlso
+                   Double.IsFinite(lon) AndAlso Double.IsFinite(lat) Then
                     wynik.Add(New Punkt2D(lon, lat))
                 End If
             Next
@@ -579,20 +580,31 @@ Imports System.Text.RegularExpressions
         Private Shared Function ParsujPojedynczyWielokatGeoJson(polyCoords As JsonElement) As Wielokat
             If polyCoords.ValueKind <> JsonValueKind.Array Then Return Nothing
             Dim pierscienie As New List(Of PierscienPoligonu)()
+            Dim indeksPierscienia As Integer = 0
 
             For Each ringElem As JsonElement In polyCoords.EnumerateArray()
-                If ringElem.ValueKind <> JsonValueKind.Array Then Continue For
+                If ringElem.ValueKind <> JsonValueKind.Array Then
+                    If indeksPierscienia = 0 Then Return Nothing
+                    indeksPierscienia += 1
+                    Continue For
+                End If
                 Dim punkty As New List(Of Punkt2D)()
                 For Each ptElem As JsonElement In ringElem.EnumerateArray()
                     If ptElem.ValueKind = JsonValueKind.Array AndAlso ptElem.GetArrayLength() >= 2 Then
-                        Dim x As Double = ptElem(0).GetDouble()
-                        Dim y As Double = ptElem(1).GetDouble()
-                        punkty.Add(New Punkt2D(x, y))
+                        Dim x As Double, y As Double
+                        If ptElem(0).ValueKind = JsonValueKind.Number AndAlso ptElem(1).ValueKind = JsonValueKind.Number AndAlso
+                           ptElem(0).TryGetDouble(x) AndAlso ptElem(1).TryGetDouble(y) AndAlso
+                           Double.IsFinite(x) AndAlso Double.IsFinite(y) Then
+                            punkty.Add(New Punkt2D(x, y))
+                        End If
                     End If
                 Next
-                If punkty.Count >= 3 Then
+                If punkty.Count < 3 Then
+                    If indeksPierscienia = 0 Then Return Nothing
+                Else
                     pierscienie.Add(New PierscienPoligonu(punkty))
                 End If
+                indeksPierscienia += 1
             Next
 
             If pierscienie.Count = 0 Then Return Nothing
@@ -600,20 +612,23 @@ Imports System.Text.RegularExpressions
         End Function
 
         Private Shared Sub RozpoznajUkladPoligonu(zestaw As ZestawPoligonow, epsgZNaglowka As Integer?)
+            Dim b As ZakresAABB = zestaw.GlobalnyAabb
+            Dim srX As Double = (b.MinWschod + b.MaxWschod) * 0.5
+            Dim srY As Double = (b.MinPolnoc + b.MaxPolnoc) * 0.5
             If epsgZNaglowka.HasValue Then
                 Dim kandydat As RodzinaUkladuPoligonu = CType(epsgZNaglowka.Value, RodzinaUkladuPoligonu)
                 If [Enum].IsDefined(Of RodzinaUkladuPoligonu)(kandydat) Then
                     zestaw.WykrytyUklad = kandydat
                     zestaw.ZrodloWykryciaUkladu = String.Format("Nagłówek CRS (EPSG:{0})", epsgZNaglowka.Value)
                     zestaw.NiejednoznaczneOsie = (kandydat = RodzinaUkladuPoligonu.Pl1992 OrElse
-                                                  kandydat = RodzinaUkladuPoligonu.Pl2000Strefa5)
+                                                  kandydat = RodzinaUkladuPoligonu.Pl2000Strefa5 OrElse
+                                                  ((kandydat = RodzinaUkladuPoligonu.Pl2000Strefa6 OrElse
+                                                    kandydat = RodzinaUkladuPoligonu.Pl2000Strefa7 OrElse
+                                                    kandydat = RodzinaUkladuPoligonu.Pl2000Strefa8) AndAlso srX < srY))
                     Return
                 End If
             End If
 
-            Dim b As ZakresAABB = zestaw.GlobalnyAabb
-            Dim srX As Double = (b.MinWschod + b.MaxWschod) * 0.5
-            Dim srY As Double = (b.MinPolnoc + b.MaxPolnoc) * 0.5
             Dim maksAbs As Double = Math.Max(Math.Max(Math.Abs(b.MinWschod), Math.Abs(b.MaxWschod)),
                                              Math.Max(Math.Abs(b.MinPolnoc), Math.Abs(b.MaxPolnoc)))
 
@@ -624,11 +639,12 @@ Imports System.Text.RegularExpressions
                 Return
             End If
 
-            If (srX >= 1400000.0 AndAlso srX <= 2800000.0 AndAlso srY >= 6100000.0 AndAlso srY <= 7600000.0) OrElse
-               (srY >= 1400000.0 AndAlso srY <= 2800000.0 AndAlso srX >= 6100000.0 AndAlso srX <= 7600000.0) Then
+            Dim mercatorEn As Boolean = (srX >= 1400000.0 AndAlso srX <= 2800000.0 AndAlso srY >= 6100000.0 AndAlso srY <= 7600000.0)
+            Dim mercatorNe As Boolean = (srY >= 1400000.0 AndAlso srY <= 2800000.0 AndAlso srX >= 6100000.0 AndAlso srX <= 7600000.0)
+            If mercatorEn OrElse mercatorNe Then
                 zestaw.WykrytyUklad = RodzinaUkladuPoligonu.WebMercator
                 zestaw.ZrodloWykryciaUkladu = "Heurystyka: Web Mercator (EPSG:3857)"
-                zestaw.NiejednoznaczneOsie = False
+                zestaw.NiejednoznaczneOsie = Not mercatorEn
                 Return
             End If
 
@@ -636,13 +652,13 @@ Imports System.Text.RegularExpressions
                 Dim maksOs As Double = Math.Max(srX, srY)
                 If maksOs >= 8000000.0 Then
                     zestaw.WykrytyUklad = RodzinaUkladuPoligonu.Pl2000Strefa8
-                    zestaw.NiejednoznaczneOsie = False
+                    zestaw.NiejednoznaczneOsie = (srX < srY)
                 ElseIf maksOs >= 7000000.0 Then
                     zestaw.WykrytyUklad = RodzinaUkladuPoligonu.Pl2000Strefa7
-                    zestaw.NiejednoznaczneOsie = False
+                    zestaw.NiejednoznaczneOsie = (srX < srY)
                 ElseIf maksOs >= 6200000.0 Then
                     zestaw.WykrytyUklad = RodzinaUkladuPoligonu.Pl2000Strefa6
-                    zestaw.NiejednoznaczneOsie = False
+                    zestaw.NiejednoznaczneOsie = (srX < srY)
                 Else
                     zestaw.WykrytyUklad = RodzinaUkladuPoligonu.Pl2000Strefa5
                     zestaw.NiejednoznaczneOsie = True
@@ -651,11 +667,12 @@ Imports System.Text.RegularExpressions
                 Return
             End If
 
-            If (srX >= 100000.0 AndAlso srX <= 900000.0 AndAlso srY >= 5300000.0 AndAlso srY <= 6200000.0) OrElse
-               (srY >= 100000.0 AndAlso srY <= 900000.0 AndAlso srX >= 5300000.0 AndAlso srX <= 6200000.0) Then
+            Dim utmEn As Boolean = (srX >= 100000.0 AndAlso srX <= 900000.0 AndAlso srY >= 5300000.0 AndAlso srY <= 6200000.0)
+            Dim utmNe As Boolean = (srY >= 100000.0 AndAlso srY <= 900000.0 AndAlso srX >= 5300000.0 AndAlso srX <= 6200000.0)
+            If utmEn OrElse utmNe Then
                 zestaw.WykrytyUklad = RodzinaUkladuPoligonu.Utm34N
                 zestaw.ZrodloWykryciaUkladu = "Heurystyka: UTM (domyślnie 34N – zweryfikuj strefę)"
-                zestaw.NiejednoznaczneOsie = False
+                zestaw.NiejednoznaczneOsie = Not utmEn
                 Return
             End If
 

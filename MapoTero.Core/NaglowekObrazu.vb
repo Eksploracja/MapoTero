@@ -98,8 +98,9 @@ Public Class NaglowekObrazu
             If CzytajPelne(s, b, 0, 8) < 8 Then Throw New InvalidDataException("Uszkodzony plik BMP")
             Dim szer = BitConverter.ToInt32(b, 0)
             Dim wys = BitConverter.ToInt32(b, 4)
-            If szer <= 0 OrElse wys = 0 Then Throw New InvalidDataException("Uszkodzony plik BMP")
-            Return New NaglowekObrazu With {.SzerokoscPx = szer, .WysokoscPx = Math.Abs(wys)}
+            Dim wysAbs As Long = Math.Abs(CLng(wys))
+            If szer <= 0 OrElse wysAbs <= 0 OrElse wysAbs > Integer.MaxValue Then Throw New InvalidDataException("Uszkodzony plik BMP")
+            Return New NaglowekObrazu With {.SzerokoscPx = szer, .WysokoscPx = wysAbs}
         End If
         Throw New InvalidDataException("Nieobsługiwany format obrazu (oczekiwano TIFF, JPEG, PNG, GIF lub BMP)")
     End Function
@@ -109,7 +110,10 @@ Public Class NaglowekObrazu
         s.Position = 8
         Dim b(15) As Byte
         If CzytajPelne(s, b, 0, 16) < 16 OrElse b(4) <> AscW("I"c) OrElse b(5) <> AscW("H"c) Then Throw New InvalidDataException("Uszkodzony plik PNG")
-        Return New NaglowekObrazu With {.SzerokoscPx = LiczbaBE(b, 8, 4), .WysokoscPx = LiczbaBE(b, 12, 4)}
+        Dim szer = LiczbaBE(b, 8, 4)
+        Dim wys = LiczbaBE(b, 12, 4)
+        If szer <= 0 OrElse wys <= 0 Then Throw New InvalidDataException("Uszkodzony plik PNG")
+        Return New NaglowekObrazu With {.SzerokoscPx = szer, .WysokoscPx = wys}
     End Function
 
     Private Shared Function Jpeg(s As Stream) As NaglowekObrazu
@@ -132,7 +136,10 @@ Public Class NaglowekObrazu
             'SOF0-SOF15 z wyjątkiem DHT (C4), JPG (C8) i DAC (CC): precyzja, wysokość, szerokość
             If typ >= &HC0 AndAlso typ <= &HCF AndAlso typ <> &HC4 AndAlso typ <> &HC8 AndAlso typ <> &HCC Then
                 If CzytajPelne(s, b, 0, 5) < 5 Then Exit Do
-                Return New NaglowekObrazu With {.WysokoscPx = LiczbaBE(b, 1, 2), .SzerokoscPx = LiczbaBE(b, 3, 2)}
+                Dim wys = LiczbaBE(b, 1, 2)
+                Dim szer = LiczbaBE(b, 3, 2)
+                If szer <= 0 OrElse wys <= 0 Then Throw New InvalidDataException("Uszkodzony plik JPEG")
+                Return New NaglowekObrazu With {.WysokoscPx = wys, .SzerokoscPx = szer}
             End If
             If dlugosc < 2 Then Exit Do
             s.Seek(dlugosc - 2, SeekOrigin.Current)
@@ -144,7 +151,8 @@ Public Class NaglowekObrazu
     Private Shared Function Tiff(s As Stream) As NaglowekObrazu
         s.Position = 0
         Dim nagl(15) As Byte
-        If CzytajPelne(s, nagl, 0, 16) < 8 Then Throw New InvalidDataException("Uszkodzony plik TIFF")
+        Dim odczytanoNagl As Integer = CzytajPelne(s, nagl, 0, 16)
+        If odczytanoNagl < 8 Then Throw New InvalidDataException("Uszkodzony plik TIFF")
         Dim le As Boolean = nagl(0) = AscW("I"c)
         Dim wersja As Long = Liczba(nagl, 2, 2, le)
         Dim big As Boolean
@@ -152,11 +160,13 @@ Public Class NaglowekObrazu
         If wersja = 42 Then
             ifd = Liczba(nagl, 4, 4, le)
         ElseIf wersja = 43 Then
+            If odczytanoNagl < 16 Then Throw New InvalidDataException("Uszkodzony plik BigTIFF")
             big = True
             ifd = Liczba(nagl, 8, 8, le)
         Else
             Throw New InvalidDataException("Uszkodzony plik TIFF")
         End If
+        If ifd < 8 OrElse ifd >= s.Length Then Throw New InvalidDataException("Uszkodzony plik TIFF")
 
         Dim wynik As New NaglowekObrazu With {.BigTiff = big}
         Dim rozmiarWpisu As Integer = If(big, 20, 12)
@@ -176,8 +186,8 @@ Public Class NaglowekObrazu
             Dim pWartosci As Integer = p + If(big, 12, 8)
             Select Case tag
                 Case TagSzerokosc, TagWysokosc
-                    'SHORT (3), LONG (4) albo LONG8 (16)
-                    Dim bajty As Integer = If(typ = 3, 2, If(typ = 16, 8, 4))
+                    'SHORT (3), LONG (4) albo LONG8 (16 tylko dla BigTIFF)
+                    Dim bajty As Integer = If(typ = 3, 2, If(big AndAlso typ = 16, 8, 4))
                     Dim v As Long = Liczba(wpisy, pWartosci, bajty, le)
                     If tag = TagSzerokosc Then wynik.SzerokoscPx = v Else wynik.WysokoscPx = v
                 Case TagSkalaPiksela, TagPunktDowiazania
@@ -220,7 +230,9 @@ Public Class NaglowekObrazu
             Array.Copy(wpisy, pWartosci, dane, 0, rozmiar)
         Else
             Dim poz As Long = s.Position
-            s.Position = Liczba(wpisy, pWartosci, wPolu, le)
+            Dim off As Long = Liczba(wpisy, pWartosci, wPolu, le)
+            If off < 0 OrElse off + rozmiar > s.Length Then Throw New InvalidDataException("Uszkodzony plik TIFF")
+            s.Position = off
             If CzytajPelne(s, dane, 0, rozmiar) < rozmiar Then Throw New InvalidDataException("Uszkodzony plik TIFF")
             s.Position = poz
         End If

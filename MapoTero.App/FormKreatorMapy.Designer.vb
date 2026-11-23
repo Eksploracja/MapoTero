@@ -42,10 +42,12 @@ Partial Class FormKreatorMapy
     Friend WithEvents rbCelGarmin As System.Windows.Forms.RadioButton
     Friend WithEvents rbCelWydruk As System.Windows.Forms.RadioButton
     Friend WithEvents rbCelCadGis As System.Windows.Forms.RadioButton
+    Friend WithEvents rbCelCad As System.Windows.Forms.RadioButton
     Friend WithEvents lblOpisCelTelefon As System.Windows.Forms.Label
     Friend WithEvents lblOpisCelGarmin As System.Windows.Forms.Label
     Friend WithEvents lblOpisCelWydruk As System.Windows.Forms.Label
     Friend WithEvents lblOpisCelCadGis As System.Windows.Forms.Label
+    Friend WithEvents lblOpisCelCad As System.Windows.Forms.Label
 
     ' Krok 2: Styl
     Friend WithEvents pnlKrok2 As System.Windows.Forms.Panel
@@ -125,6 +127,9 @@ Partial Class FormKreatorMapy
     Friend WithEvents lblDrawOrder As System.Windows.Forms.Label
     Friend WithEvents numDrawOrder As System.Windows.Forms.NumericUpDown
     Friend WithEvents chkPodzialTomow As System.Windows.Forms.CheckBox
+    Friend WithEvents lblUkladCad As System.Windows.Forms.Label
+    Friend WithEvents cboUkladCad As System.Windows.Forms.ComboBox
+    Friend WithEvents lblCadInfo As System.Windows.Forms.Label
     Friend WithEvents lblRozmiarPiksela As System.Windows.Forms.Label
     Friend WithEvents numRozmiarPiksela As System.Windows.Forms.NumericUpDown
     Friend WithEvents lblPikselJednostka As System.Windows.Forms.Label
@@ -170,6 +175,8 @@ Partial Class FormKreatorMapy
         Me.lblOpisCelWydruk = New System.Windows.Forms.Label()
         Me.rbCelCadGis = New System.Windows.Forms.RadioButton()
         Me.lblOpisCelCadGis = New System.Windows.Forms.Label()
+        Me.rbCelCad = New System.Windows.Forms.RadioButton()
+        Me.lblOpisCelCad = New System.Windows.Forms.Label()
 
         Me.pnlKrok2 = New System.Windows.Forms.Panel()
         Me.lblNaglowekSzablonow = New System.Windows.Forms.Label()
@@ -246,6 +253,9 @@ Partial Class FormKreatorMapy
         Me.lblDrawOrder = New System.Windows.Forms.Label()
         Me.numDrawOrder = New System.Windows.Forms.NumericUpDown()
         Me.chkPodzialTomow = New System.Windows.Forms.CheckBox()
+        Me.lblUkladCad = New System.Windows.Forms.Label()
+        Me.cboUkladCad = New System.Windows.Forms.ComboBox()
+        Me.lblCadInfo = New System.Windows.Forms.Label()
         Me.lblRozmiarPiksela = New System.Windows.Forms.Label()
         Me.numRozmiarPiksela = New System.Windows.Forms.NumericUpDown()
         Me.lblPikselJednostka = New System.Windows.Forms.Label()
@@ -387,7 +397,7 @@ Partial Class FormKreatorMapy
         Me.rbCelTelefon.AutoSize = True
         Me.rbCelTelefon.Checked = True
         Me.rbCelTelefon.Font = New System.Drawing.Font("Segoe UI", 10.5!, System.Drawing.FontStyle.Bold)
-        Me.rbCelTelefon.Location = New System.Drawing.Point(30, 20)
+        Me.rbCelTelefon.Location = New System.Drawing.Point(30, 15)
         Me.rbCelTelefon.Name = "rbCelTelefon"
         Me.rbCelTelefon.Size = New System.Drawing.Size(560, 23)
         Me.rbCelTelefon.Text = "Smartfon lub tablet (Locus Map, OsmAnd, OruxMaps)"
@@ -395,14 +405,14 @@ Partial Class FormKreatorMapy
 
         Me.lblOpisCelTelefon.Font = New System.Drawing.Font("Segoe UI", 9.0!)
         Me.lblOpisCelTelefon.ForeColor = System.Drawing.Color.FromArgb(70, 70, 70)
-        Me.lblOpisCelTelefon.Location = New System.Drawing.Point(62, 45)
+        Me.lblOpisCelTelefon.Location = New System.Drawing.Point(62, 38)
         Me.lblOpisCelTelefon.Name = "lblOpisCelTelefon"
-        Me.lblOpisCelTelefon.Size = New System.Drawing.Size(680, 40)
+        Me.lblOpisCelTelefon.Size = New System.Drawing.Size(680, 36)
         Me.lblOpisCelTelefon.Text = "Plik MBTiles (albo SQLiteDB dla OsmAnd) z piramidą powiększeń: mapa płynnie się przybliża i oddala i działa bez internetu."
 
         Me.rbCelGarmin.AutoSize = True
         Me.rbCelGarmin.Font = New System.Drawing.Font("Segoe UI", 10.5!, System.Drawing.FontStyle.Bold)
-        Me.rbCelGarmin.Location = New System.Drawing.Point(30, 95)
+        Me.rbCelGarmin.Location = New System.Drawing.Point(30, 78)
         Me.rbCelGarmin.Name = "rbCelGarmin"
         Me.rbCelGarmin.Size = New System.Drawing.Size(580, 23)
         Me.rbCelGarmin.Text = "Odbiornik turystyczny lub zegarek Garmin (Fenix, GPSMAP, eTrex)"
@@ -410,14 +420,14 @@ Partial Class FormKreatorMapy
 
         Me.lblOpisCelGarmin.Font = New System.Drawing.Font("Segoe UI", 9.0!)
         Me.lblOpisCelGarmin.ForeColor = System.Drawing.Color.FromArgb(70, 70, 70)
-        Me.lblOpisCelGarmin.Location = New System.Drawing.Point(62, 120)
+        Me.lblOpisCelGarmin.Location = New System.Drawing.Point(62, 101)
         Me.lblOpisCelGarmin.Name = "lblOpisCelGarmin"
-        Me.lblOpisCelGarmin.Size = New System.Drawing.Size(680, 40)
+        Me.lblOpisCelGarmin.Size = New System.Drawing.Size(680, 36)
         Me.lblOpisCelGarmin.Text = "KMZ dla urządzeń obsługujących Garmin Custom Maps albo JNX dla urządzeń obsługujących pliki BirdsEye."
 
         Me.rbCelWydruk.AutoSize = True
         Me.rbCelWydruk.Font = New System.Drawing.Font("Segoe UI", 10.5!, System.Drawing.FontStyle.Bold)
-        Me.rbCelWydruk.Location = New System.Drawing.Point(30, 170)
+        Me.rbCelWydruk.Location = New System.Drawing.Point(30, 141)
         Me.rbCelWydruk.Name = "rbCelWydruk"
         Me.rbCelWydruk.Size = New System.Drawing.Size(540, 23)
         Me.rbCelWydruk.Text = "Arkusz graficzny do druku lub przeglądania na komputerze"
@@ -425,25 +435,40 @@ Partial Class FormKreatorMapy
 
         Me.lblOpisCelWydruk.Font = New System.Drawing.Font("Segoe UI", 9.0!)
         Me.lblOpisCelWydruk.ForeColor = System.Drawing.Color.FromArgb(70, 70, 70)
-        Me.lblOpisCelWydruk.Location = New System.Drawing.Point(62, 195)
+        Me.lblOpisCelWydruk.Location = New System.Drawing.Point(62, 164)
         Me.lblOpisCelWydruk.Name = "lblOpisCelWydruk"
-        Me.lblOpisCelWydruk.Size = New System.Drawing.Size(680, 40)
+        Me.lblOpisCelWydruk.Size = New System.Drawing.Size(680, 36)
         Me.lblOpisCelWydruk.Text = "Jeden scalony arkusz GeoTIFF w wysokiej rozdzielczości, z georeferencją - do druku, plakatu albo przeglądania na komputerze."
 
         Me.rbCelCadGis.AutoSize = True
         Me.rbCelCadGis.Font = New System.Drawing.Font("Segoe UI", 10.5!, System.Drawing.FontStyle.Bold)
-        Me.rbCelCadGis.Location = New System.Drawing.Point(30, 245)
+        Me.rbCelCadGis.Location = New System.Drawing.Point(30, 204)
         Me.rbCelCadGis.Name = "rbCelCadGis"
         Me.rbCelCadGis.Size = New System.Drawing.Size(580, 23)
-        Me.rbCelCadGis.Text = "Projekt inżynierski CAD / GIS (AutoCAD, QGIS, ArcGIS)"
+        Me.rbCelCadGis.Text = "Systemy GIS i aplikacje mobilne (QGIS, QField, Avenza Maps)"
         Me.rbCelCadGis.UseVisualStyleBackColor = True
 
         Me.lblOpisCelCadGis.Font = New System.Drawing.Font("Segoe UI", 9.0!)
         Me.lblOpisCelCadGis.ForeColor = System.Drawing.Color.FromArgb(70, 70, 70)
-        Me.lblOpisCelCadGis.Location = New System.Drawing.Point(62, 270)
+        Me.lblOpisCelCadGis.Location = New System.Drawing.Point(62, 227)
         Me.lblOpisCelCadGis.Name = "lblOpisCelCadGis"
-        Me.lblOpisCelCadGis.Size = New System.Drawing.Size(680, 40)
-        Me.lblOpisCelCadGis.Text = "Arkusz GeoTIFF z georeferencją w układzie PL-1992 jako podkład w AutoCAD, MicroStation, QGIS lub ArcGIS. Rysunek DXF, SCR lub LISP przygotujesz potem w oknie Eksport do CAD."
+        Me.lblOpisCelCadGis.Size = New System.Drawing.Size(680, 36)
+        Me.lblOpisCelCadGis.Text = "Arkusz GeoTIFF z georeferencją w układzie PL-1992 jako podkład w QGIS, ArcGIS, Avenza Maps lub QField."
+
+        Me.rbCelCad.AutoSize = True
+        Me.rbCelCad.Font = New System.Drawing.Font("Segoe UI", 10.5!, System.Drawing.FontStyle.Bold)
+        Me.rbCelCad.Location = New System.Drawing.Point(30, 267)
+        Me.rbCelCad.Name = "rbCelCad"
+        Me.rbCelCad.Size = New System.Drawing.Size(580, 23)
+        Me.rbCelCad.Text = "Projekt CAD (AutoCAD, ZWCAD, BricsCAD – raster i skrypt wpasowania)"
+        Me.rbCelCad.UseVisualStyleBackColor = True
+
+        Me.lblOpisCelCad.Font = New System.Drawing.Font("Segoe UI", 9.0!)
+        Me.lblOpisCelCad.ForeColor = System.Drawing.Color.FromArgb(70, 70, 70)
+        Me.lblOpisCelCad.Location = New System.Drawing.Point(62, 290)
+        Me.lblOpisCelCad.Name = "lblOpisCelCad"
+        Me.lblOpisCelCad.Size = New System.Drawing.Size(680, 36)
+        Me.lblOpisCelCad.Text = "Podkład rastrowy w wybranym pasie PL-2000 (strefy 5–8) lub PL-1992 wraz ze skryptem wpasowania (.scr)."
 
         Me.pnlKrok1.Controls.Add(Me.rbCelTelefon)
         Me.pnlKrok1.Controls.Add(Me.lblOpisCelTelefon)
@@ -453,6 +478,8 @@ Partial Class FormKreatorMapy
         Me.pnlKrok1.Controls.Add(Me.lblOpisCelWydruk)
         Me.pnlKrok1.Controls.Add(Me.rbCelCadGis)
         Me.pnlKrok1.Controls.Add(Me.lblOpisCelCadGis)
+        Me.pnlKrok1.Controls.Add(Me.rbCelCad)
+        Me.pnlKrok1.Controls.Add(Me.lblOpisCelCad)
 
         '
         ' pnlKrok2: Styl
@@ -466,7 +493,7 @@ Partial Class FormKreatorMapy
         Me.lblNaglowekSzablonow.Font = New System.Drawing.Font("Segoe UI", 9.5!, System.Drawing.FontStyle.Bold)
         Me.lblNaglowekSzablonow.ForeColor = System.Drawing.Color.FromArgb(40, 40, 40)
         Me.lblNaglowekSzablonow.Location = New System.Drawing.Point(16, 10)
-        Me.lblNaglowekSzablonow.Text = "Dostępne kompozycje mapowe:"
+        Me.lblNaglowekSzablonow.Text = "Dostępne szablony mapy:"
 
         Me.lstSzablony.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed
         Me.lstSzablony.ItemHeight = 46
@@ -1034,6 +1061,38 @@ Partial Class FormKreatorMapy
         Me.chkPodzialTomow.Text = "Automatyczny podział KMZ na tomy (gdy ponad 100 kafli)"
         Me.chkPodzialTomow.UseVisualStyleBackColor = True
 
+        '
+        ' lblUkladCad / cboUkladCad / lblCadInfo
+        '
+        Me.lblUkladCad.AutoSize = True
+        Me.lblUkladCad.Location = New System.Drawing.Point(16, 144)
+        Me.lblUkladCad.Name = "lblUkladCad"
+        Me.lblUkladCad.Size = New System.Drawing.Size(142, 15)
+        Me.lblUkladCad.Text = "Układ współrzędnych CAD:"
+        Me.lblUkladCad.Visible = False
+
+        Me.cboUkladCad.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
+        Me.cboUkladCad.FormattingEnabled = True
+        Me.cboUkladCad.Items.AddRange(New Object() {
+            "PL-2000 strefa 5 (EPSG:2176)",
+            "PL-2000 strefa 6 (EPSG:2177)",
+            "PL-2000 strefa 7 (EPSG:2178)",
+            "PL-2000 strefa 8 (EPSG:2179)",
+            "PL-1992 (EPSG:2180)"
+        })
+        Me.cboUkladCad.Location = New System.Drawing.Point(165, 141)
+        Me.cboUkladCad.Name = "cboUkladCad"
+        Me.cboUkladCad.Size = New System.Drawing.Size(220, 23)
+        Me.cboUkladCad.Visible = False
+
+        Me.lblCadInfo.AutoSize = True
+        Me.lblCadInfo.ForeColor = System.Drawing.Color.FromArgb(70, 70, 70)
+        Me.lblCadInfo.Location = New System.Drawing.Point(395, 144)
+        Me.lblCadInfo.Name = "lblCadInfo"
+        Me.lblCadInfo.Size = New System.Drawing.Size(260, 15)
+        Me.lblCadInfo.Text = "Generowany jest raster + skrypt wpasowania (.scr)"
+        Me.lblCadInfo.Visible = False
+
         Me.btnOtworzWieloskalowy.Location = New System.Drawing.Point(16, 175)
         Me.btnOtworzWieloskalowy.Name = "btnOtworzWieloskalowy"
         Me.btnOtworzWieloskalowy.Size = New System.Drawing.Size(280, 30)
@@ -1058,6 +1117,9 @@ Partial Class FormKreatorMapy
         Me.grpZaawansowane.Controls.Add(Me.numZoomMax)
         Me.grpZaawansowane.Controls.Add(Me.lblDrawOrder)
         Me.grpZaawansowane.Controls.Add(Me.numDrawOrder)
+        Me.grpZaawansowane.Controls.Add(Me.lblUkladCad)
+        Me.grpZaawansowane.Controls.Add(Me.cboUkladCad)
+        Me.grpZaawansowane.Controls.Add(Me.lblCadInfo)
         Me.grpZaawansowane.Controls.Add(Me.lblRozmiarPiksela)
         Me.grpZaawansowane.Controls.Add(Me.numRozmiarPiksela)
         Me.grpZaawansowane.Controls.Add(Me.lblPikselJednostka)

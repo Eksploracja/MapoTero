@@ -214,7 +214,7 @@ Public NotInheritable Class PobieranieSegmentow
 
         'usługi kafelkowe (WMTS, XYZ, TMS) - warstwy składane z kafli; wspólny folder kafli sesji
         Dim maKafelkowe As Boolean = grupy.Any(Function(g) g.CzyKafelkowa)
-        Dim domyslnyFolderKafli As String = z.Folder & "_kafle_wmts\"
+        Dim domyslnyFolderKafli As String = Path.Combine(z.Folder, "_kafle_wmts") & Path.DirectorySeparatorChar
         If maKafelkowe AndAlso z.Odswiez Then
             Try
                 If Directory.Exists(domyslnyFolderKafli) Then Directory.Delete(domyslnyFolderKafli, True)
@@ -501,12 +501,13 @@ Public NotInheritable Class PobieranieSegmentow
                 przepustka.Dispose()
                 Dim typ As String = If(odpowiedz.Content.Headers.ContentType?.MediaType, "")
 
+                If Not odpowiedz.IsSuccessStatusCode Then
+                    Dim tekstBledu As String = Text.Encoding.UTF8.GetString(dane, 0, Math.Min(dane.Length, 500)).Replace(vbCr, " ").Replace(vbLf, " ")
+                    Return Blad("HTTP " & CInt(odpowiedz.StatusCode) & " " & odpowiedz.ReasonPhrase & PodpowiedzUkladu(adres, CInt(odpowiedz.StatusCode)) & ": " & tekstBledu)
+                End If
                 If Not CzyObraz(dane) Then
                     'serwer WMS w razie błędu zwraca zwykle dokument XML (ServiceException) zamiast obrazka
                     Dim tekst As String = Text.Encoding.UTF8.GetString(dane, 0, Math.Min(dane.Length, 500)).Replace(vbCr, " ").Replace(vbLf, " ")
-                    If Not odpowiedz.IsSuccessStatusCode Then
-                        Return Blad("HTTP " & CInt(odpowiedz.StatusCode) & " " & odpowiedz.ReasonPhrase & PodpowiedzUkladu(adres, CInt(odpowiedz.StatusCode)) & ": " & tekst)
-                    End If
                     If tekst.IndexOf("InvalidCRS", StringComparison.OrdinalIgnoreCase) >= 0 OrElse
                        tekst.IndexOf("CRS not supported", StringComparison.OrdinalIgnoreCase) >= 0 OrElse
                        tekst.IndexOf("SRS not supported", StringComparison.OrdinalIgnoreCase) >= 0 Then
@@ -553,11 +554,12 @@ Public NotInheritable Class PobieranieSegmentow
                 Dim dane() As Byte = Await odpowiedz.Content.ReadAsByteArrayAsync(limit.Token).ConfigureAwait(False)
                 Dim typ As String = If(odpowiedz.Content.Headers.ContentType?.MediaType, "")
 
+                If Not odpowiedz.IsSuccessStatusCode Then
+                    Dim tekstBledu As String = Text.Encoding.UTF8.GetString(dane, 0, Math.Min(dane.Length, 500)).Replace(vbCr, " ").Replace(vbLf, " ")
+                    Return Blad("HTTP " & CInt(odpowiedz.StatusCode) & " " & odpowiedz.ReasonPhrase & PodpowiedzUkladu(adres, CInt(odpowiedz.StatusCode)) & ": " & tekstBledu)
+                End If
                 If Not CzyObraz(dane) Then
                     Dim tekst As String = Text.Encoding.UTF8.GetString(dane, 0, Math.Min(dane.Length, 500)).Replace(vbCr, " ").Replace(vbLf, " ")
-                    If Not odpowiedz.IsSuccessStatusCode Then
-                        Return Blad("HTTP " & CInt(odpowiedz.StatusCode) & " " & odpowiedz.ReasonPhrase & PodpowiedzUkladu(adres, CInt(odpowiedz.StatusCode)) & ": " & tekst)
-                    End If
                     If tekst.IndexOf("InvalidCRS", StringComparison.OrdinalIgnoreCase) >= 0 OrElse
                        tekst.IndexOf("CRS not supported", StringComparison.OrdinalIgnoreCase) >= 0 OrElse
                        tekst.IndexOf("SRS not supported", StringComparison.OrdinalIgnoreCase) >= 0 Then
@@ -662,7 +664,7 @@ Public NotInheritable Class PobieranieSegmentow
     Private Shared Sub ZapiszKoordynaty(z As ZadaniePobierania, segmenty As List(Of OpisSegmentu),
                                         nazwa As Func(Of OpisSegmentu, String), adres As Func(Of OpisSegmentu, String))
         'zapis strumieniowy - przy milionach segmentów tekst całego pliku nie mieścił się w pamięci
-        Using plik As New StreamWriter(z.Folder & "koordynaty.txt", False, KodowanieSystemowe())
+        Using plik As New StreamWriter(Path.Combine(z.Folder, "koordynaty.txt"), False, KodowanieSystemowe())
             plik.WriteLine("""" & z.Folder & """")
             plik.WriteLine(z.Siatka.BokSegmentuPx.ToString(Globalization.CultureInfo.InvariantCulture))
             For Each sg In segmenty

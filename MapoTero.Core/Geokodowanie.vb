@@ -157,10 +157,13 @@ Public NotInheritable Class KlientGeokodowania
         Dim czyste = zapytanie.Trim()
         Dim znormalizowane = NormalizujZapytanieAdresowe(czyste)
         Dim frazaDoSzukania = If(Not String.IsNullOrWhiteSpace(znormalizowane), znormalizowane, czyste)
+        Dim udanePolaczenie As Boolean = False
+        Dim ostatniBlad As Exception = Nothing
 
         ' 1. Próba: Photon (szybki, tolerancyjny, uwzględnia przybliżone położenie mapy jako lokalny bias)
         Try
             Dim wynikiPhoton = Await SzukajPhotonAsync(frazaDoSzukania, srodekLat, srodekLon, limit:=15, token:=token).ConfigureAwait(False)
+            udanePolaczenie = True
             If wynikiPhoton IsNot Nothing AndAlso wynikiPhoton.Count > 0 Then
                 Return wynikiPhoton
             End If
@@ -173,33 +176,43 @@ Public NotInheritable Class KlientGeokodowania
             End If
         Catch ex As OperationCanceledException
             Throw
-        Catch
-            ' Błąd sieci Photon - przechodzimy do Nominatim
+        Catch ex As Exception
+            ' Błąd sieci Photon - przechodzimy do Nominatim bez powtarzania tego samego serwera
+            ostatniBlad = ex
         End Try
 
         ' 2. Próba (fallback): Nominatim z oczyszczoną frazą
+        Dim bladNominatim As Boolean = False
         Try
             Dim wynikiNom = Await SzukajNominatimAsync(frazaDoSzukania, token).ConfigureAwait(False)
+            udanePolaczenie = True
             If wynikiNom IsNot Nothing AndAlso wynikiNom.Count > 0 Then
                 Return wynikiNom
             End If
         Catch ex As OperationCanceledException
             Throw
-        Catch
-            ' Błąd Nominatim
+        Catch ex As Exception
+            bladNominatim = True
+            ostatniBlad = ex
         End Try
 
-        ' 3. Próba: Nominatim z surowym zapytaniem
-        If Not String.Equals(frazaDoSzukania, czyste, StringComparison.OrdinalIgnoreCase) Then
+        ' 3. Próba: Nominatim z surowym zapytaniem (tylko gdy Nominatim wcześniej odpowiedział)
+        If Not bladNominatim AndAlso Not String.Equals(frazaDoSzukania, czyste, StringComparison.OrdinalIgnoreCase) Then
             Try
                 Dim wynikiNomSurowe = Await SzukajNominatimAsync(czyste, token).ConfigureAwait(False)
+                udanePolaczenie = True
                 If wynikiNomSurowe IsNot Nothing AndAlso wynikiNomSurowe.Count > 0 Then
                     Return wynikiNomSurowe
                 End If
             Catch ex As OperationCanceledException
                 Throw
-            Catch
+            Catch ex As Exception
+                ostatniBlad = ex
             End Try
+        End If
+
+        If Not udanePolaczenie AndAlso ostatniBlad IsNot Nothing Then
+            System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(ostatniBlad).Throw()
         End If
 
         Return wynik

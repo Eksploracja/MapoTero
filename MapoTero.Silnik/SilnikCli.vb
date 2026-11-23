@@ -111,6 +111,12 @@ End Class
 Public NotInheritable Class SilnikCli
 
     Private Const AttachParentProcess As Integer = -1
+    Private Const STD_OUTPUT_HANDLE As Integer = -11
+    Private Const FILE_TYPE_UNKNOWN As UInteger = 0UI
+
+    Private Shared ReadOnly DozwoloneFormatyEksportu As New HashSet(Of String)(StringComparer.OrdinalIgnoreCase) From {
+        "kmz", "jnx", "mbtiles", "sqlitedb", "orux", "oruxmaps", "geotiff", "tif", "tiff", "arkusz", "gpkg", "geopackage", "trekbuddy", "tar"
+    }
 
     <DllImport("kernel32.dll", SetLastError:=True)>
     Private Shared Function AttachConsole(dwProcessId As Integer) As Boolean
@@ -118,6 +124,14 @@ Public NotInheritable Class SilnikCli
 
     <DllImport("kernel32.dll", SetLastError:=True)>
     Private Shared Function FreeConsole() As Boolean
+    End Function
+
+    <DllImport("kernel32.dll", SetLastError:=True)>
+    Private Shared Function GetStdHandle(nStdHandle As Integer) As IntPtr
+    End Function
+
+    <DllImport("kernel32.dll", SetLastError:=True)>
+    Private Shared Function GetFileType(hFile As IntPtr) As UInteger
     End Function
 
     ''' <summary>
@@ -141,9 +155,20 @@ Public NotInheritable Class SilnikCli
     Public Shared Function Uruchom(argumenty As String(), wykonawca As IWykonawcaSesjiCli) As KodWyjsciaCli
         Dim podpietoKonsole As Boolean = False
 
-        ' Jeśli stdout nie jest przekierowany do pliku/potoku, podpinamy się do okna konsoli rodzica
-        If Not Console.IsOutputRedirected Then
+        ' Jeśli stdout nie jest podpięty / jest nieznany (typowe dla aplikacji WinExe) i nie jest przekierowany, podpinamy konsolę rodzica
+        Dim hOut As IntPtr = GetStdHandle(STD_OUTPUT_HANDLE)
+        Dim brakUchwytu As Boolean = (hOut = IntPtr.Zero OrElse hOut = New IntPtr(-1) OrElse GetFileType(hOut) = FILE_TYPE_UNKNOWN)
+        If brakUchwytu OrElse Not Console.IsOutputRedirected Then
             podpietoKonsole = AttachConsole(AttachParentProcess)
+            If podpietoKonsole Then
+                Try
+                    Dim swOut As New StreamWriter(Console.OpenStandardOutput()) With {.AutoFlush = True}
+                    Dim swErr As New StreamWriter(Console.OpenStandardError()) With {.AutoFlush = True}
+                    Console.SetOut(swOut)
+                    Console.SetError(swErr)
+                Catch
+                End Try
+            End If
         End If
 
         Try
@@ -167,10 +192,16 @@ Public NotInheritable Class SilnikCli
 
             ' Obsługa Ctrl+C w konsoli
             Using cts As New CancellationTokenSource()
+                Dim zakonczono As Integer = 0
                 Dim handlerAnulowania As ConsoleCancelEventHandler =
                     Sub(sender, e)
                         e.Cancel = True
-                        cts.Cancel()
+                        If Threading.Volatile.Read(zakonczono) <> 0 Then Return
+                        Try
+                            cts.Cancel()
+                        Catch ex As ObjectDisposedException
+                            Return
+                        End Try
                         Console.Error.WriteLine()
                         Console.Error.WriteLine("Otrzymano sygnał przerwania (Ctrl+C) – bezpieczne kończenie...")
                     End Sub
@@ -179,6 +210,7 @@ Public NotInheritable Class SilnikCli
                 Try
                     Return WykonajZadanieAsync(opcje, wykonawca, cts.Token).GetAwaiter().GetResult()
                 Finally
+                    Threading.Volatile.Write(zakonczono, 1)
                     RemoveHandler Console.CancelKeyPress, handlerAnulowania
                 End Try
             End Using
@@ -276,7 +308,12 @@ Public NotInheritable Class SilnikCli
                         Return False
                     End If
                     i += 1
-                    wynik.FormatEksportu = args(i).ToLowerInvariant()
+                    Dim fmt As String = args(i).Trim().ToLowerInvariant()
+                    If Not DozwoloneFormatyEksportu.Contains(fmt) Then
+                        blad = $"Nieznany format eksportu: {args(i)}. Dozwolone: kmz, jnx, mbtiles, sqlitedb, orux, geotiff, gpkg."
+                        Return False
+                    End If
+                    wynik.FormatEksportu = fmt
 
                 Case "--wyjscie", "-o"
                     If i + 1 >= args.Length Then

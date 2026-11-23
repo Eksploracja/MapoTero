@@ -11,6 +11,7 @@ Imports MapoTero.Core
 Imports Xunit
 
 ''' <summary>Testy opóźnienia i zachowania dymków pomocy (ToolTip) w panelach warstw i danych źródłowych.</summary>
+<Collection("OknaKreatora")>
 Public Class PodpowiedziTesty
 
     <Fact>
@@ -109,9 +110,12 @@ Public Class PodpowiedziTesty
                     Using f As New MapoTero.Form1()
                         f.Show()
                         Application.DoEvents()
-                        Dim btn = DirectCast(f.Controls("btnSzukajDzialki"), Button)
-                        Assert.NotNull(btn)
-                        Assert.Equal("", btn.Text)
+                        Dim btn = Assert.IsType(Of Button)(Assert.Single(f.Controls.Find("btnSzukajDzialki", True)))
+                        'jedno narzędzie wyszukiwania: pole z lupą na pasku; osobny przycisk lupy jest ukryty
+                        Assert.False(btn.Visible)
+                        Dim pole = Assert.IsType(Of TextBox)(Assert.Single(f.Controls.Find("txtSzukajMiejsca", True)))
+                        Assert.Equal("Szukaj miejsca lub działki…", pole.PlaceholderText)
+                        Assert.True(pole.Visible)
                         Assert.NotNull(btn.Image)
                         Assert.Equal(16, btn.Image.Width)
                         Assert.Equal(16, btn.Image.Height)

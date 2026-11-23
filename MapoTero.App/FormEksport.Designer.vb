@@ -51,6 +51,13 @@ Partial Class FormEksport
         Me.chkGeoTiffPiramidy = New System.Windows.Forms.CheckBox()
         Me.rbTrekBuddy = New System.Windows.Forms.RadioButton()
         Me.grpMBTiles = New System.Windows.Forms.GroupBox()
+        Me.grpArkuszOpcje = New System.Windows.Forms.GroupBox()
+        Me.chkSiatkaKilometrowa = New System.Windows.Forms.CheckBox()
+        Me.cmbUkladSiatki = New System.Windows.Forms.ComboBox()
+        Me.cmbKrokSiatki = New System.Windows.Forms.ComboBox()
+        Me.btnSladWydruku = New System.Windows.Forms.Button()
+        Me.lblSladInfo = New System.Windows.Forms.Label()
+        Me.btnUsunSlad = New System.Windows.Forms.Button()
         Me.chkPng = New System.Windows.Forms.CheckBox()
         Me.nudPoziomMax = New System.Windows.Forms.NumericUpDown()
         Me.lblPoziomDo = New System.Windows.Forms.Label()
@@ -457,6 +464,84 @@ Partial Class FormEksport
         Me.lblPoziomOd.TabIndex = 0
         Me.lblPoziomOd.Text = "poziomy powiększenia od"
         '
+        'grpArkuszOpcje
+        '
+        Me.grpArkuszOpcje.Controls.Add(Me.btnUsunSlad)
+        Me.grpArkuszOpcje.Controls.Add(Me.lblSladInfo)
+        Me.grpArkuszOpcje.Controls.Add(Me.btnSladWydruku)
+        Me.grpArkuszOpcje.Controls.Add(Me.cmbKrokSiatki)
+        Me.grpArkuszOpcje.Controls.Add(Me.cmbUkladSiatki)
+        Me.grpArkuszOpcje.Controls.Add(Me.chkSiatkaKilometrowa)
+        Me.grpArkuszOpcje.Location = New System.Drawing.Point(12, 414)
+        Me.grpArkuszOpcje.Name = "grpArkuszOpcje"
+        Me.grpArkuszOpcje.Size = New System.Drawing.Size(486, 50)
+        Me.grpArkuszOpcje.TabIndex = 5
+        Me.grpArkuszOpcje.TabStop = False
+        Me.grpArkuszOpcje.Text = "Opcje arkusza (siatka kilometrowa, ślad GPX/KML)"
+        Me.grpArkuszOpcje.Visible = False
+        '
+        'chkSiatkaKilometrowa
+        '
+        Me.chkSiatkaKilometrowa.AutoSize = True
+        Me.chkSiatkaKilometrowa.Location = New System.Drawing.Point(10, 20)
+        Me.chkSiatkaKilometrowa.Name = "chkSiatkaKilometrowa"
+        Me.chkSiatkaKilometrowa.Size = New System.Drawing.Size(76, 17)
+        Me.chkSiatkaKilometrowa.TabIndex = 0
+        Me.chkSiatkaKilometrowa.Text = "Siatka km:"
+        Me.ToolTip1.SetToolTip(Me.chkSiatkaKilometrowa, "Rysuje siatkę kilometrową z opisami współrzędnych na marginesach arkusza.")
+        Me.chkSiatkaKilometrowa.UseVisualStyleBackColor = True
+        '
+        'cmbUkladSiatki
+        '
+        Me.cmbUkladSiatki.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
+        Me.cmbUkladSiatki.FormattingEnabled = True
+        Me.cmbUkladSiatki.Items.AddRange(New Object() {"Układ arkusza", "PUWG 1992", "UTM 33N", "UTM 34N", "UTM 35N", "PL-2000 strefa 5", "PL-2000 strefa 6", "PL-2000 strefa 7", "PL-2000 strefa 8"})
+        Me.cmbUkladSiatki.Location = New System.Drawing.Point(88, 17)
+        Me.cmbUkladSiatki.Name = "cmbUkladSiatki"
+        Me.cmbUkladSiatki.Size = New System.Drawing.Size(120, 21)
+        Me.cmbUkladSiatki.TabIndex = 1
+        Me.ToolTip1.SetToolTip(Me.cmbUkladSiatki, "Układ współrzędnych siatki kilometrowej.")
+        '
+        'cmbKrokSiatki
+        '
+        Me.cmbKrokSiatki.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
+        Me.cmbKrokSiatki.FormattingEnabled = True
+        Me.cmbKrokSiatki.Items.AddRange(New Object() {"Auto", "500 m", "1 km", "2 km", "5 km", "10 km"})
+        Me.cmbKrokSiatki.Location = New System.Drawing.Point(212, 17)
+        Me.cmbKrokSiatki.Name = "cmbKrokSiatki"
+        Me.cmbKrokSiatki.Size = New System.Drawing.Size(76, 21)
+        Me.cmbKrokSiatki.TabIndex = 2
+        Me.ToolTip1.SetToolTip(Me.cmbKrokSiatki, "Gęstość linii siatki kilometrowej.")
+        '
+        'btnSladWydruku
+        '
+        Me.btnSladWydruku.Location = New System.Drawing.Point(292, 16)
+        Me.btnSladWydruku.Name = "btnSladWydruku"
+        Me.btnSladWydruku.Size = New System.Drawing.Size(110, 23)
+        Me.btnSladWydruku.TabIndex = 3
+        Me.btnSladWydruku.Text = "Ślad trasy..."
+        Me.ToolTip1.SetToolTip(Me.btnSladWydruku, "Wybierz plik śladu GPX, KML lub KMZ do narysowania na arkuszu.")
+        Me.btnSladWydruku.UseVisualStyleBackColor = True
+        '
+        'lblSladInfo
+        '
+        Me.lblSladInfo.AutoEllipsis = True
+        Me.lblSladInfo.Location = New System.Drawing.Point(404, 21)
+        Me.lblSladInfo.Name = "lblSladInfo"
+        Me.lblSladInfo.Size = New System.Drawing.Size(54, 15)
+        Me.lblSladInfo.TabIndex = 4
+        '
+        'btnUsunSlad
+        '
+        Me.btnUsunSlad.Location = New System.Drawing.Point(460, 16)
+        Me.btnUsunSlad.Name = "btnUsunSlad"
+        Me.btnUsunSlad.Size = New System.Drawing.Size(22, 23)
+        Me.btnUsunSlad.TabIndex = 5
+        Me.btnUsunSlad.Text = "✕"
+        Me.ToolTip1.SetToolTip(Me.btnUsunSlad, "Usuń ślad trasy z arkusza.")
+        Me.btnUsunSlad.UseVisualStyleBackColor = True
+        Me.btnUsunSlad.Visible = False
+        '
         'grpWarstwy
         '
         Me.grpWarstwy.Controls.Add(Me.chkBialeNakladka)
@@ -728,6 +813,7 @@ Partial Class FormEksport
         Me.Controls.Add(Me.grpRozmiar)
         Me.Controls.Add(Me.grpWarstwy)
         Me.Controls.Add(Me.grpMBTiles)
+        Me.Controls.Add(Me.grpArkuszOpcje)
         Me.Controls.Add(Me.grpFormat)
         Me.Controls.Add(Me.lblInfo)
         Me.Controls.Add(Me.btnFolder)
@@ -819,4 +905,11 @@ Partial Class FormEksport
     Friend WithEvents btnPrzerwij As System.Windows.Forms.Button
     Friend WithEvents dlgFolder As System.Windows.Forms.FolderBrowserDialog
     Friend WithEvents ToolTip1 As System.Windows.Forms.ToolTip
+    Friend WithEvents grpArkuszOpcje As System.Windows.Forms.GroupBox
+    Friend WithEvents chkSiatkaKilometrowa As System.Windows.Forms.CheckBox
+    Friend WithEvents cmbUkladSiatki As System.Windows.Forms.ComboBox
+    Friend WithEvents cmbKrokSiatki As System.Windows.Forms.ComboBox
+    Friend WithEvents btnSladWydruku As System.Windows.Forms.Button
+    Friend WithEvents lblSladInfo As System.Windows.Forms.Label
+    Friend WithEvents btnUsunSlad As System.Windows.Forms.Button
 End Class

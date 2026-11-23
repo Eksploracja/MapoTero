@@ -52,7 +52,7 @@ Public Class FormWyslijNaTelefon
             _serwer.Uruchom(0)
 
             Dim listaIp = SerwerWysylkiWifi.PobierzWszystkieAdresyLan()
-            Dim domyslneIp = SerwerWysylkiWifi.WykryjDomyslneIpLan()
+            Dim domyslneIp = If(listaIp.Count > 0, listaIp(0), SerwerWysylkiWifi.WykryjDomyslneIpLan())
 
             cmbInterfejsy.Items.Clear()
             For Each ip In listaIp
@@ -71,7 +71,7 @@ Public Class FormWyslijNaTelefon
                 cmbInterfejsy.SelectedIndex = 0
             End If
 
-            OdswiezKodQr()
+            If picQr.Image Is Nothing Then OdswiezKodQr()
             PokazStanGotowy()
         Catch ex As Exception
             MessageBox.Show("Nie udało się uruchomić serwera transferu Wi-Fi: " & OpisBledu.Z(ex),
@@ -103,15 +103,25 @@ Public Class FormWyslijNaTelefon
 
     Private Sub btnKopiuj_Click(sender As Object, e As EventArgs) Handles btnKopiuj.Click
         If Not String.IsNullOrEmpty(txtAdres.Text) Then
-            Clipboard.SetText(txtAdres.Text)
-            ToolTip1.Show("Skopiowano link do schowka!", btnKopiuj, 0, -25, 1500)
+            Try
+                Clipboard.SetText(txtAdres.Text)
+                ToolTip1.Show("Skopiowano link do schowka!", btnKopiuj, 0, -25, 1500)
+            Catch ex As Exception
+                lblStatus.Text = "Nie udało się skopiować linku do schowka: " & OpisBledu.Z(ex)
+            End Try
         End If
     End Sub
 
     Private Sub OnZmianaStatusu(aktywne As Integer, komunikat As String)
         If IsDisposed OrElse Disposing Then Return
         If InvokeRequired Then
-            BeginInvoke(New Action(Sub() OnZmianaStatusu(aktywne, komunikat)))
+            If IsHandleCreated Then
+                Try
+                    BeginInvoke(New Action(Sub() OnZmianaStatusu(aktywne, komunikat)))
+                Catch ex As ObjectDisposedException
+                Catch ex As InvalidOperationException
+                End Try
+            End If
             Return
         End If
 

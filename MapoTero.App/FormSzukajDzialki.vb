@@ -39,6 +39,22 @@ Public Class FormSzukajDzialki
     <DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)>
     Public Property WlaczWarstwy As Boolean = True
 
+    ''' <summary>Fraza wpisana w pole wyszukiwania okna głównego - po otwarciu okna od razu wyszukiwana.</summary>
+    <DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)>
+    Public Property PoczatkowaFraza As String = ""
+
+    Protected Overrides Sub OnShown(e As EventArgs)
+        MyBase.OnShown(e)
+        If String.IsNullOrWhiteSpace(PoczatkowaFraza) Then Return
+        If tabSzukaj.SelectedIndex = 0 Then
+            txtZapytanieMiejscowosc.Text = PoczatkowaFraza
+            btnSzukajMiejscowosc.PerformClick()
+        Else
+            txtZapytanie.Text = PoczatkowaFraza
+            btnSzukaj.PerformClick()
+        End If
+    End Sub
+
     ''' <summary>Przerwanie trwającego wyszukiwania przy zamknięciu okna.</summary>
     Private ReadOnly _przerwanie As New Threading.CancellationTokenSource()
 
@@ -52,8 +68,12 @@ Public Class FormSzukajDzialki
     ''' </summary>
     Protected Overrides Sub OnFormClosed(e As FormClosedEventArgs)
         _timerPodpowiedzi.Stop()
+        _timerPodpowiedzi.Dispose()
         _ctsBiezace?.Cancel()
+        _ctsBiezace?.Dispose()
+        _ctsBiezace = Nothing
         _przerwanie.Cancel()
+        _przerwanie.Dispose()
         MyBase.OnFormClosed(e)
     End Sub
 
@@ -146,8 +166,9 @@ Public Class FormSzukajDzialki
     Private Async Sub WyszukajMiejscowosciAsync(fraza As String, automatyczne As Boolean)
         _ctsBiezace?.Cancel()
         _ctsBiezace?.Dispose()
-        _ctsBiezace = Threading.CancellationTokenSource.CreateLinkedTokenSource(_przerwanie.Token)
-        Dim token = _ctsBiezace.Token
+        Dim cts = Threading.CancellationTokenSource.CreateLinkedTokenSource(_przerwanie.Token)
+        _ctsBiezace = cts
+        Dim token = cts.Token
 
         If Not automatyczne Then
             btnSzukajMiejscowosc.Enabled = False
@@ -189,7 +210,9 @@ Public Class FormSzukajDzialki
             End If
             lblStatusMiejscowosc.Text = "Błąd wyszukiwania."
         Finally
-            If Not IsDisposed Then
+            If _ctsBiezace Is cts Then _ctsBiezace = Nothing
+            cts.Dispose()
+            If Not IsDisposed AndAlso _ctsBiezace Is Nothing Then
                 btnSzukajMiejscowosc.Enabled = True
                 prgSzukajMiejscowosc.Visible = False
                 AktualizujStanPrzyciskow()

@@ -33,8 +33,9 @@ Public NotInheritable Class SerwerWysylkiWifi
     Private _listener As TcpListener
     Private _cts As CancellationTokenSource
     Private _zadanieNasluchu As Task
+    Private ReadOnly _limitPolaczen As New SemaphoreSlim(16, 16)
     Private _aktywneTransfery As Integer
-    Private _zwolniony As Boolean
+    Private _zwolniony As Integer
     Private _port As Integer
 
     Public ReadOnly Property Port As Integer
@@ -95,7 +96,7 @@ Public NotInheritable Class SerwerWysylkiWifi
     ''' Uruchamia nasłuch na wszystkich interfejsach IPv4. Port 0 = wolny port dobrany przez system.
     ''' </summary>
     Public Sub Uruchom(Optional preferowanyPort As Integer = 0)
-        If _zwolniony Then Throw New ObjectDisposedException(NameOf(SerwerWysylkiWifi))
+        If Volatile.Read(_zwolniony) <> 0 Then Throw New ObjectDisposedException(NameOf(SerwerWysylkiWifi))
         If _listener IsNot Nothing Then Throw New InvalidOperationException("Serwer jest już uruchomiony.")
 
         _cts = New CancellationTokenSource()
@@ -123,9 +124,28 @@ Public NotInheritable Class SerwerWysylkiWifi
     Private Async Function PetlaAkceptacjiAsync(ct As CancellationToken) As Task
         Try
             While Not ct.IsCancellationRequested
-                Dim klient As TcpClient = Await _listener.AcceptTcpClientAsync(ct).ConfigureAwait(False)
-                ' Każde połączenie obsługiwane równolegle (Safari HEAD + GET, DownloadManager multi-range)
-                Dim ignoruj = Task.Run(Function() ObsluzKlientaAsync(klient, ct))
+                Await _limitPolaczen.WaitAsync(ct).ConfigureAwait(False)
+                Dim przejetoSemafor As Boolean = True
+                Try
+                    Dim klient As TcpClient
+                    Try
+                        klient = Await _listener.AcceptTcpClientAsync(ct).ConfigureAwait(False)
+                    Catch ex As SocketException When Not ct.IsCancellationRequested
+                        _limitPolaczen.Release()
+                        przejetoSemafor = False
+                        Continue While
+                    End Try
+                    ' Każde połączenie obsługiwane równolegle (Safari HEAD + GET, DownloadManager multi-range)
+                    przejetoSemafor = False
+                    Dim ignoruj = Task.Run(Function() ObsluzKlientaAsync(klient, ct))
+                Finally
+                    If przejetoSemafor Then
+                        Try
+                            _limitPolaczen.Release()
+                        Catch
+                        End Try
+                    End If
+                End Try
             End While
         Catch ex As OperationCanceledException
             ' Normalne zatrzymanie serwera
@@ -137,9 +157,9 @@ Public NotInheritable Class SerwerWysylkiWifi
     End Function
 
     Private Async Function ObsluzKlientaAsync(klient As TcpClient, ctSerwera As CancellationToken) As Task
-        Using klient
-            klient.NoDelay = True
-            Try
+        Try
+            Using klient
+                klient.NoDelay = True
                 Using strumien As NetworkStream = klient.GetStream()
                     Dim zadanie = Await OdczytajZadanieHttpAsync(strumien, ctSerwera).ConfigureAwait(False)
                     If zadanie Is Nothing Then Return
@@ -150,7 +170,7 @@ Public NotInheritable Class SerwerWysylkiWifi
                     If Not czyHead AndAlso Not czyGet Then
                         Await WyslijProstaOdpowiedzAsync(strumien, "405 Method Not Allowed",
                                                          "Allow: GET, HEAD" & vbCrLf,
-                                                         "Dozwolone tylko GET i HEAD.", ctSerwera).ConfigureAwait(False)
+                                                         "Dozwolone tylko GET i HEAD.", ctSerwera, czyHead).ConfigureAwait(False)
                         Return
                     End If
 
@@ -167,57 +187,87 @@ Public NotInheritable Class SerwerWysylkiWifi
                         Return
                     End If
 
-                    If Not sciezkaBezQuery.StartsWith(prefiksTokenu & "/", StringComparison.Ordinal) Then
+                    If Not String.Equals(sciezkaBezQuery, prefiksTokenu & "/pobierz", StringComparison.Ordinal) Then
                         Await WyslijProstaOdpowiedzAsync(strumien, "404 Not Found", String.Empty,
-                                                         "Nie znaleziono zasobu.", ctSerwera).ConfigureAwait(False)
+                                                         "Nie znaleziono zasobu.", ctSerwera, czyHead).ConfigureAwait(False)
                         Return
                     End If
 
                     ' Zawsze strumieniujemy wyłącznie ten jeden plik skonfigurowany w konstruktorze
                     Await WyslijPlikAsync(strumien, czyHead, zadanie.NaglowekRange, ctSerwera).ConfigureAwait(False)
                 End Using
-            Catch ex As OperationCanceledException
-                ' Przerwanie przez zamknięcie okna lub timeout
-            Catch ex As IOException
-                ' Telefon zamknął połączenie (np. anulowanie lub przełączenie połączenia w Safari)
-            Catch ex As SocketException
-                ' Zerwanie sieci Wi-Fi
+            End Using
+        Catch ex As OperationCanceledException
+            ' Przerwanie przez zamknięcie okna lub timeout
+        Catch ex As ObjectDisposedException
+            ' Połączenie lub token zamknięte podczas kończenia serwera
+        Catch ex As IOException
+            ' Telefon zamknął połączenie (np. anulowanie lub przełączenie połączenia w Safari)
+        Catch ex As SocketException
+            ' Zerwanie sieci Wi-Fi
+        Finally
+            Try
+                _limitPolaczen.Release()
+            Catch
             End Try
-        End Using
+        End Try
     End Function
 
     Private Async Function OdczytajZadanieHttpAsync(strumien As NetworkStream, ctSerwera As CancellationToken) As Task(Of ZadanieHttp)
         Using ctsTimeout = CancellationTokenSource.CreateLinkedTokenSource(ctSerwera)
             ctsTimeout.CancelAfter(TimeSpan.FromSeconds(TIMEOUT_NAGLOWKOW_SEK))
 
-            Using czytnik As New StreamReader(strumien, Encoding.ASCII, detectEncodingFromByteOrderMarks:=False, bufferSize:=4096, leaveOpen:=True)
-                Dim liniaStartowa As String = Await czytnik.ReadLineAsync(ctsTimeout.Token).ConfigureAwait(False)
-                If String.IsNullOrWhiteSpace(liniaStartowa) OrElse liniaStartowa.Length > MAX_DLUGOSC_LINII Then
-                    Return Nothing
-                End If
+            Dim bufor(4095) As Byte
+            Dim biezacaLinia As New List(Of Byte)(256)
+            Dim linie As New List(Of String)(16)
+            Dim znalezionoKoniec As Boolean = False
 
-                Dim czesci = liniaStartowa.Split(" "c, StringSplitOptions.RemoveEmptyEntries)
-                If czesci.Length < 2 Then Return Nothing
+            While Not znalezionoKoniec
+                Dim odczytano As Integer = Await strumien.ReadAsync(bufor.AsMemory(0, bufor.Length), ctsTimeout.Token).ConfigureAwait(False)
+                If odczytano <= 0 Then Exit While
 
-                Dim wynik As New ZadanieHttp With {
-                    .Metoda = czesci(0),
-                    .Sciezka = czesci(1),
-                    .NaglowekRange = Nothing
-                }
-
-                For i = 1 To MAX_LINII_NAGLOWKA
-                    Dim linia As String = Await czytnik.ReadLineAsync(ctsTimeout.Token).ConfigureAwait(False)
-                    If linia Is Nothing Then Return Nothing
-                    If linia.Length = 0 Then Exit For ' Koniec sekcji nagłówków
-                    If linia.Length > MAX_DLUGOSC_LINII Then Return Nothing
-
-                    If linia.StartsWith("Range:", StringComparison.OrdinalIgnoreCase) Then
-                        wynik.NaglowekRange = linia.Substring(6).Trim()
+                For i = 0 To odczytano - 1
+                    Dim b = bufor(i)
+                    If b = 10 Then ' LF
+                        If biezacaLinia.Count > 0 AndAlso biezacaLinia(biezacaLinia.Count - 1) = 13 Then
+                            biezacaLinia.RemoveAt(biezacaLinia.Count - 1)
+                        End If
+                        If biezacaLinia.Count = 0 Then
+                            If linie.Count = 0 Then Return Nothing
+                            znalezionoKoniec = True
+                            Exit For
+                        End If
+                        If linie.Count >= MAX_LINII_NAGLOWKA Then Return Nothing
+                        linie.Add(Encoding.ASCII.GetString(biezacaLinia.ToArray()))
+                        biezacaLinia.Clear()
+                    Else
+                        If biezacaLinia.Count >= MAX_DLUGOSC_LINII Then Return Nothing
+                        biezacaLinia.Add(b)
                     End If
                 Next
+            End While
 
-                Return wynik
-            End Using
+            If Not znalezionoKoniec OrElse linie.Count = 0 Then Return Nothing
+            Dim liniaStartowa = linie(0)
+            If String.IsNullOrWhiteSpace(liniaStartowa) Then Return Nothing
+
+            Dim czesci = liniaStartowa.Split(" "c, StringSplitOptions.RemoveEmptyEntries)
+            If czesci.Length < 2 Then Return Nothing
+
+            Dim wynik As New ZadanieHttp With {
+                .Metoda = czesci(0),
+                .Sciezka = czesci(1),
+                .NaglowekRange = Nothing
+            }
+
+            For i = 1 To linie.Count - 1
+                Dim linia = linie(i)
+                If linia.StartsWith("Range:", StringComparison.OrdinalIgnoreCase) Then
+                    wynik.NaglowekRange = linia.Substring(6).Trim()
+                End If
+            Next
+
+            Return wynik
         End Using
     End Function
 
@@ -232,7 +282,7 @@ Public NotInheritable Class SerwerWysylkiWifi
         If zakres.Status = StatusRange.Nieprawidlowy Then
             Dim extra = $"Content-Range: bytes */{_dlugoscPliku}" & vbCrLf
             Await WyslijProstaOdpowiedzAsync(strumien, "416 Range Not Satisfiable", extra,
-                                             String.Empty, ctSerwera).ConfigureAwait(False)
+                                             String.Empty, ctSerwera, czyHead).ConfigureAwait(False)
             Return
         End If
 
@@ -273,9 +323,12 @@ Public NotInheritable Class SerwerWysylkiWifi
         End If
 
         Dim aktywne = Interlocked.Increment(_aktywneTransfery)
-        RaiseEvent ZmianaStatusu(aktywne, $"Wysyłanie ({SzacunekRozmiaru.Tekst(dlugoscOdpowiedzi)})...")
-
         Try
+            Try
+                RaiseEvent ZmianaStatusu(aktywne, $"Wysyłanie ({SzacunekRozmiaru.Tekst(dlugoscOdpowiedzi)})...")
+            Catch
+            End Try
+
             ' Pojedynczy CancellationTokenSource na cały transfer — zero alokacji na kawałek 64 KB
             Using ctsZapis = CancellationTokenSource.CreateLinkedTokenSource(ctSerwera)
                 Using fs As New FileStream(_sciezkaPliku, FileMode.Open, FileAccess.Read, FileShare.Read,
@@ -302,7 +355,10 @@ Public NotInheritable Class SerwerWysylkiWifi
             Await strumien.FlushAsync(ctSerwera).ConfigureAwait(False)
         Finally
             Dim po = Interlocked.Decrement(_aktywneTransfery)
-            RaiseEvent ZmianaStatusu(po, If(po > 0, "Trwa transfer...", "Gotowy do pobrania"))
+            Try
+                RaiseEvent ZmianaStatusu(po, If(po > 0, "Trwa transfer...", "Gotowy do pobrania"))
+            Catch
+            End Try
         End Try
     End Function
 
@@ -328,7 +384,8 @@ Public NotInheritable Class SerwerWysylkiWifi
         kodStatusu As String,
         dodatkoweNaglowki As String,
         tresc As String,
-        ct As CancellationToken) As Task
+        ct As CancellationToken,
+        Optional czyHead As Boolean = False) As Task
 
         Dim cialo = Encoding.UTF8.GetBytes(tresc)
         Dim sb As New StringBuilder(256)
@@ -341,7 +398,7 @@ Public NotInheritable Class SerwerWysylkiWifi
 
         Dim nagl = Encoding.ASCII.GetBytes(sb.ToString())
         Await ZapiszZTimeoutemAsync(strumien, nagl, 0, nagl.Length, ct).ConfigureAwait(False)
-        If cialo.Length > 0 Then
+        If Not czyHead AndAlso cialo.Length > 0 Then
             Await ZapiszZTimeoutemAsync(strumien, cialo, 0, cialo.Length, ct).ConfigureAwait(False)
         End If
     End Function
@@ -524,28 +581,34 @@ Public NotInheritable Class SerwerWysylkiWifi
     Public Shared Function PobierzWszystkieAdresyLan() As List(Of String)
         Dim wyniki As New List(Of (Priorytet As Integer, Adres As String))()
 
-        For Each nic In NetworkInterface.GetAllNetworkInterfaces()
-            If nic.OperationalStatus <> OperationalStatus.Up Then Continue For
-            If nic.NetworkInterfaceType = NetworkInterfaceType.Loopback OrElse
-               nic.NetworkInterfaceType = NetworkInterfaceType.Tunnel Then Continue For
+        Try
+            For Each nic In NetworkInterface.GetAllNetworkInterfaces()
+                If nic.OperationalStatus <> OperationalStatus.Up Then Continue For
+                If nic.NetworkInterfaceType = NetworkInterfaceType.Loopback OrElse
+                   nic.NetworkInterfaceType = NetworkInterfaceType.Tunnel Then Continue For
 
-            Dim props = nic.GetIPProperties()
-            Dim maBrame = props.GatewayAddresses.Any(Function(g) g.Address.AddressFamily = AddressFamily.InterNetwork AndAlso
-                                                                 Not g.Address.Equals(IPAddress.Any))
+                Try
+                    Dim props = nic.GetIPProperties()
+                    Dim maBrame = props.GatewayAddresses.Any(Function(g) g.Address.AddressFamily = AddressFamily.InterNetwork AndAlso
+                                                                         Not g.Address.Equals(IPAddress.Any))
 
-            Dim priorytet As Integer = PriorytetKarty($"{nic.Name} {nic.Description}", nic.NetworkInterfaceType, maBrame)
+                    Dim priorytet As Integer = PriorytetKarty($"{nic.Name} {nic.Description}", nic.NetworkInterfaceType, maBrame)
 
-            For Each ua In props.UnicastAddresses
-                If ua.Address.AddressFamily <> AddressFamily.InterNetwork Then Continue For
-                If IPAddress.IsLoopback(ua.Address) Then Continue For
+                    For Each ua In props.UnicastAddresses
+                        If ua.Address.AddressFamily <> AddressFamily.InterNetwork Then Continue For
+                        If IPAddress.IsLoopback(ua.Address) Then Continue For
 
-                Dim tekstIp = ua.Address.ToString()
-                ' Pomiń adresy APIPA (169.254.x.x)
-                If tekstIp.StartsWith("169.254.", StringComparison.Ordinal) Then Continue For
+                        Dim tekstIp = ua.Address.ToString()
+                        ' Pomiń adresy APIPA (169.254.x.x)
+                        If tekstIp.StartsWith("169.254.", StringComparison.Ordinal) Then Continue For
 
-                wyniki.Add((priorytet, tekstIp))
+                        wyniki.Add((priorytet, tekstIp))
+                    Next
+                Catch
+                End Try
             Next
-        Next
+        Catch
+        End Try
 
         Return wyniki _
             .OrderBy(Function(x) x.Priorytet) _
@@ -572,8 +635,7 @@ Public NotInheritable Class SerwerWysylkiWifi
     End Function
 
     Public Sub Dispose() Implements IDisposable.Dispose
-        If _zwolniony Then Return
-        _zwolniony = True
+        If Interlocked.Exchange(_zwolniony, 1) <> 0 Then Return
         Try
             _cts?.Cancel()
         Catch
@@ -582,7 +644,14 @@ Public NotInheritable Class SerwerWysylkiWifi
             _listener?.Stop()
         Catch
         End Try
-        _cts?.Dispose()
+        Try
+            _zadanieNasluchu?.Wait(200)
+        Catch
+        End Try
+        Try
+            _cts?.Dispose()
+        Catch
+        End Try
     End Sub
 
     Private NotInheritable Class ZadanieHttp

@@ -15,6 +15,7 @@ Imports MapoTero.Core
 Imports Xunit
 
 ''' <summary>Testy poprawek z drugiego przebiegu audytu (etap 2, znaleziska E2-xx w docs-ai/audyt/rejestr.md).</summary>
+<Collection("OknaKreatora")>
 Public Class AudytEtap2Testy
 
     Private Shared Sub WWatkuSta(akcja As Action)

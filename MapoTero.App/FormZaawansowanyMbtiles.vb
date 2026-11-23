@@ -25,6 +25,7 @@ Public Class FormZaawansowanyMbtiles
     Private ReadOnly _warstwy As New List(Of WarstwaWielowarstwowa)
     Private _cts As CancellationTokenSource
     Private _ctsPodglad As CancellationTokenSource
+    Private _ctsOszacuj As CancellationTokenSource
     Private _srodekGeo As New PunktGeo(52.0, 19.0) ' Domyślnie środek Polski
     Private _wTrakcieLadowania As Boolean = True
     Private _opcjeKorekty As New OpcjeKorekcjiMip()
@@ -190,9 +191,7 @@ Public Class FormZaawansowanyMbtiles
             Dim nowa As New WarstwaWielowarstwowa With {.Folder = folder}
             Dim blad As String = ""
             If nowa.WczytajSesje(blad) Then
-                If nowa.Konfiguracja IsNot Nothing AndAlso nowa.Konfiguracja.Przezroczystosc Then
-                    nowa.BialePrzezroczyste = True
-                End If
+                ' Segmenty pobrane z TRANSPARENT=TRUE mają już kanał alfa; wypalanie bieli (ProgBieli=248) niszczyłoby jasne detale.
                 _warstwy.Add(nowa)
             End If
         Next
@@ -295,11 +294,6 @@ Public Class FormZaawansowanyMbtiles
         w.PoziomMax = Math.Min(21, Math.Max(1, zoomNat))
         w.PoziomMin = Math.Max(1, w.PoziomMax - 3)
         w.Kolejnosc = _warstwy.Count + 1
-
-        ' Domyślne przezroczyste białe tło dla warstw z przezroczystością lub nakładek
-        If w.Konfiguracja IsNot Nothing AndAlso w.Konfiguracja.Przezroczystosc Then
-            w.BialePrzezroczyste = True
-        End If
 
         _warstwy.Add(w)
         If _warstwy.Count > 1 Then
@@ -474,6 +468,7 @@ Public Class FormZaawansowanyMbtiles
     Private Async Sub OdswiezPodgladAsync()
         If _wTrakcieLadowania Then Exit Sub
         _ctsPodglad?.Cancel()
+        _ctsPodglad?.Dispose()
         _ctsPodglad = New CancellationTokenSource()
         Dim token = _ctsPodglad.Token
 
@@ -536,9 +531,19 @@ Public Class FormZaawansowanyMbtiles
                 Dim aktywneWiz = KompilatorMbtiles.WarstwyDlaPoziomu(_warstwy, z)
                 If aktywneWiz.Count > 0 AndAlso _silnikKreatora IsNot Nothing AndAlso _zestawKreatora IsNot Nothing Then
                     Dim aktywneWarstwy As New List(Of WarstwaWybrana)()
-                    For Each wz In _zestawKreatora.Warstwy
-                        Dim pasujaca = aktywneWiz.FirstOrDefault(Function(w) String.Equals(w.Tytul, wz.Nazwa, StringComparison.OrdinalIgnoreCase))
+                    Dim uzyte As New HashSet(Of WarstwaWielowarstwowa)()
+                    For idx = 0 To _zestawKreatora.Warstwy.Count - 1
+                        Dim wz = _zestawKreatora.Warstwy(idx)
+                        Dim znakPozycji = "(Kreator: warstwa #" & (idx + 1) & ")"
+                        Dim pasujaca = aktywneWiz.FirstOrDefault(Function(w) Not uzyte.Contains(w) AndAlso String.Equals(w.Folder, znakPozycji, StringComparison.OrdinalIgnoreCase))
+                        If pasujaca Is Nothing AndAlso Not String.IsNullOrEmpty(wz.Adres) Then
+                            pasujaca = aktywneWiz.FirstOrDefault(Function(w) Not uzyte.Contains(w) AndAlso w.OpisPelny.IndexOf(wz.Adres, StringComparison.OrdinalIgnoreCase) >= 0 AndAlso String.Equals(w.Tytul, wz.Nazwa, StringComparison.OrdinalIgnoreCase))
+                        End If
+                        If pasujaca Is Nothing Then
+                            pasujaca = aktywneWiz.FirstOrDefault(Function(w) Not uzyte.Contains(w) AndAlso String.Equals(w.Tytul, wz.Nazwa, StringComparison.OrdinalIgnoreCase))
+                        End If
                         If pasujaca IsNot Nothing Then
+                            uzyte.Add(pasujaca)
                             Dim kopia As New WarstwaWybrana With {
                                 .Nazwa = If(wz.Nazwa, ""),
                                 .Adres = If(wz.Adres, ""),
@@ -636,49 +641,52 @@ Public Class FormZaawansowanyMbtiles
         btnKorekta.Enabled = False
         UseWaitCursor = True
         Try
-            If _trybKreatora AndAlso _probkaBmpKreatora IsNot Nothing Then
-                probka = New Bitmap(_probkaBmpKreatora)
-            Else
-                probka = Await Task.Run(Function() KompilatorMbtiles.RenderujPodgladKafla(warstwy, srodek.Szerokosc, srodek.Dlugosc, z, opcje))
-            End If
-            If probka Is Nothing Then
-                For Each w In warstwy
-                    If w.Wlaczona AndAlso w.PoziomMin <= w.PoziomMax Then
-                        probka = Await Task.Run(Function() KompilatorMbtiles.RenderujPodgladKafla(warstwy, srodek.Szerokosc, srodek.Dlugosc, w.PoziomMax, opcje))
-                        If probka IsNot Nothing Then Exit For
-                    End If
-                Next
-            End If
-            If probka Is Nothing Then
-                For Each w In warstwy
-                    If w.Zrodlo IsNot Nothing Then
-                        Dim plik = w.Zrodlo.ZnajdzIstniejacySegmentSrodkowy()
-                        If Not String.IsNullOrEmpty(plik) AndAlso File.Exists(plik) Then
-                            probka = New Bitmap(plik)
-                            Exit For
+            Try
+                If _trybKreatora AndAlso _probkaBmpKreatora IsNot Nothing Then
+                    probka = New Bitmap(_probkaBmpKreatora)
+                Else
+                    probka = Await Task.Run(Function() KompilatorMbtiles.RenderujPodgladKafla(warstwy, srodek.Szerokosc, srodek.Dlugosc, z, opcje))
+                End If
+                If probka Is Nothing Then
+                    For Each w In warstwy
+                        If w.Wlaczona AndAlso w.PoziomMin <= w.PoziomMax Then
+                            probka = Await Task.Run(Function() KompilatorMbtiles.RenderujPodgladKafla(warstwy, srodek.Szerokosc, srodek.Dlugosc, w.PoziomMax, opcje))
+                            If probka IsNot Nothing Then Exit For
                         End If
-                    End If
-                Next
-            End If
-        Catch ex As Exception
-            probka = Nothing
+                    Next
+                End If
+                If probka Is Nothing Then
+                    For Each w In warstwy
+                        If w.Zrodlo IsNot Nothing Then
+                            Dim plik = w.Zrodlo.ZnajdzIstniejacySegmentSrodkowy()
+                            If Not String.IsNullOrEmpty(plik) AndAlso File.Exists(plik) Then
+                                probka = New Bitmap(plik)
+                                Exit For
+                            End If
+                        End If
+                    Next
+                End If
+            Catch ex As Exception
+                probka?.Dispose()
+                probka = Nothing
+            Finally
+                If Not Zamkniete AndAlso Not IsDisposed Then
+                    btnKorekta.Enabled = (_cts Is Nothing) AndAlso chkKorekta.Checked
+                    UseWaitCursor = False
+                End If
+            End Try
+            If Zamkniete OrElse IsDisposed Then Exit Sub
+            Using dlg As New FormPodgladMip(_opcjeKorekty, probka)
+                If dlg.ShowDialog(Me) = DialogResult.OK Then
+                    _opcjeKorekty = dlg.Opcje.Kopia()
+                    chkKorekta.Checked = _opcjeKorekty.Wlaczona
+                    AktualizujPrzyciskKorekty()
+                    OdswiezPodgladAsync()
+                End If
+            End Using
         Finally
-            btnKorekta.Enabled = (_cts Is Nothing) AndAlso chkKorekta.Checked
-            UseWaitCursor = False
-        End Try
-        If Zamkniete Then
             probka?.Dispose()
-            Exit Sub
-        End If
-        Using dlg As New FormPodgladMip(_opcjeKorekty, probka)
-            If dlg.ShowDialog(Me) = DialogResult.OK Then
-                _opcjeKorekty = dlg.Opcje.Kopia()
-                chkKorekta.Checked = _opcjeKorekty.Wlaczona
-                AktualizujPrzyciskKorekty()
-                OdswiezPodgladAsync()
-            End If
-        End Using
-        probka?.Dispose()
+        End Try
     End Sub
 
     'format mm:ss pokazywał czas powyżej godziny bez godzin (1 h 05 min jako 05:00)
@@ -732,6 +740,12 @@ Public Class FormZaawansowanyMbtiles
         lblSzacunekPodsumowanie.Text = "Trwa szacowanie rozmiaru..."
         lblStatusFat32.Text = "Próbkowanie poziomów powiększeń..."
 
+        _ctsOszacuj?.Cancel()
+        _ctsOszacuj?.Dispose()
+        Dim ctsOsz As New CancellationTokenSource()
+        _ctsOszacuj = ctsOsz
+        Dim tokenOsz = ctsOsz.Token
+
         Dim opcje = PobierzOpcjeZFormularza()
         Try
             If _trybKreatora AndAlso (_zasiegKreatora.Poprawny OrElse _srodekGeo.Szerokosc <> 0) Then
@@ -744,12 +758,14 @@ Public Class FormZaawansowanyMbtiles
 
                 Dim pGeo As ProstokatGeo
                 If _zasiegKreatora.Poprawny Then
-                    pGeo = ProstokatGeo.Opisany(UkladWspolrzednych.PL1992, _zasiegKreatora)
+                    Dim ukladWarstwy = If(_warstwy.FirstOrDefault(Function(w) w.Wlaczona AndAlso w.Uklad IsNot Nothing)?.Uklad, UkladWspolrzednych.PL1992)
+                    pGeo = ProstokatGeo.Opisany(ukladWarstwy, _zasiegKreatora)
                 Else
                     pGeo = New ProstokatGeo(_srodekGeo.Szerokosc + 0.05, _srodekGeo.Szerokosc - 0.05, _srodekGeo.Dlugosc + 0.05, _srodekGeo.Dlugosc - 0.05)
                 End If
 
                 For poziom = minZ To maxZ
+                    tokenOsz.ThrowIfCancellationRequested()
                     Dim aktywne = KompilatorMbtiles.WarstwyDlaPoziomu(_warstwy, poziom)
                     If aktywne.Count = 0 AndAlso Not opcje.WypelnijLukiWarstwaNizsza Then Continue For
 
@@ -782,8 +798,8 @@ Public Class FormZaawansowanyMbtiles
                 Exit Sub
             End If
 
-            Dim szacunek = Await KompilatorMbtiles.OszacujRozmiarAsync(KopiaWarstw(), opcje, CancellationToken.None)
-            If Zamkniete Then Exit Sub
+            Dim szacunek = Await KompilatorMbtiles.OszacujRozmiarAsync(KopiaWarstw(), opcje, tokenOsz)
+            If Zamkniete OrElse tokenOsz.IsCancellationRequested Then Exit Sub
             lvwPoziomy.Items.Clear()
 
             For Each kv In szacunek.Poziomy
@@ -811,10 +827,13 @@ Public Class FormZaawansowanyMbtiles
 
             Loguj("Oszacowano parametry pliku: " & szacunek.LacznaLiczbaKafli.ToString("N0") & " kafli, " &
                   szacunek.TekstRozmiaru(), Color.Blue)
+        Catch ex As OperationCanceledException
         Catch ex As Exception
-            Loguj("Błąd szacowania rozmiaru: " & OpisBledu.Z(ex), Color.Red)
+            If Not Zamkniete Then Loguj("Błąd szacowania rozmiaru: " & OpisBledu.Z(ex), Color.Red)
         Finally
-            If Not Zamkniete Then btnOszacuj.Enabled = _cts Is Nothing
+            If _ctsOszacuj Is ctsOsz Then _ctsOszacuj = Nothing
+            ctsOsz.Dispose()
+            If Not Zamkniete AndAlso Not IsDisposed AndAlso _ctsOszacuj Is Nothing Then btnOszacuj.Enabled = (_cts Is Nothing)
         End Try
     End Sub
 
@@ -967,6 +986,13 @@ Public Class FormZaawansowanyMbtiles
             End If
         End If
         _ctsPodglad?.Cancel()
+        _ctsPodglad?.Dispose()
+        _ctsPodglad = Nothing
+        _ctsOszacuj?.Cancel()
+        _ctsOszacuj?.Dispose()
+        _ctsOszacuj = Nothing
+        picPodglad.Image?.Dispose()
+        picPodglad.Image = Nothing
         _probkaBmpKreatora?.Dispose()
         _probkaBmpKreatora = Nothing
         If Not _trybKreatora Then
@@ -1211,7 +1237,7 @@ Public Class FormZaawansowanyMbtiles
                     .Krycie = Math.Max(0.0, Math.Min(1.0, wz.Krycie / 100.0)),
                     .TrybMieszania = wz.TrybMieszania,
                     .Wlaczona = True,
-                    .BialePrzezroczyste = (wz.Krycie < 100 OrElse wz.Nazwa.IndexOf("szlak", StringComparison.OrdinalIgnoreCase) >= 0 OrElse wz.Nazwa.IndexOf("cien", StringComparison.OrdinalIgnoreCase) >= 0 OrElse wz.Nazwa.IndexOf("granic", StringComparison.OrdinalIgnoreCase) >= 0),
+                    .BialePrzezroczyste = False,
                     .OdcienieSzarosci = False,
                     .Uklad = If(uklad, UkladWspolrzednych.PL1992),
                     .Folder = "(Kreator: warstwa #" & (i + 1) & ")"
@@ -1245,11 +1271,43 @@ Public Class FormZaawansowanyMbtiles
         ' Zaktualizuj parametry w warstwach zestawu (kolejność, krycie, tryb mieszania)
         If zestaw IsNot Nothing Then
             Dim stareWarstwy = zestaw.Warstwy.ToList()
+            Dim uzyteStare As New HashSet(Of Integer)()
             zestaw.Wyczysc()
             For Each w In _warstwy
                 If w.Wlaczona Then
-                    Dim pasujaca = stareWarstwy.FirstOrDefault(Function(x) String.Equals(x.Nazwa, w.Tytul, StringComparison.OrdinalIgnoreCase))
-                    If pasujaca IsNot Nothing Then
+                    Dim pasujacyIndeks As Integer = -1
+                    Dim folderStr = If(w.Folder, "")
+                    If folderStr.StartsWith("(Kreator: warstwa #", StringComparison.OrdinalIgnoreCase) AndAlso folderStr.EndsWith(")") Then
+                        Dim nrTekst = folderStr.Substring("(Kreator: warstwa #".Length, folderStr.Length - "(Kreator: warstwa #".Length - 1)
+                        Dim nr As Integer
+                        If Integer.TryParse(nrTekst, nr) AndAlso nr >= 1 AndAlso nr <= stareWarstwy.Count AndAlso Not uzyteStare.Contains(nr - 1) Then
+                            pasujacyIndeks = nr - 1
+                        End If
+                    End If
+                    If pasujacyIndeks < 0 Then
+                        For idx = 0 To stareWarstwy.Count - 1
+                            If uzyteStare.Contains(idx) Then Continue For
+                            Dim x = stareWarstwy(idx)
+                            If Not String.IsNullOrEmpty(x.Adres) AndAlso Not String.IsNullOrEmpty(w.OpisPelny) AndAlso
+                               w.OpisPelny.IndexOf(x.Adres, StringComparison.OrdinalIgnoreCase) >= 0 AndAlso
+                               String.Equals(x.Nazwa, w.Tytul, StringComparison.OrdinalIgnoreCase) Then
+                                pasujacyIndeks = idx
+                                Exit For
+                            End If
+                        Next
+                    End If
+                    If pasujacyIndeks < 0 Then
+                        For idx = 0 To stareWarstwy.Count - 1
+                            If uzyteStare.Contains(idx) Then Continue For
+                            If String.Equals(stareWarstwy(idx).Nazwa, w.Tytul, StringComparison.OrdinalIgnoreCase) Then
+                                pasujacyIndeks = idx
+                                Exit For
+                            End If
+                        Next
+                    End If
+                    If pasujacyIndeks >= 0 Then
+                        uzyteStare.Add(pasujacyIndeks)
+                        Dim pasujaca = stareWarstwy(pasujacyIndeks)
                         zestaw.Dodaj(pasujaca.Nazwa, CInt(Math.Round(w.Krycie * 100)), pasujaca.Adres, pasujaca.Zbior,
                                      pasujaca.ZalecanyPiksel, pasujaca.TypZrodla, pasujaca.Nakladka, False, pasujaca.IgnorujSsl, w.TrybMieszania)
                     Else

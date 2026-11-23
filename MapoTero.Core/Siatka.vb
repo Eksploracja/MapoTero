@@ -153,7 +153,7 @@ Public Class Siatka
     Public ReadOnly Property LiczbaKolumn As Integer
         Get
             If Not Poprawna Then Return 0
-            Return CInt(Math.Ceiling(Math.Round(Obszar.Szerokosc / BokSegmentu, 9)))
+            Return Math.Max(1, CInt(Math.Ceiling(Math.Round(Obszar.Szerokosc / BokSegmentu, 9))))
         End Get
     End Property
 
@@ -161,7 +161,7 @@ Public Class Siatka
     Public ReadOnly Property LiczbaWierszy As Integer
         Get
             If Not Poprawna Then Return 0
-            Return CInt(Math.Ceiling(Math.Round(Obszar.Wysokosc / BokSegmentu, 9)))
+            Return Math.Max(1, CInt(Math.Ceiling(Math.Round(Obszar.Wysokosc / BokSegmentu, 9))))
         End Get
     End Property
 
@@ -234,7 +234,7 @@ Public Class Siatka
     ''' <summary>Nazwa segmentu mapy TrekBuddy: przesunięcie lewego górnego rogu w pikselach (_x_y).</summary>
     Public Function NazwaSegmentuTrekBuddy(prefiks As String, wiersz As Integer, kolumna As Integer) As String
         Dim ci = CultureInfo.InvariantCulture
-        Return prefiks & "_" & ((kolumna - 1) * BokSegmentuPx).ToString(ci) & "_" & ((wiersz - 1) * BokSegmentuPx).ToString(ci)
+        Return prefiks & "_" & (CLng(kolumna - 1) * BokSegmentuPx).ToString(ci) & "_" & (CLng(wiersz - 1) * BokSegmentuPx).ToString(ci)
     End Function
 
     ''' <summary>Styl numeracji z tekstu zapisanego w plikach ustawień.</summary>

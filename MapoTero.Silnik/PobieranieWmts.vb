@@ -41,6 +41,10 @@ Public Class ZrodloWmts
     Private ReadOnly _planyWgNazwy As New Dictionary(Of String, PlanWmts)(StringComparer.Ordinal)
     Public ReadOnly Property FolderKafli As String
 
+    Public Function CzyMaWarstwe(nazwa As String) As Boolean
+        Return Not String.IsNullOrEmpty(nazwa) AndAlso _planyWgNazwy.ContainsKey(nazwa)
+    End Function
+
     'liczba kafli pobieranych jednocześnie dla jednego segmentu
     Private Const WatkiKafli As Integer = 4
     'największa mozaika kafli jednej warstwy segmentu (piksele)
@@ -94,7 +98,7 @@ Public Class ZrodloWmts
                                                 token As CancellationToken, Optional folderKafli As String = Nothing,
                                                 Optional typUslugi As TypUslugiMapowej = TypUslugiMapowej.Nieznana,
                                                 Optional plikWarstw As PlikWarstw = Nothing) As Task(Of ZrodloWmts)
-        Dim folderDocelowy As String = If(folderKafli, z.Folder & "_kafle_wmts\")
+        Dim folderDocelowy As String = If(folderKafli, Path.Combine(z.Folder, "_kafle_wmts") & Path.DirectorySeparatorChar)
         Dim czyIgnorujSsl As Boolean = z.IgnorujSsl OrElse If(plikWarstw IsNot Nothing, plikWarstw.IgnorujSsl, False)
         Dim progCache As TimeSpan = TimeSpan.FromSeconds(Math.Max(0, z.WiekWalidacjiCacheSekundy))
         Dim efektywnyTyp As TypUslugiMapowej = KafleXyz.WybierzTyp(adresUslugi, typUslugi)
@@ -517,17 +521,22 @@ Public Class ZrodloWmts
         Dim bajtyWalidacji() As Byte = Nothing
 
         If File.Exists(plik) Then
-            Dim bajty = File.ReadAllBytes(plik)
-            If bajty.Length > 0 Then
-                If Not PobieranieSegmentow.CzyObraz(bajty) Then
+            Dim bajty() As Byte = Nothing
+            Try
+                bajty = File.ReadAllBytes(plik)
+            Catch
+                bajty = Nothing
+            End Try
+            If bajty IsNot Nothing AndAlso bajty.Length > 0 Then
+                If _zweryfikowaneWSesji.ContainsKey(klucz) Then
+                    Interlocked.Increment(_udaneObrazki)
+                    Return Tuple.Create(bajty, "")
+                ElseIf Not PobieranieSegmentow.CzyObraz(bajty) Then
                     'uszkodzony plik w folderze kafli - usuń i pobierz na nowo
                     UsunPlikSafely(plik)
                     UsunPlikSafely(plikMeta)
                     Dim usuniety As Boolean = False
                     _zweryfikowaneWSesji.TryRemove(klucz, usuniety)
-                ElseIf _zweryfikowaneWSesji.ContainsKey(klucz) Then
-                    Interlocked.Increment(_udaneObrazki)
-                    Return Tuple.Create(bajty, "")
                 Else
                     Dim meta = OdczytajMeta(plikMeta)
                     Dim maWalidator As Boolean = meta IsNot Nothing AndAlso (meta.ETag <> "" OrElse meta.LastModified <> "")
@@ -540,7 +549,7 @@ Public Class ZrodloWmts
                     metaWalidacji = meta
                     bajtyWalidacji = bajty
                 End If
-            Else
+            ElseIf bajty IsNot Nothing Then
                 'dla XYZ/TMS ignoruj ewentualny pusty plik 0 B z poprzednich uruchomień dla podkładu
                 If Not _czyKafleXyz OrElse (opcje IsNot Nothing AndAlso opcje.Nakladka) Then
                     Return Tuple.Create(bajty, "")
@@ -556,8 +565,8 @@ Public Class ZrodloWmts
             Return Await zadanie.Value.WaitAsync(token).ConfigureAwait(False)
         Finally
             'kafel pobrany jest już w folderze kafli; nieudany - przy kolejnej próbie pobierany od nowa
-            Dim usuniete As Lazy(Of Task(Of Tuple(Of Byte(), String))) = Nothing
-            _wTrakcie.TryRemove(klucz, usuniete)
+            CType(_wTrakcie, ICollection(Of KeyValuePair(Of String, Lazy(Of Task(Of Tuple(Of Byte(), String)))))).Remove(
+                New KeyValuePair(Of String, Lazy(Of Task(Of Tuple(Of Byte(), String))))(klucz, zadanie))
         End Try
     End Function
 
@@ -589,7 +598,7 @@ Public Class ZrodloWmts
                         If metaCache.ETag <> "" Then req.Headers.TryAddWithoutValidation("If-None-Match", metaCache.ETag)
                         If metaCache.LastModified <> "" Then req.Headers.TryAddWithoutValidation("If-Modified-Since", metaCache.LastModified)
                     End If
-                    Using limit = PobieranieSegmentow.LimitCzasu(_limitCzasu, CancellationToken.None),
+                    Using limit = PobieranieSegmentow.LimitCzasu(_limitCzasu, token),
                           odpowiedz = Await klientHttp.SendAsync(req, HttpCompletionOption.ResponseContentRead, limit.Token).ConfigureAwait(False)
                         przepustka.Odpowiedz(odpowiedz)
 

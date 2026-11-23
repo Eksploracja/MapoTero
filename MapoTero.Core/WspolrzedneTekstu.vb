@@ -22,8 +22,10 @@ Public Module WspolrzedneTekstu
     Private ReadOnly ZnakMinut As String = "['" & ChrW(&H2032) & ChrW(&H2019) & "]"
     Private ReadOnly ZnakSekund As String = "(?:""|''|" & ChrW(&H2033) & "|" & ChrW(&H201D) & ")"
     Private ReadOnly WzorStopni As New Regex(
-        "(?<st>\d{1,3})\s*[" & ChrW(&HB0) & ChrW(&HBA) & ChrW(&H2DA) & "]\s*(?:(?<min>\d{1,2}(?:[.,]\d+)?)\s*" & ZnakMinut & "\s*)?" &
-        "(?:(?<sek>\d{1,2}(?:[.,]\d+)?)\s*" & ZnakSekund & "\s*)?(?<kier>[NSEW])?",
+        "(?<![\d.,\p{L}])(?:(?<kierPrzed>[NSEW])\s*)?(?<st>\d{1,3}(?:[.,]\d+)?)\s*[" & ChrW(&HB0) & ChrW(&HBA) & ChrW(&H2DA) & "]\s*" &
+        "(?:(?<min>\d{1,2}(?:[.,]\d+)?)\s*" & ZnakMinut & "\s*)?" &
+        "(?:(?<sek>\d{1,2}(?:[.,]\d+)?)\s*" & ZnakSekund & "\s*)?" &
+        "(?(kierPrzed)|(?:(?<kierPo>[NSEW])(?![\p{L}]))?)",
         RegexOptions.IgnoreCase)
     Private ReadOnly WzorLiczby As New Regex("[-+]?\d+(?:[.,]\d+)?")
 
@@ -32,7 +34,7 @@ Public Module WspolrzedneTekstu
         If String.IsNullOrWhiteSpace(tekst) Then Return Nothing
         Dim t = tekst.Trim()
         ' litery inne niż oznaczenia kierunków i jednostek - to nazwa lub adres, nie współrzędne
-        Dim bezKierunkow = Regex.Replace(t, "\b[NSEWnsew]\b|[NSEWnsew](?=\s|$|[,;])|(?<=\d)[NSEWnsew]|\b(?:x|y|X|Y)\s*[=:]?", " ")
+        Dim bezKierunkow = Regex.Replace(t, "\b[NSEWnsew]\b|[NSEWnsew](?=\s|$|[,;])|(?<=\d)[NSEWnsew]|(?<=^|[\s,;])[NSEWnsew](?=\d)|\b(?:x|y|X|Y)\s*[=:]?", " ")
         If Regex.IsMatch(bezKierunkow, "\p{L}") Then Return Nothing
 
         Dim stopnie = WzorStopni.Matches(t)
@@ -42,8 +44,9 @@ Public Module WspolrzedneTekstu
         If liczby.Count <> 2 Then Return Nothing
         Dim a = Liczba(liczby(0).Value)
         Dim b = Liczba(liczby(1).Value)
+        Dim yPrzedX = Regex.IsMatch(t, "(?i)(?:^|[\s,;])Y\s*[=:]?\s*[-+\d].*(?:[\s,;])X\s*[=:]?\s*[-+\d]")
         Dim pierwszyKierunek = Regex.Match(t, "[NSEWnsew]")
-        Dim odwrotnie = pierwszyKierunek.Success AndAlso "EeWw".Contains(pierwszyKierunek.Value) AndAlso pierwszyKierunek.Index < liczby(1).Index
+        Dim odwrotnie = yPrzedX OrElse (pierwszyKierunek.Success AndAlso "EeWw".Contains(pierwszyKierunek.Value) AndAlso pierwszyKierunek.Index < liczby(1).Index)
 
         If Math.Abs(a) <= 180 AndAlso Math.Abs(b) <= 180 Then
             If odwrotnie OrElse (Math.Abs(a) > 90 AndAlso Math.Abs(b) <= 90) Then
@@ -58,6 +61,9 @@ Public Module WspolrzedneTekstu
             If Not WOkolicyPolski(a, b) Then Return Nothing
             Return New PunktZTekstu With {.Punkt = New PunktGeo(a, b), .Uklad = "WGS84"}
         End If
+        If yPrzedX Then
+            Dim tmp = a : a = b : b = tmp
+        End If
         Return ZUkladuPlaskiego(a, b)
     End Function
 
@@ -70,16 +76,21 @@ Public Module WspolrzedneTekstu
     End Function
 
     Private Function ZeStopni(m1 As Match, m2 As Match) As PunktZTekstu
+        Dim kierunek = Function(m As Match) As String
+                           If m.Groups("kierPrzed").Success Then Return m.Groups("kierPrzed").Value.ToUpperInvariant()
+                           If m.Groups("kierPo").Success Then Return m.Groups("kierPo").Value.ToUpperInvariant()
+                           Return ""
+                       End Function
         Dim wartosc = Function(m As Match) As Double
                           Dim v = Liczba(m.Groups("st").Value)
                           If m.Groups("min").Success Then v += Liczba(m.Groups("min").Value) / 60.0
                           If m.Groups("sek").Success Then v += Liczba(m.Groups("sek").Value) / 3600.0
-                          Dim k = m.Groups("kier").Value.ToUpperInvariant()
+                          Dim k = kierunek(m)
                           If k = "S" OrElse k = "W" Then v = -v
                           Return v
                       End Function
         Dim a = wartosc(m1), b = wartosc(m2)
-        Dim k1 = m1.Groups("kier").Value.ToUpperInvariant()
+        Dim k1 = kierunek(m1)
         If k1 = "E" OrElse k1 = "W" Then
             Dim tmp = a : a = b : b = tmp
         End If

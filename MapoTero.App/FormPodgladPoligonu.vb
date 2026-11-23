@@ -41,7 +41,12 @@ Imports MapoTero.Core
         End Property
 
         Public Sub New(zestaw As ZestawPoligonow, konwertujDoWgs84 As Func(Of RodzinaUkladuPoligonu, Punkt2D, Punkt2D))
-            _zestaw = zestaw
+            _zestaw = New ZestawPoligonow(zestaw.Wielokaty) With {
+                .WykrytyUklad = zestaw.WykrytyUklad,
+                .NiejednoznaczneOsie = zestaw.NiejednoznaczneOsie,
+                .OsieZamienione = zestaw.OsieZamienione,
+                .ZrodloWykryciaUkladu = zestaw.ZrodloWykryciaUkladu
+            }
             _konwertujDoWgs84 = konwertujDoWgs84
 
             ZbudujInterfejs()
@@ -130,16 +135,20 @@ Imports MapoTero.Core
                 g.DrawPolygon(pioroPolska, punktyPolski)
             End Using
 
-            Dim krok As Integer = Math.Max(1, _zestaw.LiczbaWierzcholkow \ 2500)
             Using pedzelPoli As New SolidBrush(Color.FromArgb(95, 220, 45, 45)),
                   pioroPoli As New Pen(Color.FromArgb(210, 25, 25), 2.0F)
                 For Each w As Wielokat In _zestaw.Wielokaty
                     Dim wierzch As Punkt2D() = w.ObrysZewnetrzny.Wierzcholki
+                    Dim krok As Integer = Math.Max(1, wierzch.Length \ 250)
                     Dim pktEkran As New List(Of PointF)()
                     For i As Integer = 0 To wierzch.Length - 1 Step krok
                         Try
                             Dim wgs As Punkt2D = _konwertujDoWgs84(_zestaw.WykrytyUklad, wierzch(i))
-                            pktEkran.Add(rzutuj(wgs))
+                            If Not Double.IsFinite(wgs.Polnoc) OrElse Not Double.IsFinite(wgs.Wschod) Then Continue For
+                            Dim pt As PointF = rzutuj(wgs)
+                            If Not Single.IsFinite(pt.X) OrElse Not Single.IsFinite(pt.Y) Then Continue For
+                            If Math.Abs(pt.X) > 50000.0F OrElse Math.Abs(pt.Y) > 50000.0F Then Continue For
+                            pktEkran.Add(pt)
                         Catch
                         End Try
                     Next
@@ -167,7 +176,11 @@ Imports MapoTero.Core
                 MessageBox.Show(rodzic, "Plik " & System.IO.Path.GetFileName(sciezkaPliku) & " nie zawiera poprawnych poligonów.", "Podgląd poligonu", MessageBoxButtons.OK, MessageBoxIcon.Exclamation)
                 Return Nothing
             End If
+            Return PokazDlaZestawu(rodzic, zestaw)
+        End Function
 
+        ''' <summary>Podgląd gotowego zestawu poligonów (np. z GeoPackage); Nothing - użytkownik anulował.</summary>
+        Public Shared Function PokazDlaZestawu(rodzic As IWin32Window, zestaw As ZestawPoligonow) As ZestawPoligonow
             Dim konwerter As Func(Of RodzinaUkladuPoligonu, Punkt2D, Punkt2D) = AddressOf ZestawPoligonow.PunktDoWgs84
 
             Using dlg As New FormPodgladPoligonu(zestaw, konwerter)

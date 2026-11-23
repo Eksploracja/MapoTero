@@ -182,14 +182,18 @@ Public Class UzytkownikInterakcjaTesty
 
                     Dim lstWarstwy = DirectCast(f.Controls.Find("lstWybraneWarstwy", True)(0), Global.MapoTero.ListaWarstw)
                     Dim numKrycie = DirectCast(f.Controls.Find("numKrycie", True)(0), NumericUpDown)
-                    Dim btnGora = DirectCast(f.Controls.Find("btnWarstwaWyzej", True)(0), Button)
-                    Dim btnDol = DirectCast(f.Controls.Find("btnWarstwaNizej", True)(0), Button)
-                    Dim btnUsun = DirectCast(f.Controls.Find("btnUsunWarstwe", True)(0), Button)
+                    ' Kolejność i usuwanie: przeciąganie, Ctrl+strzałka, ✕ w wierszu i menu warstwy wywołują te procedury okna
+                    ' (dawny wiersz przycisków ▲ ▼ ✕ pod listą jest ukryty).
+                    Dim przesun = GetType(Global.MapoTero.Form1).GetMethod("PrzesunZaznaczonaWarstwe", BindingFlags.NonPublic Or BindingFlags.Instance)
+                    Dim usun = GetType(Global.MapoTero.Form1).GetMethod("UsunZaznaczonaWarstwe", BindingFlags.NonPublic Or BindingFlags.Instance)
+                    Dim btnGora As Action = Sub() przesun.Invoke(f, {1})
+                    Dim btnDol As Action = Sub() przesun.Invoke(f, {-1})
+                    Dim btnUsun As Action = Sub() usun.Invoke(f, Nothing)
 
-                    ' 1. Klikanie góra/dół/usuń przy pustej liście
-                    btnGora.PerformClick()
-                    btnDol.PerformClick()
-                    btnUsun.PerformClick()
+                    ' 1. Góra/dół/usuń przy pustej liście
+                    btnGora()
+                    btnDol()
+                    btnUsun()
                     Application.DoEvents()
 
                     ' 2. Dodanie warstw testowych do zestawu Form1
@@ -213,14 +217,14 @@ Public Class UzytkownikInterakcjaTesty
                     Assert.Equal(35, lstWarstwy.Zestaw.Warstwy(1).Krycie)
 
                     ' 4. Zmiana kolejności przyciskami
-                    btnGora.PerformClick()
+                    btnGora()
                     Application.DoEvents()
 
-                    btnDol.PerformClick()
+                    btnDol()
                     Application.DoEvents()
 
                     ' 5. Usuwanie warstwy przyciskiem
-                    btnUsun.PerformClick()
+                    btnUsun()
                     Application.DoEvents()
                     Assert.Equal(2, lstWarstwy.Zestaw.Liczba)
 
@@ -636,14 +640,19 @@ Public Class UzytkownikInterakcjaTesty
 
                     Dim grp = DirectCast(f.Controls.Find("grpWybraneWarstwy", True)(0), GroupBox)
                     Dim numKrycie = DirectCast(f.Controls.Find("numKrycie", True)(0), NumericUpDown)
-                    Dim lblKrycie = DirectCast(f.Controls.Find("lblKrycie", True)(0), Label)
-                    Dim btnZaaw = DirectCast(f.Controls.Find("btnWarstwyZaawansowane", True)(0), Button)
+                    Dim lista = DirectCast(f.Controls.Find("lstWybraneWarstwy", True)(0), Global.MapoTero.ListaWarstw)
+                    f.WybranyZestaw().Dodaj("W1")
+                    GetType(Global.MapoTero.Form1).GetMethod("PokazWarstwy", BindingFlags.NonPublic Or BindingFlags.Instance).Invoke(f, Nothing)
+                    lista.Zaznaczona = 0
+                    Application.DoEvents()
 
                     ' Pole krycia musi mieć wystarczającą szerokość na liczbę 100 i strzałki (min 48 px)
                     Assert.True(numKrycie.Width >= 48, $"Szerokość numKrycie ({numKrycie.Width}) powinna wynosić co najmniej 48 px, aby nie przycinać liczby 100.")
-                    ' Elementy nie mogą się nakładać
-                    Assert.True(numKrycie.Left >= lblKrycie.Right - 2, $"Etykieta lblKrycie (Right={lblKrycie.Right}) nakłada się na numKrycie (Left={numKrycie.Left}).")
-                    Assert.True(btnZaaw.Left >= numKrycie.Right - 1, $"numKrycie (Right={numKrycie.Right}) nakłada się na btnWarstwyZaawansowane (Left={btnZaaw.Left}).")
+                    ' Pole krycia leży w wierszu zaznaczonej warstwy i mieści się w liście
+                    Assert.Same(lista, numKrycie.Parent)
+                    Assert.True(numKrycie.Visible)
+                    Assert.True(numKrycie.Right <= lista.ClientSize.Width, $"Pole krycia wystaje poza listę: {numKrycie.Bounds}")
+                    Assert.True(numKrycie.Bottom <= lista.WysokoscWiersza + 4, $"Pole krycia nie mieści się w wierszu: {numKrycie.Bounds}")
 
                     ' Wyrenderuj grpWybraneWarstwy do bitmapy i zapisz do artefaktów
                     Using bmp As New Bitmap(grp.Width, grp.Height)

@@ -102,128 +102,135 @@ Public NotInheritable Class KlientCapabilities
             adresyPrób.Add(Tuple.Create(AdresCapabilitiesWmts(adresWyczyszczony), TypUslugiMapowej.Wmts))
         End If
 
-        'błędy kolejnych prób; wyświetlany jest błąd usługi próbowanej jako pierwsza (dawniej - ostatniej, przez co
-        'chwilowy błąd serwera WMS zastępował komunikat próby WMTS, np. "Can't recognize service requested")
-        Dim bledy As New List(Of String)
-        Dim ostatniBlad As String = ""
-        For Each proba In adresyPrób
-            If ostatniBlad <> "" Then bledy.Add(ostatniBlad)
-            ostatniBlad = ""
-            Dim adresDoPobrania As String = proba.Item1
-            Try
-                Dim bajty = Await PobierzBajtyAsync(adresDoPobrania, ignorujSsl, timeoutSekundy, token, handler).ConfigureAwait(False)
-                If bajty Is Nothing OrElse bajty.Length = 0 Then
-                    ostatniBlad = "Serwer zwrócił pustą odpowiedź."
-                    Continue For
-                End If
+        Dim wlasnyHandler As Boolean = handler Is Nothing
+        Dim obsluga As HttpMessageHandler = If(wlasnyHandler, UtworzDomyslnyHandler(ignorujSsl), handler)
+        Using klient As New HttpClient(obsluga, disposeHandler:=wlasnyHandler)
+            klient.Timeout = Timeout.InfiniteTimeSpan
+            klient.DefaultRequestHeaders.UserAgent.ParseAdd(WersjaProgramu.UserAgent(GetType(KlientCapabilities).Assembly))
 
-                'sprawdzenie, czy serwer nie zwrócił strony HTML (błąd 502, Cloudflare, portal WWW)
-                Dim naglowekTekst As String = System.Text.Encoding.UTF8.GetString(bajty, 0, Math.Min(bajty.Length, 200)).TrimStart()
-                If naglowekTekst.StartsWith("<!DOCTYPE html", StringComparison.OrdinalIgnoreCase) OrElse
-                   naglowekTekst.StartsWith("<html", StringComparison.OrdinalIgnoreCase) Then
-                    ostatniBlad = "Serwer zwrócił stronę WWW zamiast dokumentu usługi. Upewnij się, że adres wskazuje usługę WMS/WMTS/TileJSON, a nie stronę informacyjną geoportalu."
-                    Continue For
-                End If
+            'błędy kolejnych prób; wyświetlany jest błąd usługi próbowanej jako pierwsza (dawniej - ostatniej, przez co
+            'chwilowy błąd serwera WMS zastępował komunikat próby WMTS, np. "Can't recognize service requested")
+            Dim bledy As New List(Of String)
+            Dim ostatniBlad As String = ""
+            For Each proba In adresyPrób
+                If ostatniBlad <> "" Then bledy.Add(ostatniBlad)
+                ostatniBlad = ""
+                Dim adresDoPobrania As String = proba.Item1
+                Try
+                    Dim bajty = Await PobierzBajtyAsync(adresDoPobrania, ignorujSsl, timeoutSekundy, token, handler, klient).ConfigureAwait(False)
+                    If bajty Is Nothing OrElse bajty.Length = 0 Then
+                        ostatniBlad = "Serwer zwrócił pustą odpowiedź."
+                        Continue For
+                    End If
 
-                'TileJSON
-                If naglowekTekst.StartsWith("{", StringComparison.Ordinal) Then
-                    Dim jsonTekst As String = System.Text.Encoding.UTF8.GetString(bajty)
-                    Dim tj = KafleXyz.ParsujTileJson(jsonTekst)
-                    Dim nazwaWarstwy As String = If(String.IsNullOrWhiteSpace(tj.Nazwa), MetadaneMapy.Serwer(tj.Szablon), tj.Nazwa)
-                    Return Await ZbudujWynikZeSzablonuAsync(tj.Szablon, nazwaWarstwy, tj.Opcje, adresDoPobrania,
-                                                             ignorujSsl, timeoutSekundy, token, handler, srodekTestowy).ConfigureAwait(False)
-                End If
+                    'sprawdzenie, czy serwer nie zwrócił strony HTML (błąd 502, Cloudflare, portal WWW)
+                    Dim naglowekTekst As String = System.Text.Encoding.UTF8.GetString(bajty, 0, Math.Min(bajty.Length, 200)).TrimStart(ChrW(&HFEFF)).TrimStart()
+                    If naglowekTekst.StartsWith("<!DOCTYPE html", StringComparison.OrdinalIgnoreCase) OrElse
+                       naglowekTekst.StartsWith("<html", StringComparison.OrdinalIgnoreCase) Then
+                        ostatniBlad = "Serwer zwrócił stronę WWW zamiast dokumentu usługi. Upewnij się, że adres wskazuje usługę WMS/WMTS/TileJSON, a nie stronę informacyjną geoportalu."
+                        Continue For
+                    End If
 
-                'odczyt XML ze strumienia (XDocument sam odczytuje deklarację encoding=...)
-                Dim doc As XDocument
-                Using ms As New MemoryStream(bajty)
-                    doc = XDocument.Load(ms)
-                End Using
+                    'TileJSON
+                    If naglowekTekst.StartsWith("{", StringComparison.Ordinal) Then
+                        Dim jsonTekst As String = System.Text.Encoding.UTF8.GetString(bajty).TrimStart(ChrW(&HFEFF))
+                        Dim tj = KafleXyz.ParsujTileJson(jsonTekst)
+                        Dim nazwaWarstwy As String = If(String.IsNullOrWhiteSpace(tj.Nazwa), MetadaneMapy.Serwer(tj.Szablon), tj.Nazwa)
+                        Return Await ZbudujWynikZeSzablonuAsync(tj.Szablon, nazwaWarstwy, tj.Opcje, adresDoPobrania,
+                                                                 ignorujSsl, timeoutSekundy, token, handler, srodekTestowy, klient).ConfigureAwait(False)
+                    End If
 
-                Dim korzen = doc.Root
-                If korzen Is Nothing Then
-                    ostatniBlad = "Pusty dokument XML."
-                    Continue For
-                End If
-
-                Dim nazwaKorzenia As String = korzen.Name.LocalName
-
-                'obsługa błędu WFS
-                If nazwaKorzenia.IndexOf("WFS_Capabilities", StringComparison.OrdinalIgnoreCase) >= 0 Then
-                    wynik.KomunikatBledu = "Podany adres wskazuje usługę wektorową WFS. MapoTero obsługuje rastrowe usługi WMS, WMTS oraz kafle XYZ/TMS."
-                    Return wynik
-                End If
-
-                'obsługa ServiceExceptionReport
-                If nazwaKorzenia.IndexOf("ServiceExceptionReport", StringComparison.OrdinalIgnoreCase) >= 0 OrElse
-                   nazwaKorzenia.IndexOf("ExceptionReport", StringComparison.OrdinalIgnoreCase) >= 0 Then
-                    Dim komunikat As String = korzen.Value.Trim()
-                    If komunikat.Length > 250 Then komunikat = komunikat.Substring(0, 250)
-                    ostatniBlad = "Serwer zgłosił błąd: " & komunikat
-                    Continue For
-                End If
-
-                'OSGeo TMS (tilemapresource.xml)
-                If nazwaKorzenia.Equals("TileMap", StringComparison.OrdinalIgnoreCase) Then
-                    Dim tms = KafleXyz.ParsujTmsXml(doc.ToString(SaveOptions.DisableFormatting), adresDoPobrania)
-                    Dim nazwaWarstwy As String = If(String.IsNullOrWhiteSpace(tms.Tytul), MetadaneMapy.Serwer(tms.Szablon), tms.Tytul)
-                    Return Await ZbudujWynikZeSzablonuAsync(tms.Szablon, nazwaWarstwy, tms.Opcje, adresDoPobrania,
-                                                             ignorujSsl, timeoutSekundy, token, handler, srodekTestowy).ConfigureAwait(False)
-                End If
-
-                'sprawdzenie czy WMTS
-                If nazwaKorzenia.Equals("Capabilities", StringComparison.OrdinalIgnoreCase) AndAlso
-                   (doc.Descendants().Any(Function(x) x.Name.LocalName.Equals("TileMatrixSet", StringComparison.OrdinalIgnoreCase)) OrElse
-                    proba.Item2 = TypUslugiMapowej.Wmts) Then
-                    'tekst z dokumentu odczytanego już wg deklaracji encoding (StreamReader ją pomijał - np. ISO-8859-2)
-                    Dim usluga = UslugaWmts.Wczytaj(doc.ToString(SaveOptions.DisableFormatting), adresDoPobrania)
-                    wynik.Typ = TypUslugiMapowej.Wmts
-                    wynik.UslugaWmts = usluga
-                    wynik.AdresCapabilities = adresDoPobrania
-                    wynik.AdresBazowy = adresWyczyszczony
-                    wynik.Tytul = If(usluga.Warstwy.Count > 0 AndAlso Not String.IsNullOrEmpty(usluga.Warstwy(0).Tytul),
-                                     usluga.Warstwy(0).Tytul, "Usługa WMTS")
-                    SprawdzUkładyWmts(usluga, wynik)
-                    Return wynik
-                End If
-
-                'sprawdzenie czy WMS
-                If nazwaKorzenia.IndexOf("Capabilities", StringComparison.OrdinalIgnoreCase) >= 0 Then
-                    Using msWms As New MemoryStream(bajty)
-                        Dim usluga = WmsCapabilities.Wczytaj(msWms, adresDoPobrania)
-                        wynik.Typ = TypUslugiMapowej.Wms
-                        wynik.UslugaWms = usluga
-                        wynik.AdresCapabilities = adresDoPobrania
-                        wynik.AdresBazowy = usluga.AdresGetMap
-                        wynik.Tytul = usluga.Tytul
-                        SprawdzUkladyWms(usluga, wynik)
-                        Return wynik
+                    'odczyt XML ze strumienia (XDocument sam odczytuje deklarację encoding=...)
+                    Dim doc As XDocument
+                    Using ms As New MemoryStream(bajty)
+                        doc = XDocument.Load(ms)
                     End Using
-                End If
 
-                ostatniBlad = "Serwer zwrócił dokument XML inny niż WMS/WMTS (element główny: " & nazwaKorzenia & ")."
+                    Dim korzen = doc.Root
+                    If korzen Is Nothing Then
+                        ostatniBlad = "Pusty dokument XML."
+                        Continue For
+                    End If
 
-            Catch ex As OperationCanceledException When token.IsCancellationRequested
-                'przerwanie (nowe połączenie, zamknięcie kreatora) - dawniej traktowane jak błąd serwera: pętla próbowała
-                'kolejnych adresów i zwracała „błąd”, a kreator przywracał przyciski w trakcie nowego połączenia
-                Throw
-            Catch ex As InvalidOperationException When CzyBladCertyfikatuSsl(ex)
-                wynik.KomunikatBledu = OpisBledu.Z(ex)
-                Return wynik
-            Catch ex As Exception
-                ostatniBlad = OpisBledu.Z(ex)
-            End Try
-        Next
-        If ostatniBlad <> "" Then bledy.Add(ostatniBlad)
+                    Dim nazwaKorzenia As String = korzen.Name.LocalName
 
-        wynik.KomunikatBledu = If(bledy.Count > 0, bledy(0), "Nie udało się połączyć z serwerem WMS/WMTS pod podanym adresem.")
-        Return wynik
+                    'obsługa błędu WFS
+                    If nazwaKorzenia.IndexOf("WFS_Capabilities", StringComparison.OrdinalIgnoreCase) >= 0 Then
+                        wynik.KomunikatBledu = "Podany adres wskazuje usługę wektorową WFS. MapoTero obsługuje rastrowe usługi WMS, WMTS oraz kafle XYZ/TMS."
+                        Return wynik
+                    End If
+
+                    'obsługa ServiceExceptionReport
+                    If nazwaKorzenia.IndexOf("ServiceExceptionReport", StringComparison.OrdinalIgnoreCase) >= 0 OrElse
+                       nazwaKorzenia.IndexOf("ExceptionReport", StringComparison.OrdinalIgnoreCase) >= 0 Then
+                        Dim komunikat As String = korzen.Value.Trim()
+                        If komunikat.Length > 250 Then komunikat = komunikat.Substring(0, 250)
+                        ostatniBlad = "Serwer zgłosił błąd: " & komunikat
+                        Continue For
+                    End If
+
+                    'OSGeo TMS (tilemapresource.xml)
+                    If nazwaKorzenia.Equals("TileMap", StringComparison.OrdinalIgnoreCase) Then
+                        Dim tms = KafleXyz.ParsujTmsXml(doc.ToString(SaveOptions.DisableFormatting), adresDoPobrania)
+                        Dim nazwaWarstwy As String = If(String.IsNullOrWhiteSpace(tms.Tytul), MetadaneMapy.Serwer(tms.Szablon), tms.Tytul)
+                        Return Await ZbudujWynikZeSzablonuAsync(tms.Szablon, nazwaWarstwy, tms.Opcje, adresDoPobrania,
+                                                                 ignorujSsl, timeoutSekundy, token, handler, srodekTestowy, klient).ConfigureAwait(False)
+                    End If
+
+                    'sprawdzenie czy WMTS
+                    If nazwaKorzenia.Equals("Capabilities", StringComparison.OrdinalIgnoreCase) AndAlso
+                       (doc.Descendants().Any(Function(x) x.Name.LocalName.Equals("TileMatrixSet", StringComparison.OrdinalIgnoreCase)) OrElse
+                        proba.Item2 = TypUslugiMapowej.Wmts) Then
+                        Dim usluga = UslugaWmts.Wczytaj(doc, adresDoPobrania)
+                        wynik.Typ = TypUslugiMapowej.Wmts
+                        wynik.UslugaWmts = usluga
+                        wynik.AdresCapabilities = adresDoPobrania
+                        wynik.AdresBazowy = adresWyczyszczony
+                        wynik.Tytul = If(usluga.Warstwy.Count > 0 AndAlso Not String.IsNullOrEmpty(usluga.Warstwy(0).Tytul),
+                                         usluga.Warstwy(0).Tytul, "Usługa WMTS")
+                        SprawdzUkładyWmts(usluga, wynik)
+                        Return wynik
+                    End If
+
+                    'sprawdzenie czy WMS
+                    If nazwaKorzenia.IndexOf("Capabilities", StringComparison.OrdinalIgnoreCase) >= 0 Then
+                        Using msWms As New MemoryStream(bajty)
+                            Dim usluga = WmsCapabilities.Wczytaj(msWms, adresDoPobrania)
+                            wynik.Typ = TypUslugiMapowej.Wms
+                            wynik.UslugaWms = usluga
+                            wynik.AdresCapabilities = adresDoPobrania
+                            wynik.AdresBazowy = usluga.AdresGetMap
+                            wynik.Tytul = usluga.Tytul
+                            SprawdzUkladyWms(usluga, wynik)
+                            Return wynik
+                        End Using
+                    End If
+
+                    ostatniBlad = "Serwer zwrócił dokument XML inny niż WMS/WMTS (element główny: " & nazwaKorzenia & ")."
+
+                Catch ex As OperationCanceledException When token.IsCancellationRequested
+                    'przerwanie (nowe połączenie, zamknięcie kreatora) - dawniej traktowane jak błąd serwera: pętla próbowała
+                    'kolejnych adresów i zwracała „błąd”, a kreator przywracał przyciski w trakcie nowego połączenia
+                    Throw
+                Catch ex As InvalidOperationException When CzyBladCertyfikatuSsl(ex)
+                    wynik.KomunikatBledu = OpisBledu.Z(ex)
+                    Return wynik
+                Catch ex As Exception
+                    ostatniBlad = OpisBledu.Z(ex)
+                End Try
+            Next
+            If ostatniBlad <> "" Then bledy.Add(ostatniBlad)
+
+            wynik.KomunikatBledu = If(bledy.Count > 0, bledy(0), "Nie udało się połączyć z serwerem WMS/WMTS pod podanym adresem.")
+            Return wynik
+        End Using
     End Function
 
     ''' <summary>Tworzy adres GetCapabilities dla WMS z zachowaniem istniejących parametrów niestandardowych (np. token, key).</summary>
     Public Shared Function AdresCapabilitiesWms(adres As String) As String
         Dim a = adres.Trim()
         If Regex.IsMatch(a, "[?&]request=getcapabilities", RegexOptions.IgnoreCase) Then Return a
+        a = Regex.Replace(a, "(?<=[?&])(service|request)=[^&]*&?", "", RegexOptions.IgnoreCase).TrimEnd("&"c, "?"c)
         Dim separator As String = If(a.Contains("?"), "&", "?")
         If a.EndsWith("?", StringComparison.Ordinal) OrElse a.EndsWith("&", StringComparison.Ordinal) Then separator = ""
         Return a & separator & "SERVICE=WMS&REQUEST=GetCapabilities"
@@ -276,7 +283,8 @@ Public NotInheritable Class KlientCapabilities
         For Each w In warstwy
             If w.ObslugujeEpsg(2180) OrElse w.ObslugujeEpsg(2176) OrElse w.ObslugujeEpsg(2177) OrElse
                w.ObslugujeEpsg(2178) OrElse w.ObslugujeEpsg(2179) OrElse w.ObslugujeEpsg(4326) OrElse
-               w.ObslugujeEpsg(3857) Then
+               w.ObslugujeEpsg(3857) OrElse w.ObslugujeEpsg(32633) OrElse w.ObslugujeEpsg(32634) OrElse
+               w.ObslugujeEpsg(32635) Then
                 zUkladem += 1
             End If
         Next
@@ -302,10 +310,11 @@ Public NotInheritable Class KlientCapabilities
     End Function
 
     Private Shared Async Function PobierzBajtyAsync(url As String, ignorujSsl As Boolean, timeoutSekundy As Integer,
-                                                    token As CancellationToken, handler As HttpMessageHandler) As Task(Of Byte())
+                                                    token As CancellationToken, handler As HttpMessageHandler,
+                                                    Optional klientZewnetrzny As HttpClient = Nothing) As Task(Of Byte())
         For proba = 1 To LiczbaProbPobrania
             Try
-                Return Await PobierzBajtyRazAsync(url, ignorujSsl, timeoutSekundy, token, handler).ConfigureAwait(False)
+                Return Await PobierzBajtyRazAsync(url, ignorujSsl, timeoutSekundy, token, handler, klientZewnetrzny).ConfigureAwait(False)
             Catch ex As BladHttp When ex.Chwilowy AndAlso proba < LiczbaProbPobrania
             Catch ex As TimeoutException When proba < LiczbaProbPobrania
             Catch ex As HttpRequestException When CzyBladCertyfikatuSsl(ex)
@@ -347,24 +356,33 @@ Public NotInheritable Class KlientCapabilities
     End Class
 
     Private Shared Async Function SprobujPobierzAsync(url As String, ignorujSsl As Boolean, timeoutSekundy As Integer,
-                                                      token As CancellationToken, handler As HttpMessageHandler) As Task(Of OdpowiedHttpProby)
+                                                      token As CancellationToken, handler As HttpMessageHandler,
+                                                      Optional klientZewnetrzny As HttpClient = Nothing) As Task(Of OdpowiedHttpProby)
+        Dim wyslij = Async Function(k As HttpClient) As Task(Of OdpowiedHttpProby)
+                         Using ctsTimeout As New CancellationTokenSource(TimeSpan.FromSeconds(Math.Max(5, timeoutSekundy))),
+                               ctsLinked = CancellationTokenSource.CreateLinkedTokenSource(token, ctsTimeout.Token)
+                             Try
+                                 Using odp = Await k.GetAsync(url, HttpCompletionOption.ResponseContentRead, ctsLinked.Token).ConfigureAwait(False)
+                                     Dim dane As Byte() = Await odp.Content.ReadAsByteArrayAsync().ConfigureAwait(False)
+                                     Dim ct As String = If(odp.Content.Headers.ContentType IsNot Nothing, If(odp.Content.Headers.ContentType.MediaType, ""), "")
+                                     Return New OdpowiedHttpProby With {.Kod = CInt(odp.StatusCode), .ContentType = ct, .Bajty = dane}
+                                 End Using
+                             Catch ex As OperationCanceledException When Not token.IsCancellationRequested
+                                 Return New OdpowiedHttpProby With {.Blad = "Serwer nie odpowiedział w ciągu " & Math.Max(5, timeoutSekundy) & " s."}
+                             Catch ex As Exception When Not token.IsCancellationRequested
+                                 Return New OdpowiedHttpProby With {.Blad = OpisBledu.Z(ex)}
+                             End Try
+                         End Using
+                     End Function
+        If klientZewnetrzny IsNot Nothing Then
+            Return Await wyslij(klientZewnetrzny).ConfigureAwait(False)
+        End If
         Dim wlasnyHandler As Boolean = handler Is Nothing
         Dim obsluga As HttpMessageHandler = If(wlasnyHandler, UtworzDomyslnyHandler(ignorujSsl), handler)
-        Using ctsTimeout As New CancellationTokenSource(TimeSpan.FromSeconds(Math.Max(5, timeoutSekundy))),
-              ctsLinked = CancellationTokenSource.CreateLinkedTokenSource(token, ctsTimeout.Token),
-              klient As New HttpClient(obsluga, disposeHandler:=wlasnyHandler)
+        Using klient As New HttpClient(obsluga, disposeHandler:=wlasnyHandler)
+            klient.Timeout = Timeout.InfiniteTimeSpan
             klient.DefaultRequestHeaders.UserAgent.ParseAdd(WersjaProgramu.UserAgent(GetType(KlientCapabilities).Assembly))
-            Try
-                Using odp = Await klient.GetAsync(url, HttpCompletionOption.ResponseContentRead, ctsLinked.Token).ConfigureAwait(False)
-                    Dim dane As Byte() = Await odp.Content.ReadAsByteArrayAsync().ConfigureAwait(False)
-                    Dim ct As String = If(odp.Content.Headers.ContentType IsNot Nothing, If(odp.Content.Headers.ContentType.MediaType, ""), "")
-                    Return New OdpowiedHttpProby With {.Kod = CInt(odp.StatusCode), .ContentType = ct, .Bajty = dane}
-                End Using
-            Catch ex As OperationCanceledException When Not token.IsCancellationRequested
-                Return New OdpowiedHttpProby With {.Blad = "Serwer nie odpowiedział w ciągu " & Math.Max(5, timeoutSekundy) & " s."}
-            Catch ex As Exception When Not token.IsCancellationRequested
-                Return New OdpowiedHttpProby With {.Blad = OpisBledu.Z(ex)}
-            End Try
+            Return Await wyslij(klient).ConfigureAwait(False)
         End Using
     End Function
 
@@ -379,24 +397,32 @@ Public NotInheritable Class KlientCapabilities
     End Function
 
     Private Shared Async Function PobierzBajtyRazAsync(url As String, ignorujSsl As Boolean, timeoutSekundy As Integer,
-                                                       token As CancellationToken, handler As HttpMessageHandler) As Task(Of Byte())
+                                                       token As CancellationToken, handler As HttpMessageHandler,
+                                                       Optional klientZewnetrzny As HttpClient = Nothing) As Task(Of Byte())
+        Dim wyslij = Async Function(k As HttpClient) As Task(Of Byte())
+                         Using ctsTimeout As New CancellationTokenSource(TimeSpan.FromSeconds(Math.Max(5, timeoutSekundy))),
+                               ctsLinked = CancellationTokenSource.CreateLinkedTokenSource(token, ctsTimeout.Token)
+                             Dim odp As HttpResponseMessage
+                             Try
+                                 odp = Await k.GetAsync(url, HttpCompletionOption.ResponseContentRead, ctsLinked.Token).ConfigureAwait(False)
+                             Catch ex As OperationCanceledException When Not token.IsCancellationRequested
+                                 Throw New TimeoutException("Serwer nie odpowiedział w ciągu " & Math.Max(5, timeoutSekundy) & " s.", ex)
+                             End Try
+                             Using odp
+                                 If Not odp.IsSuccessStatusCode Then Throw New BladHttp(CInt(odp.StatusCode), odp.ReasonPhrase)
+                                 Return Await odp.Content.ReadAsByteArrayAsync().ConfigureAwait(False)
+                             End Using
+                         End Using
+                     End Function
+        If klientZewnetrzny IsNot Nothing Then
+            Return Await wyslij(klientZewnetrzny).ConfigureAwait(False)
+        End If
         Dim wlasnyHandler As Boolean = handler Is Nothing
         Dim obsluga As HttpMessageHandler = If(wlasnyHandler, UtworzDomyslnyHandler(ignorujSsl), handler)
-
-        Using ctsTimeout As New CancellationTokenSource(TimeSpan.FromSeconds(Math.Max(5, timeoutSekundy))),
-              ctsLinked = CancellationTokenSource.CreateLinkedTokenSource(token, ctsTimeout.Token),
-              klient As New HttpClient(obsluga, disposeHandler:=wlasnyHandler)
+        Using klient As New HttpClient(obsluga, disposeHandler:=wlasnyHandler)
+            klient.Timeout = Timeout.InfiniteTimeSpan
             klient.DefaultRequestHeaders.UserAgent.ParseAdd(WersjaProgramu.UserAgent(GetType(KlientCapabilities).Assembly))
-            Dim odp As HttpResponseMessage
-            Try
-                odp = Await klient.GetAsync(url, HttpCompletionOption.ResponseContentRead, ctsLinked.Token).ConfigureAwait(False)
-            Catch ex As OperationCanceledException When Not token.IsCancellationRequested
-                Throw New TimeoutException("Serwer nie odpowiedział w ciągu " & Math.Max(5, timeoutSekundy) & " s.", ex)
-            End Try
-            Using odp
-                If Not odp.IsSuccessStatusCode Then Throw New BladHttp(CInt(odp.StatusCode), odp.ReasonPhrase)
-                Return Await odp.Content.ReadAsByteArrayAsync().ConfigureAwait(False)
-            End Using
+            Return Await wyslij(klient).ConfigureAwait(False)
         End Using
     End Function
 
@@ -408,6 +434,9 @@ Public NotInheritable Class KlientCapabilities
         Dim subdomeny As New List(Of String)
         Dim jestTmsZAdresu As Boolean = False
         Dim szablonNorm As String = KafleXyz.NormalizujSzablon(adresSzablonu, subdomeny, jestTmsZAdresu)
+        If szablonNorm.IndexOf("{s}", StringComparison.OrdinalIgnoreCase) >= 0 AndAlso subdomeny.Count = 0 Then
+            subdomeny.AddRange({"a", "b", "c"})
+        End If
 
         If szablonNorm.IndexOf("{layer}", StringComparison.OrdinalIgnoreCase) >= 0 Then
             wynik.KomunikatBledu = "Szablon zawiera parametr {layer} - podaj w adresie nazwę konkretnej warstwy."
@@ -419,114 +448,127 @@ Public NotInheritable Class KlientCapabilities
             Return wynik
         End If
 
-        Dim srodek As PunktGeo = If(srodekTestowy.HasValue, srodekTestowy.Value, New PunktGeo(52.23, 21.01))
-        Dim zBase As Integer = -1
-        Dim wykryteTms As Boolean = jestTmsZAdresu
-        Dim probka As Byte() = Nothing
-        Dim probkaCt As String = ""
-        Dim rozmiarKafla As Integer = 256
-        Dim ostatniBlad As String = ""
+        Dim wlasnyHandler As Boolean = handler Is Nothing
+        Dim obsluga As HttpMessageHandler = If(wlasnyHandler, UtworzDomyslnyHandler(ignorujSsl), handler)
+        Using klient As New HttpClient(obsluga, disposeHandler:=wlasnyHandler)
+            klient.Timeout = Timeout.InfiniteTimeSpan
+            klient.DefaultRequestHeaders.UserAgent.ParseAdd(WersjaProgramu.UserAgent(GetType(KlientCapabilities).Assembly))
 
-        For Each zCand In {10, 6, 2}
-            Dim probujOdwrocone = If(jestTmsZAdresu, New Boolean() {True}, New Boolean() {False, True})
-            For Each tmsCand In probujOdwrocone
-                Dim url As String = AdresKaflaDoProby(szablonNorm, subdomeny, zCand, srodek, tmsCand)
-                Dim odp = Await SprobujPobierzAsync(url, ignorujSsl, timeoutSekundy, token, handler).ConfigureAwait(False)
-                If odp.Blad <> "" Then
-                    ostatniBlad = MetadaneMapy.MaskujSekrety(odp.Blad)
-                    Exit For
-                End If
-                If odp.Kod = 200 Then
-                    Dim szer As Integer, wys As Integer
-                    Dim diag As String = KafleXyz.DiagnozujOdpowiedzKafla(odp.Bajty, odp.ContentType, szer, wys, url)
-                    If diag <> "" Then
-                        wynik.KomunikatBledu = diag
-                        Return wynik
+            Dim srodek As PunktGeo = If(srodekTestowy.HasValue, srodekTestowy.Value, New PunktGeo(52.23, 21.01))
+            Dim zBase As Integer = -1
+            Dim wykryteTms As Boolean = jestTmsZAdresu
+            Dim probka As Byte() = Nothing
+            Dim probkaCt As String = ""
+            Dim rozmiarKafla As Integer = 256
+            Dim ostatniBlad As String = ""
+            Dim ostatniDiag As String = ""
+            Dim przerwanoSiecia As Boolean = False
+
+            For Each zCand In {10, 6, 2}
+                Dim probujOdwrocone = If(jestTmsZAdresu, New Boolean() {True}, New Boolean() {False, True})
+                For Each tmsCand In probujOdwrocone
+                    Dim url As String = AdresKaflaDoProby(szablonNorm, subdomeny, zCand, srodek, tmsCand)
+                    Dim odp = Await SprobujPobierzAsync(url, ignorujSsl, timeoutSekundy, token, handler, klient).ConfigureAwait(False)
+                    If odp.Blad <> "" Then
+                        ostatniBlad = MetadaneMapy.MaskujSekrety(odp.Blad)
+                        przerwanoSiecia = True
+                        Exit For
                     End If
-                    zBase = zCand
-                    wykryteTms = tmsCand
-                    probka = odp.Bajty
-                    probkaCt = odp.ContentType
-                    If szer >= 64 Then rozmiarKafla = szer
-                    Exit For
-                ElseIf odp.Kod = 401 OrElse odp.Kod = 403 Then
-                    ostatniBlad = "Serwer odmówił dostępu (HTTP " & odp.Kod & ") dla przykładowego kafelka."
-                    Exit For
-                Else
-                    ostatniBlad = "Serwer zwrócił błąd HTTP " & odp.Kod & " dla przykładowego kafelka (" & MetadaneMapy.MaskujSekrety(url) & ")."
-                End If
+                    If odp.Kod = 200 Then
+                        Dim szer As Integer, wys As Integer
+                        Dim diag As String = KafleXyz.DiagnozujOdpowiedzKafla(odp.Bajty, odp.ContentType, szer, wys, url)
+                        If diag <> "" Then
+                            ostatniDiag = diag
+                            Continue For
+                        End If
+                        zBase = zCand
+                        wykryteTms = tmsCand
+                        probka = odp.Bajty
+                        probkaCt = odp.ContentType
+                        If szer >= 64 Then rozmiarKafla = szer
+                        Exit For
+                    ElseIf odp.Kod = 401 OrElse odp.Kod = 403 Then
+                        ostatniBlad = "Serwer odmówił dostępu (HTTP " & odp.Kod & ") dla przykładowego kafelka."
+                        Exit For
+                    Else
+                        ostatniBlad = "Serwer zwrócił błąd HTTP " & odp.Kod & " dla przykładowego kafelka (" & MetadaneMapy.MaskujSekrety(url) & ")."
+                    End If
+                Next
+                If zBase >= 0 OrElse przerwanoSiecia OrElse ostatniBlad.StartsWith("Serwer odmówił", StringComparison.Ordinal) Then Exit For
             Next
-            If zBase >= 0 OrElse ostatniBlad.StartsWith("Serwer odmówił", StringComparison.Ordinal) Then Exit For
-        Next
 
-        If zBase < 0 Then
-            wynik.KomunikatBledu = If(ostatniBlad <> "", ostatniBlad, "Nie udało się pobrać testowego kafelka z podanego szablonu.")
-            Return wynik
-        End If
+            If zBase < 0 Then
+                wynik.KomunikatBledu = If(ostatniDiag <> "" AndAlso Not przerwanoSiecia AndAlso Not ostatniBlad.StartsWith("Serwer odmówił", StringComparison.Ordinal),
+                                          ostatniDiag,
+                                          If(ostatniBlad <> "", ostatniBlad, "Nie udało się pobrać testowego kafelka z podanego szablonu."))
+                Return wynik
+            End If
 
-        'wykrywanie zMin (najpierw szybka próba z=0, bo większość map działa od 0)
-        Dim zMin As Integer = zBase
-        Dim odpZero = Await SprobujPobierzAsync(AdresKaflaDoProby(szablonNorm, subdomeny, 0, srodek, wykryteTms),
-                                               ignorujSsl, timeoutSekundy, token, handler).ConfigureAwait(False)
-        If odpZero.Kod = 200 AndAlso KafleXyz.DiagnozujOdpowiedzKafla(odpZero.Bajty, odpZero.ContentType) = "" Then
-            zMin = 0
-        Else
-            Dim lo As Integer = 1, hi As Integer = zBase - 1
-            While lo <= hi
-                Dim mid As Integer = (lo + hi) \ 2
+            'wykrywanie zMin (najpierw szybka próba z=0, bo większość map działa od 0)
+            Dim zMin As Integer = zBase
+            Dim odpZero = Await SprobujPobierzAsync(AdresKaflaDoProby(szablonNorm, subdomeny, 0, srodek, wykryteTms),
+                                                   ignorujSsl, timeoutSekundy, token, handler, klient).ConfigureAwait(False)
+            If odpZero.Kod = 200 AndAlso KafleXyz.DiagnozujOdpowiedzKafla(odpZero.Bajty, odpZero.ContentType) = "" Then
+                zMin = 0
+            Else
+                Dim lo As Integer = 1, hi As Integer = zBase - 1
+                While lo <= hi
+                    Dim mid As Integer = (lo + hi) \ 2
+                    Dim odpMid = Await SprobujPobierzAsync(AdresKaflaDoProby(szablonNorm, subdomeny, mid, srodek, wykryteTms),
+                                                          ignorujSsl, timeoutSekundy, token, handler, klient).ConfigureAwait(False)
+                    If odpMid.Kod = 200 AndAlso KafleXyz.DiagnozujOdpowiedzKafla(odpMid.Bajty, odpMid.ContentType) = "" Then
+                        zMin = mid
+                        hi = mid - 1
+                    Else
+                        lo = mid + 1
+                    End If
+                End While
+            End If
+
+            'wykrywanie zMax w zakresie [zBase..20]
+            Dim zMax As Integer = zBase
+            Dim loMax As Integer = zBase + 1, hiMax As Integer = 20
+            While loMax <= hiMax
+                Dim mid As Integer = (loMax + hiMax) \ 2
                 Dim odpMid = Await SprobujPobierzAsync(AdresKaflaDoProby(szablonNorm, subdomeny, mid, srodek, wykryteTms),
-                                                      ignorujSsl, timeoutSekundy, token, handler).ConfigureAwait(False)
+                                                      ignorujSsl, timeoutSekundy, token, handler, klient).ConfigureAwait(False)
                 If odpMid.Kod = 200 AndAlso KafleXyz.DiagnozujOdpowiedzKafla(odpMid.Bajty, odpMid.ContentType) = "" Then
-                    zMin = mid
-                    hi = mid - 1
+                    zMax = mid
+                    loMax = mid + 1
                 Else
-                    lo = mid + 1
+                    hiMax = mid - 1
                 End If
             End While
-        End If
 
-        'wykrywanie zMax w zakresie [zBase..20]
-        Dim zMax As Integer = zBase
-        Dim loMax As Integer = zBase + 1, hiMax As Integer = 20
-        While loMax <= hiMax
-            Dim mid As Integer = (loMax + hiMax) \ 2
-            Dim odpMid = Await SprobujPobierzAsync(AdresKaflaDoProby(szablonNorm, subdomeny, mid, srodek, wykryteTms),
-                                                  ignorujSsl, timeoutSekundy, token, handler).ConfigureAwait(False)
-            If odpMid.Kod = 200 AndAlso KafleXyz.DiagnozujOdpowiedzKafla(odpMid.Bajty, odpMid.ContentType) = "" Then
-                zMax = mid
-                loMax = mid + 1
-            Else
-                hiMax = mid - 1
-            End If
-        End While
+            Dim opcje As New OpcjeKafliXyz With {
+                .Typ = If(wykryteTms, TypUslugiMapowej.Tms, TypUslugiMapowej.Xyz),
+                .ZMin = zMin,
+                .ZMax = zMax,
+                .RozmiarKafla = rozmiarKafla,
+                .FormatObrazu = KafleXyz.WykryjMimeZObrazu(probka, probkaCt),
+                .IgnorujSsl = ignorujSsl
+            }
+            opcje.Subdomeny.AddRange(subdomeny)
 
-        Dim opcje As New OpcjeKafliXyz With {
-            .Typ = If(wykryteTms, TypUslugiMapowej.Tms, TypUslugiMapowej.Xyz),
-            .ZMin = zMin,
-            .ZMax = zMax,
-            .RozmiarKafla = rozmiarKafla,
-            .FormatObrazu = KafleXyz.WykryjMimeZObrazu(probka, probkaCt),
-            .IgnorujSsl = ignorujSsl
-        }
-        opcje.Subdomeny.AddRange(subdomeny)
-
-        Dim nazwa As String = MetadaneMapy.Serwer(szablonNorm)
-        If nazwa = "" Then nazwa = "Mapa kafelkowa"
-        wynik.Typ = opcje.Typ
-        wynik.Tytul = nazwa
-        wynik.AdresCapabilities = szablonNorm
-        wynik.AdresBazowy = szablonNorm
-        wynik.SzablonKafli = szablonNorm
-        wynik.OpcjeKafli = opcje
-        wynik.PrzykladowyKafel = probka
-        wynik.UslugaWmts = KafleXyz.UtworzUsluge(szablonNorm, {nazwa}, opcje)
-        Return wynik
+            Dim nazwa As String = MetadaneMapy.Serwer(szablonNorm)
+            If nazwa = "" Then nazwa = "Mapa kafelkowa"
+            wynik.Typ = opcje.Typ
+            wynik.Tytul = nazwa
+            wynik.AdresCapabilities = szablonNorm
+            wynik.AdresBazowy = szablonNorm
+            wynik.SzablonKafli = szablonNorm
+            wynik.OpcjeKafli = opcje
+            wynik.PrzykladowyKafel = probka
+            wynik.UslugaWmts = KafleXyz.UtworzUsluge(szablonNorm, {nazwa}, opcje)
+            Return wynik
+        End Using
     End Function
 
     Private Shared Async Function ZbudujWynikZeSzablonuAsync(szablon As String, tytul As String, opcje As OpcjeKafliXyz,
                                                              adresOpisu As String, ignorujSsl As Boolean, timeoutSekundy As Integer,
                                                              token As CancellationToken, handler As HttpMessageHandler,
-                                                             srodekTestowy As PunktGeo?) As Task(Of WynikCapabilities)
+                                                             srodekTestowy As PunktGeo?,
+                                                             Optional klientZewnetrzny As HttpClient = Nothing) As Task(Of WynikCapabilities)
         Dim wynik As New WynikCapabilities()
         Dim sciezka As String = If(szablon, "").Split("?"c)(0).ToLowerInvariant()
         If sciezka.EndsWith(".mvt", StringComparison.Ordinal) OrElse sciezka.EndsWith(".pbf", StringComparison.Ordinal) Then
@@ -536,6 +578,9 @@ Public NotInheritable Class KlientCapabilities
 
         Dim kopiaOpcji As OpcjeKafliXyz = If(opcje, New OpcjeKafliXyz()).Kopia()
         kopiaOpcji.IgnorujSsl = ignorujSsl
+        If If(szablon, "").IndexOf("{s}", StringComparison.OrdinalIgnoreCase) >= 0 AndAlso kopiaOpcji.Subdomeny.Count = 0 Then
+            kopiaOpcji.Subdomeny.AddRange({"a", "b", "c"})
+        End If
         Dim nazwa As String = If(String.IsNullOrWhiteSpace(tytul), MetadaneMapy.Serwer(szablon), tytul.Trim())
         If nazwa = "" Then nazwa = "Mapa kafelkowa"
 
@@ -549,7 +594,7 @@ Public NotInheritable Class KlientCapabilities
         End If
         Dim zTest As Integer = Math.Max(kopiaOpcji.ZMin, Math.Min(kopiaOpcji.ZMax, 10))
         Dim urlTest As String = AdresKaflaDoProby(szablon, kopiaOpcji.Subdomeny, zTest, srodek, kopiaOpcji.Typ = TypUslugiMapowej.Tms)
-        Dim odp = Await SprobujPobierzAsync(urlTest, ignorujSsl, timeoutSekundy, token, handler).ConfigureAwait(False)
+        Dim odp = Await SprobujPobierzAsync(urlTest, ignorujSsl, timeoutSekundy, token, handler, klientZewnetrzny).ConfigureAwait(False)
         If odp.Kod = 200 AndAlso odp.Bajty IsNot Nothing Then
             Dim szer As Integer, wys As Integer
             Dim diag As String = KafleXyz.DiagnozujOdpowiedzKafla(odp.Bajty, odp.ContentType, szer, wys, urlTest)
@@ -579,7 +624,7 @@ Public NotInheritable Class KlientCapabilities
         Dim col As Integer = Math.Max(0, Math.Min(maks, CInt(Math.Floor(WebMercator.PikselX(srodek.Dlugosc, z) / WebMercator.RozmiarKafla))))
         Dim row As Integer = Math.Max(0, Math.Min(maks, CInt(Math.Floor(WebMercator.PikselY(srodek.Szerokosc, z) / WebMercator.RozmiarKafla))))
         Dim y As Integer = If(odwroconeY, maks - row, row)
-        Dim s As String = If(subdomeny IsNot Nothing AndAlso subdomeny.Count > 0, subdomeny(0), "")
+        Dim s As String = If(subdomeny IsNot Nothing AndAlso subdomeny.Count > 0, subdomeny(0), "a")
         Return Regex.Replace(szablon, "\{([^}]+)\}",
                              Function(m)
                                  Select Case m.Groups(1).Value.Trim().ToLowerInvariant()

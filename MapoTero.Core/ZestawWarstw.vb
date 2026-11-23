@@ -37,6 +37,8 @@ Public Class WarstwaWybrana
     Public Property IgnorujSsl As Boolean
     ''' <summary>Tryb mieszania warstwy z warstwami leżącymi poniżej (domyślnie Zwykły).</summary>
     Public Property TrybMieszania As TrybMieszania = TrybMieszania.Zwykly
+    ''' <summary>Maksymalny bezpieczny bok segmentu w pikselach (0 - brak ograniczenia).</summary>
+    Public Property MaksRozmiarSegmentu As Integer = 0
 
     Public ReadOnly Property EfektywnyTyp As TypUslugiMapowej
         Get
@@ -60,7 +62,7 @@ Public Class WarstwaWybrana
         Return New WarstwaWybrana With {
             .Nazwa = Nazwa, .Zbior = Zbior, .Adres = Adres, .Krycie = Krycie,
             .ZalecanyPiksel = ZalecanyPiksel, .TypZrodla = TypZrodla, .Nakladka = Nakladka,
-            .IgnorujSsl = IgnorujSsl, .TrybMieszania = TrybMieszania}
+            .IgnorujSsl = IgnorujSsl, .TrybMieszania = TrybMieszania, .MaksRozmiarSegmentu = MaksRozmiarSegmentu}
     End Function
 
     ''' <summary>Ta sama warstwa tego samego serwera.</summary>
@@ -193,6 +195,7 @@ Public Class ZestawWarstw
     ''' <summary>Zmiany wyglądu warstw współdzielonych przez stopnie skali, z zachowaniem ich domyślnego krycia.</summary>
     Public NotInheritable Class ZmianyWygladu
         Private ReadOnly _krycie As New Dictionary(Of (String, String, String), Integer)
+        Private ReadOnly _ostatniaBaza As New Dictionary(Of (String, String, String), Integer)
         Private ReadOnly _tryby As New Dictionary(Of (String, String, String), TrybMieszania)
 
         Public Sub Zapisz(przed As ZestawWarstw, po As ZestawWarstw)
@@ -201,7 +204,19 @@ Public Class ZestawWarstw
                 If przed(i).Krycie <> po(i).Krycie Then
                     Dim delta As Integer
                     _krycie.TryGetValue(klucz, delta)
-                    _krycie(klucz) = delta + po(i).Krycie - przed(i).Krycie
+                    Dim baza As Integer
+                    Dim nowyDelta As Integer
+                    If _ostatniaBaza.TryGetValue(klucz, baza) AndAlso przed(i).Krycie = Math.Clamp(baza + delta, 0, PelneKrycie) Then
+                        nowyDelta = po(i).Krycie - baza
+                    Else
+                        If przed(i).Krycie = PelneKrycie AndAlso po(i).Krycie < PelneKrycie AndAlso delta > 0 Then
+                            delta = 0
+                        ElseIf przed(i).Krycie = 0 AndAlso po(i).Krycie > 0 AndAlso delta < 0 Then
+                            delta = 0
+                        End If
+                        nowyDelta = delta + po(i).Krycie - przed(i).Krycie
+                    End If
+                    _krycie(klucz) = Math.Clamp(nowyDelta, -PelneKrycie, PelneKrycie)
                 End If
                 If przed(i).TrybMieszania <> po(i).TrybMieszania Then _tryby(klucz) = po(i).TrybMieszania
             Next
@@ -212,7 +227,8 @@ Public Class ZestawWarstw
                 Dim klucz = KluczWarstwy(w)
                 Dim delta As Integer
                 Dim tryb As TrybMieszania
-                If _krycie.TryGetValue(klucz, delta) Then w.Krycie = Math.Clamp(w.Krycie + delta, 0, 100)
+                _ostatniaBaza(klucz) = w.Krycie
+                If _krycie.TryGetValue(klucz, delta) Then w.Krycie = Math.Clamp(w.Krycie + delta, 0, PelneKrycie)
                 If _tryby.TryGetValue(klucz, tryb) Then w.TrybMieszania = tryb
             Next
         End Sub
@@ -302,6 +318,16 @@ Public Class ZestawWarstw
     ''' <summary>Warstwa o największym zalecanym rozmiarze piksela (Nothing - brak zalecanych rozmiarów).</summary>
     Public Function NajmniejDokladnaWarstwa() As WarstwaWybrana
         Return _warstwy.Where(Function(w) w.ZalecanyPiksel > 0).OrderByDescending(Function(w) w.ZalecanyPiksel).FirstOrDefault()
+    End Function
+
+    ''' <summary>
+    ''' Wyznacza bezpieczny maksymalny bok segmentu w pikselach dla aktywnego zestawu warstw.
+    ''' Obliczany jako Min() z limitów warstw (odrzucając limity &lt;= 0). Jeśli żadna warstwa nie ma limitu, zwraca domyślny bok.
+    ''' </summary>
+    Public Function BezpiecznyBokSegmentu(domyslnyBok As Integer) As Integer
+        Dim limity = _warstwy.Select(Function(w) w.MaksRozmiarSegmentu).Where(Function(lim) lim > 0).ToList()
+        If limity.Count = 0 Then Return domyslnyBok
+        Return Math.Min(domyslnyBok, limity.Min())
     End Function
 
     Public Sub UstawKrycie(indeks As Integer, krycie As Integer)
@@ -517,9 +543,9 @@ Public NotInheritable Class NakladanieWarstw
                 End Select
 
                 Dim oa As Double = sa + da * (1.0 - sa)
-                Dim wr As Double = mr * sa + br * da * (1.0 - sa)
-                Dim wg As Double = mg * sa + bg * da * (1.0 - sa)
-                Dim wb As Double = mb * sa + bb * da * (1.0 - sa)
+                Dim wr As Double = sa * (1.0 - da) * lr + sa * da * mr + (1.0 - sa) * da * br
+                Dim wg As Double = sa * (1.0 - da) * lg + sa * da * mg + (1.0 - sa) * da * bg
+                Dim wb As Double = sa * (1.0 - da) * lb + sa * da * mb + (1.0 - sa) * da * bb
                 Dim r As Double = wr / oa * 255.0
                 Dim g As Double = wg / oa * 255.0
                 Dim b As Double = wb / oa * 255.0

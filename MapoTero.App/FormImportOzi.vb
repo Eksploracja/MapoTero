@@ -437,6 +437,7 @@ Public Class FormImportOzi
         grpFormat.Enabled = False
         grpOpcje.Enabled = False
         btnZamknij.Text = "Anuluj"
+        btnZamknij.DialogResult = DialogResult.None
         prgPostep.Value = 0
 
         _anulowanie = New CancellationTokenSource()
@@ -470,6 +471,7 @@ Public Class FormImportOzi
             grpFormat.Enabled = True
             grpOpcje.Enabled = True
             btnZamknij.Text = "Zamknij"
+            btnZamknij.DialogResult = DialogResult.Cancel
             If _anulowanie IsNot Nothing Then
                 _anulowanie.Dispose()
                 _anulowanie = Nothing
@@ -500,6 +502,7 @@ Public Class FormImportOzi
         grpFormat.Enabled = False
         grpOpcje.Enabled = False
         btnZamknij.Text = "Anuluj"
+        btnZamknij.DialogResult = DialogResult.None
         prgPostep.Value = 0
 
         _anulowanie = New CancellationTokenSource()
@@ -548,6 +551,7 @@ Public Class FormImportOzi
             grpFormat.Enabled = True
             grpOpcje.Enabled = True
             btnZamknij.Text = "Zamknij"
+            btnZamknij.DialogResult = DialogResult.Cancel
             If _anulowanie IsNot Nothing Then
                 _anulowanie.Dispose()
                 _anulowanie = Nothing
@@ -871,6 +875,8 @@ Public Class FormImportOzi
                 Catch
                 End Try
                 Throw
+            Finally
+                SQLiteConnection.ClearAllPools()
             End Try
         End Using
     End Sub

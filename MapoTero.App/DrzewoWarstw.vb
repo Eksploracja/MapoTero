@@ -131,6 +131,20 @@ Public Class DrzewoWarstw
         Next
     End Sub
 
+    Private Const TVS_NOHSCROLL As Integer = &H8000
+
+    ''' <summary>
+    ''' Bez poziomego paska przewijania: długie nazwy warstw są ucięte na prawej krawędzi, a pełną nazwę pokazuje
+    ''' podpowiedź węzła. Pasek zabierał wiersz drzewa, a przewinięcie w bok chowało pola wyboru.
+    ''' </summary>
+    Protected Overrides ReadOnly Property CreateParams As CreateParams
+        Get
+            Dim cp = MyBase.CreateParams
+            cp.Style = cp.Style Or TVS_NOHSCROLL
+            Return cp
+        End Get
+    End Property
+
     Protected Overrides Sub OnHandleCreated(e As EventArgs)
         MyBase.OnHandleCreated(e)
         UkryjPolaGrup()

@@ -143,4 +143,47 @@ Public Class NakladkaWydrukuTesty
         End Using
     End Sub
 
+    <Fact>
+    Public Sub ZakresArkusza_NiesymetrycznyPiksel_ZachowujeGeometrie()
+        Dim arkusz As New ZakresArkusza() With {
+            .SzerokoscPx = 1000,
+            .WysokoscPx = 500,
+            .RozmiarPikselaXM = 2.0,
+            .RozmiarPikselaYM = 4.0,
+            .LewyEastingM = 200000.0,
+            .GornyNorthingM = 400000.0
+        }
+
+        Dim pPD = arkusz.MetryNaPiksel(202000.0, 398000.0)
+        Assert.Equal(1000.0F, pPD.X)
+        Assert.Equal(500.0F, pPD.Y)
+    End Sub
+
+    <Fact>
+    Public Sub RysujSiatkeKilometrowa_TransformacjaSiatki_DzialaPoprawnie()
+        Using bmp As New Bitmap(600, 600)
+            Using g = Graphics.FromImage(bmp)
+                Dim arkusz As New ZakresArkusza() With {
+                    .SzerokoscPx = 600,
+                    .WysokoscPx = 600,
+                    .RozmiarPikselaXM = 2.0,
+                    .RozmiarPikselaYM = 2.0,
+                    .LewyEastingM = 500000.0,
+                    .GornyNorthingM = 600000.0
+                }
+                Dim parametry As New ParametrySiatkiKilometrowej() With {
+                    .UkladSiatki = UkladSiatkiWydruku.Utm34N,
+                    .KrokMetry = 500
+                }
+
+                ' Transformacja np. z przesunięciem
+                Dim transformacja As Func(Of Double, Double, (E As Double, N As Double)) =
+                    Function(e, n) (e + 100.0, n + 200.0)
+                Dim zakres = Tuple.Create(499000.0, 502000.0, 599000.0, 602000.0)
+
+                RendererNakladekWydruku.RysujSiatkeKilometrowa(g, arkusz, parametry, offsetPasaY:=0, przeliczZUkSiatkiNaArkusz:=transformacja, zakresMetrowySiatki:=zakres)
+            End Using
+        End Using
+    End Sub
+
 End Class

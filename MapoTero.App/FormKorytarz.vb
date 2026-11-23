@@ -35,6 +35,8 @@ Public Class FormKorytarz
         'bufor adaptacyjny ukryty: stan pola nie był nigdzie odczytywany, a eksport piramidy nie zna korytarza -
         'szerszy pas na małych powiększeniach wymagałby segmentów, których program nie pobrał (decyzje.md, 2026-11-16)
         chkBuforAdaptacyjny.Visible = False
+        dlgPlik.Filter = "Trasy (*.gpx;*.kml;*.kmz;*.gpkg)|*.gpx;*.kml;*.kmz;*.gpkg|Wszystkie pliki (*.*)|*.*"
+        lblPlik.Text = "Plik trasy (GPX, KML, KMZ, GPKG):"
         If biezacy IsNot Nothing Then
             'kopia - Anuluj nie może zmienić korytarza sesji
             _korytarz = Korytarz.ZTekstuZapisu(biezacy.DoTekstu())
@@ -54,10 +56,18 @@ Public Class FormKorytarz
     Friend Sub WczytajPlikTrasy(plik As String)
         txtPlik.Text = plik
         Try
-            Dim k = Korytarz.WczytajTrase(plik)
+            Dim k As Korytarz
+            If IO.Path.GetExtension(plik).Equals(".gpkg", StringComparison.OrdinalIgnoreCase) Then
+                ' GeoPackage: linie wybranej warstwy (np. trasa narysowana w QGIS); komunikaty pokazuje okno wyboru warstwy
+                Dim geometria = WyborWarstwyGeoPackage.Wczytaj(Me, plik, linie:=True)
+                If geometria Is Nothing Then Exit Sub
+                k = geometria.TrasaWgs84(IO.Path.GetFileNameWithoutExtension(plik))
+            Else
+                k = Korytarz.WczytajTrase(plik)
+            End If
             If Not k.Poprawny Then
                 _korytarz = Nothing
-                Opis("Plik nie zawiera śladu, trasy ani linii (GPX: trk, rte, wpt; KML: LineString, gx:Track).", Color.Red)
+                Opis("Plik nie zawiera śladu, trasy ani linii (GPX: trk, rte, wpt; KML: LineString, gx:Track; GPKG: warstwa linii).", Color.Red)
                 btnOK.Enabled = False
                 Exit Sub
             End If

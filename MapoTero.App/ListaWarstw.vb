@@ -66,13 +66,106 @@ Public Class ListaWarstw
     ''' </summary>
     Private ReadOnly _pasek As New VScrollBar() With {.Dock = DockStyle.Right, .Visible = False, .TabStop = False}
 
+    Private _edytorKrycia As Control
+    'wiersz, nad którego krzyżykiem jest kursor (podświetlenie na czerwono)
+    Private _krzyzykPod As Integer = -1
+
     Public Sub New()
         SetStyle(ControlStyles.UserPaint Or ControlStyles.AllPaintingInWmPaint Or ControlStyles.OptimizedDoubleBuffer Or
                  ControlStyles.ResizeRedraw Or ControlStyles.Selectable, True)
         TabStop = True
         BackColor = SystemColors.Window
         Controls.Add(_pasek)
-        AddHandler _pasek.ValueChanged, Sub() Invalidate()
+        AddHandler _pasek.ValueChanged, Sub()
+                                            Invalidate()
+                                            PolozEdytorKrycia()
+                                        End Sub
+    End Sub
+
+    ''' <summary>
+    ''' Pole krycia (np. NumericUpDown okna) pokazywane w wierszu zaznaczonej warstwy, w miejscu napisu „80 %”.
+    ''' Pozostałe wiersze rysują krycie jako tekst w ramce - jedno pole zamiast osobnego wiersza pod listą.
+    ''' </summary>
+    <Browsable(False), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)>
+    Public Property EdytorKrycia As Control
+        Get
+            Return _edytorKrycia
+        End Get
+        Set(value As Control)
+            If _edytorKrycia IsNot Nothing Then Controls.Remove(_edytorKrycia)
+            _edytorKrycia = value
+            If value IsNot Nothing Then
+                value.Dock = DockStyle.None
+                value.Anchor = AnchorStyles.None
+                value.Margin = Padding.Empty
+                Controls.Add(value)
+            End If
+            UstawPasek()
+            PolozEdytorKrycia()
+        End Set
+    End Property
+
+    Private Function Skaluj(wartosc As Integer) As Integer
+        Return CInt(wartosc * DeviceDpi / 96.0)
+    End Function
+
+    Private ReadOnly Property SzerokoscProcenta As Integer
+        Get
+            Return Skaluj(14)
+        End Get
+    End Property
+
+    Private ReadOnly Property SzerokoscUchwytu As Integer
+        Get
+            Return If(_zestaw.Liczba > 1, Skaluj(12), 0)
+        End Get
+    End Property
+
+    Private ReadOnly Property SzerokoscKrzyzyka As Integer
+        Get
+            Return Skaluj(24)
+        End Get
+    End Property
+
+    Private Function ProstokatProcenta(r As Rectangle) As Rectangle
+        Return New Rectangle(r.Right - SzerokoscKrzyzyka - SzerokoscProcenta, r.Y, SzerokoscProcenta, r.Height)
+    End Function
+
+    ''' <summary>Ramka krycia w wierszu (tam leży pole krycia zaznaczonej warstwy).</summary>
+    Private Function ProstokatKrycia(r As Rectangle) As Rectangle
+        Dim h As Integer = If(_edytorKrycia IsNot Nothing, _edytorKrycia.Height, Font.Height + Skaluj(6))
+        Dim szer As Integer = If(_edytorKrycia IsNot Nothing, _edytorKrycia.Width, Skaluj(46))
+        Return New Rectangle(r.Right - SzerokoscKrzyzyka - SzerokoscProcenta - szer - Skaluj(2), r.Y + (r.Height - h) \ 2, szer, h)
+    End Function
+
+    Private Function ProstokatKrzyzyka(r As Rectangle) As Rectangle
+        Return New Rectangle(r.Right - SzerokoscKrzyzyka, r.Y, SzerokoscKrzyzyka, r.Height)
+    End Function
+
+    Friend Shared Function SkrotTrybuMieszania(tryb As TrybMieszania) As String
+        Select Case tryb
+            Case TrybMieszania.Mnozenie : Return "Mnoż."
+            Case TrybMieszania.Ciemniej : Return "Ciemn."
+            Case TrybMieszania.Jasniej : Return "Jaśn."
+            Case TrybMieszania.Ekran : Return "Ekran"
+            Case TrybMieszania.Nakladka : Return "Nakł."
+            Case TrybMieszania.RzezbaTerenu : Return "Rzeźba"
+            Case Else : Return ""
+        End Select
+    End Function
+
+    ''' <summary>Pole krycia nad wierszem zaznaczonej warstwy; ukryte bez zaznaczenia albo gdy wiersz jest przewinięty poza listę.</summary>
+    Private Sub PolozEdytorKrycia()
+        If _edytorKrycia Is Nothing Then Exit Sub
+        Dim i As Integer = Zaznaczona
+        If i < 0 Then
+            _edytorKrycia.Visible = False
+            Exit Sub
+        End If
+        Dim k = ProstokatKrycia(ProstokatMiejsca(i))
+        Dim widoczny As Boolean = k.Top >= 2 AndAlso k.Bottom <= ClientSize.Height - 2
+        If widoczny Then _edytorKrycia.Location = k.Location
+        _edytorKrycia.Visible = widoczny
     End Sub
 
     ''' <summary>Wyświetlany zestaw warstw (po zmianie zestawu wywołaj <see cref="Odswiez"/>).</summary>
@@ -98,14 +191,11 @@ Public Class ListaWarstw
             If nowa = _zaznaczona Then Exit Property
             _zaznaczona = nowa
             PokazMiejsce(nowa)
+            PolozEdytorKrycia()
             Invalidate()
             RaiseEvent ZaznaczenieZmienione(Me, EventArgs.Empty)
         End Set
     End Property
-
-    ''' <summary>Obraz w tle listy (prawy dolny róg).</summary>
-    <Browsable(False), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)>
-    Public Property ObrazTla As Image
 
     ''' <summary>Menu warstwy (prawy przycisk myszy na zajętym wierszu, klawisz menu).</summary>
     <Browsable(False), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)>
@@ -137,13 +227,16 @@ Public Class ListaWarstw
         _oczekujaceMiejsce = -2
         UstawPasek()
         PokazMiejsce(If(Zaznaczona >= 0, Zaznaczona, _zestaw.Liczba - 1))
+        PolozEdytorKrycia()
         Invalidate()
     End Sub
 
-    ''' <summary>Wysokość miejsca: całe wnętrze podzielone na 12, ale nie mniej niż wiersz tekstu (niżej - przewijanie).</summary>
-    Private ReadOnly Property WysokoscWiersza As Integer
+    ''' <summary>Wysokość wiersza proporcjonalna do czcionki i skalowania okna; mieści pole krycia.</summary>
+    Friend ReadOnly Property WysokoscWiersza As Integer
         Get
-            Return Math.Max(Font.Height + 2, (ClientSize.Height - 4) \ ZestawWarstw.MaksLiczba)
+            Dim h As Integer = Font.Height + Skaluj(8)
+            If _edytorKrycia IsNot Nothing Then h = Math.Max(h, _edytorKrycia.Height + Skaluj(6))
+            Return h
         End Get
     End Property
 
@@ -161,9 +254,9 @@ Public Class ListaWarstw
         End Get
     End Property
 
-    ''' <summary>Pasek przewijania widoczny, gdy 12 miejsc nie mieści się we wnętrzu listy.</summary>
+    ''' <summary>Pasek przewijania widoczny, gdy wybrane warstwy nie mieszczą się w liście.</summary>
     Private Sub UstawPasek()
-        Dim tresc As Integer = WysokoscWiersza * ZestawWarstw.MaksLiczba
+        Dim tresc As Integer = WysokoscWiersza * _zestaw.Liczba
         Dim przewijanie As Boolean = tresc > WysokoscWnetrza
         If przewijanie Then
             _pasek.Minimum = 0
@@ -182,7 +275,7 @@ Public Class ListaWarstw
         If Not _pasek.Visible Then Exit Sub
         If indeks < 0 Then indeks = 0
         Dim h As Integer = WysokoscWiersza
-        Dim gora As Integer = (ZestawWarstw.MaksLiczba - 1 - indeks) * h
+        Dim gora As Integer = (_zestaw.Liczba - 1 - indeks) * h
         Dim maks As Integer = _pasek.Maximum - _pasek.LargeChange + 1
         If gora < _pasek.Value Then
             _pasek.Value = Math.Max(0, gora)
@@ -194,6 +287,7 @@ Public Class ListaWarstw
     Protected Overrides Sub OnResize(e As EventArgs)
         MyBase.OnResize(e)
         UstawPasek()
+        PolozEdytorKrycia()
     End Sub
 
     Protected Overrides Sub OnFontChanged(e As EventArgs)
@@ -210,17 +304,17 @@ Public Class ListaWarstw
         _pasek.Value = Math.Max(0, Math.Min(maks, _pasek.Value - Math.Sign(e.Delta) * 2 * WysokoscWiersza))
     End Sub
 
-    ''' <summary>Prostokąt miejsca warstwy o indeksie (miejsce 12 u góry, podkład na dole), z uwzględnieniem przewinięcia.</summary>
+    ''' <summary>Prostokąt wiersza warstwy (wierzch kompozycji u góry, podkład na dole).</summary>
     Private Function ProstokatMiejsca(indeks As Integer) As Rectangle
         Dim h As Integer = WysokoscWiersza
-        Dim gora As Integer = If(_pasek.Visible, 2 - _pasek.Value, 2 + (WysokoscWnetrza - h * ZestawWarstw.MaksLiczba) \ 2)
-        Return New Rectangle(2, gora + (ZestawWarstw.MaksLiczba - 1 - indeks) * h, SzerokoscWnetrza - 4, h)
+        Dim gora As Integer = 2 - If(_pasek.Visible, _pasek.Value, 0)
+        Return New Rectangle(2, gora + (_zestaw.Liczba - 1 - indeks) * h, SzerokoscWnetrza - 4, h)
     End Function
 
     ''' <summary>Indeks miejsca pod punktem (-1 - poza miejscami albo poza widocznym wnętrzem listy).</summary>
     Private Function MiejscePod(p As Point) As Integer
         If p.Y < 2 OrElse p.Y >= ClientSize.Height - 2 Then Return -1
-        For i = 0 To ZestawWarstw.MaksLiczba - 1
+        For i = 0 To _zestaw.Liczba - 1
             If ProstokatMiejsca(i).Contains(p) Then Return i
         Next
         Return -1
@@ -230,10 +324,11 @@ Public Class ListaWarstw
         Dim g = e.Graphics
         g.Clear(If(Enabled, BackColor, SystemColors.Control))
 
-        If ObrazTla IsNot Nothing Then
-            Dim skala As Double = Math.Min(1.0, Math.Min((SzerokoscWnetrza - 6) / ObrazTla.Width, (ClientSize.Height - 6) / ObrazTla.Height))
-            Dim w As Integer = CInt(ObrazTla.Width * skala), h As Integer = CInt(ObrazTla.Height * skala)
-            g.DrawImage(ObrazTla, New Rectangle(SzerokoscWnetrza - w - 4, ClientSize.Height - h - 3, w, h))
+        If _zestaw.Liczba = 0 Then
+            'tylko stan listy - co zrobić, podpowiada karta „Stan sesji” pod mapą (wcześniej ta sama rada była w trzech miejscach)
+            TextRenderer.DrawText(g, "Brak wybranych warstw.", Font, Rectangle.Inflate(ClientRectangle, -6, -3),
+                                  Color.FromArgb(75, 94, 113), TextFormatFlags.WordBreak Or TextFormatFlags.VerticalCenter)
+            Return
         End If
         'przewinięte miejsca nie wchodzą na ramkę
         g.SetClip(New Rectangle(2, 2, SzerokoscWnetrza - 4, WysokoscWnetrza))
@@ -243,33 +338,85 @@ Public Class ListaWarstw
         'zmienna lokalna nie może nazywać się jak właściwość Zaznaczona (VB nie rozróżnia wielkości liter)
         Dim wybrana As Integer = Zaznaczona
         Dim wieleZrodel As Boolean = _zestaw.WieleZrodel
-        For i = 0 To ZestawWarstw.MaksLiczba - 1
+        Dim kolorRamki As Color = Color.FromArgb(207, 218, 229)
+        For i = 0 To _zestaw.Liczba - 1
             Dim r = ProstokatMiejsca(i)
-            Dim numer As String = (i + 1).ToString() & ")"
-            If i >= _zestaw.Liczba Then
-                TextRenderer.DrawText(g, numer, Font, New Rectangle(r.X + 2, r.Y, r.Width - 2, r.Height), SystemColors.GrayText, flagi)
-                Continue For
-            End If
             Dim w = _zestaw(i)
             Dim tlo As Color = BackColor, kolor As Color = ForeColor
             If i = wybrana Then
-                tlo = If(Focused, SystemColors.Highlight, SystemColors.ControlLight)
+                tlo = If(Focused, SystemColors.Highlight, Color.FromArgb(227, 238, 249))
                 kolor = If(Focused, SystemColors.HighlightText, ForeColor)
             End If
             If Not Enabled Then kolor = SystemColors.GrayText
             Using pedzel As New SolidBrush(tlo)
                 g.FillRectangle(pedzel, r)
             End Using
-            Dim cecha As String = ""
-            If w.TrybMieszania <> TrybMieszania.Zwykly Then
-                cecha = TrybMieszaniaRozszerzenia.NazwaWyswietlana(w.TrybMieszania)
-                If w.Krycie < ZestawWarstw.PelneKrycie Then cecha &= " • " & w.Krycie & " %"
-            ElseIf w.Krycie < ZestawWarstw.PelneKrycie Then
-                cecha = w.Krycie & " %"
+            'cienka linia między wierszami - bez numerów („2)”, „1)”) wiersze inaczej zlewały się ze sobą
+            If i > 0 Then
+                Using pioro As New Pen(Color.FromArgb(236, 241, 246))
+                    g.DrawLine(pioro, r.Left + Skaluj(4), r.Bottom - 1, r.Right - Skaluj(4), r.Bottom - 1)
+                End Using
             End If
-            Dim szerCechy As Integer = If(cecha = "", 0, TextRenderer.MeasureText(g, cecha, Font, Size.Empty, flagiKrycia).Width + 4)
-            Dim obszarNazwy As New Rectangle(r.X + 2, r.Y, r.Width - 4 - szerCechy, r.Height)
-            Dim tekstNazwy As String = numer & " " & NazwaWarstwy(w)
+            If _zestaw.Liczba > 1 Then
+                Dim kropka = Math.Max(2, Skaluj(2))
+                Dim odstepX = Math.Max(2, Skaluj(2))
+                Dim odstepY = Math.Max(2, Skaluj(2))
+                Dim calaWys = 3 * kropka + 2 * odstepY
+                Dim gx = r.X + Skaluj(4)
+                Dim gy = r.Y + (r.Height - calaWys) \ 2
+                Dim kolorUchwytu = If(i = wybrana AndAlso Focused, kolor, Color.FromArgb(158, 172, 188))
+                Using pedzelUchwytu As New SolidBrush(kolorUchwytu)
+                    For kol = 0 To 1
+                        For wierz = 0 To 2
+                            g.FillRectangle(pedzelUchwytu, gx + kol * (kropka + odstepX), gy + wierz * (kropka + odstepY), kropka, kropka)
+                        Next
+                    Next
+                End Using
+            End If
+            Dim lewaIkony = r.X + Skaluj(4) + SzerokoscUchwytu
+            RysujIkoneWarstwy(g, New Rectangle(lewaIkony, r.Y, Skaluj(16), r.Height), i = 0, If(i = wybrana AndAlso Focused, kolor, Color.FromArgb(25, 78, 128)))
+            Dim krycie = ProstokatKrycia(r)
+            Dim lewaNazwy = lewaIkony + Skaluj(22)
+            Dim prawaNazwy = krycie.Left - Skaluj(4)
+            Dim skrotTrybu = SkrotTrybuMieszania(w.TrybMieszania)
+            If skrotTrybu <> "" Then
+                Using czcionkaTrybu As New Font(Font.FontFamily, Math.Max(7.0F, Font.Size - 1.25F), FontStyle.Regular)
+                    Dim szerTekstu = TextRenderer.MeasureText(g, skrotTrybu, czcionkaTrybu, Size.Empty, flagiKrycia).Width
+                    Dim szerZnacznika = szerTekstu + Skaluj(8)
+                    If prawaNazwy - lewaNazwy - szerZnacznika - Skaluj(4) >= Skaluj(45) Then
+                        Dim wysZnacznika = Math.Min(r.Height - Skaluj(6), czcionkaTrybu.Height + Skaluj(4))
+                        Dim rectTrybu As New Rectangle(prawaNazwy - szerZnacznika, r.Y + (r.Height - wysZnacznika) \ 2, szerZnacznika, wysZnacznika)
+                        Dim tloTrybu = If(i = wybrana AndAlso Focused, Color.FromArgb(60, 255, 255, 255), Color.FromArgb(232, 240, 250))
+                        Dim ramkaTrybu = If(i = wybrana AndAlso Focused, Color.FromArgb(180, 255, 255, 255), Color.FromArgb(175, 196, 220))
+                        Dim tekstTrybu = If(i = wybrana AndAlso Focused, kolor, Color.FromArgb(25, 78, 128))
+                        Using pedzelTla As New SolidBrush(tloTrybu), pioroTrybu As New Pen(ramkaTrybu)
+                            g.FillRectangle(pedzelTla, rectTrybu)
+                            g.DrawRectangle(pioroTrybu, rectTrybu.X, rectTrybu.Y, rectTrybu.Width - 1, rectTrybu.Height - 1)
+                        End Using
+                        TextRenderer.DrawText(g, skrotTrybu, czcionkaTrybu, rectTrybu, tekstTrybu,
+                                              flagiKrycia Or TextFormatFlags.HorizontalCenter)
+                        prawaNazwy = rectTrybu.Left - Skaluj(4)
+                    End If
+                End Using
+            End If
+            Dim obszarNazwy As New Rectangle(lewaNazwy, r.Y, Math.Max(0, prawaNazwy - lewaNazwy), r.Height)
+            'krycie zaznaczonej warstwy pokazuje pole edycji położone nad wierszem; pozostałe - napis w ramce
+            If i <> wybrana OrElse _edytorKrycia Is Nothing OrElse Not _edytorKrycia.Visible Then
+                Using tloPola As New SolidBrush(If(Enabled, Color.White, SystemColors.Control)), pioro As New Pen(kolorRamki)
+                    g.FillRectangle(tloPola, krycie)
+                    g.DrawRectangle(pioro, krycie.X, krycie.Y, krycie.Width - 1, krycie.Height - 1)
+                End Using
+                TextRenderer.DrawText(g, w.Krycie.ToString(), Font, New Rectangle(krycie.X, krycie.Y, krycie.Width - Skaluj(5), krycie.Height),
+                                      If(Enabled, ForeColor, SystemColors.GrayText), flagiKrycia Or TextFormatFlags.Right)
+            End If
+            TextRenderer.DrawText(g, "%", Font, ProstokatProcenta(r),
+                                  If(i = wybrana AndAlso Focused, kolor, SystemColors.GrayText),
+                                  flagiKrycia Or TextFormatFlags.HorizontalCenter)
+            Dim krzyzyk = ProstokatKrzyzyka(r)
+            TextRenderer.DrawText(g, "✕", Font, krzyzyk, If(i = _krzyzykPod AndAlso Enabled, Color.Firebrick,
+                                                             If(i = wybrana AndAlso Focused, kolor, SystemColors.GrayText)),
+                                  flagiKrycia Or TextFormatFlags.HorizontalCenter)
+            Dim tekstNazwy As String = NazwaWarstwy(w)
             TextRenderer.DrawText(g, tekstNazwy, Font, obszarNazwy, kolor, flagi)
             'warstwy z różnych serwerów - po nazwie (szarym) zbiór map, jeśli się zmieści
             Dim zrodlo As String = ZrodloWarstwy(w)
@@ -279,10 +426,6 @@ Public Class ListaWarstw
                     TextRenderer.DrawText(g, zrodlo, Font, New Rectangle(obszarNazwy.X + szerNazwy, r.Y, obszarNazwy.Width - szerNazwy, r.Height),
                                           If(i = wybrana AndAlso Focused, kolor, SystemColors.GrayText), flagi)
                 End If
-            End If
-            If cecha <> "" Then
-                TextRenderer.DrawText(g, cecha, Font, New Rectangle(r.Right - szerCechy - 2, r.Y, szerCechy, r.Height),
-                                      If(i = wybrana AndAlso Focused, kolor, SystemColors.GrayText), flagiKrycia Or TextFormatFlags.Right)
             End If
             If i = wybrana AndAlso Focused Then ControlPaint.DrawFocusRectangle(g, r, kolor, tlo)
         Next
@@ -297,7 +440,24 @@ Public Class ListaWarstw
         End If
 
         g.ResetClip()
-        ControlPaint.DrawBorder3D(g, ClientRectangle, Border3DStyle.Sunken)
+    End Sub
+
+    ''' <summary>Symbol warstwy: równoległobok (arkusz mapy); podkład wypełniony, warstwy nad nim - sam obrys.</summary>
+    Private Sub RysujIkoneWarstwy(g As Graphics, obszar As Rectangle, podklad As Boolean, kolor As Color)
+        Dim s As Single = obszar.Width
+        Dim x As Single = obszar.X, y As Single = obszar.Y + (obszar.Height - s * 0.6F) / 2
+        Dim punkty = {New PointF(x + s * 0.3F, y), New PointF(x + s, y), New PointF(x + s * 0.7F, y + s * 0.6F), New PointF(x, y + s * 0.6F)}
+        Dim tryb = g.SmoothingMode
+        g.SmoothingMode = Drawing2D.SmoothingMode.AntiAlias
+        If podklad Then
+            Using pedzel As New SolidBrush(Color.FromArgb(150, kolor))
+                g.FillPolygon(pedzel, punkty)
+            End Using
+        End If
+        Using pioro As New Pen(kolor, Math.Max(1.0F, Skaluj(1) * 1.3F))
+            g.DrawPolygon(pioro, punkty)
+        End Using
+        g.SmoothingMode = tryb
     End Sub
 
     Protected Overrides Sub OnEnabledChanged(e As EventArgs)
@@ -332,8 +492,21 @@ Public Class ListaWarstw
         Focus()
         Dim i As Integer = MiejscePod(e.Location)
         If i >= _zestaw.Liczba Then i = -1
-        If e.Button = MouseButtons.Left OrElse e.Button = MouseButtons.Right Then
-            If i >= 0 Then Zaznaczona = i
+        If e.Button = MouseButtons.Left AndAlso i >= 0 Then
+            Dim r = ProstokatMiejsca(i)
+            If ProstokatKrzyzyka(r).Contains(e.Location) Then
+                _zaznaczona = i
+                RaiseEvent UsuniecieZadane(Me, EventArgs.Empty)
+                Exit Sub
+            End If
+            If _edytorKrycia IsNot Nothing AndAlso ProstokatKrycia(r).Contains(e.Location) Then
+                Zaznaczona = i
+                _edytorKrycia.Focus()
+                Exit Sub
+            End If
+        End If
+        If (e.Button = MouseButtons.Left OrElse e.Button = MouseButtons.Right) AndAlso i >= 0 Then
+            Zaznaczona = i
         End If
         If e.Button = MouseButtons.Left AndAlso i >= 0 Then
             _chwyconaWarstwa = i
@@ -361,7 +534,7 @@ Public Class ListaWarstw
                     End If
                 End If
                 Dim cel As Integer = MiejscePod(e.Location)
-                If cel < 0 Then cel = If(e.Y < ClientSize.Height \ 2, _zestaw.Liczba - 1, 0)
+                If cel < 0 Then cel = If(e.Y <= ProstokatMiejsca(_zestaw.Liczba - 1).Top, _zestaw.Liczba - 1, 0)
                 cel = Math.Min(cel, _zestaw.Liczba - 1)
                 If cel <> _cel Then
                     _cel = cel
@@ -370,7 +543,17 @@ Public Class ListaWarstw
             End If
             Exit Sub
         End If
-        ObsluzRuchPodpowiedzi(MiejscePod(e.Location))
+        Dim pod As Integer = MiejscePod(e.Location)
+        Dim krzyzyk As Integer = If(pod >= 0 AndAlso ProstokatKrzyzyka(ProstokatMiejsca(pod)).Contains(e.Location), pod, -1)
+        Dim nadUchwytem As Boolean = krzyzyk < 0 AndAlso _zestaw.Liczba > 1 AndAlso Enabled AndAlso pod >= 0 AndAlso
+                                     e.X <= ProstokatMiejsca(pod).X + SzerokoscUchwytu + Skaluj(4)
+        Dim nowyKursor = If(krzyzyk >= 0, Cursors.Hand, If(nadUchwytem, Cursors.SizeNS, Cursors.Default))
+        If Cursor IsNot nowyKursor Then Cursor = nowyKursor
+        If krzyzyk <> _krzyzykPod Then
+            _krzyzykPod = krzyzyk
+            Invalidate()
+        End If
+        ObsluzRuchPodpowiedzi(pod)
     End Sub
 
     Protected Overrides Sub OnMouseUp(e As MouseEventArgs)
@@ -393,6 +576,11 @@ Public Class ListaWarstw
 
     Protected Overrides Sub OnMouseLeave(e As EventArgs)
         MyBase.OnMouseLeave(e)
+        If Cursor IsNot Cursors.Default Then Cursor = Cursors.Default
+        If _krzyzykPod >= 0 Then
+            _krzyzykPod = -1
+            Invalidate()
+        End If
         UkryjPodpowiedz()
         _oczekujaceMiejsce = -2
     End Sub
@@ -467,12 +655,12 @@ Public Class ListaWarstw
         If miejsce >= 0 AndAlso miejsce < _zestaw.Liczba Then
             Dim w = _zestaw(miejsce)
             Dim nazwa As String = NazwaWarstwy(w)
-            Return (miejsce + 1) & ") " & nazwa & If(miejsce = 0, " - podkład", "") &
+            Return nazwa & If(miejsce = 0, " - podkład (na spodzie)", If(miejsce = _zestaw.Liczba - 1, " - na wierzchu", "")) &
                    If(w.TrybMieszania <> TrybMieszania.Zwykly, ", tryb: " & TrybMieszaniaRozszerzenia.NazwaWyswietlana(w.TrybMieszania), "") &
                    If(w.Krycie < ZestawWarstw.PelneKrycie, ", krycie " & w.Krycie & " %", "") & vbCrLf &
                    "Warstwa " & w.Nazwa & ", zbiór map " & If(w.Zbior <> "", w.Zbior, "?") & " (" & KafleXyz.NazwaTypu(w.EfektywnyTyp) & ")" &
                    If(w.ZalecanyPiksel > 0, ", zalecany piksel " & w.ZalecanyPiksel.ToString("0.###") & " m", "") & vbCrLf &
-                   "Przeciągnij, aby zmienić kolejność; prawy przycisk - menu warstwy."
+                   "Przeciągnij lub użyj Ctrl+↑/↓, aby zmienić kolejność; ✕ usuwa warstwę; prawy przycisk - menu warstwy."
         ElseIf Not String.IsNullOrEmpty(OpisListy) Then
             Return OpisListy
         End If

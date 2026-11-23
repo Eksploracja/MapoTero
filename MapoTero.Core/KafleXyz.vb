@@ -377,21 +377,21 @@ Public NotInheritable Class KafleXyz
 
         Dim wKorytarzu = korytarz.Segmenty(siatka, uklad)
         If wKorytarzu.Count = 0 Then Return 0
+        Dim kolumny As Integer = Math.Max(1, siatka.LiczbaKolumn)
         Dim sumaK As Long = 0
         For pi = 0 To listaPlanow.Count - 1
             Dim p = listaPlanow(pi)
             Dim unikalne As New HashSet(Of Long)
-            For w = 1 To siatka.LiczbaWierszy
-                For k = 1 To siatka.LiczbaKolumn
-                    If Not wKorytarzu.Contains(siatka.NumerKolejny(w, k) - 1) Then Continue For
-                    Dim r = ZakresKafliObszaru(p, siatka.Segment(w, k))
-                    For row = r.Item1 To r.Item2
-                        For col = r.Item3 To r.Item4
-                            If Not p.KafelDostepny(row, col) Then Continue For
-                            If unikalne.Add(CLng(row) * 100000000L + col) Then
-                                If sumaK + unikalne.Count >= limitZliczania Then Return sumaK + unikalne.Count
-                            End If
-                        Next
+            For Each klucz In wKorytarzu
+                Dim w As Integer = (klucz \ kolumny) + 1
+                Dim k As Integer = (klucz Mod kolumny) + 1
+                Dim r = ZakresKafliObszaru(p, siatka.Segment(w, k))
+                For row = r.Item1 To r.Item2
+                    For col = r.Item3 To r.Item4
+                        If Not p.KafelDostepny(row, col) Then Continue For
+                        If unikalne.Add(CLng(row) * 100000000L + col) Then
+                            If sumaK + unikalne.Count >= limitZliczania Then Return sumaK + unikalne.Count
+                        End If
                     Next
                 Next
             Next
@@ -417,10 +417,18 @@ Public NotInheritable Class KafleXyz
             minK = Math.Min(minK, kol) : maksK = Math.Max(maksK, kol)
         Next
         Dim mc = p.Macierz
-        Dim w0 As Integer = Math.Max(0, CInt(Math.Floor((minW - 2) / mc.WysokoscKafla)))
-        Dim w1 As Integer = Math.Min(mc.LiczbaWierszy - 1, CInt(Math.Floor((maksW + 2) / mc.WysokoscKafla)))
-        Dim k0 As Integer = Math.Max(0, CInt(Math.Floor((minK - 2) / mc.SzerokoscKafla)))
-        Dim k1 As Integer = Math.Min(mc.LiczbaKolumn - 1, CInt(Math.Floor((maksK + 2) / mc.SzerokoscKafla)))
+        Dim maksWIdx As Integer = mc.LiczbaWierszy - 1
+        Dim maksKIdx As Integer = mc.LiczbaKolumn - 1
+        Dim przytnij = Function(d As Double, dol As Integer, gora As Integer) As Integer
+                           If gora < dol OrElse Not Double.IsFinite(d) Then Return dol
+                           If d <= dol Then Return dol
+                           If d >= gora Then Return gora
+                           Return CInt(d)
+                       End Function
+        Dim w0 As Integer = przytnij(Math.Floor((minW - 2) / mc.WysokoscKafla), 0, Math.Max(0, maksWIdx))
+        Dim w1 As Integer = przytnij(Math.Floor((maksW + 2) / mc.WysokoscKafla), 0, Math.Max(0, maksWIdx))
+        Dim k0 As Integer = przytnij(Math.Floor((minK - 2) / mc.SzerokoscKafla), 0, Math.Max(0, maksKIdx))
+        Dim k1 As Integer = przytnij(Math.Floor((maksK + 2) / mc.SzerokoscKafla), 0, Math.Max(0, maksKIdx))
         Return Tuple.Create(w0, w1, k0, k1)
     End Function
 

@@ -88,15 +88,16 @@ Public Class FormProfilNmt
         'trasa, dla której pobierane są wysokości - użytkownik może w tym czasie wskazać inny plik
         Dim trasa As Korytarz = _trasa
         Dim cts As New CancellationTokenSource()
+        Dim token = cts.Token
         _pobieranieCts = cts
         Dim postep = New Progress(Of Integer)(Sub(p)
-                                                  If Not Me.IsDisposed AndAlso prgNmt.Visible Then
+                                                  If Not token.IsCancellationRequested AndAlso Not Me.IsDisposed AndAlso prgNmt.Visible Then
                                                       prgNmt.Value = Math.Max(0, Math.Min(100, p))
                                                   End If
                                               End Sub)
         Try
-            Dim h = Await ProfilNmt.PobierzWysokosciAsync(punkty, cts.Token, postep)
-            If cts.IsCancellationRequested OrElse IsDisposed OrElse trasa IsNot _trasa Then Exit Sub
+            Dim h = Await ProfilNmt.PobierzWysokosciAsync(punkty, token, postep)
+            If token.IsCancellationRequested OrElse IsDisposed OrElse trasa IsNot _trasa Then Exit Sub
             _linieWysokosci.Clear()
             Dim offset = 0
             For Each l In trasa.Linie
@@ -114,13 +115,13 @@ Public Class FormProfilNmt
         Catch ex As OperationCanceledException
             ' Anulowano
         Catch ex As Exception
-            If Not IsDisposed AndAlso trasa Is _trasa Then
+            If Not token.IsCancellationRequested AndAlso Not IsDisposed AndAlso trasa Is _trasa Then
                 MessageBox.Show("Nie udało się pobrać danych wysokościowych z Geoportalu: " & OpisBledu.Z(ex), Text, MessageBoxButtons.OK, MessageBoxIcon.Warning)
             End If
         Finally
             If _pobieranieCts Is cts Then _pobieranieCts = Nothing
             cts.Dispose()
-            If Not IsDisposed Then
+            If Not IsDisposed AndAlso _pobieranieCts Is Nothing Then
                 btnNmt.Enabled = _trasa IsNot Nothing
                 prgNmt.Visible = False
             End If
@@ -129,7 +130,11 @@ Public Class FormProfilNmt
 
     Private Sub btnZapiszGpx_Click(sender As Object, e As EventArgs) Handles btnZapiszGpx.Click
         If _trasa Is Nothing OrElse _linieWysokosci.Count = 0 Then Exit Sub
-        Dim nazwaPliku = If(_trasa.Nazwa <> "", _trasa.Nazwa, "trasa") & "_nmt.gpx"
+        Dim bezpiecznaNazwa = If(_trasa.Nazwa, "").Trim()
+        For Each znak In System.IO.Path.GetInvalidFileNameChars()
+            bezpiecznaNazwa = bezpiecznaNazwa.Replace(znak, "_"c)
+        Next
+        Dim nazwaPliku = If(bezpiecznaNazwa <> "", bezpiecznaNazwa, "trasa") & "_nmt.gpx"
         dlgZapiszGpx.FileName = nazwaPliku
         If dlgZapiszGpx.ShowDialog(Me) = DialogResult.OK Then
             Try

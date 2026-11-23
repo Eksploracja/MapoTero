@@ -206,8 +206,10 @@ Public Class FormSkaleMapy
             If Not CBool(If(r.Cells("Uzyj").Value, False)) Then Continue For
             Dim piksel As Double, zOd As Double, zDo As Double
             If Not CzytajLiczbe(r.Cells("Piksel").Value, piksel) OrElse Not CzytajLiczbe(r.Cells("ZoomOd").Value, zOd) OrElse
-               Not CzytajLiczbe(r.Cells("ZoomDo").Value, zDo) Then
-                MessageBox.Show($"Skala {_wiersze(i).Stopien.Opis}: wpisz liczby w polach piksela i powiększeń.", Text, MessageBoxButtons.OK, MessageBoxIcon.Warning)
+               Not CzytajLiczbe(r.Cells("ZoomDo").Value, zDo) OrElse
+               Not Double.IsFinite(piksel) OrElse Not Double.IsFinite(zOd) OrElse Not Double.IsFinite(zDo) OrElse
+               zOd < 0 OrElse zOd > 22 OrElse zDo < 0 OrElse zDo > 22 Then
+                MessageBox.Show($"Skala {_wiersze(i).Stopien.Opis}: wpisz poprawne liczby w polach piksela i powiększeń (0–22).", Text, MessageBoxButtons.OK, MessageBoxIcon.Warning)
                 Exit Sub
             End If
             Dim w = _wiersze(i).Kopia()

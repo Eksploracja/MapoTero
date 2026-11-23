@@ -39,7 +39,17 @@ Namespace My
         Private Const MaksAwariiWSesji As Integer = 3
 
         Private Sub MyApplication_Startup(sender As Object, e As Global.Microsoft.VisualBasic.ApplicationServices.StartupEventArgs) Handles Me.Startup
+            If SilnikCli.CzyTrybCli(e.CommandLine) Then
+                Dim args = e.CommandLine.ToArray()
+                Dim adapter As New AdapterSesjiCli()
+                Dim kod = SilnikCli.Uruchom(args, adapter)
+                Environment.ExitCode = CInt(kod)
+                e.Cancel = True
+                Return
+            End If
+
             AddHandler AppDomain.CurrentDomain.UnhandledException, AddressOf AwariaWatkuTla
+            Global.MapoTero.OknaNaEkranie.Zarejestruj()
         End Sub
 
         ''' <summary>

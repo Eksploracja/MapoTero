@@ -27,7 +27,15 @@ Public NotInheritable Class OpisBledu
     ''' <summary>Opis błędu po polsku (bez kropki na końcu, gdy pochodzi z programu).</summary>
     Public Shared Function Z(ex As Exception) As String
         If ex Is Nothing Then Return "nieznany błąd"
-        If TypeOf ex Is AggregateException AndAlso ex.InnerException IsNot Nothing Then Return Z(ex.InnerException)
+        If TypeOf ex Is AggregateException Then
+            Dim agg = DirectCast(ex, AggregateException)
+            If agg.InnerExceptions.Count = 1 Then Return Z(agg.InnerException)
+            If Not String.IsNullOrWhiteSpace(agg.Message) AndAlso
+               Not agg.Message.StartsWith("One or more errors occurred", StringComparison.OrdinalIgnoreCase) Then
+                Return agg.Message
+            End If
+            If agg.InnerException IsNot Nothing Then Return Z(agg.InnerException)
+        End If
 
         If TypeOf ex Is UnauthorizedAccessException Then
             Return "brak uprawnień do pliku lub folderu (plik tylko do odczytu albo folder chroniony, np. Program Files)" & Sciezka(ex.Message)

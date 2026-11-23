@@ -30,6 +30,8 @@ Public Class WarstwaMapy
     Public Property ZMin As Integer?
     Public Property ZMax As Integer?
     Public Property Nakladka As Boolean?
+    ''' <summary>Maksymalny bezpieczny bok segmentu w pikselach (0 - brak ograniczenia).</summary>
+    Public Property MaksRozmiarSegmentu As Integer = 0
 
     Public Overrides Function ToString() As String
         Return If(Not String.IsNullOrWhiteSpace(Tytul), Tytul, Nazwa)
@@ -58,6 +60,8 @@ Public Class PlikWarstw
     Public Property Atrybucja As String = ""
     Public Property FormatObrazu As String = ""
     Public Property IgnorujSsl As Boolean
+    ''' <summary>Maksymalny bezpieczny bok segmentu w pikselach dla tego serwera (0 - brak ograniczenia/domyślny).</summary>
+    Public Property MaksRozmiarSegmentu As Integer = 0
     Public Property ZasiegGeo As ProstokatGeo?
 
     ''' <summary>Faktyczny typ usługi: jawny z pliku albo rozpoznany z adresu (XYZ/TMS przed WMTS).</summary>
@@ -168,6 +172,7 @@ Public Class PlikWarstw
             p.Atrybucja = TekstJson(root, "atrybucja")
             p.FormatObrazu = TekstJson(root, "format")
             p.IgnorujSsl = LogicznaJson(root, "ignorujSsl", False)
+            p.MaksRozmiarSegmentu = CalkowitaJson(root, "maksRozmiarSegmentu", CalkowitaJson(root, "limitSegmentu", 0))
 
             Dim subEl As JsonElement
             If PobierzWlasciwosc(root, "subdomeny", subEl) AndAlso subEl.ValueKind = JsonValueKind.Array Then
@@ -215,6 +220,7 @@ Public Class PlikWarstw
                     If PobierzWlasciwosc(item, "nakladka", nakEl) AndAlso (nakEl.ValueKind = JsonValueKind.True OrElse nakEl.ValueKind = JsonValueKind.False) Then
                         wm.Nakladka = nakEl.GetBoolean()
                     End If
+                    wm.MaksRozmiarSegmentu = CalkowitaJson(item, "maksRozmiarSegmentu", CalkowitaJson(item, "limitSegmentu", p.MaksRozmiarSegmentu))
                     p.Warstwy.Add(wm)
                 Next
             End If
@@ -302,9 +308,11 @@ Public Class PlikWarstw
             Return t = TypUslugiMapowej.Xyz OrElse t = TypUslugiMapowej.Tms OrElse
                    Not String.IsNullOrWhiteSpace(Tytul) OrElse
                    Subdomeny.Count > 0 OrElse Nakladka OrElse OdstepMs > 0 OrElse MaksWatkow > 0 OrElse
+                   MaksRozmiarSegmentu > 0 OrElse
                    RozmiarKafla <> 256 OrElse Referer <> "" OrElse Atrybucja <> "" OrElse
                    FormatObrazu <> "" OrElse IgnorujSsl OrElse ZasiegGeo.HasValue OrElse
                    Warstwy.Any(Function(w) w.ZMin.HasValue OrElse w.ZMax.HasValue OrElse w.Nakladka.HasValue OrElse
+                                           (w.MaksRozmiarSegmentu > 0 AndAlso w.MaksRozmiarSegmentu <> MaksRozmiarSegmentu) OrElse
                                            (Not String.IsNullOrWhiteSpace(w.Tytul) AndAlso Not String.Equals(w.Tytul, w.Nazwa, StringComparison.Ordinal)))
         End Get
     End Property
@@ -348,6 +356,7 @@ Public Class PlikWarstw
                 If Nakladka Then w.WriteBoolean("nakladka", True)
                 If MaksWatkow > 0 Then w.WriteNumber("maksWatkow", MaksWatkow)
                 If OdstepMs > 0 Then w.WriteNumber("odstepMs", OdstepMs)
+                If MaksRozmiarSegmentu > 0 Then w.WriteNumber("maksRozmiarSegmentu", MaksRozmiarSegmentu)
                 If Referer <> "" Then w.WriteString("referer", Referer)
                 If Atrybucja <> "" Then w.WriteString("atrybucja", Atrybucja)
                 If FormatObrazu <> "" Then w.WriteString("format", FormatObrazu)
@@ -372,6 +381,7 @@ Public Class PlikWarstw
                     If war.ZMin.HasValue Then w.WriteNumber("zMin", war.ZMin.Value)
                     If war.ZMax.HasValue Then w.WriteNumber("zMax", war.ZMax.Value)
                     If war.Nakladka.HasValue Then w.WriteBoolean("nakladka", war.Nakladka.Value)
+                    If war.MaksRozmiarSegmentu > 0 AndAlso war.MaksRozmiarSegmentu <> MaksRozmiarSegmentu Then w.WriteNumber("maksRozmiarSegmentu", war.MaksRozmiarSegmentu)
                     w.WriteEndObject()
                 Next
                 w.WriteEndArray()
@@ -396,13 +406,14 @@ Public Class PlikWarstw
             End If
         Next
         Dim male = czysta.ToLowerInvariant()
-        If male = "warstwy" OrElse male = "_archiwalne" OrElse male = "download" OrElse male = "conf" Then
+        If male = "warstwy" OrElse male = "_archiwalne" OrElse male = "download" OrElse male = "conf" OrElse male = "katalog" Then
             komunikatBledu = "Nazwa '" & czysta & "' jest zarezerwowana dla plików programu."
             Return False
         End If
         Dim zarezerwowaneDos As String() = {"con", "prn", "aux", "nul", "com1", "com2", "com3", "com4", "com5", "com6",
                                             "com7", "com8", "com9", "lpt1", "lpt2", "lpt3", "lpt4", "lpt5", "lpt6", "lpt7", "lpt8", "lpt9"}
-        If Array.IndexOf(zarezerwowaneDos, male) >= 0 Then
+        Dim bazaDos = male.Split("."c)(0)
+        If Array.IndexOf(zarezerwowaneDos, bazaDos) >= 0 Then
             komunikatBledu = "Nazwa '" & czysta & "' jest nazwą zarezerwowaną systemu Windows."
             Return False
         End If
@@ -475,5 +486,33 @@ Public Class PlikWarstw
             File.WriteAllLines(plikIndeksu, linie, Kodowanie())
         End If
     End Sub
+
+    ''' <summary>Sprawdza, czy plik tekstowy ma składnię definicji zbioru map (adres URL na początku lub JSON ze zbiorem).</summary>
+    Public Shared Function CzyWygladaNaZbiorMap(sciezka As String) As Boolean
+        Try
+            If Not File.Exists(sciezka) Then Return False
+            Dim fi As New FileInfo(sciezka)
+            If fi.Length = 0 OrElse fi.Length > 2 * 1024 * 1024 Then Return False
+            Dim bajty = File.ReadAllBytes(sciezka)
+            Dim pos As Integer = 0
+            If bajty.Length >= 3 AndAlso bajty(0) = &HEF AndAlso bajty(1) = &HBB AndAlso bajty(2) = &HBF Then
+                pos = 3
+            End If
+            While pos < bajty.Length AndAlso (bajty(pos) = 32 OrElse bajty(pos) = 9 OrElse bajty(pos) = 10 OrElse bajty(pos) = 13)
+                pos += 1
+            End While
+            If pos < bajty.Length AndAlso bajty(pos) = AscW("{"c) Then
+                Dim tekstUtf8 = Encoding.UTF8.GetString(bajty, pos, bajty.Length - pos)
+                Return tekstUtf8.Contains("""adres""") OrElse tekstUtf8.Contains("""typ""")
+            End If
+            Dim tekst = Kodowanie().GetString(bajty, pos, bajty.Length - pos)
+            Dim czytnik As New CzytnikPlikuVb(tekst)
+            If czytnik.KoniecPliku Then Return False
+            Dim pierwszyWpis = czytnik.Nastepne().Trim().ToLowerInvariant()
+            Return pierwszyWpis.StartsWith("http://") OrElse pierwszyWpis.StartsWith("https://")
+        Catch
+            Return False
+        End Try
+    End Function
 
 End Class

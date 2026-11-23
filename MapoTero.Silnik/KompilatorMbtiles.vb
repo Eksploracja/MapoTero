@@ -518,8 +518,17 @@ Public NotInheritable Class KompilatorMbtiles
         Dim lacznieKafli As Long = 0
         For p = minZ To maxZ
             Dim aktywne = WarstwyDlaPoziomu(warstwy, p)
-            If aktywne.Count > 0 OrElse opcje.WypelnijLukiWarstwaNizsza Then
-                lacznieKafli += WebMercator.LiczbaKafli(obszarGlobalny, p)
+            If aktywne.Count = 0 AndAlso opcje.WypelnijLukiWarstwaNizsza Then
+                For pn = p - 1 To 0 Step -1
+                    Dim nizsze = WarstwyDlaPoziomu(warstwy, pn)
+                    If nizsze.Count > 0 Then
+                        aktywne = nizsze
+                        Exit For
+                    End If
+                Next
+            End If
+            If aktywne.Count > 0 Then
+                lacznieKafli += WebMercator.LiczbaKafli(WyznaczObszarWgs84(aktywne), p)
             End If
         Next
         lacznieKafli = Math.Max(1, lacznieKafli)
@@ -564,12 +573,23 @@ Public NotInheritable Class KompilatorMbtiles
                 ' Sprawdzenie, czy ten poziom można wygenerować szybką piramidą 2x z poziomu poziom+1
                 ' (Możliwe tylko wtedy, gdy poziom+1 istnieje w bazy i ma ten sam zestaw warstw!)
                 Dim moznaPiramida As Boolean = False
-                If opcje.SzybkaPiramidaWPasmach AndAlso poziom < maxZ AndAlso Not warstwyEksportu.Any(Function(w) w.Zrodlo.PrzytnijDoObszaru) Then
+                If opcje.SzybkaPiramidaWPasmach AndAlso poziom < maxZ AndAlso Not warstwyEksportu.Any(Function(w) w.Zrodlo IsNot Nothing AndAlso w.Zrodlo.PrzytnijDoObszaru) Then
                     Dim warstwyWyzej = WarstwyDlaPoziomu(warstwy, poziom + 1)
-                    ' Porównanie zestawu warstw
-                    If warstwyWyzej.Count = aktywne.Count AndAlso
-                       warstwyWyzej.All(Function(w1) aktywne.Any(Function(w2) w2.Folder = w1.Folder)) Then
+                    ' Porównanie zestawu warstw (kolejność, folder, krycie, tryb mieszania i opcje pikseli)
+                    If warstwyWyzej.Count = aktywne.Count Then
                         moznaPiramida = True
+                        For iw = 0 To aktywne.Count - 1
+                            Dim w1 = warstwyWyzej(iw)
+                            Dim w2 = aktywne(iw)
+                            If Not String.Equals(w1.Folder, w2.Folder, StringComparison.OrdinalIgnoreCase) OrElse
+                               Math.Abs(w1.Krycie - w2.Krycie) > 0.0001 OrElse
+                               w1.TrybMieszania <> w2.TrybMieszania OrElse
+                               w1.BialePrzezroczyste <> w2.BialePrzezroczyste OrElse
+                               w1.OdcienieSzarosci <> w2.OdcienieSzarosci Then
+                                moznaPiramida = False
+                                Exit For
+                            End If
+                        Next
                     End If
                 End If
 
@@ -728,7 +748,10 @@ Public NotInheritable Class KompilatorMbtiles
                     g.Clear(Color.Transparent)
                     g.InterpolationMode = InterpolationMode.HighQualityBicubic
                     g.PixelOffsetMode = PixelOffsetMode.Half
-                    g.DrawImage(duzy, New Rectangle(0, 0, 256, 256), 0, 0, 512, 512, GraphicsUnit.Pixel)
+                    Using attr As New ImageAttributes()
+                        attr.SetWrapMode(WrapMode.TileFlipXY)
+                        g.DrawImage(duzy, New Rectangle(0, 0, 256, 256), 0, 0, 512, 512, GraphicsUnit.Pixel, attr)
+                    End Using
                 End Using
                 Return KodujKafel(maly, opcje)
             End Using

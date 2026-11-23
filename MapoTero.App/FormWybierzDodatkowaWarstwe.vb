@@ -41,6 +41,16 @@ Public Class FormWybierzDodatkowaWarstwe
         End Function
     End Class
 
+    Private _czcionkaPogrubiona As Font
+
+    Protected Overrides Sub Dispose(disposing As Boolean)
+        If disposing Then
+            _czcionkaPogrubiona?.Dispose()
+            _czcionkaPogrubiona = Nothing
+        End If
+        MyBase.Dispose(disposing)
+    End Sub
+
     Private Shared ReadOnly _znaneNazwySerwerow As New Dictionary(Of String, String)(StringComparer.OrdinalIgnoreCase) From {
         {"BDOO_WMTS", "Geoportal GUGiK – Baza Danych Obiektów Ogólnogeograficznych (BDOO)"},
         {"BDOT10k_WMTS", "Geoportal GUGiK – Baza Danych Obiektów Topograficznych (BDOT10k)"},
@@ -240,6 +250,7 @@ Public Class FormWybierzDodatkowaWarstwe
         _wszystkieElementy.Clear()
         If _zrodla Is Nothing Then Exit Sub
 
+        Dim katalog = KatalogWarstw.PobierzDomyslny()
         For Each kv In _zrodla
             Dim zbiorKlucz = kv.Key
             Dim plik = kv.Value
@@ -251,7 +262,7 @@ Public Class FormWybierzDodatkowaWarstwe
             For Each w In plik.Warstwy
                 If String.IsNullOrWhiteSpace(w.Nazwa) Then Continue For
 
-                Dim nazwaWyswietlana = KatalogWarstw.PobierzDomyslny().ZnajdzNazwe(czystyKlucz, w.Nazwa)
+                Dim nazwaWyswietlana = katalog.ZnajdzNazwe(czystyKlucz, w.Nazwa)
                 If String.IsNullOrWhiteSpace(nazwaWyswietlana) Then
                     nazwaWyswietlana = If(Not String.IsNullOrWhiteSpace(w.Tytul), w.Tytul, w.Nazwa)
                 End If
@@ -315,9 +326,12 @@ Public Class FormWybierzDodatkowaWarstwe
             Dim opisLiczby = If(pasujaceWarstwy.Count = 1, "1 warstwa", pasujaceWarstwy.Count & " warstwy")
             If pasujaceWarstwy.Count >= 5 Then opisLiczby = pasujaceWarstwy.Count & " warstw"
 
+            If _czcionkaPogrubiona Is Nothing Then
+                _czcionkaPogrubiona = New Font(_tvWarstwy.Font, FontStyle.Bold)
+            End If
             Dim nodeSerwer As New TreeNode(serwerNazwa & "  [" & opisLiczby & "]") With {
                 .Tag = Nothing,
-                .NodeFont = New Font(_tvWarstwy.Font, FontStyle.Bold),
+                .NodeFont = _czcionkaPogrubiona,
                 .ForeColor = Color.FromArgb(15, 45, 95)
             }
 

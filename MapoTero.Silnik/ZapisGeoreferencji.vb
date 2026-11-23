@@ -13,6 +13,7 @@
 'You should have received a copy of the GNU General Public License
 'along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+Imports System.IO
 Imports MapoTero.Core
 
 ''' <summary>
@@ -30,7 +31,7 @@ Public Module ZapisGeoreferencji
     ''' <param name="rozszerzenie">Rozszerzenie pliku obrazu (jpg, png, tif, gif).</param>
     Public Sub ZapiszPliki(obraz As ObrazGeoreferencyjny, folder As String, nazwa As String, rozszerzenie As String, opcje As OpcjeGeoreferencji)
         Dim kod = KodowanieSystemowe()
-        Dim baza As String = folder & nazwa
+        Dim baza As String = Path.Combine(folder, nazwa)
 
         If opcje.Map Then Georeferencja.Zapisz(baza & ".map", Georeferencja.MapOzi(obraz), kod)
         If opcje.Gmi Then Georeferencja.Zapisz(baza & ".gmi", Georeferencja.Gmi(obraz), kod)
@@ -51,7 +52,7 @@ Public Module ZapisGeoreferencji
     Public Function Obraz(uklad As UkladWspolrzednych, zasieg As Zasieg, szerokoscPx As Long, wysokoscPx As Long,
                           folder As String, nazwaPliku As String) As ObrazGeoreferencyjny
         Return New ObrazGeoreferencyjny With {.Uklad = uklad, .Zasieg = zasieg, .SzerokoscPx = szerokoscPx, .WysokoscPx = wysokoscPx,
-                                              .NazwaPliku = nazwaPliku, .SciezkaPliku = folder & nazwaPliku}
+                                              .NazwaPliku = nazwaPliku, .SciezkaPliku = Path.Combine(folder, nazwaPliku)}
     End Function
 
 End Module

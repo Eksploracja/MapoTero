@@ -103,6 +103,7 @@ Public Class FormKorektaFolderu
         Try
             If Directory.Exists(folder) Then
                 For Each plik In Directory.GetFiles(folder)
+                    If Path.GetFileName(plik).StartsWith(PrzedrostekArkusza, StringComparison.OrdinalIgnoreCase) Then Continue For
                     Dim ext = Path.GetExtension(plik).ToLowerInvariant()
                     If {".png", ".jpg", ".jpeg", ".tif", ".tiff"}.Contains(ext) Then
                         Using bmp = Image.FromFile(plik)

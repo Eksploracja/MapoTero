@@ -85,11 +85,11 @@ Public Class PanelKatalogSerwerow
     Private Sub UpewnijIstniejaceZbiory()
         If _istniejaceZbiory.Count > 0 Then Exit Sub
         Dim foldery As New List(Of String)()
-        If Not String.IsNullOrWhiteSpace(FolderWarstwProgramu) AndAlso Directory.Exists(FolderWarstwProgramu) Then
-            foldery.Add(FolderWarstwProgramu)
-        End If
         If Not String.IsNullOrWhiteSpace(FolderWarstwDanych) AndAlso Directory.Exists(FolderWarstwDanych) Then
             foldery.Add(FolderWarstwDanych)
+        End If
+        If Not String.IsNullOrWhiteSpace(FolderWarstwProgramu) AndAlso Directory.Exists(FolderWarstwProgramu) Then
+            foldery.Add(FolderWarstwProgramu)
         End If
 
         Dim dodaneNazwy As New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
@@ -250,8 +250,9 @@ Public Class PanelKatalogSerwerow
             Exit Function
         End If
 
-        _ctsZapytania = New CancellationTokenSource()
-        Dim token = _ctsZapytania.Token
+        Dim cts = New CancellationTokenSource()
+        _ctsZapytania = cts
+        Dim token = cts.Token
         UstawStanLadowania(True)
         lblStatus.ForeColor = Color.Black
         lblStatus.Text = If(tryb = TrybGeoportal,
@@ -305,7 +306,9 @@ Public Class PanelKatalogSerwerow
                 lblStatus.Text = "Błąd pobierania wykazu: " & MetadaneMapy.MaskujSekrety(OpisBledu.Z(ex))
             End If
         Finally
-            If Not IsDisposed Then UstawStanLadowania(False)
+            If _ctsZapytania Is cts Then _ctsZapytania = Nothing
+            cts.Dispose()
+            If Not IsDisposed AndAlso _ctsZapytania Is Nothing Then UstawStanLadowania(False)
         End Try
     End Function
 
@@ -323,8 +326,9 @@ Public Class PanelKatalogSerwerow
         If cmbZakresLokalny.SelectedIndex = 2 Then zakres = "gminy"
 
         AnulujAktywneZapytanie()
-        _ctsZapytania = New CancellationTokenSource()
-        Dim token = _ctsZapytania.Token
+        Dim cts = New CancellationTokenSource()
+        _ctsZapytania = cts
+        Dim token = cts.Token
 
         WyczyscSzczegoly()
         UstawStanLadowania(True)
@@ -368,7 +372,9 @@ Public Class PanelKatalogSerwerow
                 lblStatus.Text = "Błąd wyszukiwania w EZiUDP: " & MetadaneMapy.MaskujSekrety(OpisBledu.Z(ex))
             End If
         Finally
-            If Not IsDisposed Then UstawStanLadowania(False)
+            If _ctsZapytania Is cts Then _ctsZapytania = Nothing
+            cts.Dispose()
+            If Not IsDisposed AndAlso _ctsZapytania Is Nothing Then UstawStanLadowania(False)
         End Try
     End Function
 
@@ -704,8 +710,16 @@ Public Class PanelKatalogSerwerow
             If w IsNot Nothing Then url = w.Adres
         End If
         If Not String.IsNullOrWhiteSpace(url) Then
+            Dim uri As Uri = Nothing
+            If Not Uri.TryCreate(url, UriKind.Absolute, uri) OrElse
+               (Not String.Equals(uri.Scheme, Uri.UriSchemeHttp, StringComparison.OrdinalIgnoreCase) AndAlso
+                Not String.Equals(uri.Scheme, Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase)) Then
+                lblStatus.ForeColor = Color.Red
+                lblStatus.Text = "Dozwolone są wyłącznie adresy http:// lub https://."
+                Return
+            End If
             Try
-                Process.Start(New ProcessStartInfo(url) With {.UseShellExecute = True})
+                Process.Start(New ProcessStartInfo(uri.AbsoluteUri) With {.UseShellExecute = True})
             Catch ex As Exception
                 lblStatus.ForeColor = Color.Red
                 lblStatus.Text = "Nie udało się otworzyć adresu w przeglądarce: " & OpisBledu.Z(ex)

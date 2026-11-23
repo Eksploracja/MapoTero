@@ -205,6 +205,22 @@ Imports System.Threading.Tasks
             End Select
         End Function
 
+        Friend Shared Function NazwaDocelowaPliku(sciezkaZrodlowa As String, nazwaDocelowa As String) As String
+            Dim extZrodla As String = Path.GetExtension(sciezkaZrodlowa).ToLowerInvariant()
+            Dim surowaNazwa As String
+            If String.IsNullOrWhiteSpace(nazwaDocelowa) Then
+                surowaNazwa = Path.GetFileName(sciezkaZrodlowa)
+            Else
+                Dim przycieta = nazwaDocelowa.Trim()
+                If przycieta.EndsWith(extZrodla, StringComparison.OrdinalIgnoreCase) AndAlso przycieta.Length > extZrodla.Length Then
+                    surowaNazwa = przycieta
+                Else
+                    surowaNazwa = przycieta & extZrodla
+                End If
+            End If
+            Return SanityzujNazwePlikuGarmina(surowaNazwa)
+        End Function
+
         ''' <summary>
         ''' Kopiuje plik mapy na wybrany nośnik Garmina ze sprawdzeniem wolnego miejsca i raportowaniem postępu.
         ''' </summary>
@@ -236,8 +252,7 @@ Imports System.Threading.Tasks
             Dim katalogDocelowy As String = Path.Combine(dysk.SciezkaKataloguGarmin, podfolder)
             Directory.CreateDirectory(katalogDocelowy)
 
-            Dim bezpiecznaNazwa As String = SanityzujNazwePlikuGarmina(
-                If(String.IsNullOrWhiteSpace(nazwaDocelowa), infoPliku.Name, nazwaDocelowa))
+            Dim bezpiecznaNazwa As String = NazwaDocelowaPliku(sciezkaZrodlowa, nazwaDocelowa)
             'nie nadpisujemy mapy w odbiorniku: po zamianie polskich liter różne pliki („Łódź”, „Lodz”) mają tę samą nazwę
             Dim sciezkaDocelowa As String = WolnaNazwaPliku(katalogDocelowy, bezpiecznaNazwa)
             Dim sciezkaTmp As String = sciezkaDocelowa & ".tmp"
@@ -304,6 +319,7 @@ Imports System.Threading.Tasks
                 .Arguments = String.Format("/select,""{0}""", sciezkaPliku),
                 .UseShellExecute = True
             }
-            Process.Start(psi)
+            Using p = Process.Start(psi)
+            End Using
         End Sub
     End Class

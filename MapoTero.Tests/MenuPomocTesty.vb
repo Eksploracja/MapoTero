@@ -8,6 +8,7 @@ Imports System.Windows.Forms
 Imports Xunit
 
 ''' <summary>Układ menu Pomoc i przycisk wsparcia w oknie O programie.</summary>
+<Collection("OknaKreatora")>
 Public Class MenuPomocTesty
 
     Private Shared Sub WWatkuSta(akcja As Action)

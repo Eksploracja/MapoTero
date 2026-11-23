@@ -61,6 +61,7 @@ Public MustInherit Class ZapisRastra
 
     ''' <summary>Zapisuje kolejne wiersze: bufor RGB (RGBA) o długości liczbaWierszy * Szerokosc * Kanaly, wierszami od góry.</summary>
     Public Sub ZapiszWiersze(rgb() As Byte, liczbaWierszy As Integer)
+        If liczbaWierszy < 0 Then Throw New ArgumentOutOfRangeException(NameOf(liczbaWierszy))
         If Zapisane + liczbaWierszy > Wysokosc Then Throw New InvalidOperationException("Za dużo wierszy obrazu")
         ZapiszWierszeWewn(rgb, liczbaWierszy)
         Zapisane += liczbaWierszy
@@ -125,21 +126,27 @@ Public Class ZapisPng
     Public Sub New(sciezka As String, szerokosc As Integer, wysokosc As Integer, Optional kanaly As Integer = 3)
         MyBase.New(szerokosc, wysokosc, kanaly)
         _plik = New FileStream(sciezka, FileMode.Create, FileAccess.Write, FileShare.None, 1 << 16)
-        _plik.Write(New Byte() {137, 80, 78, 71, 13, 10, 26, 10}, 0, 8)
-        Dim ihdr(12) As Byte
-        ZapiszBE(ihdr, 0, CUInt(szerokosc))
-        ZapiszBE(ihdr, 4, CUInt(wysokosc))
-        ihdr(8) = 8   'głębia bitowa
-        ihdr(9) = CByte(If(kanaly = 4, 6, 2))   'RGBA albo RGB
-        ihdr(10) = 0 : ihdr(11) = 0 : ihdr(12) = 0
-        ZapiszFragment(_plik, "IHDR", ihdr, ihdr.Length)
+        Try
+            _plik.Write(New Byte() {137, 80, 78, 71, 13, 10, 26, 10}, 0, 8)
+            Dim ihdr(12) As Byte
+            ZapiszBE(ihdr, 0, CUInt(szerokosc))
+            ZapiszBE(ihdr, 4, CUInt(wysokosc))
+            ihdr(8) = 8   'głębia bitowa
+            ihdr(9) = CByte(If(kanaly = 4, 6, 2))   'RGBA albo RGB
+            ihdr(10) = 0 : ihdr(11) = 0 : ihdr(12) = 0
+            ZapiszFragment(_plik, "IHDR", ihdr, ihdr.Length)
 
-        _idat = New StrumienFragmentow(_plik, "IDAT")
-        'nagłówek zlib (deflate, okno 32 kB)
-        _idat.Write(New Byte() {&H78, &H9C}, 0, 2)
-        _deflate = New DeflateStream(_idat, CompressionLevel.Optimal, True)
-        _poprzedni = New Byte(szerokosc * kanaly - 1) {}
-        _wiersz = New Byte(szerokosc * kanaly) {}
+            _idat = New StrumienFragmentow(_plik, "IDAT")
+            'nagłówek zlib (deflate, okno 32 kB)
+            _idat.Write(New Byte() {&H78, &H9C}, 0, 2)
+            _deflate = New DeflateStream(_idat, CompressionLevel.Optimal, True)
+            _poprzedni = New Byte(szerokosc * kanaly - 1) {}
+            _wiersz = New Byte(szerokosc * kanaly) {}
+        Catch
+            _deflate?.Dispose()
+            _plik?.Dispose()
+            Throw
+        End Try
     End Sub
 
     Protected Overrides Sub ZapiszWierszeWewn(rgb() As Byte, liczbaWierszy As Integer)
@@ -173,6 +180,7 @@ Public Class ZapisPng
     End Sub
 
     Public Overrides Sub Zakoncz()
+        If _zakonczony Then Return
         If Zapisane <> Wysokosc Then Throw New InvalidOperationException("Nie zapisano wszystkich wierszy obrazu")
         _deflate.Dispose()
         Dim adler(3) As Byte
@@ -326,6 +334,7 @@ Public Class ZapisJpeg
 
     Private ReadOnly _plik As FileStream
     Private ReadOnly _jpeg As jpeg_compress_struct
+    Private ReadOnly _wierszBufor(0)() As Byte
     Private _zakonczony As Boolean
 
     Public Sub New(sciezka As String, szerokosc As Integer, wysokosc As Integer, jakosc As Integer)
@@ -334,25 +343,30 @@ Public Class ZapisJpeg
             Throw New ArgumentException("Format JPEG pozwala na obraz o boku najwyżej 65500 pikseli - wybierz GeoTIFF lub PNG")
         End If
         _plik = New FileStream(sciezka, FileMode.Create, FileAccess.Write, FileShare.None, 1 << 16)
-        _jpeg = New jpeg_compress_struct(New jpeg_error_mgr()) With {
-            .Image_width = szerokosc, .Image_height = wysokosc, .Input_components = 3, .In_color_space = J_COLOR_SPACE.JCS_RGB}
-        _jpeg.jpeg_set_defaults()
-        _jpeg.jpeg_set_quality(Math.Max(1, Math.Min(100, jakosc)), True)
-        _jpeg.jpeg_stdio_dest(_plik)
-        _jpeg.jpeg_start_compress(True)
+        Try
+            _jpeg = New jpeg_compress_struct(New jpeg_error_mgr()) With {
+                .Image_width = szerokosc, .Image_height = wysokosc, .Input_components = 3, .In_color_space = J_COLOR_SPACE.JCS_RGB}
+            _jpeg.jpeg_set_defaults()
+            _jpeg.jpeg_set_quality(Math.Max(1, Math.Min(100, jakosc)), True)
+            _jpeg.jpeg_stdio_dest(_plik)
+            _jpeg.jpeg_start_compress(True)
+            _wierszBufor(0) = New Byte(szerokosc * 3 - 1) {}
+        Catch
+            _plik?.Dispose()
+            Throw
+        End Try
     End Sub
 
     Protected Overrides Sub ZapiszWierszeWewn(rgb() As Byte, liczbaWierszy As Integer)
         Dim dl As Integer = Szerokosc * 3
-        Dim wiersz(0)() As Byte
-        wiersz(0) = New Byte(dl - 1) {}
         For w = 0 To liczbaWierszy - 1
-            Buffer.BlockCopy(rgb, w * dl, wiersz(0), 0, dl)
-            _jpeg.jpeg_write_scanlines(wiersz, 1)
+            Buffer.BlockCopy(rgb, w * dl, _wierszBufor(0), 0, dl)
+            _jpeg.jpeg_write_scanlines(_wierszBufor, 1)
         Next
     End Sub
 
     Public Overrides Sub Zakoncz()
+        If _zakonczony Then Return
         If Zapisane <> Wysokosc Then Throw New InvalidOperationException("Nie zapisano wszystkich wierszy obrazu")
         _jpeg.jpeg_finish_compress()
         _plik.Flush()
@@ -360,13 +374,13 @@ Public Class ZapisJpeg
     End Sub
 
     Public Overrides Sub Dispose()
-        If Not _zakonczony Then
+        If Not _zakonczony AndAlso _jpeg IsNot Nothing Then
             Try
                 _jpeg.jpeg_abort_compress()
             Catch
             End Try
         End If
-        _plik.Dispose()
+        _plik?.Dispose()
     End Sub
 
 End Class
@@ -696,7 +710,7 @@ Public Class ZapisGeoTiff
         If Zapisane <> Wysokosc Then Throw New InvalidOperationException($"Nie zapisano wszystkich wierszy obrazu ({Zapisane}/{Wysokosc}).")
         _zakonczony = True
 
-        _tiff.WriteDirectory()
+        If Not _tiff.WriteDirectory() Then Throw New IOException("Błąd zapisu katalogu głównego GeoTIFF.")
         _tiff.Close()
         _tiff.Dispose()
         _tiff = Nothing
@@ -723,6 +737,7 @@ Public Class ZapisGeoTiff
         Dim zrobione As Long = 0
         Dim ostatniProcent = -1
 
+        Dim rawBufor As Byte() = Array.Empty(Of Byte)()
         Using fs As New FileStream(_sciezka, FileMode.Open, FileAccess.ReadWrite, FileShare.None, 65536)
             Using writer As Tiff = Tiff.ClientOpen("GeoTiff", "a", fs, New TiffStream())
                 If writer Is Nothing Then Throw New IOException("Nie udało się otworzyć pliku GeoTIFF do dopisania piramid.")
@@ -733,11 +748,26 @@ Public Class ZapisGeoTiff
                         For y = 0 To p.H - 1 Step ROZMIAR_KAFLA
                             For x = 0 To p.W - 1 Step ROZMIAR_KAFLA
                                 Przerwanie.ThrowIfCancellationRequested()
-                                If reader.ReadTile(_kafelBufor, 0, x, y, 0, 0) < 0 Then
-                                    Throw New IOException($"Błąd odczytu kafelka piramidy ({x}, {y}).")
+                                Dim skopiowanoSurowo As Boolean = False
+                                If Not _kompresjaJpeg Then
+                                    Dim srcTile As Integer = reader.ComputeTile(x, y, 0, 0)
+                                    Dim surowyRozmiarLong As Long = reader.RawTileSize(srcTile)
+                                    If surowyRozmiarLong > 0 AndAlso surowyRozmiarLong <= Integer.MaxValue Then
+                                        Dim surowyRozmiar As Integer = CInt(surowyRozmiarLong)
+                                        If surowyRozmiar > rawBufor.Length Then ReDim rawBufor(surowyRozmiar - 1)
+                                        Dim odczytano As Integer = reader.ReadRawTile(srcTile, rawBufor, 0, surowyRozmiar)
+                                        If odczytano = surowyRozmiar AndAlso writer.WriteRawTile(writer.ComputeTile(x, y, 0, 0), rawBufor, 0, odczytano) >= 0 Then
+                                            skopiowanoSurowo = True
+                                        End If
+                                    End If
                                 End If
-                                If writer.WriteTile(_kafelBufor, 0, x, y, 0, 0) < 0 Then
-                                    Throw New IOException($"Błąd zapisu kafelka piramidy ({x}, {y}).")
+                                If Not skopiowanoSurowo Then
+                                    If reader.ReadTile(_kafelBufor, 0, x, y, 0, 0) < 0 Then
+                                        Throw New IOException($"Błąd odczytu kafelka piramidy ({x}, {y}).")
+                                    End If
+                                    If writer.WriteTile(_kafelBufor, 0, x, y, 0, 0) < 0 Then
+                                        Throw New IOException($"Błąd zapisu kafelka piramidy ({x}, {y}).")
+                                    End If
                                 End If
                                 zrobione += 1
                                 Dim procent = CInt(zrobione * 100 \ wszystkie)
@@ -747,7 +777,7 @@ Public Class ZapisGeoTiff
                                 End If
                             Next
                         Next
-                        writer.WriteDirectory()
+                        If Not writer.WriteDirectory() Then Throw New IOException("Błąd zapisu katalogu piramidy GeoTIFF.")
                     End Using
                 Next
             End Using
@@ -758,7 +788,7 @@ Public Class ZapisGeoTiff
         For Each p In _poziomy
             Try
                 If File.Exists(p.Sciezka) Then File.Delete(p.Sciezka)
-            Catch ex As IOException
+            Catch ex As Exception When TypeOf ex Is IOException OrElse TypeOf ex Is UnauthorizedAccessException
                 'plik tymczasowy zostaje, gdy inny program go trzyma - zapis mapy się nie przerywa
             End Try
         Next

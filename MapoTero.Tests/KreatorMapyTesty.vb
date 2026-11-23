@@ -40,8 +40,8 @@ Public Class KreatorMapyTesty
                     f.Show()
                     Application.DoEvents()
 
-                    ' Przycisk na pasku narzędziowym
-                    Dim btn = f.Controls.Find("btnKreator", True)
+                    ' Przycisk w belce pod mapą
+                    Dim btn = f.Controls.Find("btnKreatorDolny", True)
                     Assert.NotEmpty(btn)
                     Assert.True(btn(0).Visible)
 
@@ -152,26 +152,27 @@ Public Class KreatorMapyTesty
     End Sub
 
     <Fact>
-    Public Sub SiatkaPrzyciskow_GornyRzadPrzygotowanie_DolnyPobranePliki()
+    Public Sub PrzygotowanieMapyNaBelce_FolderIZarzadzaniePlikamiWZakladceSesji()
         UruchomWWatkuSta(
             Sub()
                 Using f As New Global.MapoTero.Form1()
                     f.Show()
                     Application.DoEvents()
                     Dim k = Function(nazwa As String) f.Controls.Find(nazwa, True)(0)
-                    Dim kreator = k("btnKreator"), siatka = k("btnZnaczniki"), nowa = k("btnNowaSesja")
-                    Dim folder = k("btnOtworzFolder"), usun = k("btnUsunPobrane"), scalanie = k("btnScalanie")
-                    'górny rząd: kreator, siatka, nowa sesja
-                    Assert.Equal(siatka.Top, kreator.Top)
-                    Assert.Equal(siatka.Top, nowa.Top)
-                    Assert.True(kreator.Right < siatka.Left AndAlso siatka.Right < nowa.Left)
-                    'dolny rząd: folder, usuwanie, scalanie - pod nimi, w tych samych kolumnach
-                    Assert.Equal(usun.Top, folder.Top)
-                    Assert.Equal(usun.Top, scalanie.Top)
-                    Assert.True(siatka.Bottom < usun.Top)
-                    Assert.Equal(kreator.Left, folder.Left)
-                    Assert.Equal(siatka.Left, usun.Left)
-                    Assert.Equal(nowa.Left, scalanie.Left)
+                    Dim kreator = k("btnKreatorDolny"), folderPobran = k("btnFolderPobran"), nowaSesja = k("btnNowaSesja")
+                    Assert.True(kreator.Visible)
+                    Assert.True(folderPobran.Visible)
+                    Assert.True(nowaSesja.Visible)
+                    'kreator stoi na pasku narzędzi obok przycisków sesji (dawniej osobno pod kartami belki)
+                    Assert.Same(folderPobran.Parent, kreator.Parent)
+                    Assert.Same(nowaSesja.Parent, kreator.Parent)
+
+                    Dim zakladki = DirectCast(k("zakladkiPracy"), TabControl)
+                    zakladki.SelectedIndex = 2
+                    Dim sesja = zakladki.SelectedTab
+                    Assert.Equal("Sesja", sesja.Text)
+                    Assert.True(sesja.Controls.Find("btnOtworzFolderDolny", True)(0).Visible)
+                    Assert.True(sesja.Controls.Find("btnUsunPobrane", True)(0).Visible)
                     f.Close()
                 End Using
             End Sub)

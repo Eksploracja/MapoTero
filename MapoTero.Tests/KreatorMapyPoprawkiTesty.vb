@@ -209,10 +209,23 @@ Public Class KreatorMapyPoprawkiTesty
                         k.Show() : Application.DoEvents()
                         DoKroku4(k, "rbCelTelefon", "piesza_gory")
                         Assert.True(Kt(Of NumericUpDown)(k, "numRozmiarPiksela").Visible)
-                        Assert.True(Kt(Of GroupBox)(k, "grpSzczegolowosc").Bottom <= Kt(Of LinkLabel)(k, "lnkZaawansowane").Top)
-                        Assert.True(Kt(Of LinkLabel)(k, "lnkZaawansowane").Bottom <= Kt(Of GroupBox)(k, "grpZaawansowane").Top + 4)
+                        Assert.True(Kt(Of GroupBox)(k, "grpZaawansowane").Visible)
+                        Assert.True(Kt(Of GroupBox)(k, "grpSzczegolowosc").Bottom <= Kt(Of GroupBox)(k, "grpZaawansowane").Top)
                         Assert.True(Kt(Of GroupBox)(k, "grpZaawansowane").Bottom <= Kt(Of Panel)(k, "pnlKrok4").Height)
                         Assert.True(Kt(Of GroupBox)(k, "grpZapis").Bottom <= Kt(Of GroupBox)(k, "grpSzczegolowosc").Top)
+
+                        Dim chkKorekta = Kt(Of CheckBox)(k, "chkKorektaObrazu")
+                        Dim btnDostosuj = Kt(Of Button)(k, "btnDostosujKorekte")
+                        Assert.False(chkKorekta.Checked)
+                        Assert.False(btnDostosuj.Enabled)
+
+                        chkKorekta.Checked = True
+                        Application.DoEvents()
+                        Assert.True(btnDostosuj.Enabled)
+
+                        chkKorekta.Checked = False
+                        Application.DoEvents()
+                        Assert.False(btnDostosuj.Enabled)
                     End Using
                 End Using
             End Sub)

@@ -218,7 +218,7 @@ Public Class Korytarz
         Dim ci = CultureInfo.InvariantCulture
         For i = 0 To punkty.Count - 1
             Dim h = wysokosci(i)
-            If Double.IsNaN(h) OrElse h = 0.0 Then Continue For
+            If Double.IsNaN(h) Then Continue For
             Dim p = punkty(i)
             Dim ele = p.Elements().FirstOrDefault(Function(e) e.Name.LocalName = "ele")
             If ele IsNot Nothing Then
@@ -655,10 +655,10 @@ Public Class Korytarz
             sb.AppendLine("    <trkseg>")
             For j = 0 To l.Count - 1
                 Dim p = l(j)
-                Dim h = If(hList IsNot Nothing AndAlso j < hList.Count, hList(j), 0.0)
+                Dim h = If(hList IsNot Nothing AndAlso j < hList.Count, hList(j), Double.NaN)
                 sb.Append("      <trkpt lat=""").Append(p.Szerokosc.ToString("0.000000", ci)).
                    Append(""" lon=""").Append(p.Dlugosc.ToString("0.000000", ci)).Append(""">")
-                If Not Double.IsNaN(h) AndAlso h <> 0.0 Then
+                If Not Double.IsNaN(h) Then
                     sb.Append("<ele>").Append(h.ToString("0.0", ci)).Append("</ele>")
                 End If
                 sb.AppendLine("</trkpt>")

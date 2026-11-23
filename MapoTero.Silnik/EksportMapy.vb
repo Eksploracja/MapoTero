@@ -20,6 +20,7 @@ Imports System.Drawing.Imaging
 Imports System.IO
 Imports System.Runtime.InteropServices
 Imports System.Threading
+Imports System.Threading.Tasks
 Imports MapoTero.Core
 
 ''' <summary>
@@ -56,6 +57,7 @@ Public Class ZrodloSegmentow
     'numer stanu pamięci podręcznej - zmiana opcji w trakcie dekodowania segmentu unieważnia jego wynik
     Private _pokolenie As Integer
     Private ReadOnly _blokada As New Object()
+    Private ReadOnly _ostatniWatek As New ThreadLocal(Of Tuple(Of Long, Integer, Byte()))()
 
     Public Sub New(folder As String, prefiks As String, styl As StylNumeracji, rozszerzenie As String, siatka As Siatka,
                    Optional przytnijDoObszaru As Boolean = False, Optional maska As Func(Of Double, Double, Boolean) = Nothing)
@@ -87,6 +89,11 @@ Public Class ZrodloSegmentow
 
     Public ReadOnly Property PrzytnijDoObszaru As Boolean
     Public ReadOnly Property ZasiegMapy As Zasieg
+    Friend ReadOnly Property MaMaske As Boolean
+        Get
+            Return _maska IsNot Nothing
+        End Get
+    End Property
 
     Public ReadOnly Property Siatka As Siatka
         Get
@@ -152,7 +159,7 @@ Public Class ZrodloSegmentow
         _kolejnosc.Clear()
         _ostatniKlucz = -1
         _ostatnieDane = Nothing
-        _pokolenie += 1
+        Interlocked.Increment(_pokolenie)
     End Sub
 
     Friend Function SciezkaSegmentu(wiersz As Integer, kolumna As Integer) As String
@@ -266,15 +273,23 @@ Public Class ZrodloSegmentow
     ''' </summary>
     Friend Function Segment(wiersz As Integer, kolumna As Integer) As Byte()
         Dim klucz As Long = wiersz * 100000L + kolumna
+        Dim genStart As Integer = Volatile.Read(_pokolenie)
+        Dim thr = _ostatniWatek.Value
+        If thr IsNot Nothing AndAlso thr.Item1 = klucz AndAlso thr.Item2 = genStart Then Return thr.Item3
+
         Dim pokolenie As Integer, biale As Boolean, szare As Boolean
         SyncLock _blokada
-            If klucz = _ostatniKlucz Then Return _ostatnieDane
+            If klucz = _ostatniKlucz Then
+                _ostatniWatek.Value = Tuple.Create(klucz, _pokolenie, _ostatnieDane)
+                Return _ostatnieDane
+            End If
             Dim wezel As LinkedListNode(Of KeyValuePair(Of Long, Byte())) = Nothing
             If _pamiec.TryGetValue(klucz, wezel) Then
                 _kolejnosc.Remove(wezel)
                 _kolejnosc.AddFirst(wezel)
                 _ostatniKlucz = klucz
                 _ostatnieDane = wezel.Value.Value
+                _ostatniWatek.Value = Tuple.Create(klucz, _pokolenie, _ostatnieDane)
                 Return _ostatnieDane
             End If
             pokolenie = _pokolenie : biale = _bialePrzezroczyste : szare = _odcienieSzarosci
@@ -294,6 +309,7 @@ Public Class ZrodloSegmentow
             End If
             _ostatniKlucz = klucz
             _ostatnieDane = dane
+            _ostatniWatek.Value = Tuple.Create(klucz, pokolenie, dane)
         End SyncLock
         Return dane
     End Function
@@ -534,6 +550,7 @@ Public NotInheritable Class EksportMapy
     ''' <summary>Plan kafli KMZ dla zadania.</summary>
     Public Shared Function PlanKmz(z As ZadanieEksportu) As PlanKmz
         Dim obszar = ProstokatGeo.Wpisany(z.Uklad, z.Zrodlo.ZasiegMapy)
+        If Not obszar.Poprawny Then obszar = ProstokatGeo.Opisany(z.Uklad, z.Zrodlo.ZasiegMapy)
         'podział na tomy: plan w pełnej rozdzielczości (limit kafli dotyczy pojedynczego tomu, nie całej mapy) -
         'z limitem w planie rozdzielczość malała do MaksKafli i zawsze powstawał jeden tom
         Dim limit As Integer = If(z.Rodzaj = RodzajEksportu.KmzGarmin AndAlso Not z.PodzialNaTomy, z.MaksKafli, 0)
@@ -572,6 +589,30 @@ Public NotInheritable Class EksportMapy
             z.Plik = Path.Combine(roboczy, Path.GetFileName(docelowy))
             Eksportuj(z, postep, token)
             token.ThrowIfCancellationRequested()
+            If z.Rodzaj = RodzajEksportu.OruxMaps Then
+                If Not Directory.Exists(z.Plik) OrElse Not File.Exists(Path.Combine(z.Plik, MapaOruxMaps.NazwaBazy)) Then
+                    Throw New IOException("Eksport OruxMaps nie utworzył folderu mapy.")
+                End If
+                SQLiteConnection.ClearAllPools()
+                Dim kopiaOrux As String = Path.Combine(kopie, Path.GetFileName(docelowy))
+                Dim mialStary As Boolean = Directory.Exists(docelowy)
+                If mialStary Then
+                    Directory.CreateDirectory(kopie)
+                    Directory.Move(docelowy, kopiaOrux)
+                End If
+                Try
+                    Directory.Move(z.Plik, docelowy)
+                Catch
+                    If mialStary AndAlso Directory.Exists(kopiaOrux) AndAlso Not Directory.Exists(docelowy) Then
+                        Try
+                            Directory.Move(kopiaOrux, docelowy)
+                        Catch
+                        End Try
+                    End If
+                    Throw
+                End Try
+                Return {docelowy}
+            End If
             Dim pliki = Directory.GetFiles(roboczy).OrderBy(Function(p) p, StringComparer.OrdinalIgnoreCase).ToArray()
             Dim mapy = pliki.Where(Function(p) String.Equals(Path.GetExtension(p), Path.GetExtension(docelowy), StringComparison.OrdinalIgnoreCase)).
                 Select(Function(p) Path.Combine(folder, Path.GetFileName(p))).ToArray()
@@ -641,14 +682,16 @@ Public NotInheritable Class EksportMapy
         ElseIf z.Rodzaj = RodzajEksportu.Jnx Then
             If File.Exists(z.Plik) Then File.Delete(z.Plik)
             UsunPlikBazy(z.Plik & ".tmp_tiles")
-            If Not Directory.Exists(z.Plik) Then Exit Sub
-            UsunPlikBazy(Path.Combine(z.Plik, MapaOruxMaps.NazwaBazy))
-            For Each plik In Directory.GetFiles(z.Plik, "*" & MapaOruxMaps.RozszerzenieKalibracji)
-                File.Delete(plik)
-            Next
-            If Directory.GetFileSystemEntries(z.Plik).Length = 0 Then Directory.Delete(z.Plik)
+        ElseIf z.Rodzaj = RodzajEksportu.KmzGarmin OrElse z.Rodzaj = RodzajEksportu.Kmz Then
+            If File.Exists(z.Plik) Then File.Delete(z.Plik)
+            If z.PodzialNaTomy Then
+                For Each tom In IstniejaceTomyKmz(z.Plik)
+                    If File.Exists(tom) Then File.Delete(tom)
+                Next
+            End If
         ElseIf z.Piramida Then
             UsunPlikBazy(z.Plik)
+            UsunPlikBazy(z.Plik & ".tmp")
         ElseIf File.Exists(z.Plik) Then
             File.Delete(z.Plik)
         End If
@@ -803,13 +846,11 @@ Public NotInheritable Class EksportMapy
                                 mb = lb
                         End Select
 
-                        Dim tr As Double = mr * sa
-                        Dim tg As Double = mg * sa
-                        Dim tb As Double = mb * sa
-                        wr = tr + wr * (1 - sa)
-                        wg = tg + wg * (1 - sa)
-                        wb = tb + wb * (1 - sa)
-                        wa = sa + wa * (1 - sa)
+                        Dim nowyWa As Double = sa + wa * (1 - sa)
+                        wr = sa * (1 - wa) * lr + sa * wa * mr + (1 - sa) * wr
+                        wg = sa * (1 - wa) * lg + sa * wa * mg + (1 - sa) * wg
+                        wb = sa * (1 - wa) * lb + sa * wa * mb + (1 - sa) * wb
+                        wa = nowyWa
                     Else
                         ' Pierwsza widoczna warstwa (podkład) - zawsze rysowana normalnie
                         wr = sr : wg = sg : wb = sb : wa = sa
@@ -1065,6 +1106,51 @@ Public Shared Function NazwaPlikuTomu(sciezkaBazowa As String, numerTomu As Inte
         Return (a << 24) Or (nowyR << 16) Or (nowyG << 8) Or nowyB
     End Function
 
+    Friend Shared Function NalozPikselZTrybem(stary As Integer, r As Double, g As Double, b As Double, efA As Double, tryb As TrybMieszania) As Integer
+        If efA <= 0 Then Return stary
+        Dim da = ((stary >> 24) And &HFF) / 255.0
+        If da <= 0.001 OrElse tryb = TrybMieszania.Zwykly Then Return NalozPiksel(stary, r, g, b, efA)
+
+        Dim sa = Math.Min(1.0, efA)
+        Dim br = ((stary >> 16) And &HFF) / 255.0
+        Dim bg = ((stary >> 8) And &HFF) / 255.0
+        Dim bb = (stary And &HFF) / 255.0
+        Dim lr = Math.Max(0.0, Math.Min(1.0, r / 255.0))
+        Dim lg = Math.Max(0.0, Math.Min(1.0, g / 255.0))
+        Dim lb = Math.Max(0.0, Math.Min(1.0, b / 255.0))
+
+        Dim mr As Double, mg As Double, mb As Double
+        Select Case tryb
+            Case TrybMieszania.Mnozenie
+                mr = br * lr : mg = bg * lg : mb = bb * lb
+            Case TrybMieszania.Ciemniej
+                mr = Math.Min(br, lr) : mg = Math.Min(bg, lg) : mb = Math.Min(bb, lb)
+            Case TrybMieszania.Jasniej
+                mr = Math.Max(br, lr) : mg = Math.Max(bg, lg) : mb = Math.Max(bb, lb)
+            Case TrybMieszania.Ekran
+                mr = 1.0 - (1.0 - br) * (1.0 - lr)
+                mg = 1.0 - (1.0 - bg) * (1.0 - lg)
+                mb = 1.0 - (1.0 - bb) * (1.0 - lb)
+            Case TrybMieszania.Nakladka
+                mr = If(br < 0.5, 2.0 * br * lr, 1.0 - 2.0 * (1.0 - br) * (1.0 - lr))
+                mg = If(bg < 0.5, 2.0 * bg * lg, 1.0 - 2.0 * (1.0 - bg) * (1.0 - lg))
+                mb = If(bb < 0.5, 2.0 * bb * lb, 1.0 - 2.0 * (1.0 - bb) * (1.0 - lb))
+            Case TrybMieszania.RzezbaTerenu
+                Dim f = TrybMieszaniaRozszerzenia.WspolczynnikRzezby((lr + lg + lb) / 3.0)
+                mr = Math.Min(1.0, br * f)
+                mg = Math.Min(1.0, bg * f)
+                mb = Math.Min(1.0, bb * f)
+            Case Else
+                mr = lr : mg = lg : mb = lb
+        End Select
+
+        Dim oa As Double = sa + da * (1.0 - sa)
+        Dim wr As Double = sa * (1.0 - da) * lr + sa * da * mr + (1.0 - sa) * da * br
+        Dim wg As Double = sa * (1.0 - da) * lg + sa * da * mg + (1.0 - sa) * da * bg
+        Dim wb As Double = sa * (1.0 - da) * lb + sa * da * mb + (1.0 - sa) * da * bb
+        Return (CInt(Bajt(oa)) << 24) Or (CInt(Bajt(wr / oa)) << 16) Or (CInt(Bajt(wg / oa)) << 8) Or CInt(Bajt(wb / oa))
+    End Function
+
     ''' <summary>
     ''' Czy piksele warstwy można kopiować 1:1 do arkusza: ten sam układ, bok segmentu, liczba wierszy i kolumn, a także
     ''' ten sam narożnik siatki i rozmiar piksela. Dawniej porównywano tylko wymiary, więc nakładka o tych samych wymiarach,
@@ -1134,16 +1220,64 @@ Public Shared Function NazwaPlikuTomu(sciezkaBazowa As String, numerTomu As Inte
         Dim pikseleArgb(pas * szer - 1) As Integer
         Dim taSamaSiatka As New List(Of Boolean)
         For Each warstwa In warstwy
-            taSamaSiatka.Add(Not przycinany AndAlso TaSamaSiatkaPikseli(warstwa.Zrodlo.Siatka, warstwa.Uklad, s, z.Uklad))
+            taSamaSiatka.Add(Not przycinany AndAlso Not warstwa.Zrodlo.PrzytnijDoObszaru AndAlso Not warstwa.Zrodlo.MaMaske AndAlso
+                             TaSamaSiatkaPikseli(warstwa.Zrodlo.Siatka, warstwa.Uklad, s, z.Uklad))
         Next
 
         'nakładki wydruku: plik śladu czytany raz przed pętlą (dawniej osobno dla każdego pasa arkusza)
         Dim arkuszZakres As New ZakresArkusza With {
             .SzerokoscPx = szer, .WysokoscPx = wys,
-            .LewyEastingM = zasieg.YLewy, .GornyNorthingM = zasieg.XGora, .RozmiarPikselaM = pikselX}
+            .LewyEastingM = zasieg.YLewy, .GornyNorthingM = zasieg.XGora,
+            .RozmiarPikselaXM = pikselY, .RozmiarPikselaYM = pikselX}
         Dim segmentySladu As List(Of List(Of (Lon As Double, Lat As Double))) = Nothing
         If Not String.IsNullOrEmpty(z.PlikSladuWydruku) Then
             segmentySladu = RendererNakladekWydruku.WczytajSegmentySladu(z.PlikSladuWydruku)
+        End If
+
+        Dim transformacjaSiatki As Func(Of Double, Double, (E As Double, N As Double)) = Nothing
+        Dim zakresMetrowySiatki As Tuple(Of Double, Double, Double, Double) = Nothing
+        If z.SiatkaKilometrowa IsNot Nothing Then
+            Dim ukladSiatkiDocelowy As UkladWspolrzednych
+            Select Case z.SiatkaKilometrowa.UkladSiatki
+                Case UkladSiatkiWydruku.Utm33N : ukladSiatkiDocelowy = UkladWspolrzednych.Utm33N
+                Case UkladSiatkiWydruku.Utm34N : ukladSiatkiDocelowy = UkladWspolrzednych.Utm34N
+                Case UkladSiatkiWydruku.Utm35N : ukladSiatkiDocelowy = UkladWspolrzednych.Utm35N
+                Case UkladSiatkiWydruku.Pl2000Strefa5 : ukladSiatkiDocelowy = UkladWspolrzednych.PL2000Strefa5
+                Case UkladSiatkiWydruku.Pl2000Strefa6 : ukladSiatkiDocelowy = UkladWspolrzednych.PL2000Strefa6
+                Case UkladSiatkiWydruku.Pl2000Strefa7 : ukladSiatkiDocelowy = UkladWspolrzednych.PL2000Strefa7
+                Case UkladSiatkiWydruku.Pl2000Strefa8 : ukladSiatkiDocelowy = UkladWspolrzednych.PL2000Strefa8
+                Case Else : ukladSiatkiDocelowy = UkladWspolrzednych.PL1992
+            End Select
+
+            If z.Uklad.Geograficzny OrElse z.Uklad.Epsg <> ukladSiatkiDocelowy.Epsg Then
+                Dim uSiatki = ukladSiatkiDocelowy
+                transformacjaSiatki = Function(easting, northing)
+                                          Dim geo = uSiatki.DoWgs84(northing, easting)
+                                          Dim ark = z.Uklad.ZWgs84(geo)
+                                          Return (E:=ark.Y, N:=ark.X)
+                                      End Function
+
+                Dim naroznikiArk = {
+                    New PunktXY(zasieg.XGora, zasieg.YLewy),
+                    New PunktXY(zasieg.XGora, zasieg.YPrawy),
+                    New PunktXY(zasieg.XDol, zasieg.YPrawy),
+                    New PunktXY(zasieg.XDol, zasieg.YLewy),
+                    New PunktXY((zasieg.XGora + zasieg.XDol) / 2.0, zasieg.YLewy),
+                    New PunktXY((zasieg.XGora + zasieg.XDol) / 2.0, zasieg.YPrawy)
+                }
+                Dim minE As Double = Double.MaxValue, maxE As Double = Double.MinValue
+                Dim minN As Double = Double.MaxValue, maxN As Double = Double.MinValue
+                For Each nArk In naroznikiArk
+                    Dim geo = z.Uklad.DoWgs84(nArk)
+                    Dim wUk = uSiatki.ZWgs84(geo)
+                    If wUk.Y < minE Then minE = wUk.Y
+                    If wUk.Y > maxE Then maxE = wUk.Y
+                    If wUk.X < minN Then minN = wUk.X
+                    If wUk.X > maxN Then maxN = wUk.X
+                Next
+                Dim krok As Integer = If(z.SiatkaKilometrowa.KrokMetry > 0, z.SiatkaKilometrowa.KrokMetry, 1000)
+                zakresMetrowySiatki = Tuple.Create(minE - krok, maxE + krok, minN - krok, maxN + krok)
+            End If
         End If
 
         Dim plikTymczasowy As String = z.Plik & ".tmp"
@@ -1155,7 +1289,67 @@ Public Shared Function NazwaPlikuTomu(sciezkaBazowa As String, numerTomu As Inte
         Using zapis As ZapisRastra = If(trekBuddy, New ZapisKafliTrekBuddy(folderTb, nazwaTb, szer, wys, z.JakoscJpeg),
                                         ZapisRastra.Utworz(format, plikTymczasowy, szer, wys, z.JakoscJpeg, z.Uklad, zasieg, kanaly = 4, z.PiramidyGeoTiff))
             zapisTb = zapis
-            zapiszPas = Sub(b, k) zapis.ZapiszWiersze(b, k)
+            Dim maNakladkiWydruku As Boolean = z.SiatkaKilometrowa IsNot Nothing OrElse segmentySladu IsNot Nothing
+            Dim wierszDoNalozenia As Integer = 0
+            zapiszPas = Sub(b, k)
+                            If korekta IsNot Nothing AndAlso maNakladkiWydruku AndAlso k > 0 Then
+                                Using bmpPas As New Bitmap(szer, k, Imaging.PixelFormat.Format32bppArgb)
+                                    Dim bd = bmpPas.LockBits(New Rectangle(0, 0, szer, k), Imaging.ImageLockMode.WriteOnly, Imaging.PixelFormat.Format32bppArgb)
+                                    Try
+                                        Dim wierszBgra(szer * 4 - 1) As Byte
+                                        For yy = 0 To k - 1
+                                            Dim off = yy * szer * kanaly
+                                            For xx = 0 To szer - 1
+                                                Dim di = xx * 4
+                                                Dim si = off + xx * kanaly
+                                                wierszBgra(di) = b(si + 2)
+                                                wierszBgra(di + 1) = b(si + 1)
+                                                wierszBgra(di + 2) = b(si)
+                                                wierszBgra(di + 3) = If(kanaly = 4, b(si + 3), CByte(255))
+                                            Next
+                                            Marshal.Copy(wierszBgra, 0, IntPtr.Add(bd.Scan0, yy * bd.Stride), wierszBgra.Length)
+                                        Next
+                                    Finally
+                                        bmpPas.UnlockBits(bd)
+                                    End Try
+                                    Using g = Graphics.FromImage(bmpPas)
+                                        If z.SiatkaKilometrowa IsNot Nothing Then
+                                            RendererNakladekWydruku.RysujSiatkeKilometrowa(g, arkuszZakres, z.SiatkaKilometrowa, wierszDoNalozenia, transformacjaSiatki, zakresMetrowySiatki)
+                                        End If
+                                        If segmentySladu IsNot Nothing Then
+                                            Dim segs = segmentySladu
+                                            Dim przelicz As Func(Of Double, Double, PointF) =
+                                                Function(lon, lat)
+                                                    Dim xy = z.Uklad.ZWgs84(New PunktGeo(lat, lon))
+                                                    Return arkuszZakres.MetryNaPiksel(xy.Y, xy.X)
+                                                End Function
+                                            Dim styl = If(z.StylSladuWydruku, New StylSladuWydruku())
+                                            RendererNakladekWydruku.RysujSladNaArkuszu(g, segs, przelicz, styl, wierszDoNalozenia)
+                                        End If
+                                    End Using
+                                    Dim bdRead = bmpPas.LockBits(New Rectangle(0, 0, szer, k), Imaging.ImageLockMode.ReadOnly, Imaging.PixelFormat.Format32bppArgb)
+                                    Try
+                                        Dim wierszBgra(szer * 4 - 1) As Byte
+                                        For yy = 0 To k - 1
+                                            Marshal.Copy(IntPtr.Add(bdRead.Scan0, yy * bdRead.Stride), wierszBgra, 0, wierszBgra.Length)
+                                            Dim off = yy * szer * kanaly
+                                            For xx = 0 To szer - 1
+                                                Dim di = xx * 4
+                                                Dim si = off + xx * kanaly
+                                                b(si) = wierszBgra(di + 2)
+                                                b(si + 1) = wierszBgra(di + 1)
+                                                b(si + 2) = wierszBgra(di)
+                                                If kanaly = 4 Then b(si + 3) = wierszBgra(di + 3)
+                                            Next
+                                        Next
+                                    Finally
+                                        bmpPas.UnlockBits(bdRead)
+                                    End Try
+                                End Using
+                                wierszDoNalozenia += k
+                            End If
+                            zapis.ZapiszWiersze(b, k)
+                        End Sub
             'piramidy GeoTIFF dopisywane w Zakoncz dostają ostatnie 10% paska postępu i reagują na Przerwij
             Dim zapisGeoTiff = TryCast(zapis, ZapisGeoTiff)
             Dim udzialPiramid As Integer = If(zapisGeoTiff IsNot Nothing AndAlso zapisGeoTiff.MaPiramidy, 10, 0)
@@ -1198,40 +1392,40 @@ Public Shared Function NazwaPlikuTomu(sciezkaBazowa As String, numerTomu As Inte
                                     Dim efA As Double = (a / 255.0) * krycie
                                     If efA <= 0 Then Continue For
 
-                                    If iw = 0 AndAlso efA >= 0.999 Then
+                                    If iw = 0 AndAlso efA >= 0.999 AndAlso warstwa.TrybMieszania = TrybMieszania.Zwykly Then
                                         pikseleArgb(idxCel + x) = (CInt(a) << 24) Or (CInt(r) << 16) Or (CInt(g) << 8) Or b
                                     Else
-                                        pikseleArgb(idxCel + x) = NalozPiksel(pikseleArgb(idxCel + x), r, g, b, efA)
+                                        pikseleArgb(idxCel + x) = NalozPikselZTrybem(pikseleArgb(idxCel + x), r, g, b, efA, warstwa.TrybMieszania)
                                     End If
                                 Next
                             Next
                         Next
                     Else
+                        Dim wierszPasaStart As Integer = (w - 1) * bok + y0
+                        Dim siatkaPasa As SiatkaPrzeliczen = If(warstwa.Uklad.Epsg <> z.Uklad.Epsg,
+                            New SiatkaPrzeliczen(szer, n, 16,
+                                Function(px, py) warstwa.Uklad.ZWgs84(z.Uklad.DoWgs84(New PunktXY(zasieg.XGora - (wierszPasaStart + py) * pikselX, zasieg.YLewy + px * pikselY)))),
+                            Nothing)
                         For y = 0 To n - 1
-                            Dim pyWiersz = (w - 1) * bok + y0 + y
+                            Dim pyWiersz = wierszPasaStart + y
                             Dim pX = zasieg.XGora - (pyWiersz + 0.5) * pikselX
                             Dim idxCel = y * szer
                             For x = 0 To szer - 1
-                                Dim pY = zasieg.YLewy + (x + 0.5) * pikselY
-                                Dim pWarstwy As PunktXY
-                                If warstwa.Uklad.Epsg = z.Uklad.Epsg Then
-                                    pWarstwy = New PunktXY(pX, pY)
-                                Else
-                                    Dim geo = z.Uklad.DoWgs84(New PunktXY(pX, pY))
-                                    pWarstwy = warstwa.Uklad.ZWgs84(geo)
-                                End If
+                                Dim pWarstwy As PunktXY = If(siatkaPasa IsNot Nothing, siatkaPasa.Punkt(x + 0.5, y + 0.5), New PunktXY(pX, zasieg.YLewy + (x + 0.5) * pikselY))
                                 Dim r, g, b, a As Double
                                 If zr.Probka(pWarstwy.X, pWarstwy.Y, r, g, b, a) AndAlso a > 0 Then
                                     saPiksele = True
+                                    Dim skalaA As Double = 255.0 / a
+                                    r *= skalaA : g *= skalaA : b *= skalaA
                                     Dim efA As Double = (a / 255.0) * krycie
-                                    pikseleArgb(idxCel + x) = NalozPiksel(pikseleArgb(idxCel + x), r, g, b, efA)
+                                    pikseleArgb(idxCel + x) = NalozPikselZTrybem(pikseleArgb(idxCel + x), r, g, b, efA, warstwa.TrybMieszania)
                                 End If
                             Next
                         Next
                     End If
                 Next
 
-                If z.SiatkaKilometrowa IsNot Nothing OrElse segmentySladu IsNot Nothing Then
+                If korekta Is Nothing AndAlso maNakladkiWydruku Then
                     Dim offsetPasaY As Integer = (w - 1) * bok + y0
                     Using bmpPas As New Bitmap(szer, n, Imaging.PixelFormat.Format32bppArgb)
                         Dim bd = bmpPas.LockBits(New Rectangle(0, 0, szer, n), Imaging.ImageLockMode.WriteOnly, Imaging.PixelFormat.Format32bppArgb)
@@ -1240,7 +1434,7 @@ Public Shared Function NazwaPlikuTomu(sciezkaBazowa As String, numerTomu As Inte
 
                         Using g = Graphics.FromImage(bmpPas)
                             If z.SiatkaKilometrowa IsNot Nothing Then
-                                RendererNakladekWydruku.RysujSiatkeKilometrowa(g, arkuszZakres, z.SiatkaKilometrowa, offsetPasaY)
+                                RendererNakladekWydruku.RysujSiatkeKilometrowa(g, arkuszZakres, z.SiatkaKilometrowa, offsetPasaY, transformacjaSiatki, zakresMetrowySiatki)
                             End If
                             If segmentySladu IsNot Nothing Then
                                 Dim segs = segmentySladu
@@ -1326,62 +1520,135 @@ Public Shared Function NazwaPlikuTomu(sciezkaBazowa As String, numerTomu As Inte
     End Function
 
     Private Shared Sub EksportPiramidy(z As ZadanieEksportu, postep As IProgress(Of Integer), token As CancellationToken)
-        UsunWynik(z)
+        Dim plikDocelowy As String = z.Plik
+        Dim uzyjPlikuTmp As Boolean = (z.Rodzaj <> RodzajEksportu.OruxMaps AndAlso z.Rodzaj <> RodzajEksportu.Jnx)
+        Dim plikRoboczy As String = If(uzyjPlikuTmp, plikDocelowy & ".tmp", plikDocelowy)
+        If Not uzyjPlikuTmp Then UsunWynik(z)
         Dim obszar = ObszarKafli(z)
         Dim wszystkie As Long = Math.Max(1, LiczbaKafliMBTiles(z))
         Dim gotowe As Long = 0
         Dim zapisane As Long = 0
         Dim srodekSz As Double = (obszar.Polnoc + obszar.Poludnie) / 2
+        Dim po As New ParallelOptions With {.CancellationToken = token, .MaxDegreeOfParallelism = Environment.ProcessorCount}
+        Const RozmiarPaczki As Integer = 64
 
-        Using m = UtworzMagazyn(z, obszar)
-            ' Przycięte mapy renderujemy w każdym zoomie, bo pomniejszanie kafli rozmywa granicę maski. Mapa wieloskalowa
-            ' (ZrodlaPoziomow) też - pomniejszony kafel szczegółowej skali nie jest mapą skali przeglądowej.
-            Dim zmax As Integer = z.PoziomMax
-            Dim minBezposredni = If(z.Zrodlo.PrzytnijDoObszaru OrElse z.ZrodlaPoziomow.Count > 0, z.PoziomMin, zmax)
+        z.Plik = plikRoboczy
+        Try
+            Using m = UtworzMagazyn(z, obszar)
+                ' Przycięte mapy renderujemy w każdym zoomie, bo pomniejszanie kafli rozmywa granicę maski. Mapa wieloskalowa
+                ' (ZrodlaPoziomow) też - pomniejszony kafel szczegółowej skali nie jest mapą skali przeglądowej.
+                Dim zmax As Integer = z.PoziomMax
+                Dim minBezposredni = If(z.Zrodlo.PrzytnijDoObszaru OrElse z.ZrodlaPoziomow.Count > 0, z.PoziomMin, zmax)
 
-            For poziom = zmax To z.PoziomMin Step -1
-                Dim rp = WebMercator.ZakresKafli(obszar, poziom)
-                Dim warstwy = z.WarstwyRenderowania(poziom)
-                If warstwy Is Nothing Then
-                    ' poziom poza planem skal - nie trafia do pliku
-                    gotowe += CLng(rp.Item3 - rp.Item1 + 1) * (rp.Item4 - rp.Item2 + 1)
-                    Continue For
-                End If
-                Dim nadprobkowanie = LiczbaProbek(warstwy, WebMercator.RozmiarPiksela(srodekSz, poziom))
-                m.RozpocznijPoziom(poziom)
-                For ty = rp.Item2 To rp.Item4
-                    For tx = rp.Item1 To rp.Item3
+                For poziom = zmax To z.PoziomMin Step -1
+                    Dim rp = WebMercator.ZakresKafli(obszar, poziom)
+                    Dim warstwy = z.WarstwyRenderowania(poziom)
+                    If warstwy Is Nothing Then
+                        ' poziom poza planem skal - nie trafia do pliku
+                        gotowe += CLng(rp.Item3 - rp.Item1 + 1) * (rp.Item4 - rp.Item2 + 1)
+                        Continue For
+                    End If
+                    Dim nadprobkowanie = LiczbaProbek(warstwy, WebMercator.RozmiarPiksela(srodekSz, poziom))
+                    Dim kaflePoziomu As New List(Of KafelXYZ)()
+                    For ty = rp.Item2 To rp.Item4
+                        For tx = rp.Item1 To rp.Item3
+                            kaflePoziomu.Add(New KafelXYZ(tx, ty, poziom))
+                        Next
+                    Next
+
+                    m.RozpocznijPoziom(poziom)
+                    For offset = 0 To kaflePoziomu.Count - 1 Step RozmiarPaczki
                         token.ThrowIfCancellationRequested()
-                        Dim k As New KafelXYZ(tx, ty, poziom)
-                        Dim dane As Byte() = Nothing
+                        Dim ile = Math.Min(RozmiarPaczki, kaflePoziomu.Count - offset)
+                        Dim daneKafli(ile - 1)() As Byte
+                        Dim biezacyOffset = offset
+
                         If poziom >= minBezposredni Then
-                            Using bmp = RenderujKafelZKorekta(warstwy, 256, 256, nadprobkowanie, PrzeliczenieKafla(tx * 256.0, ty * 256.0, poziom), z.KorekcjaMip)
-                                If bmp IsNot Nothing Then dane = Koduj(bmp, z.Png, z.JakoscJpeg)
-                            End Using
+                            Dim lokalneWarstwy = warstwy
+                            Dim lokalnyPoziom = poziom
+                            Dim lokalneNadpr = nadprobkowanie
+                            Dim lokalnaKorekta = z.KorekcjaMip
+                            Dim czyPng = z.Png
+                            Dim jakosc = z.JakoscJpeg
+                            Parallel.For(0, ile, po,
+                                Sub(i)
+                                    Dim k = kaflePoziomu(biezacyOffset + i)
+                                    Using bmp = RenderujKafelZKorekta(lokalneWarstwy, 256, 256, lokalneNadpr, PrzeliczenieKafla(k.X * 256.0, k.Y * 256.0, lokalnyPoziom), lokalnaKorekta)
+                                        If bmp IsNot Nothing Then daneKafli(i) = Koduj(bmp, czyPng, jakosc)
+                                    End Using
+                                End Sub)
                         Else
-                            dane = KafelZDzieci(m, k, z)
+                            Dim wyostrza As Boolean = z.KorekcjaMip IsNot Nothing AndAlso z.KorekcjaMip.Wyostrza
+                            Dim surowce(ile - 1)()() As Byte
+                            For i = 0 To ile - 1
+                                Dim k = kaflePoziomu(biezacyOffset + i)
+                                If wyostrza Then
+                                    surowce(i) = DzieciZSasiadami(k, Function(d) m.Odczytaj(d))
+                                Else
+                                    surowce(i) = {m.Odczytaj(New KafelXYZ(k.X * 2, k.Y * 2, k.Z + 1)),
+                                                  m.Odczytaj(New KafelXYZ(k.X * 2 + 1, k.Y * 2, k.Z + 1)),
+                                                  m.Odczytaj(New KafelXYZ(k.X * 2, k.Y * 2 + 1, k.Z + 1)),
+                                                  m.Odczytaj(New KafelXYZ(k.X * 2 + 1, k.Y * 2 + 1, k.Z + 1))}
+                                End If
+                            Next
+                            Dim lokalnaKorekta = z.KorekcjaMip
+                            Dim czyPng = z.Png
+                            Dim jakosc = z.JakoscJpeg
+                            Parallel.For(0, ile, po,
+                                Sub(i)
+                                    If wyostrza Then
+                                        Using bmp = KafelZDzieciWyostrzony(surowce(i), lokalnaKorekta)
+                                            If bmp IsNot Nothing Then daneKafli(i) = Koduj(bmp, czyPng, jakosc)
+                                        End Using
+                                    Else
+                                        daneKafli(i) = KafelZDzieciZBajtow(surowce(i), czyPng, jakosc)
+                                    End If
+                                End Sub)
                         End If
-                        If dane IsNot Nothing Then
-                            m.Zapisz(k, dane)
-                            zapisane += 1
-                        End If
-                        gotowe += 1
+
+                        For i = 0 To ile - 1
+                            Dim dane = daneKafli(i)
+                            If dane IsNot Nothing Then
+                                m.Zapisz(kaflePoziomu(biezacyOffset + i), dane)
+                                zapisane += 1
+                            End If
+                        Next
+                        gotowe += ile
                         postep?.Report(CInt(Math.Min(100, gotowe * 100 \ wszystkie)))
                     Next
+                    m.ZakonczPoziom()
                 Next
-                m.ZakonczPoziom()
-            Next
-            If z.Zrodlo.PrzytnijDoObszaru AndAlso zapisane = 0 Then
-                Throw New InvalidOperationException("Brak obrazu mapy w wybranym obszarze.")
+                If z.Zrodlo.PrzytnijDoObszaru AndAlso zapisane = 0 Then
+                    Throw New InvalidOperationException("Brak obrazu mapy w wybranym obszarze.")
+                End If
+                m.ZakonczZapis()
+            End Using
+            SQLiteConnection.ClearAllPools()
+            If uzyjPlikuTmp Then
+                UsunPlikBazy(plikDocelowy)
+                File.Move(plikRoboczy, plikDocelowy, overwrite:=True)
             End If
-            m.ZakonczZapis()
-        End Using
-        SQLiteConnection.ClearAllPools()
+        Catch
+            SQLiteConnection.ClearAllPools()
+            If uzyjPlikuTmp Then
+                Try
+                    UsunPlikBazy(plikRoboczy)
+                Catch
+                End Try
+            End If
+            Throw
+        Finally
+            z.Plik = plikDocelowy
+        End Try
     End Sub
 
     Private Shared Sub EksportPrzycietegoJnx(z As ZadanieEksportu, postep As IProgress(Of Integer), token As CancellationToken)
+        If z.PoziomMin > z.PoziomMax Then
+            Throw New ArgumentException("Nieprawidłowy zakres poziomów powiększenia JNX.")
+        End If
         ' JPEG w JNX nie obsługuje przezroczystości. Każdy poziom ma własną siatkę kafli wpisaną w obszar.
         Dim obszar = ProstokatGeo.Wpisany(z.Uklad, z.Zrodlo.ZasiegMapy)
+        If Not obszar.Poprawny Then obszar = ProstokatGeo.Opisany(z.Uklad, z.Zrodlo.ZasiegMapy)
         Dim szerokoscGeo = (obszar.Polnoc + obszar.Poludnie) / 2
         Dim poziomy As New List(Of PoziomJnx)
         Dim plany = Enumerable.Range(z.PoziomMin, z.PoziomMax - z.PoziomMin + 1).
@@ -1417,6 +1684,9 @@ Public Shared Function NazwaPlikuTomu(sciezkaBazowa As String, numerTomu As Inte
             Next
             If poziom.Kafle.Count > 0 Then poziomy.Add(poziom)
         Next
+        If poziomy.Count = 0 Then
+            Throw New InvalidOperationException("Brak kafli do zapisania w formacie JNX.")
+        End If
         ZapisJnx.Zapisz(z.Plik, z.Nazwa, z.KolejnoscRysowania, poziomy)
     End Sub
 
@@ -1470,7 +1740,10 @@ Public Shared Function NazwaPlikuTomu(sciezkaBazowa As String, numerTomu As Inte
                     g.Clear(Color.Transparent)
                     g.InterpolationMode = InterpolationMode.HighQualityBicubic
                     g.PixelOffsetMode = PixelOffsetMode.Half
-                    g.DrawImage(duzy, New Rectangle(0, 0, 512, 512), 0, 0, 1024, 1024, GraphicsUnit.Pixel)
+                    Using attr As New ImageAttributes()
+                        attr.SetWrapMode(WrapMode.TileFlipXY)
+                        g.DrawImage(duzy, New Rectangle(0, 0, 512, 512), 0, 0, 1024, 1024, GraphicsUnit.Pixel, attr)
+                    End Using
                 End Using
                 piksele = NakladanieObrazow.PikseleBitmapy(sredni)
             End Using
@@ -1484,13 +1757,24 @@ Public Shared Function NazwaPlikuTomu(sciezkaBazowa As String, numerTomu As Inte
     End Function
 
     Friend Shared Function KafelZDzieci(m As MagazynKafli, k As KafelXYZ, png As Boolean, jakoscJpeg As Integer) As Byte()
+        Dim dzieci(3)() As Byte
+        For dy = 0 To 1
+            For dx = 0 To 1
+                dzieci(dy * 2 + dx) = m.Odczytaj(New KafelXYZ(k.X * 2 + dx, k.Y * 2 + dy, k.Z + 1))
+            Next
+        Next
+        Return KafelZDzieciZBajtow(dzieci, png, jakoscJpeg)
+    End Function
+
+    Friend Shared Function KafelZDzieciZBajtow(dzieci As Byte()(), png As Boolean, jakoscJpeg As Integer) As Byte()
+        If dzieci Is Nothing OrElse dzieci.Length < 4 Then Return Nothing
         Using duzy As New Bitmap(512, 512, PixelFormat.Format32bppArgb)
             Dim jest As Boolean = False
             Using g = Graphics.FromImage(duzy)
                 g.Clear(Color.Transparent)
                 For dy = 0 To 1
                     For dx = 0 To 1
-                        Dim dane = m.Odczytaj(New KafelXYZ(k.X * 2 + dx, k.Y * 2 + dy, k.Z + 1))
+                        Dim dane = dzieci(dy * 2 + dx)
                         If dane Is Nothing Then Continue For
                         Using ms As New MemoryStream(dane), obraz = Image.FromStream(ms)
                             g.DrawImage(obraz, New Rectangle(dx * 256, dy * 256, 256, 256))
@@ -1505,7 +1789,10 @@ Public Shared Function NazwaPlikuTomu(sciezkaBazowa As String, numerTomu As Inte
                     g.Clear(Color.Transparent)
                     g.InterpolationMode = InterpolationMode.HighQualityBicubic
                     g.PixelOffsetMode = PixelOffsetMode.Half
-                    g.DrawImage(duzy, New Rectangle(0, 0, 256, 256), 0, 0, 512, 512, GraphicsUnit.Pixel)
+                    Using attr As New ImageAttributes()
+                        attr.SetWrapMode(WrapMode.TileFlipXY)
+                        g.DrawImage(duzy, New Rectangle(0, 0, 256, 256), 0, 0, 512, 512, GraphicsUnit.Pixel, attr)
+                    End Using
                 End Using
                 Return Koduj(maly, png, jakoscJpeg)
             End Using
@@ -1662,9 +1949,14 @@ Public MustInherit Class MagazynKafli
         EksportMapy.UsunPlikBazy(plikBazy)
         Polaczenie = New SQLiteConnection(EksportMapy.ParametryPolaczenia(plikBazy, "Wal"))
         Polaczenie.Open()
-        Wykonaj("PRAGMA synchronous = OFF;")
-        Wykonaj("PRAGMA cache_size = -64000;")
-        Wykonaj("PRAGMA journal_mode = WAL;")
+        Try
+            Wykonaj("PRAGMA synchronous = OFF;")
+            Wykonaj("PRAGMA cache_size = -64000;")
+            Wykonaj("PRAGMA journal_mode = WAL;")
+        Catch
+            Polaczenie.Dispose()
+            Throw
+        End Try
     End Sub
 
     ''' <summary>Przygotowanie poleceń zapisu i odczytu kafla (parametry @z, @x, @y, @d).</summary>
@@ -1785,28 +2077,33 @@ Public Class MagazynMBTiles
     ''' <param name="z">Zadanie eksportu albo Nothing (kompilator wieloskalowy, konwerter Ozi).</param>
     Public Sub New(plik As String, opis As OpisMbtiles, Optional z As ZadanieEksportu = Nothing)
         MyBase.New(plik, z)
-        Wykonaj("CREATE TABLE metadata (name text, value text);")
-        Wykonaj("CREATE TABLE tiles (zoom_level integer, tile_column integer, tile_row integer, tile_data blob);")
-        'indeks od początku: piramida odczytuje kafle poziomu wyżej zapytaniem SELECT - bez indeksu każde przeglądało
-        'całą tabelę i czas zapisu rósł z kwadratem liczby kafli
-        Wykonaj("CREATE UNIQUE INDEX tile_index ON tiles (zoom_level, tile_column, tile_row);")
-        'tabela oczekiwana przez bazy SQLite otwierane w Androidzie
-        Wykonaj("CREATE TABLE android_metadata (locale text);")
-        Wykonaj("INSERT INTO android_metadata VALUES ('pl_PL');")
-        Dim ci = Globalization.CultureInfo.InvariantCulture
-        Dim obszar = opis.Obszar
-        Dim srodekSz As Double = (obszar.Polnoc + obszar.Poludnie) / 2
-        Dim meta As New Dictionary(Of String, String) From {
-            {"name", opis.Nazwa}, {"type", If(opis.Nakladka, "overlay", "baselayer")}, {"version", opis.Wersja}, {"description", opis.Opis},
-            {"format", If(opis.Png, "png", "jpg")}, {"minzoom", opis.PoziomMin.ToString(ci)}, {"maxzoom", opis.PoziomMax.ToString(ci)},
-            {"bounds", String.Format(ci, "{0},{1},{2},{3}", obszar.Zachod, obszar.Poludnie, obszar.Wschod, obszar.Polnoc)},
-            {"center", String.Format(ci, "{0},{1},{2}", (obszar.Zachod + obszar.Wschod) / 2, srodekSz, opis.PoziomMax)}}
-        If Not String.IsNullOrEmpty(opis.Atrybucja) Then meta("attribution") = opis.Atrybucja
-        For Each m In meta
-            Wstaw("INSERT INTO metadata (name, value) VALUES (@0, @1);", m.Key, m.Value)
-        Next
-        Przygotuj("INSERT OR REPLACE INTO tiles (zoom_level, tile_column, tile_row, tile_data) VALUES (@z, @x, @y, @d);",
-                  "SELECT tile_data FROM tiles WHERE zoom_level = @z AND tile_column = @x AND tile_row = @y;")
+        Try
+            Wykonaj("CREATE TABLE metadata (name text, value text);")
+            Wykonaj("CREATE TABLE tiles (zoom_level integer, tile_column integer, tile_row integer, tile_data blob);")
+            'indeks od początku: piramida odczytuje kafle poziomu wyżej zapytaniem SELECT - bez indeksu każde przeglądało
+            'całą tabelę i czas zapisu rósł z kwadratem liczby kafli
+            Wykonaj("CREATE UNIQUE INDEX tile_index ON tiles (zoom_level, tile_column, tile_row);")
+            'tabela oczekiwana przez bazy SQLite otwierane w Androidzie
+            Wykonaj("CREATE TABLE android_metadata (locale text);")
+            Wykonaj("INSERT INTO android_metadata VALUES ('pl_PL');")
+            Dim ci = Globalization.CultureInfo.InvariantCulture
+            Dim obszar = opis.Obszar
+            Dim srodekSz As Double = (obszar.Polnoc + obszar.Poludnie) / 2
+            Dim meta As New Dictionary(Of String, String) From {
+                {"name", opis.Nazwa}, {"type", If(opis.Nakladka, "overlay", "baselayer")}, {"version", opis.Wersja}, {"description", opis.Opis},
+                {"format", If(opis.Png, "png", "jpg")}, {"minzoom", opis.PoziomMin.ToString(ci)}, {"maxzoom", opis.PoziomMax.ToString(ci)},
+                {"bounds", String.Format(ci, "{0},{1},{2},{3}", obszar.Zachod, obszar.Poludnie, obszar.Wschod, obszar.Polnoc)},
+                {"center", String.Format(ci, "{0},{1},{2}", (obszar.Zachod + obszar.Wschod) / 2, srodekSz, opis.PoziomMax)}}
+            If Not String.IsNullOrEmpty(opis.Atrybucja) Then meta("attribution") = opis.Atrybucja
+            For Each m In meta
+                Wstaw("INSERT INTO metadata (name, value) VALUES (@0, @1);", m.Key, m.Value)
+            Next
+            Przygotuj("INSERT OR REPLACE INTO tiles (zoom_level, tile_column, tile_row, tile_data) VALUES (@z, @x, @y, @d);",
+                      "SELECT tile_data FROM tiles WHERE zoom_level = @z AND tile_column = @x AND tile_row = @y;")
+        Catch
+            Dispose()
+            Throw
+        End Try
     End Sub
 
     Protected Overrides Function Indeks(k As KafelXYZ) As Tuple(Of Integer, Integer, Integer)
@@ -1835,108 +2132,112 @@ Public Class MagazynGeoPackage
     ''' <param name="z">Zadanie eksportu albo Nothing.</param>
     Public Sub New(plik As String, opis As OpisMbtiles, Optional z As ZadanieEksportu = Nothing)
         MyBase.New(plik, z)
+        Try
+            ' 1. Nagłówki binarne SQLite wymagane przez specyfikację OGC GeoPackage (Klauzula 1.1.1.1.1)
+            Wykonaj("PRAGMA application_id = 1196444487;") ' 0x47504B47 = 'GPKG'
+            Wykonaj("PRAGMA user_version = 10300;")        ' GeoPackage 1.3.0
 
-        ' 1. Nagłówki binarne SQLite wymagane przez specyfikację OGC GeoPackage (Klauzula 1.1.1.1.1)
-        Wykonaj("PRAGMA application_id = 1196444487;") ' 0x47504B47 = 'GPKG'
-        Wykonaj("PRAGMA user_version = 10300;")        ' GeoPackage 1.3.0
+            ' 2. Tabela gpkg_spatial_ref_sys i obowiązkowe rekordy OGC (Requirement 11) oraz EPSG:3857
+            Wykonaj("CREATE TABLE gpkg_spatial_ref_sys (" &
+                    "srs_name TEXT NOT NULL, " &
+                    "srs_id INTEGER NOT NULL PRIMARY KEY, " &
+                    "organization TEXT NOT NULL, " &
+                    "organization_coordsys_id INTEGER NOT NULL, " &
+                    "definition TEXT NOT NULL, " &
+                    "description TEXT);")
 
-        ' 2. Tabela gpkg_spatial_ref_sys i obowiązkowe rekordy OGC (Requirement 11) oraz EPSG:3857
-        Wykonaj("CREATE TABLE gpkg_spatial_ref_sys (" &
-                "srs_name TEXT NOT NULL, " &
-                "srs_id INTEGER NOT NULL PRIMARY KEY, " &
-                "organization TEXT NOT NULL, " &
-                "organization_coordsys_id INTEGER NOT NULL, " &
-                "definition TEXT NOT NULL, " &
-                "description TEXT);")
+            Wstaw("INSERT INTO gpkg_spatial_ref_sys VALUES (@0, @1, @2, @3, @4, @5);",
+                  "Undefined Cartesian SRS", 0, "NONE", 0, "undefined", "undefined cartesian coordinate reference system")
+            Wstaw("INSERT INTO gpkg_spatial_ref_sys VALUES (@0, @1, @2, @3, @4, @5);",
+                  "Undefined geographic SRS", -1, "NONE", -1, "undefined", "undefined geographic coordinate reference system")
+            Wstaw("INSERT INTO gpkg_spatial_ref_sys VALUES (@0, @1, @2, @3, @4, @5);",
+                  "WGS 84", 4326, "EPSG", 4326,
+                  "GEOGCS[""WGS 84"",DATUM[""WGS_1984"",SPHEROID[""WGS 84"",6378137,298.257223563]],PRIMEM[""Greenwich"",0],UNIT[""degree"",0.0174532925199433]]",
+                  "WGS 84")
+            Wstaw("INSERT INTO gpkg_spatial_ref_sys VALUES (@0, @1, @2, @3, @4, @5);",
+                  "WGS 84 / Pseudo-Mercator", 3857, "EPSG", 3857,
+                  "PROJCS[""WGS 84 / Pseudo-Mercator"",GEOGCS[""WGS 84"",DATUM[""WGS_1984"",SPHEROID[""WGS 84"",6378137,298.257223563,AUTHORITY[""EPSG"",""7030""]],AUTHORITY[""EPSG"",""6326""]],PRIMEM[""Greenwich"",0,AUTHORITY[""EPSG"",""8901""]],UNIT[""degree"",0.0174532925199433,AUTHORITY[""EPSG"",""9122""]],AUTHORITY[""EPSG"",""4326""]],PROJECTION[""Popular_Visualisation_Pseudo_Mercator""],PARAMETER[""latitude_of_origin"",0],PARAMETER[""central_meridian"",0],PARAMETER[""false_easting"",0],PARAMETER[""false_northing"",0],UNIT[""metre"",1,AUTHORITY[""EPSG"",""9001""]],AXIS[""Easting"",EAST],AXIS[""Northing"",NORTH],EXTENSION[""PROJ4"",""+proj=merc +a=6378137 +b=6378137 +lat_ts=0 +lon_0=0 +x_0=0 +y_0=0 +k=1 +units=m +nadgrids=@null +wktext +no_defs""],AUTHORITY[""EPSG"",""3857""]]",
+                  "Web Mercator")
 
-        Wstaw("INSERT INTO gpkg_spatial_ref_sys VALUES (@0, @1, @2, @3, @4, @5);",
-              "Undefined Cartesian SRS", 0, "NONE", 0, "undefined", "undefined cartesian coordinate reference system")
-        Wstaw("INSERT INTO gpkg_spatial_ref_sys VALUES (@0, @1, @2, @3, @4, @5);",
-              "Undefined geographic SRS", -1, "NONE", -1, "undefined", "undefined geographic coordinate reference system")
-        Wstaw("INSERT INTO gpkg_spatial_ref_sys VALUES (@0, @1, @2, @3, @4, @5);",
-              "WGS 84", 4326, "EPSG", 4326,
-              "GEOGCS[""WGS 84"",DATUM[""WGS_1984"",SPHEROID[""WGS 84"",6378137,298.257223563]],PRIMEM[""Greenwich"",0],UNIT[""degree"",0.0174532925199433]]",
-              "WGS 84")
-        Wstaw("INSERT INTO gpkg_spatial_ref_sys VALUES (@0, @1, @2, @3, @4, @5);",
-              "WGS 84 / Pseudo-Mercator", 3857, "EPSG", 3857,
-              "PROJCS[""WGS 84 / Pseudo-Mercator"",GEOGCS[""WGS 84"",DATUM[""WGS_1984"",SPHEROID[""WGS 84"",6378137,298.257223563]],PRIMEM[""Greenwich"",0],UNIT[""degree"",0.0174532925199433]],PROJECTION[""Mercator_1SP""],PARAMETER[""central_meridian"",0],PARAMETER[""scale_factor"",1],PARAMETER[""false_easting"",0],PARAMETER[""false_northing"",0],UNIT[""metre"",1]]",
-              "Web Mercator")
+            ' 3. Tabela gpkg_contents z rzeczywistym zakresem danych w metrach EPSG:3857
+            Wykonaj("CREATE TABLE gpkg_contents (" &
+                    "table_name TEXT NOT NULL PRIMARY KEY, " &
+                    "data_type TEXT NOT NULL, " &
+                    "identifier TEXT, " &
+                    "description TEXT DEFAULT '', " &
+                    "last_change DATETIME NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')), " &
+                    "min_x DOUBLE, " &
+                    "min_y DOUBLE, " &
+                    "max_x DOUBLE, " &
+                    "max_y DOUBLE, " &
+                    "srs_id INTEGER, " &
+                    "CONSTRAINT fk_gc_r_srs_id FOREIGN KEY (srs_id) REFERENCES gpkg_spatial_ref_sys(srs_id));")
 
-        ' 3. Tabela gpkg_contents z rzeczywistym zakresem danych w metrach EPSG:3857
-        Wykonaj("CREATE TABLE gpkg_contents (" &
-                "table_name TEXT NOT NULL PRIMARY KEY, " &
-                "data_type TEXT NOT NULL, " &
-                "identifier TEXT, " &
-                "description TEXT DEFAULT '', " &
-                "last_change DATETIME NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')), " &
-                "min_x DOUBLE, " &
-                "min_y DOUBLE, " &
-                "max_x DOUBLE, " &
-                "max_y DOUBLE, " &
-                "srs_id INTEGER, " &
-                "CONSTRAINT fk_gc_r_srs_id FOREIGN KEY (srs_id) REFERENCES gpkg_spatial_ref_sys(srs_id));")
+            Dim bb = DoMetrow3857(opis.Obszar)
+            'GeoPackage nie ma pola atrybucji (MBTiles ma metadane attribution), więc trafia ona do opisu warstwy
+            Dim opisWarstwy = If(opis.Opis, "")
+            If Not String.IsNullOrWhiteSpace(opis.Atrybucja) Then
+                opisWarstwy = If(opisWarstwy = "", "", opisWarstwy & " ") & "Źródło: " & opis.Atrybucja
+            End If
+            Wstaw("INSERT INTO gpkg_contents (table_name, data_type, identifier, description, min_x, min_y, max_x, max_y, srs_id) " &
+                  "VALUES (@0, @1, @2, @3, @4, @5, @6, @7, @8);",
+                  "tiles", "tiles", opis.Nazwa, opisWarstwy, bb.Item1, bb.Item2, bb.Item3, bb.Item4, 3857)
 
-        Dim bb = DoMetrow3857(opis.Obszar)
-        'GeoPackage nie ma pola atrybucji (MBTiles ma metadane attribution), więc trafia ona do opisu warstwy
-        Dim opisWarstwy = If(opis.Opis, "")
-        If Not String.IsNullOrWhiteSpace(opis.Atrybucja) Then
-            opisWarstwy = If(opisWarstwy = "", "", opisWarstwy & " ") & "Źródło: " & opis.Atrybucja
-        End If
-        Wstaw("INSERT INTO gpkg_contents (table_name, data_type, identifier, description, min_x, min_y, max_x, max_y, srs_id) " &
-              "VALUES (@0, @1, @2, @3, @4, @5, @6, @7, @8);",
-              "tiles", "tiles", opis.Nazwa, opisWarstwy, bb.Item1, bb.Item2, bb.Item3, bb.Item4, 3857)
+            ' 4. Tabela gpkg_tile_matrix_set: pełna globalna siatka Web Mercator (Requirement 37)
+            Wykonaj("CREATE TABLE gpkg_tile_matrix_set (" &
+                    "table_name TEXT NOT NULL PRIMARY KEY, " &
+                    "srs_id INTEGER NOT NULL, " &
+                    "min_x DOUBLE NOT NULL, " &
+                    "min_y DOUBLE NOT NULL, " &
+                    "max_x DOUBLE NOT NULL, " &
+                    "max_y DOUBLE NOT NULL, " &
+                    "CONSTRAINT fk_gtms_table_name FOREIGN KEY (table_name) REFERENCES gpkg_contents(table_name), " &
+                    "CONSTRAINT fk_gtms_srs FOREIGN KEY (srs_id) REFERENCES gpkg_spatial_ref_sys(srs_id));")
 
-        ' 4. Tabela gpkg_tile_matrix_set: pełna globalna siatka Web Mercator (Requirement 37)
-        Wykonaj("CREATE TABLE gpkg_tile_matrix_set (" &
-                "table_name TEXT NOT NULL PRIMARY KEY, " &
-                "srs_id INTEGER NOT NULL, " &
-                "min_x DOUBLE NOT NULL, " &
-                "min_y DOUBLE NOT NULL, " &
-                "max_x DOUBLE NOT NULL, " &
-                "max_y DOUBLE NOT NULL, " &
-                "CONSTRAINT fk_gtms_table_name FOREIGN KEY (table_name) REFERENCES gpkg_contents(table_name), " &
-                "CONSTRAINT fk_gtms_srs FOREIGN KEY (srs_id) REFERENCES gpkg_spatial_ref_sys(srs_id));")
+            Wstaw("INSERT INTO gpkg_tile_matrix_set VALUES (@0, @1, @2, @3, @4, @5);",
+                  "tiles", 3857, -Granica3857, -Granica3857, Granica3857, Granica3857)
 
-        Wstaw("INSERT INTO gpkg_tile_matrix_set VALUES (@0, @1, @2, @3, @4, @5);",
-              "tiles", 3857, -Granica3857, -Granica3857, Granica3857, Granica3857)
+            ' 5. Tabela gpkg_tile_matrix ze zdefiniowanymi poziomami powiększenia (Requirement 41)
+            Wykonaj("CREATE TABLE gpkg_tile_matrix (" &
+                    "table_name TEXT NOT NULL, " &
+                    "zoom_level INTEGER NOT NULL, " &
+                    "matrix_width INTEGER NOT NULL, " &
+                    "matrix_height INTEGER NOT NULL, " &
+                    "tile_width INTEGER NOT NULL, " &
+                    "tile_height INTEGER NOT NULL, " &
+                    "pixel_x_size DOUBLE NOT NULL, " &
+                    "pixel_y_size DOUBLE NOT NULL, " &
+                    "PRIMARY KEY (table_name, zoom_level), " &
+                    "CONSTRAINT fk_gtm_table_name FOREIGN KEY (table_name) REFERENCES gpkg_contents(table_name));")
 
-        ' 5. Tabela gpkg_tile_matrix ze zdefiniowanymi poziomami powiększenia (Requirement 41)
-        Wykonaj("CREATE TABLE gpkg_tile_matrix (" &
-                "table_name TEXT NOT NULL, " &
-                "zoom_level INTEGER NOT NULL, " &
-                "matrix_width INTEGER NOT NULL, " &
-                "matrix_height INTEGER NOT NULL, " &
-                "tile_width INTEGER NOT NULL, " &
-                "tile_height INTEGER NOT NULL, " &
-                "pixel_x_size DOUBLE NOT NULL, " &
-                "pixel_y_size DOUBLE NOT NULL, " &
-                "PRIMARY KEY (table_name, zoom_level), " &
-                "CONSTRAINT fk_gtm_table_name FOREIGN KEY (table_name) REFERENCES gpkg_contents(table_name));")
+            Dim obwod = 2.0 * Granica3857
+            For zoom = Math.Max(0, Math.Min(opis.PoziomMin, opis.PoziomMax)) To Math.Min(22, Math.Max(opis.PoziomMin, opis.PoziomMax))
+                Dim n = 1L << zoom
+                Dim piksel = obwod / (256.0 * n)
+                Wstaw("INSERT INTO gpkg_tile_matrix VALUES (@0, @1, @2, @3, @4, @5, @6, @7);",
+                      "tiles", zoom, n, n, 256, 256, piksel, piksel)
+            Next
 
-        Dim obwod = 2.0 * Granica3857
-        For zoom = opis.PoziomMin To opis.PoziomMax
-            Dim n = 1L << zoom
-            Dim piksel = obwod / (256.0 * n)
-            Wstaw("INSERT INTO gpkg_tile_matrix VALUES (@0, @1, @2, @3, @4, @5, @6, @7);",
-                  "tiles", zoom, n, n, 256, 256, piksel, piksel)
-        Next
+            ' 6. Tabela kafli z kluczem głównym id (Requirement 34 i 35)
+            Wykonaj("CREATE TABLE tiles (" &
+                    "id INTEGER PRIMARY KEY AUTOINCREMENT, " &
+                    "zoom_level INTEGER NOT NULL, " &
+                    "tile_column INTEGER NOT NULL, " &
+                    "tile_row INTEGER NOT NULL, " &
+                    "tile_data BLOB NOT NULL, " &
+                    "UNIQUE (zoom_level, tile_column, tile_row));")
 
-        ' 6. Tabela kafli z kluczem głównym id (Requirement 34 i 35)
-        Wykonaj("CREATE TABLE tiles (" &
-                "id INTEGER PRIMARY KEY AUTOINCREMENT, " &
-                "zoom_level INTEGER NOT NULL, " &
-                "tile_column INTEGER NOT NULL, " &
-                "tile_row INTEGER NOT NULL, " &
-                "tile_data BLOB NOT NULL, " &
-                "UNIQUE (zoom_level, tile_column, tile_row));")
+            ' Tabela android_metadata dla bazy SQLite otwieranej przez Androida (dodatkowe tabele są dozwolone w GeoPackage)
+            Wykonaj("CREATE TABLE android_metadata (locale text);")
+            Wykonaj("INSERT INTO android_metadata VALUES ('pl_PL');")
 
-        ' Tabela android_metadata dla bazy SQLite otwieranej przez Androida (dodatkowe tabele są dozwolone w GeoPackage)
-        Wykonaj("CREATE TABLE android_metadata (locale text);")
-        Wykonaj("INSERT INTO android_metadata VALUES ('pl_PL');")
-
-        ' Przygotowanie poleceń zapisu i odczytu kafli
-        Przygotuj("INSERT OR REPLACE INTO tiles (zoom_level, tile_column, tile_row, tile_data) VALUES (@z, @x, @y, @d);",
-                  "SELECT tile_data FROM tiles WHERE zoom_level = @z AND tile_column = @x AND tile_row = @y;")
+            ' Przygotowanie poleceń zapisu i odczytu kafli
+            Przygotuj("INSERT OR REPLACE INTO tiles (zoom_level, tile_column, tile_row, tile_data) VALUES (@z, @x, @y, @d);",
+                      "SELECT tile_data FROM tiles WHERE zoom_level = @z AND tile_column = @x AND tile_row = @y;")
+        Catch
+            Dispose()
+            Throw
+        End Try
     End Sub
 
     Private Shared Function DoMetrow3857(p As ProstokatGeo) As Tuple(Of Double, Double, Double, Double)
@@ -1966,13 +2267,18 @@ Friend Class MagazynSQLiteDB
 
     Public Sub New(z As ZadanieEksportu)
         MyBase.New(z.Plik, z)
-        Wykonaj("CREATE TABLE tiles (x int, y int, z int, s int, image blob, PRIMARY KEY (x, y, z, s));")
-        Wykonaj("CREATE TABLE info (maxzoom int, minzoom int, tilenumbering text, tilesize int, ellipsoid int, inverted_y int);")
-        'tabela wymagana przez bazy SQLite otwierane w Androidzie bez prawa zapisu
-        Wykonaj("CREATE TABLE android_metadata (locale text);")
-        Wykonaj("INSERT INTO android_metadata VALUES ('pl_PL');")
-        Przygotuj("INSERT OR REPLACE INTO tiles (x, y, z, s, image) VALUES (@x, @y, @z, 0, @d);",
-                  "SELECT image FROM tiles WHERE x = @x AND y = @y AND z = @z AND s = 0;")
+        Try
+            Wykonaj("CREATE TABLE tiles (x int, y int, z int, s int, image blob, PRIMARY KEY (x, y, z, s));")
+            Wykonaj("CREATE TABLE info (maxzoom int, minzoom int, tilenumbering text, tilesize int, ellipsoid int, inverted_y int);")
+            'tabela wymagana przez bazy SQLite otwierane w Androidzie bez prawa zapisu
+            Wykonaj("CREATE TABLE android_metadata (locale text);")
+            Wykonaj("INSERT INTO android_metadata VALUES ('pl_PL');")
+            Przygotuj("INSERT OR REPLACE INTO tiles (x, y, z, s, image) VALUES (@x, @y, @z, 0, @d);",
+                      "SELECT image FROM tiles WHERE x = @x AND y = @y AND z = @z AND s = 0;")
+        Catch
+            Dispose()
+            Throw
+        End Try
     End Sub
 
     Protected Overrides Function Indeks(k As KafelXYZ) As Tuple(Of Integer, Integer, Integer)
@@ -1999,11 +2305,16 @@ Friend Class MagazynOruxMaps
     Public Sub New(z As ZadanieEksportu, obszar As ProstokatGeo)
         MyBase.New(PrzygotujFolder(z.Plik), z)
         _obszar = obszar
-        Wykonaj("CREATE TABLE tiles (x int, y int, z int, image blob, PRIMARY KEY (x, y, z));")
-        Wykonaj("CREATE TABLE android_metadata (locale text);")
-        Wykonaj("INSERT INTO android_metadata VALUES ('pl_PL');")
-        Przygotuj("INSERT OR REPLACE INTO tiles (x, y, z, image) VALUES (@x, @y, @z, @d);",
-                  "SELECT image FROM tiles WHERE x = @x AND y = @y AND z = @z;")
+        Try
+            Wykonaj("CREATE TABLE tiles (x int, y int, z int, image blob, PRIMARY KEY (x, y, z));")
+            Wykonaj("CREATE TABLE android_metadata (locale text);")
+            Wykonaj("INSERT INTO android_metadata VALUES ('pl_PL');")
+            Przygotuj("INSERT OR REPLACE INTO tiles (x, y, z, image) VALUES (@x, @y, @z, @d);",
+                      "SELECT image FROM tiles WHERE x = @x AND y = @y AND z = @z;")
+        Catch
+            Dispose()
+            Throw
+        End Try
     End Sub
 
     Private Shared Function PrzygotujFolder(folder As String) As String
@@ -2047,9 +2358,14 @@ Friend Class MagazynJnx
         MyBase.New(z.Plik & ".tmp_tiles", z)
         _plikTmp = z.Plik & ".tmp_tiles"
         _obszar = obszar
-        Wykonaj("CREATE TABLE tiles (zoom_level integer, tile_column integer, tile_row integer, tile_data blob, PRIMARY KEY (zoom_level, tile_column, tile_row));")
-        Przygotuj("INSERT OR REPLACE INTO tiles (zoom_level, tile_column, tile_row, tile_data) VALUES (@z, @x, @y, @d);",
-                  "SELECT tile_data FROM tiles WHERE zoom_level = @z AND tile_column = @x AND tile_row = @y;")
+        Try
+            Wykonaj("CREATE TABLE tiles (zoom_level integer, tile_column integer, tile_row integer, tile_data blob, PRIMARY KEY (zoom_level, tile_column, tile_row));")
+            Przygotuj("INSERT OR REPLACE INTO tiles (zoom_level, tile_column, tile_row, tile_data) VALUES (@z, @x, @y, @d);",
+                      "SELECT tile_data FROM tiles WHERE zoom_level = @z AND tile_column = @x AND tile_row = @y;")
+        Catch
+            Dispose()
+            Throw
+        End Try
     End Sub
 
     Protected Overrides Function Indeks(k As KafelXYZ) As Tuple(Of Integer, Integer, Integer)

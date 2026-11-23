@@ -66,7 +66,7 @@ Public Module SzablonyWlasne
             .Id = s.Id, .Nazwa = s.Nazwa, .Opis = s.Opis, .Piktogram = s.Piktogram, .DomyslnyPiksel = s.DomyslnyPiksel,
             .ProfilKorekty = s.ProfilKorekty, .ProbkaLat = s.ProbkaLat, .ProbkaLon = s.ProbkaLon, .ProbkaPiksel = s.ProbkaPiksel,
             .UwagaPokrycia = s.UwagaPokrycia, .Cele = s.DozwoloneCele.ToList()}
-        If s.Wieloskalowy Then
+        If s.StopnieSkali.Count > 0 Then
             d.Skale = s.StopnieSkali.Select(Function(st) New DaneSkali With {.Opis = st.Opis, .Piksel = st.Piksel,
                                                                               .Opcjonalny = st.Opcjonalny, .Warstwy = st.Warstwy.ToList()}).ToList()
         Else
@@ -84,7 +84,7 @@ Public Module SzablonyWlasne
             .ProbkaPiksel = If(d.ProbkaPiksel > 0, d.ProbkaPiksel, If(d.DomyslnyPiksel > 0, d.DomyslnyPiksel, 1.0)),
             .UwagaPokrycia = If(d.UwagaPokrycia, "")}
         If d.Skale IsNot Nothing AndAlso d.Skale.Count > 0 Then
-            For Each sk In d.Skale.Where(Function(x) x.Warstwy IsNot Nothing AndAlso x.Warstwy.Count > 0)
+            For Each sk In d.Skale.Where(Function(x) x.Warstwy IsNot Nothing AndAlso x.Warstwy.Count > 0).OrderBy(Function(x) If(x.Opcjonalny, 1, 0))
                 If sk.Opcjonalny Then
                     s.DodajStopienOpcjonalny(If(sk.Opis, ""), If(sk.Piksel > 0, sk.Piksel, 1.0), sk.Warstwy.ToArray())
                 Else

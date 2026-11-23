@@ -5,6 +5,7 @@ Imports System.Drawing
 Imports System.Drawing.Drawing2D
 Imports System.Globalization
 Imports System.IO
+Imports System.IO.Compression
 Imports System.Linq
 Imports System.Xml.Linq
 
@@ -16,6 +17,10 @@ Public Enum UkladSiatkiWydruku
     Utm33N = 32633
     Utm34N = 32634
     Utm35N = 32635
+    Pl2000Strefa5 = 2176
+    Pl2000Strefa6 = 2177
+    Pl2000Strefa7 = 2178
+    Pl2000Strefa8 = 2179
 End Enum
 
 ''' <summary>
@@ -42,30 +47,43 @@ Public NotInheritable Class StylSladuWydruku
 End Class
 
 ''' <summary>
-''' Opis prostokąta terenowego scalonego arkusza w metrach (lewy-górny narożnik i rozmiar piksela).
+''' Opis prostokąta terenowego scalonego arkusza w jednostkach arkusza (lewy-górny narożnik i rozmiar piksela w poziomie/pionie).
 ''' </summary>
 Public NotInheritable Class ZakresArkusza
     Public Property SzerokoscPx As Integer
     Public Property WysokoscPx As Integer
     Public Property LewyEastingM As Double
     Public Property GornyNorthingM As Double
+    Public Property RozmiarPikselaXM As Double
+    Public Property RozmiarPikselaYM As Double
+
     Public Property RozmiarPikselaM As Double
+        Get
+            Return If(RozmiarPikselaXM > 0, RozmiarPikselaXM, RozmiarPikselaYM)
+        End Get
+        Set(value As Double)
+            RozmiarPikselaXM = value
+            RozmiarPikselaYM = value
+        End Set
+    End Property
 
     Public ReadOnly Property PrawyEastingM As Double
         Get
-            Return LewyEastingM + (SzerokoscPx * RozmiarPikselaM)
+            Return LewyEastingM + (SzerokoscPx * RozmiarPikselaXM)
         End Get
     End Property
 
     Public ReadOnly Property DolnyNorthingM As Double
         Get
-            Return GornyNorthingM - (WysokoscPx * RozmiarPikselaM)
+            Return GornyNorthingM - (WysokoscPx * RozmiarPikselaYM)
         End Get
     End Property
 
     Public Function MetryNaPiksel(eastingM As Double, northingM As Double) As PointF
-        Dim px As Single = CSng((eastingM - LewyEastingM) / RozmiarPikselaM)
-        Dim py As Single = CSng((GornyNorthingM - northingM) / RozmiarPikselaM)
+        Dim rx As Double = If(RozmiarPikselaXM > 0, RozmiarPikselaXM, 1.0)
+        Dim ry As Double = If(RozmiarPikselaYM > 0, RozmiarPikselaYM, rx)
+        Dim px As Single = CSng((eastingM - LewyEastingM) / rx)
+        Dim py As Single = CSng((GornyNorthingM - northingM) / ry)
         Return New PointF(px, py)
     End Function
 End Class
@@ -77,9 +95,9 @@ End Class
 ''' </summary>
 Public NotInheritable Class RendererNakladekWydruku
 
-    Public Shared Function DobierzKrokSiatki(arkusz As ZakresArkusza) As Integer
-        Dim szerokoscM As Double = arkusz.SzerokoscPx * arkusz.RozmiarPikselaM
-        Dim docelowy As Double = szerokoscM / 8.0
+    Public Shared Function DobierzKrokSiatki(arkusz As ZakresArkusza, Optional szerokoscM As Double = 0) As Integer
+        Dim szerokosc As Double = If(szerokoscM > 0, szerokoscM, arkusz.SzerokoscPx * arkusz.RozmiarPikselaM)
+        Dim docelowy As Double = szerokosc / 8.0
         Dim kroki As Integer() = {100, 250, 500, 1000, 2000, 5000, 10000}
 
         For Each k As Integer In kroki
@@ -93,9 +111,11 @@ Public NotInheritable Class RendererNakladekWydruku
         arkusz As ZakresArkusza,
         parametry As ParametrySiatkiKilometrowej,
         Optional offsetPasaY As Integer = 0,
-        Optional przeliczZUkSiatkiNaArkusz As Func(Of Double, Double, (E As Double, N As Double)) = Nothing)
+        Optional przeliczZUkSiatkiNaArkusz As Func(Of Double, Double, (E As Double, N As Double)) = Nothing,
+        Optional zakresMetrowySiatki As Tuple(Of Double, Double, Double, Double) = Nothing)
 
-        Dim krok As Integer = If(parametry.KrokMetry > 0, parametry.KrokMetry, DobierzKrokSiatki(arkusz))
+        Dim szerokoscDoKroku As Double = If(zakresMetrowySiatki IsNot Nothing, Math.Abs(zakresMetrowySiatki.Item2 - zakresMetrowySiatki.Item1), 0)
+        Dim krok As Integer = If(parametry.KrokMetry > 0, parametry.KrokMetry, DobierzKrokSiatki(arkusz, szerokoscDoKroku))
         Dim stan As GraphicsState = g.Save()
 
         Try
@@ -106,10 +126,22 @@ Public NotInheritable Class RendererNakladekWydruku
                 g.TranslateTransform(0.0F, -CSng(offsetPasaY))
             End If
 
-            Dim minE As Double = Math.Floor(arkusz.LewyEastingM / krok) * krok
-            Dim maxE As Double = Math.Ceiling(arkusz.PrawyEastingM / krok) * krok
-            Dim minN As Double = Math.Floor(arkusz.DolnyNorthingM / krok) * krok
-            Dim maxN As Double = Math.Ceiling(arkusz.GornyNorthingM / krok) * krok
+            Dim minE As Double
+            Dim maxE As Double
+            Dim minN As Double
+            Dim maxN As Double
+
+            If zakresMetrowySiatki IsNot Nothing Then
+                minE = Math.Floor(zakresMetrowySiatki.Item1 / krok) * krok
+                maxE = Math.Ceiling(zakresMetrowySiatki.Item2 / krok) * krok
+                minN = Math.Floor(zakresMetrowySiatki.Item3 / krok) * krok
+                maxN = Math.Ceiling(zakresMetrowySiatki.Item4 / krok) * krok
+            Else
+                minE = Math.Floor(arkusz.LewyEastingM / krok) * krok
+                maxE = Math.Ceiling(arkusz.PrawyEastingM / krok) * krok
+                minN = Math.Floor(arkusz.DolnyNorthingM / krok) * krok
+                maxN = Math.Ceiling(arkusz.GornyNorthingM / krok) * krok
+            End If
 
             Using pioro As New Pen(parametry.KolorLinii, parametry.GruboscLiniiPx),
                   czcionka As New Font("Segoe UI", parametry.RozmiarCzcionkiPt, FontStyle.Bold)
@@ -125,7 +157,7 @@ Public NotInheritable Class RendererNakladekWydruku
                             RysujEtykieteZObwiednia(g, opis, czcionka, px + 4.0F, CSng(arkusz.WysokoscPx - parametry.MarginesEtykietPx - czcionka.Height))
                         End If
                     Else
-                        RysujKrzywaSiatki(g, pioro, arkusz, eVal, minN, maxN, True, przeliczZUkSiatkiNaArkusz)
+                        RysujKrzywaSiatki(g, pioro, czcionka, arkusz, eVal, minN, maxN, True, przeliczZUkSiatkiNaArkusz, krok, parametry.OpisujPelneMetry, parametry.MarginesEtykietPx)
                     End If
                     eVal += krok
                 End While
@@ -142,7 +174,7 @@ Public NotInheritable Class RendererNakladekWydruku
                             RysujEtykieteZObwiednia(g, opis, czcionka, arkusz.SzerokoscPx - szerTekstu - parametry.MarginesEtykietPx, py - czcionka.Height - 2.0F)
                         End If
                     Else
-                        RysujKrzywaSiatki(g, pioro, arkusz, nVal, minE, maxE, False, przeliczZUkSiatkiNaArkusz)
+                        RysujKrzywaSiatki(g, pioro, czcionka, arkusz, nVal, minE, maxE, False, przeliczZUkSiatkiNaArkusz, krok, parametry.OpisujPelneMetry, parametry.MarginesEtykietPx)
                     End If
                     nVal += krok
                 End While
@@ -155,28 +187,64 @@ Public NotInheritable Class RendererNakladekWydruku
     Private Shared Sub RysujKrzywaSiatki(
         g As Graphics,
         pioro As Pen,
+        czcionka As Font,
         arkusz As ZakresArkusza,
         stala As Double,
         zakresOd As Double,
         zakresDo As Double,
         czyPionowa As Boolean,
-        transformacja As Func(Of Double, Double, (E As Double, N As Double)))
+        transformacja As Func(Of Double, Double, (E As Double, N As Double)),
+        krok As Integer,
+        pelneMetry As Boolean,
+        marginesEtykietPx As Integer)
 
-        Const probki As Integer = 16
-        Dim punkty(probki) As PointF
+        Const probki As Integer = 32
+        Dim punkty As New List(Of PointF)()
+        Dim widocznyPrzynajmniejJeden As Boolean = False
+
         For i As Integer = 0 To probki
             Dim t As Double = zakresOd + ((zakresDo - zakresOd) * i) / probki
             Dim m = If(czyPionowa, transformacja(stala, t), transformacja(t, stala))
-            punkty(i) = arkusz.MetryNaPiksel(m.E, m.N)
+            Dim pt = arkusz.MetryNaPiksel(m.E, m.N)
+            punkty.Add(pt)
+            If pt.X >= -50.0F AndAlso pt.X <= arkusz.SzerokoscPx + 50.0F AndAlso
+               pt.Y >= -50.0F AndAlso pt.Y <= arkusz.WysokoscPx + 50.0F Then
+                widocznyPrzynajmniejJeden = True
+            End If
         Next
-        g.DrawLines(pioro, punkty)
+
+        If widocznyPrzynajmniejJeden AndAlso punkty.Count >= 2 Then
+            g.DrawLines(pioro, punkty.ToArray())
+
+            ' Etykiety na brzegach dla linii widocznych
+            Dim opis As String = FormatujEtykieteWspolrzednej(stala, krok, pelneMetry)
+            Dim ptPierwszy As PointF? = Nothing
+            Dim ptOstatni As PointF? = Nothing
+            For Each p In punkty
+                If p.X >= 0 AndAlso p.X <= arkusz.SzerokoscPx AndAlso p.Y >= 0 AndAlso p.Y <= arkusz.WysokoscPx Then
+                    If Not ptPierwszy.HasValue Then ptPierwszy = p
+                    ptOstatni = p
+                End If
+            Next
+
+            If ptPierwszy.HasValue Then
+                Dim ex As Single = Math.Max(CSng(marginesEtykietPx), Math.Min(ptPierwszy.Value.X + 4.0F, CSng(arkusz.SzerokoscPx - 70)))
+                Dim ey As Single = Math.Max(CSng(marginesEtykietPx), Math.Min(ptPierwszy.Value.Y - czcionka.Height - 2.0F, CSng(arkusz.WysokoscPx - 25)))
+                RysujEtykieteZObwiednia(g, opis, czcionka, ex, ey)
+            End If
+            If ptOstatni.HasValue AndAlso ptPierwszy.HasValue AndAlso (Math.Abs(ptOstatni.Value.X - ptPierwszy.Value.X) > 100.0F OrElse Math.Abs(ptOstatni.Value.Y - ptPierwszy.Value.Y) > 100.0F) Then
+                Dim ex As Single = Math.Max(CSng(marginesEtykietPx), Math.Min(ptOstatni.Value.X + 4.0F, CSng(arkusz.SzerokoscPx - 70)))
+                Dim ey As Single = Math.Max(CSng(marginesEtykietPx), Math.Min(ptOstatni.Value.Y - czcionka.Height - 2.0F, CSng(arkusz.WysokoscPx - 25)))
+                RysujEtykieteZObwiednia(g, opis, czcionka, ex, ey)
+            End If
+        End If
     End Sub
 
     Public Shared Function FormatujEtykieteWspolrzednej(wartoscMetry As Double, krok As Integer, pelneMetry As Boolean) As String
         If pelneMetry Then
             Return String.Format(CultureInfo.InvariantCulture, "{0:N0}", Math.Round(wartoscMetry)).Replace(","c, " "c)
         End If
-        If wartoscMetry < 1000.0 Then
+        If Math.Abs(wartoscMetry) < 1000.0 Then
             Return String.Format(CultureInfo.InvariantCulture, "{0:0} m", Math.Round(wartoscMetry))
         End If
         Dim valKm As Double = wartoscMetry / 1000.0
@@ -210,12 +278,24 @@ Public NotInheritable Class RendererNakladekWydruku
 
     Public Shared Function WczytajSegmentySladu(sciezkaPliku As String) As List(Of List(Of (Lon As Double, Lat As Double)))
         If Not File.Exists(sciezkaPliku) Then
-            Throw New FileNotFoundException("Nie znaleziono pliku śladu GPX/KML.", sciezkaPliku)
+            Throw New FileNotFoundException("Nie znaleziono pliku śladu GPX/KML/KMZ.", sciezkaPliku)
         End If
 
         Dim wynik As New List(Of List(Of (Lon As Double, Lat As Double)))()
-        Dim doc As XDocument = XDocument.Load(sciezkaPliku)
         Dim ext As String = Path.GetExtension(sciezkaPliku).ToLowerInvariant()
+        Dim doc As XDocument
+        If ext = ".kmz" Then
+            Using arch = ZipFile.OpenRead(sciezkaPliku)
+                Dim wpis = arch.Entries.FirstOrDefault(Function(e) e.FullName.EndsWith(".kml", StringComparison.OrdinalIgnoreCase))
+                If wpis Is Nothing Then Throw New InvalidDataException("Archiwum KMZ nie zawiera pliku .kml ze śladem.")
+                Using s = wpis.Open()
+                    doc = XDocument.Load(s)
+                End Using
+            End Using
+            ext = ".kml"
+        Else
+            doc = XDocument.Load(sciezkaPliku)
+        End If
 
         If ext = ".gpx" Then
             For Each seg As XElement In doc.Descendants().Where(Function(e) e.Name.LocalName = "trkseg" OrElse e.Name.LocalName = "rte")
@@ -255,7 +335,7 @@ Public NotInheritable Class RendererNakladekWydruku
                 If lista.Count >= 2 Then wynik.Add(lista)
             Next
         Else
-            Throw New NotSupportedException(String.Format("Nieobsługiwany format śladu: {0} (obsługiwane: .gpx, .kml).", ext))
+            Throw New NotSupportedException(String.Format("Nieobsługiwany format śladu: {0} (obsługiwane: .gpx, .kml, .kmz).", Path.GetExtension(sciezkaPliku).ToLowerInvariant()))
         End If
 
         Return wynik
@@ -288,17 +368,39 @@ Public NotInheritable Class RendererNakladekWydruku
 
                 For Each seg As List(Of (Lon As Double, Lat As Double)) In segmentyWgs84
                     If seg.Count < 2 Then Continue For
-                    Dim punkty(seg.Count - 1) As PointF
+                    Dim bezpieczny = Function(p As PointF) As Boolean
+                                         Return Single.IsFinite(p.X) AndAlso Single.IsFinite(p.Y) AndAlso
+                                                Math.Abs(p.X) <= 100000.0F AndAlso Math.Abs(p.Y - offsetPasaY) <= 100000.0F
+                                     End Function
+                    Dim pierwszyPunkt As PointF? = Nothing
+                    Dim ostatniPunkt As PointF? = Nothing
+                    Dim podsegment As New List(Of PointF)(seg.Count)
+
                     For i As Integer = 0 To seg.Count - 1
-                        punkty(i) = przeliczWgs84NaPiksel(seg(i).Lon, seg(i).Lat)
+                        Dim pt = przeliczWgs84NaPiksel(seg(i).Lon, seg(i).Lat)
+                        If i = 0 Then pierwszyPunkt = pt
+                        If i = seg.Count - 1 Then ostatniPunkt = pt
+                        If bezpieczny(pt) Then
+                            podsegment.Add(pt)
+                        ElseIf podsegment.Count >= 2 Then
+                            Dim arr = podsegment.ToArray()
+                            g.DrawLines(pioroObwiedni, arr)
+                            g.DrawLines(pioroWnetrza, arr)
+                            podsegment.Clear()
+                        Else
+                            podsegment.Clear()
+                        End If
                     Next
 
-                    g.DrawLines(pioroObwiedni, punkty)
-                    g.DrawLines(pioroWnetrza, punkty)
+                    If podsegment.Count >= 2 Then
+                        Dim arr = podsegment.ToArray()
+                        g.DrawLines(pioroObwiedni, arr)
+                        g.DrawLines(pioroWnetrza, arr)
+                    End If
 
                     If styl.RysujZnacznikiStartKoniec Then
-                        RysujZnacznikPunktu(g, punkty(0), Color.ForestGreen)
-                        RysujZnacznikPunktu(g, punkty(punkty.Length - 1), Color.Crimson)
+                        If pierwszyPunkt.HasValue AndAlso bezpieczny(pierwszyPunkt.Value) Then RysujZnacznikPunktu(g, pierwszyPunkt.Value, Color.ForestGreen)
+                        If ostatniPunkt.HasValue AndAlso bezpieczny(ostatniPunkt.Value) Then RysujZnacznikPunktu(g, ostatniPunkt.Value, Color.Crimson)
                     End If
                 Next
             End Using

@@ -119,6 +119,10 @@ Public Class UstawieniaProgramu
     Public Property SiatkaSegmentowNaMapie As Boolean = True
     ''' <summary>Szerokość prawego panelu ustawiona przez użytkownika w pikselach; 0 - szerokość domyślna.</summary>
     Public Property SzerokoscPanelu As Integer
+    ''' <summary>Wysokość karty „Wybrane warstwy” ustawiona uchwytem (piksele przy 96 dpi); 0 - według liczby warstw.</summary>
+    Public Property WysokoscWybranych As Integer
+    ''' <summary>Wysokość zakładek Podgląd/Komunikaty/Sesja ustawiona uchwytem (piksele przy 96 dpi); 0 - domyślna.</summary>
+    Public Property WysokoscZakladek As Integer
     ''' <summary>Podkład mapy w oknie głównym: osm, google albo bing (dawniej po każdym uruchomieniu wracał OpenStreetMap).</summary>
     Public Property PodkladMapy As String = "osm"
 
@@ -241,6 +245,8 @@ Public Class UstawieniaProgramu
         ZaznaczenieWgs84 = u.Logiczna("zaznaczenie_wgs84", ZaznaczenieWgs84)
         EdycjaXY = u.Logiczna("edycja_xy", EdycjaXY)
         SzerokoscPanelu = Math.Max(0, u.Calkowita("szerokosc_panelu", SzerokoscPanelu))
+        WysokoscWybranych = Math.Max(0, u.Calkowita("wysokosc_wybranych", WysokoscWybranych))
+        WysokoscZakladek = Math.Max(0, u.Calkowita("wysokosc_zakladek", WysokoscZakladek))
         'opcje okna eksportu do CAD
         CadObrys = u.Logiczna("cad_obrys", CadObrys)
         CadSiatka = u.Logiczna("cad_siatka", CadSiatka)
@@ -332,6 +338,8 @@ Public Class UstawieniaProgramu
         u.Ustaw("korekta_kontrast", KorektaKontrast)
         u.Ustaw("korekta_nasycenie", KorektaNasycenie)
         u.Ustaw("korekta_wyostrzanie", KorektaWyostrzanie)
+        u.Ustaw("wysokosc_wybranych", WysokoscWybranych)
+        u.Ustaw("wysokosc_zakladek", WysokoscZakladek)
         u.Zapisz(sciezka, KodowanieSystemowe())
     End Sub
 

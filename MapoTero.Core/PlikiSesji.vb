@@ -54,14 +54,13 @@ Public Class CzytnikPlikuVb
         While _pozycja < _tekst.Length AndAlso (_tekst(_pozycja) = " "c OrElse _tekst(_pozycja) = ChrW(9))
             _pozycja += 1
         End While
-        'pomija znak końca poprzedniego wiersza
-        If _pozycja < _tekst.Length AndAlso (_tekst(_pozycja) = ChrW(13) OrElse _tekst(_pozycja) = ChrW(10)) Then
-            If _tekst(_pozycja) = ChrW(13) AndAlso _pozycja + 1 < _tekst.Length AndAlso _tekst(_pozycja + 1) = ChrW(10) Then _pozycja += 1
+        'pomija znaki końca poprzednich wierszy (wiele kolejnych CR/LF)
+        While _pozycja < _tekst.Length AndAlso (_tekst(_pozycja) = ChrW(13) OrElse _tekst(_pozycja) = ChrW(10))
             _pozycja += 1
-            While _pozycja < _tekst.Length AndAlso (_tekst(_pozycja) = " "c OrElse _tekst(_pozycja) = ChrW(9))
-                _pozycja += 1
-            End While
-        End If
+        End While
+        While _pozycja < _tekst.Length AndAlso (_tekst(_pozycja) = " "c OrElse _tekst(_pozycja) = ChrW(9))
+            _pozycja += 1
+        End While
         If _pozycja >= _tekst.Length Then Throw New EndOfStreamException("Koniec pliku")
 
         Dim wynik As String
@@ -272,8 +271,13 @@ Public Class KonfiguracjaSesji
     ''' <summary>Siatka segmentów sesji (pola zasięgu, rozmiaru piksela i boku segmentu).</summary>
     Public Function SiatkaSesji() As Siatka
         Dim bok As Double = LiczbaZPola(BokSegmentuPx)
+        Dim bokZaokraglony As Integer = 0
+        If Double.IsFinite(bok) AndAlso bok >= Integer.MinValue AndAlso bok <= Integer.MaxValue Then
+            Dim r As Double = Math.Round(bok)
+            If r >= Integer.MinValue AndAlso r <= Integer.MaxValue Then bokZaokraglony = CInt(r)
+        End If
         Return New Siatka(New Zasieg(LiczbaZPola(XDol), LiczbaZPola(YLewy), LiczbaZPola(XGora), LiczbaZPola(YPrawy)),
-                          LiczbaZPola(RozmiarPiksela), If(Double.IsNaN(bok), 0, CInt(Math.Round(bok))))
+                          LiczbaZPola(RozmiarPiksela), bokZaokraglony)
     End Function
 
     ''' <summary>
@@ -289,7 +293,7 @@ Public Class KonfiguracjaSesji
         If a.BokSegmentuPx <> b.BokSegmentuPx OrElse Not RowneLiczby(a.RozmiarPiksela, b.RozmiarPiksela) Then Return False
         If a.LiczbaKolumn <> b.LiczbaKolumn OrElse a.LiczbaWierszy <> b.LiczbaWierszy Then Return False
         If Not RowneLiczby(a.Obszar.XDol, b.Obszar.XDol) OrElse Not RowneLiczby(a.Obszar.YLewy, b.Obszar.YLewy) Then Return False
-        If UkladEpsg <> inna.UkladEpsg OrElse Przezroczystosc <> inna.Przezroczystosc Then Return False
+        If UkladEpsg <> inna.UkladEpsg OrElse Przezroczystosc <> inna.Przezroczystosc OrElse TrekBuddy <> inna.TrekBuddy Then Return False
         If Not String.Equals(Prefiks, inna.Prefiks, StringComparison.Ordinal) Then Return False
         If Siatka.StylZTekstu(Numeracja) <> Siatka.StylZTekstu(inna.Numeracja) Then Return False
         If Wms.RozszerzeniePliku(Format) <> Wms.RozszerzeniePliku(inna.Format) Then Return False

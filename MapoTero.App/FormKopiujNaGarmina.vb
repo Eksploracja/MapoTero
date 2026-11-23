@@ -115,6 +115,7 @@ Imports MapoTero.Core
                                               If _cts IsNot Nothing Then _cts.Cancel()
                                               Me.Close()
                                           End Sub
+            Me.CancelButton = _btnZamknij
 
             Me.Controls.AddRange(New Control() {
                 _lblInformacjaPlik, lblDyski, _btnOdswiez, _lstDyski,
@@ -123,7 +124,12 @@ Imports MapoTero.Core
             })
         End Sub
 
-        Private Sub OdswiezListeDyskow()
+        Protected Overrides Sub OnFormClosing(e As FormClosingEventArgs)
+            _cts?.Cancel()
+            MyBase.OnFormClosing(e)
+        End Sub
+
+        Private Sub OdswiezListeDyskow(Optional zachowajStatus As Boolean = False)
             _lstDyski.Items.Clear()
             Dim dyski As List(Of DyskGarmina) = MenadzerGarminUsb.WykryjDyskiGarmina()
 
@@ -133,9 +139,11 @@ Imports MapoTero.Core
 
             If _lstDyski.Items.Count > 0 Then
                 _lstDyski.SelectedIndex = 0
-                _lblStatus.ForeColor = Color.DimGray
-                _lblStatus.Text = String.Format("Znaleziono nośników Garmina: {0}.", _lstDyski.Items.Count)
-            Else
+                If Not zachowajStatus Then
+                    _lblStatus.ForeColor = Color.DimGray
+                    _lblStatus.Text = String.Format("Znaleziono nośników Garmina: {0}.", _lstDyski.Items.Count)
+                End If
+            ElseIf Not zachowajStatus Then
                 _lblStatus.ForeColor = Color.DarkOrange
                 _lblStatus.Text = "Nie wykryto odbiornika Garmin w trybie pamięci masowej USB."
             End If
@@ -170,6 +178,7 @@ Imports MapoTero.Core
 
             _cts = New CancellationTokenSource()
             Dim postep As New Progress(Of Double)(Sub(procent)
+                                                      If IsDisposed OrElse Disposing Then Return
                                                       _pasekPostepu.Value = Math.Max(0, Math.Min(100, CInt(Math.Round(procent))))
                                                   End Sub)
 
@@ -177,21 +186,28 @@ Imports MapoTero.Core
                 Dim cel As String = Await MenadzerGarminUsb.KopiujNaGarminaAsync(
                     _sciezkaZrodlowa, wybrany, _txtNazwaDocelowa.Text, postep, _cts.Token)
 
+                If IsDisposed OrElse Disposing Then Return
                 _pasekPostepu.Value = 100
                 _lblStatus.ForeColor = Color.DarkGreen
                 _lblStatus.Text = String.Format("Zapisano pomyślnie: {0}", cel)
-                OdswiezListeDyskow()
+                OdswiezListeDyskow(zachowajStatus:=True)
             Catch ex As OperationCanceledException
-                _lblStatus.ForeColor = Color.DarkOrange
-                _lblStatus.Text = "Kopiowanie zostało przerwane."
+                If Not IsDisposed AndAlso Not Disposing Then
+                    _lblStatus.ForeColor = Color.DarkOrange
+                    _lblStatus.Text = "Kopiowanie zostało przerwane."
+                End If
             Catch ex As Exception
-                _lblStatus.ForeColor = Color.Firebrick
-                _lblStatus.Text = "Błąd kopiowania: " & OpisBledu.Z(ex)
+                If Not IsDisposed AndAlso Not Disposing Then
+                    _lblStatus.ForeColor = Color.Firebrick
+                    _lblStatus.Text = "Błąd kopiowania: " & OpisBledu.Z(ex)
+                End If
             Finally
-                _cts.Dispose()
+                _cts?.Dispose()
                 _cts = Nothing
-                _btnOdswiez.Enabled = True
-                AktualizujStanPrzyciskuKopiuj()
+                If Not IsDisposed AndAlso Not Disposing Then
+                    _btnOdswiez.Enabled = True
+                    AktualizujStanPrzyciskuKopiuj()
+                End If
             End Try
         End Sub
 

@@ -93,7 +93,10 @@ Public Class FormPodgladDuzy
                                                       If Not token.IsCancellationRequested AndAlso Not IsDisposed Then _lblStan.Text = msg
                                                   End Sub)
             Dim wynik = Await _silnik.PobierzPodgladAsync(zadanie, _zestaw, token, postep)
-            If token.IsCancellationRequested OrElse IsDisposed Then Exit Sub
+            If token.IsCancellationRequested OrElse IsDisposed Then
+                wynik.Item1?.Dispose()
+                Exit Sub
+            End If
             If wynik.Item1 Is Nothing Then
                 _lblStan.Text = "Brak podglądu z serwera"
                 _lblStan.ForeColor = Color.FromArgb(180, 50, 0)

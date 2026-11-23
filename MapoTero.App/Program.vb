@@ -86,26 +86,30 @@ Public Module Program
         End Get
     End Property
 
-    ''' <summary>Katalog ze zbiorami map w folderze danych użytkownika (%LocalAppData%\MapoTero\warstwy).</summary>
+    ''' <summary>Katalog ze zbiorami map w folderze danych użytkownika (w trybie portable: warstwy_wlasne obok exe, w instalacyjnym: %LocalAppData%\MapoTero\warstwy).</summary>
     Public ReadOnly Property FolderWarstwDanych As String
         Get
-            Return Path.Combine(FolderDanych, "warstwy")
+            If String.Equals(FolderDanych, FolderProgramu, StringComparison.OrdinalIgnoreCase) Then
+                Return Path.Combine(FolderProgramu, "warstwy_wlasne")
+            Else
+                Return Path.Combine(FolderDanych, "warstwy")
+            End If
         End Get
     End Property
 
-    ''' <summary>Katalog zapisu nowych zbiorów map (katalog programu, a przy braku uprawnień - katalog użytkownika).</summary>
+    ''' <summary>Katalog zapisu nowych zbiorów map (zawsze katalog użytkownika, by aktualizacja programu nie nadpisywała własnych warstw).</summary>
     Public Function FolderZapisuWarstw() As String
+        Dim katDanych = FolderWarstwDanych
         Try
-            Dim katProg = FolderWarstwProgramu
-            Directory.CreateDirectory(katProg)
-            Dim test = Path.Combine(katProg, "zapis_test.tmp")
+            Directory.CreateDirectory(katDanych)
+            Dim test = Path.Combine(katDanych, "zapis_test.tmp")
             File.WriteAllText(test, "")
             File.Delete(test)
-            Return katProg
-        Catch
-            Dim katDanych = FolderWarstwDanych
-            Directory.CreateDirectory(katDanych)
             Return katDanych
+        Catch
+            Dim katProg = FolderWarstwProgramu
+            Directory.CreateDirectory(katProg)
+            Return katProg
         End Try
     End Function
 
@@ -252,15 +256,17 @@ Public Module Program
         Try
             If Directory.Exists(cel) Then cel &= " " & Guid.NewGuid().ToString("N").Substring(0, 6)
             Directory.CreateDirectory(cel)
+            Dim wszystkiePrzeniesione As Boolean = True
             For Each p In pliki
                 Dim docelowy = Path.Combine(cel, Path.GetFileName(p))
                 Try
                     File.Move(p, docelowy)
                     przeniesione.Add((p, docelowy))
                 Catch
-                    'plik zajęty - zostaje i zostanie przeniesiony zwykłym sposobem (albo policzony jako błąd)
+                    wszystkiePrzeniesione = False
                 End Try
             Next
+            If Not wszystkiePrzeniesione Then Throw New IOException("Nie wszystkie pliki udało się przenieść do Kosza grupowo.")
             FileIO.FileSystem.DeleteDirectory(cel, FileIO.UIOption.OnlyErrorDialogs, FileIO.RecycleOption.SendToRecycleBin)
             Return True
         Catch

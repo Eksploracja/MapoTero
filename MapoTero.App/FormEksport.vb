@@ -74,6 +74,7 @@ Public Class FormEksport
     Private _przerwanie As CancellationTokenSource
     Private Shared _ostatniPlikEksportu As String = ""
     Private _opcjeMip As New OpcjeKorekcjiMip()
+    Private _plikSladuArkusza As String = ""
 
     ''' <summary>Ścieżka do ostatnio wyeksportowanego pliku mapy (dla wysyłki Wi-Fi / eksploratora).</summary>
     Public Shared Property OstatniPlik As String
@@ -91,6 +92,14 @@ Public Class FormEksport
     ''' </summary>
     <ComponentModel.DesignerSerializationVisibility(ComponentModel.DesignerSerializationVisibility.Hidden)>
     Public Property ArkuszDomyslnie As Boolean
+
+    ''' <summary>Domyślny rodzaj eksportu przy otwarciu okna.</summary>
+    <ComponentModel.DesignerSerializationVisibility(ComponentModel.DesignerSerializationVisibility.Hidden)>
+    Public Property FormatPoczatkowy As RodzajEksportu? = Nothing
+
+    ''' <summary>Domyślny format arkusza scalonego (GeoTIFF, JPEG, PNG) przy otwarciu okna.</summary>
+    <ComponentModel.DesignerSerializationVisibility(ComponentModel.DesignerSerializationVisibility.Hidden)>
+    Public Property FormatArkuszaPoczatkowy As FormatArkusza? = Nothing
 
     ''' <summary>Folder sesji zamiast bieżącej sesji okna głównego (okno otwarte z eksportu do CAD).</summary>
     <ComponentModel.DesignerSerializationVisibility(ComponentModel.DesignerSerializationVisibility.Hidden)>
@@ -138,17 +147,37 @@ Public Class FormEksport
             _folder = FolderSesjiDlaNarzedzia(Form1.FolderSesji, uwagaFolderu)
         End If
         'opcje arkusza zapamiętane jak dawniej w oknie scalania
-        cmbFormatArkusza.SelectedIndex = Math.Max(0, Math.Min(cmbFormatArkusza.Items.Count - 1, CInt(Ustawienia.FormatArkusza)))
+        If FormatArkuszaPoczatkowy.HasValue Then
+            cmbFormatArkusza.SelectedIndex = Math.Max(0, Math.Min(cmbFormatArkusza.Items.Count - 1, CInt(FormatArkuszaPoczatkowy.Value)))
+        Else
+            cmbFormatArkusza.SelectedIndex = Math.Max(0, Math.Min(cmbFormatArkusza.Items.Count - 1, CInt(Ustawienia.FormatArkusza)))
+        End If
+        If cmbUkladSiatki.SelectedIndex < 0 Then cmbUkladSiatki.SelectedIndex = 0
+        If cmbKrokSiatki.SelectedIndex < 0 Then cmbKrokSiatki.SelectedIndex = 0
         chkArkuszWorldFile.Checked = Ustawienia.ScalanieWorldFile
         chkArkuszMap.Checked = Ustawienia.ScalanieMap
         chkArkuszTab.Checked = Ustawienia.ScalanieTab
         chkArkuszKml.Checked = Ustawienia.ScalanieKml
-        If ArkuszDomyslnie Then rbGeoTiff.Checked = True
+        If FormatPoczatkowy.HasValue Then
+            Select Case FormatPoczatkowy.Value
+                Case RodzajEksportu.GeoTiff : rbGeoTiff.Checked = True
+                Case RodzajEksportu.MBTiles : rbMBTiles.Checked = True
+                Case RodzajEksportu.KmzGarmin : rbKmzGarmin.Checked = True
+                Case RodzajEksportu.Kmz : rbKmz.Checked = True
+                Case RodzajEksportu.SQLiteDB : rbSQLiteDB.Checked = True
+                Case RodzajEksportu.OruxMaps : rbOruxMaps.Checked = True
+                Case RodzajEksportu.Jnx : rbJnx.Checked = True
+                Case RodzajEksportu.GeoPackage : rbGeoPackage.Checked = True
+                Case RodzajEksportu.TrekBuddy : rbTrekBuddy.Checked = True
+            End Select
+        ElseIf ArkuszDomyslnie Then
+            rbGeoTiff.Checked = True
+        End If
         WczytajSesje()
         UsunNiepasujaceNakladki()
         If File.Exists(_folder & "error.txt") Then
             uwagaFolderu = If(uwagaFolderu = "", "", uwagaFolderu & vbCrLf) &
-                "W folderze sesji jest plik error.txt - pobieranie nie zostało ukończone i części segmentów brakuje (w mapie będą białe pola). Uzupełnij je przyciskiem Pobierz w oknie głównym."
+                "Pobieranie lub odświeżanie nie zakończyło się w pełni. Mapa może zawierać puste fragmenty lub wcześniejsze wersje segmentów."
         End If
         'UstawWgProfilu włącza korektę, więc dawniej po odczycie stanu „wyłączona” korekta znów była zaznaczona
         _opcjeMip = Ustawienia.OpcjeKorekty()
@@ -273,7 +302,7 @@ Public Class FormEksport
         nudPoziomMax.Value = Math.Min(nudPoziomMax.Maximum, zmax)
         nudPoziomMin.Value = Math.Max(nudPoziomMin.Minimum, Math.Min(zmax, Math.Max(8, zmax - 6)))
         If File.Exists(_folder & "error.txt") Then
-            Komunikat("W folderze jest plik error.txt - zestaw segmentów jest niekompletny (brakujące fragmenty pozostaną puste).", Color.Red)
+            Komunikat("Pobieranie lub odświeżanie nie zakończyło się w pełni. Mapa może zawierać puste fragmenty lub wcześniejsze wersje segmentów.", Color.Red)
         ElseIf Korytarz.ZFolderu(_folder) IsNot Nothing Then
             Komunikat("Segmenty pobrane wzdłuż trasy (korytarz) - obszar poza korytarzem pozostanie pusty (przezroczysty w kaflach PNG).", Color.Black)
         Else
@@ -368,6 +397,42 @@ Public Class FormEksport
         z.PiramidyGeoTiff = chkGeoTiffPiramidy.Checked
         z.Georeferencja = New OpcjeGeoreferencji With {.WorldFile = chkArkuszWorldFile.Checked, .Map = chkArkuszMap.Checked,
                                                        .Tab = chkArkuszTab.Checked, .Kml = chkArkuszKml.Checked}
+        Dim czyArkusz As Boolean = rodzaj = RodzajEksportu.GeoTiff
+        If czyArkusz AndAlso chkSiatkaKilometrowa.Checked Then
+            Dim krokM As Integer = 0
+            Select Case cmbKrokSiatki.SelectedIndex
+                Case 1 : krokM = 500
+                Case 2 : krokM = 1000
+                Case 3 : krokM = 2000
+                Case 4 : krokM = 5000
+                Case 5 : krokM = 10000
+                Case Else : krokM = 0
+            End Select
+            Dim ukSiatki As UkladSiatkiWydruku = UkladSiatkiWydruku.Puwg1992
+            Select Case cmbUkladSiatki.SelectedIndex
+                Case 1 : ukSiatki = UkladSiatkiWydruku.Puwg1992
+                Case 2 : ukSiatki = UkladSiatkiWydruku.Utm33N
+                Case 3 : ukSiatki = UkladSiatkiWydruku.Utm34N
+                Case 4 : ukSiatki = UkladSiatkiWydruku.Utm35N
+                Case 5 : ukSiatki = UkladSiatkiWydruku.Pl2000Strefa5
+                Case 6 : ukSiatki = UkladSiatkiWydruku.Pl2000Strefa6
+                Case 7 : ukSiatki = UkladSiatkiWydruku.Pl2000Strefa7
+                Case 8 : ukSiatki = UkladSiatkiWydruku.Pl2000Strefa8
+                Case Else
+                    If _sesja IsNot Nothing AndAlso Not _sesja.Uklad.Geograficzny Then
+                        ukSiatki = CType(_sesja.Uklad.Epsg, UkladSiatkiWydruku)
+                    Else
+                        ukSiatki = UkladSiatkiWydruku.Puwg1992
+                    End If
+            End Select
+            z.SiatkaKilometrowa = New ParametrySiatkiKilometrowej With {
+                .UkladSiatki = ukSiatki,
+                .KrokMetry = krokM
+            }
+        End If
+        If czyArkusz AndAlso Not String.IsNullOrEmpty(_plikSladuArkusza) Then
+            z.PlikSladuWydruku = _plikSladuArkusza
+        End If
         z.Nazwa = z.Metadane.Nazwa
         For Each p In lstNakladki.Items.Cast(Of PozycjaNakladki)()
             z.Nakladki.Add(p.Warstwa)
@@ -375,17 +440,47 @@ Public Class FormEksport
         Return z
     End Function
 
+    ''' <summary>Wybór użytkownika „piramidy w GeoTIFF” - pamiętany, gdy pole jest wyłączone dla JPEG i PNG.</summary>
+    Private _piramidyWybrane As Boolean = True
+    Private _ustawianiePiramid As Boolean
+
+    Private Sub chkGeoTiffPiramidy_CheckedChanged(sender As Object, e As EventArgs) Handles chkGeoTiffPiramidy.CheckedChanged
+        If Not _ustawianiePiramid AndAlso chkGeoTiffPiramidy.Enabled Then _piramidyWybrane = chkGeoTiffPiramidy.Checked
+    End Sub
+
+    Private Function WynikDoOtwarcia() As String
+        If String.IsNullOrEmpty(_ostatniPlikEksportu) Then Return ""
+        If File.Exists(_ostatniPlikEksportu) OrElse Directory.Exists(_ostatniPlikEksportu) Then Return _ostatniPlikEksportu
+        If _ostatniPlikEksportu.EndsWith(".kmz", StringComparison.OrdinalIgnoreCase) Then
+            Dim pierwszyTom = EksportMapy.IstniejaceTomyKmz(_ostatniPlikEksportu).FirstOrDefault()
+            If Not String.IsNullOrEmpty(pierwszyTom) AndAlso File.Exists(pierwszyTom) Then Return pierwszyTom
+        End If
+        Dim folderWyniku = Path.GetDirectoryName(_ostatniPlikEksportu)
+        If Not String.IsNullOrEmpty(folderWyniku) AndAlso Directory.Exists(folderWyniku) Then Return folderWyniku
+        Return ""
+    End Function
+
     ''' <summary>Dostępność opcji i podsumowanie planu eksportu.</summary>
     Private Sub UstawWidok()
         Dim wolny As Boolean = _przerwanie Is Nothing
+        Dim celWyniku As String = If(wolny, WynikDoOtwarcia(), "")
+        btnPokazPlik.Enabled = wolny AndAlso Not String.IsNullOrEmpty(celWyniku)
+        btnWyslijNaTelefon.Enabled = wolny AndAlso File.Exists(celWyniku)
         Dim rodzaj = WybranyRodzaj
         Dim piramida As Boolean = rodzaj = RodzajEksportu.MBTiles OrElse rodzaj = RodzajEksportu.SQLiteDB OrElse rodzaj = RodzajEksportu.OruxMaps OrElse rodzaj = RodzajEksportu.Jnx OrElse rodzaj = RodzajEksportu.GeoPackage
         Dim garmin As Boolean = rodzaj = RodzajEksportu.KmzGarmin OrElse rodzaj = RodzajEksportu.Jnx
         Dim geotiff As Boolean = rodzaj = RodzajEksportu.GeoTiff
         cmbFormatArkusza.Enabled = wolny AndAlso geotiff
-        For Each c As CheckBox In {chkArkuszWorldFile, chkArkuszMap, chkArkuszTab, chkArkuszKml, chkGeoTiffPiramidy}
+        For Each c As CheckBox In {chkArkuszWorldFile, chkArkuszMap, chkArkuszTab, chkArkuszKml}
             c.Enabled = wolny AndAlso geotiff
         Next
+        ' Piramidy są częścią pliku TIFF. Przy arkuszu JPEG lub PNG zaznaczone pole sugerowało, że powstanie GeoTIFF,
+        ' więc jest wtedy odznaczone i wyłączone, a po powrocie do GeoTIFF wraca wybór użytkownika.
+        Dim tiff = WybranyFormatArkusza = FormatArkusza.GeoTiff OrElse WybranyFormatArkusza = FormatArkusza.GeoTiffJpeg
+        _ustawianiePiramid = True
+        chkGeoTiffPiramidy.Checked = tiff AndAlso _piramidyWybrane
+        _ustawianiePiramid = False
+        chkGeoTiffPiramidy.Enabled = wolny AndAlso geotiff AndAlso tiff
         chkKorekcjaMip.Enabled = wolny
         btnPodgladMip.Enabled = wolny AndAlso chkKorekcjaMip.Checked
         btnWielowarstwowyMbtiles.Enabled = wolny AndAlso (rbMBTiles.Checked OrElse rbGeoPackage.Checked)
@@ -400,6 +495,15 @@ Public Class FormEksport
         lblKolejnoscGarmin.Enabled = garmin
         cboKolejnoscGarmin.Enabled = garmin AndAlso wolny
         grpMBTiles.Enabled = wolny AndAlso piramida
+        grpArkuszOpcje.Visible = geotiff
+        grpMBTiles.Visible = Not geotiff
+        grpArkuszOpcje.Enabled = wolny
+        chkSiatkaKilometrowa.Enabled = wolny
+        cmbUkladSiatki.Enabled = wolny AndAlso chkSiatkaKilometrowa.Checked
+        cmbKrokSiatki.Enabled = wolny AndAlso chkSiatkaKilometrowa.Checked
+        btnSladWydruku.Enabled = wolny
+        btnUsunSlad.Enabled = wolny AndAlso Not String.IsNullOrEmpty(_plikSladuArkusza)
+        btnUsunSlad.Visible = Not String.IsNullOrEmpty(_plikSladuArkusza)
         chkPng.Enabled = piramida AndAlso rodzaj <> RodzajEksportu.Jnx AndAlso Not (chkNakladka.Checked AndAlso chkNakladka.Enabled)
         chkNakladka.Enabled = rodzaj <> RodzajEksportu.Jnx
         btnDopasuj.Enabled = piramida
@@ -441,7 +545,8 @@ Public Class FormEksport
                                                                     rbSQLiteDB.CheckedChanged, rbOruxMaps.CheckedChanged, rbJnx.CheckedChanged, rbGeoTiff.CheckedChanged, rbTrekBuddy.CheckedChanged, cmbFormatArkusza.SelectedIndexChanged, chkArkuszWorldFile.CheckedChanged, chkArkuszMap.CheckedChanged, chkArkuszTab.CheckedChanged, chkArkuszKml.CheckedChanged, chkKorekcjaMip.CheckedChanged,
                                                                     cboKolejnoscGarmin.SelectedIndexChanged, chkPodzialNaTomy.CheckedChanged, nudMaksKafli.ValueChanged,
                                                                     nudPoziomMin.ValueChanged, nudPoziomMax.ValueChanged, chkPng.CheckedChanged,
-                                                                    chkNakladka.CheckedChanged, chkBialePodstawa.CheckedChanged, nudJakosc.ValueChanged
+                                                                    chkNakladka.CheckedChanged, chkBialePodstawa.CheckedChanged, nudJakosc.ValueChanged,
+                                                                    chkSiatkaKilometrowa.CheckedChanged, cmbUkladSiatki.SelectedIndexChanged, cmbKrokSiatki.SelectedIndexChanged
         If chkKorekcjaMip.Checked <> _opcjeMip.Wlaczona Then
             _opcjeMip.Wlaczona = chkKorekcjaMip.Checked
             If chkKorekcjaMip.Checked AndAlso _opcjeMip.Profil = ProfilKorektyRastra.Brak Then
@@ -450,6 +555,26 @@ Public Class FormEksport
             AktualizujPrzyciskMip()
         End If
         lblRozmiar.Text = ""
+        UstawWidok()
+    End Sub
+
+    Private Sub btnSladWydruku_Click(sender As Object, e As EventArgs) Handles btnSladWydruku.Click
+        Using dlg As New OpenFileDialog()
+            dlg.Filter = "Pliki tras (*.gpx;*.kml;*.kmz)|*.gpx;*.kml;*.kmz|Wszystkie pliki (*.*)|*.*"
+            dlg.Title = "Wybierz plik śladu trasy dla arkusza"
+            If dlg.ShowDialog(Me) = DialogResult.OK Then
+                _plikSladuArkusza = dlg.FileName
+                lblSladInfo.Text = Path.GetFileName(_plikSladuArkusza)
+                ToolTip1.SetToolTip(lblSladInfo, _plikSladuArkusza)
+                UstawWidok()
+            End If
+        End Using
+    End Sub
+
+    Private Sub btnUsunSlad_Click(sender As Object, e As EventArgs) Handles btnUsunSlad.Click
+        _plikSladuArkusza = ""
+        lblSladInfo.Text = ""
+        ToolTip1.SetToolTip(lblSladInfo, "")
         UstawWidok()
     End Sub
 
@@ -489,9 +614,8 @@ Public Class FormEksport
             MsgBox("Segmenty z tego folderu nie pokrywają obszaru mapy podstawowej.", MsgBoxStyle.Exclamation, "Eksport mapy")
             Exit Sub
         End If
-        'segmenty bez przezroczystego tła (JPEG albo PNG pobrane bez TRANSPARENT=TRUE) - białe tło domyślnie przezroczyste
-        Dim c = s.Konfiguracja
-        s.Zrodlo.BialePrzezroczyste = Not (Wms.CzyFormatZPrzezroczystoscia(c.Format) AndAlso c.Przezroczystosc)
+        'wypalanie białego tła tylko na wyraźne życzenie użytkownika (chkBialeNakladka), żeby nie niszczyć jasnych detali JPEG
+        s.Zrodlo.BialePrzezroczyste = False
         Dim p As New PozycjaNakladki With {.Sesja = s, .Warstwa = New WarstwaEksportu With {
             .Zrodlo = s.Zrodlo, .Uklad = s.Uklad, .Krycie = 1, .Opis = s.Opis, .AdresSerwera = s.AdresSerwera}}
         lstNakladki.Items.Add(p)
@@ -657,8 +781,9 @@ Public Class FormEksport
             If Not Me.IsDisposed AndAlso Not Me.Disposing Then
                 prgEksport.Value = 100
                 _ostatniPlikEksportu = z.Plik
-                btnPokazPlik.Enabled = True
-                btnWyslijNaTelefon.Enabled = File.Exists(z.Plik)
+                Dim celWyniku = WynikDoOtwarcia()
+                btnPokazPlik.Enabled = Not String.IsNullOrEmpty(celWyniku)
+                btnWyslijNaTelefon.Enabled = File.Exists(celWyniku)
                 Select Case z.Rodzaj
                     Case RodzajEksportu.GeoTiff
                         Dim rozmiar As Long = If(File.Exists(z.Plik), New FileInfo(z.Plik).Length, 0)
@@ -699,7 +824,9 @@ Public Class FormEksport
                         Komunikat("Zapisano plik " & z.Plik & " (" & SzacunekRozmiaru.Tekst(rozmiar) & ")", Color.Green)
                 End Select
             End If
-            Form1.Komunikat("Wyeksportowano mapę do " & Path.GetFileName(z.Plik), Color.Green)
+            If Not IsDisposed AndAlso Not Form1.IsDisposed Then
+                Form1.Komunikat("Wyeksportowano mapę do " & Path.GetFileName(z.Plik), Color.Green)
+            End If
         Catch ex As OperationCanceledException
             If Not Me.IsDisposed AndAlso Not Me.Disposing Then
                 Komunikat("Przerwano eksport", Color.Red)
@@ -734,12 +861,13 @@ Public Class FormEksport
     End Function
 
     Private Sub btnPokazPlik_Click(sender As Object, e As EventArgs) Handles btnPokazPlik.Click
-        If Not String.IsNullOrEmpty(_ostatniPlikEksportu) Then
+        Dim cel = WynikDoOtwarcia()
+        If Not String.IsNullOrEmpty(cel) Then
             Try
-                If Directory.Exists(_ostatniPlikEksportu) Then
-                    Process.Start(New ProcessStartInfo("explorer.exe", """" & _ostatniPlikEksportu & """") With {.UseShellExecute = True})
-                ElseIf File.Exists(_ostatniPlikEksportu) Then
-                    Process.Start(New ProcessStartInfo("explorer.exe", "/select,""" & _ostatniPlikEksportu & """") With {.UseShellExecute = True})
+                If Directory.Exists(cel) Then
+                    Process.Start(New ProcessStartInfo("explorer.exe", """" & cel & """") With {.UseShellExecute = True})
+                ElseIf File.Exists(cel) Then
+                    Process.Start(New ProcessStartInfo("explorer.exe", "/select,""" & cel & """") With {.UseShellExecute = True})
                 End If
             Catch ex As Exception
                 MsgBox("Nie udało się otworzyć folderu: " & OpisBledu.Z(ex), MsgBoxStyle.Exclamation, "Eksport mapy")
@@ -748,10 +876,11 @@ Public Class FormEksport
     End Sub
 
     Private Sub btnWyslijNaTelefon_Click(sender As Object, e As EventArgs) Handles btnWyslijNaTelefon.Click
-        If Not String.IsNullOrEmpty(_ostatniPlikEksportu) AndAlso File.Exists(_ostatniPlikEksportu) Then
-            Dim ext = Path.GetExtension(_ostatniPlikEksportu).ToLowerInvariant()
+        Dim cel = WynikDoOtwarcia()
+        If Not String.IsNullOrEmpty(cel) AndAlso File.Exists(cel) Then
+            Dim ext = Path.GetExtension(cel).ToLowerInvariant()
             If ext = ".jnx" Then
-                FormKopiujNaGarmina.PokazDlaPliku(Me, _ostatniPlikEksportu)
+                FormKopiujNaGarmina.PokazDlaPliku(Me, cel)
                 Return
             ElseIf ext = ".kmz" AndAlso MenadzerGarminUsb.WykryjDyskiGarmina().Any() Then
                 Dim odp = MessageBox.Show(Me, "Wykryto odbiornik Garmin podłączony przez USB." & vbCrLf & vbCrLf &
@@ -759,13 +888,13 @@ Public Class FormEksport
                                           "(Wybierz 'Nie', aby wyświetlić kod QR do pobrania przez Wi-Fi)",
                                           "Kopiowanie na urządzenie", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question)
                 If odp = DialogResult.Yes Then
-                    FormKopiujNaGarmina.PokazDlaPliku(Me, _ostatniPlikEksportu)
+                    FormKopiujNaGarmina.PokazDlaPliku(Me, cel)
                     Return
                 ElseIf odp = DialogResult.Cancel Then
                     Return
                 End If
             End If
-            FormWyslijNaTelefon.PokazDlaPliku(Me, _ostatniPlikEksportu)
+            FormWyslijNaTelefon.PokazDlaPliku(Me, cel)
         End If
     End Sub
 
@@ -853,8 +982,10 @@ Public Class FormEksport
     End Sub
 
     Private Sub btnWielowarstwowyMbtiles_Click(sender As Object, e As EventArgs) Handles btnWielowarstwowyMbtiles.Click
-        FormZaawansowanyMbtiles.WybranyFormat = If(rbGeoPackage.Checked, RodzajEksportu.GeoPackage, RodzajEksportu.MBTiles)
-        FormZaawansowanyMbtiles.ShowDialog(Me)
+        Using okno As New FormZaawansowanyMbtiles()
+            okno.WybranyFormat = If(rbGeoPackage.Checked, RodzajEksportu.GeoPackage, RodzajEksportu.MBTiles)
+            okno.ShowDialog(Me)
+        End Using
     End Sub
 
     Private Sub btnPrzerwij_Click(sender As Object, e As EventArgs) Handles btnPrzerwij.Click

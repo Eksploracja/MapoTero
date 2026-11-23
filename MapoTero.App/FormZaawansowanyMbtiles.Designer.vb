@@ -155,7 +155,7 @@ Partial Class FormZaawansowanyMbtiles
         Me.colTryb.DisplayStyleForCurrentCellOnly = False
         Me.colTryb.FlatStyle = System.Windows.Forms.FlatStyle.Flat
         Me.colTryb.HeaderText = "Mieszanie"
-        Me.colTryb.Items.AddRange(New Object() {"1 Zwykły", "2 Mnożenie", "3 Ciemniej", "4 Jaśniej", "5 Ekran", "6 Nakładka"})
+        Me.colTryb.Items.AddRange(New Object() {"1 Zwykły", "2 Mnożenie", "3 Ciemniej", "4 Jaśniej", "5 Ekran", "6 Nakładka", "7 Rzeźba terenu"})
         Me.colTryb.Name = "colTryb"
         Me.colTryb.Width = 105
         '

@@ -891,7 +891,8 @@ Public NotInheritable Class KatalogSerwerow
     Private Shared Function DopiszDoOpisu(istniejacyOpis As String, kolejnyZbior As String) As String
         If String.IsNullOrWhiteSpace(kolejnyZbior) Then Return istniejacyOpis
         If String.IsNullOrWhiteSpace(istniejacyOpis) Then Return "Inne zbiory w tej usłudze: " & kolejnyZbior
-        If istniejacyOpis.IndexOf("Inne zbiory w tej usłudze:", StringComparison.OrdinalIgnoreCase) >= 0 Then
+        If istniejacyOpis.IndexOf("Inne zbiory:", StringComparison.OrdinalIgnoreCase) >= 0 OrElse
+           istniejacyOpis.IndexOf("Inne zbiory w tej usłudze:", StringComparison.OrdinalIgnoreCase) >= 0 Then
             Return istniejacyOpis & ", " & kolejnyZbior
         End If
         Return istniejacyOpis & " | Inne zbiory: " & kolejnyZbior
@@ -1142,34 +1143,40 @@ Public NotInheritable Class KlientKataloguSerwerow
             End If
 
             If szukajGminy Then
-                Dim gminy As List(Of WpisKataloguSerwerow) = Await zadanieGminyPoczatkowe.ConfigureAwait(False)
-                If Not tylkoCyfry Then
-                    'jeśli fraza wielowyrazowa nie dała wyniku, próba po najdłuższym słowie oraz po rdzeniu
-                    If gminy.Count = 0 AndAlso slowoGlowne <> "" AndAlso Not String.Equals(zapytanieNazwaPoczatkowe, slowoGlowne, StringComparison.OrdinalIgnoreCase) Then
-                        gminy = Await PobierzGminyEziudpAsync("nazwa=" & Uri.EscapeDataString(slowoGlowne), timeoutSekundy, token, handler).ConfigureAwait(False)
-                    End If
-                    If gminy.Count = 0 AndAlso slowoGlowne.Length >= 6 Then
-                        Dim rdzen = slowoGlowne.Substring(0, slowoGlowne.Length - 2)
-                        gminy = Await PobierzGminyEziudpAsync("nazwa=" & Uri.EscapeDataString(rdzen), timeoutSekundy, token, handler).ConfigureAwait(False)
+                Try
+                    Dim gminy As List(Of WpisKataloguSerwerow) = Await zadanieGminyPoczatkowe.ConfigureAwait(False)
+                    If Not tylkoCyfry Then
+                        'jeśli fraza wielowyrazowa nie dała wyniku, próba po najdłuższym słowie oraz po rdzeniu
+                        If gminy.Count = 0 AndAlso slowoGlowne <> "" AndAlso Not String.Equals(zapytanieNazwaPoczatkowe, slowoGlowne, StringComparison.OrdinalIgnoreCase) Then
+                            gminy = Await PobierzGminyEziudpAsync("nazwa=" & Uri.EscapeDataString(slowoGlowne), timeoutSekundy, token, handler).ConfigureAwait(False)
+                        End If
+                        If gminy.Count = 0 AndAlso slowoGlowne.Length >= 6 Then
+                            Dim rdzen = slowoGlowne.Substring(0, slowoGlowne.Length - 2)
+                            gminy = Await PobierzGminyEziudpAsync("nazwa=" & Uri.EscapeDataString(rdzen), timeoutSekundy, token, handler).ConfigureAwait(False)
+                        End If
+
+                        'dla miast na prawach powiatu (np. Łódź, Bielsko-Biała) API po organie ("Łodzi") nie zwraca wyników,
+                        'ale 4-cyfrowy TERYT z listy powiatów odnajduje wszystkie usługi gminne miasta
+                        If kodyTerytZPowiatow.Count > 0 AndAlso kodyTerytZPowiatow.Count <= 3 Then
+                            Dim zadaniaTeryt = kodyTerytZPowiatow.Select(Function(kod) PobierzGminyEziudpAsync("teryt=" & Uri.EscapeDataString(kod), timeoutSekundy, token, handler)).ToList()
+                            Dim wynikiTeryt = Await Task.WhenAll(zadaniaTeryt).ConfigureAwait(False)
+                            For Each listaT In wynikiTeryt
+                                gminy.AddRange(listaT)
+                            Next
+                        End If
                     End If
 
-                    'dla miast na prawach powiatu (np. Łódź, Bielsko-Biała) API po organie ("Łodzi") nie zwraca wyników,
-                    'ale 4-cyfrowy TERYT z listy powiatów odnajduje wszystkie usługi gminne miasta
-                    If kodyTerytZPowiatow.Count > 0 AndAlso kodyTerytZPowiatow.Count <= 3 Then
-                        Dim zadaniaTeryt = kodyTerytZPowiatow.Select(Function(kod) PobierzGminyEziudpAsync("teryt=" & Uri.EscapeDataString(kod), timeoutSekundy, token, handler)).ToList()
-                        Dim wynikiTeryt = Await Task.WhenAll(zadaniaTeryt).ConfigureAwait(False)
-                        For Each listaT In wynikiTeryt
-                            gminy.AddRange(listaT)
-                        Next
+                    Dim przefiltrowaneGminy = KatalogSerwerow.Filtruj(gminy, przycieta)
+                    If przefiltrowaneGminy.Count = 0 AndAlso Not tylkoCyfry AndAlso slowoGlowne.Length >= 6 Then
+                        Dim frazaZRdzeniem = If(frazaRdzeniowaPowiaty, ZastapSlowoRdzeniem(przycieta, slowoGlowne, Math.Min(5, slowoGlowne.Length - 2)))
+                        przefiltrowaneGminy = KatalogSerwerow.Filtruj(gminy, frazaZRdzeniem)
                     End If
-                End If
-
-                Dim przefiltrowaneGminy = KatalogSerwerow.Filtruj(gminy, przycieta)
-                If przefiltrowaneGminy.Count = 0 AndAlso Not tylkoCyfry AndAlso slowoGlowne.Length >= 6 Then
-                    Dim frazaZRdzeniem = If(frazaRdzeniowaPowiaty, ZastapSlowoRdzeniem(przycieta, slowoGlowne, Math.Min(5, slowoGlowne.Length - 2)))
-                    przefiltrowaneGminy = KatalogSerwerow.Filtruj(gminy, frazaZRdzeniem)
-                End If
-                polaczone.AddRange(przefiltrowaneGminy)
+                    polaczone.AddRange(przefiltrowaneGminy)
+                Catch ex As OperationCanceledException When token.IsCancellationRequested
+                    Throw
+                Catch
+                    If Not szukajPowiaty OrElse polaczone.Count = 0 Then Throw
+                End Try
             End If
 
             'deduplikacja końcowa między powiatami i gminami
@@ -1230,9 +1237,15 @@ Public NotInheritable Class KlientKataloguSerwerow
     End Function
 
     Private Shared Function ZastapSlowoRdzeniem(calaFraza As String, slowo As String, dlugoscRdzenia As Integer) As String
-        If String.IsNullOrEmpty(slowo) OrElse dlugoscRdzenia <= 0 OrElse dlugoscRdzenia >= slowo.Length Then Return calaFraza
-        Dim rdzen = FiltrWarstw.Uprosc(slowo).Substring(0, dlugoscRdzenia)
-        Dim czesci = FiltrWarstw.Slowa(calaFraza).Select(Function(s) If(String.Equals(s, FiltrWarstw.Uprosc(slowo), StringComparison.OrdinalIgnoreCase), rdzen, s))
+        Dim uproszczone = FiltrWarstw.Uprosc(slowo)
+        If String.IsNullOrEmpty(uproszczone) OrElse dlugoscRdzenia <= 0 OrElse dlugoscRdzenia >= uproszczone.Length Then Return calaFraza
+        Dim rdzen = uproszczone.Substring(0, dlugoscRdzenia)
+        Dim czesciTokeny = uproszczone.Split({"-"c}, StringSplitOptions.RemoveEmptyEntries)
+        Dim najdluzszyToken = If(czesciTokeny.Length > 1, czesciTokeny.OrderByDescending(Function(t) t.Length).First(), "")
+        Dim czesci = FiltrWarstw.Slowa(calaFraza).Select(
+            Function(s) If(String.Equals(s, uproszczone, StringComparison.OrdinalIgnoreCase) OrElse
+                           (najdluzszyToken.Length > dlugoscRdzenia AndAlso String.Equals(s, najdluzszyToken, StringComparison.OrdinalIgnoreCase)),
+                           If(String.Equals(s, uproszczone, StringComparison.OrdinalIgnoreCase), rdzen, s.Substring(0, Math.Min(dlugoscRdzenia, s.Length))), s))
         Return String.Join(" ", czesci)
     End Function
 
@@ -1292,6 +1305,7 @@ Public NotInheritable Class KlientKataloguSerwerow
                     Dim charset = odp.Content.Headers?.ContentType?.CharSet
                     If Not String.IsNullOrWhiteSpace(charset) Then
                         Try
+                            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance)
                             kodowanie = Encoding.GetEncoding(charset.Trim(""""c, " "c))
                         Catch
                         End Try
