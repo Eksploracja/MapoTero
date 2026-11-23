@@ -644,7 +644,7 @@
         .catch(function () {
           pasekMapoTero.classList.add("gw-pasek-blad");
           pasekMapoTero.textContent =
-            "Brak odpowiedzi z MapoTero — upewnij się, że program nadal jest uruchomiony.";
+            "Brak odpowiedzi z MapoTero — upewnij się, że program nadal jest uruchomiony i że w wyskakującym oknie przeglądarki wyraziłeś zgodę na dostęp do sieci lokalnej (127.0.0.1).";
         });
     }
 
