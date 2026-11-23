@@ -391,6 +391,7 @@ Public Class Form1
 
     Private Sub Form1_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         RejestrujKodowania()
+        btnGaleriaWarstw.Image = UtworzIkoneGalerii()
         'silnik (MapoTero.Silnik) nie zna ustawień programu - dla sesji bez numeracji w conf.txt pyta o bieżącą
         UstawieniaSilnika.NumeracjaDomyslna = Function() Ustawienia.Numeracja
 
@@ -4021,9 +4022,31 @@ Public Class Form1
         OtworzPomocOnline()
     End Sub
 
-    Private Sub GaleriaWarstwToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles GaleriaWarstwToolStripMenuItem.Click
+    Private Sub GaleriaWarstwToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles GaleriaWarstwToolStripMenuItem.Click, btnGaleriaWarstw.Click
         OtworzGalerieWarstw()
     End Sub
+
+    Private Shared Function UtworzIkoneGalerii() As Bitmap
+        Dim bmp As New Bitmap(16, 16)
+        Using g = Graphics.FromImage(bmp)
+            g.Clear(Color.Transparent)
+            Using p1 As New SolidBrush(Color.FromArgb(46, 125, 50)),
+                  p2 As New SolidBrush(Color.FromArgb(29, 78, 216)),
+                  p3 As New SolidBrush(Color.FromArgb(217, 119, 6)),
+                  p4 As New SolidBrush(Color.FromArgb(114, 83, 237)),
+                  ramka As New Pen(Color.FromArgb(80, 80, 90))
+                g.FillRectangle(p1, 1, 1, 6, 6)
+                g.FillRectangle(p2, 9, 1, 6, 6)
+                g.FillRectangle(p3, 1, 9, 6, 6)
+                g.FillRectangle(p4, 9, 9, 6, 6)
+                g.DrawRectangle(ramka, 1, 1, 5, 5)
+                g.DrawRectangle(ramka, 9, 1, 5, 5)
+                g.DrawRectangle(ramka, 1, 9, 5, 5)
+                g.DrawRectangle(ramka, 9, 9, 5, 5)
+            End Using
+        End Using
+        Return bmp
+    End Function
 
     ''' <summary>
     ''' Uruchamia lokalny nasłuch MostekGalerii (jeśli nie działa) i otwiera stronę galerii warstw w przeglądarce

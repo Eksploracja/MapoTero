@@ -49,6 +49,7 @@ Partial Class Form1
         Me.tvWarstwy = New MapoTero.DrzewoWarstw()
         Me.txtSzukajWarstwy = New System.Windows.Forms.TextBox()
         Me.btnZwinRozwin = New System.Windows.Forms.Button()
+        Me.btnGaleriaWarstw = New System.Windows.Forms.Button()
         Me.lblUklad = New System.Windows.Forms.Label()
         Me.cmbUklad = New System.Windows.Forms.ComboBox()
         Me.Panel1 = New System.Windows.Forms.Panel()
@@ -255,6 +256,7 @@ Partial Class Form1
         Me.grpDaneZrodlowe.Controls.Add(Me.txtSzukajWarstwy)
         Me.grpDaneZrodlowe.Controls.Add(Me.btnZwinRozwin)
         Me.grpDaneZrodlowe.Controls.Add(Me.btnDodajSerwer)
+        Me.grpDaneZrodlowe.Controls.Add(Me.btnGaleriaWarstw)
         Me.grpDaneZrodlowe.Controls.Add(Me.lblUklad)
         Me.grpDaneZrodlowe.Controls.Add(Me.cmbUklad)
         Me.grpDaneZrodlowe.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
@@ -291,7 +293,7 @@ Partial Class Form1
         Me.txtSzukajWarstwy.Location = New System.Drawing.Point(6, 30)
         Me.txtSzukajWarstwy.Name = "txtSzukajWarstwy"
         Me.txtSzukajWarstwy.PlaceholderText = "szukaj warstwy…"
-        Me.txtSzukajWarstwy.Size = New System.Drawing.Size(144, 20)
+        Me.txtSzukajWarstwy.Size = New System.Drawing.Size(118, 20)
         Me.txtSzukajWarstwy.TabIndex = 215
         Me.ToolTip1.SetToolTip(Me.txtSzukajWarstwy, "Pokaż tylko warstwy, których nazwa lub nazwa zbioru map zawiera wpisane słowa" & _
         " (wielkość liter i polskie znaki nie mają znaczenia). Esc - wyczyść.")
@@ -300,7 +302,7 @@ Partial Class Form1
         '
         Me.btnZwinRozwin.Font = New System.Drawing.Font("Segoe UI Symbol", 8.25!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
         Me.btnZwinRozwin.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.btnZwinRozwin.Location = New System.Drawing.Point(153, 28)
+        Me.btnZwinRozwin.Location = New System.Drawing.Point(127, 28)
         Me.btnZwinRozwin.Margin = New System.Windows.Forms.Padding(0)
         Me.btnZwinRozwin.Name = "btnZwinRozwin"
         Me.btnZwinRozwin.Size = New System.Drawing.Size(25, 23)
@@ -313,13 +315,24 @@ Partial Class Form1
         '
         Me.btnDodajSerwer.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
         Me.btnDodajSerwer.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.btnDodajSerwer.Location = New System.Drawing.Point(179, 28)
+        Me.btnDodajSerwer.Location = New System.Drawing.Point(153, 28)
         Me.btnDodajSerwer.Name = "btnDodajSerwer"
         Me.btnDodajSerwer.Size = New System.Drawing.Size(25, 23)
         Me.btnDodajSerwer.TabIndex = 217
         Me.btnDodajSerwer.Text = "+"
         Me.ToolTip1.SetToolTip(Me.btnDodajSerwer, "Dodaj nowy serwer WMS / WMTS (kreator pobierania warstw)...")
         Me.btnDodajSerwer.UseVisualStyleBackColor = True
+        '
+        'btnGaleriaWarstw
+        '
+        Me.btnGaleriaWarstw.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.btnGaleriaWarstw.Location = New System.Drawing.Point(179, 28)
+        Me.btnGaleriaWarstw.Margin = New System.Windows.Forms.Padding(0)
+        Me.btnGaleriaWarstw.Name = "btnGaleriaWarstw"
+        Me.btnGaleriaWarstw.Size = New System.Drawing.Size(25, 23)
+        Me.btnGaleriaWarstw.TabIndex = 218
+        Me.ToolTip1.SetToolTip(Me.btnGaleriaWarstw, "Galeria warstw map (podgląd online) - zobacz wygląd warstw i dodaj wybraną jednym kliknięciem")
+        Me.btnGaleriaWarstw.UseVisualStyleBackColor = True
         '
         'lblUklad
         '
@@ -2109,6 +2122,7 @@ Partial Class Form1
     Friend WithEvents MenuStrip1 As System.Windows.Forms.MenuStrip
     Friend WithEvents txtSzukajWarstwy As System.Windows.Forms.TextBox
     Friend WithEvents btnZwinRozwin As System.Windows.Forms.Button
+    Friend WithEvents btnGaleriaWarstw As System.Windows.Forms.Button
     Friend WithEvents lblUklad As System.Windows.Forms.Label
     Friend WithEvents cmbUklad As System.Windows.Forms.ComboBox
     Friend WithEvents tvWarstwy As MapoTero.DrzewoWarstw
