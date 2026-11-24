@@ -1,30 +1,18 @@
-<div align="center">
-
 # MapoTero
-
-**Darmowy, otwartoźródłowy program dla systemu Windows do pobierania map WMS, WMTS oraz XYZ/TMS**  
-Ortofotomapy, cieniowanie LiDAR/NMT, mapy topograficzne, historyczne i ewidencja działek (EGiB) → gotowe mapy offline na telefon, odbiorniki Garmin, do programów GIS oraz rysunków CAD.
-
-<br>
-
-[![Pobierz najnowszą wersję](https://img.shields.io/github/v/release/Eksploracja/MapoTero?label=Pobierz%20MapoTero&style=for-the-badge&color=2ea44f)](https://github.com/Eksploracja/MapoTero/releases/latest)
-[![Podręcznik online](https://img.shields.io/badge/Podr%C4%99cznik-Online-0969da?style=for-the-badge)](https://eksploracja.github.io/MapoTero/pomoc/)
-[![Galeria warstw](https://img.shields.io/badge/Galeria-Warstw-8250df?style=for-the-badge)](https://eksploracja.github.io/MapoTero/pomoc/galeria-warstw/)
-
-<br>
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue?style=flat-square)](LICENSE)
 [![Platforma](https://img.shields.io/badge/.NET-10-purple?style=flat-square&logo=dotnet&logoColor=white)](https://dotnet.microsoft.com/)
 [![Kompilacja i testy](https://img.shields.io/github/actions/workflow/status/Eksploracja/MapoTero/kompilacja.yml?style=flat-square&label=Kompilacja%20i%20testy)](https://github.com/Eksploracja/MapoTero/actions/workflows/kompilacja.yml)
 [![Pobrania](https://img.shields.io/github/downloads/Eksploracja/MapoTero/total?style=flat-square&label=Pobrania&color=orange)](https://github.com/Eksploracja/MapoTero/releases)
+[![Dokumentacja](https://img.shields.io/badge/Dokumentacja-Podr%C4%99cznik%20online-brightgreen.svg)](https://eksploracja.github.io/MapoTero/pomoc/)
 [![Facebook](https://img.shields.io/badge/Facebook-MapoTero-1877F2?style=flat-square&logo=facebook&logoColor=white)](https://www.facebook.com/mapotero.opensource)
 [![Wesprzyj](https://img.shields.io/badge/Wesprzyj-BuyCoffee-FFDD00?style=flat-square&logo=buy-me-a-coffee&logoColor=black)](https://buycoffee.to/mapy)
 
-<br>
+**MapoTero** to darmowy, otwartoźródłowy program dla systemu Windows do pobierania map rastrowych z usług **WMS, WMTS oraz XYZ/TMS**. Pozwala pobrać ortofotomapy, cieniowanie LiDAR/NMT, mapy topograficzne, historyczne i ewidencję działek (EGiB) → gotowe mapy offline na telefon, odbiorniki Garmin, do programów GIS oraz rysunków CAD.
+
+[Pobierz](#pobieranie-i-wymagania) · [Szybki start](#szybki-start) · [Galeria warstw](https://eksploracja.github.io/MapoTero/pomoc/galeria-warstw/) · [Podręcznik online](https://eksploracja.github.io/MapoTero/pomoc/) · [Zgłoś błąd](https://github.com/Eksploracja/MapoTero/issues)
 
 ![Główne okno programu MapoTero](pomoc/obrazy/03-okno-glowne.png)
-
-</div>
 
 ## Co zrobisz w MapoTero?
 
@@ -62,10 +50,8 @@ Program działa w trybie **portable (bez instalacji)** jako pojedynczy plik `Map
 > * **Szybszy sposób (przed rozpakowaniem):** kliknij prawym przyciskiem myszy na pobranym pliku ZIP → **Właściwości** → zaznacz **„Odblokuj”** u dołu okna → **OK**.  
 > * **Weryfikacja pliku:** w opisie każdego [wydania w Releases](https://github.com/Eksploracja/MapoTero/releases/latest) znajdziesz sumy kontrolne SHA-256 archiwum ZIP i `MapoTero.exe` oraz link do skanu w serwisie VirusTotal.
 
-<details>
+<details markdown="block">
 <summary><b>Zobacz jak wygląda monit SmartScreen (zrzut ekranu)</b></summary>
-
-<br>
 
 ![Okno SmartScreen: najpierw „Więcej informacji”, potem „Uruchom mimo to”](obrazy/smartscreen.png)
 
@@ -93,10 +79,8 @@ Program działa w trybie **portable (bez instalacji)** jako pojedynczy plik `Map
 
 ![Bezpośredni transfer mapy na telefon przez Wi-Fi i kod QR](pomoc/obrazy/16-wyslij-telefon.png)
 
-<details>
+<details markdown="block">
 <summary><b>Więcej zrzutów ekranu (Eksport mapy, kompozycje warstw z cieniowaniem LiDAR)</b></summary>
-
-<br>
 
 ### Eksport mapy (formaty mobilne, arkusze GeoTIFF, Garmin USB)
 ![Okno eksportu mapy](pomoc/obrazy/10-eksport-mapy.png)
@@ -121,10 +105,8 @@ Główne wbudowane źródła danych:
 * **Mapy kafelkowe XYZ/TMS:** OSMapa.pl, UMP-pcPL, szlaki Waymarked Trails (piesze, rowerowe, MTB i inne), OpenTopoMap oraz usługi z katalogu QuickMapServices.
 * **Służby geodezyjne krajów sąsiednich i Bałtyku:** Czechy (**ČÚZK**), Słowacja (**ZBGIS**, **Freemap**), Niemcy (**BKG**, **GeoBasis-BB Brandenburgia**, **GeoSN Saksonia**), Litwa (**INSPIRE**) oraz **EMODnet Bathymetry**.
 
-<details>
+<details markdown="block">
 <summary><b>Wskazówki dla map w strefie przygranicznej (Czechy, Słowacja, Niemcy, Litwa)</b></summary>
-
-<br>
 
 * **Dobór układu współrzędnych:**
   * **Warstwy WMTS i XYZ** (np. czeska *ZTM_WM*, słowacka *Freemap Outdoor*, niemiecka *basemap.de*, *OpenTopoMap*): działają w każdym układzie (PL-1992, PL-2000, UTM, WGS84), ponieważ program przelicza je w locie na siatkę wybranego układu.
@@ -137,10 +119,8 @@ Główne wbudowane źródła danych:
 > [!TIP]
 > **Własne zbiory map:** zaawansowani użytkownicy mogą dodawać i organizować własne pliki definicji warstw w katalogu `warstwy/` oraz konfigurować strukturę grup w pliku `katalog.txt`. Szczegółowy opis formatów znajdziesz w [Podręczniku online](https://eksploracja.github.io/MapoTero/pomoc/warstwy/).
 
-<details>
+<details markdown="block">
 <summary><b>Budowanie ze źródeł i kompilacja (dla programistów)</b></summary>
-
-<br>
 
 **Wymagania:** **Visual Studio 2026 (18.0+)** z obsługą .NET 10 albo samo **.NET 10 SDK** (*Visual Studio 2022 nie kompiluje projektów .NET 10*).
 
