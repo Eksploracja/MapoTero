@@ -20,7 +20,7 @@ Ustawienia i zbiory map z poprzednich wersji (plik `lastsettings.txt`, folder `w
   * **Mapy wieloskalowe:** automatyczne generowanie piramid skalowych w formatach MBTiles, GeoPackage, SQLiteDB i JNX — przy oddalaniu widoku mapa automatycznie przełącza się na mniejszą skalę (np. 1:10 000 → 1:25 000 → 1:50 000 → 1:100 000) zamiast pokazywać nieczytelną pomniejszoną mozaikę.
   * Opcjonalna warstwa zdjęć lotniczych (ortofotomapa przy zbliżeniu, zoom 17, piksel 0,75 m) dla największych powiększeń w stylach turystycznych.
   * Zaawansowany kalkulator: precyzyjne szacowanie liczby segmentów, rozmiaru pliku i czasu generowania z podziałem na serwery, ostrzeganie o limicie 100 kafli Garmina i braku miejsca na dysku, wskaźnik rzeczywistego postępu i pozostałego czasu pobierania.
-  * Możliwość zapisu własnej kompozycji jako *Mój styl* do wielokrotnego wykorzystania.
+  * Możliwość zapisu własnej kompozycji jako własnego szablonu (*Zapisz jako szablon...*) do wielokrotnego wykorzystania.
 * **Bezpośredni transfer map na telefon przez Wi-Fi i kod QR:**
   * W oknie *Eksport mapy*, oknie zaawansowanego MBTiles oraz w menu *Narzędzia -> Prześlij mapę na telefon (Wi-Fi)...* przycisk *Wyślij na telefon...* uruchamia wbudowany, lekki serwer HTTP w sieci lokalnej i wyświetla na ekranie duży, czytelny kod QR (natywny generator bez zewnętrznych zależności).
   * Zeskanowanie kodu aparatem smartfona natychmiast otwiera stronę pobierania i przesyła plik (`.mbtiles`, `.gpkg`, `.tif`, `.kmz`, `.sqlitedb`, `.tar`) bezpośrednio do pamięci telefonu (Locus Map, QField, OsmAnd, OruxMaps, Avenza Maps) bez użycia kabla USB i bez wysyłania map do zewnętrznych chmur.
@@ -35,7 +35,7 @@ Ustawienia i zbiory map z poprzednich wersji (plik `lastsettings.txt`, folder `w
   * Błyskawiczne otwieranie i płynne przeglądanie wielogigabajtowych map w Avenza Maps, QGIS, ArcGIS oraz oprogramowaniu CAD (AutoCAD, MicroStation) z dekompresją z dysku wyłącznie widocznych fragmentów rastra.
 * **Nowy, ergonomiczny układ okna głównego i kart narzędziowych:**
   * Zintegrowany pasek wyszukiwania nad mapą (*Szukaj miejsca lub działki...*, skrót Ctrl+F) z podpowiedziami w trakcie pisania, obsługą adresów, miejscowości (geokoder Nominatim), identyfikatorów TERYT / numerów działek (ULDK) oraz bezpośrednim wklejaniem współrzędnych (WGS84, PL-1992, PL-2000).
-  * Nowy podział na karty pod mapą z czytelnymi ikonami i obramowaniem: karta *Zasięg obszaru* z rozwijanym menu *Zmień ▾* (dostęp do współrzędnych, korytarza GPX, poligonu KML/GeoPackage), karta *Parametry segmentów* z bezpośrednim linkiem do edycji oraz karta *Stan sesji* zawierająca wyróżniony przycisk *Pobierz segmenty* wraz z łukiem postępu i statusem.
+  * Nowy podział na karty pod mapą z czytelnymi ikonami i obramowaniem: karta *Obszar pobierania* z rozwijanym menu *Zmień ▾* (dostęp do współrzędnych, korytarza GPX, poligonu KML/GeoPackage), karta *Parametry segmentów* z bezpośrednim linkiem do edycji oraz karta *Stan sesji* zawierająca wyróżniony przycisk *Pobierz segmenty* wraz z łukiem postępu i statusem.
   * Prawy panel boczny z regulacją wysokości sekcji za pomocą uchwytu, zoptymalizowana lista wybranych warstw z bezpośrednią edycją krycia w wierszu warstwy i usuwaniem przyciskiem ✕.
   * Odświeżony dolny pasek stanu z precyzyjną informacją o układzie współrzędnych sesji, aktualnych współrzędnych kursora (X, Y), przybliżonej skali mapy na ekranie oraz statusie sesji pobierania.
 * **Nowy tryb mieszania „7 Rzeźba terenu”:**
@@ -50,42 +50,14 @@ Ustawienia i zbiory map z poprzednich wersji (plik `lastsettings.txt`, folder `w
 
 ## Zmiany w wersji 3.18
 
-* **Wyszukiwarka działek katastralnych ULDK GUGiK (skrót Ctrl+D):**
-  * Bezpośrednia integracja z krajową usługą ULDK Głównego Urzędu Geodezji i Kartografii.
-  * Wyszukiwanie po pełnym identyfikatorze TERYT (np. `022503_5.0003.134`) lub nazwie miejscowości/obrębu i numerze działki (np. `Krzewina 134`).
-  * Automatyczne pobranie geometrii poligonowej WKT, wycentrowanie mapy na działce z rysowaniem jej konturu, ustawienie siatki pobierania z konfigurowalnym buforem w metrach oraz opcja natychmiastowego aktywowania ortofotomapy i warstwy ewidencji gruntów EGiB.
-* **Profil wysokościowy i uzupełnianie rzędnych NMT LIDAR wzdłuż śladu GPX:**
-  * Pobieranie rzeczywistych rzędnych terenu z lotniczego skaningu laserowego NMT GUGiK dla wszystkich punktów korytarza.
-  * Wykres profilu podłużnego trasy w oknie definiowania korytarza z obliczeniem przewyższeń (min, max, suma podejść, suma zejść, dystans).
-  * Opcja natychmiastowego zapisu wzbogaconego pliku GPX z rzędnymi `<ele>` do urządzeń i zegarków turystycznych.
-* **Konwerter kalibrowanych map OziExplorer (.map -> Garmin JNX / KMZ / MBTiles):**
-  * Narzędzie w menu *Narzędzia -> Konwertuj mapę OziExplorer (.map)...* oraz obsługa przeciągania plików `.map` i całych folderów metodą Drag & Drop na okno programu.
-  * Tryb pojedynczy oraz wsadowy (hurtowy) umożliwiający konwersję całych katalogów map za jednym razem ze zbiorczym raportem postępu i automatycznym dopasowaniem obrazów.
-  * Przeliczanie kalibracji wielopunktowej i automatyczna transformacja historycznych układów współrzędnych i Datum (Borowa Góra, Potsdam, Pulkovo 1942 do WGS84) z eliminacją przesunięcia 100–200 m w odbiornikach turystycznych.
-  * Arkusze o dużym zasięgu (np. 1:200 000, 1:1 000 000) kalibrowane modelem rzutowym albo wielomianem 2. stopnia, punkty kalibracyjne także w siatce UTM i poprzecznego Merkatora, ostrzeżenie o dużym błędzie kalibracji i nieznanym datum.
-  * JNX i MBTiles z piramidą 5 poziomów powiększenia, KMZ przerysowany do siatki geograficznej (poprawne położenie map obróconych względem południków).
-* **Post-processing MIP dla odbiorników Garmin (podgląd na żywo):**
-  * Filtr optymalizujący kontrast, nasycenie barw, korekcję gamma ($\gamma = 0{,}75$) oraz wyostrzanie splotowe krawędzi (Laplacian 3×3) pod kątem transflektywnych wyświetlaczy Memory-In-Pixel w pełnym słońcu.
-  * Nowe interaktywne okno strojenia parametrów z podglądem na żywo przed eksportem.
-  * Własne ustawienia suwaków są zapamiętywane, a wyostrzanie działa jednakowo na brzegach kafli i pasów arkusza oraz na niższych poziomach powiększenia MBTiles i JNX.
-  * Gotowe profile korekty (Garmin MIP, wyostrzenie krawędzi, stare mapy, jasne lasy, podkład CAD, skan CAD) także przy scalaniu segmentów, nakładaniu map i w wielowarstwowym MBTiles.
-  * Nowe narzędzie *Narzędzia -> Korekta i optymalizacja obrazów w folderze...*: poprawia naraz wszystkie obrazy PNG, JPEG i TIFF z folderu i zapisuje kopie z plikami georeferencji w osobnym folderze.
-* **Bezpośredni eksport do GeoTIFF (Avenza Maps, QField, GIS, CAD):**
-  * Eksport wielowarstwowej mapy bezpośrednio do formatu GeoTIFF z kompresją bezstratną Deflate lub JPEG, z georeferencją w nagłówkach TIFF oraz opcjonalnymi plikami `.tfw`, `.prj` i `.map`.
-* **Bieżący podgląd zestawu warstw z lupą rastrową w oknie głównym:**
-  * Podgląd kompozycji warstw w prawym dolnym rogu okna głównego, odświeżany asynchronicznie w tle z buforem próbek i debouncingiem.
-  * Skala 1:1 (piksel w piksel), lupa ×2 i widok ×½ z większym obszarem pobranym z serwera; okno *Warstwy - zaawansowane* korzysta z tej samej próbki (lupa do ×4).
-  * Przy obszarze wzdłuż trasy próbka pochodzi z pobieranego segmentu, a bez siatki podgląd podąża za widokiem mapy; brakujące warstwy oznacza czerwona ramka.
-* **Optymalizacje interfejsu użytkownika:**
-  * Poprawka układu kontrolek w panelu warstw okna głównego eliminująca obcinanie wartości `100%` w polu wprowadzania krycia warstwy.
-* **Inteligentna detekcja fałszywych sukcesów WMS:**
-  * Wychwytywanie pustych białych segmentów zwracanych z kodem HTTP 200 OK przez przeciążone węzły WMS i ponawianie ich pobrania.
-* **Automatyczne dzielenie dużych map KMZ na tomy:**
-  * Dzielenie map przekraczających limit 100 kafli odbiorników Garmin na paczki tomów (`_tom1.kmz`, `_tom2.kmz` itd.) z zachowaniem pełnej rozdzielczości.
-* **Odporność klastrów WMTS:**
-  * Obsługa aliasów `ISOK_Cien` <-> `Cieniowanie` za load balancerem Geoportalu.
-* **Stabilność i testy regresyjne:**
-  * Kompletny pakiet **886 testów automatycznych** (.NET 10 x64) weryfikujący obliczenia matematyczne, georeferencję i interfejs użytkownika.
+* **Wyszukiwarka miejscowości, adresów i działek ULDK (`Ctrl+F`, `Ctrl+D`):** szukanie po adresie, kodzie TERYT lub nazwie obrębu i numerze działki, z obrysem działki na mapie i automatyczną siatką pobierania z buforem.
+* **Podgląd zestawu warstw na żywo:** miniatura wybranych warstw z lupą w prawym dolnym rogu okna głównego, pokazująca krycie i mieszanie warstw przed pobieraniem.
+* **Korekta obrazu i profile Garmin MIP:** poprawa kontrastu, nasycenia i ostrości z podglądem na żywo dla ekranów Garmin MIP, gotowe profile korekty oraz narzędzie do zbiorczej korekty obrazów w folderze.
+* **Konwerter map OziExplorer (`.map` na JNX, KMZ i MBTiles):** konwersja pojedynczych plików i całych folderów (także przez przeciągnięcie na okno programu) z korektą historycznych układów współrzędnych.
+* **Profil wysokościowy trasy (NMT LiDAR):** wykres wysokości i suma podejść dla śladu GPX w oknie korytarza oraz zapis pliku GPX z uzupełnionymi wysokościami.
+* **Bezpośredni eksport do GeoTIFF:** zapis mapy wprost do GeoTIFF (dla Avenza Maps, QField, GIS i CAD) z georeferencją.
+* **Automatyczne dzielenie dużych map KMZ na tomy:** podział map przekraczających limit 100 kafli Garmin na kolejne pliki bez obniżania rozdzielczości.
+* **Wygoda i niezawodność:** podręczna pomoc (`F1`) w oknach narzędzi, przycisk *Nowa sesja* oraz wykrywanie i ponawianie pustych białych segmentów zwracanych przez serwery WMS.
 
 ## Zmiany w wersji 3.17
 
