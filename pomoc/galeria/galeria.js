@@ -1587,7 +1587,10 @@
     const ctrl = new AbortController();
     stan.abortPodglad = ctrl;
 
+    ref.mikserLadowanie.textContent = "Pobieranie podglądu z MapoTero…";
     ref.mikserLadowanie.hidden = false;
+    ref.mikserStanPodgladu.classList.remove("ostrzezenie");
+    ref.mikserStanPodgladu.textContent = "Pobieranie podglądu z MapoTero dla wybranego miejsca…";
     const pikselDoWyslania = stan.podgladPiksel > 0
       ? Math.min(MAKS_PIKSEL_PODGLADU, stan.podgladPiksel)
       : null;
@@ -1742,14 +1745,18 @@
 
       ref.mikserLadowanie.hidden = true;
       const miejsce = (stan.dane && stan.dane.mikser_miejsce) || "wspólny kadr testowy";
+      const dopisekObszaru = stan.zaznaczonyBbox
+        ? " Zaznaczony obszar zapisze się w pliku .mapotero (podgląd na żywo tego miejsca wymaga otwarcia galerii z MapoTero)."
+        : "";
       if (bezProbki.length > 0 || bledne.length > 0) {
         const pomin = bezProbki.map(function (x) { return x.nazwa; }).concat(bledne);
         ref.mikserStanPodgladu.classList.add("ostrzezenie");
         ref.mikserStanPodgladu.textContent =
-          "Podgląd offline (" + miejsce + "). Bez wspólnej próbki (" + pomin.join(", ") + ") — pełny podgląd działa po otwarciu galerii z MapoTero.";
+          "Tryb przeglądarki — stała próbka (" + miejsce + "). Bez wspólnej próbki (" + pomin.join(", ") + ")." + dopisekObszaru;
       } else {
         ref.mikserStanPodgladu.classList.remove("ostrzezenie");
-        ref.mikserStanPodgladu.textContent = "Podgląd miksera na wspólnej próbce: " + miejsce + ".";
+        ref.mikserStanPodgladu.textContent =
+          "Tryb przeglądarki — stała próbka: " + miejsce + "." + dopisekObszaru;
       }
     });
   }
@@ -1825,18 +1832,24 @@
         : "📍 Miejsce i obszar";
     }
     if (ref.minimapaInfo) {
-      let txt = "Próbka (czerwona): " + stan.podgladLat.toFixed(4) + ", " + stan.podgladLon.toFixed(4);
+      let txt = czyPolaczonoZProgramem()
+        ? "Próbka (czerwona): " + stan.podgladLat.toFixed(4) + ", " + stan.podgladLon.toFixed(4)
+        : "Obszar do pliku .mapotero";
       if (stan.zaznaczonyBbox) {
         const pxAuto = obliczPikselDlaBbox(stan.zaznaczonyBbox, 360);
         const bokKm = ((pxAuto * 360) / 1000).toFixed(1).replace(".", ",");
-        txt += " · Obszar dla MapoTero: ~" + bokKm + " km";
-        if (pxAuto > MAKS_PIKSEL_DOPASOWANIA_BBOX) {
+        txt += (czyPolaczonoZProgramem() ? " · Obszar dla MapoTero: ~" : ": ~") + bokKm + " km";
+        if (!czyPolaczonoZProgramem()) {
+          txt += " (podgląd na żywo tego miejsca wymaga otwarcia galerii z MapoTero; tu widać stałą próbkę Tatr)";
+        } else if (pxAuto > MAKS_PIKSEL_DOPASOWANIA_BBOX) {
           txt += " (duży obszar — podgląd pokazuje detal w skali roboczej)";
         }
       } else if (stan.obszarProgramu && stan.obszarProgramu.maSiatke) {
         txt += " · Niebieska ramka: obszar z MapoTero";
       } else {
-        txt += " · Kliknij, aby ustawić próbkę";
+        txt += czyPolaczonoZProgramem()
+          ? " · Kliknij punkt lub włącz „Zaznacz obszar”"
+          : " · Włącz „Zaznacz obszar”, aby przekazać zasięg do pliku .mapotero";
       }
       ref.minimapaInfo.textContent = txt;
     }
@@ -2282,7 +2295,7 @@
           stan.podgladLat = Math.round(((nw.lat + se.lat) / 2) * 100000) / 100000;
           stan.podgladLon = Math.round(((nw.lon + se.lon) / 2) * 100000) / 100000;
 
-          const wyborPx = wybierzPikselPoZaznaczeniuBbox(stan.zaznaczonyBbox, stan.podgladPiksel);
+          const wyborPx = wybierzPikselPoZaznaczeniuBbox(stan.zaznaczonyBbox, parseFloat(selSkala.value) || 0);
           if (czyPolaczonoZProgramem()) {
             if (!wyborPx.rozdzielony) {
               stan.podgladPiksel = wyborPx.piksel;
@@ -2609,6 +2622,12 @@
     mikserCialo.appendChild(kolPodglad);
     mikserCialo.appendChild(kolLista);
     mikserModal.appendChild(mikserNaglowek);
+    if (!czyPolaczonoZProgramem()) {
+      const wskazowkaPolaczenia = el("div", "gw-mikser-wskazowka-polaczenie");
+      wskazowkaPolaczenia.innerHTML =
+        "💡 <strong>Wskazówka:</strong> uruchom <strong>MapoTero</strong> i otwórz Galerię warstw z okna programu (ikona siatki obok wyszukiwarki warstw) — odblokujesz wtedy <strong>podgląd na żywo dla dowolnego zaznaczonego obszaru</strong> oraz <strong>wysyłanie zestawu 1 klikiem</strong> prosto do programu.";
+      mikserModal.appendChild(wskazowkaPolaczenia);
+    }
     mikserModal.appendChild(mikserCialo);
     mikserTlo.appendChild(mikserModal);
 

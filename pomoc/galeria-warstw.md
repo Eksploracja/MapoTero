@@ -18,10 +18,10 @@ Próbki nakładek przezroczystych (np. działek ewidencyjnych lub szlaków) są 
 {: .wskazowka }
 **Układanie warstw i dodawanie do programu:** możesz wybierać warstwy przyciskiem **Dodaj do miksu**, ułożyć ich kolejność, krycie i tryb mieszania w **Mikserze warstw** u dołu ekranu, a następnie przesłać cały zestaw jednym kliknięciem do `MapoTero.exe` (albo kliknąć **Wyślij**, aby dodać pojedynczą warstwę od razu). Jeśli otworzyłeś tę stronę z okna MapoTero, przeglądarka (np. Chrome, Edge) może wyświetlić jednorazowe okienko z pytaniem o zgodę na połączenie z siecią lokalną (`127.0.0.1`) — **wyraź zgodę**, służy to wyłącznie do lokalnej komunikacji z programem i nie wysyła żadnych danych na zewnątrz.
 
-<link rel="stylesheet" href="{{ '/pomoc/galeria/galeria.css' | relative_url }}?v=3.24">
+<link rel="stylesheet" href="{{ '/pomoc/galeria/galeria.css' | relative_url }}?v=3.25">
 
 <div id="galeria-warstw-app"
-  data-json-url="{{ '/pomoc/galeria/warstwy.json' | relative_url }}?v=3.24"
+  data-json-url="{{ '/pomoc/galeria/warstwy.json' | relative_url }}?v=3.25"
   data-img-base="{{ '/pomoc/' | relative_url }}"
   data-zbiory-url="{{ '/pomoc/zbiory-map/' | relative_url }}">
 <p class="gw-status">Wczytywanie galerii warstw…</p>
@@ -31,4 +31,4 @@ Próbki nakładek przezroczystych (np. działek ewidencyjnych lub szlaków) są 
 <p><strong>Uwaga:</strong> Przeglądarka ma wyłączoną obsługę JavaScript. Spis wszystkich zbiorów i warstw w formie tekstowej znajdziesz w rozdziale <a href="{{ '/pomoc/zbiory-map/' | relative_url }}">Katalog zbiorów map</a>.</p>
 </noscript>
 
-<script src="{{ '/pomoc/galeria/galeria.js' | relative_url }}?v=3.24" defer></script>
+<script src="{{ '/pomoc/galeria/galeria.js' | relative_url }}?v=3.25" defer></script>

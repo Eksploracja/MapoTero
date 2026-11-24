@@ -217,6 +217,86 @@ Public Class PodgladGaleriiTesty
         End Try
     End Function
 
+    Private Shared Function ZnajdzFolderWarstwRepo() As String
+        Dim kandydaci = {
+            Path.Combine(AppContext.BaseDirectory, "MapoTero_SingleFile", "warstwy"),
+            Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "MapoTero_SingleFile", "warstwy"),
+            Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "MapoTero_SingleFile", "warstwy")
+        }
+        For Each sc In kandydaci
+            Dim pelna = Path.GetFullPath(sc)
+            If File.Exists(Path.Combine(pelna, KatalogWarstw.NazwaPliku)) Then Return pelna
+        Next
+        Return ""
+    End Function
+
+    Private Shared Sub ZbierzWarstwyZKatalogu(wezel As WezelKatalogu,
+                                              sciezka As List(Of String),
+                                              pliki As Dictionary(Of String, PlikWarstw),
+                                              uzyte As HashSet(Of String),
+                                              wynik As List(Of (Zbior As String, Warstwa As String, Grupa As String, Podgrupa As String, Nazwa As String)))
+        If String.IsNullOrEmpty(wezel.Zbior) Then
+            Dim nowaSciezka As New List(Of String)(sciezka)
+            If Not String.IsNullOrWhiteSpace(wezel.Nazwa) Then nowaSciezka.Add(wezel.Nazwa)
+            For Each d In wezel.Dzieci
+                ZbierzWarstwyZKatalogu(d, nowaSciezka, pliki, uzyte, wynik)
+            Next
+            Return
+        End If
+
+        Dim plik As PlikWarstw = Nothing
+        If Not pliki.TryGetValue(wezel.Zbior, plik) Then Return
+        Dim wm = plik.Znajdz(wezel.Warstwa)
+        If wm Is Nothing Then Return
+
+        Dim klucz = $"{wezel.Zbior}||{wm.Nazwa}"
+        If Not uzyte.Add(klucz) Then Return
+
+        Dim grupa = If(sciezka.Count > 0, sciezka(0), "Pozostałe zbiory")
+        Dim podgrupa = If(sciezka.Count > 1, String.Join(" › ", sciezka.Skip(1)), "")
+        wynik.Add((wezel.Zbior, wm.Nazwa, grupa, podgrupa, If(Not String.IsNullOrWhiteSpace(wezel.Nazwa), wezel.Nazwa, wm.Nazwa)))
+    End Sub
+
+    <Fact>
+    Public Sub KatalogGaleriiWarstw_JestZgodnyZKatalogiemWarstwProgramu()
+        Dim pomoc = ZnajdzFolderPomocyRepo()
+        Dim warstwyDir = ZnajdzFolderWarstwRepo()
+        Assert.NotEqual("", pomoc)
+        Assert.NotEqual("", warstwyDir)
+
+        Dim pliki As New Dictionary(Of String, PlikWarstw)(StringComparer.OrdinalIgnoreCase)
+        For Each sc In Directory.GetFiles(warstwyDir, "*.txt")
+            Dim nazwaZbioru = Path.GetFileNameWithoutExtension(sc)
+            If String.Equals(nazwaZbioru, "katalog", StringComparison.OrdinalIgnoreCase) OrElse
+               String.Equals(nazwaZbioru, "warstwy", StringComparison.OrdinalIgnoreCase) Then Continue For
+            pliki(nazwaZbioru) = PlikWarstw.Wczytaj(sc)
+        Next
+
+        Dim katalog = KatalogWarstw.Wczytaj(Path.Combine(warstwyDir, KatalogWarstw.NazwaPliku))
+        Dim oczekiwane As New List(Of (Zbior As String, Warstwa As String, Grupa As String, Podgrupa As String, Nazwa As String))
+        Dim uzyte As New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
+        For Each g In katalog.Grupy
+            ZbierzWarstwyZKatalogu(g, New List(Of String)(), pliki, uzyte, oczekiwane)
+        Next
+
+        Dim json = File.ReadAllText(Path.Combine(pomoc, "galeria", "warstwy.json"), Encoding.UTF8)
+        Dim galeria = KatalogGaleriiWarstw.ZTekstu(json)
+
+        Assert.True(oczekiwane.Count = galeria.Pozycje.Count,
+                    $"Liczba warstw w katalog.txt ({oczekiwane.Count}) różni się od pomoc/galeria/warstwy.json ({galeria.Pozycje.Count}). Uruchom scratch\aktualizuj_galerie.ps1.")
+
+        For i = 0 To oczekiwane.Count - 1
+            Dim o = oczekiwane(i)
+            Dim a = galeria.Pozycje(i)
+            Assert.True(String.Equals(o.Zbior, a.Zbior, StringComparison.OrdinalIgnoreCase) AndAlso
+                        String.Equals(o.Warstwa, a.Warstwa, StringComparison.OrdinalIgnoreCase),
+                        $"Kolejność na pozycji {i + 1}: w programie '{o.Zbior}|{o.Warstwa}', w galerii WWW '{a.Zbior}|{a.Warstwa}'. Uruchom scratch\aktualizuj_galerie.ps1.")
+            Assert.Equal(o.Grupa, a.Grupa)
+            Assert.Equal(o.Podgrupa, a.Podgrupa)
+            Assert.Equal(o.Nazwa, a.Nazwa)
+        Next
+    End Sub
+
     <Fact>
     Public Sub FolderCacheGalerii_WskazujeLocalAppData()
         Dim folder = Global.MapoTero.Program.FolderCacheGalerii()

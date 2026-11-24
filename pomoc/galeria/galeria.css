@@ -1194,6 +1194,17 @@
   color: #5c5962;
 }
 
+.gw-mikser-wskazowka-polaczenie {
+  margin: 0.65rem 1.15rem 0;
+  padding: 0.52rem 0.78rem;
+  border-radius: 6px;
+  border: 1px solid #c4b5fd;
+  background: #f5f3ff;
+  color: #3b2667;
+  font-size: 0.81rem;
+  line-height: 1.4;
+}
+
 .gw-mikser-cialo {
   padding: 1rem 1.15rem;
   overflow-y: auto;
