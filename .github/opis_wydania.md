@@ -13,6 +13,12 @@ Ustawienia i zbiory map z poprzednich wersji (plik `lastsettings.txt`, folder `w
 
 ## Zmiany w wersji 3.19
 
+* **Internetowa galeria warstw z zasięgiem przestrzennym i warstwy Lasów Państwowych (poprawka 3.19):**
+  * W internetowej galerii warstw ([eksploracja.github.io/MapoTero/pomoc/galeria-warstw/](https://eksploracja.github.io/MapoTero/pomoc/galeria-warstw/)) dodano interaktywną mapę wektorową SVG prezentującą zasięg przestrzenny każdej warstwy (pokrycie ogólnokrajowe, sąsiedzi, Morze Bałtyckie, obwiednie BBOX dla map regionalnych/historycznych, wybrane aglomeracje dla TrueOrtho oraz zasięg globalny).
+  * W oknie szczegółów wprowadzono zakładki widoku: *[ 🖼️ Próbka mapy ]* oraz *[ 🗺️ Zasięg na mapie ]*, zapamiętujące wybór podczas przeglądania warstw.
+  * Na miniaturach w siatce kart dodano czytelne plakietki terytorialne (*Region*, *Czechy*, *Słowacja*, *Niemcy*, *Bałtyk*, *Świat*).
+  * Zaktualizowano bazę warstw programu o 7 nowych zbiorów WMS z Banku Danych o Lasach (BDL): dojazdy pożarowe z numeracją, turystyka (obszary *Zanocuj w lesie*, wiaty, miejsca biwakowe i obiekty rekreacyjne), składy gatunkowe drzewostanów i klasy odnowień, siedliska leśne TSL, kategorie własności i ochronności lasów oraz obwody łowieckie.
+
 * **Szybki kreator generowania map (skrót Ctrl+K, przycisk z różdżką na pasku):**
   * Prowadzi użytkownika krok po kroku przez cały proces przygotowania gotowej mapy w 4 prostych krokach: wybór urządzenia docelowego, wybór stylu mapy z podglądem na żywo, wskazanie obszaru oraz podsumowanie z kalkulacją parametrów i automatycznym wygenerowaniem pliku.
   * Obsługiwane platformy docelowe: smartfon (MBTiles, OGC GeoPackage, SQLiteDB dla Locus Map, OsmAnd, QField, OruxMaps), odbiornik turystyczny Garmin (Garmin Custom Maps KMZ oraz BirdsEye JNX v4), wydruk wielkoformatowy (arkusz GeoTIFF / JPEG / PNG w formatach A4–A0) oraz podkład CAD/GIS (georeferencjonowany GeoTIFF).
