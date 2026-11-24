@@ -1,17 +1,30 @@
+<div align="center">
+
 # MapoTero
 
-[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
-[![Wersja](https://img.shields.io/github/v/release/Eksploracja/MapoTero?label=Wersja&color=2ea44f)](https://github.com/Eksploracja/MapoTero/releases/latest)
-[![Platforma](https://img.shields.io/badge/.NET-10-purple.svg)](https://dotnet.microsoft.com/)
-[![Kompilacja i testy](https://github.com/Eksploracja/MapoTero/actions/workflows/kompilacja.yml/badge.svg)](https://github.com/Eksploracja/MapoTero/actions/workflows/kompilacja.yml)
-[![Dokumentacja](https://img.shields.io/badge/Dokumentacja-Podr%C4%99cznik%20online-brightgreen.svg)](https://eksploracja.github.io/MapoTero/pomoc/)
-[![Facebook](https://img.shields.io/badge/Facebook-MapoTero-1877F2?logo=facebook&logoColor=white)](https://www.facebook.com/mapotero.opensource)
+**Darmowy, otwartoźródłowy program dla systemu Windows do pobierania map WMS, WMTS oraz XYZ/TMS**  
+Ortofotomapy, cieniowanie LiDAR/NMT, mapy topograficzne, historyczne i ewidencja działek (EGiB) → gotowe mapy offline na telefon, odbiorniki Garmin, do programów GIS oraz rysunków CAD.
 
-**MapoTero** to darmowy, otwartoźródłowy program dla systemu Windows do pobierania map rastrowych z usług **WMS, WMTS oraz XYZ/TMS**. Pozwala pobrać ortofotomapy, cieniowanie rzeźby terenu (LiDAR/NMT), mapy topograficzne, historyczne, ewidencję działek (EGiB) czy zabytki, a następnie przygotować gotowe mapy offline na telefon, odbiorniki Garmin, do programów GIS oraz rysunków CAD.
+<br>
 
-[Pobierz](#pobieranie-i-wymagania) · [Szybki start](#szybki-start) · [Galeria warstw](https://eksploracja.github.io/MapoTero/pomoc/galeria-warstw/) · [Co nowego](#co-nowego) · [Podręcznik online](https://eksploracja.github.io/MapoTero/pomoc/) · [Zgłoś błąd](https://github.com/Eksploracja/MapoTero/issues)
+[![Pobierz najnowszą wersję](https://img.shields.io/github/v/release/Eksploracja/MapoTero?label=Pobierz%20MapoTero&style=for-the-badge&color=2ea44f)](https://github.com/Eksploracja/MapoTero/releases/latest)
+[![Podręcznik online](https://img.shields.io/badge/Podr%C4%99cznik-Online-0969da?style=for-the-badge)](https://eksploracja.github.io/MapoTero/pomoc/)
+[![Galeria warstw](https://img.shields.io/badge/Galeria-Warstw-8250df?style=for-the-badge)](https://eksploracja.github.io/MapoTero/pomoc/galeria-warstw/)
+
+<br>
+
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue?style=flat-square)](LICENSE)
+[![Platforma](https://img.shields.io/badge/.NET-10-purple?style=flat-square&logo=dotnet&logoColor=white)](https://dotnet.microsoft.com/)
+[![Kompilacja i testy](https://img.shields.io/github/actions/workflow/status/Eksploracja/MapoTero/kompilacja.yml?style=flat-square&label=Kompilacja%20i%20testy)](https://github.com/Eksploracja/MapoTero/actions/workflows/kompilacja.yml)
+[![Pobrania](https://img.shields.io/github/downloads/Eksploracja/MapoTero/total?style=flat-square&label=Pobrania&color=orange)](https://github.com/Eksploracja/MapoTero/releases)
+[![Facebook](https://img.shields.io/badge/Facebook-MapoTero-1877F2?style=flat-square&logo=facebook&logoColor=white)](https://www.facebook.com/mapotero.opensource)
+[![Wesprzyj](https://img.shields.io/badge/Wesprzyj-BuyCoffee-FFDD00?style=flat-square&logo=buy-me-a-coffee&logoColor=black)](https://buycoffee.to/mapy)
+
+<br>
 
 ![Główne okno programu MapoTero](pomoc/obrazy/03-okno-glowne.png)
+
+</div>
 
 ## Co zrobisz w MapoTero?
 
@@ -25,43 +38,48 @@
 ### Najważniejsze możliwości
 
 * **Szybki kreator map (`Ctrl+K`):** w 4 krokach prowadzi od wyboru urządzenia i gotowego stylu mapy do gotowego pliku offline.
-* **Transfer na telefon przez Wi-Fi i kod QR:** bez kabla USB i bez zewnętrznej chmury. Wystarczy zeskanować kod QR aparatem telefonu, aby pobrać mapę bezpośrednio przez lokalną sieć.
+* **Transfer na telefon przez Wi-Fi i kod QR:** bez kabla USB i bez zewnętrznej chmury. Wystarczy zeskanować kod QR aparatem telefonu, aby pobrać mapę bezpośrednio przez sieć lokalną.
 * **Własne kompozycje warstw:** łączenie warstw z różnych serwerów (WMS, WMTS i XYZ razem), regulacja krycia, tryby mieszania (w tym tryb *7 Rzeźba terenu* dla cieniowania LiDAR) oraz podgląd efektu na żywo przed pobieraniem.
 * **Pobieranie tylko potrzebnego obszaru:** siatka segmentów (do 2048×2048 px) z przesuwanymi uchwytami, korytarz wzdłuż trasy GPX/KML/KMZ, obrys z pliku `.gpkg` oraz wyszukiwarka miejscowości, adresów i działek ULDK (`Ctrl+F`).
-* **Układy współrzędnych i konwertery:** precyzyjne przeliczenia w locie dla PL-1992, PL-2000 (strefy 5–8), UTM (33N–35N) i WGS84 oraz konwerter starych map OziExplorer (`.map`) do formatów JNX, KMZ i MBTiles.
+* **Układy współrzędnych i konwertery:** precyzyjne przeliczenia w locie dla PL-1992, PL-2000 (strefy 5–8), UTM (33N–35N) i WGS84 oraz wbudowany konwerter starych map OziExplorer (`.map`) do formatów JNX, KMZ i MBTiles.
 
 ## Pobieranie i wymagania
 
-Program działa w trybie **portable (bez instalacji)** jako pojedynczy plik `MapoTero.exe`, dostarczany w archiwum ZIP wraz z katalogiem `warstwy` (definicje zbiorów map):
+Program działa w trybie **portable (bez instalacji)** jako pojedynczy plik `MapoTero.exe`, dostarczany w archiwum ZIP wraz z katalogiem `warstwy` (definicje zbiorów map) oraz plikiem `CZYTAJTO.txt`:
 
 * 📥 **[Pobierz najnowszą wersję MapoTero (ZIP, Windows 64-bit)](https://github.com/Eksploracja/MapoTero/releases/latest):** pobierz i rozpakuj archiwum ZIP, a następnie uruchom `MapoTero.exe` (folder `warstwy` musi znajdować się obok pliku `.exe`).
-* 📦 **[Wszystkie wydania, kody źródłowe i historia zmian (GitHub Releases)](https://github.com/Eksploracja/MapoTero/releases):** pełne archiwum wersji oraz sumy kontrolne SHA-256.
+* 📦 **[Wszystkie wydania, kody źródłowe i historia zmian (GitHub Releases)](https://github.com/Eksploracja/MapoTero/releases):** pełne archiwum wydań oraz sumy kontrolne SHA-256.
 * 📖 **[Podręcznik użytkownika online](https://eksploracja.github.io/MapoTero/pomoc/):** 42 rozdziały instrukcji krok po kroku z opisem narzędzi, formatów i konfiguracji.
 
 **Wymagania systemowe:**
-
 * System Windows (64-bitowy).
 * Środowisko uruchomieniowe **[.NET Desktop Runtime 10 (x64)](https://dotnet.microsoft.com/download/dotnet/10.0)** (jeśli nie jest zainstalowane, Windows zaproponuje jego automatyczne pobranie przy pierwszym uruchomieniu).
 
 > [!NOTE]
-> **Pierwsze uruchomienie w systemie Windows (komunikat SmartScreen)**
->
-> MapoTero jest darmowym projektem otwartoźródłowym (GPLv3) i nie posiada płatnego podpisu cyfrowego Microsoft, dlatego Windows może przy pierwszym uruchomieniu wyświetlić niebieski ekran *„System Windows ochronił ten komputer”*.
->
-> * **Jak uruchomić:** kliknij **„Więcej informacji”**, a następnie **„Uruchom mimo to”**.
->
-> ![Okno SmartScreen: najpierw „Więcej informacji”, potem „Uruchom mimo to”](obrazy/smartscreen.png)
->
-> * **Szybszy sposób (przed rozpakowaniem):** kliknij prawym przyciskiem myszy na pobranym pliku ZIP → **Właściwości** → zaznacz **„Odblokuj”** u dołu okna → **OK**.
-> * **Weryfikacja pliku:** w opisie każdego [wydania](https://github.com/Eksploracja/MapoTero/releases/latest) znajdziesz sumy kontrolne SHA-256 archiwum ZIP i `MapoTero.exe` oraz link do skanu w serwisie VirusTotal.
+> **Pierwsze uruchomienie w systemie Windows (komunikat SmartScreen)**  
+> MapoTero jest darmowym projektem otwartoźródłowym (GPLv3) i nie posiada płatnego podpisu cyfrowego, dlatego Windows może przy pierwszym uruchomieniu wyświetlić niebieski ekran *„System Windows ochronił ten komputer”*.  
+> * **Jak uruchomić:** kliknij **„Więcej informacji”**, a następnie **„Uruchom mimo to”**.  
+> * **Szybszy sposób (przed rozpakowaniem):** kliknij prawym przyciskiem myszy na pobranym pliku ZIP → **Właściwości** → zaznacz **„Odblokuj”** u dołu okna → **OK**.  
+> * **Weryfikacja pliku:** w opisie każdego [wydania w Releases](https://github.com/Eksploracja/MapoTero/releases/latest) znajdziesz sumy kontrolne SHA-256 archiwum ZIP i `MapoTero.exe` oraz link do skanu w serwisie VirusTotal.
+
+<details>
+<summary><b>Zobacz jak wygląda monit SmartScreen (zrzut ekranu)</b></summary>
+
+<br>
+
+![Okno SmartScreen: najpierw „Więcej informacji”, potem „Uruchom mimo to”](obrazy/smartscreen.png)
+
+</details>
 
 ## Szybki start
 
 ### Opcja A: Szybki kreator map (polecana na start)
 
-1. Uruchom program i naciśnij **`Ctrl+K`** (lub wybierz *Szybki kreator map* z menu lub paska narzędzi).
+1. Uruchom program i naciśnij **`Ctrl+K`** (lub wybierz *Szybki kreator map* z menu/paska).
 2. Wybierz urządzenie docelowe (smartfon, Garmin KMZ/JNX, wydruk A4–A0 lub CAD/GIS) oraz gotowy styl mapy (np. turystyka, góry, rower, cieniowanie LiDAR z zabytkami NID, mapy historyczne lub działki EGiB).
 3. Wskaż obszar na mapie i zatwierdź. Program pobierze dane i wygeneruje gotowy plik, który możesz od razu przesłać na telefon kodem QR lub skopiować na odbiornik Garmin przez USB.
+
+![Szybki kreator mapy](pomoc/obrazy/16-szybki-kreator.png)
 
 ### Opcja B: Tryb ręczny (pełna kontrola nad warstwami)
 
@@ -73,13 +91,12 @@ Program działa w trybie **portable (bez instalacji)** jako pojedynczy plik `Map
    * **Telefon, Garmin lub scalony arkusz:** otwórz *Narzędzia > Eksport mapy* (`Ctrl+E`), aby zapisać mapę jako MBTiles, OGC GeoPackage (`.gpkg`), Garmin JNX/KMZ, SQLiteDB, OruxMaps albo scalony arkusz *GeoTIFF / JPEG / PNG* (format *Arkusz*). Z tego okna możesz także wysłać plik na telefon przez **Wi-Fi (kod QR)** lub zapisać prosto na podłączony **Garmin USB**.
    * **Programy CAD:** wybierz *Narzędzia > Eksport do CAD*, aby utworzyć rysunek DXF, skrypt `SCRIPT` (`.scr`) lub program LISP (`APPLOAD`) wstawiający mapę na warstwy `MAPOTERO_...` (przy dużej liczbie segmentów skorzystaj w tym oknie z przycisku *Scal segmenty…*).
 
-## Zrzuty ekranu
-
-### Szybki kreator mapy (`Ctrl+K`)
-![Szybki kreator mapy](pomoc/obrazy/16-szybki-kreator.png)
-
-### Bezpośredni transfer mapy na telefon przez Wi-Fi i kod QR
 ![Bezpośredni transfer mapy na telefon przez Wi-Fi i kod QR](pomoc/obrazy/16-wyslij-telefon.png)
+
+<details>
+<summary><b>Więcej zrzutów ekranu (Eksport mapy, kompozycje warstw z cieniowaniem LiDAR)</b></summary>
+
+<br>
 
 ### Eksport mapy (formaty mobilne, arkusze GeoTIFF, Garmin USB)
 ![Okno eksportu mapy](pomoc/obrazy/10-eksport-mapy.png)
@@ -87,17 +104,7 @@ Program działa w trybie **portable (bez instalacji)** jako pojedynczy plik `Map
 ### Kompozycje warstw, krycie i rzeźba terenu (LiDAR)
 ![Okno Warstwy - zaawansowane z suwakami krycia i podglądem](pomoc/obrazy/03-warstwy-zaawansowane.png)
 
-## Co nowego
-
-### Wersja 3.19 (23.11.2026)
-
-* **Szybki kreator map (`Ctrl+K`):** 4-krokowy kreator z gotowymi stylami (turystyka, góry, MTB, dziedzictwo z LiDAR i zabytkami NID, mapy historyczne, działki EGiB), mapami wieloskalowymi, szacowaniem rozmiaru i zapisem własnych szablonów.
-* **Wysyłanie map na telefon przez Wi-Fi i kod QR:** przycisk *Wyślij na telefon…* w oknie eksportu udostępnia gotowy plik (`.mbtiles`, `.gpkg`, `.tif`, `.kmz`, `.sqlitedb`) w lokalnej sieci bez kabla USB i chmury.
-* **Bezpośredni zapis na odbiornik Garmin (USB):** automatyczne wykrywanie podłączonych urządzeń Garmin oraz kart microSD i kopiowanie prosto do folderów `Garmin/CustomMaps` lub `Garmin/BirdsEye`.
-* **Obsługa OGC GeoPackage (`.gpkg`) i kafelkowany GeoTIFF (COG):** eksport kafelków `.gpkg`, wczytywanie poligonów i tras z `.gpkg` jako obszaru pobierania oraz zapis GeoTIFF z kaflami 256×256 i piramidą pomniejszeń.
-* **Odświeżony interfejs i tryb *7 Rzeźba terenu*:** wyszukiwarka miejsc i działek ULDK (`Ctrl+F`) nad mapą, edycja krycia wprost na liście warstw, mieszanie cieniowania LiDAR bez przyciemniania płaskich powierzchni oraz scalanie segmentów zintegrowane w oknie *Eksport mapy*.
-
-📜 Pełną historię wcześniejszych zmian i opisy wszystkich wydań znajdziesz w zakładce **[GitHub Releases](https://github.com/Eksploracja/MapoTero/releases)**.
+</details>
 
 ## Obsługiwane źródła map (WMS, WMTS, XYZ/TMS)
 
@@ -114,7 +121,10 @@ Główne wbudowane źródła danych:
 * **Mapy kafelkowe XYZ/TMS:** OSMapa.pl, UMP-pcPL, szlaki Waymarked Trails (piesze, rowerowe, MTB i inne), OpenTopoMap oraz usługi z katalogu QuickMapServices.
 * **Służby geodezyjne krajów sąsiednich i Bałtyku:** Czechy (**ČÚZK**), Słowacja (**ZBGIS**, **Freemap**), Niemcy (**BKG**, **GeoBasis-BB Brandenburgia**, **GeoSN Saksonia**), Litwa (**INSPIRE**) oraz **EMODnet Bathymetry**.
 
-### Wskazówki dla map w strefie przygranicznej
+<details>
+<summary><b>Wskazówki dla map w strefie przygranicznej (Czechy, Słowacja, Niemcy, Litwa)</b></summary>
+
+<br>
 
 * **Dobór układu współrzędnych:**
   * **Warstwy WMTS i XYZ** (np. czeska *ZTM_WM*, słowacka *Freemap Outdoor*, niemiecka *basemap.de*, *OpenTopoMap*): działają w każdym układzie (PL-1992, PL-2000, UTM, WGS84), ponieważ program przelicza je w locie na siatkę wybranego układu.
@@ -122,15 +132,19 @@ Główne wbudowane źródła danych:
 * **Łączenie na granicy bez białych plam:**
   * Gdy zagraniczny serwer wypełnia obszar poza granicą białym kolorem zamiast przezroczystości (np. Saksonia lub Brandenburgia), w oknie *Warstwy zaawansowane* (przycisk `…`) zmień tryb mieszania górnej warstwy na **Mnożenie (Multiply)**. Biel stanie się niewidoczna, a drogi, warstwice i napisy obu map płynnie się połączą.
 
+</details>
+
 > [!TIP]
 > **Własne zbiory map:** zaawansowani użytkownicy mogą dodawać i organizować własne pliki definicji warstw w katalogu `warstwy/` oraz konfigurować strukturę grup w pliku `katalog.txt`. Szczegółowy opis formatów znajdziesz w [Podręczniku online](https://eksploracja.github.io/MapoTero/pomoc/warstwy/).
 
-## Budowanie ze źródeł (dla programistów)
+<details>
+<summary><b>Budowanie ze źródeł i kompilacja (dla programistów)</b></summary>
+
+<br>
 
 **Wymagania:** **Visual Studio 2026 (18.0+)** z obsługą .NET 10 albo samo **.NET 10 SDK** (*Visual Studio 2022 nie kompiluje projektów .NET 10*).
 
 **Struktura rozwiązania (`MapoTero.sln`):**
-
 * `MapoTero.App`: aplikacja desktopowa (Windows Forms),
 * `MapoTero.Core`: obliczenia geodezyjne, obsługa usług i formatów plików,
 * `MapoTero.Silnik`: potok obrazów, nakładanie warstw, scalanie i eksport map,
@@ -139,20 +153,22 @@ Główne wbudowane źródła danych:
 
 **Kompilacja, testy i publikacja jednego pliku `MapoTero.exe`:**
 
-Program wydawany jest wyłącznie jako pojedynczy plik `MapoTero.exe` (projekt nie pozwala na publikację wersji wieloplikowej). Polecenie `dotnet publish` tworzy katalog `MapoTero_SingleFile` z plikiem `MapoTero.exe`, folderem `warstwy` i plikiem `README.md`:
+Program wydawany jest wyłącznie jako pojedynczy plik `MapoTero.exe` (projekt nie pozwala na publikację wersji wieloplikowej). Polecenie `dotnet publish` tworzy katalog `MapoTero_SingleFile` z plikiem `MapoTero.exe`, folderem `warstwy` i plikiem `CZYTAJTO.txt`:
 
 ```powershell
 # Sprawdzenie kompilacji (katalog bin zawiera tylko pliki pośrednie)
 dotnet build MapoTero.App/MapoTero_v3.vbproj -c Release
 
 # Uruchomienie testów jednostkowych
-dotnet test MapoTero.Tests/MapoTero.Tests.vbproj -c Release
+powershell -NoProfile -File MapoTero.Tests/uruchom.ps1
 
 # Publikacja jednoplikowego wydania
 dotnet publish MapoTero.App/MapoTero_v3.vbproj -c Release -o MapoTero_SingleFile
 ```
 
-Każda zmiana w repozytorium jest automatycznie budowana i testowana w **GitHub Actions**. Aktualną kompilację testową (`MapoTero.exe` + `warstwy`) można pobrać jako artefakt *MapoTero* w zakładce **Actions**.
+Każda zmiana w repozytorium jest automatycznie budowana i testowana w **GitHub Actions**. Aktualną kompilację testową (`MapoTero.exe` + `warstwy` + `CZYTAJTO.txt`) można pobrać jako artefakt *MapoTero* w zakładce **Actions**.
+
+</details>
 
 ## Dokumentacja, społeczność i wsparcie
 
@@ -161,12 +177,13 @@ Każda zmiana w repozytorium jest automatycznie budowana i testowana w **GitHub 
 * 🐛 **[Zgłaszanie błędów i propozycji (GitHub Issues)](https://github.com/Eksploracja/MapoTero/issues):** miejsce na raporty usterek i pomysły na nowe funkcje.
 * 👥 **[Oficjalny profil na Facebooku](https://www.facebook.com/mapotero.opensource):** aktualności, informacje o wydaniach i ciekawostki.
 * 💬 **[Pomorskie Forum Eksploracyjne](https://forum.eksploracja.pl/viewforum.php?f=205):** dyskusje i wsparcie techniczne w dziale *„Programy GPS/GIS wspierające eksplorację”*.
+* 🤝 **Współtworzenie zbiorów map:** znasz ciekawy serwer WMS/WMTS albo chcesz poprawić/dodać warstwę? Zgłoś Issue lub wyślij Pull Request z nowym plikiem w katalogu `warstwy/`.
 * ☕ **[Wesprzyj rozwój projektu (buycoffee.to/mapy)](https://buycoffee.to/mapy):** postaw kawę autorowi (link dostępny także w menu *Pomoc* w programie).
 
 ## Zespół projektu
 
 * **Twórca programu:** Pajakt (2009–2014)
-* **Rozwój projektu:** [Kazimierz Niecikowski](http://labgis.pl/) (od 2015)
+* **Rozwój projektu:** [Kazimierz Niecikowski](https://www.labgis.pl/) (od 2015)
 * **Współpraca programistyczna:**
   * Paweł\_gdn
   * AAA222 (moduł NoTo, scalanie segmentów do wersji 3.11)

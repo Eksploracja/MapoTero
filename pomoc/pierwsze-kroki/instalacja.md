@@ -48,7 +48,7 @@ Zawartość paczki:
 ```
 MapoTero.exe     program
 warstwy\         zbiory map (pliki .txt)
-README.md        opis programu
+CZYTAJTO.txt     krótka instrukcja pierwszego uruchomienia
 ```
 
 {: .wskazowka }
