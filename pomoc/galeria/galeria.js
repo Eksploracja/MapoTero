@@ -96,6 +96,22 @@
     const przykryta = znajdzPrzykrytaNakladke(kanapka);
     if (przykryta) {
       lista.push("Uwaga: nakładka „" + przykryta.nazwa + "” leży pod pełnokryjącą warstwą i może zostać zasłonięta.");
+    } else {
+      // Sprawdź także czy cieniowanie rzeźby nie zostało przykryte pełnokryjącym podkładem powyżej
+      for (let i = 0; i < kanapka.length - 1; i++) {
+        if (!czyWarstwaCieniowania(kanapka[i])) continue;
+        let zaslonieta = false;
+        for (let j = i + 1; j < kanapka.length; j++) {
+          if (!kanapka[j].nakladka && kanapka[j].krycie >= PELNE_KRYCIE && kanapka[j].tryb === "Zwykly") {
+            zaslonieta = true;
+            break;
+          }
+        }
+        if (zaslonieta) {
+          lista.push("Uwaga: cieniowanie „" + kanapka[i].nazwa + "” leży pod pełnokryjącą warstwą i może zostać zasłonięte (użyj „⚡ Ułóż automatycznie”).");
+          break;
+        }
+      }
     }
 
     if (kanapka.every(function (x) { return x.nakladka; })) {
@@ -417,6 +433,7 @@
     cacheKafelkowOsm: new Map(),
     abortPodglad: null,
     timerPodgladu: null,
+    tokenPodgladuOffline: 0,
     cacheObrazow: new Map()
   };
 
@@ -512,12 +529,47 @@
     return Array.isArray(stan.funkcjeProgramu) && stan.funkcjeProgramu.indexOf(nazwa) >= 0;
   }
 
+  function odmienWarstwy(n) {
+    const abs = Math.abs(Math.floor(n));
+    if (abs === 1) return abs + " warstwa";
+    const mod100 = abs % 100;
+    const mod10 = abs % 10;
+    if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return abs + " warstwy";
+    return abs + " warstw";
+  }
+
+  function kopiujTekstDoSchowka(tekst) {
+    if (navigator.clipboard && typeof navigator.clipboard.writeText === "function") {
+      return navigator.clipboard.writeText(tekst).catch(function () {
+        return kopiujPrzezTextarea(tekst);
+      });
+    }
+    return kopiujPrzezTextarea(tekst);
+  }
+
+  function kopiujPrzezTextarea(tekst) {
+    try {
+      const ta = document.createElement("textarea");
+      ta.value = tekst;
+      ta.setAttribute("readonly", "");
+      ta.style.position = "fixed";
+      ta.style.left = "-9999px";
+      document.body.appendChild(ta);
+      ta.select();
+      const ok = document.execCommand("copy");
+      document.body.removeChild(ta);
+      return ok ? Promise.resolve() : Promise.reject(new Error("Brak dostępu do schowka"));
+    } catch (e) {
+      return Promise.reject(e);
+    }
+  }
+
   function wczytajParametryUrl() {
     const params = new URLSearchParams(window.location.search);
     if (params.has("q")) stan.szukaj = params.get("q") || "";
     if (params.has("grupa")) stan.grupa = params.get("grupa") || "WSZYSTKIE";
     if (params.has("typ")) stan.typ = (params.get("typ") || "WSZYSTKIE").toUpperCase();
-    if (params.has("rola")) stan.rola = params.get("rola") || "WSZYSTKIE";
+    if (params.has("rola")) stan.rola = (params.get("rola") || "WSZYSTKIE").toUpperCase();
     if (params.has("kanapka")) stan.kanapkaUrlStart = (params.get("kanapka") || "").trim();
     const p = parseInt(params.get("port") || "0", 10);
     const t = (params.get("token") || "").trim();
@@ -636,10 +688,10 @@
         poz.tryb = "RzezbaTerenu";
         poz.krycie = 70;
       }
-      if (!poz.nakladka && stan.kanapka.length > 0) {
-        // Nowy podkład wsuwamy pod końcowe nakładki, tak jak w MapoTero
+      if (!poz.nakladka && !czyWarstwaCieniowania(poz) && stan.kanapka.length > 0) {
+        // Nowy podkład wsuwamy pod końcowe nakładki i warstwy cieniowania, tak jak w MapoTero
         let wstaw = stan.kanapka.length;
-        while (wstaw > 0 && stan.kanapka[wstaw - 1].nakladka) wstaw--;
+        while (wstaw > 0 && (stan.kanapka[wstaw - 1].nakladka || czyWarstwaCieniowania(stan.kanapka[wstaw - 1]))) wstaw--;
         stan.kanapka.splice(wstaw, 0, poz);
       } else {
         stan.kanapka.push(poz);
@@ -999,7 +1051,7 @@
       const sekcja = el("section", "gw-sekcja-grupy");
       const naglowek = el("div", "gw-naglowek-grupy");
       naglowek.appendChild(el("h2", null, nazwaGrupy));
-      naglowek.appendChild(el("span", "gw-liczba-w-grupie", elementy.length + " warstw"));
+      naglowek.appendChild(el("span", "gw-liczba-w-grupie", odmienWarstwy(elementy.length)));
       sekcja.appendChild(naglowek);
 
       const bloki = zgrupujPodgrupyWKolejnosci(elementy);
@@ -1176,7 +1228,7 @@
         svgHtml += '<rect x="' + x.toFixed(1) + '" y="' + y.toFixed(1) + '" width="' + wRect.toFixed(1) + '" height="' + hRect.toFixed(1) + '" class="gw-mapa-bbox" rx="3" ry="3">';
         svgHtml += '<title>' + escapeHtml(z.etykieta || "Obszar warstwy") + '</title>';
         svgHtml += '</rect>';
-      } else if (typ === "regionalny" && w.zbior && w.zbior.indexOf("PrawdziwaOrtofotomapa") >= 0) {
+      } else if (typ === "regionalny" && ((w.zbior && w.zbior.indexOf("TrueOrtho") >= 0) || (w.warstwa && w.warstwa.indexOf("PrawdziwaOrtofotomapa") >= 0))) {
         MAPA_GEOM.miastaTrueOrtho.forEach(function (m) {
           svgHtml += '<g class="gw-mapa-punkt-trueortho" transform="translate(' + m.x.toFixed(1) + ',' + m.y.toFixed(1) + ')">';
           svgHtml += '<circle r="6" class="gw-punkt-pierscien" />';
@@ -1257,12 +1309,18 @@
     if (ref.modalDodaj) {
       ref.modalDodaj.hidden = idx >= 0;
     }
+    if (ref.modalOtworzMikser) {
+      ref.modalOtworzMikser.hidden = stan.kanapka.length === 0;
+      ref.modalOtworzMikser.textContent = "🧩 Mikser (" + stan.kanapka.length + ")";
+    }
   }
 
   function otworzModal(indeks) {
     if (indeks < 0 || indeks >= stan.widoczne.length) return;
     stan.indeksModala = indeks;
     const w = stan.widoczne[indeks];
+
+    if (ref.modalObrazKol) ref.modalObrazKol.scrollTop = 0;
 
     ref.modalPanelProbka.innerHTML = "";
     if (w.nakladka) {
@@ -1374,7 +1432,7 @@
     ref.mikserDokLicznik.textContent = n + " / " + MAKS_WARSTW_KANAPKI + " warstw";
     ref.mikserDok.classList.toggle("zwiniety", stan.dokZwiniety);
     if (ref.mikserDokZwin) {
-      ref.mikserDokZwin.textContent = stan.dokZwiniety ? "▴ Rozwiń" : "✕ Zwiń";
+      ref.mikserDokZwin.textContent = stan.dokZwiniety ? "▴ Rozwiń" : "▾ Zwiń";
       ref.mikserDokZwin.title = stan.dokZwiniety
         ? "Rozwiń dolny pasek Miksera warstw"
         : "Zwiń pasek do małej pigułki w rogu ekranu, aby nie zasłaniał kart";
@@ -1545,6 +1603,7 @@
           wartoscSpan.textContent = poz.krycie + "%";
           zapiszKanapkeLocalStorage();
           if (stan.kanapkaUrlStart) zapiszParametryUrl();
+          odswiezOstrzezeniaMiksera();
           zglosOdswiezeniePodgladuMiksera();
         });
         suwakGrupa.appendChild(suwak);
@@ -1720,14 +1779,15 @@
   }
 
   function odswiezPodgladCanvasOffline() {
+    const mojToken = ++stan.tokenPodgladuOffline;
     ref.mikserCanvas.hidden = false;
     ref.mikserImgLive.hidden = true;
     ref.mikserLadowanie.hidden = false;
 
     const zProbka = [];
     const bezProbki = [];
-    stan.kanapka.forEach(function (item) {
-      if (item.probka_miksu) zProbka.push(item);
+    stan.kanapka.forEach(function (item, idx) {
+      if (item.probka_miksu) zProbka.push({ item: item, jestSpodem: idx === 0 });
       else bezProbki.push(item);
     });
 
@@ -1746,6 +1806,7 @@
         return;
       }
       ladujObrazekZCache(sciezkaObrazka(zMiniatura.obrazek)).then(function (img) {
+        if (mojToken !== stan.tokenPodgladuOffline || !stan.mikserOtwarty) return;
         ctx.clearRect(0, 0, szer, wys);
         if (img) ctx.drawImage(img, 0, 0, szer, wys);
         ref.mikserLadowanie.hidden = true;
@@ -1756,13 +1817,14 @@
       return;
     }
 
-    const obietnice = zProbka.map(function (item) {
-      return ladujObrazekZCache(sciezkaObrazka(item.probka_miksu)).then(function (img) {
-        return { item: item, img: img };
+    const obietnice = zProbka.map(function (wpis) {
+      return ladujObrazekZCache(sciezkaObrazka(wpis.item.probka_miksu)).then(function (img) {
+        return { item: wpis.item, jestSpodem: wpis.jestSpodem, img: img };
       });
     });
 
     Promise.all(obietnice).then(function (zaladowane) {
+      if (mojToken !== stan.tokenPodgladuOffline || !stan.mikserOtwarty) return;
       ctx.clearRect(0, 0, szer, wys);
 
       const tempCanvas = document.createElement("canvas");
@@ -1771,12 +1833,15 @@
       const tempCtx = tempCanvas.getContext("2d");
 
       const bledne = [];
+      let czyCosNarysowano = false;
       zaladowane.forEach(function (para) {
         if (!para.img) {
           bledne.push(para.item.nazwa);
           return;
         }
-        const trybInfo = znajdzTryb(para.item.tryb);
+        const trybInfo = (para.jestSpodem || !czyCosNarysowano)
+          ? TRYBY_MIESZANIA[0]
+          : znajdzTryb(para.item.tryb);
         if (trybInfo.kod === "RzezbaTerenu") {
           tempCtx.clearRect(0, 0, szer, wys);
           tempCtx.drawImage(para.img, 0, 0, szer, wys);
@@ -1791,6 +1856,7 @@
           ctx.drawImage(para.img, 0, 0, szer, wys);
           ctx.restore();
         }
+        czyCosNarysowano = true;
       });
 
       ref.mikserLadowanie.hidden = true;
@@ -2065,7 +2131,7 @@
       dokAkcjePelne.appendChild(dokWyslij);
     }
 
-    const dokReset = el("button", "gw-btn-prosty", "✕ Resetuj");
+    const dokReset = el("button", "gw-btn-prosty", "↺ Resetuj");
     dokReset.type = "button";
     dokReset.hidden = true;
     dokReset.title = "Usuwa wszystkie warstwy z miksu i czyści zapamiętane ustawienia";
@@ -2073,7 +2139,7 @@
     dokAkcjePelne.appendChild(dokReset);
     dokAkcje.appendChild(dokAkcjePelne);
 
-    const dokZwin = el("button", "gw-btn-prosty", "✕ Zwiń");
+    const dokZwin = el("button", "gw-btn-prosty", "▾ Zwiń");
     dokZwin.type = "button";
     dokZwin.addEventListener("click", function () {
       stan.dokZwiniety = !stan.dokZwiniety;
@@ -2159,12 +2225,32 @@
       selSkala.appendChild(opt);
     });
 
+    function zsynchronizujSelectSkali(piksel) {
+      const staraCustom = selSkala.querySelector("option[data-custom='1']");
+      if (staraCustom) staraCustom.remove();
+      const val = Number(piksel) > 0 ? Math.min(MAKS_PIKSEL_PODGLADU, Number(piksel)) : 0;
+      if (val <= 0) {
+        selSkala.value = "0";
+        return;
+      }
+      const kandydat = String(val);
+      const maOpcje = Array.prototype.some.call(selSkala.options, function (o) { return o.value === kandydat; });
+      if (maOpcje) {
+        selSkala.value = kandydat;
+      } else {
+        const opt = document.createElement("option");
+        opt.value = kandydat;
+        opt.textContent = (Math.round(val * 10) / 10).toString().replace(".", ",") + " m/px (obszar)";
+        opt.setAttribute("data-custom", "1");
+        selSkala.appendChild(opt);
+        selSkala.value = kandydat;
+      }
+    }
+
     function ustawSkalePodgladu(nowyPiksel) {
       const wartosc = Number(nowyPiksel) > 0 ? Math.min(MAKS_PIKSEL_PODGLADU, Number(nowyPiksel)) : 0;
       stan.podgladPiksel = wartosc;
-      const kandydat = wartosc > 0 ? String(wartosc) : "0";
-      const maOpcje = Array.prototype.some.call(selSkala.options, function (o) { return o.value === kandydat; });
-      selSkala.value = maOpcje ? kandydat : "0";
+      zsynchronizujSelectSkali(wartosc);
       rysujMinimape();
       zglosOdswiezeniePodgladuMiksera(true);
     }
@@ -2260,6 +2346,8 @@
     btnTrybZaznacz.addEventListener("click", function () { ustawTrybMapy("zaznacz"); });
     btnWyczyscZazn.addEventListener("click", function () {
       stan.zaznaczonyBbox = null;
+      stan.podgladPiksel = 0;
+      zsynchronizujSelectSkali(0);
       rysujMinimape();
       zglosOdswiezeniePodgladuMiksera(true);
     });
@@ -2393,10 +2481,10 @@
             if (!wyborPx.rozdzielony) {
               stan.podgladPiksel = wyborPx.piksel;
               stan.ostatniPikselRenderu = wyborPx.piksel;
-              selSkala.value = "0";
+              zsynchronizujSelectSkali(wyborPx.piksel);
             } else {
               stan.podgladPiksel = wyborPx.piksel;
-              if (wyborPx.piksel === 0) selSkala.value = "0";
+              zsynchronizujSelectSkali(wyborPx.piksel);
             }
           }
           rysujMinimape();
@@ -2444,6 +2532,8 @@
       btnZMapoTero.title = "Pobierz ponownie środek i obszar zaznaczenia z okna MapoTero";
       btnZMapoTero.addEventListener("click", function () {
         stan.zaznaczonyBbox = null;
+        stan.podgladPiksel = 0;
+        zsynchronizujSelectSkali(0);
         pobierzStanZMapoTero(false, false);
       });
       skrotyBox.appendChild(btnZMapoTero);
@@ -2493,7 +2583,7 @@
         const px = Math.min(MAKS_PIKSEL_PODGLADU, obliczPikselDlaBbox(stan.zaznaczonyBbox, 360));
         stan.podgladPiksel = px;
         stan.ostatniPikselRenderu = px;
-        selSkala.value = "0";
+        zsynchronizujSelectSkali(px);
         przelaczZakladkeMiksera("podglad");
         zglosOdswiezeniePodgladuMiksera(true);
       });
@@ -2661,10 +2751,13 @@
     btnKopiujLink.type = "button";
     btnKopiujLink.addEventListener("click", function () {
       const link = zbudujLinkUdostepniania();
-      if (!navigator.clipboard) return;
-      navigator.clipboard.writeText(link).then(function () {
-        pokazStatusMiksera("Skopiowano link do udostępnienia tego miksu.", false);
-      });
+      kopiujTekstDoSchowka(link)
+        .then(function () {
+          pokazStatusMiksera("Skopiowano link do udostępnienia tego miksu.", false);
+        })
+        .catch(function () {
+          pokazStatusMiksera("Nie udało się automatycznie skopiować linku do schowka.", true);
+        });
     });
 
     const btnKopiujJson = el("button", "gw-btn-prosty", "📋 Kopiuj JSON");
@@ -2673,12 +2766,16 @@
       const przepis = budujPrzepisJson(stan.kanapka, {
         nazwa: stan.nazwaKanapki,
         cel: "okno_glowne",
-        zapiszStyl: stan.zapiszJakoStyl
+        zapiszStyl: stan.zapiszJakoStyl,
+        obszarWgs84: stan.przekazObszarDoMapoTero && stan.zaznaczonyBbox ? stan.zaznaczonyBbox : null
       });
-      if (!navigator.clipboard) return;
-      navigator.clipboard.writeText(JSON.stringify(przepis, null, 2)).then(function () {
-        pokazStatusMiksera("Skopiowano przepis JSON do schowka — kliknij prawym na liście warstw w MapoTero i wybierz „Wklej kanapkę ze schowka”.", false);
-      });
+      kopiujTekstDoSchowka(JSON.stringify(przepis, null, 2))
+        .then(function () {
+          pokazStatusMiksera("Skopiowano przepis JSON do schowka — kliknij prawym na liście warstw w MapoTero i wybierz „Wklej kanapkę ze schowka”.", false);
+        })
+        .catch(function () {
+          pokazStatusMiksera("Nie udało się automatycznie skopiować przepisu JSON — użyj przycisku „Pobierz plik (.mapotero)”.", true);
+        });
     });
 
     akcjeZapasowe.appendChild(btnPobierzPlik);
@@ -2962,6 +3059,16 @@
     });
     modalLinki.appendChild(modalKanapka);
 
+    const modalOtworzMikser = el("button", "gw-btn-prosty", "🧩 Mikser");
+    modalOtworzMikser.type = "button";
+    modalOtworzMikser.hidden = stan.kanapka.length === 0;
+    modalOtworzMikser.title = "Przejdź bezpośrednio do Miksera warstw, aby ułożyć kolejność i krycie";
+    modalOtworzMikser.addEventListener("click", function () {
+      zamknijModal();
+      otworzMikser();
+    });
+    modalLinki.appendChild(modalOtworzMikser);
+
     let modalDodaj = null;
     if (czyPolaczonoZProgramem()) {
       modalDodaj = el("button", "gw-btn-dodaj-modal", "Wyślij");
@@ -2978,13 +3085,20 @@
     modalKopiuj.type = "button";
     modalKopiuj.addEventListener("click", function () {
       const w = stan.widoczne[stan.indeksModala];
-      if (!w || !navigator.clipboard) return;
-      navigator.clipboard.writeText(w.nazwa).then(function () {
-        modalKopiuj.textContent = "Skopiowano!";
-        setTimeout(function () {
-          modalKopiuj.textContent = "Kopiuj nazwę";
-        }, 1400);
-      });
+      if (!w) return;
+      kopiujTekstDoSchowka(w.nazwa)
+        .then(function () {
+          modalKopiuj.textContent = "Skopiowano!";
+          setTimeout(function () {
+            modalKopiuj.textContent = "Kopiuj nazwę";
+          }, 1400);
+        })
+        .catch(function () {
+          modalKopiuj.textContent = "Błąd schowka";
+          setTimeout(function () {
+            modalKopiuj.textContent = "Kopiuj nazwę";
+          }, 1400);
+        });
     });
 
     const linkKatalog = el("a", "gw-btn-prosty", "Katalog zbiorów");
@@ -3095,6 +3209,7 @@
       modalSciezka: modalSciezka,
       modalTabela: modalTabela,
       modalKanapka: modalKanapka,
+      modalOtworzMikser: modalOtworzMikser,
       modalDodaj: modalDodaj,
       modalKopiuj: modalKopiuj,
       modalPoprz: modalPoprz,

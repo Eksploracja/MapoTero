@@ -4028,7 +4028,7 @@
       "typ": "WMS",
       "nakladka": false,
       "zalecany_piksel": 2,
-      "zrodlo": "Serwer map",
+      "zrodlo": "ÚGKK SR / ZBGIS (Słowacja)",
       "obrazek": "obrazy/galeria/slowacja_zmsr_wms__1.webp",
       "miejsce_probki": "Poprad / Tatry (49.06, 20.30)",
       "zasieg": {
@@ -4050,7 +4050,7 @@
       "typ": "WMS",
       "nakladka": false,
       "zalecany_piksel": 4,
-      "zrodlo": "Serwer map",
+      "zrodlo": "ÚGKK SR / ZBGIS (Słowacja)",
       "obrazek": "obrazy/galeria/slowacja_zmsr_wms__5.webp",
       "miejsce_probki": "Poprad / Tatry (49.06, 20.30)",
       "zasieg": {
@@ -4072,7 +4072,7 @@
       "typ": "WMS",
       "nakladka": false,
       "zalecany_piksel": 8,
-      "zrodlo": "Serwer map",
+      "zrodlo": "ÚGKK SR / ZBGIS (Słowacja)",
       "obrazek": "obrazy/galeria/slowacja_zmsr_wms__9.webp",
       "miejsce_probki": "Poprad / Tatry (49.06, 20.30)",
       "zasieg": {
@@ -4094,7 +4094,7 @@
       "typ": "WMS",
       "nakladka": false,
       "zalecany_piksel": 15,
-      "zrodlo": "Serwer map",
+      "zrodlo": "ÚGKK SR / ZBGIS (Słowacja)",
       "obrazek": "obrazy/galeria/slowacja_zmsr_wms__13.webp",
       "miejsce_probki": "Poprad / Tatry (49.06, 20.30)",
       "zasieg": {
@@ -4116,7 +4116,7 @@
       "typ": "WMS",
       "nakladka": false,
       "zalecany_piksel": 0.5,
-      "zrodlo": "Serwer map",
+      "zrodlo": "ÚGKK SR / ZBGIS (Słowacja)",
       "obrazek": "obrazy/galeria/slowacja_orto_wms__1.webp",
       "miejsce_probki": "Poprad / Tatry (49.06, 20.30)",
       "zasieg": {
@@ -4138,7 +4138,7 @@
       "typ": "WMS",
       "nakladka": false,
       "zalecany_piksel": 2,
-      "zrodlo": "Serwer map",
+      "zrodlo": "ÚGKK SR / ZBGIS (Słowacja)",
       "obrazek": "obrazy/galeria/slowacja_dmr_wms__0.webp",
       "miejsce_probki": "Poprad / Tatry (49.06, 20.30)",
       "zasieg": {
@@ -4160,7 +4160,7 @@
       "typ": "WMTS",
       "nakladka": false,
       "zalecany_piksel": 2,
-      "zrodlo": "Serwer map",
+      "zrodlo": "BKG basemap.de (Niemcy)",
       "obrazek": "obrazy/galeria/niemcy_basemapde_WMTS__de_basemapde_web_raster_farbe.webp",
       "miejsce_probki": "Berlin (52.52, 13.41)",
       "zasieg": {
@@ -4182,7 +4182,7 @@
       "typ": "WMTS",
       "nakladka": false,
       "zalecany_piksel": 2,
-      "zrodlo": "Serwer map",
+      "zrodlo": "BKG basemap.de (Niemcy)",
       "obrazek": "obrazy/galeria/niemcy_basemapde_WMTS__de_basemapde_web_raster_grau.webp",
       "miejsce_probki": "Berlin (52.52, 13.41)",
       "zasieg": {
@@ -4314,7 +4314,7 @@
       "typ": "WMS",
       "nakladka": false,
       "zalecany_piksel": 2.5,
-      "zrodlo": "Serwer map",
+      "zrodlo": "GeoSN (Saksonia)",
       "obrazek": "obrazy/galeria/niemcy_saksonia_dtk_wms__sn_dtk25_p_color.webp",
       "miejsce_probki": "Drezno (51.05, 13.74)",
       "zasieg": {
@@ -4336,7 +4336,7 @@
       "typ": "WMS",
       "nakladka": false,
       "zalecany_piksel": 5,
-      "zrodlo": "Serwer map",
+      "zrodlo": "GeoSN (Saksonia)",
       "obrazek": "obrazy/galeria/niemcy_saksonia_dtk_wms__sn_dtk50_p_color.webp",
       "miejsce_probki": "Drezno (51.05, 13.74)",
       "zasieg": {
@@ -4358,7 +4358,7 @@
       "typ": "WMS",
       "nakladka": false,
       "zalecany_piksel": 0.5,
-      "zrodlo": "Serwer map",
+      "zrodlo": "GeoSN (Saksonia)",
       "obrazek": "obrazy/galeria/niemcy_saksonia_dop_wms__sn_dop_020.webp",
       "miejsce_probki": "Drezno (51.05, 13.74)",
       "zasieg": {
@@ -4380,7 +4380,7 @@
       "typ": "WMS",
       "nakladka": false,
       "zalecany_piksel": 2,
-      "zrodlo": "Serwer map",
+      "zrodlo": "GeoSN (Saksonia)",
       "obrazek": "obrazy/galeria/niemcy_saksonia_hoehe_wms__relief_standard.webp",
       "miejsce_probki": "Szwajcaria Saksońska (50.93, 14.14)",
       "zasieg": {
@@ -4402,7 +4402,7 @@
       "typ": "WMS",
       "nakladka": false,
       "zalecany_piksel": 2,
-      "zrodlo": "Serwer map",
+      "zrodlo": "GeoSN (Saksonia)",
       "obrazek": "obrazy/galeria/niemcy_saksonia_hoehe_wms__hangneigung.webp",
       "miejsce_probki": "Szwajcaria Saksońska (50.93, 14.14)",
       "zasieg": {
@@ -4424,7 +4424,7 @@
       "typ": "WMS",
       "nakladka": false,
       "zalecany_piksel": 1,
-      "zrodlo": "Serwer map",
+      "zrodlo": "NŽT / Geoportal.lt (Litwa)",
       "obrazek": "obrazy/galeria/litwa_inspire_wms__cp_CP_CadastralParcel.webp",
       "miejsce_probki": "Wilno (54.69, 25.28)",
       "zasieg": {
@@ -4446,7 +4446,7 @@
       "typ": "WMS",
       "nakladka": false,
       "zalecany_piksel": 2,
-      "zrodlo": "Serwer map",
+      "zrodlo": "NŽT / Geoportal.lt (Litwa)",
       "obrazek": "obrazy/galeria/litwa_inspire_wms__el_EL_ContourLine.webp",
       "miejsce_probki": "Wilno (54.69, 25.28)",
       "zasieg": {
@@ -4468,7 +4468,7 @@
       "typ": "WMS",
       "nakladka": false,
       "zalecany_piksel": 1,
-      "zrodlo": "Serwer map",
+      "zrodlo": "NŽT / Geoportal.lt (Litwa)",
       "obrazek": "obrazy/galeria/litwa_inspire_wms__bu_BU_Building_polygon.webp",
       "miejsce_probki": "Wilno (54.69, 25.28)",
       "zasieg": {
@@ -4490,7 +4490,7 @@
       "typ": "WMS",
       "nakladka": false,
       "zalecany_piksel": 2,
-      "zrodlo": "Serwer map",
+      "zrodlo": "NŽT / Geoportal.lt (Litwa)",
       "obrazek": "obrazy/galeria/litwa_inspire_wms__tn_TN_RoadTransportNetwork_RoadLink.webp",
       "miejsce_probki": "Wilno (54.69, 25.28)",
       "zasieg": {
@@ -4512,7 +4512,7 @@
       "typ": "WMS",
       "nakladka": false,
       "zalecany_piksel": 10,
-      "zrodlo": "Serwer map",
+      "zrodlo": "EMODnet Bathymetry",
       "obrazek": "obrazy/galeria/baltyk_batymetria_wms__emodnet_mean_atlas_land.webp",
       "miejsce_probki": "Zatoka Gdańska (54.55, 18.85)",
       "zasieg": {
@@ -4539,7 +4539,7 @@
       "typ": "WMS",
       "nakladka": false,
       "zalecany_piksel": 10,
-      "zrodlo": "Serwer map",
+      "zrodlo": "EMODnet Bathymetry",
       "obrazek": "obrazy/galeria/baltyk_batymetria_wms__emodnet_mean_rainbowcolour.webp",
       "miejsce_probki": "Zatoka Gdańska (54.55, 18.85)",
       "zasieg": {
@@ -4566,7 +4566,7 @@
       "typ": "WMS",
       "nakladka": false,
       "zalecany_piksel": 10,
-      "zrodlo": "Serwer map",
+      "zrodlo": "EMODnet Bathymetry",
       "obrazek": "obrazy/galeria/baltyk_batymetria_wms__emodnet_contours.webp",
       "miejsce_probki": "Otwarty Bałtyk (55.05, 17.50)",
       "zasieg": {
@@ -4593,7 +4593,7 @@
       "typ": "WMS",
       "nakladka": false,
       "zalecany_piksel": 10,
-      "zrodlo": "Serwer map",
+      "zrodlo": "EMODnet Bathymetry",
       "obrazek": "obrazy/galeria/baltyk_batymetria_wms__coastlines.webp",
       "miejsce_probki": "Zatoka Gdańska (54.55, 18.85)",
       "zasieg": {

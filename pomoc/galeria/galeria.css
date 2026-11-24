@@ -5,6 +5,31 @@
   box-sizing: border-box;
 }
 
+/* Neutralizacja globalnych stylów obrazów i linków z motywu Just the Docs (head_custom.html) */
+#galeria-warstw-app img {
+  margin: 0 !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  background-color: transparent !important;
+  transition: none !important;
+}
+
+#galeria-warstw-app img[hidden] {
+  display: none !important;
+}
+
+#galeria-warstw-app a.gw-btn-prosty {
+  color: #27262b !important;
+  border-bottom: 1px solid #d5d0d8 !important;
+  text-decoration: none !important;
+}
+
+#galeria-warstw-app a.gw-btn-prosty:hover {
+  color: #7253ed !important;
+  border-color: #7253ed !important;
+}
+
 #galeria-warstw-app button,
 #galeria-warstw-app input,
 #galeria-warstw-app select {
@@ -249,7 +274,7 @@
 
 .gw-miniatura-ramka img {
   width: 100%;
-  height: 100%;
+  height: 100% !important;
   object-fit: cover;
   display: block;
 }
@@ -1296,7 +1321,7 @@
   position: absolute;
   inset: 0;
   width: 100%;
-  height: 100%;
+  height: 100% !important;
   display: block;
   object-fit: contain;
 }
