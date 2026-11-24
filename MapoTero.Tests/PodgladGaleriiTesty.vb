@@ -101,8 +101,15 @@ Public Class PodgladGaleriiTesty
             kat.Znajdz("OSMapa_PL", "osmapa"),
             kat.Znajdz("OpenTopoMap", "opentopomap"),
             kat.Znajdz("rejestr_granic_jednostki_teryt", "W03_Morskie_wody_wewnetrzne"),
-            kat.Znajdz("czechy_topo_WMTS", "ZTM_WM")
+            kat.Znajdz("czechy_topo_WMTS", "ZTM_WM"),
+            kat.Znajdz("niemcy_brandenburgia_dtk10_wms", "bb_dtk10_farbe"),
+            kat.Znajdz("niemcy_saksonia_dtk_wms", "sn_dtk25_p_color"),
+            kat.Znajdz("niemcy_basemapde_WMTS", "de_basemapde_web_raster_farbe")
         }
+
+        Assert.True(GeometriaZasieguGalerii.Polska.Length > 50)
+        Assert.True(GeometriaZasieguGalerii.DaniaWielokaty.Length > 1)
+        Assert.True(GeometriaZasieguGalerii.WislaOdcinki.Length >= 1)
 
         For Each p In probki
             Assert.NotNull(p)
@@ -191,5 +198,16 @@ Public Class PodgladGaleriiTesty
             End Try
         End Try
     End Function
+
+    <Fact>
+    Public Sub FolderCacheGalerii_WskazujeLocalAppData()
+        Dim folder = Global.MapoTero.Program.FolderCacheGalerii()
+        Dim localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData)
+        If Not String.IsNullOrWhiteSpace(localAppData) Then
+            Assert.Equal(Path.Combine(localAppData, "MapoTero"), folder)
+        Else
+            Assert.False(String.IsNullOrWhiteSpace(folder))
+        End If
+    End Sub
 
 End Class

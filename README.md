@@ -38,7 +38,7 @@
 
 ## Pobieranie i wymagania
 
-Program działa w trybie **portable (bez instalacji)** jako pojedynczy plik `MapoTero.exe`, dostarczany w archiwum ZIP wraz z katalogiem `warstwy` (definicje zbiorów map) oraz plikiem `CZYTAJTO.txt`:
+Program działa w trybie **portable (bez instalacji)** jako pojedynczy plik `MapoTero.exe`, dostarczany w archiwum ZIP wraz z katalogiem `warstwy` (definicje zbiorów map) oraz plikiem `Readme.txt`:
 
 * 📥 **[Pobierz najnowszą wersję MapoTero (ZIP, Windows 64-bit)](https://github.com/Eksploracja/MapoTero/releases/latest):** pobierz i rozpakuj archiwum ZIP, a następnie uruchom `MapoTero.exe` (folder `warstwy` musi znajdować się obok pliku `.exe`).
 * 📦 **[Wszystkie wydania, kody źródłowe i historia zmian (GitHub Releases)](https://github.com/Eksploracja/MapoTero/releases):** pełne archiwum wydań oraz sumy kontrolne SHA-256.
@@ -138,7 +138,7 @@ Główne wbudowane źródła danych:
 
 **Kompilacja, testy i publikacja jednego pliku `MapoTero.exe`:**
 
-Program wydawany jest wyłącznie jako pojedynczy plik `MapoTero.exe` (projekt nie pozwala na publikację wersji wieloplikowej). Polecenie `dotnet publish` tworzy katalog `MapoTero_SingleFile` z plikiem `MapoTero.exe`, folderem `warstwy` i plikiem `CZYTAJTO.txt`:
+Program wydawany jest wyłącznie jako pojedynczy plik `MapoTero.exe` (projekt nie pozwala na publikację wersji wieloplikowej). Polecenie `dotnet publish` tworzy katalog `MapoTero_SingleFile` z plikiem `MapoTero.exe`, folderem `warstwy` i plikiem `Readme.txt`:
 
 ```powershell
 # Sprawdzenie kompilacji (katalog bin zawiera tylko pliki pośrednie)
@@ -151,7 +151,7 @@ powershell -NoProfile -File MapoTero.Tests/uruchom.ps1
 dotnet publish MapoTero.App/MapoTero_v3.vbproj -c Release -o MapoTero_SingleFile
 ```
 
-Każda zmiana w repozytorium jest automatycznie budowana i testowana w **GitHub Actions**. Aktualną kompilację testową (`MapoTero.exe` + `warstwy` + `CZYTAJTO.txt`) można pobrać jako artefakt *MapoTero* w zakładce **Actions**.
+Każda zmiana w repozytorium jest automatycznie budowana i testowana w **GitHub Actions**. Aktualną kompilację testową (`MapoTero.exe` + `warstwy` + `Readme.txt`) można pobrać jako artefakt *MapoTero* w zakładce **Actions**.
 
 </details>
 

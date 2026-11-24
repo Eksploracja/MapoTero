@@ -31,7 +31,7 @@
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <PlatformTarget>x64</PlatformTarget>
     <!-- JEDYNA rozwijana i wydawana wersja programu: pojedynczy plik MapoTero.exe (.NET Single-File) w folderze
-         MapoTero_SingleFile (obok niego tylko folder warstwy i CZYTAJTO.txt). Nie zmieniaj tych ustawień i nie twórz
+         MapoTero_SingleFile (obok niego tylko folder warstwy i Readme.txt). Nie zmieniaj tych ustawień i nie twórz
          publikacji wieloplikowych (cel TylkoJedenPlikExe przerywa taką publikację błędem). -->
     <PublishSingleFile>true</PublishSingleFile>
     <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
@@ -129,9 +129,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <!-- pliki zbiorów map i opis programu (CZYTAJTO.txt) kopiowane do folderu wydania -->
+    <!-- pliki zbiorów map i opis programu (Readme.txt) kopiowane do folderu wydania -->
     <None Include="..\warstwy\*.txt" Link="warstwy\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
-    <None Include="CZYTAJTO.txt" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <None Include="Readme.txt" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
 
   <Target Name="KopiujWarstwyPoPublikacji" AfterTargets="Publish">
@@ -141,7 +141,7 @@
     <Copy SourceFiles="@(PlikiWarstw)"
           DestinationFolder="$(PublishDir)warstwy\"
           SkipUnchangedFiles="true" />
-    <Copy SourceFiles="$(MSBuildProjectDirectory)\CZYTAJTO.txt"
+    <Copy SourceFiles="$(MSBuildProjectDirectory)\Readme.txt"
           DestinationFolder="$(PublishDir)"
           SkipUnchangedFiles="true" />
   </Target>

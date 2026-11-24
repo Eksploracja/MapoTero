@@ -53,37 +53,58 @@ Public NotInheritable Class RendererZasieguGalerii
             Dim stan = g.Save()
             g.TranslateTransform(offX, offY)
             g.ScaleTransform(skala, skala)
+            g.SetClip(New RectangleF(25.0F, 0.0F, 315.0F, 275.0F))
 
-            Dim kolorTlaKraju = Color.FromArgb(226, 232, 240)
-            Dim kolorObramowaniaKraju = Color.FromArgb(148, 163, 184)
-            Dim kolorPolski = Color.FromArgb(238, 242, 246)
+            Dim kolorTlaKraju = Color.FromArgb(241, 245, 249)
+            Dim kolorObramowaniaKraju = Color.FromArgb(195, 206, 219)
+            Dim kolorPolski = Color.FromArgb(248, 250, 252)
             Dim kolorAktywny = Color.FromArgb(59, 130, 246)
-            Dim kolorAktywnyWyp = Color.FromArgb(147, 197, 253)
-            Dim kolorBaltyk = Color.FromArgb(219, 234, 254)
+            Dim kolorAktywnyWyp = Color.FromArgb(219, 234, 254)
+            Dim kolorBaltyk = Color.FromArgb(224, 242, 254)
             Dim kolorBaltykAktywny = Color.FromArgb(96, 165, 250)
-            Dim kolorZagranicaAktywny = Color.FromArgb(110, 175, 245)
+            Dim kolorZagranicaAktywny = Color.FromArgb(167, 243, 208)
+            Dim kolorZagranicaObramowanie = Color.FromArgb(5, 150, 105)
 
             'Bałtyk
             Using pedzel As New SolidBrush(If(typ = "morski", kolorBaltykAktywny, kolorBaltyk))
                 g.FillPolygon(pedzel, NaPointF(Baltyk))
             End Using
 
-            'Sąsiedzi
-            RysujKraj(g, NiemcyReszta, If(typ = "zagranica" AndAlso kod = "DE", kolorZagranicaAktywny, kolorTlaKraju), kolorObramowaniaKraju)
-            RysujKraj(g, NiemcyBrandenburgia, If(typ = "zagranica" AndAlso (kod = "DE-BB" OrElse kod = "DE"), kolorZagranicaAktywny, kolorTlaKraju), kolorObramowaniaKraju)
-            RysujKraj(g, NiemcySaksonia, If(typ = "zagranica" AndAlso (kod = "DE-SN" OrElse kod = "DE"), kolorZagranicaAktywny, kolorTlaKraju), kolorObramowaniaKraju)
-            RysujKraj(g, Czechy, If(typ = "zagranica" AndAlso kod = "CZ", kolorZagranicaAktywny, kolorTlaKraju), kolorObramowaniaKraju)
-            RysujKraj(g, Slowacja, If(typ = "zagranica" AndAlso kod = "SK", kolorZagranicaAktywny, kolorTlaKraju), kolorObramowaniaKraju)
-            RysujKraj(g, Litwa, If(typ = "zagranica" AndAlso kod = "LT", kolorZagranicaAktywny, kolorTlaKraju), kolorObramowaniaKraju)
+            'Sąsiedzi (pełne kontury z Natural Earth 50m i landy DE)
+            RysujKrajWielokaty(g, SzwecjaWielokaty, kolorTlaKraju, kolorObramowaniaKraju)
+            RysujKrajWielokaty(g, DaniaWielokaty, kolorTlaKraju, kolorObramowaniaKraju)
+
+            Dim aktDe = typ = "zagranica" AndAlso kod = "DE"
+            Dim aktDeBb = typ = "zagranica" AndAlso (kod = "DE-BB" OrElse aktDe)
+            Dim aktDeSn = typ = "zagranica" AndAlso (kod = "DE-SN" OrElse aktDe)
+            RysujKrajWielokaty(g, NiemcyResztaWielokaty, If(aktDe, kolorZagranicaAktywny, kolorTlaKraju), If(aktDe, kolorZagranicaObramowanie, kolorObramowaniaKraju), If(aktDe, 1.4F, 0.75F))
+            RysujKraj(g, NiemcyBrandenburgia, If(aktDeBb, kolorZagranicaAktywny, kolorTlaKraju), If(aktDeBb, kolorZagranicaObramowanie, kolorObramowaniaKraju), If(aktDeBb, 1.5F, 0.75F))
+            RysujKraj(g, NiemcySaksonia, If(aktDeSn, kolorZagranicaAktywny, kolorTlaKraju), If(aktDeSn, kolorZagranicaObramowanie, kolorObramowaniaKraju), If(aktDeSn, 1.5F, 0.75F))
+
+            Dim aktCz = typ = "zagranica" AndAlso kod = "CZ"
+            Dim aktSk = typ = "zagranica" AndAlso kod = "SK"
+            Dim aktLt = typ = "zagranica" AndAlso kod = "LT"
+            RysujKraj(g, Czechy, If(aktCz, kolorZagranicaAktywny, kolorTlaKraju), If(aktCz, kolorZagranicaObramowanie, kolorObramowaniaKraju), If(aktCz, 1.5F, 0.75F))
+            RysujKraj(g, Slowacja, If(aktSk, kolorZagranicaAktywny, kolorTlaKraju), If(aktSk, kolorZagranicaObramowanie, kolorObramowaniaKraju), If(aktSk, 1.5F, 0.75F))
+            RysujKrajWielokaty(g, LitwaWielokaty, If(aktLt, kolorZagranicaAktywny, kolorTlaKraju), If(aktLt, kolorZagranicaObramowanie, kolorObramowaniaKraju), If(aktLt, 1.5F, 0.75F))
+            RysujKrajWielokaty(g, BialorusWielokaty, kolorTlaKraju, kolorObramowaniaKraju)
+            RysujKrajWielokaty(g, UkrainaWielokaty, kolorTlaKraju, kolorObramowaniaKraju)
+            RysujKrajWielokaty(g, RosjaWielokaty, kolorTlaKraju, kolorObramowaniaKraju)
 
             'Polska (tło bazowe)
             Dim polskaWyp As Color = kolorPolski
+            Dim polskaObr As Color = Color.FromArgb(148, 163, 184)
+            Dim polskaGrubosc As Single = 1.1F
             If typ = "kraj" AndAlso Not maKomorki Then
                 polskaWyp = kolorAktywnyWyp
+                polskaObr = Color.FromArgb(37, 99, 235)
+                polskaGrubosc = 1.6F
             ElseIf typ = "regionalny" OrElse typ = "czesciowy" OrElse maKomorki Then
                 polskaWyp = Color.FromArgb(241, 245, 249)
+                polskaObr = Color.FromArgb(100, 116, 139)
+                polskaGrubosc = 1.2F
             End If
-            RysujKraj(g, Polska, polskaWyp, Color.FromArgb(71, 85, 105), 1.2F)
+            RysujKraj(g, Polska, polskaWyp, polskaObr, polskaGrubosc)
 
             'Komórki rzeczywistego zasięgu z maska_hex (pokazuje dziury wewnątrz Polski)
             If maKomorki Then
@@ -95,7 +116,7 @@ Public NotInheritable Class RendererZasieguGalerii
                         g.SetClip(sciezkaPolski, CombineMode.Intersect)
                     End Using
                 End If
-                Using pedzelKomorki As New SolidBrush(Color.FromArgb(185, 37, 99, 235))
+                Using pedzelKomorki As New SolidBrush(Color.FromArgb(150, 37, 99, 235))
                     For Each k In komorki
                         g.FillRectangle(pedzelKomorki, k.X, k.Y, k.Szerokosc, k.Wysokosc)
                     Next
@@ -108,19 +129,26 @@ Public NotInheritable Class RendererZasieguGalerii
 
             'Rzeki główne
             Using pioroRzeki As New Pen(Color.FromArgb(147, 197, 253), 1.1F)
-                g.DrawLines(pioroRzeki, NaPointF(Wisla))
-                g.DrawLines(pioroRzeki, NaPointF(Odra))
+                pioroRzeki.StartCap = LineCap.Round
+                pioroRzeki.EndCap = LineCap.Round
+                pioroRzeki.LineJoin = LineJoin.Round
+                For Each odcinek In WislaOdcinki
+                    If odcinek.Length >= 2 Then g.DrawLines(pioroRzeki, NaPointF(odcinek))
+                Next
+                For Each odcinek In OdraOdcinki
+                    If odcinek.Length >= 2 Then g.DrawLines(pioroRzeki, NaPointF(odcinek))
+                Next
             End Using
 
             'Etykiety państw
             Using fntKraj As New Font("Segoe UI", 7.0F, FontStyle.Bold)
                 Using fntPl As New Font("Segoe UI", 8.0F, FontStyle.Bold)
-                    RysujEtykiete(g, "BAŁTYK", 180.0F, 44.0F, fntKraj, Color.FromArgb(59, 130, 246))
-                    RysujEtykiete(g, "NIEMCY", 82.0F, 126.0F, fntKraj, Color.FromArgb(100, 116, 139))
-                    RysujEtykiete(g, "CZECHY", 135.0F, 211.0F, fntKraj, Color.FromArgb(100, 116, 139))
-                    RysujEtykiete(g, "SŁOWACJA", 210.0F, 246.0F, fntKraj, Color.FromArgb(100, 116, 139))
-                    RysujEtykiete(g, "LITWA", 278.0F, 51.0F, fntKraj, Color.FromArgb(100, 116, 139))
-                    RysujEtykiete(g, "POLSKA", 195.0F, 141.0F, fntPl, If(typ = "kraj" OrElse maKomorki, Color.FromArgb(30, 58, 138), Color.FromArgb(71, 85, 105)))
+                    RysujEtykiete(g, "BAŁTYK", 180.0F, 40.0F, fntKraj, Color.FromArgb(59, 130, 246))
+                    RysujEtykiete(g, "NIEMCY", 48.0F, 137.0F, fntKraj, Color.FromArgb(100, 116, 139))
+                    RysujEtykiete(g, "CZECHY", 125.0F, 215.0F, fntKraj, Color.FromArgb(100, 116, 139))
+                    RysujEtykiete(g, "SŁOWACJA", 210.0F, 245.0F, fntKraj, Color.FromArgb(100, 116, 139))
+                    RysujEtykiete(g, "LITWA", 285.0F, 37.0F, fntKraj, Color.FromArgb(100, 116, 139))
+                    RysujEtykiete(g, "POLSKA", 198.0F, 152.0F, fntPl, If(typ = "kraj" OrElse maKomorki, Color.FromArgb(30, 58, 138), Color.FromArgb(71, 85, 105)))
                 End Using
             End Using
 
@@ -193,6 +221,12 @@ Public NotInheritable Class RendererZasieguGalerii
         End Using
         Return bmp
     End Function
+
+    Private Shared Sub RysujKrajWielokaty(g As Graphics, wielokaty As PunktMapyGalerii()(), wyp As Color, obramowanie As Color, Optional grubosc As Single = 0.75F)
+        For Each poly In wielokaty
+            If poly.Length >= 3 Then RysujKraj(g, poly, wyp, obramowanie, grubosc)
+        Next
+    End Sub
 
     Private Shared Sub RysujKraj(g As Graphics, punkty As PunktMapyGalerii(), wyp As Color, obramowanie As Color, Optional grubosc As Single = 0.8F)
         Dim pts = NaPointF(punkty)

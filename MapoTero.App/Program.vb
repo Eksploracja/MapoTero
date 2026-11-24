@@ -304,12 +304,21 @@ Public Module Program
     Private ReadOnly _blokadaMagazynuGalerii As New Object()
     Private _magazynGalerii As MagazynPodgladuGalerii
 
+    ''' <summary>Katalog bazowy dla pamięci podręcznej podglądu galerii (<c>%LocalAppData%\MapoTero</c>, aby nie zaśmiecać folderu przy MapoTero.exe).</summary>
+    Public Function FolderCacheGalerii() As String
+        Dim localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData)
+        If Not String.IsNullOrWhiteSpace(localAppData) Then
+            Return Path.Combine(localAppData, "MapoTero")
+        End If
+        If Not String.IsNullOrWhiteSpace(FolderDanych) Then Return FolderDanych
+        Return Path.GetTempPath()
+    End Function
+
     ''' <summary>Wspólny magazyn podglądu próbek i zasięgów warstw (współdzielony przez okno główne i kreator warstw).</summary>
     Public Function PobierzMagazynGalerii(Optional wylaczSiec As Boolean = False) As MagazynPodgladuGalerii
         SyncLock _blokadaMagazynuGalerii
             If _magazynGalerii Is Nothing Then
-                Dim katalog = If(String.IsNullOrWhiteSpace(FolderDanych), UstalFolderDanych(If(String.IsNullOrWhiteSpace(FolderProgramu), AppContext.BaseDirectory, FolderProgramu)), FolderDanych)
-                _magazynGalerii = New MagazynPodgladuGalerii(katalog, Form1.UrlPomocyOnline, Nothing, Nothing, wylaczSiec)
+                _magazynGalerii = New MagazynPodgladuGalerii(FolderCacheGalerii(), Form1.UrlPomocyOnline, Nothing, Nothing, wylaczSiec)
             End If
             Return _magazynGalerii
         End SyncLock
