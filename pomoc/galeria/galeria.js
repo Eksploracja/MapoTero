@@ -171,7 +171,7 @@
 
   function budujPrzepisJson(kanapka, opcje) {
     const o = opcje || {};
-    return {
+    const wynik = {
       format: "mapotero-zestaw",
       wersja: 1,
       nazwa: (o.nazwa || "").trim(),
@@ -186,6 +186,10 @@
         };
       })
     };
+    if (Array.isArray(o.obszarWgs84) && o.obszarWgs84.length === 4) {
+      wynik.obszarWgs84 = o.obszarWgs84;
+    }
+    return wynik;
   }
 
   function wspolczynnikRzezby(szarosc01) {
@@ -243,6 +247,43 @@
     return { lat: lat, lon: lon };
   }
 
+  function obliczPikselDlaBbox(bbox, bokPx) {
+    if (!Array.isArray(bbox) || bbox.length !== 4) return 2.0;
+    const minLon = Math.min(bbox[0], bbox[2]);
+    const maxLon = Math.max(bbox[0], bbox[2]);
+    const minLat = Math.min(bbox[1], bbox[3]);
+    const maxLat = Math.max(bbox[1], bbox[3]);
+    const srLat = (minLat + maxLat) / 2;
+    const szerM = Math.abs(maxLon - minLon) * 111320 * Math.cos((srLat * Math.PI) / 180);
+    const wysM = Math.abs(maxLat - minLat) * 111320;
+    const maksM = Math.max(szerM, wysM, 180);
+    return Math.max(0.5, Math.round((maksM / (bokPx || 360)) * 100) / 100);
+  }
+
+  function bboxZCentrumIPiksela(lat, lon, pikselMetry, bokPx) {
+    const polM = ((bokPx || 360) * Math.max(0.25, pikselMetry || 2.0)) / 2;
+    const dLat = polM / 111320;
+    const cosLat = Math.max(0.2, Math.cos((lat * Math.PI) / 180));
+    const dLon = polM / (111320 * cosLat);
+    return [lon - dLon, lat - dLat, lon + dLon, lat + dLat];
+  }
+
+  function dopasujZoomDoBbox(bbox, szerPx, wysPx) {
+    if (!Array.isArray(bbox) || bbox.length !== 4) return 11;
+    const minLon = Math.min(bbox[0], bbox[2]);
+    const maxLon = Math.max(bbox[0], bbox[2]);
+    const minLat = Math.min(bbox[1], bbox[3]);
+    const maxLat = Math.max(bbox[1], bbox[3]);
+    for (let z = 15; z >= 5; z--) {
+      const p1 = latLonDoKafelka(maxLat, minLon, z);
+      const p2 = latLonDoKafelka(minLat, maxLon, z);
+      const dx = Math.abs(p2.x - p1.x) * 256;
+      const dy = Math.abs(p2.y - p1.y) * 256;
+      if (dx <= szerPx * 0.8 && dy <= wysPx * 0.8) return z;
+    }
+    return 5;
+  }
+
   if (typeof module !== "undefined" && module.exports) {
     module.exports = {
       MAKS_WARSTW_KANAPKI,
@@ -260,7 +301,10 @@
       wspolczynnikRzezby,
       nalozRzezbeTerenuNaPiksele,
       latLonDoKafelka,
-      kafelekDoLatLon
+      kafelekDoLatLon,
+      obliczPikselDlaBbox,
+      bboxZCentrumIPiksela,
+      dopasujZoomDoBbox
     };
   }
 
@@ -297,8 +341,15 @@
     podgladLat: 52.2297,
     podgladLon: 21.0122,
     podgladPiksel: 0,
-    minimapaOtwarta: false,
-    minimapaBazaKafelki: null,
+    ostatniPikselRenderu: 2.0,
+    zaznaczonyBbox: null,
+    przekazObszarDoMapoTero: true,
+    minimapaOtwarta: true,
+    mapaZoom: 11,
+    mapaCenterLat: 52.2297,
+    mapaCenterLon: 21.0122,
+    mapaTryb: "przesun",
+    cacheKafelkowOsm: new Map(),
     abortPodglad: null,
     timerPodgladu: null,
     cacheObrazow: new Map()
@@ -605,21 +656,25 @@
           if (Number.isFinite(dane.obszar.lat) && Number.isFinite(dane.obszar.lon) && (dane.obszar.lat !== 0 || dane.obszar.lon !== 0)) {
             stan.podgladLat = dane.obszar.lat;
             stan.podgladLon = dane.obszar.lon;
+            stan.mapaCenterLat = dane.obszar.lat;
+            stan.mapaCenterLon = dane.obszar.lon;
           }
-          if (stan.podgladPiksel === 0 && dane.obszar.piksel > 0) {
-            stan.podgladPiksel = 0; // Auto wg wybranej kanapki lub obszaru
+          if (Array.isArray(dane.obszar.bboxWgs84) && dane.obszar.bboxWgs84.length === 4) {
+            stan.mapaZoom = dopasujZoomDoBbox(dane.obszar.bboxWgs84, 356, 258);
+          } else if (dane.obszar.piksel > 0) {
+            stan.mapaZoom = dane.obszar.piksel <= 1 ? 14 : (dane.obszar.piksel <= 5 ? 12 : 10);
           }
         }
         if (dane.zestaw && Array.isArray(dane.zestaw.warstwy) && dane.zestaw.warstwy.length > 0) {
           if (wymusNadpisanieKanapki || (nadpiszKanapkeJesliPusta && stan.kanapka.length === 0)) {
             stan.kanapka = zmapujWarstwyZPrzepisu(dane.zestaw.warstwy);
             if (dane.zestaw.nazwa) stan.nazwaKanapki = dane.zestaw.nazwa;
-            poZmianieKanapki();
+            poZmianieKanapki(true);
           }
         }
         if (stan.mikserOtwarty) {
-          odswiezMinimape();
-          zglosOdswiezeniePodgladuMiksera();
+          rysujMinimape();
+          zglosOdswiezeniePodgladuMiksera(true);
         }
         return dane;
       })
@@ -641,7 +696,8 @@
     const przepis = budujPrzepisJson(stan.kanapka, {
       nazwa: stan.nazwaKanapki,
       cel: cel || "okno_glowne",
-      zapiszStyl: Boolean(zapiszStyl)
+      zapiszStyl: Boolean(zapiszStyl),
+      obszarWgs84: stan.przekazObszarDoMapoTero && stan.zaznaczonyBbox ? stan.zaznaczonyBbox : null
     });
 
     pokazStatusMiksera("Wysyłanie kanapki do programu MapoTero…", false);
@@ -1241,7 +1297,7 @@
     stan.mikserOtwarty = true;
     ref.mikserTlo.hidden = false;
     renderujListeMiksera();
-    odswiezMinimape();
+    rysujMinimape();
     zglosOdswiezeniePodgladuMiksera(true);
     ref.mikserZamknij.focus();
   }
@@ -1492,7 +1548,12 @@
         ref.mikserLadowanie.hidden = true;
 
         const opisPunktu = (wynik.latH || stan.podgladLat.toFixed(4)) + ", " + (wynik.lonH || stan.podgladLon.toFixed(4));
-        const opisPx = wynik.pxH ? " · " + wynik.pxH.replace(".", ",") + " m/px" : "";
+        const pxLiczba = parseFloat(wynik.pxH);
+        if (Number.isFinite(pxLiczba) && pxLiczba > 0) {
+          stan.ostatniPikselRenderu = pxLiczba;
+          rysujMinimape();
+        }
+        const opisPx = wynik.pxH ? " · " + wynik.pxH.replace(".", ",") + " m/px (" + Math.round((pxLiczba || 2) * 360) + " m)" : "";
         let info = "Podgląd na żywo z MapoTero (" + opisPunktu + opisPx + ").";
         if (wynik.brakH) {
           const brakujace = decodeURIComponent(wynik.brakH).split("|").join(", ");
@@ -1528,11 +1589,23 @@
     const wys = ref.mikserCanvas.height;
 
     if (zProbka.length === 0) {
-      ctx.clearRect(0, 0, szer, wys);
-      ref.mikserLadowanie.hidden = true;
-      ref.mikserStanPodgladu.classList.add("ostrzezenie");
-      ref.mikserStanPodgladu.textContent =
-        "Wybrane warstwy nie mają wspólnej próbki statycznej offline. Otwórz galerię z programu MapoTero, aby zobaczyć podgląd na żywo z serwerów.";
+      const zMiniatura = stan.kanapka.find(function (x) { return Boolean(x.obrazek); });
+      if (!zMiniatura) {
+        ctx.clearRect(0, 0, szer, wys);
+        ref.mikserLadowanie.hidden = true;
+        ref.mikserStanPodgladu.classList.add("ostrzezenie");
+        ref.mikserStanPodgladu.textContent =
+          "Wybrane warstwy nie mają wspólnej próbki statycznej offline. Otwórz galerię z programu MapoTero, aby zobaczyć podgląd na żywo z serwerów.";
+        return;
+      }
+      ladujObrazekZCache(sciezkaObrazka(zMiniatura.obrazek)).then(function (img) {
+        ctx.clearRect(0, 0, szer, wys);
+        if (img) ctx.drawImage(img, 0, 0, szer, wys);
+        ref.mikserLadowanie.hidden = true;
+        ref.mikserStanPodgladu.classList.add("ostrzezenie");
+        ref.mikserStanPodgladu.textContent =
+          "Podgląd pojedynczej miniatury („" + zMiniatura.nazwa + "”) — wspólny miks offline nie obejmuje jeszcze tej warstwy. Pełny miks dowolnych warstw działa po otwarciu galerii z MapoTero.";
+      });
       return;
     }
 
@@ -1587,30 +1660,170 @@
     });
   }
 
-  function odswiezMinimape() {
-    if (!ref.minimapaSiatka || !stan.minimapaOtwarta) return;
-    const zoom = stan.podgladPiksel > 0 && stan.podgladPiksel <= 1.5 ? 14 : (stan.podgladPiksel >= 10 ? 11 : 13);
-    const pt = latLonDoKafelka(stan.podgladLat, stan.podgladLon, zoom);
-    const txCenter = Math.floor(pt.x);
-    const tyCenter = Math.floor(pt.y);
-    const fracX = pt.x - txCenter;
-    const fracY = pt.y - tyCenter;
+  function pobierzKafelekOsm(z, tx, ty) {
+    const n = Math.pow(2, z);
+    if (ty < 0 || ty >= n) return null;
+    const xWrap = ((tx % n) + n) % n;
+    const klucz = z + "/" + xWrap + "/" + ty;
+    if (stan.cacheKafelkowOsm.has(klucz)) {
+      return stan.cacheKafelkowOsm.get(klucz);
+    }
+    const wpis = { status: "loading", img: new Image() };
+    stan.cacheKafelkowOsm.set(klucz, wpis);
+    wpis.img.onload = function () {
+      wpis.status = "ok";
+      if (stan.mikserOtwarty && stan.minimapaOtwarta) rysujMinimape();
+    };
+    wpis.img.onerror = function () {
+      wpis.status = "err";
+    };
+    wpis.img.src = "https://tile.openstreetmap.org/" + z + "/" + xWrap + "/" + ty + ".png";
+    return wpis;
+  }
 
-    stan.minimapaBazaKafelki = { zoom: zoom, txMin: txCenter - 1, tyMin: tyCenter - 1 };
+  function rysujBboxNaMapie(ctx, bbox, cX, cY, z, szer, wys, kolorObrysu, kolorWypelnienia, przerywana) {
+    if (!Array.isArray(bbox) || bbox.length !== 4) return;
+    const minLon = Math.min(bbox[0], bbox[2]);
+    const maxLon = Math.max(bbox[0], bbox[2]);
+    const minLat = Math.min(bbox[1], bbox[3]);
+    const maxLat = Math.max(bbox[1], bbox[3]);
+    const p1 = latLonDoKafelka(maxLat, minLon, z);
+    const p2 = latLonDoKafelka(minLat, maxLon, z);
+    const x1 = szer / 2 + (p1.x - cX) * 256;
+    const y1 = wys / 2 + (p1.y - cY) * 256;
+    const x2 = szer / 2 + (p2.x - cX) * 256;
+    const y2 = wys / 2 + (p2.y - cY) * 256;
+    const rw = Math.max(4, x2 - x1);
+    const rh = Math.max(4, y2 - y1);
+    ctx.save();
+    if (kolorWypelnienia) {
+      ctx.fillStyle = kolorWypelnienia;
+      ctx.fillRect(x1, y1, rw, rh);
+    }
+    ctx.strokeStyle = kolorObrysu;
+    ctx.lineWidth = 2;
+    if (przerywana) ctx.setLineDash([5, 4]);
+    ctx.strokeRect(x1, y1, rw, rh);
+    ctx.restore();
+  }
 
-    ref.minimapaSiatka.innerHTML = "";
-    for (let dy = -1; dy <= 1; dy++) {
-      for (let dx = -1; dx <= 1; dx++) {
-        const img = document.createElement("img");
-        img.alt = "";
-        img.src = "https://tile.openstreetmap.org/" + zoom + "/" + (txCenter + dx) + "/" + (tyCenter + dy) + ".png";
-        ref.minimapaSiatka.appendChild(img);
+  function rysujMinimape(tymczasowyProstokat) {
+    if (!ref.minimapaCanvas || !stan.minimapaOtwarta) return;
+    const canvas = ref.minimapaCanvas;
+    const ctx = canvas.getContext("2d");
+    const szer = canvas.width;
+    const wys = canvas.height;
+    const z = Math.max(5, Math.min(16, stan.mapaZoom));
+
+    const centerTile = latLonDoKafelka(stan.mapaCenterLat, stan.mapaCenterLon, z);
+    const cX = centerTile.x;
+    const cY = centerTile.y;
+
+    // Tło + siatka + miasta orientacyjne w rzucie Web Mercator (zawsze widoczne nawet przed wczytaniem kafli)
+    ctx.fillStyle = "#eef2f6";
+    ctx.fillRect(0, 0, szer, wys);
+
+    const txStart = Math.floor(cX - szer / 512) - 1;
+    const txEnd = Math.ceil(cX + szer / 512) + 1;
+    const tyStart = Math.floor(cY - wys / 512) - 1;
+    const tyEnd = Math.ceil(cY + wys / 512) + 1;
+
+    let brakujaceKafle = false;
+    for (let ty = tyStart; ty <= tyEnd; ty++) {
+      for (let tx = txStart; tx <= txEnd; tx++) {
+        const px = Math.round(szer / 2 + (tx - cX) * 256);
+        const py = Math.round(wys / 2 + (ty - cY) * 256);
+        const wpis = pobierzKafelekOsm(z, tx, ty);
+        if (wpis && wpis.status === "ok") {
+          ctx.drawImage(wpis.img, px, py, 256, 256);
+        } else {
+          brakujaceKafle = true;
+        }
       }
     }
-    const celownik = el("div", "gw-minimapa-celownik");
-    celownik.style.left = (((1 + fracX) / 3) * 100).toFixed(2) + "%";
-    celownik.style.top = (((1 + fracY) / 3) * 100).toFixed(2) + "%";
-    ref.minimapaSiatka.appendChild(celownik);
+
+    if (brakujaceKafle) {
+      ctx.save();
+      ctx.fillStyle = "#475569";
+      ctx.font = "11px sans-serif";
+      SKROTY_MIEJSC.forEach(function (m) {
+        const pt = latLonDoKafelka(m.lat, m.lon, z);
+        const mx = szer / 2 + (pt.x - cX) * 256;
+        const my = wys / 2 + (pt.y - cY) * 256;
+        if (mx >= -30 && mx <= szer + 30 && my >= -20 && my <= wys + 20) {
+          ctx.beginPath();
+          ctx.arc(mx, my, 3, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillText(m.nazwa, mx + 5, my + 4);
+        }
+      });
+      ctx.restore();
+    }
+
+    // 1. Obszar zaznaczony w programie MapoTero (niebieska przerywana ramka)
+    if (stan.obszarProgramu && Array.isArray(stan.obszarProgramu.bboxWgs84)) {
+      rysujBboxNaMapie(ctx, stan.obszarProgramu.bboxWgs84, cX, cY, z, szer, wys, "#0284c7", "rgba(2, 132, 199, 0.12)", true);
+    }
+
+    // 2. Obszar zaznaczony na mapce w galerii (fioletowa ramka)
+    if (Array.isArray(stan.zaznaczonyBbox)) {
+      rysujBboxNaMapie(ctx, stan.zaznaczonyBbox, cX, cY, z, szer, wys, "#7253ed", "rgba(114, 83, 237, 0.18)", false);
+    }
+
+    // 3. Aktualny obszar próbki podglądu 360x360 px (czerwona ramka + celownik)
+    const bboxProbki = bboxZCentrumIPiksela(stan.podgladLat, stan.podgladLon, stan.podgladPiksel > 0 ? stan.podgladPiksel : stan.ostatniPikselRenderu, 360);
+    rysujBboxNaMapie(ctx, bboxProbki, cX, cY, z, szer, wys, "#dc2626", "rgba(220, 38, 38, 0.08)", false);
+
+    const ptSrodek = latLonDoKafelka(stan.podgladLat, stan.podgladLon, z);
+    const sx = szer / 2 + (ptSrodek.x - cX) * 256;
+    const sy = wys / 2 + (ptSrodek.y - cY) * 256;
+    ctx.save();
+    ctx.strokeStyle = "#dc2626";
+    ctx.lineWidth = 1.6;
+    ctx.beginPath();
+    ctx.moveTo(sx - 8, sy);
+    ctx.lineTo(sx + 8, sy);
+    ctx.moveTo(sx, sy - 8);
+    ctx.lineTo(sx, sy + 8);
+    ctx.stroke();
+    ctx.restore();
+
+    // 4. Prostokąt w trakcie zaznaczania myszą
+    if (tymczasowyProstokat) {
+      const rx = Math.min(tymczasowyProstokat.x1, tymczasowyProstokat.x2);
+      const ry = Math.min(tymczasowyProstokat.y1, tymczasowyProstokat.y2);
+      const rw = Math.abs(tymczasowyProstokat.x2 - tymczasowyProstokat.x1);
+      const rh = Math.abs(tymczasowyProstokat.y2 - tymczasowyProstokat.y1);
+      ctx.save();
+      ctx.fillStyle = "rgba(114, 83, 237, 0.22)";
+      ctx.strokeStyle = "#5b3fd4";
+      ctx.lineWidth = 2;
+      ctx.setLineDash([4, 3]);
+      ctx.fillRect(rx, ry, rw, rh);
+      ctx.strokeRect(rx, ry, rw, rh);
+      ctx.restore();
+    }
+
+    if (ref.minimapaZoomTekst) {
+      ref.minimapaZoomTekst.textContent = "Zoom: " + z;
+    }
+    if (ref.minimapaInfo) {
+      let txt = "Punkt podglądu: " + stan.podgladLat.toFixed(4) + ", " + stan.podgladLon.toFixed(4);
+      if (stan.zaznaczonyBbox) {
+        const pxAuto = obliczPikselDlaBbox(stan.zaznaczonyBbox, 360);
+        const bokKm = ((pxAuto * 360) / 1000).toFixed(2).replace(".", ",");
+        txt += " · Zaznaczony obszar (~" + bokKm + " km)";
+      } else if (stan.obszarProgramu && stan.obszarProgramu.maSiatke) {
+        txt += " · Niebieska ramka: obszar z MapoTero";
+      }
+      ref.minimapaInfo.textContent = txt;
+    }
+    if (ref.minimapaBtnWyczyscZazn) {
+      ref.minimapaBtnWyczyscZazn.hidden = !stan.zaznaczonyBbox;
+    }
+    if (ref.mikserChkObszarWrap) {
+      ref.mikserChkObszarWrap.hidden = !stan.zaznaczonyBbox;
+    }
   }
 
   function utworzGrupePigulek(etykieta, opcje, pobierzAktualna, onZmiana) {
@@ -1707,79 +1920,282 @@
     ramkaPodgladu.appendChild(mikserLadowanie);
 
     const sterowaniePodgladu = el("div", "gw-mikser-sterowanie-podgladu");
-    if (czyPolaczonoZProgramem()) {
-      const selSkala = document.createElement("select");
-      selSkala.setAttribute("aria-label", "Rozdzielczość podglądu");
-      [
-        { val: "0", txt: "Skala: Auto" },
-        { val: "0.5", txt: "0,5 m/px" },
-        { val: "1", txt: "1 m/px" },
-        { val: "2", txt: "2 m/px" },
-        { val: "4", txt: "4 m/px" },
-        { val: "10", txt: "10 m/px" },
-        { val: "25", txt: "25 m/px" }
-      ].forEach(function (op) {
-        const opt = document.createElement("option");
-        opt.value = op.val;
-        opt.textContent = op.txt;
-        selSkala.appendChild(opt);
-      });
-      selSkala.addEventListener("change", function () {
-        stan.podgladPiksel = parseFloat(selSkala.value) || 0;
-        odswiezMinimape();
-        zglosOdswiezeniePodgladuMiksera(true);
-      });
-
-      const btnZMapoTero = el("button", "gw-btn-prosty", "↺ Obszar z MapoTero");
-      btnZMapoTero.type = "button";
-      btnZMapoTero.title = "Pobierz ponownie środek zaznaczenia z okna MapoTero";
-      btnZMapoTero.addEventListener("click", function () {
-        pobierzStanZMapoTero(false, false);
-      });
-
-      const btnMinimapa = el("button", "gw-btn-prosty", "🗺️ Wybierz miejsce");
-      btnMinimapa.type = "button";
-      btnMinimapa.addEventListener("click", function () {
-        stan.minimapaOtwarta = !stan.minimapaOtwarta;
-        minimapaBox.hidden = !stan.minimapaOtwarta;
-        if (stan.minimapaOtwarta) odswiezMinimape();
-      });
-
-      sterowaniePodgladu.appendChild(selSkala);
-      sterowaniePodgladu.appendChild(btnZMapoTero);
-      sterowaniePodgladu.appendChild(btnMinimapa);
-    }
-
-    const minimapaBox = el("div", "gw-mikser-minimapa-box");
-    minimapaBox.hidden = true;
-    minimapaBox.appendChild(el("div", null, "Kliknij na mapie miejsce do podglądu w MapoTero:"));
-    const minimapaSiatka = el("div", "gw-minimapa-siatka");
-    minimapaSiatka.addEventListener("click", function (e) {
-      if (!stan.minimapaBazaKafelki) return;
-      const rect = minimapaSiatka.getBoundingClientRect();
-      const rx = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
-      const ry = Math.max(0, Math.min(1, (e.clientY - rect.top) / rect.height));
-      const tx = stan.minimapaBazaKafelki.txMin + rx * 3;
-      const ty = stan.minimapaBazaKafelki.tyMin + ry * 3;
-      const geo = kafelekDoLatLon(tx, ty, stan.minimapaBazaKafelki.zoom);
-      stan.podgladLat = Math.round(geo.lat * 10000) / 10000;
-      stan.podgladLon = Math.round(geo.lon * 10000) / 10000;
-      odswiezMinimape();
+    const selSkala = document.createElement("select");
+    selSkala.setAttribute("aria-label", "Rozdzielczość podglądu");
+    [
+      { val: "0", txt: "Skala: Auto" },
+      { val: "0.5", txt: "0,5 m/px" },
+      { val: "1", txt: "1 m/px" },
+      { val: "2", txt: "2 m/px" },
+      { val: "4", txt: "4 m/px" },
+      { val: "10", txt: "10 m/px" },
+      { val: "25", txt: "25 m/px" },
+      { val: "50", txt: "50 m/px" }
+    ].forEach(function (op) {
+      const opt = document.createElement("option");
+      opt.value = op.val;
+      opt.textContent = op.txt;
+      selSkala.appendChild(opt);
+    });
+    selSkala.addEventListener("change", function () {
+      stan.podgladPiksel = parseFloat(selSkala.value) || 0;
+      rysujMinimape();
       zglosOdswiezeniePodgladuMiksera(true);
     });
+    if (czyPolaczonoZProgramem()) {
+      sterowaniePodgladu.appendChild(selSkala);
+    }
+
+    if (czyPolaczonoZProgramem()) {
+      const btnZMapoTero = el("button", "gw-btn-prosty", "↺ Obszar z MapoTero");
+      btnZMapoTero.type = "button";
+      btnZMapoTero.title = "Pobierz ponownie środek i obszar zaznaczenia z okna MapoTero";
+      btnZMapoTero.addEventListener("click", function () {
+        stan.zaznaczonyBbox = null;
+        pobierzStanZMapoTero(false, false);
+      });
+      sterowaniePodgladu.appendChild(btnZMapoTero);
+    }
+
+    const btnMinimapa = el("button", "gw-btn-prosty", "🗺️ Ukryj mapkę");
+    btnMinimapa.type = "button";
+    btnMinimapa.addEventListener("click", function () {
+      stan.minimapaOtwarta = !stan.minimapaOtwarta;
+      minimapaBox.hidden = !stan.minimapaOtwarta;
+      btnMinimapa.textContent = stan.minimapaOtwarta ? "🗺️ Ukryj mapkę" : "🗺️ Pokaż mapkę";
+      if (stan.minimapaOtwarta) rysujMinimape();
+    });
+    sterowaniePodgladu.appendChild(btnMinimapa);
+
+    const minimapaBox = el("div", "gw-mikser-minimapa-box");
+    minimapaBox.hidden = !stan.minimapaOtwarta;
+
+    const minimapaNarzedzia = el("div", "gw-minimapa-narzedzia");
+    const grupaTryby = el("div", "gw-minimapa-grupa-btn");
+    const btnTrybPrzesun = el("button", "aktywny", "🖐 Przesuń / Punkt");
+    btnTrybPrzesun.type = "button";
+    btnTrybPrzesun.title = "Przeciągaj mapę lub kliknij punkt podglądu (z Shift zaznaczasz obszar)";
+    const btnTrybZaznacz = el("button", null, "⬜ Zaznacz obszar");
+    btnTrybZaznacz.type = "button";
+    btnTrybZaznacz.title = "Narysuj prostokąt obszaru na mapie";
+    const btnWyczyscZazn = el("button", null, "✕ Wyczyść obszar");
+    btnWyczyscZazn.type = "button";
+    btnWyczyscZazn.hidden = true;
+
+    function ustawTrybMapy(tryb) {
+      stan.mapaTryb = tryb;
+      if (tryb === "zaznacz") {
+        btnTrybZaznacz.classList.add("aktywny");
+        btnTrybPrzesun.classList.remove("aktywny");
+        minimapaCanvas.classList.remove("tryb-przesun");
+        minimapaCanvas.classList.add("tryb-zaznacz");
+      } else {
+        btnTrybPrzesun.classList.add("aktywny");
+        btnTrybZaznacz.classList.remove("aktywny");
+        minimapaCanvas.classList.remove("tryb-zaznacz");
+        minimapaCanvas.classList.add("tryb-przesun");
+      }
+    }
+
+    btnTrybPrzesun.addEventListener("click", function () { ustawTrybMapy("przesun"); });
+    btnTrybZaznacz.addEventListener("click", function () { ustawTrybMapy("zaznacz"); });
+    btnWyczyscZazn.addEventListener("click", function () {
+      stan.zaznaczonyBbox = null;
+      rysujMinimape();
+      zglosOdswiezeniePodgladuMiksera(true);
+    });
+
+    grupaTryby.appendChild(btnTrybPrzesun);
+    grupaTryby.appendChild(btnTrybZaznacz);
+    grupaTryby.appendChild(btnWyczyscZazn);
+
+    const grupaZoom = el("div", "gw-minimapa-grupa-btn");
+    const btnZoomMinus = el("button", null, "−");
+    btnZoomMinus.type = "button";
+    btnZoomMinus.title = "Oddal mapę";
+    btnZoomMinus.addEventListener("click", function () {
+      stan.mapaZoom = Math.max(5, stan.mapaZoom - 1);
+      rysujMinimape();
+    });
+    const zoomTekst = el("span", "gw-minimapa-zoom-tekst", "Zoom: " + stan.mapaZoom);
+    const btnZoomPlus = el("button", null, "+");
+    btnZoomPlus.type = "button";
+    btnZoomPlus.title = "Przybliż mapę";
+    btnZoomPlus.addEventListener("click", function () {
+      stan.mapaZoom = Math.min(16, stan.mapaZoom + 1);
+      rysujMinimape();
+    });
+    grupaZoom.appendChild(btnZoomMinus);
+    grupaZoom.appendChild(zoomTekst);
+    grupaZoom.appendChild(btnZoomPlus);
+
+    minimapaNarzedzia.appendChild(grupaTryby);
+    minimapaNarzedzia.appendChild(grupaZoom);
+
+    const minimapaWrap = el("div", "gw-minimapa-canvas-wrap");
+    const minimapaCanvas = document.createElement("canvas");
+    minimapaCanvas.width = 356;
+    minimapaCanvas.height = 258;
+    minimapaCanvas.className = "gw-minimapa-canvas tryb-przesun";
+    minimapaWrap.appendChild(minimapaCanvas);
+
+    const minimapaInfo = el("div", "gw-minimapa-info", "");
+
+    function wspolrzedneCanvasaMapy(e) {
+      const rect = minimapaCanvas.getBoundingClientRect();
+      return {
+        x: ((e.clientX - rect.left) / rect.width) * minimapaCanvas.width,
+        y: ((e.clientY - rect.top) / rect.height) * minimapaCanvas.height
+      };
+    }
+
+    function pikselCanvasaNaGeo(pxX, pxY) {
+      const c = latLonDoKafelka(stan.mapaCenterLat, stan.mapaCenterLon, stan.mapaZoom);
+      const tx = c.x + (pxX - minimapaCanvas.width / 2) / 256;
+      const ty = c.y + (pxY - minimapaCanvas.height / 2) / 256;
+      return kafelekDoLatLon(tx, ty, stan.mapaZoom);
+    }
+
+    let gest = null;
+    minimapaCanvas.addEventListener("pointerdown", function (e) {
+      if (e.button !== 0) return;
+      e.preventDefault();
+      minimapaCanvas.setPointerCapture(e.pointerId);
+      const pt = wspolrzedneCanvasaMapy(e);
+      const czyZaznaczanie = stan.mapaTryb === "zaznacz" || e.shiftKey;
+      gest = {
+        id: e.pointerId,
+        tryb: czyZaznaczanie ? "zaznacz" : "przesun",
+        startX: pt.x,
+        startY: pt.y,
+        aktX: pt.x,
+        aktY: pt.y,
+        przeciagano: false,
+        startCenterTile: latLonDoKafelka(stan.mapaCenterLat, stan.mapaCenterLon, stan.mapaZoom)
+      };
+      if (gest.tryb === "przesun") minimapaCanvas.classList.add("przeciaga");
+    });
+
+    minimapaCanvas.addEventListener("pointermove", function (e) {
+      if (!gest || gest.id !== e.pointerId) return;
+      const pt = wspolrzedneCanvasaMapy(e);
+      const dx = pt.x - gest.startX;
+      const dy = pt.y - gest.startY;
+      if (Math.hypot(dx, dy) > 4) gest.przeciagano = true;
+
+      if (gest.tryb === "przesun") {
+        if (gest.przeciagano) {
+          const nowyCenter = kafelekDoLatLon(
+            gest.startCenterTile.x - dx / 256,
+            gest.startCenterTile.y - dy / 256,
+            stan.mapaZoom
+          );
+          stan.mapaCenterLat = Math.max(-80, Math.min(80, nowyCenter.lat));
+          stan.mapaCenterLon = Math.max(-179, Math.min(179, nowyCenter.lon));
+          rysujMinimape();
+        }
+      } else {
+        gest.aktX = pt.x;
+        gest.aktY = pt.y;
+        rysujMinimape({ x1: gest.startX, y1: gest.startY, x2: gest.aktX, y2: gest.aktY });
+      }
+    });
+
+    function zakonczGestMapy(e) {
+      if (!gest || gest.id !== e.pointerId) return;
+      const aktGest = gest;
+      gest = null;
+      minimapaCanvas.classList.remove("przeciaga");
+
+      const pt = wspolrzedneCanvasaMapy(e);
+      if (aktGest.tryb === "zaznacz" && aktGest.przeciagano) {
+        const x1 = Math.min(aktGest.startX, pt.x);
+        const x2 = Math.max(aktGest.startX, pt.x);
+        const y1 = Math.min(aktGest.startY, pt.y);
+        const y2 = Math.max(aktGest.startY, pt.y);
+        if (x2 - x1 >= 8 && y2 - y1 >= 8) {
+          const nw = pikselCanvasaNaGeo(x1, y1);
+          const se = pikselCanvasaNaGeo(x2, y2);
+          stan.zaznaczonyBbox = [
+            Math.round(nw.lon * 100000) / 100000,
+            Math.round(se.lat * 100000) / 100000,
+            Math.round(se.lon * 100000) / 100000,
+            Math.round(nw.lat * 100000) / 100000
+          ];
+          stan.podgladLat = Math.round(((nw.lat + se.lat) / 2) * 100000) / 100000;
+          stan.podgladLon = Math.round(((nw.lon + se.lon) / 2) * 100000) / 100000;
+          stan.ostatniPikselRenderu = obliczPikselDlaBbox(stan.zaznaczonyBbox, 360);
+          if (czyPolaczonoZProgramem()) {
+            stan.podgladPiksel = stan.ostatniPikselRenderu;
+            selSkala.value = "0";
+          }
+          rysujMinimape();
+          zglosOdswiezeniePodgladuMiksera(true);
+          return;
+        }
+      }
+
+      if (!aktGest.przeciagano) {
+        const geo = pikselCanvasaNaGeo(pt.x, pt.y);
+        stan.podgladLat = Math.round(geo.lat * 10000) / 10000;
+        stan.podgladLon = Math.round(geo.lon * 10000) / 10000;
+        rysujMinimape();
+        zglosOdswiezeniePodgladuMiksera(true);
+      } else {
+        rysujMinimape();
+      }
+    }
+
+    minimapaCanvas.addEventListener("pointerup", zakonczGestMapy);
+    minimapaCanvas.addEventListener("pointercancel", zakonczGestMapy);
+    minimapaCanvas.addEventListener("wheel", function (e) {
+      e.preventDefault();
+      const delta = e.deltaY < 0 ? 1 : -1;
+      const nowyZoom = Math.max(5, Math.min(16, stan.mapaZoom + delta));
+      if (nowyZoom === stan.mapaZoom) return;
+      const pt = wspolrzedneCanvasaMapy(e);
+      const podKursorem = pikselCanvasaNaGeo(pt.x, pt.y);
+      stan.mapaZoom = nowyZoom;
+      const poZoom = latLonDoKafelka(podKursorem.lat, podKursorem.lon, nowyZoom);
+      const nowySrodek = kafelekDoLatLon(
+        poZoom.x - (pt.x - minimapaCanvas.width / 2) / 256,
+        poZoom.y - (pt.y - minimapaCanvas.height / 2) / 256,
+        nowyZoom
+      );
+      stan.mapaCenterLat = Math.max(-80, Math.min(80, nowySrodek.lat));
+      stan.mapaCenterLon = Math.max(-179, Math.min(179, nowySrodek.lon));
+      rysujMinimape();
+    }, { passive: false });
+
     const skrotyBox = el("div", "gw-minimapa-skroty");
+    const btnPolska = el("button", null, "Polska");
+    btnPolska.type = "button";
+    btnPolska.addEventListener("click", function () {
+      stan.mapaCenterLat = 52.0;
+      stan.mapaCenterLon = 19.2;
+      stan.mapaZoom = 6;
+      rysujMinimape();
+    });
+    skrotyBox.appendChild(btnPolska);
+
     SKROTY_MIEJSC.forEach(function (m) {
       const b = el("button", null, m.nazwa);
       b.type = "button";
       b.addEventListener("click", function () {
         stan.podgladLat = m.lat;
         stan.podgladLon = m.lon;
-        odswiezMinimape();
+        stan.mapaCenterLat = m.lat;
+        stan.mapaCenterLon = m.lon;
+        if (stan.mapaZoom < 11) stan.mapaZoom = 12;
+        rysujMinimape();
         zglosOdswiezeniePodgladuMiksera(true);
       });
       skrotyBox.appendChild(b);
     });
-    minimapaBox.appendChild(minimapaSiatka);
+
+    minimapaBox.appendChild(minimapaNarzedzia);
+    minimapaBox.appendChild(minimapaWrap);
+    minimapaBox.appendChild(minimapaInfo);
     minimapaBox.appendChild(skrotyBox);
 
     const mikserStanPodgladu = el("div", "gw-mikser-stan-podgladu", "");
@@ -1882,6 +2298,23 @@
       akcjeGlowne.appendChild(lblChk);
     }
 
+    const chkObszar = document.createElement("input");
+    chkObszar.type = "checkbox";
+    chkObszar.checked = stan.przekazObszarDoMapoTero;
+    chkObszar.addEventListener("change", function () {
+      stan.przekazObszarDoMapoTero = chkObszar.checked;
+    });
+    const chkObszarWrap = el("label", null, " ustaw też zaznaczony obszar z mapki w MapoTero");
+    chkObszarWrap.style.fontSize = "0.8rem";
+    chkObszarWrap.style.display = "inline-flex";
+    chkObszarWrap.style.alignItems = "center";
+    chkObszarWrap.style.gap = "0.25rem";
+    chkObszarWrap.hidden = !stan.zaznaczonyBbox;
+    chkObszarWrap.prepend(chkObszar);
+    if (czyPolaczonoZProgramem()) {
+      akcjeGlowne.appendChild(chkObszarWrap);
+    }
+
     const akcjeZapasowe = el("div", "gw-mikser-akcje-zapasowe");
     const btnPobierzPlik = el("button", "gw-btn-prosty", "💾 Pobierz plik (.mapotero)");
     btnPobierzPlik.type = "button";
@@ -1890,7 +2323,8 @@
       const przepis = budujPrzepisJson(stan.kanapka, {
         nazwa: stan.nazwaKanapki,
         cel: "okno_glowne",
-        zapiszStyl: stan.zapiszJakoStyl
+        zapiszStyl: stan.zapiszJakoStyl,
+        obszarWgs84: stan.zaznaczonyBbox
       });
       const blob = new Blob([JSON.stringify(przepis, null, 2)], { type: "application/json;charset=utf-8" });
       const url = URL.createObjectURL(blob);
@@ -1968,7 +2402,11 @@
       mikserImgLive: mikserImgLive,
       mikserLadowanie: mikserLadowanie,
       mikserStanPodgladu: mikserStanPodgladu,
-      minimapaSiatka: minimapaSiatka,
+      minimapaCanvas: minimapaCanvas,
+      minimapaZoomTekst: zoomTekst,
+      minimapaInfo: minimapaInfo,
+      minimapaBtnWyczyscZazn: btnWyczyscZazn,
+      mikserChkObszarWrap: chkObszarWrap,
       mikserWarstwy: mikserWarstwy,
       mikserOstrzezenia: mikserOstrzezenia,
       mikserBtnAuto: btnAuto,

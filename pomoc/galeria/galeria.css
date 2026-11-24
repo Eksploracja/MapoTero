@@ -1169,10 +1169,17 @@
 
 .gw-mikser-ramka-podgladu canvas,
 .gw-mikser-ramka-podgladu img {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   display: block;
   object-fit: contain;
+}
+
+.gw-mikser-ramka-podgladu canvas[hidden],
+.gw-mikser-ramka-podgladu img[hidden] {
+  display: none !important;
 }
 
 .gw-mikser-ladowanie {
@@ -1234,41 +1241,86 @@
 }
 
 .gw-mikser-minimapa-box[hidden] {
-  display: none;
+  display: none !important;
 }
 
-.gw-minimapa-siatka {
+.gw-minimapa-narzedzia {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.35rem;
+}
+
+.gw-minimapa-grupa-btn {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  align-items: center;
+}
+
+.gw-minimapa-narzedzia button {
+  border: 1px solid #d5d0d8;
+  background: #ffffff;
+  color: #27262b;
+  border-radius: 4px;
+  padding: 0.2rem 0.5rem;
+  font-size: 0.76rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.gw-minimapa-narzedzia button:hover:not(:disabled) {
+  border-color: #7253ed;
+  color: #7253ed;
+}
+
+.gw-minimapa-narzedzia button.aktywny {
+  background: #7253ed;
+  border-color: #7253ed;
+  color: #ffffff;
+}
+
+.gw-minimapa-zoom-tekst {
+  font-size: 0.74rem;
+  color: #5c5962;
+  padding: 0 0.2rem;
+}
+
+.gw-minimapa-canvas-wrap {
   position: relative;
   width: 100%;
-  max-width: 344px;
-  aspect-ratio: 1 / 1;
+  max-width: 356px;
+  aspect-ratio: 360 / 260;
   overflow: hidden;
   border-radius: 4px;
   border: 1px solid #cbd5e1;
-  cursor: crosshair;
   background: #e2e8f0;
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  grid-template-rows: repeat(3, 1fr);
 }
 
-.gw-minimapa-siatka img {
+.gw-minimapa-canvas {
   width: 100%;
   height: 100%;
   display: block;
-  pointer-events: none;
-  user-select: none;
+  touch-action: none;
 }
 
-.gw-minimapa-celownik {
-  position: absolute;
-  width: 16px;
-  height: 16px;
-  border: 2px solid #dc2626;
-  border-radius: 50%;
-  background: rgba(220, 38, 38, 0.2);
-  transform: translate(-50%, -50%);
-  pointer-events: none;
+.gw-minimapa-canvas.tryb-przesun {
+  cursor: grab;
+}
+
+.gw-minimapa-canvas.tryb-przesun.przeciaga {
+  cursor: grabbing;
+}
+
+.gw-minimapa-canvas.tryb-zaznacz {
+  cursor: crosshair;
+}
+
+.gw-minimapa-info {
+  font-size: 0.74rem;
+  color: #5c5962;
+  line-height: 1.3;
 }
 
 .gw-minimapa-skroty {

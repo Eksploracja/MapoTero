@@ -4272,6 +4272,29 @@ Public Class Form1
             Return WynikMostkaGalerii.Blad("nie_znaleziono", "Nie rozpoznano żadnej warstwy z przepisu" & szczegoly & ".")
         End If
 
+        Dim ustawionoObszar As Boolean = False
+        If dane.ObszarWgs84 IsNot Nothing AndAlso dane.ObszarWgs84.Length = 4 AndAlso
+           dane.ObszarWgs84.All(Function(v) Not Double.IsNaN(v) AndAlso Not Double.IsInfinity(v)) Then
+            Dim minLon = Math.Min(dane.ObszarWgs84(0), dane.ObszarWgs84(2))
+            Dim maxLon = Math.Max(dane.ObszarWgs84(0), dane.ObszarWgs84(2))
+            Dim minLat = Math.Min(dane.ObszarWgs84(1), dane.ObszarWgs84(3))
+            Dim maxLat = Math.Max(dane.ObszarWgs84(1), dane.ObszarWgs84(3))
+            If maxLon > minLon AndAlso maxLat > minLat AndAlso minLat >= -85 AndAlso maxLat <= 85 AndAlso minLon >= -180 AndAlso maxLon <= 180 Then
+                Dim sw = Ustawienia.Uklad.ZWgs84(minLat, minLon)
+                Dim ne = Ustawienia.Uklad.ZWgs84(maxLat, maxLon)
+                Dim zObszar = New Zasieg(Math.Min(sw.X, ne.X), Math.Min(sw.Y, ne.Y), Math.Max(sw.X, ne.X), Math.Max(sw.Y, ne.Y))
+                If zObszar.Poprawny Then
+                    _korytarz = Nothing
+                    UsunKorytarzToolStripMenuItem.Enabled = False
+                    WpiszPolaZasiegu(Liczba(Math.Floor(zObszar.XDol)), Liczba(Math.Floor(zObszar.YLewy)),
+                                    Liczba(Math.Ceiling(zObszar.XGora)), Liczba(Math.Ceiling(zObszar.YPrawy)))
+                    WyczyscZnaczniki()
+                    PokazZnaczniki(centruj:=True)
+                    ustawionoObszar = True
+                End If
+            End If
+        End If
+
         Dim opisPiksela As String = ""
         If wynikBudowy.Cel <> "kreator" Then
             Dim bylaPusta As Boolean = _zestaw.Liczba = 0
@@ -4293,6 +4316,7 @@ Public Class Form1
             czesci.Add("Wczytano kanapkę " & zrodloOpis & " (" & wynikBudowy.Zestaw.Liczba & " warstw)")
             If zapisanyStyl IsNot Nothing Then czesci.Add("zapisano też styl '" & zapisanyStyl.Nazwa & "'")
         End If
+        If ustawionoObszar Then czesci.Add("ustawiono obszar z galerii")
         If opisPiksela <> "" Then czesci.Add(opisPiksela)
         If wynikBudowy.Pominiete.Count > 0 Then czesci.Add("pominięto: " & String.Join(", ", wynikBudowy.Pominiete))
 
@@ -4402,7 +4426,7 @@ Public Class Form1
             If zadanie.Piksel.HasValue AndAlso zadanie.Piksel.Value > 0 Then
                 pikselMetry = zadanie.Piksel.Value
             ElseIf najdokladniejsza IsNot Nothing AndAlso najdokladniejsza.ZalecanyPiksel > 0 Then
-                pikselMetry = najdokladniejsza.ZalecanyPiksel
+                pikselMetry = Math.Max(0.5, najdokladniejsza.ZalecanyPiksel)
             Else
                 pikselMetry = If(uklad.Geograficzny,
                                  uklad.PrzeliczRozmiarPiksela(UkladWspolrzednych.PL1992, stanMigawki.DomyslnyPiksel, New PunktGeo(latOut, lonOut)),

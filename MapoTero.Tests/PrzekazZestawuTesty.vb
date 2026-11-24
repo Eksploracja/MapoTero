@@ -54,6 +54,7 @@ Public Class PrzekazZestawuTesty
             ""nazwa"": ""Orto z rzeźbą i szlakami"",
             ""cel"": ""okno_glowne"",
             ""zapiszStyl"": true,
+            ""obszarWgs84"": [19.9, 49.25, 20.0, 49.3],
             ""warstwy"": [
                 { ""zbior"": ""ORTOFOTOMAPA"", ""warstwa"": ""Raster"", ""krycie"": 100, ""tryb"": ""Zwykly"" },
                 { ""zbior"": ""NMT_CIENIOWANIE"", ""warstwa"": ""Raster"", ""krycie"": 65, ""tryb"": ""RzezbaTerenu"" },
@@ -62,6 +63,8 @@ Public Class PrzekazZestawuTesty
         }"
 
         Dim dane = PrzekazZestawu.ZTekstu(json)
+        Assert.NotNull(dane.ObszarWgs84)
+        Assert.Equal(4, dane.ObszarWgs84.Length)
         Dim wynik = PrzekazZestawu.ZbudujZestaw(dane, UtworzTestoweZrodla())
 
         Assert.Equal(3, wynik.Zestaw.Liczba)

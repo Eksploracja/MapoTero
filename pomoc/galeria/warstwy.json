@@ -44,6 +44,7 @@
       "zalecany_piksel": 1,
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/skany_map_topograficznych__Raster_10_1965.webp",
+      "probka_miksu": "obrazy/mikser/skany_map_topograficznych__Raster_10_1965.webp",
       "miejsce_probki": "Warszawa (52.23, 21.01)",
       "zasieg": {
         "typ": "czesciowy",
@@ -100,6 +101,7 @@
       "zalecany_piksel": 2,
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/skany_map_topograficznych__Raster_25_1965.webp",
+      "probka_miksu": "obrazy/mikser/skany_map_topograficznych__Raster_25_1965.webp",
       "miejsce_probki": "Warszawa (52.23, 21.01)",
       "zasieg": {
         "typ": "czesciowy",
@@ -156,6 +158,7 @@
       "zalecany_piksel": 4,
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/skany_map_topograficznych__Raster_50_1965.webp",
+      "probka_miksu": "obrazy/mikser/skany_map_topograficznych__Raster_50_1965.webp",
       "miejsce_probki": "Warszawa (52.23, 21.01)",
       "zasieg": {
         "typ": "czesciowy",
@@ -234,6 +237,7 @@
       "zalecany_piksel": 4,
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/skany_map_topograficznych__Raster_50tys_VMap.webp",
+      "probka_miksu": "obrazy/mikser/skany_map_topograficznych__Raster_50tys_VMap.webp",
       "miejsce_probki": "Warszawa (52.23, 21.01)",
       "zasieg": {
         "typ": "kraj",
@@ -334,6 +338,7 @@
       "zalecany_piksel": 2,
       "zrodlo": "© OpenTopoMap / autorzy OpenStreetMap",
       "obrazek": "obrazy/galeria/OpenTopoMap__opentopomap.webp",
+      "probka_miksu": "obrazy/mikser/OpenTopoMap__opentopomap.webp",
       "miejsce_probki": "Warszawa (52.23, 21.01)",
       "zasieg": {
         "typ": "globalny",
@@ -379,6 +384,7 @@
       "zalecany_piksel": 2,
       "zrodlo": "Waymarked Trails / © autorzy OpenStreetMap",
       "obrazek": "obrazy/galeria/Waymarked_Trails__cycling.webp",
+      "probka_miksu": "obrazy/mikser/Waymarked_Trails__cycling.webp",
       "miejsce_probki": "Kraków / Wiślana Trasa Rowerowa (50.05, 19.91)",
       "zasieg": {
         "typ": "globalny",
@@ -467,6 +473,7 @@
       "zalecany_piksel": 2,
       "zrodlo": "Waymarked Trails / © autorzy OpenStreetMap",
       "obrazek": "obrazy/galeria/Waymarked_Trails__slopes.webp",
+      "probka_miksu": "obrazy/mikser/Waymarked_Trails__slopes.webp",
       "miejsce_probki": "Białka Tatrzańska (49.39, 20.10)",
       "zasieg": {
         "typ": "globalny",
@@ -534,6 +541,7 @@
       "zalecany_piksel": 16,
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/krajobrazowa__Krajobrazowa.webp",
+      "probka_miksu": "obrazy/mikser/krajobrazowa__Krajobrazowa.webp",
       "miejsce_probki": "Warszawa (52.23, 21.01)",
       "zasieg": {
         "typ": "kraj",
@@ -579,6 +587,7 @@
       "zalecany_piksel": 1,
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/numer_mod_terenu_hipsometria_WMTS__Hipsometria.webp",
+      "probka_miksu": "obrazy/mikser/numer_mod_terenu_hipsometria_WMTS__Hipsometria.webp",
       "miejsce_probki": "Tatry / Zakopane (49.25, 19.96)",
       "zasieg": {
         "typ": "kraj",
@@ -601,6 +610,7 @@
       "zalecany_piksel": 2,
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/numer_mod_terenu_WMTS__HipsoCien.webp",
+      "probka_miksu": "obrazy/mikser/numer_mod_terenu_WMTS__HipsoCien.webp",
       "miejsce_probki": "Tatry / Zakopane (49.25, 19.96)",
       "zasieg": {
         "typ": "kraj",
@@ -623,6 +633,7 @@
       "zalecany_piksel": 10,
       "zrodlo": "terrestris (OSM)",
       "obrazek": "obrazy/galeria/OpenStreetMap_Terrestris__SRTM30-Contour.webp",
+      "probka_miksu": "obrazy/mikser/OpenStreetMap_Terrestris__SRTM30-Contour.webp",
       "miejsce_probki": "Tatry / Zakopane (49.25, 19.96)",
       "zasieg": {
         "typ": "globalny",
@@ -695,6 +706,7 @@
       "zalecany_piksel": 0.1,
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/ortofotomapa_HighResolution_WMTS__ORTOFOTOMAPA.webp",
+      "probka_miksu": "obrazy/mikser/ortofotomapa_HighResolution_WMTS__ORTOFOTOMAPA.webp",
       "miejsce_probki": "Warszawa (52.23, 21.01)",
       "zasieg": {
         "typ": "kraj",
@@ -717,6 +729,7 @@
       "zalecany_piksel": 1,
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/ortofotomapa__Raster.webp",
+      "probka_miksu": "obrazy/mikser/ortofotomapa__Raster.webp",
       "miejsce_probki": "Warszawa (52.23, 21.01)",
       "zasieg": {
         "typ": "kraj",
@@ -823,6 +836,7 @@
       "zalecany_piksel": 8,
       "zrodlo": "IHPAN / Pastmaps",
       "obrazek": "obrazy/galeria/mapy_historyczne_IHPAN__wig100k_2180.webp",
+      "probka_miksu": "obrazy/mikser/mapy_historyczne_IHPAN__wig100k_2180.webp",
       "miejsce_probki": "Warszawa (52.23, 21.01)",
       "zasieg": {
         "typ": "czesciowy",
@@ -1007,6 +1021,7 @@
       "zalecany_piksel": 8,
       "zrodlo": "IHPAN / Pastmaps",
       "obrazek": "obrazy/galeria/mapy_historyczne_IHPAN__kummersberg_2180.webp",
+      "probka_miksu": "obrazy/mikser/mapy_historyczne_IHPAN__kummersberg_2180.webp",
       "miejsce_probki": "Wrocław (51.11, 17.03)",
       "zasieg": {
         "typ": "regionalny",

@@ -31,6 +31,8 @@ Public Class DaneZestawuGalerii
     ''' <summary>Cel w programie: "okno_glowne" (domyślnie), "dolacz" albo "kreator".</summary>
     <JsonPropertyName("cel")> Public Property Cel As String = "okno_glowne"
     <JsonPropertyName("zapiszStyl")> Public Property ZapiszStyl As Boolean
+    ''' <summary>Opcjonalny prostokąt obszaru w WGS84 [minLon, minLat, maxLon, maxLat] zaznaczony na mapce w galerii.</summary>
+    <JsonPropertyName("obszarWgs84")> Public Property ObszarWgs84 As Double()
     <JsonPropertyName("warstwy")> Public Property Warstwy As New List(Of PozycjaZestawuGalerii)()
 End Class
 
