@@ -13,6 +13,7 @@ Partial Public Class Form1
         Katalog
         Warstwy
         Podglad
+        Galeria
         Komunikaty
         Sesja
         Kosz
@@ -77,6 +78,23 @@ Partial Public Class Form1
                                         New PointF(x + s * 0.58F, y + s * 0.62F), New PointF(x + s * 0.7F, y + s * 0.5F),
                                         New PointF(x + s * 0.88F, y + s * 0.76F)})
                     g.FillEllipse(pedzel, x + s * 0.64F, y + s * 0.26F, s * 0.13F, s * 0.13F)
+                Case IkonaOkna.Galeria
+                    'stos kart podglądu: tylna karta lekko wysunięta w prawo-górę, przednia z krajobrazem
+                    Dim rNaroznika = s * 0.09F
+                    Using tylna = SciezkaZaokraglonegoProstokata(x + s * 0.26F, y + s * 0.09F, s * 0.65F, s * 0.65F, rNaroznika),
+                          pioroTylne As New Pen(Color.FromArgb(165, kolor), grubosc) With {.LineJoin = LineJoin.Round},
+                          przednia = SciezkaZaokraglonegoProstokata(x + s * 0.09F, y + s * 0.26F, s * 0.65F, s * 0.65F, rNaroznika),
+                          tloKarty As New SolidBrush(Color.FromArgb(238, 244, 250))
+                        g.DrawPath(pioroTylne, tylna)
+                        g.FillPath(tloKarty, przednia)
+                        g.DrawPath(pioro, przednia)
+                    End Using
+                    Using pioroKrajobraz As New Pen(kolor, grubosc) With {.StartCap = LineCap.Round, .EndCap = LineCap.Round, .LineJoin = LineJoin.Round}
+                        g.DrawLines(pioroKrajobraz, {New PointF(x + s * 0.17F, y + s * 0.79F), New PointF(x + s * 0.34F, y + s * 0.56F),
+                                                    New PointF(x + s * 0.48F, y + s * 0.7F), New PointF(x + s * 0.56F, y + s * 0.61F),
+                                                    New PointF(x + s * 0.67F, y + s * 0.79F)})
+                    End Using
+                    g.FillEllipse(pedzel, x + s * 0.49F, y + s * 0.35F, s * 0.13F, s * 0.13F)
                 Case IkonaOkna.Komunikaty
                     Using sciezka As New GraphicsPath()
                         sciezka.AddArc(x + s * 0.06F, y + s * 0.12F, s * 0.25F, s * 0.25F, 180, 90)
@@ -121,6 +139,17 @@ Partial Public Class Form1
             RysujIkone(g, ikona, New RectangleF(0, 0, rozmiar, rozmiar), kolor)
         End Using
         Return bmp
+    End Function
+
+    Private Shared Function SciezkaZaokraglonegoProstokata(x As Single, y As Single, szerokosc As Single, wysokosc As Single, promien As Single) As GraphicsPath
+        Dim sciezka As New GraphicsPath()
+        Dim srednica = Math.Min(promien * 2.0F, Math.Min(szerokosc, wysokosc))
+        sciezka.AddArc(x, y, srednica, srednica, 180, 90)
+        sciezka.AddArc(x + szerokosc - srednica, y, srednica, srednica, 270, 90)
+        sciezka.AddArc(x + szerokosc - srednica, y + wysokosc - srednica, srednica, srednica, 0, 90)
+        sciezka.AddArc(x, y + wysokosc - srednica, srednica, srednica, 90, 90)
+        sciezka.CloseFigure()
+        Return sciezka
     End Function
 
     ''' <summary>Ikona stanu sesji: strzałka pobierania, łuk postępu, znak ✓ albo wykrzyknik.</summary>

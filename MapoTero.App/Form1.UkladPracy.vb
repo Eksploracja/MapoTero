@@ -492,6 +492,7 @@ Partial Public Class Form1
         btnZwinRozwin.Padding = New Padding(Px(2), 0, Px(2), 0)
         btnZwinRozwin.Margin = New Padding(Px(4), 0, 0, Px(6))
         StylPrzycisku(btnGaleriaWarstw)
+        btnGaleriaWarstw.Image = ZarejestrujIkone(IkonaOkna.Galeria, KolorAkcjiOkna)
         btnGaleriaWarstw.MinimumSize = New Size(0, Px(28))
         btnGaleriaWarstw.Padding = Padding.Empty
         btnGaleriaWarstw.Margin = New Padding(Px(4), 0, 0, Px(6))

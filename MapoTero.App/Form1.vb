@@ -427,7 +427,6 @@ Public Class Form1
 
     Private Sub Form1_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         RejestrujKodowania()
-        btnGaleriaWarstw.Image = UtworzIkoneGalerii()
         'silnik (MapoTero.Silnik) nie zna ustawień programu - dla sesji bez numeracji w conf.txt pyta o bieżącą
         UstawieniaSilnika.NumeracjaDomyslna = Function() Ustawienia.Numeracja
 
@@ -4118,28 +4117,6 @@ Public Class Form1
         OtworzGalerieWarstw()
     End Sub
 
-    Private Shared Function UtworzIkoneGalerii() As Bitmap
-        Dim bmp As New Bitmap(16, 16)
-        Using g = Graphics.FromImage(bmp)
-            g.Clear(Color.Transparent)
-            Using p1 As New SolidBrush(Color.FromArgb(46, 125, 50)),
-                  p2 As New SolidBrush(Color.FromArgb(29, 78, 216)),
-                  p3 As New SolidBrush(Color.FromArgb(217, 119, 6)),
-                  p4 As New SolidBrush(Color.FromArgb(114, 83, 237)),
-                  ramka As New Pen(Color.FromArgb(80, 80, 90))
-                g.FillRectangle(p1, 1, 1, 6, 6)
-                g.FillRectangle(p2, 9, 1, 6, 6)
-                g.FillRectangle(p3, 1, 9, 6, 6)
-                g.FillRectangle(p4, 9, 9, 6, 6)
-                g.DrawRectangle(ramka, 1, 1, 5, 5)
-                g.DrawRectangle(ramka, 9, 1, 5, 5)
-                g.DrawRectangle(ramka, 1, 9, 5, 5)
-                g.DrawRectangle(ramka, 9, 9, 5, 5)
-            End Using
-        End Using
-        Return bmp
-    End Function
-
     ''' <summary>
     ''' Uruchamia lokalny nasłuch MostekGalerii (jeśli nie działa) i otwiera stronę galerii warstw w przeglądarce
     ''' z parametrami połączenia (port i token), aby użytkownik mógł jednym kliknięciem dodać warstwę lub całą kanapkę.
@@ -4210,6 +4187,22 @@ Public Class Form1
         Return WynikMostkaGalerii.Dodano($"Dodano warstwę '{nazwaWyswietlana}'.")
     End Function
 
+    Private Function MaAktywnyObszarDlaGalerii() As Boolean
+        Return _siatkaWidoczna OrElse Not mapa.SelectedArea.IsEmpty OrElse _korytarz IsNot Nothing OrElse Ustawienia.EdycjaXY
+    End Function
+
+    Private Sub ParametryProbkiDlaGalerii(ByRef punkt As PunktXY, ByRef piksel As Double)
+        Dim s = BiezacaSiatka()
+        ' Bez zaznaczonego obszaru pola txtXDol..txtYPrawy przechowują domyślny startowy prostokąt z Designera (okolice Ornety) —
+        ' nie traktujemy go jako aktywnego zaznaczenia użytkownika.
+        If MaAktywnyObszarDlaGalerii() AndAlso s.Poprawna Then
+            ParametryProbki(punkt, piksel)
+        Else
+            punkt = Ustawienia.Uklad.ZWgs84(mapa.Position.Lat, mapa.Position.Lng)
+            piksel = PikselPodgladuBezSiatki()
+        End If
+    End Sub
+
     Private Function PobierzStanDlaGalerii() As StanMostkaGalerii
         If Me.IsDisposed Then Return New StanMostkaGalerii()
         If Me.InvokeRequired Then
@@ -4217,7 +4210,7 @@ Public Class Form1
         End If
 
         Dim punkt As PunktXY, piksel As Double
-        ParametryProbki(punkt, piksel)
+        ParametryProbkiDlaGalerii(punkt, piksel)
         Dim geo = Ustawienia.Uklad.DoWgs84(punkt)
         Dim pikselMetry = If(Ustawienia.Uklad.Geograficzny,
                              Ustawienia.Uklad.PrzeliczRozmiarPiksela(UkladWspolrzednych.PL1992, piksel, geo),
@@ -4231,7 +4224,7 @@ Public Class Form1
         }
 
         Dim s = BiezacaSiatka()
-        If s.Poprawna Then
+        If MaAktywnyObszarDlaGalerii() AndAlso s.Poprawna Then
             obszar.MaSiatke = True
             Dim sw = Ustawienia.Uklad.DoWgs84(s.Obszar.XDol, s.Obszar.YLewy)
             Dim ne = Ustawienia.Uklad.DoWgs84(s.Obszar.XGora, s.Obszar.YPrawy)
@@ -4386,7 +4379,7 @@ Public Class Form1
                 JakoscJpegWmts As Integer
             ))(Function()
                    Dim p As PunktXY, px As Double
-                   ParametryProbki(p, px)
+                   ParametryProbkiDlaGalerii(p, px)
                    Return (ZrodlaMapSesji(), Ustawienia.Uklad, p, px, Ustawienia.Format,
                            Ustawienia.LimitCzasuSekundy, Ustawienia.IloscProbPobrania, Ustawienia.JakoscJpegWmts)
                End Function)), (

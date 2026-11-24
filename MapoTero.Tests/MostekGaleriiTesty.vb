@@ -150,4 +150,29 @@ Public Class MostekGaleriiTesty
         End Using
     End Function
 
+    <Fact>
+    Public Sub IkonaGalerii_ZwracaSkalowanaBitmapeZWidocznymRysunkiem()
+        Dim kolor = System.Drawing.Color.FromArgb(25, 78, 128)
+        For Each bok In {16, 24}
+            Using bmp = Global.MapoTero.Form1.UtworzIkoneBitmapy(Global.MapoTero.Form1.IkonaOkna.Galeria, bok, kolor)
+                Assert.Equal(bok, bmp.Width)
+                Assert.Equal(bok, bmp.Height)
+
+                Dim maPrawyGorny = False
+                Dim maLewyDolny = False
+                For y = 0 To bok - 1
+                    For x = 0 To bok - 1
+                        If bmp.GetPixel(x, y).A > 0 Then
+                            If x >= bok \ 2 AndAlso y < bok \ 2 Then maPrawyGorny = True
+                            If x < bok \ 2 AndAlso y >= bok \ 2 Then maLewyDolny = True
+                        End If
+                    Next
+                Next
+
+                Assert.True(maPrawyGorny, $"Ikona galerii ({bok}px) nie rysuje tylnej karty w prawym górnym rogu.")
+                Assert.True(maLewyDolny, $"Ikona galerii ({bok}px) nie rysuje przedniej karty w lewym dolnym rogu.")
+            End Using
+        Next
+    End Sub
+
 End Class
