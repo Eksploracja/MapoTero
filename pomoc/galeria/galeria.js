@@ -730,6 +730,8 @@
           }
           if (Array.isArray(dane.obszar.bboxWgs84) && dane.obszar.bboxWgs84.length === 4) {
             stan.mapaZoom = dopasujZoomDoBbox(dane.obszar.bboxWgs84, 356, 258);
+          } else if (!dane.obszar.maSiatke) {
+            stan.mapaZoom = 6;
           } else if (dane.obszar.piksel > 0) {
             stan.mapaZoom = dane.obszar.piksel <= 1 ? 14 : (dane.obszar.piksel <= 5 ? 12 : 10);
           }
@@ -1426,17 +1428,34 @@
     else ref.mikserStatusWysylki.classList.remove("blad");
   }
 
-  function renderujListeMiksera() {
-    if (!ref.mikserWarstwy) return;
-    ref.mikserWarstwy.innerHTML = "";
+  function czyJestWybranyObszar() {
+    return Array.isArray(stan.zaznaczonyBbox) ||
+      Boolean(stan.obszarProgramu && stan.obszarProgramu.maSiatke && Array.isArray(stan.obszarProgramu.bboxWgs84));
+  }
 
+  function odswiezOstrzezeniaMiksera() {
+    if (!ref.mikserOstrzezenia) return;
     const ostrz = ostrzezeniaKanapki(stan.kanapka);
+    if (!czyJestWybranyObszar()) {
+      ostrz.push(
+        czyPolaczonoZProgramem()
+          ? "⚠️ Nie zaznaczono jeszcze obszaru na mapie (ani w MapoTero, ani tutaj w mikserze). Przejdź do „📍 Miejsce i obszar” i zaznacz teren prawym przyciskiem myszy (PPM), albo zaznacz obszar w MapoTero."
+          : "⚠️ Nie zaznaczono jeszcze obszaru dla pliku .mapotero — możesz zaznaczyć teren prawym przyciskiem myszy (PPM) w zakładce „📍 Miejsce i obszar”."
+      );
+    }
     if (ostrz.length > 0) {
       ref.mikserOstrzezenia.hidden = false;
       ref.mikserOstrzezenia.textContent = ostrz.join(" ");
     } else {
       ref.mikserOstrzezenia.hidden = true;
     }
+  }
+
+  function renderujListeMiksera() {
+    if (!ref.mikserWarstwy) return;
+    ref.mikserWarstwy.innerHTML = "";
+
+    odswiezOstrzezeniaMiksera();
 
     if (ref.mikserBtnAuto) ref.mikserBtnAuto.disabled = stan.kanapka.length < 2;
     if (ref.mikserBtnWyczysc) ref.mikserBtnWyczysc.disabled = !czyJestCoResetowac();
@@ -1668,7 +1687,9 @@
           rysujMinimape();
         }
         const opisPx = wynik.pxH ? " · " + wynik.pxH.replace(".", ",") + " m/px (" + Math.round((pxLiczba || 2) * 360) + " m)" : "";
-        let info = "Podgląd z MapoTero (" + opisPunktu + opisPx + ")";
+        let info = czyJestWybranyObszar()
+          ? "Podgląd z MapoTero (" + opisPunktu + opisPx + ")"
+          : "Podgląd środka widoku mapy (" + opisPunktu + opisPx + ") — brak zaznaczonego obszaru";
         if (stan.zaznaczonyBbox) {
           const pxObszar = obliczPikselDlaBbox(stan.zaznaczonyBbox, 360);
           const bokObszaruKm = ((pxObszar * 360) / 1000).toFixed(1).replace(".", ",");
@@ -1682,6 +1703,8 @@
             info += " (część szczegółowych warstw nie wyświetla się przy tej skali — zmień na 1–4 m/px)";
           }
           info += ".";
+          ref.mikserStanPodgladu.classList.add("ostrzezenie");
+        } else if (!czyJestWybranyObszar()) {
           ref.mikserStanPodgladu.classList.add("ostrzezenie");
         } else {
           ref.mikserStanPodgladu.classList.remove("ostrzezenie");
@@ -1854,13 +1877,16 @@
       ref.minimapaBtnDopasujPodglad.hidden = !malyObszar;
     }
     if (ref.mikserZakladkaMapa) {
-      ref.mikserZakladkaMapa.textContent = stan.zaznaczonyBbox
+      ref.mikserZakladkaMapa.textContent = czyJestWybranyObszar()
         ? "📍 Miejsce i obszar ✓"
-        : "📍 Miejsce i obszar";
+        : "📍 Miejsce i obszar ⚠️";
     }
+    odswiezOstrzezeniaMiksera();
     if (ref.minimapaInfo) {
       let txt = czyPolaczonoZProgramem()
-        ? "Próbka (czerwona): " + stan.podgladLat.toFixed(4) + ", " + stan.podgladLon.toFixed(4)
+        ? (czyJestWybranyObszar()
+            ? "Próbka (czerwona): " + stan.podgladLat.toFixed(4) + ", " + stan.podgladLon.toFixed(4)
+            : "⚠️ Brak zaznaczonego obszaru · Środek: " + stan.podgladLat.toFixed(4) + ", " + stan.podgladLon.toFixed(4))
         : "Obszar do pliku .mapotero";
       if (stan.zaznaczonyBbox) {
         const pxAuto = obliczPikselDlaBbox(stan.zaznaczonyBbox, 360);
@@ -1875,8 +1901,8 @@
         txt += " · Niebieska ramka: obszar z MapoTero";
       } else {
         txt += czyPolaczonoZProgramem()
-          ? " · Lewy: wskaż próbkę · Prawy (PPM): zaznacz obszar"
-          : " · Prawy przycisk (PPM) lub „Zaznacz obszar” zapisze zasięg do pliku .mapotero";
+          ? " · Zaznacz prawym przyciskiem myszy (PPM) lub wybierz obszar w MapoTero"
+          : " · Brak obszaru — zaznacz prawym przyciskiem (PPM) lub przyciskiem „Zaznacz obszar”";
       }
       ref.minimapaInfo.textContent = txt;
     }
