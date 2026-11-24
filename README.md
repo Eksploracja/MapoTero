@@ -86,7 +86,7 @@ Program działa w trybie **portable (bez instalacji)** jako pojedynczy plik `Map
 ![Okno eksportu mapy](pomoc/obrazy/10-eksport-mapy.png)
 
 ### Kompozycje warstw, krycie i rzeźba terenu (LiDAR)
-![Okno Warstwy - zaawansowane z suwakami krycia i podglądem](pomoc/obrazy/03-warstwy-zaawansowane.png)
+![Okno Warstwy - zaawansowane: mapa topograficzna 1:10 000 z cieniowaniem LiDAR w trybie mnożenia](pomoc/obrazy/03-warstwy-zaawansowane.png)
 
 </details>
 

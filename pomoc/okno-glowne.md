@@ -165,9 +165,9 @@ Prawy panel programu organizuje źródła danych i kompozycję wielowarstwową:
 
 ### Okno *Warstwy - zaawansowane* (Mikser)
 
-![Okno Warstwy - zaawansowane z suwakami krycia i podglądem kanapki]({{ '/pomoc/obrazy/03-warstwy-zaawansowane.png' | relative_url }})
+![Okno Warstwy - zaawansowane: mapa topograficzna 1:10 000 z cieniowaniem LiDAR w trybie mnożenia]({{ '/pomoc/obrazy/03-warstwy-zaawansowane.png' | relative_url }})
 
-*Rysunek 2. Okno zaawansowanego miksera warstw z suwakami krycia, trybami mieszania i podglądem na żywo.*
+*Rysunek 2. Okno zaawansowanego miksera warstw: mapa topograficzna 1:10 000 połączona z cieniowaniem NMT LiDAR w trybie mnożenia (pełne krycie 100%).*
 
 * Pozwala przypisać każdej warstwie niezależny tryb mieszania: *Zwykły*, *Nakładka*, *Mnożenie*, *Ekran*, *Ciemniej*, *Jaśniej*, *Różnica* oraz **Rzeźba terenu**.
 * **Tryb „Rzeźba terenu”:** eliminuje problem szarej zasłony przy nakładaniu cieniowania NMT LiDAR. Płaski teren pozostaje neutralny, stoki w cieniu ciemnieją, a zbocza oświetlone delikatnie jaśnieją.
