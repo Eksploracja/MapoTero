@@ -822,13 +822,13 @@
         karta.classList.add("gw-karta-w-kanapce");
         if (btn) {
           btn.classList.add("aktywny");
-          btn.textContent = "✓ W kanapce (#" + (idx + 1) + ")";
+          btn.textContent = "✓ W mikserze (#" + (idx + 1) + ")";
         }
       } else {
         karta.classList.remove("gw-karta-w-kanapce");
         if (btn) {
           btn.classList.remove("aktywny");
-          btn.textContent = "☐ Do kanapki";
+          btn.textContent = "☐ do miksera warstw";
         }
       }
     });
@@ -865,10 +865,10 @@
       const btnKanapka = el(
         "button",
         "gw-btn-kanapka" + (idxWKanapce >= 0 ? " aktywny" : ""),
-        idxWKanapce >= 0 ? "✓ W kanapce (#" + (idxWKanapce + 1) + ")" : "☐ Do kanapki"
+        idxWKanapce >= 0 ? "✓ W mikserze (#" + (idxWKanapce + 1) + ")" : "☐ do miksera warstw"
       );
       btnKanapka.type = "button";
-      btnKanapka.title = "Dodaj lub usuń warstwę z miksera kanapki";
+      btnKanapka.title = "Dodaj lub usuń warstwę z miksera warstw";
       btnKanapka.addEventListener("click", function (e) {
         e.stopPropagation();
         przelaczWarstweWKanapce(w);
@@ -1177,10 +1177,10 @@
     const idx = indeksWKanapce(w);
     if (idx >= 0) {
       ref.modalKanapka.classList.add("aktywny");
-      ref.modalKanapka.textContent = "✓ W kanapce (#" + (idx + 1) + ")";
+      ref.modalKanapka.textContent = "✓ W mikserze (#" + (idx + 1) + ")";
     } else {
       ref.modalKanapka.classList.remove("aktywny");
-      ref.modalKanapka.textContent = "+ Do kanapki";
+      ref.modalKanapka.textContent = "+ do miksera warstw";
     }
   }
 
@@ -1279,7 +1279,7 @@
     const n = stan.kanapka.length;
     ref.mikserDokLicznik.textContent = n + " / " + MAKS_WARSTW_KANAPKI + " warstw";
     if (n === 0) {
-      ref.mikserDokOpis.textContent = "Zaznacz warstwy haczykiem „☐ Do kanapki”, aby ułożyć własny miks.";
+      ref.mikserDokOpis.textContent = "Zaznacz warstwy haczykiem „☐ do miksera warstw”, aby ułożyć własny miks.";
       ref.mikserDokOtworz.disabled = false;
       if (ref.mikserDokWyslij) ref.mikserDokWyslij.disabled = true;
     } else {
@@ -1345,7 +1345,7 @@
 
     if (stan.kanapka.length === 0) {
       ref.mikserWarstwy.appendChild(
-        el("div", "gw-brak-wynikow", "Kanapka jest pusta. Wybierz warstwy z galerii przyciskiem „☐ Do kanapki”.")
+        el("div", "gw-brak-wynikow", "Mikser warstw jest pusty. Wybierz warstwy z galerii przyciskiem „☐ do miksera warstw”.")
       );
       return;
     }
@@ -1861,7 +1861,7 @@
     const dokInfo = el("div", "gw-mikser-dok-info");
     const dokLicznik = el("span", "gw-mikser-badge", "0 / " + MAKS_WARSTW_KANAPKI + " warstw");
     const dokOpis = el("span", null, "");
-    dokInfo.appendChild(el("strong", null, "🧩 Mikser kanapki:"));
+    dokInfo.appendChild(el("strong", null, "🧩 Mikser warstw:"));
     dokInfo.appendChild(dokLicznik);
     dokInfo.appendChild(dokOpis);
 
@@ -1895,7 +1895,7 @@
 
     const mikserModal = el("div", "gw-mikser-modal");
     const mikserNaglowek = el("div", "gw-mikser-naglowek");
-    mikserNaglowek.appendChild(el("h3", null, "🧩 Mikser kanapki warstw"));
+    mikserNaglowek.appendChild(el("h3", null, "🧩 Mikser warstw"));
     const mikserZamknij = el("button", "gw-modal-zamknij", "×");
     mikserZamknij.type = "button";
     mikserZamknij.setAttribute("aria-label", "Zamknij mikser");
@@ -2611,7 +2611,7 @@
     const modalAkcje = el("div", "gw-modal-akcje");
     const modalLinki = el("div", "gw-modal-linki");
 
-    const modalKanapka = el("button", "gw-btn-kanapka", "+ Do kanapki");
+    const modalKanapka = el("button", "gw-btn-kanapka", "+ do miksera warstw");
     modalKanapka.type = "button";
     modalKanapka.addEventListener("click", function () {
       const w = stan.widoczne[stan.indeksModala];
@@ -2707,7 +2707,7 @@
           pasekMapoTero.textContent =
             "Połączono z MapoTero" +
             (stan.wersjaProgramu ? " " + stan.wersjaProgramu : "") +
-            " — zaznacz warstwy haczykami „Do kanapki” i otwórz Mikser na dole ekranu albo dodawaj pojedynczo.";
+            " — zaznacz warstwy haczykami „do miksera warstw” i otwórz Mikser warstw na dole ekranu albo dodawaj pojedynczo.";
           return pobierzStanZMapoTero(!stan.kanapkaUrlStart, false);
         })
         .catch(function () {
