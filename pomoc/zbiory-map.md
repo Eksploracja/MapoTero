@@ -6,7 +6,7 @@ nav_order: 17
 # Katalog zbiorów map
 {: .no_toc }
 
-Opis zbiorów map dostarczanych z programem (64 zbiory w folderze `warstwy`): skąd pochodzą, w jakich grupach drzewa je znaleźć, jakiego są typu (WMS / WMTS / XYZ) i jaki mają zalecany rozmiar piksela.
+Opis zbiorów map dostarczanych z programem (71 zbiorów w folderze `warstwy`): skąd pochodzą, w jakich grupach drzewa je znaleźć, jakiego są typu (WMS / WMTS / XYZ) i jaki mają zalecany rozmiar piksela.
 {: .fs-5 .fw-300 }
 
 **Gdzie w programie:** drzewo *Warstwy do pobrania* w oknie głównym  
@@ -47,6 +47,13 @@ Zbiory i warstwy niewymienione w `katalog.txt` (np. dodane [kreatorem serwerów]
 | `hydrograficzna_50` | GUGiK / Geoportal | WMS | 2 | 4 m/px |
 | `krajobrazowa` | GUGiK / Geoportal | WMS | 1 | 16 m/px |
 | `Lasy_Panstwowe_BDL` | Lasy Państwowe (BDL) | WMS | 7 | 2–32 m/px |
+| `Lasy_Panstwowe_Dojazdy_Ppoz` | Lasy Państwowe (BDL) | WMS | 3 | 2–4 m/px |
+| `Lasy_Panstwowe_Drzewostany` | Lasy Państwowe (BDL) | WMS | 6 | 4–16 m/px |
+| `Lasy_Panstwowe_Lowiectwo` | Lasy Państwowe (BDL) | WMS | 1 | 8 m/px |
+| `Lasy_Panstwowe_Ochronnosc` | Lasy Państwowe (BDL) | WMS | 9 | 4–16 m/px |
+| `Lasy_Panstwowe_Siedliska` | Lasy Państwowe (BDL) | WMS | 1 | 4 m/px |
+| `Lasy_Panstwowe_Turystyka` | Lasy Państwowe (BDL) | WMS | 6 | 2–4 m/px |
+| `Lasy_Panstwowe_Wlasnosc` | Lasy Państwowe (BDL) | WMS | 2 | 4 m/px |
 | `mapa_glebowo_rolnicza` | GUGiK / Geoportal | WMS | 2 | 1 m/px |
 | `mapy_historyczne_IHPAN` | IHPAN / Pastmaps | WMS | 22 | 2–40 m/px |
 | `numer_mod_terenu_cieniowanie_WMTS` | GUGiK / Geoportal | WMTS | 1 | 1 m/px |
@@ -303,6 +310,59 @@ Warstwy *Waymarked Trails* są przezroczystymi nakładkami. Po dodaniu mapy podk
 | Wydzielenia leśne (Lasy Państwowe) | `Lasy_Panstwowe_BDL` | `1` | WMS | 2 m/px |
 | Oddziały poza Lasami Państwowymi | `Lasy_Panstwowe_BDL` | `2` | WMS | 4 m/px |
 | Wydzielenia poza Lasami Państwowymi | `Lasy_Panstwowe_BDL` | `0` | WMS | 4 m/px |
+
+### Turystyka w lasach (BDL)
+
+| Nazwa w drzewie | Zbiór map | Warstwa na serwerze | Typ | Piksel |
+|---|---|---|---|---|
+| Obszar „Zanocuj w lesie” (biwaki) | `Lasy_Panstwowe_Turystyka` | `0` | WMS | 4 m/px |
+| Miejsca postoju, wiaty i ogniska | `Lasy_Panstwowe_Turystyka` | `15` | WMS | 2 m/px |
+| Powierzchniowe obiekty rekreacyjne | `Lasy_Panstwowe_Turystyka` | `17` | WMS | 4 m/px |
+| Ścieżki dydaktyczne | `Lasy_Panstwowe_Turystyka` | `1` | WMS | 2 m/px |
+| Ścieżki konne | `Lasy_Panstwowe_Turystyka` | `4` | WMS | 4 m/px |
+| Ośrodki edukacyjne i izby leśne | `Lasy_Panstwowe_Turystyka` | `13` | WMS | 2 m/px |
+
+### Drogi leśne i dojazdy pożarowe (BDL)
+
+| Nazwa w drzewie | Zbiór map | Warstwa na serwerze | Typ | Piksel |
+|---|---|---|---|---|
+| Dojazdy pożarowe (drogi leśne z numeracją) | `Lasy_Panstwowe_Dojazdy_Ppoz` | `0` | WMS | 2 m/px |
+| Punkty czerpania wody | `Lasy_Panstwowe_Dojazdy_Ppoz` | `1` | WMS | 2 m/px |
+| Lokalizacje pożarów | `Lasy_Panstwowe_Dojazdy_Ppoz` | `2` | WMS | 4 m/px |
+
+### Drzewostany i siedliska leśne (BDL)
+
+| Nazwa w drzewie | Zbiór map | Warstwa na serwerze | Typ | Piksel |
+|---|---|---|---|---|
+| Skład gatunkowy drzewostanów (LP) | `Lasy_Panstwowe_Drzewostany` | `1` | WMS | 4 m/px |
+| Skład gatunkowy (poza LP wg PUL) | `Lasy_Panstwowe_Drzewostany` | `0` | WMS | 8 m/px |
+| Klasy odnowienia KO i KDO (LP) | `Lasy_Panstwowe_Drzewostany` | `3` | WMS | 4 m/px |
+| Klasy odnowienia KO i KDO (poza LP) | `Lasy_Panstwowe_Drzewostany` | `2` | WMS | 16 m/px |
+| Wydzielenia niezalesione (LP) | `Lasy_Panstwowe_Drzewostany` | `5` | WMS | 4 m/px |
+| Wydzielenia niezalesione (poza LP) | `Lasy_Panstwowe_Drzewostany` | `4` | WMS | 8 m/px |
+| Siedliska leśne (typy TSL) | `Lasy_Panstwowe_Siedliska` | `0` | WMS | 4 m/px |
+
+### Własność i ochrona lasów (BDL)
+
+| Nazwa w drzewie | Zbiór map | Warstwa na serwerze | Typ | Piksel |
+|---|---|---|---|---|
+| Lasy Państwowe (PGL LP) | `Lasy_Panstwowe_Wlasnosc` | `1` | WMS | 4 m/px |
+| Lasy pozostałe (prywatne, PN, inne) | `Lasy_Panstwowe_Wlasnosc` | `0` | WMS | 4 m/px |
+| Lasy wodochronne | `Lasy_Panstwowe_Ochronnosc` | `1` | WMS | 4 m/px |
+| Lasy podmiejskie (wokół miast) | `Lasy_Panstwowe_Ochronnosc` | `2` | WMS | 4 m/px |
+| Cenne fragmenty rodzimej przyrody | `Lasy_Panstwowe_Ochronnosc` | `3` | WMS | 4 m/px |
+| Uszkodzone przez przemysł | `Lasy_Panstwowe_Ochronnosc` | `4` | WMS | 4 m/px |
+| Lasy glebochronne | `Lasy_Panstwowe_Ochronnosc` | `5` | WMS | 4 m/px |
+| Lasy obronne | `Lasy_Panstwowe_Ochronnosc` | `6` | WMS | 4 m/px |
+| Lasy uzdrowiskowe | `Lasy_Panstwowe_Ochronnosc` | `7` | WMS | 16 m/px |
+| Powierzchnie badawcze i doświadczalne | `Lasy_Panstwowe_Ochronnosc` | `8` | WMS | 8 m/px |
+| Drzewostany nasienne (WDN/GDN) | `Lasy_Panstwowe_Ochronnosc` | `9` | WMS | 4 m/px |
+
+### Obwody łowieckie (BDL)
+
+| Nazwa w drzewie | Zbiór map | Warstwa na serwerze | Typ | Piksel |
+|---|---|---|---|---|
+| Obwody łowieckie | `Lasy_Panstwowe_Lowiectwo` | `0` | WMS | 8 m/px |
 
 ### Mapa hydrograficzna (GUGiK)
 

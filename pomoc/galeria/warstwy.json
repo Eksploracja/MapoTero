@@ -16,6 +16,12 @@
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/TOPO_WMTS__MAPA_TOPOGRAFICZNA.webp",
       "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Cała Polska",
+        "bbox": null
+      },
       "hash_definicji": "9f739c64"
     },
     {
@@ -32,6 +38,12 @@
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/BDOT10k_WMTS__BDOT10k.webp",
       "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Cała Polska",
+        "bbox": null
+      },
       "hash_definicji": "12023066"
     },
     {
@@ -48,6 +60,12 @@
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/BDOO_WMTS__BDOOCieniowanie.webp",
       "miejsce_probki": "Tatry / Zakopane (49.25, 19.96)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Cała Polska",
+        "bbox": null
+      },
       "hash_definicji": "f0d7cb02"
     },
     {
@@ -64,6 +82,12 @@
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/krajobrazowa__Krajobrazowa.webp",
       "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Cała Polska",
+        "bbox": null
+      },
       "hash_definicji": "fe47e08b"
     },
     {
@@ -80,6 +104,12 @@
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/skany_map_topograficznych__Raster_10_1942.webp",
       "miejsce_probki": "Łódź (51.76, 19.46)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Cała Polska",
+        "bbox": null
+      },
       "hash_definicji": "73bccc3d"
     },
     {
@@ -96,6 +126,12 @@
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/skany_map_topograficznych__Raster_10_1965.webp",
       "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Cała Polska",
+        "bbox": null
+      },
       "hash_definicji": "6ec62e27"
     },
     {
@@ -112,6 +148,12 @@
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/skany_map_topograficznych__Raster_10_1992.webp",
       "miejsce_probki": "Łódź (51.76, 19.46)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Cała Polska",
+        "bbox": null
+      },
       "hash_definicji": "dddb445e"
     },
     {
@@ -128,6 +170,12 @@
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/skany_map_topograficznych__Raster_25_1965.webp",
       "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Cała Polska",
+        "bbox": null
+      },
       "hash_definicji": "f10e4d82"
     },
     {
@@ -144,6 +192,12 @@
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/skany_map_topograficznych__Raster_50_1942.webp",
       "miejsce_probki": "Łódź (51.76, 19.46)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Cała Polska",
+        "bbox": null
+      },
       "hash_definicji": "a7c5d34a"
     },
     {
@@ -160,6 +214,12 @@
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/skany_map_topograficznych__Raster_50_1965.webp",
       "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Cała Polska",
+        "bbox": null
+      },
       "hash_definicji": "69796c7a"
     },
     {
@@ -176,6 +236,12 @@
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/skany_map_topograficznych__Raster_50_1992.webp",
       "miejsce_probki": "Łódź (51.76, 19.46)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Cała Polska",
+        "bbox": null
+      },
       "hash_definicji": "9e25388a"
     },
     {
@@ -192,6 +258,12 @@
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/skany_map_topograficznych__Raster_50_UTM.webp",
       "miejsce_probki": "Łódź (51.76, 19.46)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Cała Polska",
+        "bbox": null
+      },
       "hash_definicji": "7e30909c"
     },
     {
@@ -208,6 +280,12 @@
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/skany_map_topograficznych__Raster_50tys_VMap.webp",
       "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Cała Polska",
+        "bbox": null
+      },
       "hash_definicji": "d4f834d9"
     },
     {
@@ -224,6 +302,17 @@
       "zrodlo": "OSMapa.pl / © autorzy OpenStreetMap",
       "obrazek": "obrazy/galeria/OSMapa_PL__osmapa.webp",
       "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "zasieg": {
+        "typ": "regionalny",
+        "kod": "PL",
+        "etykieta": "Zasięg zdefiniowany w pliku zbioru",
+        "bbox": [
+          13.5,
+          48.7,
+          24.6,
+          55.2
+        ]
+      },
       "hash_definicji": "c6093fbb"
     },
     {
@@ -240,6 +329,17 @@
       "zrodlo": "© UMP-pcPL",
       "obrazek": "obrazy/galeria/UMP_pcPL__ump_pcPL.webp",
       "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "zasieg": {
+        "typ": "regionalny",
+        "kod": "PL",
+        "etykieta": "Zasięg zdefiniowany w pliku zbioru",
+        "bbox": [
+          13.5,
+          48.7,
+          24.6,
+          55.2
+        ]
+      },
       "hash_definicji": "ffcc5164"
     },
     {
@@ -256,6 +356,12 @@
       "zrodlo": "© OpenTopoMap / autorzy OpenStreetMap",
       "obrazek": "obrazy/galeria/OpenTopoMap__opentopomap.webp",
       "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "zasieg": {
+        "typ": "globalny",
+        "kod": "SWIAT",
+        "etykieta": "Globalny / Europa (OpenStreetMap)",
+        "bbox": null
+      },
       "hash_definicji": "f6b9d152"
     },
     {
@@ -272,6 +378,12 @@
       "zrodlo": "Waymarked Trails / © autorzy OpenStreetMap",
       "obrazek": "obrazy/galeria/Waymarked_Trails__hiking.webp",
       "miejsce_probki": "Tatry / Zakopane (49.25, 19.96)",
+      "zasieg": {
+        "typ": "globalny",
+        "kod": "SWIAT",
+        "etykieta": "Szlaki piesze – globalnie (dane OSM)",
+        "bbox": null
+      },
       "hash_definicji": "d15a8c54"
     },
     {
@@ -288,6 +400,12 @@
       "zrodlo": "Waymarked Trails / © autorzy OpenStreetMap",
       "obrazek": "obrazy/galeria/Waymarked_Trails__cycling.webp",
       "miejsce_probki": "Kraków / Wiślana Trasa Rowerowa (50.05, 19.91)",
+      "zasieg": {
+        "typ": "globalny",
+        "kod": "SWIAT",
+        "etykieta": "Trasy rowerowe – globalnie (dane OSM)",
+        "bbox": null
+      },
       "hash_definicji": "effa55c9"
     },
     {
@@ -304,6 +422,12 @@
       "zrodlo": "Waymarked Trails / © autorzy OpenStreetMap",
       "obrazek": "obrazy/galeria/Waymarked_Trails__mtb.webp",
       "miejsce_probki": "Świeradów-Zdrój / Single Track (50.90, 15.35)",
+      "zasieg": {
+        "typ": "globalny",
+        "kod": "SWIAT",
+        "etykieta": "Szlaki MTB – globalnie (dane OSM)",
+        "bbox": null
+      },
       "hash_definicji": "e2f68615"
     },
     {
@@ -320,6 +444,12 @@
       "zrodlo": "Waymarked Trails / © autorzy OpenStreetMap",
       "obrazek": "obrazy/galeria/Waymarked_Trails__riding.webp",
       "miejsce_probki": "Jura Krakowsko-Częstochowska (50.56, 19.53)",
+      "zasieg": {
+        "typ": "globalny",
+        "kod": "SWIAT",
+        "etykieta": "Szlaki konne – wybrane regiony",
+        "bbox": null
+      },
       "hash_definicji": "57ddc295"
     },
     {
@@ -336,6 +466,12 @@
       "zrodlo": "Waymarked Trails / © autorzy OpenStreetMap",
       "obrazek": "obrazy/galeria/Waymarked_Trails__skating.webp",
       "miejsce_probki": "Fläming-Skate k. Berlina (51.99, 13.15)",
+      "zasieg": {
+        "typ": "globalny",
+        "kod": "SWIAT",
+        "etykieta": "Trasy rolkowe – wybrane regiony",
+        "bbox": null
+      },
       "hash_definicji": "bcac1272"
     },
     {
@@ -352,6 +488,12 @@
       "zrodlo": "Waymarked Trails / © autorzy OpenStreetMap",
       "obrazek": "obrazy/galeria/Waymarked_Trails__slopes.webp",
       "miejsce_probki": "Białka Tatrzańska (49.39, 20.10)",
+      "zasieg": {
+        "typ": "globalny",
+        "kod": "SWIAT",
+        "etykieta": "Trasy narciarskie – rejony górskie",
+        "bbox": null
+      },
       "hash_definicji": "cc1c46b5"
     },
     {
@@ -368,6 +510,12 @@
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/numer_mod_terenu_cieniowanie_WMTS__ISOK_Cien.webp",
       "miejsce_probki": "Tatry / Zakopane (49.25, 19.96)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Cała Polska",
+        "bbox": null
+      },
       "hash_definicji": "47bb5b5d"
     },
     {
@@ -384,6 +532,12 @@
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/numer_mod_terenu_hipsometria_WMTS__Hipsometria.webp",
       "miejsce_probki": "Tatry / Zakopane (49.25, 19.96)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Cała Polska",
+        "bbox": null
+      },
       "hash_definicji": "d3bb73db"
     },
     {
@@ -400,6 +554,12 @@
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/numer_mod_terenu_WMTS__HipsoCien.webp",
       "miejsce_probki": "Tatry / Zakopane (49.25, 19.96)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Cała Polska",
+        "bbox": null
+      },
       "hash_definicji": "25808f75"
     },
     {
@@ -416,6 +576,12 @@
       "zrodlo": "terrestris (OSM)",
       "obrazek": "obrazy/galeria/OpenStreetMap_Terrestris__SRTM30-Contour.webp",
       "miejsce_probki": "Tatry / Zakopane (49.25, 19.96)",
+      "zasieg": {
+        "typ": "globalny",
+        "kod": "SWIAT",
+        "etykieta": "Globalny / Europa (OpenStreetMap)",
+        "bbox": null
+      },
       "hash_definicji": "db9b3e82"
     },
     {
@@ -432,6 +598,17 @@
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/szczyty__szczyty.webp",
       "miejsce_probki": "Tatry / Zakopane (49.25, 19.96)",
+      "zasieg": {
+        "typ": "regionalny",
+        "kod": "PL",
+        "etykieta": "Pasma górskie i wzniesienia (Karpaty, Sudety, Góry Świętokrzyskie)",
+        "bbox": [
+          14.9,
+          49,
+          23.5,
+          51.5
+        ]
+      },
       "hash_definicji": "26f81805"
     },
     {
@@ -448,6 +625,12 @@
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/ortofotomapa_WMTS__ORTOFOTOMAPA.webp",
       "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Cała Polska",
+        "bbox": null
+      },
       "hash_definicji": "9d34c7df"
     },
     {
@@ -464,6 +647,12 @@
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/ortofotomapa_HighResolution_WMTS__ORTOFOTOMAPA.webp",
       "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Cała Polska",
+        "bbox": null
+      },
       "hash_definicji": "7ea9fcfa"
     },
     {
@@ -480,6 +669,12 @@
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/ortofotomapa__Raster.webp",
       "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Cała Polska",
+        "bbox": null
+      },
       "hash_definicji": "e5815c2a"
     },
     {
@@ -496,6 +691,12 @@
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/ortofotomapa_TrueOrtho__PrawdziwaOrtofotomapa.webp",
       "miejsce_probki": "Warszawa Centrum (52.23, 21.01)",
+      "zasieg": {
+        "typ": "regionalny",
+        "kod": "PL",
+        "etykieta": "Tylko wybrane miasta (np. Warszawa, Kraków, Łódź, Wrocław, Poznań, Trójmiasto, GOP)",
+        "bbox": null
+      },
       "hash_definicji": "549cf842"
     },
     {
@@ -512,6 +713,17 @@
       "zrodlo": "IHPAN / Pastmaps",
       "obrazek": "obrazy/galeria/mapy_historyczne_IHPAN__m25k_2180.webp",
       "miejsce_probki": "Poznań (52.41, 16.93)",
+      "zasieg": {
+        "typ": "regionalny",
+        "kod": "PL",
+        "etykieta": "Ziemie zachodnie i północne (dawne Niemcy)",
+        "bbox": [
+          14.1,
+          50,
+          23,
+          55
+        ]
+      },
       "hash_definicji": "1f24d557"
     },
     {
@@ -528,6 +740,12 @@
       "zrodlo": "IHPAN / Pastmaps",
       "obrazek": "obrazy/galeria/mapy_historyczne_IHPAN__wig25k_2180.webp",
       "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Ziemie polskie (II RP / powojenne)",
+        "bbox": null
+      },
       "hash_definicji": "6d83c289"
     },
     {
@@ -544,6 +762,12 @@
       "zrodlo": "IHPAN / Pastmaps",
       "obrazek": "obrazy/galeria/mapy_historyczne_IHPAN__wig100k_2180.webp",
       "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Ziemie polskie (II RP / powojenne)",
+        "bbox": null
+      },
       "hash_definicji": "669cb0b2"
     },
     {
@@ -560,6 +784,12 @@
       "zrodlo": "IHPAN / Pastmaps",
       "obrazek": "obrazy/galeria/mapy_historyczne_IHPAN__wig300k_3857.webp",
       "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Ziemie polskie (II RP / powojenne)",
+        "bbox": null
+      },
       "hash_definicji": "c0345878"
     },
     {
@@ -576,6 +806,12 @@
       "zrodlo": "IHPAN / Pastmaps",
       "obrazek": "obrazy/galeria/mapy_historyczne_IHPAN__wig500k_2180.webp",
       "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Ziemie polskie (II RP / powojenne)",
+        "bbox": null
+      },
       "hash_definicji": "60b7a2c4"
     },
     {
@@ -592,6 +828,17 @@
       "zrodlo": "IHPAN / Pastmaps",
       "obrazek": "obrazy/galeria/mapy_historyczne_IHPAN__kdr_2180.webp",
       "miejsce_probki": "Kraków (50.06, 19.94)",
+      "zasieg": {
+        "typ": "regionalny",
+        "kod": "PL",
+        "etykieta": "Ziemie zachodnie i północne (dawne Niemcy)",
+        "bbox": [
+          14.1,
+          50,
+          23,
+          55
+        ]
+      },
       "hash_definicji": "d2d872f7"
     },
     {
@@ -608,6 +855,17 @@
       "zrodlo": "IHPAN / Pastmaps",
       "obrazek": "obrazy/galeria/mapy_historyczne_IHPAN__kdr_gb_2180.webp",
       "miejsce_probki": "Kraków (50.06, 19.94)",
+      "zasieg": {
+        "typ": "regionalny",
+        "kod": "PL",
+        "etykieta": "Ziemie zachodnie i północne (dawne Niemcy)",
+        "bbox": [
+          14.1,
+          50,
+          23,
+          55
+        ]
+      },
       "hash_definicji": "1721706c"
     },
     {
@@ -624,6 +882,17 @@
       "zrodlo": "IHPAN / Pastmaps",
       "obrazek": "obrazy/galeria/mapy_historyczne_IHPAN__kdwr_2180.webp",
       "miejsce_probki": "Kraków (50.06, 19.94)",
+      "zasieg": {
+        "typ": "regionalny",
+        "kod": "PL",
+        "etykieta": "Polska centralna i wschodnia oraz kraje bałtyckie",
+        "bbox": [
+          17.5,
+          50,
+          32,
+          57
+        ]
+      },
       "hash_definicji": "9cfb2385"
     },
     {
@@ -640,6 +909,17 @@
       "zrodlo": "IHPAN / Pastmaps",
       "obrazek": "obrazy/galeria/mapy_historyczne_IHPAN__ukvme_2180.webp",
       "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "zasieg": {
+        "typ": "regionalny",
+        "kod": "PL",
+        "etykieta": "Europa Środkowa (Niemcy i Polska)",
+        "bbox": [
+          10,
+          46,
+          26,
+          55.5
+        ]
+      },
       "hash_definicji": "23833eb5"
     },
     {
@@ -656,6 +936,17 @@
       "zrodlo": "IHPAN / Pastmaps",
       "obrazek": "obrazy/galeria/mapy_historyczne_IHPAN__kummersberg_2180.webp",
       "miejsce_probki": "Wrocław (51.11, 17.03)",
+      "zasieg": {
+        "typ": "regionalny",
+        "kod": "PL",
+        "etykieta": "Galicja i Lodomeria (Małopolska, Podkarpacie)",
+        "bbox": [
+          18.8,
+          47.7,
+          26.5,
+          50.8
+        ]
+      },
       "hash_definicji": "ed5b7565"
     },
     {
@@ -672,6 +963,17 @@
       "zrodlo": "IHPAN / Pastmaps",
       "obrazek": "obrazy/galeria/mapy_historyczne_IHPAN__slask18w_2180.webp",
       "miejsce_probki": "Wrocław (51.11, 17.03)",
+      "zasieg": {
+        "typ": "regionalny",
+        "kod": "PL",
+        "etykieta": "Śląsk (Dolny i Górny)",
+        "bbox": [
+          14.8,
+          49.8,
+          19.3,
+          52.2
+        ]
+      },
       "hash_definicji": "aafbfa6b"
     },
     {
@@ -688,6 +990,17 @@
       "zrodlo": "IHPAN / Pastmaps",
       "obrazek": "obrazy/galeria/mapy_historyczne_IHPAN__schroetter_3857.webp",
       "miejsce_probki": "Olsztyn (53.78, 20.48)",
+      "zasieg": {
+        "typ": "regionalny",
+        "kod": "PL",
+        "etykieta": "Prusy Wschodnie (Warmia, Mazury)",
+        "bbox": [
+          18.5,
+          52.8,
+          23,
+          55
+        ]
+      },
       "hash_definicji": "1ecc8f85"
     },
     {
@@ -704,6 +1017,17 @@
       "zrodlo": "IHPAN / Pastmaps",
       "obrazek": "obrazy/galeria/mapy_historyczne_IHPAN__gilly_3857.webp",
       "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "zasieg": {
+        "typ": "regionalny",
+        "kod": "PL",
+        "etykieta": "Prusy Południowe (Wielkopolska, Mazowsze)",
+        "bbox": [
+          15.5,
+          51,
+          22,
+          53.5
+        ]
+      },
       "hash_definicji": "2ec65265"
     },
     {
@@ -720,6 +1044,17 @@
       "zrodlo": "IHPAN / Pastmaps",
       "obrazek": "obrazy/galeria/mapy_historyczne_IHPAN__textor_3857.webp",
       "miejsce_probki": "Białystok (53.13, 23.17)",
+      "zasieg": {
+        "typ": "regionalny",
+        "kod": "PL",
+        "etykieta": "Nowe Prusy Wschodnie (Podlasie, wsch. Mazowsze)",
+        "bbox": [
+          20.5,
+          52,
+          24.5,
+          54.5
+        ]
+      },
       "hash_definicji": "3554c749"
     },
     {
@@ -736,6 +1071,17 @@
       "zrodlo": "IHPAN / Pastmaps",
       "obrazek": "obrazy/galeria/mapy_historyczne_IHPAN__gaul_3857.webp",
       "miejsce_probki": "Poznań (52.41, 16.93)",
+      "zasieg": {
+        "typ": "regionalny",
+        "kod": "PL",
+        "etykieta": "Wielkopolska",
+        "bbox": [
+          15.5,
+          51.3,
+          19.2,
+          53.5
+        ]
+      },
       "hash_definicji": "3747f998"
     },
     {
@@ -752,6 +1098,17 @@
       "zrodlo": "IHPAN / Pastmaps",
       "obrazek": "obrazy/galeria/mapy_historyczne_IHPAN__TKKP_126k_3857.webp",
       "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "zasieg": {
+        "typ": "regionalny",
+        "kod": "PL",
+        "etykieta": "Królestwo Polskie (zabór rosyjski)",
+        "bbox": [
+          17.8,
+          50,
+          24.2,
+          54.5
+        ]
+      },
       "hash_definicji": "ee5c8162"
     },
     {
@@ -768,6 +1125,17 @@
       "zrodlo": "IHPAN / Pastmaps",
       "obrazek": "obrazy/galeria/mapy_historyczne_IHPAN__chrzanowski_3857.webp",
       "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "zasieg": {
+        "typ": "regionalny",
+        "kod": "PL",
+        "etykieta": "Ziemie dawnej Rzeczypospolitej",
+        "bbox": [
+          14,
+          48,
+          32,
+          57
+        ]
+      },
       "hash_definicji": "43f76d3b"
     },
     {
@@ -784,6 +1152,17 @@
       "zrodlo": "IHPAN / Pastmaps",
       "obrazek": "obrazy/galeria/mapy_historyczne_IHPAN__reymann_3857.webp",
       "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "zasieg": {
+        "typ": "regionalny",
+        "kod": "PL",
+        "etykieta": "Europa Środkowa (Niemcy i Polska)",
+        "bbox": [
+          10,
+          46,
+          26,
+          55.5
+        ]
+      },
       "hash_definicji": "f0f311d9"
     },
     {
@@ -800,6 +1179,17 @@
       "zrodlo": "IHPAN / Pastmaps",
       "obrazek": "obrazy/galeria/mapy_historyczne_IHPAN__dwuwiorstowka_3857.webp",
       "miejsce_probki": "Lublin (51.25, 22.57)",
+      "zasieg": {
+        "typ": "regionalny",
+        "kod": "PL",
+        "etykieta": "Zabór rosyjski (Polska centralna i wschodnia)",
+        "bbox": [
+          17.8,
+          50,
+          24.2,
+          54.5
+        ]
+      },
       "hash_definicji": "6161585b"
     },
     {
@@ -816,6 +1206,17 @@
       "zrodlo": "IHPAN / Pastmaps",
       "obrazek": "obrazy/galeria/mapy_historyczne_IHPAN__wig100k_4326_extended.webp",
       "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "zasieg": {
+        "typ": "regionalny",
+        "kod": "PL",
+        "etykieta": "II Rzeczpospolita i tereny przyległe",
+        "bbox": [
+          14,
+          48,
+          28.5,
+          56.5
+        ]
+      },
       "hash_definicji": "fbb0a0df"
     },
     {
@@ -832,6 +1233,12 @@
       "zrodlo": "IHPAN / Pastmaps",
       "obrazek": "obrazy/galeria/mapy_historyczne_IHPAN__wig500k1939_3857.webp",
       "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Ziemie polskie (II RP / powojenne)",
+        "bbox": null
+      },
       "hash_definicji": "ca168e78"
     },
     {
@@ -848,6 +1255,12 @@
       "zrodlo": "IHPAN / Pastmaps",
       "obrazek": "obrazy/galeria/mapy_historyczne_IHPAN__wig_1947_1952_3857.webp",
       "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Ziemie polskie (II RP / powojenne)",
+        "bbox": null
+      },
       "hash_definicji": "d12c8144"
     },
     {
@@ -864,6 +1277,12 @@
       "zrodlo": "NID",
       "obrazek": "obrazy/galeria/zabytki_zasiegi_NID__Zabytki_nieruchome_I.webp",
       "miejsce_probki": "Kraków Stare Miasto (50.06, 19.94)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Cała Polska",
+        "bbox": null
+      },
       "hash_definicji": "2ba3e8bb"
     },
     {
@@ -880,6 +1299,12 @@
       "zrodlo": "NID",
       "obrazek": "obrazy/galeria/zabytki_NID__Immovable_Monuments.webp",
       "miejsce_probki": "Kraków Stare Miasto (50.06, 19.94)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Cała Polska",
+        "bbox": null
+      },
       "hash_definicji": "8cd7c76d"
     },
     {
@@ -896,6 +1321,12 @@
       "zrodlo": "NID",
       "obrazek": "obrazy/galeria/zabytki_archeo_NID__Archaeological_Monuments.webp",
       "miejsce_probki": "Kraków Stare Miasto (50.06, 19.94)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Cała Polska",
+        "bbox": null
+      },
       "hash_definicji": "5ff5698e"
     },
     {
@@ -912,6 +1343,12 @@
       "zrodlo": "NID",
       "obrazek": "obrazy/galeria/zabytki_ewidencja_nieruchomych_NID__Ewidencja_zabytkow_nieruchomych_I.webp",
       "miejsce_probki": "Kraków Stare Miasto (50.06, 19.94)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Cała Polska",
+        "bbox": null
+      },
       "hash_definicji": "93768859"
     },
     {
@@ -928,6 +1365,12 @@
       "zrodlo": "NID",
       "obrazek": "obrazy/galeria/zabytki_ewidencja_archeo_NID__Ewidencja_zabytków_archeologicznych.webp",
       "miejsce_probki": "Kraków Stare Miasto (50.06, 19.94)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Cała Polska",
+        "bbox": null
+      },
       "hash_definicji": "88fcc30d"
     },
     {
@@ -944,6 +1387,12 @@
       "zrodlo": "NID",
       "obrazek": "obrazy/galeria/zabytki_pomniki_historii_NID__Monuments_of_History.webp",
       "miejsce_probki": "Kraków Stare Miasto (50.06, 19.94)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Cała Polska",
+        "bbox": null
+      },
       "hash_definicji": "52ff4938"
     },
     {
@@ -960,6 +1409,12 @@
       "zrodlo": "NID",
       "obrazek": "obrazy/galeria/zabytki_unesco_NID__World_Heritage_Properties_List.webp",
       "miejsce_probki": "Kraków Stare Miasto (50.06, 19.94)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Cała Polska",
+        "bbox": null
+      },
       "hash_definicji": "d1627f3f"
     },
     {
@@ -976,6 +1431,12 @@
       "zrodlo": "NID",
       "obrazek": "obrazy/galeria/zabytki_groby_wojenne_NID__Groby_i_cmentarze_wojenne_I.webp",
       "miejsce_probki": "Kraków / Rakowice (50.08, 19.95)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Cała Polska",
+        "bbox": null
+      },
       "hash_definicji": "d537e8b8"
     },
     {
@@ -992,6 +1453,12 @@
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/dzialki_ewid_EGIB__dzialki.webp",
       "miejsce_probki": "Warszawa Centrum (52.23, 21.01)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Cała Polska",
+        "bbox": null
+      },
       "hash_definicji": "2049aba4"
     },
     {
@@ -1008,6 +1475,12 @@
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/dzialki_ewid_EGIB__numery_dzialek.webp",
       "miejsce_probki": "Warszawa Centrum (52.23, 21.01)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Cała Polska",
+        "bbox": null
+      },
       "hash_definicji": "5e5078d9"
     },
     {
@@ -1024,6 +1497,12 @@
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/dzialki_ewid_EGIB__budynki.webp",
       "miejsce_probki": "Warszawa Centrum (52.23, 21.01)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Cała Polska",
+        "bbox": null
+      },
       "hash_definicji": "c8d9e59b"
     },
     {
@@ -1040,6 +1519,12 @@
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/dzialki_ewid_EGIB__uzytki.webp",
       "miejsce_probki": "Łabędzie / pow. drawski (53.65, 15.81)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Cała Polska",
+        "bbox": null
+      },
       "hash_definicji": "efe92006"
     },
     {
@@ -1056,6 +1541,12 @@
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/dzialki_ewid_EGIB__kontury.webp",
       "miejsce_probki": "Łabędzie / pow. drawski (53.65, 15.81)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Cała Polska",
+        "bbox": null
+      },
       "hash_definicji": "8fef89f7"
     },
     {
@@ -1072,6 +1563,12 @@
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/dzialki_ewid_EGIB__obreby.webp",
       "miejsce_probki": "Warszawa Centrum (52.23, 21.01)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Cała Polska",
+        "bbox": null
+      },
       "hash_definicji": "33c00611"
     },
     {
@@ -1088,6 +1585,12 @@
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/uzbrojenie_terenu_KIUT__przewod_wodociagowy.webp",
       "miejsce_probki": "Warszawa Centrum (52.23, 21.01)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Cała Polska",
+        "bbox": null
+      },
       "hash_definicji": "d13ca1f3"
     },
     {
@@ -1104,6 +1607,12 @@
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/uzbrojenie_terenu_KIUT__przewod_kanalizacyjny.webp",
       "miejsce_probki": "Warszawa Centrum (52.23, 21.01)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Cała Polska",
+        "bbox": null
+      },
       "hash_definicji": "ded612e7"
     },
     {
@@ -1120,6 +1629,12 @@
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/uzbrojenie_terenu_KIUT__przewod_elektroenergetyczny.webp",
       "miejsce_probki": "Warszawa Centrum (52.23, 21.01)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Cała Polska",
+        "bbox": null
+      },
       "hash_definicji": "9d18c9e3"
     },
     {
@@ -1136,6 +1651,12 @@
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/uzbrojenie_terenu_KIUT__przewod_gazowy.webp",
       "miejsce_probki": "Warszawa Centrum (52.23, 21.01)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Cała Polska",
+        "bbox": null
+      },
       "hash_definicji": "fe1cfe04"
     },
     {
@@ -1152,6 +1673,12 @@
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/uzbrojenie_terenu_KIUT__przewod_cieplowniczy.webp",
       "miejsce_probki": "Warszawa Centrum (52.23, 21.01)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Cała Polska",
+        "bbox": null
+      },
       "hash_definicji": "9d8dd43c"
     },
     {
@@ -1168,6 +1695,12 @@
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/uzbrojenie_terenu_KIUT__przewod_telekomunikacyjny.webp",
       "miejsce_probki": "Warszawa Centrum (52.23, 21.01)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Cała Polska",
+        "bbox": null
+      },
       "hash_definicji": "b4981729"
     },
     {
@@ -1184,6 +1717,12 @@
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/uzbrojenie_terenu_KIUT__przewod_specjalny.webp",
       "miejsce_probki": "Warszawa Centrum (52.23, 21.01)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Cała Polska",
+        "bbox": null
+      },
       "hash_definicji": "35a48f0c"
     },
     {
@@ -1200,6 +1739,12 @@
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/uzbrojenie_terenu_KIUT__przewod_niezidentyfikowany.webp",
       "miejsce_probki": "Warszawa Centrum (52.23, 21.01)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Cała Polska",
+        "bbox": null
+      },
       "hash_definicji": "1afdd945"
     },
     {
@@ -1216,6 +1761,12 @@
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/uzbrojenie_terenu_KIUT__przewod_urzadzenia.webp",
       "miejsce_probki": "Warszawa Centrum (52.23, 21.01)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Cała Polska",
+        "bbox": null
+      },
       "hash_definicji": "f08636db"
     },
     {
@@ -1232,6 +1783,12 @@
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/osnowy_geodezyjne__osnowa-XY.webp",
       "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Cała Polska",
+        "bbox": null
+      },
       "hash_definicji": "0f845bc6"
     },
     {
@@ -1248,6 +1805,12 @@
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/osnowy_geodezyjne__osnowa-H.webp",
       "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Cała Polska",
+        "bbox": null
+      },
       "hash_definicji": "6d9bb8c6"
     },
     {
@@ -1264,6 +1827,12 @@
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/osnowy_geodezyjne__osnowa-XYH.webp",
       "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Cała Polska",
+        "bbox": null
+      },
       "hash_definicji": "5ab9ce9d"
     },
     {
@@ -1280,6 +1849,12 @@
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/rejestr_granic_jednostki_teryt__A00_Granice_panstwa.webp",
       "miejsce_probki": "Warszawa i okolice (52.23, 21.01)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Cała Polska",
+        "bbox": null
+      },
       "hash_definicji": "ac7c0507"
     },
     {
@@ -1296,6 +1871,12 @@
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/rejestr_granic_jednostki_teryt__A01_Granice_wojewodztw.webp",
       "miejsce_probki": "Warszawa i okolice (52.23, 21.01)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Cała Polska",
+        "bbox": null
+      },
       "hash_definicji": "68db273a"
     },
     {
@@ -1312,6 +1893,12 @@
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/rejestr_granic_jednostki_teryt__A02_Granice_powiatow.webp",
       "miejsce_probki": "Warszawa i okolice (52.23, 21.01)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Cała Polska",
+        "bbox": null
+      },
       "hash_definicji": "8e801a0a"
     },
     {
@@ -1328,6 +1915,12 @@
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/rejestr_granic_jednostki_teryt__A03_Granice_gmin.webp",
       "miejsce_probki": "Warszawa i okolice (52.23, 21.01)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Cała Polska",
+        "bbox": null
+      },
       "hash_definicji": "4f2f0e82"
     },
     {
@@ -1344,6 +1937,12 @@
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/rejestr_granic_jednostki_teryt__A04_Granice_miast.webp",
       "miejsce_probki": "Warszawa i okolice (52.23, 21.01)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Cała Polska",
+        "bbox": null
+      },
       "hash_definicji": "192fef59"
     },
     {
@@ -1360,6 +1959,12 @@
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/rejestr_granic_jednostki_teryt__A05_Granice_jednostek_ewidencyjnych.webp",
       "miejsce_probki": "Warszawa i okolice (52.23, 21.01)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Cała Polska",
+        "bbox": null
+      },
       "hash_definicji": "b103d797"
     },
     {
@@ -1376,6 +1981,12 @@
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/rejestr_granic_jednostki_teryt__A06_Granice_obrebow_ewidencyjnych.webp",
       "miejsce_probki": "Warszawa i okolice (52.23, 21.01)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Cała Polska",
+        "bbox": null
+      },
       "hash_definicji": "f67f21ac"
     },
     {
@@ -1392,6 +2003,12 @@
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/rejestr_granic_jednostki_teryt__R01_Granice_rejonow_statystycznych.webp",
       "miejsce_probki": "Warszawa i okolice (52.23, 21.01)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Cała Polska",
+        "bbox": null
+      },
       "hash_definicji": "ba87ff83"
     },
     {
@@ -1408,6 +2025,12 @@
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/rejestr_granic_jednostki_teryt__R02_Granice_obwodow_spisowych.webp",
       "miejsce_probki": "Warszawa i okolice (52.23, 21.01)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Cała Polska",
+        "bbox": null
+      },
       "hash_definicji": "db5c12a9"
     },
     {
@@ -1424,6 +2047,12 @@
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/administracyjna__Administracyjna.webp",
       "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Cała Polska",
+        "bbox": null
+      },
       "hash_definicji": "cf05dd79"
     },
     {
@@ -1440,6 +2069,12 @@
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/rejestr_granic_punkty_adresowe__AD_Address.webp",
       "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Cała Polska",
+        "bbox": null
+      },
       "hash_definicji": "98023508"
     },
     {
@@ -1456,6 +2091,12 @@
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/rejestr_nazw_geograficznych__M1_UrzedoweNazwyMiejscowosci.webp",
       "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Cała Polska",
+        "bbox": null
+      },
       "hash_definicji": "e630b833"
     },
     {
@@ -1472,6 +2113,12 @@
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/rejestr_nazw_geograficznych__M2_PozostaleNazwyMiejscowosci.webp",
       "miejsce_probki": "Podhale (49.45, 20.05)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Cała Polska",
+        "bbox": null
+      },
       "hash_definicji": "15e9037d"
     },
     {
@@ -1488,6 +2135,12 @@
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/rejestr_nazw_geograficznych__O1_UrzedoweNazwyObiektowFizjograficznych.webp",
       "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Cała Polska",
+        "bbox": null
+      },
       "hash_definicji": "c3dcf081"
     },
     {
@@ -1504,6 +2157,12 @@
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/rejestr_nazw_geograficznych__O2_ZestandaryzowaneNazwyObiektowFizjograficznych.webp",
       "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Cała Polska",
+        "bbox": null
+      },
       "hash_definicji": "a3be2624"
     },
     {
@@ -1520,6 +2179,12 @@
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/rejestr_nazw_geograficznych__O3_PozostaleNazwyObiektowFizjograficznych.webp",
       "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Cała Polska",
+        "bbox": null
+      },
       "hash_definicji": "c2d322ed"
     },
     {
@@ -1536,6 +2201,17 @@
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/rejestr_granic_jednostki_teryt__W03_Morskie_wody_wewnetrzne.webp",
       "miejsce_probki": "Półwysep Helski / Bałtyk (54.78, 18.60)",
+      "zasieg": {
+        "typ": "morski",
+        "kod": "BALTYK",
+        "etykieta": "Pas wód morskich i polska strefa ekonomiczna na Bałtyku",
+        "bbox": [
+          14.1,
+          53.8,
+          20,
+          55.8
+        ]
+      },
       "hash_definicji": "4b6a165c"
     },
     {
@@ -1552,6 +2228,17 @@
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/rejestr_granic_jednostki_teryt__W02_Morze_terytorialne_RP.webp",
       "miejsce_probki": "Półwysep Helski / Bałtyk (54.78, 18.60)",
+      "zasieg": {
+        "typ": "morski",
+        "kod": "BALTYK",
+        "etykieta": "Pas wód morskich i polska strefa ekonomiczna na Bałtyku",
+        "bbox": [
+          14.1,
+          53.8,
+          20,
+          55.8
+        ]
+      },
       "hash_definicji": "6c8eb421"
     },
     {
@@ -1568,6 +2255,17 @@
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/rejestr_granic_jednostki_teryt__W01_Linia_podstawowa_morza_terytorialnego.webp",
       "miejsce_probki": "Półwysep Helski / Bałtyk (54.78, 18.60)",
+      "zasieg": {
+        "typ": "morski",
+        "kod": "BALTYK",
+        "etykieta": "Pas wód morskich i polska strefa ekonomiczna na Bałtyku",
+        "bbox": [
+          14.1,
+          53.8,
+          20,
+          55.8
+        ]
+      },
       "hash_definicji": "1b3fa02f"
     },
     {
@@ -1584,6 +2282,17 @@
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/rejestr_granic_jednostki_teryt__W05_Strefa_przylegla.webp",
       "miejsce_probki": "Półwysep Helski / Bałtyk (54.78, 18.60)",
+      "zasieg": {
+        "typ": "morski",
+        "kod": "BALTYK",
+        "etykieta": "Pas wód morskich i polska strefa ekonomiczna na Bałtyku",
+        "bbox": [
+          14.1,
+          53.8,
+          20,
+          55.8
+        ]
+      },
       "hash_definicji": "5707dd81"
     },
     {
@@ -1600,6 +2309,17 @@
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/rejestr_granic_jednostki_teryt__W04_Wylaczna_strefa_ekonomiczna.webp",
       "miejsce_probki": "Otwarty Bałtyk (55.15, 17.50)",
+      "zasieg": {
+        "typ": "morski",
+        "kod": "BALTYK",
+        "etykieta": "Pas wód morskich i polska strefa ekonomiczna na Bałtyku",
+        "bbox": [
+          14.1,
+          53.8,
+          20,
+          55.8
+        ]
+      },
       "hash_definicji": "15362267"
     },
     {
@@ -1616,6 +2336,17 @@
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/rejestr_granic_jednostki_teryt__W06_Morskie_linie_brzegowe.webp",
       "miejsce_probki": "Półwysep Helski / Bałtyk (54.78, 18.60)",
+      "zasieg": {
+        "typ": "morski",
+        "kod": "BALTYK",
+        "etykieta": "Pas wód morskich i polska strefa ekonomiczna na Bałtyku",
+        "bbox": [
+          14.1,
+          53.8,
+          20,
+          55.8
+        ]
+      },
       "hash_definicji": "13f7d82b"
     },
     {
@@ -1632,6 +2363,17 @@
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/rejestr_granic_jednostki_teryt__W09_Pas_techniczny.webp",
       "miejsce_probki": "Półwysep Helski / Bałtyk (54.78, 18.60)",
+      "zasieg": {
+        "typ": "morski",
+        "kod": "BALTYK",
+        "etykieta": "Pas wód morskich i polska strefa ekonomiczna na Bałtyku",
+        "bbox": [
+          14.1,
+          53.8,
+          20,
+          55.8
+        ]
+      },
       "hash_definicji": "2e4b6749"
     },
     {
@@ -1648,6 +2390,17 @@
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/rejestr_granic_jednostki_teryt__W08_Pas_ochronny.webp",
       "miejsce_probki": "Półwysep Helski / Bałtyk (54.78, 18.60)",
+      "zasieg": {
+        "typ": "morski",
+        "kod": "BALTYK",
+        "etykieta": "Pas wód morskich i polska strefa ekonomiczna na Bałtyku",
+        "bbox": [
+          14.1,
+          53.8,
+          20,
+          55.8
+        ]
+      },
       "hash_definicji": "321a054f"
     },
     {
@@ -1664,6 +2417,17 @@
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/rejestr_granic_jednostki_teryt__W07_Pas_nadbrzezny.webp",
       "miejsce_probki": "Półwysep Helski / Bałtyk (54.78, 18.60)",
+      "zasieg": {
+        "typ": "morski",
+        "kod": "BALTYK",
+        "etykieta": "Pas wód morskich i polska strefa ekonomiczna na Bałtyku",
+        "bbox": [
+          14.1,
+          53.8,
+          20,
+          55.8
+        ]
+      },
       "hash_definicji": "7b845533"
     },
     {
@@ -1680,6 +2444,17 @@
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/rejestr_granic_jednostki_teryt__U10_Urzad_morski.webp",
       "miejsce_probki": "Półwysep Helski / Bałtyk (54.78, 18.60)",
+      "zasieg": {
+        "typ": "morski",
+        "kod": "BALTYK",
+        "etykieta": "Pas wód morskich i polska strefa ekonomiczna na Bałtyku",
+        "bbox": [
+          14.1,
+          53.8,
+          20,
+          55.8
+        ]
+      },
       "hash_definicji": "1467433a"
     },
     {
@@ -1696,6 +2471,17 @@
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/rejestr_granic_jednostki_teryt__W11_Port_morski.webp",
       "miejsce_probki": "Półwysep Helski / Bałtyk (54.78, 18.60)",
+      "zasieg": {
+        "typ": "morski",
+        "kod": "BALTYK",
+        "etykieta": "Porty morskie (wybrzeże Bałtyku)",
+        "bbox": [
+          14.1,
+          53.8,
+          20,
+          55.8
+        ]
+      },
       "hash_definicji": "cce11761"
     },
     {
@@ -1712,6 +2498,17 @@
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/rejestr_granic_jednostki_teryt__W12_Przystan_morska.webp",
       "miejsce_probki": "Półwysep Helski / Bałtyk (54.78, 18.60)",
+      "zasieg": {
+        "typ": "morski",
+        "kod": "BALTYK",
+        "etykieta": "Przystanie morskie (wybrzeże Bałtyku)",
+        "bbox": [
+          14.1,
+          53.8,
+          20,
+          55.8
+        ]
+      },
       "hash_definicji": "f69c3d23"
     },
     {
@@ -1728,6 +2525,17 @@
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/rejestr_granic_jednostki_teryt__W10_Reda.webp",
       "miejsce_probki": "Zatoka Gdańska / Reda (54.45, 18.70)",
+      "zasieg": {
+        "typ": "morski",
+        "kod": "BALTYK",
+        "etykieta": "Redy portowe (Gdańsk, Gdynia)",
+        "bbox": [
+          14.1,
+          53.8,
+          20,
+          55.8
+        ]
+      },
       "hash_definicji": "2df7b9a8"
     },
     {
@@ -1744,6 +2552,12 @@
       "zrodlo": "GDOŚ",
       "obrazek": "obrazy/galeria/obszary_chronione_GDOS__GDOS_ParkiNarodowe.webp",
       "miejsce_probki": "Warszawa i okolice (52.23, 21.01)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Cała Polska",
+        "bbox": null
+      },
       "hash_definicji": "e62f546d"
     },
     {
@@ -1760,6 +2574,12 @@
       "zrodlo": "GDOŚ",
       "obrazek": "obrazy/galeria/obszary_chronione_GDOS__GDOS_ParkiKrajobrazowe.webp",
       "miejsce_probki": "Mazowiecki Park Krajobrazowy (52.13, 21.33)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Cała Polska",
+        "bbox": null
+      },
       "hash_definicji": "6753111f"
     },
     {
@@ -1776,6 +2596,12 @@
       "zrodlo": "GDOŚ",
       "obrazek": "obrazy/galeria/obszary_chronione_GDOS__GDOS_Rezerwaty.webp",
       "miejsce_probki": "Rezerwat Las Kabacki (52.12, 21.06)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Cała Polska",
+        "bbox": null
+      },
       "hash_definicji": "af76e3fc"
     },
     {
@@ -1792,6 +2618,12 @@
       "zrodlo": "GDOŚ",
       "obrazek": "obrazy/galeria/obszary_chronione_GDOS__GDOS_ObszarySpecjalnejOchrony.webp",
       "miejsce_probki": "Warszawa i okolice (52.23, 21.01)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Cała Polska",
+        "bbox": null
+      },
       "hash_definicji": "55e51005"
     },
     {
@@ -1808,6 +2640,12 @@
       "zrodlo": "GDOŚ",
       "obrazek": "obrazy/galeria/obszary_chronione_GDOS__GDOS_SpecjalneObszaryOchrony.webp",
       "miejsce_probki": "Warszawa i okolice (52.23, 21.01)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Cała Polska",
+        "bbox": null
+      },
       "hash_definicji": "014b1cbb"
     },
     {
@@ -1824,6 +2662,12 @@
       "zrodlo": "GDOŚ",
       "obrazek": "obrazy/galeria/obszary_chronione_GDOS__GDOS_ObszaryChronionegoKrajobrazu.webp",
       "miejsce_probki": "Warszawa i okolice (52.23, 21.01)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Cała Polska",
+        "bbox": null
+      },
       "hash_definicji": "5d7851f5"
     },
     {
@@ -1840,6 +2684,12 @@
       "zrodlo": "GDOŚ",
       "obrazek": "obrazy/galeria/obszary_chronione_GDOS__GDOS_ZespolyPrzyrodniczoKrajobrazowe.webp",
       "miejsce_probki": "Mazowiecki Park Krajobrazowy (52.13, 21.33)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Cała Polska",
+        "bbox": null
+      },
       "hash_definicji": "d52c53f4"
     },
     {
@@ -1856,6 +2706,12 @@
       "zrodlo": "GDOŚ",
       "obrazek": "obrazy/galeria/obszary_chronione_GDOS__GDOS_UzytkiEkologiczne.webp",
       "miejsce_probki": "Warszawa i okolice (52.23, 21.01)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Cała Polska",
+        "bbox": null
+      },
       "hash_definicji": "32450ad0"
     },
     {
@@ -1872,6 +2728,12 @@
       "zrodlo": "GDOŚ",
       "obrazek": "obrazy/galeria/obszary_chronione_GDOS__GDOS_StanowiskaDokumentacyjne.webp",
       "miejsce_probki": "Wieliczka / Małopolska (49.98, 20.06)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Cała Polska",
+        "bbox": null
+      },
       "hash_definicji": "53ceb3a2"
     },
     {
@@ -1888,6 +2750,12 @@
       "zrodlo": "GDOŚ",
       "obrazek": "obrazy/galeria/obszary_chronione_GDOS__GDOS_PomnikiPrzyrody.webp",
       "miejsce_probki": "Warszawa i okolice (52.23, 21.01)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Cała Polska",
+        "bbox": null
+      },
       "hash_definicji": "893cc127"
     },
     {
@@ -1904,6 +2772,12 @@
       "zrodlo": "Lasy Państwowe (BDL)",
       "obrazek": "obrazy/galeria/Lasy_Panstwowe_BDL__6.webp",
       "miejsce_probki": "Puszcza Kozienicka (51.48, 21.45)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Lasy w całej Polsce (Bank Danych o Lasach)",
+        "bbox": null
+      },
       "hash_definicji": "db83c43f"
     },
     {
@@ -1920,6 +2794,12 @@
       "zrodlo": "Lasy Państwowe (BDL)",
       "obrazek": "obrazy/galeria/Lasy_Panstwowe_BDL__5.webp",
       "miejsce_probki": "Puszcza Kozienicka (51.48, 21.45)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Lasy w całej Polsce (Bank Danych o Lasach)",
+        "bbox": null
+      },
       "hash_definicji": "aa643392"
     },
     {
@@ -1936,6 +2816,12 @@
       "zrodlo": "Lasy Państwowe (BDL)",
       "obrazek": "obrazy/galeria/Lasy_Panstwowe_BDL__4.webp",
       "miejsce_probki": "Puszcza Kozienicka (51.48, 21.45)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Lasy w całej Polsce (Bank Danych o Lasach)",
+        "bbox": null
+      },
       "hash_definicji": "ddf6f9e3"
     },
     {
@@ -1952,6 +2838,12 @@
       "zrodlo": "Lasy Państwowe (BDL)",
       "obrazek": "obrazy/galeria/Lasy_Panstwowe_BDL__3.webp",
       "miejsce_probki": "Puszcza Kozienicka (51.48, 21.45)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Lasy w całej Polsce (Bank Danych o Lasach)",
+        "bbox": null
+      },
       "hash_definicji": "a2acbd96"
     },
     {
@@ -1968,6 +2860,12 @@
       "zrodlo": "Lasy Państwowe (BDL)",
       "obrazek": "obrazy/galeria/Lasy_Panstwowe_BDL__1.webp",
       "miejsce_probki": "Puszcza Kozienicka (51.48, 21.45)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Lasy w całej Polsce (Bank Danych o Lasach)",
+        "bbox": null
+      },
       "hash_definicji": "c093ef7c"
     },
     {
@@ -1984,6 +2882,12 @@
       "zrodlo": "Lasy Państwowe (BDL)",
       "obrazek": "obrazy/galeria/Lasy_Panstwowe_BDL__2.webp",
       "miejsce_probki": "Puszcza Kozienicka (51.48, 21.45)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Lasy w całej Polsce (Bank Danych o Lasach)",
+        "bbox": null
+      },
       "hash_definicji": "62d0efc9"
     },
     {
@@ -2000,7 +2904,629 @@
       "zrodlo": "Lasy Państwowe (BDL)",
       "obrazek": "obrazy/galeria/Lasy_Panstwowe_BDL__0.webp",
       "miejsce_probki": "Puszcza Kozienicka (51.48, 21.45)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Lasy w całej Polsce (Bank Danych o Lasach)",
+        "bbox": null
+      },
       "hash_definicji": "5eefb82c"
+    },
+    {
+      "id": "Lasy_Panstwowe_Turystyka__0",
+      "zbior": "Lasy_Panstwowe_Turystyka",
+      "warstwa": "0",
+      "nazwa": "Obszar „Zanocuj w lesie” (biwaki)",
+      "identyfikator": "Lasy_Tur_Zanocuj",
+      "grupa": "Przyroda i środowisko",
+      "podgrupa": "Turystyka w lasach (BDL)",
+      "typ": "WMS",
+      "nakladka": true,
+      "zalecany_piksel": 4,
+      "zrodlo": "Lasy Państwowe (BDL)",
+      "obrazek": "obrazy/galeria/Lasy_Panstwowe_Turystyka__0.webp",
+      "miejsce_probki": "Puszcza Kozienicka (51.48, 21.45)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Lasy w całej Polsce (Bank Danych o Lasach)",
+        "bbox": null
+      },
+      "hash_definicji": "493b3edf"
+    },
+    {
+      "id": "Lasy_Panstwowe_Turystyka__15",
+      "zbior": "Lasy_Panstwowe_Turystyka",
+      "warstwa": "15",
+      "nazwa": "Miejsca postoju, wiaty i ogniska",
+      "identyfikator": "Lasy_Tur_Wypoczynek",
+      "grupa": "Przyroda i środowisko",
+      "podgrupa": "Turystyka w lasach (BDL)",
+      "typ": "WMS",
+      "nakladka": true,
+      "zalecany_piksel": 2,
+      "zrodlo": "Lasy Państwowe (BDL)",
+      "obrazek": "obrazy/galeria/Lasy_Panstwowe_Turystyka__15.webp",
+      "miejsce_probki": "Bory Tucholskie (53.65, 17.95)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Lasy w całej Polsce (Bank Danych o Lasach)",
+        "bbox": null
+      },
+      "hash_definicji": "a1d7b9d9"
+    },
+    {
+      "id": "Lasy_Panstwowe_Turystyka__17",
+      "zbior": "Lasy_Panstwowe_Turystyka",
+      "warstwa": "17",
+      "nazwa": "Powierzchniowe obiekty rekreacyjne",
+      "identyfikator": "Lasy_Tur_Rekreacja",
+      "grupa": "Przyroda i środowisko",
+      "podgrupa": "Turystyka w lasach (BDL)",
+      "typ": "WMS",
+      "nakladka": true,
+      "zalecany_piksel": 4,
+      "zrodlo": "Lasy Państwowe (BDL)",
+      "obrazek": "obrazy/galeria/Lasy_Panstwowe_Turystyka__17.webp",
+      "miejsce_probki": "Puszcza Kozienicka (51.48, 21.45)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Lasy w całej Polsce (Bank Danych o Lasach)",
+        "bbox": null
+      },
+      "hash_definicji": "3eda5f78"
+    },
+    {
+      "id": "Lasy_Panstwowe_Turystyka__1",
+      "zbior": "Lasy_Panstwowe_Turystyka",
+      "warstwa": "1",
+      "nazwa": "Ścieżki dydaktyczne",
+      "identyfikator": "Lasy_Tur_Dydaktyka",
+      "grupa": "Przyroda i środowisko",
+      "podgrupa": "Turystyka w lasach (BDL)",
+      "typ": "WMS",
+      "nakladka": true,
+      "zalecany_piksel": 2,
+      "zrodlo": "Lasy Państwowe (BDL)",
+      "obrazek": "obrazy/galeria/Lasy_Panstwowe_Turystyka__1.webp",
+      "miejsce_probki": "Puszcza Kozienicka (51.48, 21.45)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Lasy w całej Polsce (Bank Danych o Lasach)",
+        "bbox": null
+      },
+      "hash_definicji": "5d27e3ac"
+    },
+    {
+      "id": "Lasy_Panstwowe_Turystyka__4",
+      "zbior": "Lasy_Panstwowe_Turystyka",
+      "warstwa": "4",
+      "nazwa": "Ścieżki konne",
+      "identyfikator": "Lasy_Tur_Konne",
+      "grupa": "Przyroda i środowisko",
+      "podgrupa": "Turystyka w lasach (BDL)",
+      "typ": "WMS",
+      "nakladka": true,
+      "zalecany_piksel": 4,
+      "zrodlo": "Lasy Państwowe (BDL)",
+      "obrazek": "obrazy/galeria/Lasy_Panstwowe_Turystyka__4.webp",
+      "miejsce_probki": "Puszcza Kozienicka (51.48, 21.45)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Lasy w całej Polsce (Bank Danych o Lasach)",
+        "bbox": null
+      },
+      "hash_definicji": "715ebe12"
+    },
+    {
+      "id": "Lasy_Panstwowe_Turystyka__13",
+      "zbior": "Lasy_Panstwowe_Turystyka",
+      "warstwa": "13",
+      "nazwa": "Ośrodki edukacyjne i izby leśne",
+      "identyfikator": "Lasy_Tur_Edukacja",
+      "grupa": "Przyroda i środowisko",
+      "podgrupa": "Turystyka w lasach (BDL)",
+      "typ": "WMS",
+      "nakladka": true,
+      "zalecany_piksel": 2,
+      "zrodlo": "Lasy Państwowe (BDL)",
+      "obrazek": "obrazy/galeria/Lasy_Panstwowe_Turystyka__13.webp",
+      "miejsce_probki": "Mazowsze / Płońsk (52.51, 20.38)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Lasy w całej Polsce (Bank Danych o Lasach)",
+        "bbox": null
+      },
+      "hash_definicji": "a53450b2"
+    },
+    {
+      "id": "Lasy_Panstwowe_Dojazdy_Ppoz__0",
+      "zbior": "Lasy_Panstwowe_Dojazdy_Ppoz",
+      "warstwa": "0",
+      "nazwa": "Dojazdy pożarowe (drogi leśne z numeracją)",
+      "identyfikator": "Lasy_DojazdyPpoz",
+      "grupa": "Przyroda i środowisko",
+      "podgrupa": "Drogi leśne i dojazdy pożarowe (BDL)",
+      "typ": "WMS",
+      "nakladka": true,
+      "zalecany_piksel": 2,
+      "zrodlo": "Lasy Państwowe (BDL)",
+      "obrazek": "obrazy/galeria/Lasy_Panstwowe_Dojazdy_Ppoz__0.webp",
+      "miejsce_probki": "Puszcza Kozienicka (51.48, 21.45)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Lasy w całej Polsce (Bank Danych o Lasach)",
+        "bbox": null
+      },
+      "hash_definicji": "de34edbe"
+    },
+    {
+      "id": "Lasy_Panstwowe_Dojazdy_Ppoz__1",
+      "zbior": "Lasy_Panstwowe_Dojazdy_Ppoz",
+      "warstwa": "1",
+      "nazwa": "Punkty czerpania wody",
+      "identyfikator": "Lasy_PunktyWody",
+      "grupa": "Przyroda i środowisko",
+      "podgrupa": "Drogi leśne i dojazdy pożarowe (BDL)",
+      "typ": "WMS",
+      "nakladka": true,
+      "zalecany_piksel": 4,
+      "zrodlo": "Lasy Państwowe (BDL)",
+      "obrazek": "obrazy/galeria/Lasy_Panstwowe_Dojazdy_Ppoz__1.webp",
+      "miejsce_probki": "Puszcza Kozienicka (51.48, 21.45)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Lasy w całej Polsce (Bank Danych o Lasach)",
+        "bbox": null
+      },
+      "hash_definicji": "23d3fbba"
+    },
+    {
+      "id": "Lasy_Panstwowe_Dojazdy_Ppoz__2",
+      "zbior": "Lasy_Panstwowe_Dojazdy_Ppoz",
+      "warstwa": "2",
+      "nazwa": "Lokalizacje pożarów",
+      "identyfikator": "Lasy_Pozary",
+      "grupa": "Przyroda i środowisko",
+      "podgrupa": "Drogi leśne i dojazdy pożarowe (BDL)",
+      "typ": "WMS",
+      "nakladka": true,
+      "zalecany_piksel": 4,
+      "zrodlo": "Lasy Państwowe (BDL)",
+      "obrazek": "obrazy/galeria/Lasy_Panstwowe_Dojazdy_Ppoz__2.webp",
+      "miejsce_probki": "Puszcza Kozienicka (51.48, 21.45)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Lasy w całej Polsce (Bank Danych o Lasach)",
+        "bbox": null
+      },
+      "hash_definicji": "625f0ad0"
+    },
+    {
+      "id": "Lasy_Panstwowe_Drzewostany__1",
+      "zbior": "Lasy_Panstwowe_Drzewostany",
+      "warstwa": "1",
+      "nazwa": "Skład gatunkowy drzewostanów (LP)",
+      "identyfikator": "Lasy_Drzewostan_LP",
+      "grupa": "Przyroda i środowisko",
+      "podgrupa": "Drzewostany i siedliska leśne (BDL)",
+      "typ": "WMS",
+      "nakladka": false,
+      "zalecany_piksel": 2,
+      "zrodlo": "Lasy Państwowe (BDL)",
+      "obrazek": "obrazy/galeria/Lasy_Panstwowe_Drzewostany__1.webp",
+      "miejsce_probki": "Puszcza Kozienicka (51.48, 21.45)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Lasy w całej Polsce (Bank Danych o Lasach)",
+        "bbox": null
+      },
+      "hash_definicji": "6127dab6"
+    },
+    {
+      "id": "Lasy_Panstwowe_Drzewostany__0",
+      "zbior": "Lasy_Panstwowe_Drzewostany",
+      "warstwa": "0",
+      "nazwa": "Skład gatunkowy (poza LP wg PUL)",
+      "identyfikator": "Lasy_DrzewostanInne",
+      "grupa": "Przyroda i środowisko",
+      "podgrupa": "Drzewostany i siedliska leśne (BDL)",
+      "typ": "WMS",
+      "nakladka": false,
+      "zalecany_piksel": 2,
+      "zrodlo": "Lasy Państwowe (BDL)",
+      "obrazek": "obrazy/galeria/Lasy_Panstwowe_Drzewostany__0.webp",
+      "miejsce_probki": "Puszcza Kozienicka (51.48, 21.45)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Lasy w całej Polsce (Bank Danych o Lasach)",
+        "bbox": null
+      },
+      "hash_definicji": "d66729bc"
+    },
+    {
+      "id": "Lasy_Panstwowe_Drzewostany__3",
+      "zbior": "Lasy_Panstwowe_Drzewostany",
+      "warstwa": "3",
+      "nazwa": "Klasy odnowienia KO i KDO (LP)",
+      "identyfikator": "Lasy_KO_KDO_LP",
+      "grupa": "Przyroda i środowisko",
+      "podgrupa": "Drzewostany i siedliska leśne (BDL)",
+      "typ": "WMS",
+      "nakladka": false,
+      "zalecany_piksel": 2,
+      "zrodlo": "Lasy Państwowe (BDL)",
+      "obrazek": "obrazy/galeria/Lasy_Panstwowe_Drzewostany__3.webp",
+      "miejsce_probki": "Puszcza Kozienicka (51.48, 21.45)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Lasy w całej Polsce (Bank Danych o Lasach)",
+        "bbox": null
+      },
+      "hash_definicji": "394c3c2c"
+    },
+    {
+      "id": "Lasy_Panstwowe_Drzewostany__2",
+      "zbior": "Lasy_Panstwowe_Drzewostany",
+      "warstwa": "2",
+      "nazwa": "Klasy odnowienia KO i KDO (poza LP)",
+      "identyfikator": "Lasy_KO_KDO_Inne",
+      "grupa": "Przyroda i środowisko",
+      "podgrupa": "Drzewostany i siedliska leśne (BDL)",
+      "typ": "WMS",
+      "nakladka": false,
+      "zalecany_piksel": 2,
+      "zrodlo": "Lasy Państwowe (BDL)",
+      "obrazek": "obrazy/galeria/Lasy_Panstwowe_Drzewostany__2.webp",
+      "miejsce_probki": "Podhale / Nowy Targ (49.48, 20.03)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Lasy w całej Polsce (Bank Danych o Lasach)",
+        "bbox": null
+      },
+      "hash_definicji": "d62814f7"
+    },
+    {
+      "id": "Lasy_Panstwowe_Drzewostany__5",
+      "zbior": "Lasy_Panstwowe_Drzewostany",
+      "warstwa": "5",
+      "nazwa": "Wydzielenia niezalesione (LP)",
+      "identyfikator": "Lasy_NiezalesioneLP",
+      "grupa": "Przyroda i środowisko",
+      "podgrupa": "Drzewostany i siedliska leśne (BDL)",
+      "typ": "WMS",
+      "nakladka": false,
+      "zalecany_piksel": 2,
+      "zrodlo": "Lasy Państwowe (BDL)",
+      "obrazek": "obrazy/galeria/Lasy_Panstwowe_Drzewostany__5.webp",
+      "miejsce_probki": "Puszcza Kozienicka (51.48, 21.45)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Lasy w całej Polsce (Bank Danych o Lasach)",
+        "bbox": null
+      },
+      "hash_definicji": "aa258184"
+    },
+    {
+      "id": "Lasy_Panstwowe_Drzewostany__4",
+      "zbior": "Lasy_Panstwowe_Drzewostany",
+      "warstwa": "4",
+      "nazwa": "Wydzielenia niezalesione (poza LP)",
+      "identyfikator": "Lasy_NiezalesInne",
+      "grupa": "Przyroda i środowisko",
+      "podgrupa": "Drzewostany i siedliska leśne (BDL)",
+      "typ": "WMS",
+      "nakladka": false,
+      "zalecany_piksel": 2,
+      "zrodlo": "Lasy Państwowe (BDL)",
+      "obrazek": "obrazy/galeria/Lasy_Panstwowe_Drzewostany__4.webp",
+      "miejsce_probki": "Siedlce / Mazowsze (52.20, 22.30)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Lasy w całej Polsce (Bank Danych o Lasach)",
+        "bbox": null
+      },
+      "hash_definicji": "4d615b81"
+    },
+    {
+      "id": "Lasy_Panstwowe_Siedliska__0",
+      "zbior": "Lasy_Panstwowe_Siedliska",
+      "warstwa": "0",
+      "nazwa": "Siedliska leśne (typy TSL)",
+      "identyfikator": "Lasy_Siedliska",
+      "grupa": "Przyroda i środowisko",
+      "podgrupa": "Drzewostany i siedliska leśne (BDL)",
+      "typ": "WMS",
+      "nakladka": false,
+      "zalecany_piksel": 4,
+      "zrodlo": "Lasy Państwowe (BDL)",
+      "obrazek": "obrazy/galeria/Lasy_Panstwowe_Siedliska__0.webp",
+      "miejsce_probki": "Puszcza Kozienicka (51.48, 21.45)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Lasy w całej Polsce (Bank Danych o Lasach)",
+        "bbox": null
+      },
+      "hash_definicji": "fcee7bc8"
+    },
+    {
+      "id": "Lasy_Panstwowe_Wlasnosc__1",
+      "zbior": "Lasy_Panstwowe_Wlasnosc",
+      "warstwa": "1",
+      "nazwa": "Lasy Państwowe (PGL LP)",
+      "identyfikator": "Lasy_Wlasnosc_LP",
+      "grupa": "Przyroda i środowisko",
+      "podgrupa": "Własność i ochrona lasów (BDL)",
+      "typ": "WMS",
+      "nakladka": false,
+      "zalecany_piksel": 2,
+      "zrodlo": "Lasy Państwowe (BDL)",
+      "obrazek": "obrazy/galeria/Lasy_Panstwowe_Wlasnosc__1.webp",
+      "miejsce_probki": "Puszcza Kozienicka (51.48, 21.45)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Lasy w całej Polsce (Bank Danych o Lasach)",
+        "bbox": null
+      },
+      "hash_definicji": "7a793c38"
+    },
+    {
+      "id": "Lasy_Panstwowe_Wlasnosc__0",
+      "zbior": "Lasy_Panstwowe_Wlasnosc",
+      "warstwa": "0",
+      "nazwa": "Lasy pozostałe (prywatne, PN, inne)",
+      "identyfikator": "Lasy_Wlasnosc_Inne",
+      "grupa": "Przyroda i środowisko",
+      "podgrupa": "Własność i ochrona lasów (BDL)",
+      "typ": "WMS",
+      "nakladka": false,
+      "zalecany_piksel": 2,
+      "zrodlo": "Lasy Państwowe (BDL)",
+      "obrazek": "obrazy/galeria/Lasy_Panstwowe_Wlasnosc__0.webp",
+      "miejsce_probki": "Puszcza Kozienicka (51.48, 21.45)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Lasy w całej Polsce (Bank Danych o Lasach)",
+        "bbox": null
+      },
+      "hash_definicji": "be18110c"
+    },
+    {
+      "id": "Lasy_Panstwowe_Ochronnosc__1",
+      "zbior": "Lasy_Panstwowe_Ochronnosc",
+      "warstwa": "1",
+      "nazwa": "Lasy wodochronne",
+      "identyfikator": "Lasy_Ochr_Wodochr",
+      "grupa": "Przyroda i środowisko",
+      "podgrupa": "Własność i ochrona lasów (BDL)",
+      "typ": "WMS",
+      "nakladka": true,
+      "zalecany_piksel": 4,
+      "zrodlo": "Lasy Państwowe (BDL)",
+      "obrazek": "obrazy/galeria/Lasy_Panstwowe_Ochronnosc__1.webp",
+      "miejsce_probki": "Puszcza Kozienicka (51.48, 21.45)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Lasy w całej Polsce (Bank Danych o Lasach)",
+        "bbox": null
+      },
+      "hash_definicji": "3b409861"
+    },
+    {
+      "id": "Lasy_Panstwowe_Ochronnosc__2",
+      "zbior": "Lasy_Panstwowe_Ochronnosc",
+      "warstwa": "2",
+      "nazwa": "Lasy podmiejskie (wokół miast)",
+      "identyfikator": "Lasy_Ochr_Miasta",
+      "grupa": "Przyroda i środowisko",
+      "podgrupa": "Własność i ochrona lasów (BDL)",
+      "typ": "WMS",
+      "nakladka": true,
+      "zalecany_piksel": 4,
+      "zrodlo": "Lasy Państwowe (BDL)",
+      "obrazek": "obrazy/galeria/Lasy_Panstwowe_Ochronnosc__2.webp",
+      "miejsce_probki": "Puszcza Kozienicka (51.48, 21.45)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Lasy w całej Polsce (Bank Danych o Lasach)",
+        "bbox": null
+      },
+      "hash_definicji": "cf858a58"
+    },
+    {
+      "id": "Lasy_Panstwowe_Ochronnosc__3",
+      "zbior": "Lasy_Panstwowe_Ochronnosc",
+      "warstwa": "3",
+      "nazwa": "Cenne fragmenty rodzimej przyrody",
+      "identyfikator": "Lasy_Ochr_Przyroda",
+      "grupa": "Przyroda i środowisko",
+      "podgrupa": "Własność i ochrona lasów (BDL)",
+      "typ": "WMS",
+      "nakladka": true,
+      "zalecany_piksel": 4,
+      "zrodlo": "Lasy Państwowe (BDL)",
+      "obrazek": "obrazy/galeria/Lasy_Panstwowe_Ochronnosc__3.webp",
+      "miejsce_probki": "Puszcza Kozienicka (51.48, 21.45)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Lasy w całej Polsce (Bank Danych o Lasach)",
+        "bbox": null
+      },
+      "hash_definicji": "06bffd19"
+    },
+    {
+      "id": "Lasy_Panstwowe_Ochronnosc__4",
+      "zbior": "Lasy_Panstwowe_Ochronnosc",
+      "warstwa": "4",
+      "nazwa": "Uszkodzone przez przemysł",
+      "identyfikator": "Lasy_Ochr_Przemysl",
+      "grupa": "Przyroda i środowisko",
+      "podgrupa": "Własność i ochrona lasów (BDL)",
+      "typ": "WMS",
+      "nakladka": true,
+      "zalecany_piksel": 4,
+      "zrodlo": "Lasy Państwowe (BDL)",
+      "obrazek": "obrazy/galeria/Lasy_Panstwowe_Ochronnosc__4.webp",
+      "miejsce_probki": "Puszcza Kozienicka (51.48, 21.45)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Lasy w całej Polsce (Bank Danych o Lasach)",
+        "bbox": null
+      },
+      "hash_definicji": "ab0341c1"
+    },
+    {
+      "id": "Lasy_Panstwowe_Ochronnosc__5",
+      "zbior": "Lasy_Panstwowe_Ochronnosc",
+      "warstwa": "5",
+      "nazwa": "Lasy glebochronne",
+      "identyfikator": "Lasy_Ochr_Glebochr",
+      "grupa": "Przyroda i środowisko",
+      "podgrupa": "Własność i ochrona lasów (BDL)",
+      "typ": "WMS",
+      "nakladka": true,
+      "zalecany_piksel": 4,
+      "zrodlo": "Lasy Państwowe (BDL)",
+      "obrazek": "obrazy/galeria/Lasy_Panstwowe_Ochronnosc__5.webp",
+      "miejsce_probki": "Karkonosze / Szklarska Poręba (50.82, 15.52)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Lasy w całej Polsce (Bank Danych o Lasach)",
+        "bbox": null
+      },
+      "hash_definicji": "bdb7f203"
+    },
+    {
+      "id": "Lasy_Panstwowe_Ochronnosc__6",
+      "zbior": "Lasy_Panstwowe_Ochronnosc",
+      "warstwa": "6",
+      "nazwa": "Lasy obronne",
+      "identyfikator": "Lasy_Ochr_Obronne",
+      "grupa": "Przyroda i środowisko",
+      "podgrupa": "Własność i ochrona lasów (BDL)",
+      "typ": "WMS",
+      "nakladka": true,
+      "zalecany_piksel": 4,
+      "zrodlo": "Lasy Państwowe (BDL)",
+      "obrazek": "obrazy/galeria/Lasy_Panstwowe_Ochronnosc__6.webp",
+      "miejsce_probki": "Puszcza Kozienicka (51.48, 21.45)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Lasy w całej Polsce (Bank Danych o Lasach)",
+        "bbox": null
+      },
+      "hash_definicji": "c2ee55f9"
+    },
+    {
+      "id": "Lasy_Panstwowe_Ochronnosc__7",
+      "zbior": "Lasy_Panstwowe_Ochronnosc",
+      "warstwa": "7",
+      "nazwa": "Lasy uzdrowiskowe",
+      "identyfikator": "Lasy_Ochr_Uzdrow",
+      "grupa": "Przyroda i środowisko",
+      "podgrupa": "Własność i ochrona lasów (BDL)",
+      "typ": "WMS",
+      "nakladka": true,
+      "zalecany_piksel": 4,
+      "zrodlo": "Lasy Państwowe (BDL)",
+      "obrazek": "obrazy/galeria/Lasy_Panstwowe_Ochronnosc__7.webp",
+      "miejsce_probki": "Szczawnica / Pieniny (49.42, 20.48)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Lasy w całej Polsce (Bank Danych o Lasach)",
+        "bbox": null
+      },
+      "hash_definicji": "be99dcea"
+    },
+    {
+      "id": "Lasy_Panstwowe_Ochronnosc__8",
+      "zbior": "Lasy_Panstwowe_Ochronnosc",
+      "warstwa": "8",
+      "nazwa": "Powierzchnie badawcze i doświadczalne",
+      "identyfikator": "Lasy_Ochr_Badawcze",
+      "grupa": "Przyroda i środowisko",
+      "podgrupa": "Własność i ochrona lasów (BDL)",
+      "typ": "WMS",
+      "nakladka": true,
+      "zalecany_piksel": 4,
+      "zrodlo": "Lasy Państwowe (BDL)",
+      "obrazek": "obrazy/galeria/Lasy_Panstwowe_Ochronnosc__8.webp",
+      "miejsce_probki": "Puszcza Białowieska (52.70, 23.70)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Lasy w całej Polsce (Bank Danych o Lasach)",
+        "bbox": null
+      },
+      "hash_definicji": "632bb7e5"
+    },
+    {
+      "id": "Lasy_Panstwowe_Ochronnosc__9",
+      "zbior": "Lasy_Panstwowe_Ochronnosc",
+      "warstwa": "9",
+      "nazwa": "Drzewostany nasienne (WDN/GDN)",
+      "identyfikator": "Lasy_Ochr_Nasienne",
+      "grupa": "Przyroda i środowisko",
+      "podgrupa": "Własność i ochrona lasów (BDL)",
+      "typ": "WMS",
+      "nakladka": true,
+      "zalecany_piksel": 2,
+      "zrodlo": "Lasy Państwowe (BDL)",
+      "obrazek": "obrazy/galeria/Lasy_Panstwowe_Ochronnosc__9.webp",
+      "miejsce_probki": "Puszcza Kozienicka (51.48, 21.45)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Lasy w całej Polsce (Bank Danych o Lasach)",
+        "bbox": null
+      },
+      "hash_definicji": "dbe143d4"
+    },
+    {
+      "id": "Lasy_Panstwowe_Lowiectwo__0",
+      "zbior": "Lasy_Panstwowe_Lowiectwo",
+      "warstwa": "0",
+      "nazwa": "Obwody łowieckie",
+      "identyfikator": "Lasy_ObwodyLowiec",
+      "grupa": "Przyroda i środowisko",
+      "podgrupa": "Obwody łowieckie (BDL)",
+      "typ": "WMS",
+      "nakladka": true,
+      "zalecany_piksel": 8,
+      "zrodlo": "Lasy Państwowe (BDL)",
+      "obrazek": "obrazy/galeria/Lasy_Panstwowe_Lowiectwo__0.webp",
+      "miejsce_probki": "Puszcza Kozienicka (51.48, 21.45)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Lasy w całej Polsce (Bank Danych o Lasach)",
+        "bbox": null
+      },
+      "hash_definicji": "0731bc51"
     },
     {
       "id": "hydrograficzna_50__Raster",
@@ -2016,6 +3542,12 @@
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/hydrograficzna_50__Raster.webp",
       "miejsce_probki": "Katowice / Śląsk (50.26, 19.02)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Cała Polska",
+        "bbox": null
+      },
       "hash_definicji": "8842a887"
     },
     {
@@ -2032,6 +3564,12 @@
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/hydrograficzna_50__Raster_enviDMS_50k.webp",
       "miejsce_probki": "Katowice / Śląsk (50.26, 19.02)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Cała Polska",
+        "bbox": null
+      },
       "hash_definicji": "586121d6"
     },
     {
@@ -2048,6 +3586,12 @@
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/sozologiczna_50__0.webp",
       "miejsce_probki": "Katowice / Śląsk (50.26, 19.02)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Cała Polska",
+        "bbox": null
+      },
       "hash_definicji": "43435433"
     },
     {
@@ -2064,6 +3608,12 @@
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/mapa_glebowo_rolnicza__0.webp",
       "miejsce_probki": "Kujawy / Inowrocław (52.79, 18.26)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Cała Polska",
+        "bbox": null
+      },
       "hash_definicji": "374d69f8"
     },
     {
@@ -2080,6 +3630,12 @@
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/mapa_glebowo_rolnicza__2.webp",
       "miejsce_probki": "Kujawy / Inowrocław (52.77, 18.20)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Cała Polska",
+        "bbox": null
+      },
       "hash_definicji": "f9b72fa6"
     },
     {
@@ -2096,6 +3652,12 @@
       "zrodlo": "PIG-PIB (Geologia)",
       "obrazek": "obrazy/galeria/regiony_fizycznogeograficzne__1.webp",
       "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Cała Polska",
+        "bbox": null
+      },
       "hash_definicji": "ae436041"
     },
     {
@@ -2112,6 +3674,12 @@
       "zrodlo": "PIG-PIB (Geologia)",
       "obrazek": "obrazy/galeria/regiony_fizycznogeograficzne__0.webp",
       "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Cała Polska",
+        "bbox": null
+      },
       "hash_definicji": "07fdec88"
     },
     {
@@ -2128,6 +3696,12 @@
       "zrodlo": "PIG-PIB (Geologia)",
       "obrazek": "obrazy/galeria/geologiczna_50_SMGP__0.webp",
       "miejsce_probki": "Katowice / Śląsk (50.26, 19.02)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Cała Polska",
+        "bbox": null
+      },
       "hash_definicji": "8490786e"
     },
     {
@@ -2144,6 +3718,12 @@
       "zrodlo": "PIG-PIB (Geologia)",
       "obrazek": "obrazy/galeria/geologiczna_50_litogenetyczna__1.webp",
       "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Cała Polska",
+        "bbox": null
+      },
       "hash_definicji": "f735eb1c"
     },
     {
@@ -2160,6 +3740,12 @@
       "zrodlo": "PIG-PIB (Geologia)",
       "obrazek": "obrazy/galeria/geologiczna_500__0.webp",
       "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "zasieg": {
+        "typ": "kraj",
+        "kod": "PL",
+        "etykieta": "Cała Polska",
+        "bbox": null
+      },
       "hash_definicji": "7f82fc8c"
     },
     {
@@ -2176,6 +3762,12 @@
       "zrodlo": "Serwer map",
       "obrazek": "obrazy/galeria/czechy_topo_WMTS__ZTM_WM.webp",
       "miejsce_probki": "Praga (50.09, 14.42)",
+      "zasieg": {
+        "typ": "zagranica",
+        "kod": "CZ",
+        "etykieta": "Republika Czeska (ČÚZK)",
+        "bbox": null
+      },
       "hash_definicji": "58ec387f"
     },
     {
@@ -2192,6 +3784,12 @@
       "zrodlo": "Serwer map",
       "obrazek": "obrazy/galeria/czechy_ztm10_wms__0.webp",
       "miejsce_probki": "Praga (50.09, 14.42)",
+      "zasieg": {
+        "typ": "zagranica",
+        "kod": "CZ",
+        "etykieta": "Republika Czeska (ČÚZK)",
+        "bbox": null
+      },
       "hash_definicji": "e7fe1642"
     },
     {
@@ -2208,6 +3806,12 @@
       "zrodlo": "Serwer map",
       "obrazek": "obrazy/galeria/czechy_ztm25_wms__0.webp",
       "miejsce_probki": "Praga (50.09, 14.42)",
+      "zasieg": {
+        "typ": "zagranica",
+        "kod": "CZ",
+        "etykieta": "Republika Czeska (ČÚZK)",
+        "bbox": null
+      },
       "hash_definicji": "f673ecb9"
     },
     {
@@ -2224,6 +3828,12 @@
       "zrodlo": "Serwer map",
       "obrazek": "obrazy/galeria/czechy_ztm50_wms__0.webp",
       "miejsce_probki": "Praga (50.09, 14.42)",
+      "zasieg": {
+        "typ": "zagranica",
+        "kod": "CZ",
+        "etykieta": "Republika Czeska (ČÚZK)",
+        "bbox": null
+      },
       "hash_definicji": "463e07f8"
     },
     {
@@ -2240,6 +3850,12 @@
       "zrodlo": "Serwer map",
       "obrazek": "obrazy/galeria/czechy_orto_WMTS__ORTOFOTO_WM.webp",
       "miejsce_probki": "Praga (50.09, 14.42)",
+      "zasieg": {
+        "typ": "zagranica",
+        "kod": "CZ",
+        "etykieta": "Republika Czeska (ČÚZK)",
+        "bbox": null
+      },
       "hash_definicji": "59ce9cd4"
     },
     {
@@ -2256,6 +3872,12 @@
       "zrodlo": "Serwer map",
       "obrazek": "obrazy/galeria/czechy_orto_wms__0.webp",
       "miejsce_probki": "Praga (50.09, 14.42)",
+      "zasieg": {
+        "typ": "zagranica",
+        "kod": "CZ",
+        "etykieta": "Republika Czeska (ČÚZK)",
+        "bbox": null
+      },
       "hash_definicji": "0dd84721"
     },
     {
@@ -2272,6 +3894,12 @@
       "zrodlo": "© Freemap Slovakia / autorzy OpenStreetMap",
       "obrazek": "obrazy/galeria/slowacja_freemap__outdoor.webp",
       "miejsce_probki": "Poprad / Tatry (49.06, 20.30)",
+      "zasieg": {
+        "typ": "zagranica",
+        "kod": "SK",
+        "etykieta": "Słowacja (ZBGIS / GKÚ)",
+        "bbox": null
+      },
       "hash_definicji": "7f9cda48"
     },
     {
@@ -2288,6 +3916,12 @@
       "zrodlo": "Serwer map",
       "obrazek": "obrazy/galeria/slowacja_zmsr_wms__1.webp",
       "miejsce_probki": "Poprad / Tatry (49.06, 20.30)",
+      "zasieg": {
+        "typ": "zagranica",
+        "kod": "SK",
+        "etykieta": "Słowacja (ZBGIS / GKÚ)",
+        "bbox": null
+      },
       "hash_definicji": "c03e4857"
     },
     {
@@ -2304,6 +3938,12 @@
       "zrodlo": "Serwer map",
       "obrazek": "obrazy/galeria/slowacja_zmsr_wms__5.webp",
       "miejsce_probki": "Poprad / Tatry (49.06, 20.30)",
+      "zasieg": {
+        "typ": "zagranica",
+        "kod": "SK",
+        "etykieta": "Słowacja (ZBGIS / GKÚ)",
+        "bbox": null
+      },
       "hash_definicji": "28af7370"
     },
     {
@@ -2320,6 +3960,12 @@
       "zrodlo": "Serwer map",
       "obrazek": "obrazy/galeria/slowacja_zmsr_wms__9.webp",
       "miejsce_probki": "Poprad / Tatry (49.06, 20.30)",
+      "zasieg": {
+        "typ": "zagranica",
+        "kod": "SK",
+        "etykieta": "Słowacja (ZBGIS / GKÚ)",
+        "bbox": null
+      },
       "hash_definicji": "041e368e"
     },
     {
@@ -2336,6 +3982,12 @@
       "zrodlo": "Serwer map",
       "obrazek": "obrazy/galeria/slowacja_zmsr_wms__13.webp",
       "miejsce_probki": "Poprad / Tatry (49.06, 20.30)",
+      "zasieg": {
+        "typ": "zagranica",
+        "kod": "SK",
+        "etykieta": "Słowacja (ZBGIS / GKÚ)",
+        "bbox": null
+      },
       "hash_definicji": "6f1cb9ce"
     },
     {
@@ -2352,6 +4004,12 @@
       "zrodlo": "Serwer map",
       "obrazek": "obrazy/galeria/slowacja_orto_wms__1.webp",
       "miejsce_probki": "Poprad / Tatry (49.06, 20.30)",
+      "zasieg": {
+        "typ": "zagranica",
+        "kod": "SK",
+        "etykieta": "Słowacja (ZBGIS / GKÚ)",
+        "bbox": null
+      },
       "hash_definicji": "28092f8a"
     },
     {
@@ -2368,6 +4026,12 @@
       "zrodlo": "Serwer map",
       "obrazek": "obrazy/galeria/slowacja_dmr_wms__0.webp",
       "miejsce_probki": "Poprad / Tatry (49.06, 20.30)",
+      "zasieg": {
+        "typ": "zagranica",
+        "kod": "SK",
+        "etykieta": "Słowacja (ZBGIS / GKÚ)",
+        "bbox": null
+      },
       "hash_definicji": "683a2dea"
     },
     {
@@ -2384,6 +4048,12 @@
       "zrodlo": "Serwer map",
       "obrazek": "obrazy/galeria/niemcy_basemapde_WMTS__de_basemapde_web_raster_farbe.webp",
       "miejsce_probki": "Berlin (52.52, 13.41)",
+      "zasieg": {
+        "typ": "zagranica",
+        "kod": "DE",
+        "etykieta": "Niemcy – cały kraj (basemap.de)",
+        "bbox": null
+      },
       "hash_definicji": "fad06aef"
     },
     {
@@ -2400,6 +4070,12 @@
       "zrodlo": "Serwer map",
       "obrazek": "obrazy/galeria/niemcy_basemapde_WMTS__de_basemapde_web_raster_grau.webp",
       "miejsce_probki": "Berlin (52.52, 13.41)",
+      "zasieg": {
+        "typ": "zagranica",
+        "kod": "DE",
+        "etykieta": "Niemcy – cały kraj (basemap.de)",
+        "bbox": null
+      },
       "hash_definicji": "0c0a8414"
     },
     {
@@ -2416,6 +4092,12 @@
       "zrodlo": "Serwer map",
       "obrazek": "obrazy/galeria/niemcy_brandenburgia_dtk10_wms__bb_dtk10_farbe.webp",
       "miejsce_probki": "Poczdam (52.40, 13.07)",
+      "zasieg": {
+        "typ": "zagranica",
+        "kod": "DE-BB",
+        "etykieta": "Brandenburgia – Niemcy (LGB)",
+        "bbox": null
+      },
       "hash_definicji": "449473ba"
     },
     {
@@ -2432,6 +4114,12 @@
       "zrodlo": "Serwer map",
       "obrazek": "obrazy/galeria/niemcy_brandenburgia_dtk25_wms__bb_dtk25_farbe.webp",
       "miejsce_probki": "Poczdam (52.40, 13.07)",
+      "zasieg": {
+        "typ": "zagranica",
+        "kod": "DE-BB",
+        "etykieta": "Brandenburgia – Niemcy (LGB)",
+        "bbox": null
+      },
       "hash_definicji": "e9107eeb"
     },
     {
@@ -2448,6 +4136,12 @@
       "zrodlo": "Serwer map",
       "obrazek": "obrazy/galeria/niemcy_brandenburgia_dtk50_wms__bb_dtk50_farbe.webp",
       "miejsce_probki": "Poczdam (52.40, 13.07)",
+      "zasieg": {
+        "typ": "zagranica",
+        "kod": "DE-BB",
+        "etykieta": "Brandenburgia – Niemcy (LGB)",
+        "bbox": null
+      },
       "hash_definicji": "b30fbb70"
     },
     {
@@ -2464,6 +4158,12 @@
       "zrodlo": "Serwer map",
       "obrazek": "obrazy/galeria/niemcy_brandenburgia_sdop_wms__bb_sdop.webp",
       "miejsce_probki": "Poczdam (52.40, 13.07)",
+      "zasieg": {
+        "typ": "zagranica",
+        "kod": "DE-BB",
+        "etykieta": "Brandenburgia – Niemcy (LGB)",
+        "bbox": null
+      },
       "hash_definicji": "a54b3954"
     },
     {
@@ -2480,6 +4180,12 @@
       "zrodlo": "Serwer map",
       "obrazek": "obrazy/galeria/niemcy_brandenburgia_dgm_wms__dgmshade.webp",
       "miejsce_probki": "Bad Freienwalde (52.79, 14.03)",
+      "zasieg": {
+        "typ": "zagranica",
+        "kod": "DE-BB",
+        "etykieta": "Brandenburgia – Niemcy (LGB)",
+        "bbox": null
+      },
       "hash_definicji": "668b235c"
     },
     {
@@ -2496,6 +4202,12 @@
       "zrodlo": "Serwer map",
       "obrazek": "obrazy/galeria/niemcy_saksonia_dtk_wms__sn_dtk25_p_color.webp",
       "miejsce_probki": "Drezno (51.05, 13.74)",
+      "zasieg": {
+        "typ": "zagranica",
+        "kod": "DE-SN",
+        "etykieta": "Saksonia – Niemcy (GeoSN)",
+        "bbox": null
+      },
       "hash_definicji": "57471bf9"
     },
     {
@@ -2512,6 +4224,12 @@
       "zrodlo": "Serwer map",
       "obrazek": "obrazy/galeria/niemcy_saksonia_dtk_wms__sn_dtk50_p_color.webp",
       "miejsce_probki": "Drezno (51.05, 13.74)",
+      "zasieg": {
+        "typ": "zagranica",
+        "kod": "DE-SN",
+        "etykieta": "Saksonia – Niemcy (GeoSN)",
+        "bbox": null
+      },
       "hash_definicji": "d3cf1b6a"
     },
     {
@@ -2528,6 +4246,12 @@
       "zrodlo": "Serwer map",
       "obrazek": "obrazy/galeria/niemcy_saksonia_dop_wms__sn_dop_020.webp",
       "miejsce_probki": "Drezno (51.05, 13.74)",
+      "zasieg": {
+        "typ": "zagranica",
+        "kod": "DE-SN",
+        "etykieta": "Saksonia – Niemcy (GeoSN)",
+        "bbox": null
+      },
       "hash_definicji": "03916462"
     },
     {
@@ -2544,6 +4268,12 @@
       "zrodlo": "Serwer map",
       "obrazek": "obrazy/galeria/niemcy_saksonia_hoehe_wms__relief_standard.webp",
       "miejsce_probki": "Szwajcaria Saksońska (50.93, 14.14)",
+      "zasieg": {
+        "typ": "zagranica",
+        "kod": "DE-SN",
+        "etykieta": "Saksonia – Niemcy (GeoSN)",
+        "bbox": null
+      },
       "hash_definicji": "2608b80a"
     },
     {
@@ -2560,6 +4290,12 @@
       "zrodlo": "Serwer map",
       "obrazek": "obrazy/galeria/niemcy_saksonia_hoehe_wms__hangneigung.webp",
       "miejsce_probki": "Szwajcaria Saksońska (50.93, 14.14)",
+      "zasieg": {
+        "typ": "zagranica",
+        "kod": "DE-SN",
+        "etykieta": "Saksonia – Niemcy (GeoSN)",
+        "bbox": null
+      },
       "hash_definicji": "a4ac7634"
     },
     {
@@ -2576,6 +4312,12 @@
       "zrodlo": "Serwer map",
       "obrazek": "obrazy/galeria/litwa_inspire_wms__cp_CP_CadastralParcel.webp",
       "miejsce_probki": "Wilno (54.69, 25.28)",
+      "zasieg": {
+        "typ": "zagranica",
+        "kod": "LT",
+        "etykieta": "Litwa (NŽT / INSPIRE)",
+        "bbox": null
+      },
       "hash_definicji": "13016ee5"
     },
     {
@@ -2592,6 +4334,12 @@
       "zrodlo": "Serwer map",
       "obrazek": "obrazy/galeria/litwa_inspire_wms__el_EL_ContourLine.webp",
       "miejsce_probki": "Wilno (54.69, 25.28)",
+      "zasieg": {
+        "typ": "zagranica",
+        "kod": "LT",
+        "etykieta": "Litwa (NŽT / INSPIRE)",
+        "bbox": null
+      },
       "hash_definicji": "5bfe4fa4"
     },
     {
@@ -2608,6 +4356,12 @@
       "zrodlo": "Serwer map",
       "obrazek": "obrazy/galeria/litwa_inspire_wms__bu_BU_Building_polygon.webp",
       "miejsce_probki": "Wilno (54.69, 25.28)",
+      "zasieg": {
+        "typ": "zagranica",
+        "kod": "LT",
+        "etykieta": "Litwa (NŽT / INSPIRE)",
+        "bbox": null
+      },
       "hash_definicji": "8cef9c19"
     },
     {
@@ -2624,6 +4378,12 @@
       "zrodlo": "Serwer map",
       "obrazek": "obrazy/galeria/litwa_inspire_wms__tn_TN_RoadTransportNetwork_RoadLink.webp",
       "miejsce_probki": "Wilno (54.69, 25.28)",
+      "zasieg": {
+        "typ": "zagranica",
+        "kod": "LT",
+        "etykieta": "Litwa (NŽT / INSPIRE)",
+        "bbox": null
+      },
       "hash_definicji": "73c67080"
     },
     {
@@ -2640,6 +4400,17 @@
       "zrodlo": "Serwer map",
       "obrazek": "obrazy/galeria/baltyk_batymetria_wms__emodnet_mean_atlas_land.webp",
       "miejsce_probki": "Zatoka Gdańska (54.55, 18.85)",
+      "zasieg": {
+        "typ": "morski",
+        "kod": "BALTYK",
+        "etykieta": "Morze Bałtyckie (EMODnet)",
+        "bbox": [
+          9.5,
+          53.5,
+          26,
+          66
+        ]
+      },
       "hash_definicji": "0b040b97"
     },
     {
@@ -2656,6 +4427,17 @@
       "zrodlo": "Serwer map",
       "obrazek": "obrazy/galeria/baltyk_batymetria_wms__emodnet_mean_rainbowcolour.webp",
       "miejsce_probki": "Zatoka Gdańska (54.55, 18.85)",
+      "zasieg": {
+        "typ": "morski",
+        "kod": "BALTYK",
+        "etykieta": "Morze Bałtyckie (EMODnet)",
+        "bbox": [
+          9.5,
+          53.5,
+          26,
+          66
+        ]
+      },
       "hash_definicji": "645ec46d"
     },
     {
@@ -2672,6 +4454,17 @@
       "zrodlo": "Serwer map",
       "obrazek": "obrazy/galeria/baltyk_batymetria_wms__emodnet_contours.webp",
       "miejsce_probki": "Otwarty Bałtyk (55.05, 17.50)",
+      "zasieg": {
+        "typ": "morski",
+        "kod": "BALTYK",
+        "etykieta": "Morze Bałtyckie (EMODnet)",
+        "bbox": [
+          9.5,
+          53.5,
+          26,
+          66
+        ]
+      },
       "hash_definicji": "be329e60"
     },
     {
@@ -2688,6 +4481,17 @@
       "zrodlo": "Serwer map",
       "obrazek": "obrazy/galeria/baltyk_batymetria_wms__coastlines.webp",
       "miejsce_probki": "Zatoka Gdańska (54.55, 18.85)",
+      "zasieg": {
+        "typ": "morski",
+        "kod": "BALTYK",
+        "etykieta": "Morze Bałtyckie (EMODnet)",
+        "bbox": [
+          9.5,
+          53.5,
+          26,
+          66
+        ]
+      },
       "hash_definicji": "50e9dd60"
     }
   ]

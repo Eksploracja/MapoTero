@@ -381,13 +381,58 @@
 .gw-modal-obraz-kol {
   background: #f0eff4;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 260px;
+  flex-direction: column;
+  min-height: 340px;
   position: relative;
 }
 
-.gw-modal-obraz-kol.gw-nakladka-tlo {
+.gw-modal-tabs {
+  display: flex;
+  background: #e6e4ec;
+  border-bottom: 1px solid #d5d0d8;
+  padding: 0.4rem 0.5rem 0;
+  gap: 0.35rem;
+}
+
+.gw-modal-tab {
+  border: 1px solid transparent;
+  border-bottom: none;
+  background: transparent;
+  padding: 0.42rem 0.85rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #5c5962;
+  border-radius: 5px 5px 0 0;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  transition: all 0.15s ease;
+}
+
+.gw-modal-tab:hover {
+  background: rgba(255, 255, 255, 0.6);
+  color: #27262b;
+}
+
+.gw-modal-tab.aktywny {
+  background: #ffffff;
+  color: #1d4ed8;
+  border-color: #d5d0d8;
+  border-bottom-color: #ffffff;
+  margin-bottom: -1px;
+}
+
+.gw-modal-panel-probka {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 280px;
+  position: relative;
+}
+
+.gw-modal-panel-probka.gw-nakladka-tlo {
   background-image:
     linear-gradient(45deg, #e7e5ec 25%, transparent 25%),
     linear-gradient(-45deg, #e7e5ec 25%, transparent 25%),
@@ -397,12 +442,267 @@
   background-position: 0 0, 0 8px, 8px -8px, -8px 0;
 }
 
+.gw-modal-panel-probka img,
 .gw-modal-obraz-kol img {
   width: 100%;
   height: 100%;
   max-height: 460px;
   object-fit: contain;
   display: block;
+}
+
+.gw-modal-panel-zasieg {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  padding: 0.85rem;
+  min-height: 320px;
+}
+
+.gw-modal-panel-zasieg[hidden] {
+  display: none;
+}
+
+.gw-widok-zasiegu-kontener {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  gap: 0.75rem;
+  align-items: center;
+  justify-content: center;
+}
+
+.gw-zasieg-svg {
+  width: 100%;
+  max-width: 380px;
+  max-height: 320px;
+  height: auto;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  display: block;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+/* Warstwy wektorowe mapy */
+.gw-mapa-akwen {
+  fill: #e0f2fe;
+  stroke: #bae6fd;
+  stroke-width: 0.75;
+}
+
+.gw-mapa-sasiad {
+  fill: #f1f5f9;
+  stroke: #cbd5e1;
+  stroke-width: 0.75;
+}
+
+.gw-mapa-polska {
+  fill: #f8fafc;
+  stroke: #94a3b8;
+  stroke-width: 1.1;
+  transition: all 0.25s ease;
+}
+
+.gw-mapa-rzeka {
+  stroke: #93c5fd;
+  stroke-width: 1.1;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.85;
+}
+
+/* Wyróżnienia zasięgu */
+.gw-mapa-polska.gw-mapa-aktywny {
+  fill: #dbeafe;
+  stroke: #2563eb;
+  stroke-width: 1.8;
+}
+
+.gw-mapa-polska.gw-mapa-baza-regionalna {
+  fill: #f1f5f9;
+  stroke: #64748b;
+  stroke-width: 1.2;
+}
+
+.gw-mapa-akwen.gw-mapa-aktywny-morze {
+  fill: #0284c7;
+  fill-opacity: 0.45;
+  stroke: #0369a1;
+  stroke-width: 1.8;
+}
+
+.gw-mapa-sasiad.gw-mapa-aktywny-zagranica {
+  fill: #a7f3d0;
+  stroke: #059669;
+  stroke-width: 1.8;
+}
+
+/* Bounding box dla warstw regionalnych */
+.gw-mapa-bbox {
+  fill: rgba(220, 38, 38, 0.22);
+  stroke: #dc2626;
+  stroke-width: 1.8;
+  stroke-dasharray: 4 2;
+  animation: gw-bbox-puls 2s infinite ease-in-out;
+}
+
+@keyframes gw-bbox-puls {
+  0%, 100% { fill-opacity: 0.22; stroke-width: 1.8; }
+  50% { fill-opacity: 0.38; stroke-width: 2.2; }
+}
+
+/* Punkty miast TrueOrtho */
+.gw-mapa-punkt-trueortho .gw-punkt-pierscien {
+  fill: none;
+  stroke: #dc2626;
+  stroke-width: 1.2;
+  opacity: 0.6;
+}
+
+.gw-mapa-punkt-trueortho .gw-punkt-kropka {
+  fill: #dc2626;
+}
+
+.gw-mapa-punkt-trueortho .gw-punkt-etykieta {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 7.5px;
+  font-weight: 700;
+  fill: #991b1b;
+}
+
+/* Nakładka globalna */
+.gw-mapa-nakladka-globalna {
+  fill: rgba(14, 165, 233, 0.08);
+}
+
+.gw-mapa-globus .gw-globus-tlo {
+  fill: #f0f9ff;
+  stroke: #0284c7;
+  stroke-width: 1.5;
+}
+
+.gw-mapa-globus .gw-globus-siatka {
+  stroke: #38bdf8;
+  stroke-width: 1;
+}
+
+.gw-mapa-globus .gw-globus-napis {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 8.5px;
+  font-weight: 800;
+  fill: #0369a1;
+  letter-spacing: 0.08em;
+}
+
+/* Etykiety i napisy na mapie */
+.gw-etykieta-kraju {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 8px;
+  font-weight: 700;
+  fill: #94a3b8;
+  letter-spacing: 0.05em;
+  user-select: none;
+  pointer-events: none;
+}
+
+.gw-etykieta-polska {
+  font-size: 11px;
+  font-weight: 800;
+  fill: #64748b;
+  letter-spacing: 0.1em;
+}
+
+.gw-etykieta-baltyk {
+  fill: #7dd3fc;
+}
+
+/* Punkty miast */
+.gw-miasto-kropka {
+  fill: #475569;
+}
+
+.gw-miasto-nazwa {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 7.5px;
+  font-weight: 500;
+  fill: #475569;
+  user-select: none;
+  pointer-events: none;
+}
+
+/* Karta informacyjna pod mapą */
+.gw-zasieg-info-karta {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 0.65rem 0.85rem;
+  width: 100%;
+  max-width: 380px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  text-align: left;
+}
+
+.gw-zasieg-info-tytul {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.88rem;
+  color: #1e293b;
+}
+
+.gw-zasieg-info-ikona {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.gw-zasieg-info-opis {
+  font-size: 0.78rem;
+  color: #64748b;
+  line-height: 1.35;
+}
+
+/* Przycisk linkujący do zasięgu w tabeli modala */
+.gw-link-pokaz-zasieg {
+  background: none;
+  border: none;
+  padding: 0 0.2rem;
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: #2563eb;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.gw-link-pokaz-zasieg:hover {
+  color: #1d4ed8;
+}
+
+/* Odznaki zasięgu na miniaturach kart w siatce */
+.gw-odznaka-zasieg {
+  font-size: 0.68rem;
+}
+
+.gw-zasieg-region {
+  background: rgba(217, 119, 6, 0.92);
+}
+
+.gw-zasieg-kraj {
+  background: rgba(5, 150, 105, 0.92);
+}
+
+.gw-zasieg-morze {
+  background: rgba(2, 132, 199, 0.92);
+}
+
+.gw-zasieg-swiat {
+  background: rgba(109, 40, 217, 0.92);
 }
 
 .gw-modal-info-kol {

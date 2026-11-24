@@ -15,6 +15,13 @@ geologiczna_50_SMGP
 hydrograficzna_50
 krajobrazowa
 Lasy_Panstwowe_BDL
+Lasy_Panstwowe_Lowiectwo
+Lasy_Panstwowe_Ochronnosc
+Lasy_Panstwowe_Wlasnosc
+Lasy_Panstwowe_Siedliska
+Lasy_Panstwowe_Drzewostany
+Lasy_Panstwowe_Dojazdy_Ppoz
+Lasy_Panstwowe_Turystyka
 litwa_inspire_wms
 mapa_glebowo_rolnicza
 mapy_historyczne_IHPAN
