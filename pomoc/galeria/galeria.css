@@ -988,6 +988,11 @@
   color: #5b3fd4;
 }
 
+.gw-akcje-karty .gw-btn-dodaj[hidden],
+.gw-btn-dodaj-modal[hidden] {
+  display: none !important;
+}
+
 .gw-akcje-karty .gw-btn-dodaj:hover:not(:disabled) {
   background: #7253ed;
   border-color: #7253ed;
@@ -1323,6 +1328,36 @@
   gap: 0.4rem;
   align-items: center;
   font-size: 0.8rem;
+}
+
+.gw-mikser-skala-grupa {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+}
+
+.gw-mikser-btn-zoom {
+  border: 1px solid #d5d0d8;
+  background: #f5f6fa;
+  color: #27262b;
+  border-radius: 4px;
+  min-width: 1.75rem;
+  height: 1.78rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 0.35rem;
+}
+
+.gw-mikser-btn-zoom:hover:not(:disabled) {
+  border-color: #7253ed;
+  color: #7253ed;
+}
+
+.gw-mikser-btn-zoom:disabled {
+  opacity: 0.4;
+  cursor: default;
 }
 
 .gw-mikser-sterowanie-podgladu select {

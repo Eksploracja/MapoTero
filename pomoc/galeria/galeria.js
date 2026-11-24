@@ -6,6 +6,7 @@
   const PELNE_KRYCIE = 100;
   const MAKS_PIKSEL_PODGLADU = 25;
   const MAKS_PIKSEL_DOPASOWANIA_BBOX = 15;
+  const STOPNIE_SKALI_PODGLADU = [0.5, 1, 2, 4, 10, 25];
   const KLUCZ_LOCAL_STORAGE = "mapotero_galeria_kanapka_v1";
 
   const TRYBY_MIESZANIA = [
@@ -307,6 +308,23 @@
     };
   }
 
+  // Zwraca kolejny stopień rozdzielczości podglądu: kierunek > 0 przybliża (mniejszy m/px), < 0 oddala (większy m/px).
+  function wybierzNastepnyStopienSkali(aktualnyPiksel, ostatniPikselRenderu, kierunek) {
+    const baza = Number(aktualnyPiksel) > 0
+      ? Number(aktualnyPiksel)
+      : (Number(ostatniPikselRenderu) > 0 ? Number(ostatniPikselRenderu) : 2.0);
+    if (kierunek > 0) {
+      for (let i = STOPNIE_SKALI_PODGLADU.length - 1; i >= 0; i--) {
+        if (STOPNIE_SKALI_PODGLADU[i] < baza * 0.95) return STOPNIE_SKALI_PODGLADU[i];
+      }
+      return STOPNIE_SKALI_PODGLADU[0];
+    }
+    for (let i = 0; i < STOPNIE_SKALI_PODGLADU.length; i++) {
+      if (STOPNIE_SKALI_PODGLADU[i] > baza * 1.05) return STOPNIE_SKALI_PODGLADU[i];
+    }
+    return STOPNIE_SKALI_PODGLADU[STOPNIE_SKALI_PODGLADU.length - 1];
+  }
+
   // Grupuje sąsiednie elementy o tej samej podgrupie w kolejności z katalogu (bez wypychania pustej podgrupy na początek).
   function zgrupujPodgrupyWKolejnosci(elementy) {
     const bloki = [];
@@ -329,6 +347,7 @@
       MAKS_WARSTW_KANAPKI,
       MAKS_PIKSEL_PODGLADU,
       MAKS_PIKSEL_DOPASOWANIA_BBOX,
+      STOPNIE_SKALI_PODGLADU,
       TRYBY_MIESZANIA,
       poprawneKrycie,
       znajdzTryb,
@@ -348,6 +367,7 @@
       bboxZCentrumIPiksela,
       dopasujZoomDoBbox,
       wybierzPikselPoZaznaczeniuBbox,
+      wybierzNastepnyStopienSkali,
       zgrupujPodgrupyWKolejnosci
     };
   }
@@ -867,6 +887,7 @@
       const warstwa = karta.getAttribute("data-warstwa") || "";
       const idx = indeksWKanapce({ zbior: zbior, warstwa: warstwa });
       const btn = karta.querySelector(".gw-btn-kanapka");
+      const btnWyslij = karta.querySelector(".gw-btn-dodaj");
       if (idx >= 0) {
         karta.classList.add("gw-karta-w-kanapce");
         if (btn) {
@@ -874,6 +895,7 @@
           btn.textContent = "✓ W miksie (#" + (idx + 1) + ")";
           btn.title = "Usuń tę warstwę z kompozycji w Mikserze warstw";
         }
+        if (btnWyslij) btnWyslij.hidden = true;
       } else {
         karta.classList.remove("gw-karta-w-kanapce");
         if (btn) {
@@ -881,6 +903,7 @@
           btn.textContent = "☐ Dodaj do miksu";
           btn.title = "Dodaj warstwę do kompozycji w Mikserze warstw (ułożysz tam kolejność, krycie i tryb nakładania)";
         }
+        if (btnWyslij) btnWyslij.hidden = false;
       }
     });
   }
@@ -931,6 +954,7 @@
       if (czyPolaczonoZProgramem()) {
         const btnDodaj = el("button", "gw-btn-dodaj", "Wyślij");
         btnDodaj.type = "button";
+        btnDodaj.hidden = idxWKanapce >= 0;
         btnDodaj.title = "Pomiń mikser i dodaj od razu tylko tę pojedynczą warstwę do MapoTero";
         btnDodaj.addEventListener("click", function (e) {
           e.stopPropagation();
@@ -1227,6 +1251,9 @@
       ref.modalKanapka.classList.remove("aktywny");
       ref.modalKanapka.textContent = "☐ Dodaj do miksu";
       ref.modalKanapka.title = "Dodaj warstwę do kompozycji w Mikserze warstw";
+    }
+    if (ref.modalDodaj) {
+      ref.modalDodaj.hidden = idx >= 0;
     }
   }
 
@@ -1848,8 +1875,8 @@
         txt += " · Niebieska ramka: obszar z MapoTero";
       } else {
         txt += czyPolaczonoZProgramem()
-          ? " · Kliknij punkt lub włącz „Zaznacz obszar”"
-          : " · Włącz „Zaznacz obszar”, aby przekazać zasięg do pliku .mapotero";
+          ? " · Lewy: wskaż próbkę · Prawy (PPM): zaznacz obszar"
+          : " · Prawy przycisk (PPM) lub „Zaznacz obszar” zapisze zasięg do pliku .mapotero";
       }
       ref.minimapaInfo.textContent = txt;
     }
@@ -2105,13 +2132,49 @@
       opt.textContent = op.txt;
       selSkala.appendChild(opt);
     });
-    selSkala.addEventListener("change", function () {
-      stan.podgladPiksel = parseFloat(selSkala.value) || 0;
+
+    function ustawSkalePodgladu(nowyPiksel) {
+      const wartosc = Number(nowyPiksel) > 0 ? Math.min(MAKS_PIKSEL_PODGLADU, Number(nowyPiksel)) : 0;
+      stan.podgladPiksel = wartosc;
+      const kandydat = wartosc > 0 ? String(wartosc) : "0";
+      const maOpcje = Array.prototype.some.call(selSkala.options, function (o) { return o.value === kandydat; });
+      selSkala.value = maOpcje ? kandydat : "0";
       rysujMinimape();
       zglosOdswiezeniePodgladuMiksera(true);
+    }
+
+    selSkala.addEventListener("change", function () {
+      ustawSkalePodgladu(parseFloat(selSkala.value) || 0);
     });
+
     if (czyPolaczonoZProgramem()) {
-      sterowaniePodgladu.appendChild(selSkala);
+      const skalaGrupa = el("div", "gw-mikser-skala-grupa");
+      const btnPodgladOddal = el("button", "gw-mikser-btn-zoom", "−");
+      btnPodgladOddal.type = "button";
+      btnPodgladOddal.title = "Oddal podgląd (większy obszar w m/px)";
+      btnPodgladOddal.addEventListener("click", function () {
+        ustawSkalePodgladu(wybierzNastepnyStopienSkali(stan.podgladPiksel, stan.ostatniPikselRenderu, -1));
+      });
+
+      const btnPodgladPrzybliz = el("button", "gw-mikser-btn-zoom", "+");
+      btnPodgladPrzybliz.type = "button";
+      btnPodgladPrzybliz.title = "Przybliż podgląd (dokładniejsza skala w m/px)";
+      btnPodgladPrzybliz.addEventListener("click", function () {
+        ustawSkalePodgladu(wybierzNastepnyStopienSkali(stan.podgladPiksel, stan.ostatniPikselRenderu, 1));
+      });
+
+      skalaGrupa.appendChild(btnPodgladOddal);
+      skalaGrupa.appendChild(selSkala);
+      skalaGrupa.appendChild(btnPodgladPrzybliz);
+      sterowaniePodgladu.appendChild(skalaGrupa);
+
+      ramkaPodgladu.title = "Użyj przycisków − / + lub kółka myszy, aby przybliżyć lub oddalić podgląd";
+      ramkaPodgladu.addEventListener("wheel", function (e) {
+        if (stan.kanapka.length === 0) return;
+        e.preventDefault();
+        const kierunek = e.deltaY < 0 ? 1 : -1;
+        ustawSkalePodgladu(wybierzNastepnyStopienSkali(stan.podgladPiksel, stan.ostatniPikselRenderu, kierunek));
+      }, { passive: false });
 
       const btnOdswiezPodglad = el("button", "gw-btn-prosty", "↻ Odśwież");
       btnOdswiezPodglad.type = "button";
@@ -2143,10 +2206,10 @@
     const grupaTryby = el("div", "gw-minimapa-grupa-btn");
     const btnTrybPrzesun = el("button", "aktywny", "🖐 Przesuń / Punkt");
     btnTrybPrzesun.type = "button";
-    btnTrybPrzesun.title = "Przeciągaj mapę lub kliknij punkt próbki (z Shift zaznaczasz obszar)";
+    btnTrybPrzesun.title = "Lewy: przesuwaj mapę lub kliknij punkt próbki. Prawy przycisk (PPM): od razu zaznacz obszar";
     const btnTrybZaznacz = el("button", null, "⬜ Zaznacz obszar");
     btnTrybZaznacz.type = "button";
-    btnTrybZaznacz.title = "Narysuj prostokąt obszaru do pobrania w MapoTero";
+    btnTrybZaznacz.title = "Zaznacz obszar lewym przyciskiem myszy (prawym przyciskiem zaznaczasz zawsze od razu)";
     const btnWyczyscZazn = el("button", null, "✕ Wyczyść");
     btnWyczyscZazn.type = "button";
     btnWyczyscZazn.title = "Usuń zaznaczony obszar";
@@ -2227,14 +2290,18 @@
     }
 
     let gest = null;
+    minimapaCanvas.addEventListener("contextmenu", function (e) {
+      e.preventDefault();
+    });
     minimapaCanvas.addEventListener("pointerdown", function (e) {
-      if (e.button !== 0) return;
+      if (e.button !== 0 && e.button !== 2) return;
       e.preventDefault();
       minimapaCanvas.setPointerCapture(e.pointerId);
       const pt = wspolrzedneCanvasaMapy(e);
-      const czyZaznaczanie = stan.mapaTryb === "zaznacz" || e.shiftKey;
+      const czyZaznaczanie = e.button === 2 || stan.mapaTryb === "zaznacz" || e.shiftKey;
       gest = {
         id: e.pointerId,
+        przycisk: e.button,
         tryb: czyZaznaczanie ? "zaznacz" : "przesun",
         startX: pt.x,
         startY: pt.y,
@@ -3002,6 +3069,7 @@
       modalSciezka: modalSciezka,
       modalTabela: modalTabela,
       modalKanapka: modalKanapka,
+      modalDodaj: modalDodaj,
       modalKopiuj: modalKopiuj,
       modalPoprz: modalPoprz,
       modalNast: modalNast,
