@@ -219,9 +219,9 @@ Public Class PodgladGaleriiTesty
 
     Private Shared Function ZnajdzFolderWarstwRepo() As String
         Dim kandydaci = {
-            Path.Combine(AppContext.BaseDirectory, "MapoTero_SingleFile", "warstwy"),
-            Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "MapoTero_SingleFile", "warstwy"),
-            Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "MapoTero_SingleFile", "warstwy")
+            Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "warstwy"),
+            Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "warstwy"),
+            Path.Combine(AppContext.BaseDirectory, "warstwy")
         }
         For Each sc In kandydaci
             Dim pelna = Path.GetFullPath(sc)
