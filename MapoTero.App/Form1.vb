@@ -3659,10 +3659,11 @@ Public Class Form1
     Private Function ZnacznikiWidoczne(warstwa As GMapOverlay) As Boolean
         Const margines As Integer = 10
         Dim zaslony As New List(Of Rectangle)
-        For Each c As Control In New Control() {btnPowieksz, btnPomniejsz, lblZoom, btnSzukajDzialki, rbGoogle, rbBing, rbOsm,
+        For Each c As Control In New Control() {btnPowieksz, btnPomniejsz, lblZoom, btnSzukajDzialki, _polePodkladuMapy,
+                                                rbGoogle, rbBing, rbOsm,
                                                 lblKursorTytul, lblKursorUkladOpis, lblKursorUklad, lblSrodekTytul,
                                                 lblSrodekOpisSzer, lblSrodekSzer, lblSrodekOpisDlug, lblSrodekDlug}
-            If c.Visible Then zaslony.Add(mapa.RectangleToClient(c.RectangleToScreen(c.ClientRectangle)))
+            If c IsNot Nothing AndAlso c.Visible Then zaslony.Add(mapa.RectangleToClient(c.RectangleToScreen(c.ClientRectangle)))
         Next
         For Each m In warstwa.Markers
             Dim p = mapa.FromLatLngToLocal(m.Position)

@@ -208,6 +208,11 @@ Public Class OknoGlowneErgonomiaTesty
                 Assert.Equal(pole.Margin.Right, kreator.Margin.Right)
                 Dim mapa = Kontrolka(Of GMap.NET.WindowsForms.GMapControl)(f, "mapa")
                 Assert.Equal(MouseWheelZoomType.MousePositionWithoutCenter, mapa.MouseWheelZoomType)
+                ' przełącznik podkładu podglądu leży w prawym górnym rogu mapy, oddzielony od paska narzędzi
+                Dim podklad = Assert.Single(f.Controls.Find("cmbPodkladMapy", True))
+                Assert.Same(f, podklad.Parent)
+                Assert.True(podklad.Right <= mapa.Right)
+                Assert.True(podklad.Top >= mapa.Top)
             End Sub)
     End Sub
 

@@ -105,10 +105,14 @@
       "obrazek": "obrazy/galeria/skany_map_topograficznych__Raster_10_1942.webp",
       "miejsce_probki": "Łódź (51.76, 19.46)",
       "zasieg": {
-        "typ": "kraj",
-        "kod": "PL",
-        "etykieta": "Cała Polska",
-        "bbox": null
+        "typ": "czesciowy",
+        "etykieta": "Częściowe (ok. 13% kraju — wybrane rejony w układzie 1942)",
+        "opis": "Skany mapy topograficznej 1:10 000 w układzie 1942 (odwzorowanie Gaussa-Krügera). Wydano tylko dla wybranych obszarów (ok. 12% kraju).",
+        "procent_pl": 13,
+        "procent_total": 9,
+        "komorki_total": 88,
+        "maska_hex": "0000000000000000000000000000000000000000000000080001ffc0001ffe0001ffc00e1ff000e1ff000e0bf000e160000016000001f000001f000000000000000000000000",
+        "clip_polska": true
       },
       "hash_definicji": "73bccc3d"
     },
@@ -127,10 +131,14 @@
       "obrazek": "obrazy/galeria/skany_map_topograficznych__Raster_10_1965.webp",
       "miejsce_probki": "Warszawa (52.23, 21.01)",
       "zasieg": {
-        "typ": "kraj",
-        "kod": "PL",
-        "etykieta": "Cała Polska",
-        "bbox": null
+        "typ": "czesciowy",
+        "etykieta": "Częściowe (ok. 99% kraju — 5 stref układu PL-1965)",
+        "opis": "Skany mapy topograficznej 1:10 000 w układzie PL-1965. Obejmuje ok. 88% kraju w 5 strefach układu 1965 (brak arkuszy na terenach zamkniętych/wojskowych).",
+        "procent_pl": 99,
+        "procent_total": 71,
+        "komorki_total": 427,
+        "maska_hex": "00f800003fdc081fffffcffffffeffffffeffffffeffffffffffffff7fffffe7fffffe7fffffe7fffffe3fffffe3ffffff1ffffff03fffff017fffc000fff80007ff80001838",
+        "clip_polska": true
       },
       "hash_definicji": "6ec62e27"
     },
@@ -147,12 +155,16 @@
       "zalecany_piksel": 1,
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/skany_map_topograficznych__Raster_10_1992.webp",
-      "miejsce_probki": "Łódź (51.76, 19.46)",
+      "miejsce_probki": "Warszawa (52.23, 21.01)",
       "zasieg": {
-        "typ": "kraj",
-        "kod": "PL",
-        "etykieta": "Cała Polska",
-        "bbox": null
+        "typ": "czesciowy",
+        "etykieta": "Częściowe (ok. 38% kraju — pas zachodni, Śląsk, Małopolska, Mazowsze)",
+        "opis": "Skany mapy topograficznej 1:10 000 w układzie PL-1992. Pokrycie niepełne: zrealizowano ok. 39% powierzchni kraju, głównie w pasie centralno-południowym i zachodnim.",
+        "procent_pl": 38,
+        "procent_total": 27,
+        "komorki_total": 304,
+        "maska_hex": "00f800003fd0001f5ff60f46dfd87dcfffe63bfc6e7dfe4fe7df03147fe03803ffc7bc7ff81f871e07f831f073e3ff8fbf1fffff703f7ff6013fff0000ffe00001f000001800",
+        "clip_polska": true
       },
       "hash_definicji": "dddb445e"
     },
@@ -171,10 +183,14 @@
       "obrazek": "obrazy/galeria/skany_map_topograficznych__Raster_25_1965.webp",
       "miejsce_probki": "Warszawa (52.23, 21.01)",
       "zasieg": {
-        "typ": "kraj",
-        "kod": "PL",
-        "etykieta": "Cała Polska",
-        "bbox": null
+        "typ": "czesciowy",
+        "etykieta": "Częściowe (ok. 100% kraju — układ PL-1965)",
+        "opis": "Skany mapy topograficznej 1:25 000 w układzie PL-1965. Pokrycie wynosi ok. 90% kraju.",
+        "procent_pl": 100,
+        "procent_total": 72,
+        "komorki_total": 437,
+        "maska_hex": "00f800003fdc083fffffcffffffeffffffefffffffffffffffffffff7fffffe7fffffe7fffffe7fffffe3ffffff3ffffff1ffffff07fffff03ffffc001fff80007ff80001b78",
+        "clip_polska": true
       },
       "hash_definicji": "f10e4d82"
     },
@@ -193,10 +209,14 @@
       "obrazek": "obrazy/galeria/skany_map_topograficznych__Raster_50_1942.webp",
       "miejsce_probki": "Łódź (51.76, 19.46)",
       "zasieg": {
-        "typ": "kraj",
-        "kod": "PL",
-        "etykieta": "Cała Polska",
-        "bbox": null
+        "typ": "czesciowy",
+        "etykieta": "Częściowe (ok. 5% kraju — układ 1942)",
+        "opis": "Skany mapy topograficznej 1:50 000 w układzie 1942. Dostępne nieliczne arkusze archiwalne (ok. 5% kraju).",
+        "procent_pl": 5,
+        "procent_total": 4,
+        "komorki_total": 37,
+        "maska_hex": "00000000000000000000000000000000000000000000000000007fc00007fe00007fe00003fc0000000000000000000000000000000000000000000000000000000000000000",
+        "clip_polska": true
       },
       "hash_definicji": "a7c5d34a"
     },
@@ -215,10 +235,14 @@
       "obrazek": "obrazy/galeria/skany_map_topograficznych__Raster_50_1965.webp",
       "miejsce_probki": "Warszawa (52.23, 21.01)",
       "zasieg": {
-        "typ": "kraj",
-        "kod": "PL",
-        "etykieta": "Cała Polska",
-        "bbox": null
+        "typ": "czesciowy",
+        "etykieta": "Częściowe (ok. 100% kraju — układ PL-1965)",
+        "opis": "Skany mapy topograficznej 1:50 000 w układzie PL-1965. Prawie pełne pokrycie kraju (ok. 94%).",
+        "procent_pl": 100,
+        "procent_total": 75,
+        "komorki_total": 449,
+        "maska_hex": "01fc00007ffe183fffffeffffffeffffffefffffffffffffffffffff7fffffe7fffffe7fffffe7ffffff3ffffff3ffffff3ffffff07fffff03ffffe001fffc0007ff80007c78",
+        "clip_polska": true
       },
       "hash_definicji": "69796c7a"
     },
@@ -237,10 +261,14 @@
       "obrazek": "obrazy/galeria/skany_map_topograficznych__Raster_50_1992.webp",
       "miejsce_probki": "Łódź (51.76, 19.46)",
       "zasieg": {
-        "typ": "kraj",
-        "kod": "PL",
-        "etykieta": "Cała Polska",
-        "bbox": null
+        "typ": "czesciowy",
+        "etykieta": "Częściowe (ok. 57% kraju — układ PL-1992)",
+        "opis": "Skany mapy topograficznej 1:50 000 w układzie PL-1992. Zrealizowano ok. 52% powierzchni kraju.",
+        "procent_pl": 57,
+        "procent_total": 40,
+        "komorki_total": 273,
+        "maska_hex": "001c000001c000001c00007fffc007fffc07ffffc0ffff00cffff0007ffc0007ffc0007ffffc07fffff83fffff80ffffc0061fff0001ffbc001fffc001f9e00007c800001c00",
+        "clip_polska": true
       },
       "hash_definicji": "9e25388a"
     },
@@ -693,9 +721,13 @@
       "miejsce_probki": "Warszawa Centrum (52.23, 21.01)",
       "zasieg": {
         "typ": "regionalny",
-        "kod": "PL",
-        "etykieta": "Tylko wybrane miasta (np. Warszawa, Kraków, Łódź, Wrocław, Poznań, Trójmiasto, GOP)",
-        "bbox": null
+        "etykieta": "Główne aglomeracje (ok. 3% kraju — Warszawa, Kraków, Łódź, Wrocław, Poznań, GOP, Trójmiasto)",
+        "opis": "Prawdziwa ortofotomapa (TrueOrtho bez pochylenia budynków). Wykonywana w technologii lotniczej wyłącznie dla gęsto zabudowanych centrów największych miast (ok. 3% powierzchni Polski).",
+        "procent_pl": 3,
+        "procent_total": 2,
+        "komorki_total": 44,
+        "maska_hex": "00000000018000000c000000000000000000000000000000003c000003c0000038030003c330000430000800010080600000060000007000000e060000004000000000000000",
+        "clip_polska": true
       },
       "hash_definicji": "549cf842"
     },
@@ -715,14 +747,13 @@
       "miejsce_probki": "Poznań (52.41, 16.93)",
       "zasieg": {
         "typ": "regionalny",
-        "kod": "PL",
-        "etykieta": "Ziemie zachodnie i północne (dawne Niemcy)",
-        "bbox": [
-          14.1,
-          50,
-          23,
-          55
-        ]
+        "etykieta": "Dawne tereny pruskie / niemieckie (Pomorze, Śląsk, Warmia, Mazury, Wlkp.)",
+        "opis": "Messtischblatt 1:25 000 (Königlich Preussische Landesaufnahme). Obejmuje ziemie zaboru pruskiego i dawne ziemie niemieckie w granicach Polski (ok. 51% terytorium RP oraz tereny przyległe).",
+        "procent_pl": 57,
+        "procent_total": 44,
+        "komorki_total": 289,
+        "maska_hex": "00f8ff803f9ff81fffffeffffffdffffffaffffff2ffffff0fffff007ffff007ff00007ff00007ff80003ffc0007ffc0001ffe00003fe000017e000003e00000040000000000",
+        "clip_polska": false
       },
       "hash_definicji": "1f24d557"
     },
@@ -741,10 +772,14 @@
       "obrazek": "obrazy/galeria/mapy_historyczne_IHPAN__wig25k_2180.webp",
       "miejsce_probki": "Warszawa (52.23, 21.01)",
       "zasieg": {
-        "typ": "kraj",
-        "kod": "PL",
-        "etykieta": "Ziemie polskie (II RP / powojenne)",
-        "bbox": null
+        "typ": "czesciowy",
+        "etykieta": "Częściowe (ok. 31% powierzchni Polski — wydane arkusze szczegółowe WIG)",
+        "opis": "Szczegółowa mapa Polski WIG 1:25 000 (Wojskowy Instytut Geograficzny). Przed wybuchem wojny zdążono opracować i wydać tylko część arkuszy (ok. 26% terenu Polski).",
+        "procent_pl": 31,
+        "procent_total": 22,
+        "komorki_total": 194,
+        "maska_hex": "0018000003c000007e00000fe00e007c01f00ff61601fc7f007ff7f807fff8007fffc707ff800007f000003f000001ec00000fce0000fcf0001fcc1001fc81000ff600000020",
+        "clip_polska": false
       },
       "hash_definicji": "6d83c289"
     },
@@ -763,10 +798,14 @@
       "obrazek": "obrazy/galeria/mapy_historyczne_IHPAN__wig100k_2180.webp",
       "miejsce_probki": "Warszawa (52.23, 21.01)",
       "zasieg": {
-        "typ": "kraj",
-        "kod": "PL",
-        "etykieta": "Ziemie polskie (II RP / powojenne)",
-        "bbox": null
+        "typ": "czesciowy",
+        "etykieta": "Obszar II Rzeczypospolitej i Kresów Wschodnich (ok. 99% obecnej Polski)",
+        "opis": "Taktyczna mapa Polski WIG 1:100 000 (1924–1939). Pokrywa niemal całe terytorium II RP wraz z Kresami Wschodnimi (w obecnych granicach ok. 88% kraju).",
+        "procent_pl": 99,
+        "procent_total": 86,
+        "komorki_total": 506,
+        "maska_hex": "03fcfff07fffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7ffffff7fffff7ffffff7ffffff07fffff03fffff03fffff03ffffe001fffe",
+        "clip_polska": false
       },
       "hash_definicji": "669cb0b2"
     },
@@ -830,14 +869,13 @@
       "miejsce_probki": "Kraków (50.06, 19.94)",
       "zasieg": {
         "typ": "regionalny",
-        "kod": "PL",
-        "etykieta": "Ziemie zachodnie i północne (dawne Niemcy)",
-        "bbox": [
-          14.1,
-          50,
-          23,
-          55
-        ]
+        "etykieta": "Dawne tereny pruskie i Rzeszy Niemieckiej (stan ok. 1900 r.)",
+        "opis": "Karte des Deutschen Reiches 1:100 000 (Rzesza Niemiecka). Obejmuje obszar Pomorza, Śląska, Prus i Wielkopolski.",
+        "procent_pl": 53,
+        "procent_total": 45,
+        "komorki_total": 284,
+        "maska_hex": "01fcffc07ffff8ffffff8ffffff8ffffff8fffffc0ffffc00fffc000fffc000fff0000fff0000fff0000fffc000fffe000fffe00007fe00003fe000003e00000000000000000",
+        "clip_polska": false
       },
       "hash_definicji": "d2d872f7"
     },
@@ -857,14 +895,13 @@
       "miejsce_probki": "Kraków (50.06, 19.94)",
       "zasieg": {
         "typ": "regionalny",
-        "kod": "PL",
-        "etykieta": "Ziemie zachodnie i północne (dawne Niemcy)",
-        "bbox": [
-          14.1,
-          50,
-          23,
-          55
-        ]
+        "etykieta": "Europa Środkowa i tereny okupowane (Grossblatt 1944)",
+        "opis": "Karte des Deutschen Reiches 1:100 000 – Grossblatt (wydanie wojenne 1944). Obejmuje większość ziem polskich i tereny ościenne.",
+        "procent_pl": 96,
+        "procent_total": 84,
+        "komorki_total": 511,
+        "maska_hex": "03fffff03fffe77ffffff7ffffff7fffffffffffffffffffffffffff7ffffff7ffffff7ffffff73ffffffffffffffffffffffffff7ffffff1ffffff1e7ffff1e0ffff0c1ffff",
+        "clip_polska": false
       },
       "hash_definicji": "1721706c"
     },
@@ -884,14 +921,13 @@
       "miejsce_probki": "Kraków (50.06, 19.94)",
       "zasieg": {
         "typ": "regionalny",
-        "kod": "PL",
-        "etykieta": "Polska centralna i wschodnia oraz kraje bałtyckie",
-        "bbox": [
-          17.5,
-          50,
-          32,
-          57
-        ]
+        "etykieta": "Polska wschodnia, kraje bałtyckie i Białoruś (KdWR 100k)",
+        "opis": "Karte des westlichen Russlands 1:100 000. Niemieckie opracowanie kartograficzne zachodnich rubieży Imperium Rosyjskiego.",
+        "procent_pl": 48,
+        "procent_total": 38,
+        "komorki_total": 235,
+        "maska_hex": "000003f000003f000003f000003f000007f000ffff001ffff001ffff003ffff007ffff003ffff003ffff003ffff003ffff000ffff0007fff0003fff000000000000000000000",
+        "clip_polska": false
       },
       "hash_definicji": "9cfb2385"
     },
@@ -911,14 +947,13 @@
       "miejsce_probki": "Warszawa (52.23, 21.01)",
       "zasieg": {
         "typ": "regionalny",
-        "kod": "PL",
-        "etykieta": "Europa Środkowa (Niemcy i Polska)",
-        "bbox": [
-          10,
-          46,
-          26,
-          55.5
-        ]
+        "etykieta": "Europa Środkowa (UKvME 1:300 000)",
+        "opis": "Übersichtskarte von Mitteleuropa 1:300 000.",
+        "procent_pl": 100,
+        "procent_total": 99,
+        "komorki_total": 554,
+        "maska_hex": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7ffffff7ffffff7ffffff7ffffff7ffffff7ffffff",
+        "clip_polska": false
       },
       "hash_definicji": "23833eb5"
     },
@@ -938,14 +973,13 @@
       "miejsce_probki": "Wrocław (51.11, 17.03)",
       "zasieg": {
         "typ": "regionalny",
-        "kod": "PL",
         "etykieta": "Galicja i Lodomeria (Małopolska, Podkarpacie)",
-        "bbox": [
-          18.8,
-          47.7,
-          26.5,
-          50.8
-        ]
+        "opis": "Administrativ-Karte von den Königreichen Galizien und Lodomerien Carla von Kummersberga 1:115 000 (1855 r., ok. 15% Polski).",
+        "procent_pl": 12,
+        "procent_total": 11,
+        "komorki_total": 77,
+        "maska_hex": "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000003f70007fff000ffff000fffc000fffc000787c",
+        "clip_polska": false
       },
       "hash_definicji": "ed5b7565"
     },
@@ -965,14 +999,13 @@
       "miejsce_probki": "Wrocław (51.11, 17.03)",
       "zasieg": {
         "typ": "regionalny",
-        "kod": "PL",
-        "etykieta": "Śląsk (Dolny i Górny)",
-        "bbox": [
-          14.8,
-          49.8,
-          19.3,
-          52.2
-        ]
+        "etykieta": "Śląsk (Dolny i Górny) w XVIII wieku",
+        "opis": "Atlas Silesiae Homanna / Wielanda – mapa Wielkiego Księstwa Śląskiego z XVIII wieku (ok. 19% Polski).",
+        "procent_pl": 24,
+        "procent_total": 22,
+        "komorki_total": 141,
+        "maska_hex": "000000000000000000000000000000000000000000000000000000007ffe000fffe0007ffe0007ffe0007ffe0007ffe0007ffe0007ffe0007ffe0007ffe00000000000000000",
+        "clip_polska": false
       },
       "hash_definicji": "aafbfa6b"
     },
@@ -992,14 +1025,13 @@
       "miejsce_probki": "Olsztyn (53.78, 20.48)",
       "zasieg": {
         "typ": "regionalny",
-        "kod": "PL",
-        "etykieta": "Prusy Wschodnie (Warmia, Mazury)",
-        "bbox": [
-          18.5,
-          52.8,
-          23,
-          55
-        ]
+        "etykieta": "Prusy Wschodnie i Nowowschodnie (Warmia, Mazury, Podlasie)",
+        "opis": "Mapa Schroettera 1:50 000 (Karte von Ost-Preussen und Littauen, 1796–1802).",
+        "procent_pl": 26,
+        "procent_total": 22,
+        "komorki_total": 147,
+        "maska_hex": "003fff8003fff801ffff80fffff81fffff81fffff81ffff800ff8780003800000000000000000000000000000000000000000000000000000000000000000000000000000000",
+        "clip_polska": false
       },
       "hash_definicji": "1ecc8f85"
     },
@@ -1019,14 +1051,13 @@
       "miejsce_probki": "Warszawa (52.23, 21.01)",
       "zasieg": {
         "typ": "regionalny",
-        "kod": "PL",
-        "etykieta": "Prusy Południowe (Wielkopolska, Mazowsze)",
-        "bbox": [
-          15.5,
-          51,
-          22,
-          53.5
-        ]
+        "etykieta": "Prusy Południowe (Wielkopolska, Mazowsze i Ziemia Łódzka)",
+        "opis": "Spezialkarte von Südpreussen Davida Gilly'ego 1:50 000 (1802–1803).",
+        "procent_pl": 32,
+        "procent_total": 22,
+        "komorki_total": 144,
+        "maska_hex": "00000000000000000000000000000000000003f00007ff7003ffff001ffff001ffff801ffff800ffff000fffc0007ffc00007f80000300000000000000000000000000000000",
+        "clip_polska": false
       },
       "hash_definicji": "2ec65265"
     },
@@ -1046,14 +1077,13 @@
       "miejsce_probki": "Białystok (53.13, 23.17)",
       "zasieg": {
         "typ": "regionalny",
-        "kod": "PL",
-        "etykieta": "Nowe Prusy Wschodnie (Podlasie, wsch. Mazowsze)",
-        "bbox": [
-          20.5,
-          52,
-          24.5,
-          54.5
-        ]
+        "etykieta": "Nowe Prusy Wschodnie (Mazowsze północno-wschodnie, Podlasie)",
+        "opis": "Karte von Neu-Ostpreussen Textora 1:150 000 (1807 r.).",
+        "procent_pl": 18,
+        "procent_total": 15,
+        "komorki_total": 98,
+        "maska_hex": "000001f000001f000001f00001ff00001ff000ffff000ffff000ffff000fffe000000c0000000000000000000000000000000000000000000000000000000000000000000000",
+        "clip_polska": false
       },
       "hash_definicji": "3554c749"
     },
@@ -1073,14 +1103,13 @@
       "miejsce_probki": "Poznań (52.41, 16.93)",
       "zasieg": {
         "typ": "regionalny",
-        "kod": "PL",
-        "etykieta": "Wielkopolska",
-        "bbox": [
-          15.5,
-          51.3,
-          19.2,
-          53.5
-        ]
+        "etykieta": "Wielkopolska (Dystrykt Netze / Poznańskie)",
+        "opis": "Mapa Gaula / Raczyńskiego Wielkopolski (początek XIX w.).",
+        "procent_pl": 4,
+        "procent_total": 3,
+        "komorki_total": 23,
+        "maska_hex": "00000000000000000000000000000000000000000001000000f800001f800000f800000780000018000000000000000000000000000000000000000000000000000000000000",
+        "clip_polska": false
       },
       "hash_definicji": "3747f998"
     },
@@ -1100,14 +1129,13 @@
       "miejsce_probki": "Warszawa (52.23, 21.01)",
       "zasieg": {
         "typ": "regionalny",
-        "kod": "PL",
-        "etykieta": "Królestwo Polskie (zabór rosyjski)",
-        "bbox": [
-          17.8,
-          50,
-          24.2,
-          54.5
-        ]
+        "etykieta": "Królestwo Polskie (zabór rosyjski, tzw. Karta Kwatermistrzostwa)",
+        "opis": "Topograficzna Karta Królestwa Polskiego 1:126 000 (1839–1843, Karta Kwatermistrzostwa). Obejmuje obszar Kongresówki (ok. 41% obecnej Polski).",
+        "procent_pl": 53,
+        "procent_total": 40,
+        "komorki_total": 249,
+        "maska_hex": "000001f000001f000001f00000ff00003ff000ffff007fffe007fffe007ffff007ffff007ffff007ffff007ffff007ffff003ffff000ffff000ffff000000000000000000000",
+        "clip_polska": false
       },
       "hash_definicji": "ee5c8162"
     },
@@ -1127,14 +1155,13 @@
       "miejsce_probki": "Warszawa (52.23, 21.01)",
       "zasieg": {
         "typ": "regionalny",
-        "kod": "PL",
-        "etykieta": "Ziemie dawnej Rzeczypospolitej",
-        "bbox": [
-          14,
-          48,
-          32,
-          57
-        ]
+        "etykieta": "Ziemie dawnej Rzeczypospolitej (Karta gen. Chrzanowskiego 1:300 000)",
+        "opis": "Karta dawnej Polski gen. Wojciecha Chrzanowskiego 1:300 000 (Paryż 1859 r.).",
+        "procent_pl": 100,
+        "procent_total": 89,
+        "komorki_total": 508,
+        "maska_hex": "07fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff3ffffff3ffffff3ffffff3ffffff10fffff00fffff00fffff00fffff00fffff",
+        "clip_polska": false
       },
       "hash_definicji": "43f76d3b"
     },
@@ -1154,14 +1181,13 @@
       "miejsce_probki": "Warszawa (52.23, 21.01)",
       "zasieg": {
         "typ": "regionalny",
-        "kod": "PL",
-        "etykieta": "Europa Środkowa (Niemcy i Polska)",
-        "bbox": [
-          10,
-          46,
-          26,
-          55.5
-        ]
+        "etykieta": "Europa Środkowa (Mapa Reymanna 1:200 000)",
+        "opis": "Reymann's Special-Karte von Central-Europa 1:200 000 (1806–1908).",
+        "procent_pl": 96,
+        "procent_total": 77,
+        "komorki_total": 466,
+        "maska_hex": "01ffc000fffffffffffffffffffeffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff1ffffff1ffffff07ffffe003fffe001c01e0000000",
+        "clip_polska": false
       },
       "hash_definicji": "f0f311d9"
     },
@@ -1181,14 +1207,13 @@
       "miejsce_probki": "Lublin (51.25, 22.57)",
       "zasieg": {
         "typ": "regionalny",
-        "kod": "PL",
-        "etykieta": "Zabór rosyjski (Polska centralna i wschodnia)",
-        "bbox": [
-          17.8,
-          50,
-          24.2,
-          54.5
-        ]
+        "etykieta": "Zabór rosyjski i tereny zachodnich guberni carskich",
+        "opis": "Rosyjska mapa dwuwiorstowa 1:84 000 (koniec XIX w. – początek XX w.).",
+        "procent_pl": 31,
+        "procent_total": 24,
+        "komorki_total": 192,
+        "maska_hex": "0000000000003c000003f000003f000007f00017ff0019fff001ffff001ffff001f97f000feff003feff003feff0039eff001bf7f0001cff0001e00000000000000000000000",
+        "clip_polska": false
       },
       "hash_definicji": "6161585b"
     },
@@ -3543,10 +3568,14 @@
       "obrazek": "obrazy/galeria/hydrograficzna_50__Raster.webp",
       "miejsce_probki": "Katowice / Śląsk (50.26, 19.02)",
       "zasieg": {
-        "typ": "kraj",
-        "kod": "PL",
-        "etykieta": "Cała Polska",
-        "bbox": null
+        "typ": "czesciowy",
+        "etykieta": "Częściowe (ok. 71% kraju — arkusze tematyczne)",
+        "opis": "Mapa hydrograficzna Polski 1:50 000 (GUGiK). Opracowano i zdigitalizowano ok. 68% kraju (brakujące arkusze w Polsce północnej i wschodniej).",
+        "procent_pl": 71,
+        "procent_total": 51,
+        "komorki_total": 354,
+        "maska_hex": "00f800003fff007ffffe0ffffff0fffffc0fffff1efffdc1effff0007ffff007ffe30e7fff0fe7ffb4fe3ffffff3fffff01ffffc007ffff003bfff0001ff600007f800000a00",
+        "clip_polska": true
       },
       "hash_definicji": "8842a887"
     },
@@ -3565,10 +3594,14 @@
       "obrazek": "obrazy/galeria/hydrograficzna_50__Raster_enviDMS_50k.webp",
       "miejsce_probki": "Katowice / Śląsk (50.26, 19.02)",
       "zasieg": {
-        "typ": "kraj",
-        "kod": "PL",
-        "etykieta": "Cała Polska",
-        "bbox": null
+        "typ": "czesciowy",
+        "etykieta": "Częściowe (ok. 32% kraju — edycja cyfrowa enviDMS)",
+        "opis": "Mapa hydrograficzna 1:50 000 w wersji wektorowo-rastrowej enviDMS. Dostępna dla ok. 34% kraju.",
+        "procent_pl": 32,
+        "procent_total": 24,
+        "komorki_total": 180,
+        "maska_hex": "00f800001fff0001fffc001fffc001fff8000c3f000040c00007c000003e000000e000071f0003ffb4003fffc003fff8001fff80007ff800039f000001f00000060000000000",
+        "clip_polska": true
       },
       "hash_definicji": "586121d6"
     },
@@ -3587,10 +3620,14 @@
       "obrazek": "obrazy/galeria/sozologiczna_50__0.webp",
       "miejsce_probki": "Katowice / Śląsk (50.26, 19.02)",
       "zasieg": {
-        "typ": "kraj",
-        "kod": "PL",
-        "etykieta": "Cała Polska",
-        "bbox": null
+        "typ": "czesciowy",
+        "etykieta": "Częściowe (ok. 68% kraju — arkusze ochrony środowiska)",
+        "opis": "Mapa sozologiczna Polski 1:50 000 (stan i degradacja środowiska). Obejmuje ok. 65% kraju.",
+        "procent_pl": 68,
+        "procent_total": 49,
+        "komorki_total": 322,
+        "maska_hex": "00f800003ff0007fff000ffff000fffe000ffff800ffff800ffff0007ffe0007ffe00e7ffb0fe7ffb4fe3ffffff3fffff01fffff003ffffe017fffc000fff80007ff00000a38",
+        "clip_polska": true
       },
       "hash_definicji": "43435433"
     },

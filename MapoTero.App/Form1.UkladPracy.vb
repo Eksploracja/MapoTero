@@ -31,6 +31,7 @@ Partial Public Class Form1
     Private _wysokoscDanychBelki As Integer
     Private _wysokoscParametrowBelki As Integer
     Private _banerZaznaczania As Label
+    Private _polePodkladuMapy As ComboBox
     Private _ikonaZaznaczeniaNormalna As Bitmap
     Private _ikonaZaznaczeniaAktywna As Bitmap
     Private ReadOnly _zasobyUkladu As New List(Of IDisposable)()
@@ -603,22 +604,28 @@ Partial Public Class Form1
         mapa.MouseWheelZoomType = MouseWheelZoomType.MousePositionWithoutCenter
         btnPowieksz.AccessibleName = "Przybliż mapę"
         btnPomniejsz.AccessibleName = "Oddal mapę"
-        Dim podklad As New ComboBox With {.DropDownStyle = ComboBoxStyle.DropDownList, .Width = Px(157),
-                                         .Font = _czcionkaRobocza, .AccessibleName = "Podkład mapy"}
-        podklad.Items.AddRange({"OpenStreetMap", "Google Maps", "Bing — zdjęcia lotnicze"})
+        _polePodkladuMapy = New ComboBox With {
+            .Name = "cmbPodkladMapy",
+            .DropDownStyle = ComboBoxStyle.DropDownList,
+            .Width = Px(160),
+            .Font = _czcionkaRobocza,
+            .AccessibleName = "Podkład mapy podglądu"
+        }
+        _polePodkladuMapy.Items.AddRange({"OpenStreetMap", "Google Maps", "Bing — zdjęcia lotnicze"})
+        ToolTip1.SetToolTip(_polePodkladuMapy, "Podkład mapy podglądu (OpenStreetMap, Google Maps, Bing). Nie jest pobierany jako warstwa sesji.")
         Dim poprzedniPodklad() As RadioButton = {rbOsm, rbGoogle, rbBing}
-        AddHandler podklad.SelectedIndexChanged,
+        AddHandler _polePodkladuMapy.SelectedIndexChanged,
             Sub()
-                If podklad.SelectedIndex >= 0 Then poprzedniPodklad(podklad.SelectedIndex).Checked = True
+                If _polePodkladuMapy.SelectedIndex >= 0 Then poprzedniPodklad(_polePodkladuMapy.SelectedIndex).Checked = True
             End Sub
         For i = 0 To poprzedniPodklad.Length - 1
             Dim indeks = i
             Dim opcja = poprzedniPodklad(indeks)
             opcja.Visible = False
             AddHandler opcja.CheckedChanged, Sub()
-                                                If opcja.Checked Then podklad.SelectedIndex = indeks
+                                                If opcja.Checked Then _polePodkladuMapy.SelectedIndex = indeks
                                             End Sub
-            If opcja.Checked Then podklad.SelectedIndex = indeks
+            If opcja.Checked Then _polePodkladuMapy.SelectedIndex = indeks
         Next
         Dim folderPobran As New Button With {.Name = "btnFolderPobran", .Text = "Folder pobrań",
                                             .Image = ZarejestrujIkone(IkonaOkna.Sesja, KolorAkcjiOkna), .TextImageRelation = TextImageRelation.ImageBeforeText}
@@ -626,9 +633,8 @@ Partial Public Class Form1
         ToolTip1.SetToolTip(folderPobran, "Otwórz folder download ze wszystkimi pobranymi sesjami.")
         _btnNowaSesja.Text = "Nowa sesja"
         _btnNowaSesja.TextImageRelation = TextImageRelation.ImageBeforeText
-        ' Wszystkie elementy paska mają wysokość przycisku i wspólną linię środka. Pierwszy przycisk zaczyna się w linii
-        ' lewej krawędzi mapy, a lista podkładu kończy się w linii prawej krawędzi sekcji prawego panelu. (Wyrównana do prawej
-        ' krawędzi mapy zabierała tyle miejsca, że na ekranie 1366 px pole wyszukiwania spadało do drugiego wiersza.)
+        ' Wszystkie elementy paska mają wysokość przycisku i wspólną linię środka. Przełącznik podkładu podglądu leży
+        ' w prawym górnym rogu mapy, oddzielony od paska narzędzi i panelu pobieranych warstw.
         Dim wysokosc = Px(30)
         For Each przycisk In {_btnNowaSesja, btnKreatorDolny, folderPobran, _przyciskZaznaczenia}
             StylPrzycisku(przycisk)
@@ -647,10 +653,6 @@ Partial Public Class Form1
         btnKreatorDolny.Margin = New Padding(0, 0, OdstepGrup, 0)
         _poleSzukaniaMiejsca.Height = wysokosc
         _poleSzukaniaMiejsca.Margin = New Padding(0, 0, OdstepGrup, 0)
-        Dim podpisPodkladu As New Label With {.Text = "Podkład", .Font = _czcionkaRobocza, .ForeColor = KolorPomocniczy,
-                                             .AutoSize = True}
-        podpisPodkladu.Margin = New Padding(0, (wysokosc - podpisPodkladu.PreferredHeight) \ 2, Px(4), 0)
-        podklad.Margin = New Padding(0, (wysokosc - podklad.Height) \ 2, 0, 0)
         Dim lewaCzesc = PasekPrzyciskow(_btnNowaSesja, btnKreatorDolny, _przyciskZaznaczenia, _poleSzukaniaMiejsca, folderPobran)
         lewaCzesc.WrapContents = True
         AddHandler lewaCzesc.Paint,
@@ -667,18 +669,12 @@ Partial Public Class Form1
                 End Using
             End Sub
         AddHandler lewaCzesc.Layout, Sub() lewaCzesc.Invalidate()
-        Dim prawaCzesc = PasekPrzyciskow(podpisPodkladu, podklad)
-        prawaCzesc.WrapContents = False
-        prawaCzesc.Margin = New Padding(Px(8), 0, 0, 0)
-        Dim pasek As New TableLayoutPanel With {.Name = "pasekNarzedzi", .ColumnCount = 2, .RowCount = 1, .Dock = DockStyle.Top,
+        Dim pasek As New TableLayoutPanel With {.Name = "pasekNarzedzi", .ColumnCount = 1, .RowCount = 1, .Dock = DockStyle.Top,
                                                 .AutoSize = True, .AutoSizeMode = AutoSizeMode.GrowAndShrink, .BackColor = TloPaneli}
         pasek.ColumnStyles.Add(New ColumnStyle(SizeType.Percent, 100))
-        pasek.ColumnStyles.Add(New ColumnStyle(SizeType.AutoSize))
         pasek.RowStyles.Add(New RowStyle(SizeType.AutoSize))
         pasek.Controls.Add(lewaCzesc, 0, 0)
-        pasek.Controls.Add(prawaCzesc, 1, 0)
         lewaCzesc.Dock = DockStyle.Fill
-        prawaCzesc.Anchor = AnchorStyles.Top Or AnchorStyles.Right
         Dim dopasujKrawedzie As Action =
             Sub()
                 Dim prawy = Math.Max(0, ClientSize.Width - Panel2.Right) + _prawyUklad.Padding.Right
@@ -693,6 +689,11 @@ Partial Public Class Form1
         Controls.Add(pasek)
         Controls.SetChildIndex(pasek, przedMenu)
         UlozZoomNaMapie()
+        Controls.Add(_polePodkladuMapy)
+        _polePodkladuMapy.BringToFront()
+        AddHandler mapa.SizeChanged, Sub() UstawPozycjePodkladuMapy()
+        AddHandler mapa.LocationChanged, Sub() UstawPozycjePodkladuMapy()
+        UstawPozycjePodkladuMapy()
         _banerZaznaczania = New Label With {
             .Name = "lblBanerZaznaczania", .AutoSize = True, .Visible = False,
             .BackColor = KolorAkcjiOkna, .ForeColor = Color.White, .Font = _czcionkaNaglowka,
@@ -706,9 +707,18 @@ Partial Public Class Form1
         Label67.Visible = False
     End Sub
 
+    Private Sub UstawPozycjePodkladuMapy()
+        If _polePodkladuMapy Is Nothing OrElse mapa Is Nothing Then Return
+        _polePodkladuMapy.Location = New Point(mapa.Right - _polePodkladuMapy.Width - Px(10), mapa.Top + Px(10))
+    End Sub
+
     Private Sub UstawPozycjeBaneraZaznaczania()
         If _banerZaznaczania Is Nothing Then Return
-        Dim x = mapa.Left + Math.Max(Px(58), (mapa.Width - _banerZaznaczania.Width) \ 2)
+        Dim lewaWolna = mapa.Left + Px(54)
+        Dim prawaWolna = If(_polePodkladuMapy IsNot Nothing AndAlso _polePodkladuMapy.Visible, _polePodkladuMapy.Left - Px(8), mapa.Right - Px(10))
+        Dim dostepna = prawaWolna - lewaWolna
+        Dim x = If(dostepna > _banerZaznaczania.Width, lewaWolna + (dostepna - _banerZaznaczania.Width) \ 2,
+                   mapa.Left + Math.Max(Px(54), (mapa.Width - _banerZaznaczania.Width) \ 2))
         Dim y = mapa.Top + Px(10)
         _banerZaznaczania.Location = New Point(x, y)
     End Sub

@@ -203,8 +203,11 @@
       let tekstOdznaki = "";
       let klasaOdznaki = "gw-odznaka gw-odznaka-zasieg";
       if (w.zasieg.typ === "regionalny") {
-        tekstOdznaki = "Region";
+        tekstOdznaki = w.zasieg.procent_pl ? "Region " + w.zasieg.procent_pl + "%" : "Region";
         klasaOdznaki += " gw-zasieg-region";
+      } else if (w.zasieg.typ === "czesciowy") {
+        tekstOdznaki = w.zasieg.procent_pl ? w.zasieg.procent_pl + "%" : "Część";
+        klasaOdznaki += " gw-zasieg-czesciowy";
       } else if (w.zasieg.typ === "zagranica") {
         const k = w.zasieg.kod;
         tekstOdznaki = k === "DE-BB" ? "Brandenburgia" : (k === "DE-SN" ? "Saksonia" : (k === "DE" ? "Niemcy" : (k === "CZ" ? "Czechy" : (k === "SK" ? "Słowacja" : (k === "LT" ? "Litwa" : "Zagranica")))));
@@ -377,17 +380,53 @@
     };
   }
 
+  function dekodujMaskeHex(maskaHex) {
+    if (!maskaHex || typeof maskaHex !== "string" || maskaHex.length !== 140) return null;
+    const komorki = [];
+    const cols = 28;
+    const rows = 20;
+    const dLon = 10.2 / cols;
+    const dLat = 6.0 / rows;
+    for (let b = 0; b < 70; b++) {
+      const bajt = parseInt(maskaHex.substr(b * 2, 2), 16);
+      if (isNaN(bajt)) continue;
+      for (let bit = 0; bit < 8; bit++) {
+        if ((bajt & (1 << (7 - bit))) !== 0) {
+          const idx = b * 8 + bit;
+          const r = Math.floor(idx / cols);
+          const c = idx % cols;
+          const lon1 = 14.0 + c * dLon;
+          const lon2 = lon1 + dLon;
+          const latTop = 55.0 - r * dLat;
+          const latBottom = latTop - dLat;
+          const p1 = geoDoSvg(lon1, latTop);
+          const p2 = geoDoSvg(lon2, latBottom);
+          komorki.push({
+            x: Math.min(p1.x, p2.x),
+            y: Math.min(p1.y, p2.y),
+            w: Math.abs(p2.x - p1.x) + 0.35,
+            h: Math.abs(p2.y - p1.y) + 0.35
+          });
+        }
+      }
+    }
+    return komorki;
+  }
+
   function opisZasieguDlaTabeli(w) {
     const z = w.zasieg || { typ: "kraj", etykieta: "Cała Polska" };
-    if (z.typ === "kraj") return "Cała Polska (zasięg ogólnokrajowy)";
+    if (z.typ === "kraj") return "Cała Polska (zasięg ogólnokrajowy 100%)";
     if (z.typ === "zagranica") return z.etykieta || "Zasięg zagraniczny";
     if (z.typ === "morski") return z.etykieta || "Morze Bałtyckie";
     if (z.typ === "globalny") return "Globalny (cały świat)";
+    if (z.typ === "czesciowy") {
+      let tekst = z.etykieta || "Zasięg częściowy";
+      if (z.procent_pl) tekst += " · Pokrycie Polski: ok. " + z.procent_pl + "%";
+      return tekst;
+    }
     if (z.typ === "regionalny") {
       let tekst = z.etykieta || "Zasięg regionalny";
-      if (z.bbox && Array.isArray(z.bbox) && z.bbox.length === 4) {
-        tekst += " · BBOX: [" + z.bbox.join(", ") + "]";
-      }
+      if (z.procent_pl) tekst += " · Obszar w Polsce: ok. " + z.procent_pl + "%";
       return tekst;
     }
     return z.etykieta || "Cała Polska";
@@ -397,12 +436,14 @@
     const z = w.zasieg || { typ: "kraj", etykieta: "Cała Polska" };
     const typ = z.typ || "kraj";
     const kod = z.kod || "";
+    const komorki = z.maska_hex ? dekodujMaskeHex(z.maska_hex) : null;
+    const maKomorki = komorki && komorki.length > 0;
 
     const wrap = el("div", "gw-widok-zasiegu-kontener");
 
     let klasaPL = "gw-mapa-kraj gw-mapa-polska";
-    if (typ === "kraj") klasaPL += " gw-mapa-aktywny";
-    else if (typ === "regionalny") klasaPL += " gw-mapa-baza-regionalna";
+    if (typ === "kraj" && !maKomorki) klasaPL += " gw-mapa-aktywny";
+    else if (typ === "regionalny" || typ === "czesciowy" || maKomorki) klasaPL += " gw-mapa-baza-regionalna";
 
     let klasaBaltyk = "gw-mapa-akwen gw-mapa-baltyk";
     if (typ === "morski") klasaBaltyk += " gw-mapa-aktywny-morze";
@@ -431,6 +472,13 @@
 
     let svgHtml = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="25 0 315 275" class="gw-zasieg-svg" role="img" aria-label="Mapa zasięgu warstwy">';
 
+    // Defs z clipPath obrysu Polski
+    svgHtml += '<defs>';
+    svgHtml += '<clipPath id="gw-clip-polska">';
+    svgHtml += '<path d="' + MAPA_GEOM.paths.PL + '" />';
+    svgHtml += '</clipPath>';
+    svgHtml += '</defs>';
+
     // Tło akwenu Bałtyku
     svgHtml += '<path d="' + MAPA_GEOM.paths.BALTYK + '" class="' + klasaBaltyk + '" />';
 
@@ -442,8 +490,20 @@
     svgHtml += '<path d="' + MAPA_GEOM.paths.SK + '" class="' + klasaSK + '" />';
     svgHtml += '<path d="' + MAPA_GEOM.paths.LT + '" class="' + klasaLT + '" />';
 
-    // Polska
+    // Podkład Polski
     svgHtml += '<path d="' + MAPA_GEOM.paths.PL + '" class="' + klasaPL + '" />';
+
+    // RYSOWANIE KOMÓREK RZECZYWISTEGO ZASIĘGU
+    if (maKomorki) {
+      const uzyjClip = z.clip_polska !== false;
+      svgHtml += '<g class="gw-mapa-komorki-grupa"' + (uzyjClip ? ' clip-path="url(#gw-clip-polska)"' : '') + '>';
+      komorki.forEach(function (k) {
+        svgHtml += '<rect x="' + k.x.toFixed(1) + '" y="' + k.y.toFixed(1) + '" width="' + k.w.toFixed(1) + '" height="' + k.h.toFixed(1) + '" class="gw-mapa-komorka" />';
+      });
+      svgHtml += '</g>';
+      // Obrys granicy Polski na wierzchu komórek
+      svgHtml += '<path d="' + MAPA_GEOM.paths.PL + '" fill="none" stroke="#475569" stroke-width="1.2" />';
+    }
 
     // Rzeki główne
     svgHtml += '<path d="' + MAPA_GEOM.paths.WISLA + '" class="gw-mapa-rzeka" fill="none" />';
@@ -467,8 +527,8 @@
       });
     }
 
-    // Zasięg regionalny: prostokąt BBOX lub wyznaczone miasta TrueOrtho
-    if (typ === "regionalny") {
+    // Dodatkowy prostokąt BBOX (dla warstw bez maski siatkowej)
+    if (typ === "regionalny" && !maKomorki) {
       if (z.bbox && Array.isArray(z.bbox) && z.bbox.length === 4) {
         const p1 = geoDoSvg(z.bbox[0], z.bbox[3]); // minLon, maxLat
         const p2 = geoDoSvg(z.bbox[2], z.bbox[1]); // maxLon, minLat
@@ -479,14 +539,6 @@
         svgHtml += '<rect x="' + x.toFixed(1) + '" y="' + y.toFixed(1) + '" width="' + wRect.toFixed(1) + '" height="' + hRect.toFixed(1) + '" class="gw-mapa-bbox" rx="3" ry="3">';
         svgHtml += '<title>' + escapeHtml(z.etykieta || "Obszar warstwy") + '</title>';
         svgHtml += '</rect>';
-      } else if (w.zbior && w.zbior.indexOf("PrawdziwaOrtofotomapa") >= 0) {
-        MAPA_GEOM.miastaTrueOrtho.forEach(function (m) {
-          svgHtml += '<g class="gw-mapa-punkt-trueortho" transform="translate(' + m.x.toFixed(1) + ',' + m.y.toFixed(1) + ')">';
-          svgHtml += '<circle r="6" class="gw-punkt-pierscien" />';
-          svgHtml += '<circle r="3" class="gw-punkt-kropka" />';
-          svgHtml += '<text y="-8" text-anchor="middle" class="gw-punkt-etykieta">' + m.n + '</text>';
-          svgHtml += '</g>';
-        });
       }
     }
 
@@ -509,28 +561,37 @@
 
     // Karta informacyjna pod mapą
     const info = el("div", "gw-zasieg-info-karta");
-    const ikona = typ === "morski" ? "🌊" : (typ === "zagranica" ? "🌐" : (typ === "regionalny" ? "📍" : (typ === "globalny" ? "🌍" : "🇵🇱")));
+    const ikona = typ === "morski" ? "🌊" : (typ === "zagranica" ? "🌐" : (typ === "czesciowy" ? "📊" : (typ === "regionalny" ? "📍" : (typ === "globalny" ? "🌍" : "🇵🇱"))));
 
     const infoTytul = el("div", "gw-zasieg-info-tytul");
     infoTytul.appendChild(el("span", "gw-zasieg-info-ikona", ikona));
     infoTytul.appendChild(el("strong", null, z.etykieta || "Cała Polska"));
     info.appendChild(infoTytul);
 
-    let opisSzczegolowy = "";
-    if (typ === "kraj") {
-      opisSzczegolowy = "Warstwa obejmuje obszar całej Polski (pokrycie ogólnokrajowe).";
-    } else if (typ === "zagranica") {
-      opisSzczegolowy = "Urzędowa warstwa zagraniczna (" + (z.kod || "sąsiedzi") + "). Przydatna przy planowaniu tras i pobieraniu map pogranicza.";
-    } else if (typ === "morski") {
-      opisSzczegolowy = "Polskie obszary morskie, wyłączna strefa ekonomiczna (WZE) lub międzynarodowe dane batymetryczne Bałtyku.";
-    } else if (typ === "regionalny") {
-      if (z.bbox) {
+    // Wskaźnik procentowy rzeczywistego pokrycia
+    if (z.procent_pl !== undefined) {
+      const badgePkt = el("div", "gw-zasieg-procent-wiersz");
+      const klasaBadge = z.procent_pl >= 85 ? "gw-zasieg-procent-pelne" : (z.procent_pl >= 30 ? "gw-zasieg-procent-czesciowe" : "gw-zasieg-procent-regionalne");
+      const badge = el("span", "gw-zasieg-procent-odznaka " + klasaBadge, "Rzeczywiste pokrycie Polski: ok. " + z.procent_pl + "%");
+      badgePkt.appendChild(badge);
+      info.appendChild(badgePkt);
+    }
+
+    let opisSzczegolowy = z.opis || "";
+    if (!opisSzczegolowy) {
+      if (typ === "kraj") {
+        opisSzczegolowy = "Warstwa obejmuje obszar całej Polski (pokrycie ogólnokrajowe 100%).";
+      } else if (typ === "zagranica") {
+        opisSzczegolowy = "Urzędowa warstwa zagraniczna (" + (z.kod || "sąsiedzi") + "). Przydatna przy planowaniu tras i pobieraniu map pogranicza.";
+      } else if (typ === "morski") {
+        opisSzczegolowy = "Polskie obszary morskie, wyłączna strefa ekonomiczna (WZE) lub międzynarodowe dane batymetryczne Bałtyku.";
+      } else if (typ === "czesciowy") {
+        opisSzczegolowy = "Pokrycie częściowe — mapa dostępna dla wydanych arkuszy.";
+      } else if (typ === "regionalny") {
         opisSzczegolowy = "Zasięg regionalny ograniczony do wybranego obszaru historycznego lub geograficznego.";
-      } else {
-        opisSzczegolowy = "Zasięg regionalny obejmujący wybrane duże miasta i aglomeracje.";
+      } else if (typ === "globalny") {
+        opisSzczegolowy = "Warstwa o zasięgu globalnym (pokrycie całego świata z serwerów otwartych / międzynarodowych).";
       }
-    } else if (typ === "globalny") {
-      opisSzczegolowy = "Warstwa o zasięgu globalnym (pokrycie całego świata z serwerów otwartych / międzynarodowych).";
     }
     info.appendChild(el("div", "gw-zasieg-info-opis", opisSzczegolowy));
 
@@ -809,14 +870,18 @@
         tabZasieg.classList.add("aktywny");
         tabZasieg.setAttribute("aria-selected", "true");
         modalPanelProbka.hidden = true;
+        modalPanelProbka.style.display = "none";
         modalPanelZasieg.hidden = false;
+        modalPanelZasieg.style.display = "flex";
       } else {
         tabZasieg.classList.remove("aktywny");
         tabZasieg.setAttribute("aria-selected", "false");
         tabProbka.classList.add("aktywny");
         tabProbka.setAttribute("aria-selected", "true");
         modalPanelZasieg.hidden = true;
+        modalPanelZasieg.style.display = "none";
         modalPanelProbka.hidden = false;
+        modalPanelProbka.style.display = "flex";
       }
     }
 
