@@ -10,6 +10,8 @@ Imports System.Windows.Forms
 Imports Xunit
 
 ''' <summary>Położenie przycisku „Pomoc” dodawanego w kodzie do okien narzędzi (PomocProgramu.DodajPrzyciskPomocy).</summary>
+<Collection("OknaKreatora")>
+<Trait("Kategoria", "UI")>
 Public Class PrzyciskPomocyTesty
 
     ''' <summary>Okna z przyciskiem Pomoc; okno dodawania serwera w obu krokach (katalog usług i lista warstw).</summary>
@@ -48,14 +50,14 @@ Public Class PrzyciskPomocyTesty
     <Fact>
     Public Sub PrzyciskPomocyNieZaslaniaKontrolek()
         Dim bledy As New List(Of String)
-        Dim t As New Thread(
+        OknoTestowe.WykonywajNaSta(
             Sub()
                 For Each okno In Okna()
                     Try
                         Using f = okno.Utworz()
                             f.StartPosition = FormStartPosition.Manual
                             f.Location = Point.Empty
-                            f.Show()
+                            OknoTestowe.Pokaz(f)
                             Application.DoEvents()
                             Dim pomoc = f.Controls("btnPomoc")
                             If pomoc Is Nothing OrElse Not pomoc.Visible Then
@@ -84,9 +86,6 @@ Public Class PrzyciskPomocyTesty
                     End Try
                 Next
             End Sub)
-        t.SetApartmentState(ApartmentState.STA)
-        t.Start()
-        t.Join()
         Assert.True(bledy.Count = 0, String.Join(Environment.NewLine, bledy))
     End Sub
 

@@ -19,7 +19,7 @@ jobs:
           dotnet-version: 10.0.x
 
       - name: Testy jednostkowe
-        run: dotnet test MapoTero.Tests/MapoTero.Tests.vbproj -c Release
+        run: dotnet test MapoTero.Tests/MapoTero.Tests.vbproj -c Release --filter "Kategoria!=Siec&Kategoria!=Ciezkie"
 
       - name: Kompilacja programu
         run: dotnet publish MapoTero.App/MapoTero_v3.vbproj -c Release -o MapoTero_SingleFile

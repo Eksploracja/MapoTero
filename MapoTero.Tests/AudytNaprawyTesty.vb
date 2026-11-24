@@ -20,6 +20,7 @@ Imports Xunit
 ''' <summary>
 ''' Testy regresyjne dla poprawek wykrytych podczas audytu (GeoTIFF, współrzędne, kreator, WMS/XYZ, mieszanie, UI).
 ''' </summary>
+<Collection("OknaKreatora")>
 Public Class AudytNaprawyTesty
 
     Private NotInheritable Class MockTileHandler
@@ -51,19 +52,7 @@ Public Class AudytNaprawyTesty
     End Class
 
     Private Shared Sub WWatkuSta(akcja As Action)
-        Dim blad As Exception = Nothing
-        Dim t As New Thread(
-            Sub()
-                Try
-                    akcja()
-                Catch ex As Exception
-                    blad = ex
-                End Try
-            End Sub)
-        t.SetApartmentState(ApartmentState.STA)
-        t.Start()
-        t.Join()
-        If blad IsNot Nothing Then Throw New Exception(blad.Message, blad)
+        OknoTestowe.WykonywajNaSta(akcja)
     End Sub
 
     <Fact>
@@ -259,6 +248,7 @@ Public Class AudytNaprawyTesty
     End Sub
 
     <Fact>
+    <Trait("Kategoria", "UI")>
     Public Sub FormZaawansowanyMbtiles_ColTrybZawieraRzezbeTerenu()
         WWatkuSta(
             Sub()
@@ -269,6 +259,7 @@ Public Class AudytNaprawyTesty
     End Sub
 
     <Fact>
+    <Trait("Kategoria", "UI")>
     Public Sub FormZasiegXY_OdrzucaNieprawidloweZnakiIWylaczaZaokraglanieWgs84()
         WWatkuSta(
             Sub()

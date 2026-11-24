@@ -14,6 +14,7 @@ Imports MapoTero
 Imports MapoTero.Core
 Imports Xunit
 
+<Trait("Kategoria", "Wolne")>
 Public Class OziTesty
 
     <Fact>
@@ -614,10 +615,14 @@ Public Class OziTesty
                 Assert.InRange(sy / licz, v - 2.0, v + 2.0)
             End Using
         Finally
-            System.Data.SQLite.SQLiteConnection.ClearAllPools()
-            GC.Collect()
-            GC.WaitForPendingFinalizers()
-            Directory.Delete(folder, True)
+            Try
+                Directory.Delete(folder, True)
+            Catch ex As Exception When TypeOf ex Is IOException OrElse TypeOf ex Is UnauthorizedAccessException
+                System.Data.SQLite.SQLiteConnection.ClearAllPools()
+                GC.Collect()
+                GC.WaitForPendingFinalizers()
+                Directory.Delete(folder, True)
+            End Try
         End Try
     End Sub
 
@@ -669,10 +674,14 @@ Public Class OziTesty
             System.Data.SQLite.SQLiteConnection.ClearAllPools()
             Assert.Empty(Directory.GetFiles(folder, "wynik*"))
         Finally
-            System.Data.SQLite.SQLiteConnection.ClearAllPools()
-            GC.Collect()
-            GC.WaitForPendingFinalizers()
-            Directory.Delete(folder, True)
+            Try
+                Directory.Delete(folder, True)
+            Catch ex As Exception When TypeOf ex Is IOException OrElse TypeOf ex Is UnauthorizedAccessException
+                System.Data.SQLite.SQLiteConnection.ClearAllPools()
+                GC.Collect()
+                GC.WaitForPendingFinalizers()
+                Directory.Delete(folder, True)
+            End Try
         End Try
     End Sub
 

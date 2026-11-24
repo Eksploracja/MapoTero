@@ -9,21 +9,11 @@ Imports Xunit
 
 ''' <summary>Układ menu Pomoc i przycisk wsparcia w oknie O programie.</summary>
 <Collection("OknaKreatora")>
+<Trait("Kategoria", "UI")>
 Public Class MenuPomocTesty
 
     Private Shared Sub WWatkuSta(akcja As Action)
-        Dim blad As Exception = Nothing
-        Dim t As New Thread(Sub()
-                                Try
-                                    akcja()
-                                Catch ex As Exception
-                                    blad = ex
-                                End Try
-                            End Sub)
-        t.SetApartmentState(ApartmentState.STA)
-        t.Start()
-        t.Join()
-        If blad IsNot Nothing Then Throw New Exception(blad.Message, blad)
+        OknoTestowe.WykonywajNaSta(akcja)
     End Sub
 
     ''' <summary>

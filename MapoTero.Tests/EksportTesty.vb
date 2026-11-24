@@ -13,6 +13,7 @@ Imports MapoTero
 Imports MapoTero.Core
 Imports Xunit
 
+<Trait("Kategoria", "Wolne")>
 Public Class EksportTesty
 
     ''' <summary>Siatka 2 x 2 segmenty po 256 px, piksel 1 m (PL-1992, okolice Warszawy).</summary>
@@ -27,10 +28,15 @@ Public Class EksportTesty
     End Function
 
     Private Shared Sub Usun(folder As String)
-        SQLiteConnection.ClearAllPools()
-        GC.Collect()
-        GC.WaitForPendingFinalizers()
-        If Directory.Exists(folder) Then Directory.Delete(folder, True)
+        If Not Directory.Exists(folder) Then Exit Sub
+        Try
+            Directory.Delete(folder, True)
+        Catch ex As Exception When TypeOf ex Is IOException OrElse TypeOf ex Is UnauthorizedAccessException
+            SQLiteConnection.ClearAllPools()
+            GC.Collect()
+            GC.WaitForPendingFinalizers()
+            Directory.Delete(folder, True)
+        End Try
     End Sub
 
     ''' <summary>Zapisuje 4 segmenty; rysuj - rysowanie zawartości segmentu (wiersz, kolumna) na przezroczystym tle.</summary>
@@ -589,9 +595,9 @@ Public Class EksportTesty
         'z podziałem na tomy limit kafli dotyczy jednego tomu - mapa nie może tracić rozdzielczości
         Dim folder = NowyFolder()
         Try
-            For w = 1 To 3
-                For k = 1 To 3
-                    Using bmp As New Bitmap(1000, 1000, PixelFormat.Format24bppRgb)
+            For w = 1 To 2
+                For k = 1 To 2
+                    Using bmp As New Bitmap(600, 600, PixelFormat.Format24bppRgb)
                         Using g = Graphics.FromImage(bmp)
                             g.Clear(Color.FromArgb(40 * w, 60 * k, 90))
                         End Using
@@ -599,16 +605,16 @@ Public Class EksportTesty
                     End Using
                 Next
             Next
-            Dim siatka As New Siatka(New Zasieg(270000, 539800, 273000, 542800), 1.0, 1000)
+            Dim siatka As New Siatka(New Zasieg(270000, 539800, 271200, 541000), 1.0, 600)
             Dim zrodlo As New ZrodloSegmentow(folder, "_", StylNumeracji.WierszKolumna, "jpg", siatka)
             Dim plik = folder & "mapa.kmz"
             Dim z = Zadanie(RodzajEksportu.KmzGarmin, zrodlo, plik)
-            z.MaksKafli = 4
+            z.MaksKafli = 2
             z.PodzialNaTomy = True
 
             Dim plan = EksportMapy.PlanKmz(z)
             Assert.True(plan.Pomniejszenie <= 1.001)
-            Assert.True(plan.LiczbaKafli > 4)
+            Assert.True(plan.LiczbaKafli > 2)
 
             EksportMapy.Eksportuj(z, Nothing, CancellationToken.None)
 
@@ -619,7 +625,7 @@ Public Class EksportTesty
             For Each t In tomy
                 Using zip = ZipFile.OpenRead(t)
                     Dim kafle = zip.Entries.Where(Function(e) e.FullName.StartsWith("files/")).Count()
-                    Assert.InRange(kafle, 1, 4)
+                    Assert.InRange(kafle, 1, 2)
                     lacznie += kafle
                 End Using
             Next
@@ -638,16 +644,18 @@ Public Class EksportTesty
         Dim folder = NowyFolder()
         Try
             Dim los As New Random(3)
-            UtworzSegmenty(folder, "png", Sub(g, w, k)
-                                              For y = 0 To 255
-                                                  For x = 0 To 255
-                                                      Dim v = los.Next(40, 216)
-                                                      Using pedzel As New SolidBrush(Color.FromArgb(v, v, v))
-                                                          g.FillRectangle(pedzel, x, y, 1, 1)
-                                                      End Using
-                                                  Next
-                                              Next
-                                          End Sub)
+            For w = 1 To 2
+                For k = 1 To 2
+                    Dim piksele(256 * 256 - 1) As Integer
+                    For i = 0 To piksele.Length - 1
+                        Dim v = los.Next(40, 216)
+                        piksele(i) = (&HFF << 24) Or (v << 16) Or (v << 8) Or v
+                    Next
+                    Using bmp = NakladanieObrazow.DoBitmapy(piksele, 256, 256)
+                        bmp.Save(folder & "_" & w.ToString("D2") & "_" & k.ToString("D2") & ".png", ImageFormat.Png)
+                    End Using
+                Next
+            Next
             Dim warstwy As New List(Of WarstwaEksportu) From {New WarstwaEksportu With {.Zrodlo = Zrodlo(folder, "png"), .Uklad = UkladWspolrzednych.PL1992}}
             Dim s = Siatka2x2()
             Dim korekta As New OpcjeKorekcjiMip()

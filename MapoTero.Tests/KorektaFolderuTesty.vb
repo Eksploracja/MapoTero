@@ -8,6 +8,7 @@ Imports System.Windows.Forms
 Imports MapoTero.Core
 Imports Xunit
 
+<Collection("OknaKreatora")>
 Public Class KorektaFolderuTesty
 
     ''' <summary>
@@ -29,31 +30,23 @@ Public Class KorektaFolderuTesty
     ''' wpisany wcześniej folder folderem bieżącej sesji.)
     ''' </summary>
     <Fact>
+    <Trait("Kategoria", "UI")>
     Public Sub FolderPoczatkowyJestFolderemZrodlowym()
         Dim folder = Path.Combine(Path.GetTempPath(), "mapotero_korekta_" & Guid.NewGuid().ToString("N"))
         Directory.CreateDirectory(folder)
         Dim zrodlo As String = Nothing, cel As String = Nothing
-        Dim blad As Exception = Nothing
         Try
-            Dim t As New Thread(
+            OknoTestowe.WykonywajNaSta(
                 Sub()
-                    Try
-                        Using f As New MapoTero.FormKorektaFolderu() With {.FolderPoczatkowy = folder}
-                            f.StartPosition = FormStartPosition.Manual
-                            f.Show()
-                            Application.DoEvents()
-                            zrodlo = f.txtFolderZrodlo.Text
-                            cel = f.txtFolderCel.Text
-                            f.Close()
-                        End Using
-                    Catch ex As Exception
-                        blad = ex
-                    End Try
+                    Using f As New MapoTero.FormKorektaFolderu() With {.FolderPoczatkowy = folder}
+                        f.StartPosition = FormStartPosition.Manual
+                        OknoTestowe.Pokaz(f)
+                        Application.DoEvents()
+                        zrodlo = f.txtFolderZrodlo.Text
+                        cel = f.txtFolderCel.Text
+                        f.Close()
+                    End Using
                 End Sub)
-            t.SetApartmentState(ApartmentState.STA)
-            t.Start()
-            t.Join()
-            If blad IsNot Nothing Then Throw blad
             Assert.Equal(folder, zrodlo)
             Assert.Equal(Path.Combine(folder, "korekta"), cel)
         Finally

@@ -187,6 +187,23 @@ Public Class FormKreatorMapy
         End Get
     End Property
 
+    Protected Overrides ReadOnly Property ShowWithoutActivation As Boolean
+        Get
+            If Form1.TrybOkienBezAktywacji Then Return True
+            Return MyBase.ShowWithoutActivation
+        End Get
+    End Property
+
+    Protected Overrides ReadOnly Property CreateParams As CreateParams
+        Get
+            Dim cp = MyBase.CreateParams
+            If Form1.TrybOkienBezAktywacji Then
+                cp.ExStyle = cp.ExStyle Or &H8000000 Or &H80 Or &H20
+            End If
+            Return cp
+        End Get
+    End Property
+
     Public Sub New(form1 As Form1)
         ' Styl przed InitializeComponent - zdarzenia kontrolek z projektanta już z niego korzystają
         If form1 IsNot Nothing Then
@@ -195,12 +212,16 @@ Public Class FormKreatorMapy
             _styl = New StylKreatora()
         End If
         InitializeComponent()
+        If MapoTero.Form1.TrybOkienBezAktywacji Then
+            ShowInTaskbar = False
+            Opacity = 0
+        End If
         _form1 = form1
 
         PrzygotujDodatkoweKontrolki()
 
-        ' Plik trasy GPX/KML/KMZ można przeciągnąć na okno w kroku 2
-        WlaczUpuszczanie(Me)
+        ' Plik trasy GPX/KML/KMZ można przeciągnąć na okno w kroku 2 (w testach bez rejestracji OLE RegisterDragDrop)
+        If Not MapoTero.Form1.TrybTestowyBezSieci Then WlaczUpuszczanie(Me)
 
         ' Klawisz Esc zamyka okno
         PomocProgramu.ZamykanieKlawiszemEsc(Me, True)
@@ -1273,6 +1294,12 @@ Public Class FormKreatorMapy
             Exit Sub
         End If
 
+        If Form1.TrybTestowyBezSieci Then
+            lblStanPodgladuStyl.Text = "Podgląd offline (tryb testowy)"
+            lblStanPodgladuStyl.ForeColor = Color.FromArgb(120, 120, 120)
+            Exit Sub
+        End If
+
         Try
             Dim zasiegProbki = _silnikPodgladuStylu.ZasiegProbki()
             If Not zasiegProbki.HasValue Then
@@ -1771,9 +1798,11 @@ Public Class FormKreatorMapy
         _form1.Enabled = True
         PrzywrocZMinimalizacji(_form1)
         _form1.Show()
-        _form1.Activate()
-        _form1.BringToFront()
-        SetForegroundWindow(_form1.Handle)
+        If Not Form1.TrybOkienBezAktywacji Then
+            _form1.Activate()
+            _form1.BringToFront()
+            SetForegroundWindow(_form1.Handle)
+        End If
 
         Me.Hide()
 
@@ -1798,7 +1827,7 @@ Public Class FormKreatorMapy
                                              If Me.IsDisposed Then
                                                  If _form1 IsNot Nothing AndAlso Not _form1.IsDisposed Then
                                                      _form1.Enabled = True
-                                                     _form1.Activate()
+                                                     If Not Form1.TrybOkienBezAktywacji Then _form1.Activate()
                                                  End If
                                                  Exit Sub
                                              End If
@@ -1807,13 +1836,15 @@ Public Class FormKreatorMapy
                                              If Me.WindowState = FormWindowState.Minimized Then
                                                  Me.WindowState = FormWindowState.Normal
                                              End If
-                                             Me.BringToFront()
-                                             Me.Activate()
-                                             SetForegroundWindow(Me.Handle)
+                                             If Not Form1.TrybOkienBezAktywacji Then
+                                                 Me.BringToFront()
+                                                 Me.Activate()
+                                                 SetForegroundWindow(Me.Handle)
+                                             End If
                                          Catch ex As Exception
                                              If _form1 IsNot Nothing AndAlso Not _form1.IsDisposed Then
                                                  _form1.Enabled = True
-                                                 _form1.Activate()
+                                                 If Not Form1.TrybOkienBezAktywacji Then _form1.Activate()
                                              End If
                                          End Try
                                      End Sub
@@ -1982,6 +2013,12 @@ Public Class FormKreatorMapy
             ZastosujZoomObszaru()
             lblStanPodgladuObszar.Text = If(czyWzorcowy, "Przykład stylu", "Podgląd gotowy")
             lblStanPodgladuObszar.ForeColor = Color.FromArgb(0, 130, 40)
+            Exit Sub
+        End If
+
+        If Form1.TrybTestowyBezSieci Then
+            lblStanPodgladuObszar.Text = "Podgląd offline (tryb testowy)"
+            lblStanPodgladuObszar.ForeColor = Color.FromArgb(120, 120, 120)
             Exit Sub
         End If
 
@@ -3082,9 +3119,11 @@ Public Class FormKreatorMapy
                 _form1.UstawKorytarz(korytarz)
             End If
             PrzywrocZMinimalizacji(_form1)
-            SetForegroundWindow(_form1.Handle)
-            _form1.Activate()
-            _form1.BringToFront()
+            If Not Form1.TrybOkienBezAktywacji Then
+                SetForegroundWindow(_form1.Handle)
+                _form1.Activate()
+                _form1.BringToFront()
+            End If
             Me.DialogResult = DialogResult.OK
             Me.Close()
         End If

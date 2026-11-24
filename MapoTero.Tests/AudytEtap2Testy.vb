@@ -16,22 +16,11 @@ Imports Xunit
 
 ''' <summary>Testy poprawek z drugiego przebiegu audytu (etap 2, znaleziska E2-xx w docs-ai/audyt/rejestr.md).</summary>
 <Collection("OknaKreatora")>
+<Trait("Kategoria", "UI")>
 Public Class AudytEtap2Testy
 
     Private Shared Sub WWatkuSta(akcja As Action)
-        Dim blad As Exception = Nothing
-        Dim t As New Thread(
-            Sub()
-                Try
-                    akcja()
-                Catch ex As Exception
-                    blad = ex
-                End Try
-            End Sub)
-        t.SetApartmentState(ApartmentState.STA)
-        t.Start()
-        t.Join()
-        If blad IsNot Nothing Then Throw blad
+        OknoTestowe.WykonywajNaSta(akcja)
     End Sub
 
     Private Shared Function NowyFolder() As String

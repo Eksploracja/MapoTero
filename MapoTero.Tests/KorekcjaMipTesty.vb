@@ -468,37 +468,29 @@ Public Class KorekcjaMipTesty
     ''' Okno: wybór profilu „Brak” wyłącza korektę także w podglądzie.
     ''' </summary>
     <Fact>
+    <Trait("Kategoria", "UI")>
     Public Sub OknoPodgladu_ProfileMieszczaSieWZakresachSuwakow_BrakWylaczaKorekte()
         Dim bledy As New List(Of String)
-        Dim t As New Threading.Thread(
+        OknoTestowe.WykonywajNaSta(
             Sub()
-                Try
-                    For Each p In DirectCast([Enum].GetValues(GetType(ProfilKorektyRastra)), ProfilKorektyRastra())
-                        Dim o As New OpcjeKorekcjiMip()
-                        o.UstawWgProfilu(p)
-                        Using f As New MapoTero.FormPodgladMip(o, CType(Nothing, Bitmap))
-                            f.ShowInTaskbar = False
-                            f.Opacity = 0
-                            f.Show()
-                            System.Windows.Forms.Application.DoEvents()
-                            Dim w = f.Opcje
-                            If Math.Abs(w.Gamma - o.Gamma) > 0.001 OrElse Math.Abs(w.Kontrast - o.Kontrast) > 0.001 OrElse
-                               Math.Abs(w.Nasycenie - o.Nasycenie) > 0.001 OrElse Math.Abs(w.Wyostrzanie - o.Wyostrzanie) > 0.001 Then
-                                bledy.Add($"{p}: suwaki zmieniły wartości profilu ({w.Gamma}, {w.Kontrast}, {w.Nasycenie}, {w.Wyostrzanie})")
-                            End If
-                            f.cmbProfil.SelectedIndex = CInt(ProfilKorektyRastra.Brak)
-                            System.Windows.Forms.Application.DoEvents()
-                            If f.Opcje.Wlaczona Then bledy.Add($"{p}: po wyborze profilu Brak korekta w podglądzie nadal włączona")
-                            f.Close()
-                        End Using
-                    Next
-                Catch ex As Exception
-                    bledy.Add(ex.GetType().Name & ": " & ex.Message)
-                End Try
+                For Each p In DirectCast([Enum].GetValues(GetType(ProfilKorektyRastra)), ProfilKorektyRastra())
+                    Dim o As New OpcjeKorekcjiMip()
+                    o.UstawWgProfilu(p)
+                    Using f As New MapoTero.FormPodgladMip(o, CType(Nothing, Bitmap))
+                        OknoTestowe.Pokaz(f)
+                        System.Windows.Forms.Application.DoEvents()
+                        Dim w = f.Opcje
+                        If Math.Abs(w.Gamma - o.Gamma) > 0.001 OrElse Math.Abs(w.Kontrast - o.Kontrast) > 0.001 OrElse
+                           Math.Abs(w.Nasycenie - o.Nasycenie) > 0.001 OrElse Math.Abs(w.Wyostrzanie - o.Wyostrzanie) > 0.001 Then
+                            bledy.Add($"{p}: suwaki zmieniły wartości profilu ({w.Gamma}, {w.Kontrast}, {w.Nasycenie}, {w.Wyostrzanie})")
+                        End If
+                        f.cmbProfil.SelectedIndex = CInt(ProfilKorektyRastra.Brak)
+                        System.Windows.Forms.Application.DoEvents()
+                        If f.Opcje.Wlaczona Then bledy.Add($"{p}: po wyborze profilu Brak korekta w podglądzie nadal włączona")
+                        f.Close()
+                    End Using
+                Next
             End Sub)
-        t.SetApartmentState(Threading.ApartmentState.STA)
-        t.Start()
-        t.Join()
         Assert.True(bledy.Count = 0, String.Join(Environment.NewLine, bledy))
     End Sub
 

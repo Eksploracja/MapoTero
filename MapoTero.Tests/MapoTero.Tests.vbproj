@@ -11,13 +11,20 @@
     <OptionInfer>On</OptionInfer>
   </PropertyGroup>
 
-  <!-- Samo "dotnet test" (także w GitHub Actions) pomija testy łączące się z serwerami map (Kategoria=Siec)
-       i ciężkie testy na żądanie (Kategoria=Ciezkie): awaria Geoportalu nie może blokować kompilacji ani wydania.
-       Filtr podany w wierszu poleceń (opcja filter, np. "Kategoria=Siec") zastępuje ten domyślny;
+  <!-- Domyślne lokalne "dotnet test" uruchamia wyłącznie szybkie testy logiki (bez Siec, Ciezkie, UI, Wolne),
+       żeby nie otwierać dziesiątek okien WinForms na komputerze autora (w CI GitHub Actions podaje jawnie
+       Kategoria!=Siec&Kategoria!=Ciezkie, uruchamiając także UI i Wolne).
+       Filtr podany w wierszu poleceń (opcja filter, np. "Kategoria=UI") zastępuje ten domyślny;
        wszystkie testy naraz: filtr "Kategoria!=Brak". -->
   <PropertyGroup Condition="'$(VSTestTestCaseFilter)' == ''">
-    <VSTestTestCaseFilter>Kategoria!=Siec&amp;Kategoria!=Ciezkie</VSTestTestCaseFilter>
+    <VSTestTestCaseFilter>Kategoria!=Siec&amp;Kategoria!=Ciezkie&amp;Kategoria!=UI&amp;Kategoria!=Wolne</VSTestTestCaseFilter>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Update="xunit.runner.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />

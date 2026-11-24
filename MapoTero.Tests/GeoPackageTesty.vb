@@ -24,10 +24,15 @@ Public Class GeoPackageTesty
     End Function
 
     Private Shared Sub Usun(folder As String)
-        SQLiteConnection.ClearAllPools()
-        GC.Collect()
-        GC.WaitForPendingFinalizers()
-        If Directory.Exists(folder) Then Directory.Delete(folder, True)
+        If Not Directory.Exists(folder) Then Exit Sub
+        Try
+            Directory.Delete(folder, True)
+        Catch ex As Exception When TypeOf ex Is IOException OrElse TypeOf ex Is UnauthorizedAccessException
+            SQLiteConnection.ClearAllPools()
+            GC.Collect()
+            GC.WaitForPendingFinalizers()
+            Directory.Delete(folder, True)
+        End Try
     End Sub
 
     Private Shared Sub UtworzSegmenty(folder As String, rozszerzenie As String, rysuj As Action(Of Graphics, Integer, Integer))

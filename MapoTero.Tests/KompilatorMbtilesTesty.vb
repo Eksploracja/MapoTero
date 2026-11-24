@@ -11,6 +11,7 @@ Imports MapoTero
 Imports MapoTero.Core
 Imports Xunit
 
+<Trait("Kategoria", "Wolne")>
 Public Class KompilatorMbtilesTesty
 
     Private Shared Function NowyFolder() As String
@@ -20,12 +21,15 @@ Public Class KompilatorMbtilesTesty
     End Function
 
     Private Shared Sub Usun(folder As String)
-        SQLiteConnection.ClearAllPools()
-        GC.Collect()
-        GC.WaitForPendingFinalizers()
-        If Directory.Exists(folder) Then
+        If Not Directory.Exists(folder) Then Exit Sub
+        Try
+            Directory.Delete(folder, True)
+        Catch ex As Exception When TypeOf ex Is IOException OrElse TypeOf ex Is UnauthorizedAccessException
+            SQLiteConnection.ClearAllPools()
+            GC.Collect()
+            GC.WaitForPendingFinalizers()
             Try : Directory.Delete(folder, True) : Catch : End Try
-        End If
+        End Try
     End Sub
 
     Private Shared Sub UtworzSesje(folder As String, xDol As Double, yLewy As Double, xGora As Double, yPrawy As Double,

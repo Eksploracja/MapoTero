@@ -13,6 +13,7 @@ Imports MapoTero.Core
 Imports Xunit
 
 ''' <summary>Testy błędów znalezionych w przeglądzie spójności programu (2026-11-17).</summary>
+<Collection("OknaKreatora")>
 Public Class PrzegladSpojnosciTesty
 
     ''' <summary>
@@ -115,9 +116,16 @@ Public Class PrzegladSpojnosciTesty
                     b.Save(Path.Combine(folder, n), ImageFormat.Png)
                 End Using
             Next
-            Using b As New Bitmap(12000, 12000, PixelFormat.Format24bppRgb)
-                b.Save(Path.Combine(folder, "_scalone_segmenty_2x1.png"), ImageFormat.Png)
-            End Using
+            ' Nagłówek PNG 12000 x 12000 px bez alokacji 432 MB bitmapy (LiczbaWatkow czyta tylko wymiary z IHDR)
+            Dim naglowekPng12k As Byte() = {
+                &H89, &H50, &H4E, &H47, &HD, &HA, &H1A, &HA,
+                0, 0, 0, 13,
+                &H49, &H48, &H44, &H52,
+                0, 0, &H2E, &HE0,
+                0, 0, &H2E, &HE0,
+                8, 2, 0, 0, 0
+            }
+            File.WriteAllBytes(Path.Combine(folder, "_scalone_segmenty_2x1.png"), naglowekPng12k)
             Dim pominiete As Integer
             Dim pliki = MapoTero.FormKorektaFolderu.PlikiDoKorekty(folder, pominiete)
             Assert.Equal(2, pliki.Count)
@@ -144,14 +152,15 @@ Public Class PrzegladSpojnosciTesty
     ''' online opisywała F1 w oknach Scalanie i Ustawienia, a działał tylko w wielowarstwowym MBTiles.)
     ''' </summary>
     <Fact>
+    <Trait("Kategoria", "UI")>
     Public Sub F1_WOknachZPrzyciskiemPomocy()
         Dim bledy As New List(Of String)
-        Dim t As New Thread(
+        OknoTestowe.WykonywajNaSta(
             Sub()
                 For Each f As Form In {CType(New MapoTero.FormEksport(), Form), New MapoTero.Form2(), New MapoTero.FormKorektaFolderu()}
                     Try
                         f.StartPosition = FormStartPosition.Manual
-                        f.Show()
+                        OknoTestowe.Pokaz(f)
                         Application.DoEvents()
                         If Not f.KeyPreview Then bledy.Add(f.Name & ": KeyPreview wyłączone")
                         f.Close()
@@ -162,9 +171,6 @@ Public Class PrzegladSpojnosciTesty
                     End Try
                 Next
             End Sub)
-        t.SetApartmentState(ApartmentState.STA)
-        t.Start()
-        t.Join()
         Assert.True(bledy.Count = 0, String.Join(Environment.NewLine, bledy))
     End Sub
 

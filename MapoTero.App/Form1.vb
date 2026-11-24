@@ -368,6 +368,34 @@ Public Class Form1
 
 #Region "Uruchomienie i zamknięcie"
 
+    ''' <summary>W trybie testowym okno nie łączy się z internetem (GMap.NET w trybie CacheOnly, brak pobierania podglądów).</summary>
+    Friend Shared Property TrybTestowyBezSieci As Boolean = False
+
+    Friend Shared ReadOnly Property TrybOkienBezAktywacji As Boolean
+        Get
+            Return TrybTestowyBezSieci AndAlso Environment.GetEnvironmentVariable("MAPOTERO_AUDYT") <> "1"
+        End Get
+    End Property
+
+    Protected Overrides ReadOnly Property ShowWithoutActivation As Boolean
+        Get
+            If TrybOkienBezAktywacji Then Return True
+            Return MyBase.ShowWithoutActivation
+        End Get
+    End Property
+
+    Protected Overrides ReadOnly Property CreateParams As CreateParams
+        Get
+            Dim cp = MyBase.CreateParams
+            If TrybOkienBezAktywacji Then
+                ' WS_EX_NOACTIVATE (&H08000000) | WS_EX_TOOLWINDOW (&H80) | WS_EX_TRANSPARENT (&H20):
+                ' okno testowe nie kradnie fokusu, nie miesza w pasku zadań ani nie przechwytuje kliknięć myszy
+                cp.ExStyle = cp.ExStyle Or &H8000000 Or &H80 Or &H20
+            End If
+            Return cp
+        End Get
+    End Property
+
     ''' <summary>
     ''' Układ okna (pasek narzędzi, panel warstw, belka, podgląd) budowany przed utworzeniem okien kontrolek. W zdarzeniu
     ''' Load okno i wszystkie kontrolki mają już uchwyty, więc każda dodana tam kontrolka od razu tworzyła swoje okno
@@ -376,6 +404,10 @@ Public Class Form1
     ''' </summary>
     Public Sub New()
         InitializeComponent()
+        If TrybOkienBezAktywacji Then
+            ShowInTaskbar = False
+            Opacity = 0
+        End If
         Me.SetDesktopLocation(0, 0)
         ZapamietajWymiaryProjektu()
         InicjalizujPrzyciskiMapy()
@@ -443,13 +475,15 @@ Public Class Form1
         UstawRozmiarOkna()
 
         'ustawienia startowe okna mapy
-        mapa.Manager.Mode = AccessMode.ServerAndCache
+        mapa.Manager.Mode = If(TrybTestowyBezSieci, AccessMode.CacheOnly, AccessMode.ServerAndCache)
         mapa.DragButton = MouseButtons.Left
         mapa.MapScaleInfoEnabled = False
         mapa.DisableAltForSelection = True
         mapa.Zoom = Wartosc(lblZoom.Text, 6)
-        Me.AllowDrop = True
-        mapa.AllowDrop = True
+        If Not TrybTestowyBezSieci Then
+            Me.AllowDrop = True
+            mapa.AllowDrop = True
+        End If
 
         UstawEdycjeXY(False)
         UstawWidokZaznaczeniaWgs(False)
@@ -4650,9 +4684,11 @@ Public Class Form1
                                                  Enabled = True
                                                  FormKreatorMapy.PrzywrocZMinimalizacji(Me)
                                                  Show()
-                                                 Activate()
-                                                 BringToFront()
-                                                 FormKreatorMapy.SetForegroundWindow(Handle)
+                                                 If Not TrybOkienBezAktywacji Then
+                                                     Activate()
+                                                     BringToFront()
+                                                     FormKreatorMapy.SetForegroundWindow(Handle)
+                                                 End If
                                              End Sub
         _oknoKreatora.Show(Me)
         Enabled = False

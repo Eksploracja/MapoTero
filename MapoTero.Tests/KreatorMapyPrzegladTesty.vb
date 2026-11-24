@@ -10,21 +10,11 @@ Imports MapoTero.Core
 Imports Xunit
 
 <Collection("OknaKreatora")>
+<Trait("Kategoria", "UI")>
 Public Class KreatorMapyPrzegladTesty
 
     Private Shared Sub Sta(akcja As Action)
-        Dim wyjatek As Exception = Nothing
-        Dim t As New Thread(Sub()
-                                Try
-                                    akcja()
-                                Catch ex As Exception
-                                    wyjatek = ex
-                                End Try
-                            End Sub)
-        t.SetApartmentState(ApartmentState.STA)
-        t.Start()
-        t.Join()
-        If wyjatek IsNot Nothing Then Throw New Exception(wyjatek.Message, wyjatek)
+        OknoTestowe.WykonywajNaSta(akcja)
     End Sub
 
     Private Shared Function Kt(Of T As Control)(f As Form, nazwa As String) As T
@@ -79,25 +69,19 @@ Public Class KreatorMapyPrzegladTesty
     <Fact>
     Public Sub WszystkieStyle_ZestawyMajaWszystkieWarstwyKazdejSkali()
         Dim bledy As New List(Of String)()
-        Sta(Sub()
-                Using f As New Global.MapoTero.Form1()
-                    Using k As New Global.MapoTero.FormKreatorMapy(f)
-                        Dim zrodla = k.Styl.ZrodlaMap()
-                        For Each s In ZarzadcaSzablonow.PobierzDomyslne()
-                            Dim zestawyWarstw = New List(Of Tuple(Of String, IList(Of WarstwaSzablonu))) From {Tuple.Create("podstawowe", CType(s.Warstwy, IList(Of WarstwaSzablonu)))}
-                            For Each st In s.StopnieSkali
-                                zestawyWarstw.Add(Tuple.Create(st.Opis, CType(st.Warstwy, IList(Of WarstwaSzablonu))))
-                            Next
-                            For Each para In zestawyWarstw
-                                Dim zestaw = s.UtworzZestaw(zrodla, para.Item2)
-                                If zestaw.Liczba <> para.Item2.Count Then
-                                    bledy.Add($"{s.Id} / {para.Item1}: {zestaw.Liczba} z {para.Item2.Count} warstw ({String.Join(", ", para.Item2.Select(Function(w) w.Zbior & ":" & w.Warstwa))})")
-                                End If
-                            Next
-                        Next
-                    End Using
-                End Using
-            End Sub)
+        Dim zrodla = New StylKreatora().ZrodlaMap()
+        For Each s In ZarzadcaSzablonow.PobierzDomyslne()
+            Dim zestawyWarstw = New List(Of Tuple(Of String, IList(Of WarstwaSzablonu))) From {Tuple.Create("podstawowe", CType(s.Warstwy, IList(Of WarstwaSzablonu)))}
+            For Each st In s.StopnieSkali
+                zestawyWarstw.Add(Tuple.Create(st.Opis, CType(st.Warstwy, IList(Of WarstwaSzablonu))))
+            Next
+            For Each para In zestawyWarstw
+                Dim zestaw = s.UtworzZestaw(zrodla, para.Item2)
+                If zestaw.Liczba <> para.Item2.Count Then
+                    bledy.Add($"{s.Id} / {para.Item1}: {zestaw.Liczba} z {para.Item2.Count} warstw ({String.Join(", ", para.Item2.Select(Function(w) w.Zbior & ":" & w.Warstwa))})")
+                End If
+            Next
+        Next
         Assert.True(bledy.Count = 0, String.Join(Environment.NewLine, bledy))
     End Sub
 

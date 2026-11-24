@@ -14,22 +14,11 @@ Imports Xunit
 ''' Testy zmodernizowanej dolnej belki (kokpit: obszar i szacunek, rozdzielczość i format, podgląd).
 ''' </summary>
 <Collection("OknaKreatora")>
+<Trait("Kategoria", "UI")>
 Public Class KokpitDolnaBelkaTesty
 
     Private Shared Sub WWatkuSta(akcja As Action)
-        Dim blad As Exception = Nothing
-        Dim t As New Thread(
-            Sub()
-                Try
-                    akcja()
-                Catch ex As Exception
-                    blad = ex
-                End Try
-            End Sub)
-        t.SetApartmentState(ApartmentState.STA)
-        t.Start()
-        t.Join()
-        If blad IsNot Nothing Then Throw blad
+        OknoTestowe.WykonywajNaSta(akcja)
     End Sub
 
     Private Shared Function Kontrolka(Of T As Control)(f As Form, nazwa As String) As T

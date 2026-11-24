@@ -13,29 +13,21 @@ Imports Xunit
 ''' pokazywanie obszaru pobierania na mapie.
 ''' </summary>
 <Collection("OknaKreatora")>
+<Trait("Kategoria", "UI")>
 Public Class OknoGlowneErgonomiaTesty
 
     Private Shared ReadOnly Prywatne As BindingFlags = BindingFlags.NonPublic Or BindingFlags.Instance
 
     Private Shared Sub WWatkuSta(akcja As Action(Of MapoTero.Form1))
-        Dim blad As Exception = Nothing
-        Dim t As New Thread(
+        OknoTestowe.WykonywajNaSta(
             Sub()
-                Try
-                    Using f As New MapoTero.Form1()
-                        f.Show()
-                        Application.DoEvents()
-                        akcja(f)
-                        f.Close()
-                    End Using
-                Catch ex As Exception
-                    blad = ex
-                End Try
+                Using f As New MapoTero.Form1()
+                    f.Show()
+                    Application.DoEvents()
+                    akcja(f)
+                    f.Close()
+                End Using
             End Sub)
-        t.SetApartmentState(ApartmentState.STA)
-        t.Start()
-        t.Join()
-        If blad IsNot Nothing Then Throw New Exception(blad.Message, blad)
     End Sub
 
     Private Shared Function Kontrolka(Of T As Control)(f As Form, nazwa As String) As T
@@ -327,60 +319,42 @@ Public Class OknoGlowneErgonomiaTesty
     ''' </summary>
     <Fact>
     Public Sub Konstruktor_BudujeUkladBezTworzeniaUchwytow()
-        Dim blad As Exception = Nothing
-        Dim t As New Thread(
+        OknoTestowe.WykonywajNaSta(
             Sub()
-                Try
-                    Using f As New MapoTero.Form1()
-                        Assert.False(f.IsHandleCreated)
-                        Assert.False(Kontrolka(Of Control)(f, "tvWarstwy").IsHandleCreated)
-                        Assert.NotNull(Assert.Single(f.Controls.Find("zakladkiPracy", True)))
-                        Assert.NotNull(Assert.Single(f.Controls.Find("poleSzukaniaMiejsca", True)))
-                    End Using
-                Catch ex As Exception
-                    blad = ex
-                End Try
+                Using f As New MapoTero.Form1()
+                    Assert.False(f.IsHandleCreated)
+                    Assert.False(Kontrolka(Of Control)(f, "tvWarstwy").IsHandleCreated)
+                    Assert.NotNull(Assert.Single(f.Controls.Find("zakladkiPracy", True)))
+                    Assert.NotNull(Assert.Single(f.Controls.Find("poleSzukaniaMiejsca", True)))
+                End Using
             End Sub)
-        t.SetApartmentState(ApartmentState.STA)
-        t.Start()
-        t.Join()
-        If blad IsNot Nothing Then Throw New Exception(blad.Message, blad)
     End Sub
 
     ''' <summary>Arkusz JPEG lub PNG: pole „piramidy w GeoTIFF” odznaczone i wyłączone; po powrocie do GeoTIFF wraca wybór.</summary>
     <Fact>
     Public Sub Eksport_PiramidyGeoTiffTylkoDlaFormatuTiff()
-        Dim blad As Exception = Nothing
-        Dim t As New Thread(
+        OknoTestowe.WykonywajNaSta(
             Sub()
-                Try
-                    Using f As New MapoTero.FormEksport() With {.ArkuszDomyslnie = True}
-                        f.Show()
-                        Application.DoEvents()
-                        Dim format = DirectCast(Assert.Single(f.Controls.Find("cmbFormatArkusza", True)), ComboBox)
-                        Dim piramidy = DirectCast(Assert.Single(f.Controls.Find("chkGeoTiffPiramidy", True)), CheckBox)
-                        DirectCast(Assert.Single(f.Controls.Find("rbGeoTiff", True)), RadioButton).Checked = True
-                        format.SelectedIndex = 0
-                        Application.DoEvents()
-                        Assert.True(piramidy.Checked)
-                        format.SelectedIndex = 2 ' JPEG
-                        Application.DoEvents()
-                        Assert.False(piramidy.Checked)
-                        Assert.False(piramidy.Enabled)
-                        format.SelectedIndex = 1 ' GeoTIFF z kompresją JPEG
-                        Application.DoEvents()
-                        Assert.True(piramidy.Checked)
-                        Assert.True(piramidy.Enabled)
-                        f.Close()
-                    End Using
-                Catch ex As Exception
-                    blad = ex
-                End Try
+                Using f As New MapoTero.FormEksport() With {.ArkuszDomyslnie = True}
+                    OknoTestowe.Pokaz(f)
+                    Application.DoEvents()
+                    Dim format = DirectCast(Assert.Single(f.Controls.Find("cmbFormatArkusza", True)), ComboBox)
+                    Dim piramidy = DirectCast(Assert.Single(f.Controls.Find("chkGeoTiffPiramidy", True)), CheckBox)
+                    DirectCast(Assert.Single(f.Controls.Find("rbGeoTiff", True)), RadioButton).Checked = True
+                    format.SelectedIndex = 0
+                    Application.DoEvents()
+                    Assert.True(piramidy.Checked)
+                    format.SelectedIndex = 2 ' JPEG
+                    Application.DoEvents()
+                    Assert.False(piramidy.Checked)
+                    Assert.False(piramidy.Enabled)
+                    format.SelectedIndex = 1 ' GeoTIFF z kompresją JPEG
+                    Application.DoEvents()
+                    Assert.True(piramidy.Checked)
+                    Assert.True(piramidy.Enabled)
+                    f.Close()
+                End Using
             End Sub)
-        t.SetApartmentState(ApartmentState.STA)
-        t.Start()
-        t.Join()
-        If blad IsNot Nothing Then Throw New Exception(blad.Message, blad)
     End Sub
 
     <Fact>

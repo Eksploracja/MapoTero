@@ -10,30 +10,23 @@ Imports System.Windows.Forms
 Imports Xunit
 
 ''' <summary>Okno Ustawienia (Form2): blokada w trakcie pobierania i układ kontrolek.</summary>
+<Collection("OknaKreatora")>
+<Trait("Kategoria", "UI")>
 Public Class UstawieniaOknoTesty
 
     Private Shared Sub WOknie(trwaPobieranie As Boolean, akcja As Action(Of Form))
-        Dim blad As Exception = Nothing
-        Dim t As New Thread(
+        OknoTestowe.WykonywajNaSta(
             Sub()
-                Try
-                    Using f As New MapoTero.Form2()
-                        f.TrwaPobieranie = trwaPobieranie
-                        f.StartPosition = FormStartPosition.Manual
-                        f.Location = Point.Empty
-                        f.Show()
-                        Application.DoEvents()
-                        akcja(f)
-                        f.Close()
-                    End Using
-                Catch ex As Exception
-                    blad = ex
-                End Try
+                Using f As New MapoTero.Form2()
+                    f.TrwaPobieranie = trwaPobieranie
+                    f.StartPosition = FormStartPosition.Manual
+                    f.Location = Point.Empty
+                    OknoTestowe.Pokaz(f)
+                    Application.DoEvents()
+                    akcja(f)
+                    f.Close()
+                End Using
             End Sub)
-        t.SetApartmentState(ApartmentState.STA)
-        t.Start()
-        t.Join()
-        If blad IsNot Nothing Then Throw New Exception(blad.Message, blad)
     End Sub
 
     ''' <summary>Obszar kontrolki z szerokością tekstu dla kontrolek o rozmiarze automatycznym.</summary>

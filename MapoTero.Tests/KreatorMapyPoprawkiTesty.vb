@@ -8,21 +8,11 @@ Imports MapoTero.Core
 Imports Xunit
 
 <Collection("OknaKreatora")>
+<Trait("Kategoria", "UI")>
 Public Class KreatorMapyPoprawkiTesty
 
     Private Shared Sub Sta(akcja As Action)
-        Dim wyjatek As Exception = Nothing
-        Dim t As New Thread(Sub()
-                                Try
-                                    akcja()
-                                Catch ex As Exception
-                                    wyjatek = ex
-                                End Try
-                            End Sub)
-        t.SetApartmentState(ApartmentState.STA)
-        t.Start()
-        t.Join()
-        If wyjatek IsNot Nothing Then Throw New Exception(wyjatek.Message, wyjatek)
+        OknoTestowe.WykonywajNaSta(akcja)
     End Sub
 
     Private Shared Function Kt(Of T As Control)(f As Form, nazwa As String) As T

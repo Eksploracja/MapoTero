@@ -8,6 +8,7 @@ Imports MapoTero.Core
 Imports Xunit
 
 <Collection("OknaKreatora")>
+<Trait("Kategoria", "UI")>
 Public Class SzablonyWlasneTesty
 
     Private Shared Function NowyFolder() As String
@@ -97,57 +98,54 @@ Public Class SzablonyWlasneTesty
     Public Sub Kreator_ZapisujeKompozycjeIUsuwaStyl()
         Dim folder = NowyFolder()
         Dim staryFolder = Global.MapoTero.Program.FolderDanych
-        Dim wyjatek As Exception = Nothing
-        Dim t As New Thread(Sub()
-                                Try
-                                    Global.MapoTero.Program.FolderDanych = folder
-                                    Using f As New Global.MapoTero.Form1()
-                                        Using k As New Global.MapoTero.FormKreatorMapy(f)
-                                            k.Show() : Application.DoEvents()
-                                            ' cel zapamiętany z poprzedniego testu mógłby nie mieć stylu WIG na liście
-                                            DirectCast(k.Controls.Find("rbCelTelefon", True)(0), RadioButton).Checked = True
-                                            Dim dalej = DirectCast(k.Controls.Find("btnDalej", True)(0), Button)
-                                            dalej.PerformClick() : Application.DoEvents()
-                                            dalej.PerformClick() : Application.DoEvents()
-                                            Dim lst = DirectCast(k.Controls.Find("lstSzablony", True)(0), ListBox)
-                                            For i = 0 To lst.Items.Count - 1
-                                                If DirectCast(lst.Items(i), SzablonMapy).Id = "historia_wig" Then lst.SelectedIndex = i
-                                            Next
-                                            Application.DoEvents()
-                                            ' suwak cieniowania (pierwszy wiersz suwaków stylu WIG) przesunięty na 20%
-                                            Assert.Equal("Cieniowanie terenu:", DirectCast(k.Controls.Find("lblCieniowanieOpis", True)(0), Label).Text)
-                                            k.Styl.Regulacje(RodzajRegulacji.Cieniowanie) = 20
+        Try
+            OknoTestowe.WykonywajNaSta(
+                Sub()
+                    Try
+                        Global.MapoTero.Program.FolderDanych = folder
+                        Using f As New Global.MapoTero.Form1()
+                            Using k As New Global.MapoTero.FormKreatorMapy(f)
+                                k.Show() : Application.DoEvents()
+                                ' cel zapamiętany z poprzedniego testu mógłby nie mieć stylu WIG na liście
+                                DirectCast(k.Controls.Find("rbCelTelefon", True)(0), RadioButton).Checked = True
+                                Dim dalej = DirectCast(k.Controls.Find("btnDalej", True)(0), Button)
+                                dalej.PerformClick() : Application.DoEvents()
+                                dalej.PerformClick() : Application.DoEvents()
+                                Dim lst = DirectCast(k.Controls.Find("lstSzablony", True)(0), ListBox)
+                                For i = 0 To lst.Items.Count - 1
+                                    If DirectCast(lst.Items(i), SzablonMapy).Id = "historia_wig" Then lst.SelectedIndex = i
+                                Next
+                                Application.DoEvents()
+                                ' suwak cieniowania (pierwszy wiersz suwaków stylu WIG) przesunięty na 20%
+                                Assert.Equal("Cieniowanie terenu:", DirectCast(k.Controls.Find("lblCieniowanieOpis", True)(0), Label).Text)
+                                k.Styl.Regulacje(RodzajRegulacji.Cieniowanie) = 20
 
-                                            Dim styl = k.ZapiszStylWlasny("Test WIG", Function(p) True)
-                                            Assert.NotNull(styl)
-                                            Assert.True(File.Exists(Path.Combine(folder, SzablonyWlasne.NazwaPliku)))
-                                            Assert.True(3 = styl.StopnieSkali.Count, $"skale {styl.StopnieSkali.Count}, warstwy {styl.Warstwy.Count}, opis {styl.Opis}")
-                                            Dim cien = styl.StopnieSkali(0).Warstwy.First(Function(w) w.Warstwa = "ISOK_Cien")
-                                            Assert.Equal(20, cien.Krycie)
-                                            Assert.Equal(styl.Id, DirectCast(lst.SelectedItem, SzablonMapy).Id)
-                                            Assert.True(DirectCast(k.Controls.Find("btnUsunStyl", True)(0), Button).Enabled)
+                                Dim styl = k.ZapiszStylWlasny("Test WIG", Function(p) True)
+                                Assert.NotNull(styl)
+                                Assert.True(File.Exists(Path.Combine(folder, SzablonyWlasne.NazwaPliku)))
+                                Assert.True(3 = styl.StopnieSkali.Count, $"skale {styl.StopnieSkali.Count}, warstwy {styl.Warstwy.Count}, opis {styl.Opis}")
+                                Dim cien = styl.StopnieSkali(0).Warstwy.First(Function(w) w.Warstwa = "ISOK_Cien")
+                                Assert.Equal(20, cien.Krycie)
+                                Assert.Equal(styl.Id, DirectCast(lst.SelectedItem, SzablonMapy).Id)
+                                Assert.True(DirectCast(k.Controls.Find("btnUsunStyl", True)(0), Button).Enabled)
 
-                                            ' ponowne wczytanie z pliku (np. po uruchomieniu programu)
-                                            Dim zPliku = SzablonyWlasne.Wczytaj(Path.Combine(folder, SzablonyWlasne.NazwaPliku))
-                                            Assert.Equal("Test WIG", zPliku.Single().Nazwa)
+                                ' ponowne wczytanie z pliku (np. po uruchomieniu programu)
+                                Dim zPliku = SzablonyWlasne.Wczytaj(Path.Combine(folder, SzablonyWlasne.NazwaPliku))
+                                Assert.Equal("Test WIG", zPliku.Single().Nazwa)
 
-                                            k.UsunStylWlasny(styl)
-                                            Assert.Empty(SzablonyWlasne.Wczytaj(Path.Combine(folder, SzablonyWlasne.NazwaPliku)))
-                                            Assert.DoesNotContain(lst.Items.Cast(Of SzablonMapy)(), Function(s) s.Id = styl.Id)
-                                        End Using
-                                    End Using
-                                Catch ex As Exception
-                                    wyjatek = ex
-                                Finally
-                                    Global.MapoTero.Program.FolderDanych = staryFolder
-                                    ZarzadcaSzablonow.UstawWlasne(Nothing)
-                                End Try
-                            End Sub)
-        t.SetApartmentState(ApartmentState.STA)
-        t.Start()
-        t.Join()
-        Directory.Delete(folder, True)
-        If wyjatek IsNot Nothing Then Throw New Exception(wyjatek.Message, wyjatek)
+                                k.UsunStylWlasny(styl)
+                                Assert.Empty(SzablonyWlasne.Wczytaj(Path.Combine(folder, SzablonyWlasne.NazwaPliku)))
+                                Assert.DoesNotContain(lst.Items.Cast(Of SzablonMapy)(), Function(s) s.Id = styl.Id)
+                            End Using
+                        End Using
+                    Finally
+                        Global.MapoTero.Program.FolderDanych = staryFolder
+                        ZarzadcaSzablonow.UstawWlasne(Nothing)
+                    End Try
+                End Sub)
+        Finally
+            Directory.Delete(folder, True)
+        End Try
     End Sub
 
 End Class

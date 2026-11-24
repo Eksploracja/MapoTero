@@ -18,6 +18,7 @@ Imports Xunit
 ''' Testy pętli pobierania segmentów bez dostępu do internetu - lokalny serwer HTTP zwraca obrazek PNG (albo błąd)
 ''' na każde zapytanie.
 ''' </summary>
+<Trait("Kategoria", "Wolne")>
 Public Class PobieranieTesty
 
     ''' <summary>Minimalny serwer HTTP na porcie lokalnym: odpowiedź dla każdego zapytania wg funkcji (kod, typ, dane).</summary>

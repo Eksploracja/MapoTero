@@ -12,24 +12,11 @@ Imports MapoTero.Core
 Imports Xunit
 
 <Collection("OknaKreatora")>
+<Trait("Kategoria", "UI")>
 Public Class KreatorMapyTesty
 
     Private Sub UruchomWWatkuSta(akcja As Action)
-        Dim wyjatek As Exception = Nothing
-        Dim t As New Thread(
-            Sub()
-                Try
-                    akcja()
-                Catch ex As Exception
-                    wyjatek = ex
-                End Try
-            End Sub)
-        t.SetApartmentState(ApartmentState.STA)
-        t.Start()
-        t.Join()
-        If wyjatek IsNot Nothing Then
-            Throw New Exception("Błąd testu UI: " & wyjatek.Message, wyjatek)
-        End If
+        OknoTestowe.WykonywajNaSta(akcja)
     End Sub
 
     <Fact>
@@ -252,7 +239,7 @@ Public Class KreatorMapyTesty
                     fTryb.SetValue(dlg, True)
 
                     ' Inicjalizacja poprzez bezpośrednie wywołanie logiki OtworzDlaKreatora
-                    dlg.Show()
+                    OknoTestowe.Pokaz(dlg)
                     Application.DoEvents()
 
                     ' Wywołaj OtworzDlaKreatora w wątku STA
@@ -329,7 +316,7 @@ Public Class KreatorMapyTesty
                         })
                     Next
 
-                    dlg.Show()
+                    OknoTestowe.Pokaz(dlg)
                     Application.DoEvents()
 
                     Dim dgv = DirectCast(dlg.Controls.Find("dgvWarstwy", True)(0), DataGridView)
@@ -469,7 +456,7 @@ Public Class KreatorMapyTesty
         UruchomWWatkuSta(
             Sub()
                 Using dlg As New Global.MapoTero.FormWybierzDodatkowaWarstwe(zrodla)
-                    dlg.Show()
+                    OknoTestowe.Pokaz(dlg)
                     Application.DoEvents()
 
                     Dim tv = DirectCast(dlg.Controls.Find("tvWarstwy", True)(0), TreeView)
@@ -747,7 +734,7 @@ Public Class KreatorMapyTesty
                         })
                     Next
 
-                    dlg.Show()
+                    OknoTestowe.Pokaz(dlg)
                     Application.DoEvents()
 
                     Dim m = t.GetMethod("OdswiezPodgladAsync", Reflection.BindingFlags.NonPublic Or Reflection.BindingFlags.Instance)

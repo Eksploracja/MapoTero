@@ -25,6 +25,23 @@ Public Class FormPasekZaznaczania
         Me.New(Nothing)
     End Sub
 
+    Protected Overrides ReadOnly Property ShowWithoutActivation As Boolean
+        Get
+            If Form1.TrybOkienBezAktywacji Then Return True
+            Return MyBase.ShowWithoutActivation
+        End Get
+    End Property
+
+    Protected Overrides ReadOnly Property CreateParams As CreateParams
+        Get
+            Dim cp = MyBase.CreateParams
+            If Form1.TrybOkienBezAktywacji Then
+                cp.ExStyle = cp.ExStyle Or &H8000000 Or &H80 Or &H20
+            End If
+            Return cp
+        End Get
+    End Property
+
     Public Sub New(parent As Form)
         If parent IsNot Nothing Then
             Me.Owner = parent
@@ -32,8 +49,9 @@ Public Class FormPasekZaznaczania
 
         Me.FormBorderStyle = FormBorderStyle.FixedToolWindow
         Me.StartPosition = FormStartPosition.Manual
-        Me.TopMost = True
+        Me.TopMost = Not Form1.TrybOkienBezAktywacji
         Me.ShowInTaskbar = False
+        If Form1.TrybOkienBezAktywacji Then Me.Opacity = 0
         Me.Text = "Kreator mapy - zaznaczanie obszaru na mapie"
         Me.ClientSize = New Size(640, 52)
         Me.BackColor = Color.FromArgb(245, 245, 248)
