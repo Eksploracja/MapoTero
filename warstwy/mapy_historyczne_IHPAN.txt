@@ -21,10 +21,6 @@ kummersberg_2180
 8
 slask18w_2180
 16
-warszawaOKI_2180
-2
-rauch_2180
-2
 dwuwiorstowka_3857
 8
 TKKP_126k_3857
@@ -46,12 +42,4 @@ wig100k_4326_extended
 wig_1947_1952_3857
 8
 wig500k1939_3857
-40
-lindley_3857
-1
-ahp_ziemie_polskie_3857
-20
-ahp_koscielne_3857
-40
-ahp_wlasnosc_3857
 40

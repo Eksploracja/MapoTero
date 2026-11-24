@@ -39,7 +39,6 @@ ortofotomapa_TrueOrtho
 ortofotomapa_WMTS
 OSMapa_PL
 osnowy_geodezyjne
-plany_miast_1944_IHPAN
 regiony_fizycznogeograficzne
 rejestr_granic_jednostki_teryt
 rejestr_granic_punkty_adresowe

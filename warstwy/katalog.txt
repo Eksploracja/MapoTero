@@ -10,12 +10,6 @@
 # Zbiory map i warstwy, których katalog nie wymienia (np. dodane kreatorem serwerów), program pokazuje
 # w grupie „Dodane serwery”. Plik zapisuj w kodowaniu UTF-8.
 
-> Ortofotomapy
-ortofotomapa_WMTS | ORTOFOTOMAPA | Ortofotomapa standardowa 25 cm (kafle WMTS) | Orto_Std_25cm
-ortofotomapa_HighResolution_WMTS | ORTOFOTOMAPA | Ortofotomapa wysokiej rozdzielczości do 10 cm (kafle WMTS) | Orto_HiRes_10cm
-ortofotomapa | Raster | Ortofotomapa wysokiej rozdzielczości (WMS) | Orto_HiRes_WMS
-ortofotomapa_TrueOrtho | PrawdziwaOrtofotomapa | Prawdziwa ortofotomapa (TrueOrtho) | Orto_True
-
 > Mapy topograficzne
 TOPO_WMTS | MAPA TOPOGRAFICZNA | Mapa topograficzna GUGiK (kafle WMTS) | Topo_GUGiK
 BDOT10k_WMTS | BDOT10k | Baza danych obiektów topograficznych BDOT10k (kafle WMTS) | BDOT10k
@@ -41,30 +35,21 @@ Waymarked_Trails | mtb | Szlaki MTB – nakładka (Waymarked Trails) | Szlaki_MT
 Waymarked_Trails | riding | Szlaki konne – nakładka (Waymarked Trails) | Szlaki_Konne
 Waymarked_Trails | skating | Trasy rolkowe – nakładka (Waymarked Trails) | Szlaki_Rolki
 Waymarked_Trails | slopes | Trasy narciarskie – nakładka (Waymarked Trails) | Szlaki_Narty
->> OpenStreetMap (terrestris.de, ze znakiem wodnym)
-OpenStreetMap_Terrestris | OSM-WMS | Mapa ogólna OpenStreetMap | OSM_Standard
-OpenStreetMap_Terrestris | TOPO-OSM-WMS | Mapa topograficzna OpenStreetMap | OSM_Topo
-OpenStreetMap_Terrestris | HikeMap | Mapa turystyczna OpenStreetMap | OSM_Hike
-OpenStreetMap_Terrestris | OSM-Overlay-WMS | Nakładka: drogi i nazwy (przezroczysta) | OSM_Overlay
 
 > Rzeźba terenu
-numer_mod_terenu_WMTS | HipsoCien | Hipsometria z cieniowaniem NMT 1 m (kafle WMTS) | NMT_HipsoCien_1m
 numer_mod_terenu_cieniowanie_WMTS | ISOK_Cien | Cieniowanie rzeźby NMT 1 m (kafle WMTS) | NMT_Cien_1m
 numer_mod_terenu_hipsometria_WMTS | Hipsometria | Hipsometria NMT 1 m – kolory wysokości (kafle WMTS) | NMT_Hipso_1m
-OpenStreetMap_Terrestris | SRTM30-Hillshade | Cieniowanie rzeźby SRTM 30 m (terrestris, ze znakiem wodnym) | SRTM_Cien_30m
+numer_mod_terenu_WMTS | HipsoCien | Hipsometria z cieniowaniem NMT 1 m (kafle WMTS) | NMT_HipsoCien_1m
 OpenStreetMap_Terrestris | SRTM30-Contour | Poziomice SRTM 30 m (terrestris, ze znakiem wodnym) | SRTM_Poziomice
 szczyty | szczyty | Szczyty górskie i wzniesienia (GUGiK) | Szczyty_GUGiK
 
+> Ortofotomapy
+ortofotomapa_WMTS | ORTOFOTOMAPA | Ortofotomapa standardowa 25 cm (kafle WMTS) | Orto_Std_25cm
+ortofotomapa_HighResolution_WMTS | ORTOFOTOMAPA | Ortofotomapa wysokiej rozdzielczości do 10 cm (kafle WMTS) | Orto_HiRes_10cm
+ortofotomapa | Raster | Ortofotomapa wysokiej rozdzielczości (WMS) | Orto_HiRes_WMS
+ortofotomapa_TrueOrtho | PrawdziwaOrtofotomapa | Prawdziwa ortofotomapa (TrueOrtho) | Orto_True
+
 > Mapy historyczne i zabytki
->> Zabytki i dziedzictwo (NID)
-zabytki_zasiegi_NID | Zabytki_nieruchome_I | Rejestr zabytków nieruchomych – zasięgi i typy | NID_Zasiegi
-zabytki_NID | Immovable_Monuments | Rejestr zabytków nieruchomych (INSPIRE) | NID_Nieruchome
-zabytki_archeo_NID | Archaeological_Monuments | Rejestr zabytków archeologicznych | NID_Archeo
-zabytki_ewidencja_nieruchomych_NID | Ewidencja_zabytkow_nieruchomych_I | Ewidencja zabytków nieruchomych | NID_EwidNieruch
-zabytki_ewidencja_archeo_NID | Ewidencja_zabytków_archeologicznych | Ewidencja zabytków archeologicznych | NID_EwidArcheo
-zabytki_pomniki_historii_NID | Monuments_of_History | Pomniki Historii | NID_PomnikiHist
-zabytki_unesco_NID | World_Heritage_Properties_List | Obiekty światowego dziedzictwa UNESCO | NID_UNESCO
-zabytki_groby_wojenne_NID | Groby_i_cmentarze_wojenne_I | Groby i cmentarze wojenne | NID_GrobyWojenne
 >> Mapy historyczne (IHPAN)
 mapy_historyczne_IHPAN | m25k_2180 | Messtischblätter 1:25 000 (1870–1945) | Hist_Messtisch_25k
 mapy_historyczne_IHPAN | wig25k_2180 | Mapa szczegółowa WIG 1:25 000 (1918–1939) | Hist_WIG_25k
@@ -88,34 +73,15 @@ mapy_historyczne_IHPAN | dwuwiorstowka_3857 | Dwuwiorstówka 1:84 000 (1908–19
 mapy_historyczne_IHPAN | wig100k_4326_extended | Mapa taktyczna WIG 1:100 000 (1918–1939) – zasięg rozszerzony | Hist_WIG_100k_ext
 mapy_historyczne_IHPAN | wig500k1939_3857 | Mapa Polski i krajów ościennych WIG 1:500 000 (1939) | Hist_WIG_500k_39
 mapy_historyczne_IHPAN | wig_1947_1952_3857 | Mapa WIG 1:100 000 w układzie „Borowa Góra” (1947–1954) | Hist_WIG_BorowaGora
->> Ziemie polskie Korony w drugiej połowie XVI w. (IHPAN)
-mapy_historyczne_IHPAN | ahp_ziemie_polskie_3857 | Ziemie polskie Korony 1:250 000 | Hist_XVI_ZiemiePol
-mapy_historyczne_IHPAN | ahp_koscielne_3857 | Podziały kościelne 1:500 000 | Hist_XVI_Kosciol
-mapy_historyczne_IHPAN | ahp_wlasnosc_3857 | Rozmieszczenie własności ziemskiej 1:500 000 | Hist_XVI_Wlasnosc
->> Plany miast (IHPAN)
-plany_miast_1944_IHPAN | bialystok_2180 | Białystok (1944) | Plan_Bialystok_44
-plany_miast_1944_IHPAN | bydgoszcz_2180 | Bydgoszcz (1944) | Plan_Bydgoszcz_44
-plany_miast_1944_IHPAN | czestochowa_2180 | Częstochowa (1944) | Plan_Czestochowa_44
-plany_miast_1944_IHPAN | gdansk_2180 | Gdańsk (1944) | Plan_Gdansk_44
-plany_miast_1944_IHPAN | grudziadz_2180 | Grudziądz (1944) | Plan_Grudziadz_44
-plany_miast_1944_IHPAN | inowroclaw_2180 | Inowrocław (1943) | Plan_Inowroclaw_43
-plany_miast_1944_IHPAN | jaslo_2180 | Jasło (1944) | Plan_Jaslo_44
-plany_miast_1944_IHPAN | katowice_2180 | Katowice (1944) | Plan_Katowice_44
-plany_miast_1944_IHPAN | kielce_2180 | Kielce (1944) | Plan_Kielce_44
-plany_miast_1944_IHPAN | krakow_2180 | Kraków (1944) | Plan_Krakow_44
-plany_miast_1944_IHPAN | lublin_2180 | Lublin (1944) | Plan_Lublin_44
-plany_miast_1944_IHPAN | lodz_2180 | Łódź (1944) | Plan_Lodz_44
-plany_miast_1944_IHPAN | poznan_2180 | Poznań (1944) | Plan_Poznan_44
-plany_miast_1944_IHPAN | radom_2180 | Radom (1944) | Plan_Radom_44
-plany_miast_1944_IHPAN | rzeszow_2180 | Rzeszów (1944) | Plan_Rzeszow_44
-plany_miast_1944_IHPAN | siedlce_2180 | Siedlce (1944) | Plan_Siedlce_44
-plany_miast_1944_IHPAN | tarnow_2180 | Tarnów (1944) | Plan_Tarnow_44
-plany_miast_1944_IHPAN | torun_2180 | Toruń (1944) | Plan_Torun_44
-plany_miast_1944_IHPAN | warszawa_2180 | Warszawa (1944) | Plan_Warszawa_44
-mapy_historyczne_IHPAN | warszawaOKI_2180 | Warszawa (1822) | Plan_Warszawa_1822
-mapy_historyczne_IHPAN | lindley_3857 | Warszawa – plan Lindleyów 1:2500 (1897–1901) | Plan_Lindley_1900
-mapy_historyczne_IHPAN | rauch_2180 | Warszawa-Praga (1796) | Plan_Praga_1796
-plany_miast_1944_IHPAN | wroclaw_3857 | Wrocław (1944) | Plan_Wroclaw_44
+>> Zabytki i dziedzictwo (NID)
+zabytki_zasiegi_NID | Zabytki_nieruchome_I | Rejestr zabytków nieruchomych – zasięgi i typy | NID_Zasiegi
+zabytki_NID | Immovable_Monuments | Rejestr zabytków nieruchomych (INSPIRE) | NID_Nieruchome
+zabytki_archeo_NID | Archaeological_Monuments | Rejestr zabytków archeologicznych | NID_Archeo
+zabytki_ewidencja_nieruchomych_NID | Ewidencja_zabytkow_nieruchomych_I | Ewidencja zabytków nieruchomych | NID_EwidNieruch
+zabytki_ewidencja_archeo_NID | Ewidencja_zabytków_archeologicznych | Ewidencja zabytków archeologicznych | NID_EwidArcheo
+zabytki_pomniki_historii_NID | Monuments_of_History | Pomniki Historii | NID_PomnikiHist
+zabytki_unesco_NID | World_Heritage_Properties_List | Obiekty światowego dziedzictwa UNESCO | NID_UNESCO
+zabytki_groby_wojenne_NID | Groby_i_cmentarze_wojenne_I | Groby i cmentarze wojenne | NID_GrobyWojenne
 
 > Ewidencja, geodezja i uzbrojenie
 >> Działki ewidencyjne (KIEG)
@@ -159,39 +125,6 @@ rejestr_nazw_geograficznych | M2_PozostaleNazwyMiejscowosci | Pozostałe nazwy m
 rejestr_nazw_geograficznych | O1_UrzedoweNazwyObiektowFizjograficznych | Urzędowe nazwy obiektów fizjograficznych (PRNG) | PRNG_Fizjo_Urz
 rejestr_nazw_geograficznych | O2_ZestandaryzowaneNazwyObiektowFizjograficznych | Zestandaryzowane nazwy obiektów fizjograficznych (PRNG) | PRNG_Fizjo_Zestand
 rejestr_nazw_geograficznych | O3_PozostaleNazwyObiektowFizjograficznych | Pozostałe nazwy obiektów fizjograficznych (PRNG) | PRNG_Fizjo_Inne
->> Sądy i prokuratury (PRG)
-rejestr_granic_jednostki_teryt | S01_Sad_apelacyjny | Sądy apelacyjne | Sad_Apelacyjny
-rejestr_granic_jednostki_teryt | S02_Sad_okregowy | Sądy okręgowe | Sad_Okregowy
-rejestr_granic_jednostki_teryt | S03_Sad_rejonowy | Sądy rejonowe | Sad_Rejonowy
-rejestr_granic_jednostki_teryt | S04_Wojewodzki_sad_administracyjny | Wojewódzkie sądy administracyjne | Sad_WSA
-rejestr_granic_jednostki_teryt | P01_Prokuratura_regionalna | Prokuratury regionalne | Prok_Regionalna
-rejestr_granic_jednostki_teryt | P02_Prokuratura_okregowa | Prokuratury okręgowe | Prok_Okregowa
-rejestr_granic_jednostki_teryt | P03_Prokuratura_rejonowa | Prokuratury rejonowe | Prok_Rejonowa
->> Policja, straże i obrona cywilna (PRG)
-rejestr_granic_jednostki_teryt | K01_Komenda_wojewodzka_policji | Komendy wojewódzkie policji | Policja_Woj
-rejestr_granic_jednostki_teryt | K03_Komenda_stoleczna_policji | Komenda stołeczna policji | Policja_Stolica
-rejestr_granic_jednostki_teryt | K02_Komenda_powiatowa_policji | Komendy powiatowe policji | Policja_Pow
-rejestr_granic_jednostki_teryt | K04_Komenda_rejonowa_policji | Komendy rejonowe policji | Policja_Dzielnic
-rejestr_granic_jednostki_teryt | K05_Komisariat_policji | Komisariaty policji | Policja_Komisariat
-rejestr_granic_jednostki_teryt | K06_Komenda_wojewodzka_strazy_pozarnej | Komendy wojewódzkie straży pożarnej | Straz_Woj
-rejestr_granic_jednostki_teryt | K07_Komenda_powiatowa_strazy_pozarnej | Komendy powiatowe straży pożarnej | Straz_Pow
-rejestr_granic_jednostki_teryt | K08_Oddzial_strazy_granicznej | Oddziały straży granicznej | Straz_JRG
-rejestr_granic_jednostki_teryt | K09_Placowka_strazy_granicznej | Placówki straży granicznej | StrazGran_Placowki
-rejestr_granic_jednostki_teryt | K10_Dywizjon_strazy_granicznej | Dywizjony straży granicznej | StrazGran_Dywizj
-rejestr_granic_jednostki_teryt | K11_Obszar_dzialania_szefa_obrony_cywilnej_wojewodztwa | Obrona cywilna – województwa | Obrona_Woj
-rejestr_granic_jednostki_teryt | K12_Obszar_dzialania_szefa_obrony_cywilnej_powiatu | Obrona cywilna – powiaty | Obrona_Pow
-rejestr_granic_jednostki_teryt | K13_Obszar_dzialania_szefa_obrony_cywilnej_gminy | Obrona cywilna – gminy | Obrona_Gmina
->> Urzędy, lasy i wody (PRG)
-rejestr_granic_jednostki_teryt | U05_Izba_administracji_skarbowej | Izby administracji skarbowej | PRG_RZGW
-rejestr_granic_jednostki_teryt | U02_Urzad_skarbowy | Urzędy skarbowe | Izba_Skarbowa
-rejestr_granic_jednostki_teryt | U03_Wyspecjalizowany_urzad_skarbowy | Wyspecjalizowane urzędy skarbowe | PRG_Nadlesnictwa
-rejestr_granic_jednostki_teryt | U04_Urzad_celno-skarbowy | Urzędy celno-skarbowe | PRG_RDLP
-rejestr_granic_jednostki_teryt | U01_Archiwum_panstwowe | Archiwa państwowe | Urzad_Skarbowy
-rejestr_granic_jednostki_teryt | U07_Regionalna_dyrekcja_lasow_panstwowych | Regionalne dyrekcje Lasów Państwowych | PRG_NadzorWodny
-rejestr_granic_jednostki_teryt | U06_Nadlesnictwo | Nadleśnictwa | PRG_ZarzadZlewni
-rejestr_granic_jednostki_teryt | U09_Regionalny_zarzad_gospodarki_wodnej_PGWWP | Regionalne zarządy gospodarki wodnej | PRG_WUG
-rejestr_granic_jednostki_teryt | U08_Zarzad_zlewni_PGWWP | Zarządy zlewni (Wody Polskie) | PRG_UrzadGorniczy
-rejestr_granic_jednostki_teryt | U11_Urzad_zeglugi_srodladowej | Urzędy żeglugi śródlądowej | PRG_UrzadZeglugi
 >> Obszary morskie (PRG)
 rejestr_granic_jednostki_teryt | W03_Morskie_wody_wewnetrzne | Morskie wody wewnętrzne | Morze_Wewnetrzne
 rejestr_granic_jednostki_teryt | W02_Morze_terytorialne_RP | Morze terytorialne RP | Morze_Terytorialne
