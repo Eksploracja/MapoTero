@@ -165,14 +165,12 @@ Każda zmiana w repozytorium jest automatycznie budowana i testowana w **GitHub 
 * 🤝 **Współtworzenie zbiorów map:** znasz ciekawy serwer WMS/WMTS albo chcesz poprawić/dodać warstwę? Zgłoś Issue lub wyślij Pull Request z nowym plikiem w katalogu `warstwy/`.
 * ☕ **[Wesprzyj rozwój projektu (buycoffee.to/mapy)](https://buycoffee.to/mapy):** postaw kawę autorowi (link dostępny także w menu *Pomoc* w programie).
 
-## Zespół projektu
+## Twórcy projektu
 
 * **Twórca programu:** Pajakt (2009–2014)
 * **Rozwój projektu:** [Kazimierz Niecikowski](https://www.labgis.pl/) (od 2015)
-* **Współpraca programistyczna:**
-  * Paweł\_gdn
-  * AAA222 (moduł NoTo, scalanie segmentów do wersji 3.11)
-  * Edward Zadorski (kod modułu przeliczania współrzędnych)
+
+Podziękowania za pomoc w programowaniu: **Paweł\_gdn**, **AAA222** (moduł NoTo, scalanie segmentów do wersji 3.11) oraz **† Edward Zadorski** (kod modułu przeliczania współrzędnych).
 
 ## Licencja
 
