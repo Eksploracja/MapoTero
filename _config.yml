@@ -1,10 +1,10 @@
 # Strona programu w GitHub Pages: https://eksploracja.github.io/MapoTero/
-# Strona główna = README.md, pomoc programu = folder pomoc/.
+# Strona główna = index.md, pomoc programu = folder pomoc/.
 # Motyw Just the Docs (menu boczne, wyszukiwarka) - wczytywany przez jekyll-remote-theme,
 # które działa w zwykłym budowaniu GitHub Pages (bez własnego workflow).
 
 title: MapoTero
-description: Pobieranie rastrowych map z serwerów WMS i WMTS - pomoc programu
+description: "Pobieranie map z Geoportalu (WMS/WMTS), LiDAR i map historycznych – pomoc programu"
 lang: pl
 remote_theme: just-the-docs/just-the-docs@v0.12.0
 
@@ -14,7 +14,6 @@ plugins:
   - jekyll-include-cache
   - jekyll-relative-links
   - jekyll-optional-front-matter
-  - jekyll-readme-index
   - jekyll-titles-from-headings
 
 # Wersja programu, której dotyczy pomoc ({{ site.wersja_programu }} na stronach pomocy).
@@ -81,15 +80,11 @@ defaults:
       path: ""
     values:
       layout: default
-  - scope:
-      path: "README.md"
-    values:
-      title: Strona główna
-      nav_order: 1
 
-# Foldery, które nie są stroną. Lista zastępuje domyślne wykluczenia Jekylla, więc zawiera też je.
+# Foldery i pliki, które nie są stroną. Lista zastępuje domyślne wykluczenia Jekylla, więc zawiera też je.
 # Pliki dla asystentów AI nie są w repozytorium, ale wykluczone na wypadek podglądu lokalnego.
 exclude:
+  - README.md
   - MapoTero.App
   - MapoTero.Core
   - MapoTero.Tests
