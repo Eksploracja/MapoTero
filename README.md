@@ -1,247 +1,177 @@
 # MapoTero
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
-[![Platform](https://img.shields.io/badge/.NET-10-purple.svg)](https://dotnet.microsoft.com/)
+[![Wersja](https://img.shields.io/github/v/release/Eksploracja/MapoTero?label=Wersja&color=2ea44f)](https://github.com/Eksploracja/MapoTero/releases/latest)
+[![Platforma](https://img.shields.io/badge/.NET-10-purple.svg)](https://dotnet.microsoft.com/)
 [![Kompilacja i testy](https://github.com/Eksploracja/MapoTero/actions/workflows/kompilacja.yml/badge.svg)](https://github.com/Eksploracja/MapoTero/actions/workflows/kompilacja.yml)
-[![Dokumentacja](https://img.shields.io/badge/Dokumentacja-GitHub%20Pages-brightgreen.svg)](https://eksploracja.github.io/MapoTero/pomoc/)
+[![Dokumentacja](https://img.shields.io/badge/Dokumentacja-Podr%C4%99cznik%20online-brightgreen.svg)](https://eksploracja.github.io/MapoTero/pomoc/)
 [![Facebook](https://img.shields.io/badge/Facebook-MapoTero-1877F2?logo=facebook&logoColor=white)](https://www.facebook.com/mapotero.opensource)
 
-**MapoTero** to darmowy program służący do pobierania rastrowych map z internetu, opublikowanych za pośrednictwem serwerów WMS (takich jak Geoportal2, PIG, GDOŚ) oraz usług kafelkowych WMTS i XYZ/TMS (np. Waymarked Trails, OSMapa.pl, UMP-pcPL). 
+**MapoTero** to darmowy, otwartoźródłowy program dla systemu Windows do pobierania map rastrowych z usług **WMS, WMTS oraz XYZ/TMS**. Pozwala pobrać ortofotomapy, cieniowanie rzeźby terenu (LiDAR/NMT), mapy topograficzne, historyczne, ewidencję działek (EGiB) czy zabytki, a następnie przygotować gotowe mapy offline na telefon, odbiorniki Garmin, do programów GIS oraz rysunków CAD.
 
-Program pobiera mapy, dzieląc wybrany obszar na siatkę kwadratowych segmentów (do 2048×2048 px). Pobrane segmenty map można następnie:
-* **scalić w jeden duży plik rastrowy** (GeoTIFF, JPEG, PNG) z georeferencją - format *Arkusz* w oknie *Eksport mapy* (*Narzędzia > Scalanie segmentów*),
-* **wyeksportować do map dla odbiorników GPS i aplikacji mobilnych:** Garmin BirdsEye (JNX - wielopoziomowy raster bez limitu 100 kafli), Garmin Custom Maps (KMZ z wyborem z-order i obsługą przezroczystych nakładek PNG), MBTiles (Locus Map, OsmAnd, OruxMaps), OGC GeoPackage (QField, Locus Map, OruxMaps, QGIS), SQLiteDB (OsmAnd, Locus Map) i mapy offline OruxMaps - także jako przezroczyste nakładki lub z kilkoma warstwami nałożonymi na siebie,
-* **błyskawicznie przesłać na telefon przez Wi-Fi i kod QR:** bez kabli USB i bez zewnętrznej chmury – zeskanuj aparatem smartfona kod QR wyświetlony na ekranie po eksporcie, aby bezpośrednio pobrać mapę do telefonu,
-* **wstawić do rysunku CAD** (AutoCAD, AutoCAD LT, BricsCAD, ZWCAD i inne): rysunek DXF z rastrami na właściwych współrzędnych, obrysem, siatką i numerami segmentów oraz skrypt SCR lub program LISP, które wstawiają mapę do otwartego rysunku,
-* **wgrać do urządzeń GPS** i aplikacji turystycznych (np. [TrekBuddy](http://www.trekbuddy.net/forum/index.php), [OziExplorer](http://www.oziexplorer.com/)),
-* **wyświetlić jako podkład georeferencyjny** w programach GIS i GPS: [QGIS](https://www.qgis.org/), [Google Earth](https://www.google.pl/intl/pl/earth/), ArcGIS, GPS Tuner, MapInfo.
+[Pobierz](#pobieranie-i-wymagania) · [Szybki start](#szybki-start) · [Galeria warstw](https://eksploracja.github.io/MapoTero/pomoc/galeria-warstw/) · [Co nowego](#co-nowego) · [Podręcznik online](https://eksploracja.github.io/MapoTero/pomoc/) · [Zgłoś błąd](https://github.com/Eksploracja/MapoTero/issues)
 
-* **Obsługiwane formaty rastrowe:** JPEG, TIFF, PNG, GIF; arkusze scalone: GeoTIFF, JPEG, PNG.
-* **Obsługiwane formaty georeferencji:** MAP, KML, TAB, JPGW, WLD, GMI, PRJ.
-* **Eksport do CAD:** rysunek DXF (R2000), skrypt SCR i program LISP (.lsp).
-* **Układy współrzędnych:** PL-1992, PL-2000 (strefy 5-8), UTM (strefy 33N-35N), WGS84.
-* **Podręcznik użytkownika online:** [eksploracja.github.io/MapoTero/pomoc/](https://eksploracja.github.io/MapoTero/pomoc/)
-* **Oficjalny profil programu:** [facebook.com/mapotero.opensource](https://www.facebook.com/mapotero.opensource)
+![Główne okno programu MapoTero](pomoc/obrazy/03-okno-glowne.png)
 
----
+## Co zrobisz w MapoTero?
 
-## Pobieranie i dokumentacja
+| Zastosowanie | Formaty wyjściowe | Przykładowe aplikacje i urządzenia |
+| --- | --- | --- |
+| **Mapy offline w telefonie** | MBTiles (także wielowarstwowe i wieloskalowe), OGC GeoPackage (`.gpkg`), SQLiteDB, OruxMaps | Locus Map, OsmAnd, OruxMaps, QField, Mergin Maps, Avenza Maps |
+| **Odbiorniki Garmin** | Garmin BirdsEye (`.jnx` bez limitu 100 kafli), Garmin Custom Maps (`.kmz` z `z-order`, dzieleniem na tomy i przezroczystym PNG) | Urządzenia Garmin (bezpośredni zapis przez USB) |
+| **Praca w GIS i wydruki** | Kafelkowany GeoTIFF z piramidą pomniejszeń (COG), scalony JPEG / PNG oraz pojedyncze segmenty z georeferencją | [QGIS](https://www.qgis.org/), ArcGIS, [Google Earth](https://www.google.pl/intl/pl/earth/) |
+| **Podkłady do CAD** | Rysunek DXF (R2000) z obrysem, siatką i numeracją, skrypt SCR oraz program LISP (`.lsp`) | AutoCAD, AutoCAD LT, BricsCAD, ZWCAD |
 
-Program to jeden plik **MapoTero.exe** (wersja 64-bitowa dla systemu Windows), dostarczany w paczce ZIP razem z folderem `warstwy` (zbiory map):
-* 📥 **[Pobierz najnowszą wersję MapoTero z GitHub Releases (MapoTero_v3.19.zip)](https://github.com/Eksploracja/MapoTero/releases/download/v3.19/MapoTero_v3.19.zip)** – po rozpakowaniu uruchom `MapoTero.exe` (folder `warstwy` musi leżeć obok niego).
-* 📖 **[Podręcznik użytkownika i pomoc online](https://eksploracja.github.io/MapoTero/pomoc/)** – 42 rozdziały instrukcji krok po kroku z motywem Just the Docs, opis narzędzi, formatów i konfiguracji.
-* 📦 Wszystkie wydania, kody źródłowe i historia wersji: **[GitHub Releases](https://github.com/Eksploracja/MapoTero/releases/latest)**.
+### Najważniejsze możliwości
+
+* **Szybki kreator map (`Ctrl+K`):** w 4 krokach prowadzi od wyboru urządzenia i gotowego stylu mapy do gotowego pliku offline.
+* **Transfer na telefon przez Wi-Fi i kod QR:** bez kabla USB i bez zewnętrznej chmury. Wystarczy zeskanować kod QR aparatem telefonu, aby pobrać mapę bezpośrednio przez lokalną sieć.
+* **Własne kompozycje warstw:** łączenie warstw z różnych serwerów (WMS, WMTS i XYZ razem), regulacja krycia, tryby mieszania (w tym tryb *7 Rzeźba terenu* dla cieniowania LiDAR) oraz podgląd efektu na żywo przed pobieraniem.
+* **Pobieranie tylko potrzebnego obszaru:** siatka segmentów (do 2048×2048 px) z przesuwanymi uchwytami, korytarz wzdłuż trasy GPX/KML/KMZ, obrys z pliku `.gpkg` oraz wyszukiwarka miejscowości, adresów i działek ULDK (`Ctrl+F`).
+* **Układy współrzędnych i konwertery:** precyzyjne przeliczenia w locie dla PL-1992, PL-2000 (strefy 5–8), UTM (33N–35N) i WGS84 oraz konwerter starych map OziExplorer (`.map`) do formatów JNX, KMZ i MBTiles.
+
+## Pobieranie i wymagania
+
+Program działa w trybie **portable (bez instalacji)** jako pojedynczy plik `MapoTero.exe`, dostarczany w archiwum ZIP wraz z katalogiem `warstwy` (definicje zbiorów map):
+
+* 📥 **[Pobierz najnowszą wersję MapoTero (ZIP, Windows 64-bit)](https://github.com/Eksploracja/MapoTero/releases/latest):** pobierz i rozpakuj archiwum ZIP, a następnie uruchom `MapoTero.exe` (folder `warstwy` musi znajdować się obok pliku `.exe`).
+* 📦 **[Wszystkie wydania, kody źródłowe i historia zmian (GitHub Releases)](https://github.com/Eksploracja/MapoTero/releases):** pełne archiwum wersji oraz sumy kontrolne SHA-256.
+* 📖 **[Podręcznik użytkownika online](https://eksploracja.github.io/MapoTero/pomoc/):** 42 rozdziały instrukcji krok po kroku z opisem narzędzi, formatów i konfiguracji.
+
+**Wymagania systemowe:**
+
+* System Windows (64-bitowy).
+* Środowisko uruchomieniowe **[.NET Desktop Runtime 10 (x64)](https://dotnet.microsoft.com/download/dotnet/10.0)** (jeśli nie jest zainstalowane, Windows zaproponuje jego automatyczne pobranie przy pierwszym uruchomieniu).
 
 > [!NOTE]
-> **Pierwsze uruchomienie w systemie Windows (komunikat SmartScreen):**  
-> Program jest w pełni bezpieczny i otwartoźródłowy (GPLv3), lecz nie posiada kosztownego komercyjnego certyfikatu podpisu cyfrowego. System Windows może przy pierwszym uruchomieniu wyświetlić niebieski monit *"System Windows ochronił ten komputer"*.  
-> * **Jak uruchomić:** Kliknij odnośnik **„Więcej informacji”**, a następnie przycisk **„Uruchom mimo to”**.  
+> **Pierwsze uruchomienie w systemie Windows (komunikat SmartScreen)**
+>
+> MapoTero jest darmowym projektem otwartoźródłowym (GPLv3) i nie posiada płatnego podpisu cyfrowego Microsoft, dlatego Windows może przy pierwszym uruchomieniu wyświetlić niebieski ekran *„System Windows ochronił ten komputer”*.
+>
+> * **Jak uruchomić:** kliknij **„Więcej informacji”**, a następnie **„Uruchom mimo to”**.
 >
 > ![Okno SmartScreen: najpierw „Więcej informacji”, potem „Uruchom mimo to”](obrazy/smartscreen.png)
 >
-> * **Wskazówka:** Możesz także przed rozpakowaniem kliknąć prawym przyciskiem myszy na pobranym pliku ZIP → **Właściwości** → zaznaczyć pole **„Odblokuj”** na dole i kliknąć **OK**.
-> * **Jak sprawdzić plik:** w opisie każdego [wydania](https://github.com/Eksploracja/MapoTero/releases/latest) są sumy kontrolne SHA-256 archiwum ZIP i pliku `MapoTero.exe` oraz odnośnik do wyniku skanu programami antywirusowymi w serwisie VirusTotal.
+> * **Szybszy sposób (przed rozpakowaniem):** kliknij prawym przyciskiem myszy na pobranym pliku ZIP → **Właściwości** → zaznacz **„Odblokuj”** u dołu okna → **OK**.
+> * **Weryfikacja pliku:** w opisie każdego [wydania](https://github.com/Eksploracja/MapoTero/releases/latest) znajdziesz sumy kontrolne SHA-256 archiwum ZIP i `MapoTero.exe` oraz link do skanu w serwisie VirusTotal.
 
----
+## Szybki start
 
-## Aktualności
+### Opcja A: Szybki kreator map (polecana na start)
 
-* **23.11.2026 – Wersja 3.19:**
-  * **Szybki kreator map (`Ctrl+K`):** prowadzi w 4 krokach od wyboru urządzenia (smartfon, Garmin KMZ/JNX, wydruk A4–A0, CAD/GIS) i gotowego stylu z podglądem (turystyka, góry, rower/MTB, dziedzictwo z rzeźbą LiDAR i zabytkami NID, mapy historyczne WIG i niemieckie, działki EGiB albo styl własny), przez wskazanie obszaru, po gotowy plik. Tworzy mapy wieloskalowe, opcjonalnie dokłada ortofotomapę w największym zbliżeniu, szacuje czas i rozmiar oraz pozwala zapisać własny szablon (*Zapisz jako szablon...*).
-  * **Transfer map na telefon przez Wi-Fi i kod QR:** przycisk *Wyślij na telefon...* uruchamia lokalny serwer i wyświetla kod QR. Po zeskanowaniu aparatem plik (`.mbtiles`, `.gpkg`, `.tif`, `.kmz`, `.sqlitedb`, `.tar`) pobiera się prosto na telefon, bez kabla USB i bez chmury.
-  * **Kopiowanie na odbiornik Garmin (USB):** okno eksportu wykrywa podłączone urządzenia Garmin i karty microSD oraz zapisuje pliki prosto do `Garmin/CustomMaps` lub `Garmin/BirdsEye`.
-  * **Obsługa OGC GeoPackage (`.gpkg`):** eksport kafelków rastrowych (dla QField, Mergin Maps, Locus Map, OruxMaps) oraz wczytywanie poligonów i tras z plików `.gpkg` jako obszaru pobierania.
-  * **Kafelkowany GeoTIFF z piramidą pomniejszeń (COG):** eksport i scalanie do GeoTIFF tworzy pliki z kafelkami 256×256 i wewnętrznymi poziomami pomniejszeń, dzięki czemu duże arkusze szybko otwierają się w Avenza Maps, QGIS, ArcGIS i CAD.
-  * **Nowy układ okna głównego i tryb *7 Rzeźba terenu*:** wyszukiwarka miejsc, adresów i działek ULDK (`Ctrl+F`) bezpośrednio nad mapą, przejrzyste karty pod mapą, edycja krycia wprost na liście warstw oraz tryb mieszania dla cieniowania LiDAR, który nie przyciemnia płaskich powierzchni.
-  * **Uporządkowane narzędzia eksportu:** scalanie segmentów i format TrekBuddy (`.tar`) przeniesiono do okna *Eksport mapy*, razem z nakładkami i profilami korekty. Usunięto przestarzałe narzędzia zastąpione nowszymi funkcjami.
+1. Uruchom program i naciśnij **`Ctrl+K`** (lub wybierz *Szybki kreator map* z menu lub paska narzędzi).
+2. Wybierz urządzenie docelowe (smartfon, Garmin KMZ/JNX, wydruk A4–A0 lub CAD/GIS) oraz gotowy styl mapy (np. turystyka, góry, rower, cieniowanie LiDAR z zabytkami NID, mapy historyczne lub działki EGiB).
+3. Wskaż obszar na mapie i zatwierdź. Program pobierze dane i wygeneruje gotowy plik, który możesz od razu przesłać na telefon kodem QR lub skopiować na odbiornik Garmin przez USB.
 
-<details>
-<summary><b>Historia wcześniejszych wydań (od wersji 3.18 do 3.0.0.9)</b> (kliknij, aby rozwinąć)</summary>
+### Opcja B: Tryb ręczny (pełna kontrola nad warstwami)
 
-* **16.11.2026 – Wersja 3.18:**
-  * **Wyszukiwarka miejscowości, adresów i działek ULDK (`Ctrl+F`, `Ctrl+D`):** szukanie po adresie, kodzie TERYT lub nazwie obrębu i numerze działki, z obrysem działki na mapie i automatyczną siatką pobierania z buforem.
-  * **Podgląd zestawu warstw na żywo:** miniatura wybranych warstw z lupą w prawym dolnym rogu okna głównego, pokazująca krycie i mieszanie warstw przed pobieraniem.
-  * **Korekta obrazu i profile Garmin MIP:** poprawa kontrastu, nasycenia i ostrości z podglądem na żywo dla ekranów Garmin MIP, gotowe profile korekty oraz narzędzie do zbiorczej korekty obrazów w folderze.
-  * **Konwerter map OziExplorer (`.map` na JNX, KMZ i MBTiles):** konwersja pojedynczych plików i całych folderów (także przez przeciągnięcie na okno programu) z korektą historycznych układów współrzędnych.
-  * **Profil wysokościowy trasy (NMT LiDAR):** wykres wysokości i suma podejść dla śladu GPX w oknie korytarza oraz zapis pliku GPX z uzupełnionymi wysokościami.
-  * **Bezpośredni eksport do GeoTIFF:** zapis mapy wprost do GeoTIFF (dla Avenza Maps, QField, GIS i CAD) z georeferencją.
-  * **Automatyczne dzielenie dużych map KMZ na tomy:** podział map przekraczających limit 100 kafli Garmin na kolejne pliki bez obniżania rozdzielczości.
-  * **Wygoda i niezawodność:** podręczna pomoc (`F1`) w oknach narzędzi, przycisk *Nowa sesja* oraz wykrywanie i ponawianie pustych białych segmentów zwracanych przez serwery WMS.
+1. **Wybierz mapy i warstwy:** w drzewie *Wybierz mapy* po prawej stronie rozwiń grupę tematyczną (lub użyj pola *szukaj warstwy…*) i zaznacz warstwy. Pierwsza wybrana warstwa stanowi podkład, a kolejne nakładają się na nią. Możesz łączyć warstwy z różnych serwerów (WMS, WMTS i XYZ).
+2. **Ustaw kolejność i krycie:** w panelu *Wybrane warstwy oraz ich kolejność* zmień kolejność przyciskami `▲` `▼` lub przeciągając myszą, dostosuj krycie albo kliknij `…`, aby otworzyć okno zaawansowane z trybami mieszania i podglądem na żywo.
+3. **Zaznacz obszar:** prawym przyciskiem myszy zaznacz zasięg na mapie, wyszukaj miejscowość lub działkę (`Ctrl+F`) albo przeciągnij na okno plik trasy GPX/KML/KMZ (lub poligon `.gpkg`), aby wyznaczyć korytarz wzdłuż trasy.
+4. **Pobierz segmenty:** kliknij **„Pobierz”**. Pliki trafią do osobnego podfolderu sesji wewnątrz katalogu `download` (ponowne kliknięcie wznawia sesję i dociąga wyłącznie brakujące segmenty).
+5. **Wyeksportuj lub scal mapę:**
+   * **Telefon, Garmin lub scalony arkusz:** otwórz *Narzędzia > Eksport mapy* (`Ctrl+E`), aby zapisać mapę jako MBTiles, OGC GeoPackage (`.gpkg`), Garmin JNX/KMZ, SQLiteDB, OruxMaps albo scalony arkusz *GeoTIFF / JPEG / PNG* (format *Arkusz*). Z tego okna możesz także wysłać plik na telefon przez **Wi-Fi (kod QR)** lub zapisać prosto na podłączony **Garmin USB**.
+   * **Programy CAD:** wybierz *Narzędzia > Eksport do CAD*, aby utworzyć rysunek DXF, skrypt `SCRIPT` (`.scr`) lub program LISP (`APPLOAD`) wstawiający mapę na warstwy `MAPOTERO_...` (przy dużej liczbie segmentów skorzystaj w tym oknie z przycisku *Scal segmenty…*).
 
-* **12.11.2026 – Wersja 3.17:**
-  * **Pakiet map przygranicznych (Czechy, Słowacja, Niemcy, Litwa, Bałtyk):** nowa grupa w drzewie warstw *Kraje sąsiednie i strefa przygraniczna*, zawierająca zrozumiałe dla polskich użytkowników urzędowe skany map topograficznych w pełnej gamie skal (od 1:10 000 przez 1:25 000 do 1:50 000), ortofotomapy lotnicze oraz rzeźbę terenu i cieniowanie (NMT/LIDAR/batymetria): Czechy (ČÚZK – skany map topograficznych ZTM 1:10k, 1:25k, 1:50k, wieloskalowa mapa WMTS i Ortofoto), Słowacja (ZBGIS – skany map topograficznych ZM10, ZM25, ZM50, ZM100, Ortofoto, DMR 5.0 oraz Freemap Slovakia Karpaty XYZ), Niemcy (BKG – basemap.de WMTS; Brandenburgia – skany DTK10, DTK25, DTK50, SDOP 20 cm i DGMSHADE 1 m; Saksonia – skany DTK25, DTK50, DOP 20 cm i Relief DGM), Litwa (INSPIRE – ewidencja gruntów/działki, warstwice i drogi), Morze Bałtyckie (EMODnet Bathymetry – batymetria, rzeźba dna i izobaty) oraz OpenTopoMap (ogólnoeuropejska mapa topograficzna z poziomicami i cieniowaniem dla Litwy, Ukrainy i Białorusi), co pozwala na przygotowanie spójnych map turystycznych w strefach granicznych bez białych plam,
-  * **Bezpośredni eksport do Garmin BirdsEye (JNX):** format Garmin BirdsEye (wersja 4) z pełną piramidą powiększeń bez restrykcyjnego limitu 100 kafli znanego z Custom Maps (do 50 000 kafli na plik), z automatycznym wyliczaniem poziomów skali i kolejności rysowania (z-order); gotowy plik `.jnx` wystarczy skopiować do folderu `Garmin/BirdsEye` w urządzeniu z odblokowanym oprogramowaniem (patshowanym firmware),
-  * **Ulepszenia Garmin Custom Maps (KMZ):** obsługa kolejności rysowania (`drawOrder`: standardowa 50, pod siatką dróg wektora 25, na wierzchu 75), pełna obsługa przezroczystych nakładek PNG w formacie KMZ oraz inteligentny licznik kafli korytarza trasy (do limitu 100 kafli zliczane są wyłącznie kafle zawierające dane, zapobiegając niepotrzebnemu obniżaniu rozdzielczości),
-  * **Przeciągnij i upuść (Drag & Drop) tras GPX, KML i KMZ:** plik ze śladem wycieczki wystarczy przeciągnąć z Eksploratora Windows na okno programu lub mapę – okno definiowania korytarza otwiera się od razu z wczytaną trasą i parametrami, a mapa dopasowuje widok do przebiegu śladu,
-  * **Usprawnienia okna Eksport mapy:** konkretne podpowiedzi ścieżek docelowych dla urządzeń GPS i aplikacji mobilnych (`Garmin/BirdsEye`, `Garmin/CustomMaps`, `Locus/maps`, `osmand/tiles`, `oruxmaps/mapfiles`) oraz przycisk *Pokaż w folderze*, otwierający Eksplorator Windows ze wskazanym plikiem po zakończonym eksporcie,
-  * **Kreator dodawania serwerów – katalog gotowych usług publicznych na start i czytelne nazwy:** okno kreatora otwiera się od razu na katalogu z wbudowaną listą ponad 100 sprawdzonych usług dodatkowych bez skorowidzów (m.in. GUGiK – archiwalne ortofotomapy, BDOT10k/BDOO/TOPO WMS, NMT cieniowanie/hipsometria WMS, K-GESUT, osnowy podstawowe i specjalne, usługi INSPIRE, KIMP/KIBDOT; PGW Wody Polskie – zagrożenie powodziowe i hydrografia; PIG-PIB – osuwiska SOPO, jaskinie, złoża MIDAS, geologia 1:200k/1:500k 2022, geostanowiska, podtopienia, wody mineralne; GIOŚ; Ekoportal – pożary lasów i mapy hałasu; IMGW; GUS; oraz kafelki XYZ z katalogu NextGIS QuickMapServices: ESRI Imagery/Topo/Street/Hillshade, EOX Sentinel-2 2024, OpenTopoMap, CartoDB, OpenStreetMap DE/HOT/FR, CyclOSM, Freemap.sk, OpenRailwayMap, OpenSeaMap) oraz z bezpośrednim dostępem online do oficjalnego wykazu Geoportal.gov.pl i rejestru EZiUDP (usługi centralne, wojewódzkie oraz wyszukiwarka usług powiatowych i gminnych po nazwie lub kodzie TERYT); przycisk *+ Wpisz własny adres URL…* pod listą (albo wklejenie adresu `http(s)://` w polu wyszukiwania) przełącza do ręcznego wpisania własnego serwera WMS/WMTS/XYZ, a po wybraniu usługi kreator pobiera warstwy z podglądem i możliwością powrotu przyciskiem *← Wróć do listy usług*; warstwy zapisane kreatorem zachowują w grupie *Dodane serwery* i na liście wybranych warstw swoje czytelne nazwy z serwera,
-  * **Obsługa kafelków XYZ / TMS:** bezpośrednie pobieranie map z prostych serwerów kafli `{z}/{x}/{y}` i TMS (`{-y}`) w tym wbudowanych zbiorów *OSMapa.pl*, *UMP-pcPL* i przezroczystych nakładek szlaków *Waymarked Trails* (piesze, rowerowe, MTB, konne, rolkowe, narciarskie); kreator serwerów rozpoznaje szablony `{z}/{x}/{y}`, TileJSON oraz `tilemapresource.xml`, podkład dodany po nakładce automatycznie trafia pod spód, a pobieranie samych nakładek obsługuje przezroczyste tło PNG,
-  * **Kafle XYZ / TMS – poprawki:** ostrzeżenie przed pobieraniem, gdy obszar leży w całości poza zasięgiem mapy (np. OSMapa.pl poza Polską) i segmenty byłyby puste; brakujące na serwerze kafle podkładu (HTTP 404, zwykle na największym powiększeniu) program zastępuje powiększonym fragmentem kafla z poziomu wyżej zamiast zostawiać białe pola; odmowa dostępu (HTTP 403) kończy pobieranie od razu, z podpowiedzią o polu `referer`; szablony mogą zawierać `{quadkey}` (serwery w stylu Bing) i `{r}` (przyrostek kafli retina z Leaflet, pomijany),
-  * **Drzewo map w grupach tematycznych:** dawną listę zbiorów map i listę warstw zastąpił jeden panel *Wybierz mapy* - drzewo z grupami *Ortofotomapy*, *Mapy topograficzne*, *Rzeźba terenu*, *Mapy historyczne i zabytki*, *Ewidencja, geodezja i uzbrojenie*, *Granice i adresy*, *Przyroda i środowisko*, *Geologia* i podgrupami (np. *Działki ewidencyjne (KIEG)*, *Formy ochrony przyrody (GDOŚ)*); warstwy mają zrozumiałe nazwy (np. *Nadleśnictwa* zamiast `5`, *Mapa szczegółowa WIG 1:25 000 (1918–1939)* zamiast `wig25k_2180`) i pola wyboru - zaznaczenie dodaje warstwę na wierzch kanapki, odznaczenie ją usuwa, a przy grupie widać liczbę wybranych warstw; można dobierać warstwy z różnych serwerów; przycisk ⊞/⊟ rozwija lub zwija wszystkie grupy, a pole *szukaj warstwy…* filtruje warstwy (po nazwach i nazwach technicznych, bez względu na wielkość liter i polskie znaki); grupy i nazwy opisuje plik `warstwy/katalog.txt`, a serwery dodane kreatorem trafiają do grupy *Dodane serwery*; panel wybranych warstw jest niższy i przewijany, więc drzewo ma więcej miejsca,
-  * **Porządki w zbiorach map:** usunięte zdublowane zbiory `Hgis_*` (te same warstwy są w *Mapach historycznych (IHPAN)*), warstwy-skorowidze (siatki arkuszy TrueOrtho, zasięgi powiatów KIEG) i nieistniejąca już warstwa skanów 1:100 000; dodane mapy historyczne IHPAN (Übersichtskarte von Mitteleuropa 1:300 000, mapa Galicji Kummersberga 1:115 200, Śląsk w XVIII w., plany Wrocławia 1944, Warszawy 1822 i Pragi 1796) oraz sieci specjalne i niezidentyfikowane KIUT; zaktualizowane adresy i nazwy warstw PRG (nowa usługa `AdministrativeBoundaries` i `INSPIRE/Addresses` oraz *Państwowy Rejestr Nazw Geograficznych* PRNG), prefiksy warstw GDOŚ, działające warianty IHPAN (`wroclaw_3857`, `wig300k_3857`), zalecane piksele dla obrębów EGiB i mapy geologicznej 1:500 000 oraz warstwa *Regionalne dyrekcje Lasów Państwowych* (BDL); dodane nowe szybkie zbiory kafelkowe WMTS (*Mapa topograficzna GUGiK*, *Mapa ogólnogeograficzna BDOO z cieniowaniem*, *Hipsometria z cieniowaniem NMT 1 m*) i warstwa *Szczyty górskie i wzniesienia*; usunięte nieaktualne komunikaty o limicie 256 px nieczynnego serwera hgis.cartomatic.pl,
-  * **Nowe mapy i poprawki po sprawdzeniu wszystkich warstw:** nowe zbiory *Mapa glebowo-rolnicza 1:5000* (kontury i odkrywki glebowe, GUGiK) i *Regiony fizycznogeograficzne* (makro- i mezoregiony, PIG-PIB); w gałęzi *Mapy historyczne i zabytki* nowa podgrupa *Zabytki i dziedzictwo (NID)* obejmująca rejestr zabytków nieruchomych (zasięgi i typy oraz INSPIRE), rejestr zabytków archeologicznych, krajową ewidencję zabytków nieruchomych i archeologicznych, Pomniki Historii, obiekty światowego dziedzictwa UNESCO oraz groby i cmentarze wojenne; w *Mapach historycznych (IHPAN)* 15 kolejnych map, m.in. mapy Schroettera, Gilly'ego, Textora-Sotzmanna i Gaula, Topograficzna Karta Królestwa Polskiego 1:126 000, mapa Reymanna 1:200 000, Dwuwiorstówka 1:84 000, WIG 1:100 000 w układzie „Borowa Góra”, plan Warszawy Lindleyów i mapy ziem Korony w XVI w.; cieniowanie i hipsometria NMT 1 m pobierane jako kafle WMTS zamiast wolnych usług WMS; *Mapa topograficzna OpenStreetMap* korzysta z warstwy `TOPO-OSM-WMS` (dawna `TOPO-WMS` pokazywała tylko tło), a nazwy map terrestris informują o znaku wodnym, który ta darmowa usługa dokleja do obrazów; usunięta pusta warstwa *Działki – uzupełnienie z LPIS*,
-  * **Nowy panel *Wybrane warstwy oraz ich kolejność*:** usuwanie pojedynczej warstwy (przycisk kosza, ✕ albo klawisz Delete) zamiast czyszczenia całej listy, zmiana kolejności warstw przyciskami ▲ ▼, przeciąganiem myszą lub Ctrl+strzałka, menu warstwy pod prawym przyciskiem myszy; ta sama warstwa nie trafia na listę dwa razy, a rysunek kanapki w tle listy zasłaniają kolejne wybierane warstwy,
-  * **Krycie warstw:** pole *Krycie %* w panelu (i menu warstwy) nadaje zaznaczonej warstwie krycie od 5 do 100% - przez częściowo przezroczystą warstwę prześwituje to, co leży pod nią (np. granice działek na ortofotomapie); warstwy o kryciu mniejszym niż 100% pobierane są z serwera WMS osobnymi zapytaniami i nakładane w programie, a sąsiednie warstwy w pełni kryjące nadal jednym zapytaniem; krycie zapisywane jest w `conf.txt`,
-  * **Kanapka z warstw różnych serwerów WMS i WMTS:** każda wybrana warstwa pamięta swój zbiór map, więc wybór warstwy z innego zbioru nie czyści już wybranych warstw - np. na mapę topograficzną można nałożyć cieniowanie rzeźby ISOK z kryciem 50%, a na ortofotomapę WMTS granice działek; przy warstwach z różnych zbiorów lista pokazuje nazwę zbioru, a segment składany jest w programie z osobno pobranych grup warstw,
-  * **Rozmiar piksela wg najdokładniejszej warstwy:** program wpisuje najmniejszy zalecany rozmiar piksela spośród wybranych warstw (dawniej - rozmiar ostatnio klikniętej warstwy, więc np. dodanie granic administracyjnych po mapie topograficznej zmieniało piksel z 2 na 16 m); po usunięciu warstwy rozmiar jest przeliczany, a rozmiaru wpisanego ręcznie program nie zmienia - podaje tylko wartość zalecaną,
-  * **Okno *Warstwy - zaawansowane* (przycisk … w panelu):** suwaki krycia wszystkich warstw, kolejność, liczba zapytań na segment i podgląd kanapki - ta sama próbka co w panelu okna głównego (warstwy już pobrane przez panel nie są pobierane ponownie), z lupą 1:1, ×2 i ×4, odświeżana od razu po zmianie krycia lub kolejności,
-  * **Regulowana szerokość prawego panelu:** pasek między mapą a panelem *Dane źródłowe* można przeciągnąć myszą w lewo - drzewo map, lista wybranych warstw i pole komunikatów poszerzają się, więc widać długie nazwy warstw; panel można poszerzyć, gdy okno jest szersze od najmniejszego (np. zmaksymalizowane), a w węższym oknie panel zwęża się sam, żeby zmieściła się mapa i schemat siatki; szerokość zapisywana jest w `lastsettings.txt`,
-  * **Bezpieczeństwo danych i ułatwienia sesji:** przycisk *Usuń pobrane* przenosi pliki do systemowego Kosza (zamiast bezpowrotnego usuwania) i dotyczy wyłącznie bieżącej sesji; ikona folderu otwiera bezpośrednio właściwy folder bieżącej sesji; program ostrzega przed utratą przezroczystości w formacie JPEG przy warstwach z kryciem < 100% i proponuje przełączenie na PNG; w eksporcie CAD wprowadzono barierę ochronną przy próbie wstawienia > 1000 pojedynczych rastrów, a błędy serwerów WMS dotyczące nieobsługiwanego układu współrzędnych (CRS) są czytelnie sygnalizowane,
-  * **Pełna pomoc programu w GitHub Pages:** 39 rozdziałów przewodnika użytkownika z motywem Just the Docs, instrukcje, tabele parametrów i zrzuty ekranu pod adresem [eksploracja.github.io/MapoTero/pomoc/](https://eksploracja.github.io/MapoTero/pomoc/).
+## Zrzuty ekranu
 
-* **09.11.2026 – Wersja 3.16:**
-  * **Eksport do CAD (menu *Narzędzia > Eksport do CAD*):** rysunek DXF (R2000) z odnośnikami do rastrów na właściwych współrzędnych - segmenty sesji albo scalony arkusz (world file lub GeoTIFF) - z obrysem, siatką i numerami segmentów, trasą korytarza i opisem mapy na warstwach `MAPOTERO_...`; skrypt SCR (AutoCAD, AutoCAD LT, BricsCAD, ZWCAD) i program LISP (`APPLOAD`), które wstawiają mapę do otwartego rysunku pod istniejące obiekty i przywracają ustawienia rysunku; w oknie eksportu przycisk *scal teraz...* do złączenia segmentów w jeden arkusz,
-  * **Ochrona serwerów map przed przeciążeniem:** łączna liczba jednoczesnych zapytań do jednego serwera nie przekracza liczby wątków z ustawień (także przy WMTS); po odpowiedzi serwera o przeciążeniu (HTTP 429, 502, 503, 504) lub serii przekroczeń czasu program robi przerwę i zmniejsza liczbę zapytań o połowę, a potem stopniowo ją przywraca - mniejsze ryzyko zablokowania adresu IP przez serwer,
-  * **.NET 10:** program działa w środowisku .NET Desktop Runtime 10 (x64) - wsparcie .NET 8 kończy się 10.11.2026,
-  * **Obsługa awarii:** opis nieoczekiwanego błędu zapisywany jest w pliku `awarie.log`, a okno komunikatu podaje adres zgłoszeń i pozwala kontynuować pracę,
-  * **Poprawki:** położenie arkuszy GeoTIFF zapisanych jako *PixelIsPoint* (przesunięcie o pół piksela).
-* **23.10.2026 – Wersja 3.15:**
-  * **Kreator dodawania serwerów WMS i WMTS (menu *Narzędzia* lub przycisk `[+]` przy liście map):** automatyczna analiza dokumentu `GetCapabilities` (WMS 1.3.0, WMS 1.1.1 oraz WMTS 1.0.0), prezentacja drzewa warstw z wyszukiwarką/filtrem, matematyczne wyliczanie zalecanego rozmiaru piksela ze skali minimalnej, weryfikacja obsługiwanych układów CRS, podgląd próbnego kafelka 256×256 px i bezpośredni zapis nowego zbioru map do katalogu `warstwy/` (także w folderze użytkownika przy braku uprawnień w Program Files); ponawianie chwilowych błędów HTTP i poprawne polskie znaki w dokumentach ISO-8859-2,
-  * **Siatka segmentów na mapie i zmiana zasięgu uchwytami:** po zaznaczeniu obszaru prawym przyciskiem myszy na mapie widać siatkę segmentów; uchwyty w narożnikach i na bokach przesuwają krawędzie o pełne segmenty, a uchwyt w środku przesuwa całą siatkę (Esc przywraca poprzedni zasięg); siatkę można wyłączyć w ustawieniach,
-  * **Wielowarstwowy i wieloskalowy MBTiles (menu *Narzędzia*):** kompilacja kilku pobranych sesji do jednego pliku MBTiles - każda warstwa widoczna w wybranym zakresie powiększeń (np. z daleka topo 1:100k, w zbliżeniu topo 1:10k, a najbliżej ortofotomapa) albo nałożona na inne z kryciem, trybem mieszania i odcieniami szarości; podgląd wybranego poziomu powiększenia i wbudowana pomoc,
-  * **Zbiory map:** zbiór *ortofotomapa* korzysta z usługi Geoportalu HighResolution, a adresy zbiorów map z protokołem https,
-  * **Bezpieczniejsze pobieranie:** w trakcie pobierania nie można zmienić warstw, wczytać innej sesji ani scalać map; błąd jednego segmentu nie przerywa całego pobierania; obsługa obszarów do 10 mln segmentów i szybkie wyznaczanie korytarza trasy przy małym segmencie; pobieranie innego obszaru do folderu z segmentami innej sesji proponuje nowy podfolder, a przedrostek nazw segmentów nie może zawierać znaków niedozwolonych w nazwach plików,
-  * **Poprawki:** opcja *pobieraj tylko segmenty o numerze wyższym niż ostatni pobrany* działa zgodnie z opisem, scalanie zachowuje przezroczystość PNG i GeoTIFF i nie zajmuje nadmiernie pamięci, poprawny plik `.wld` dla WGS84, usuwanie pustych segmentów do Kosza z potwierdzeniem, zapamiętywanie opcji widoku i ustawień nowej sesji, domyślny limit czasu odpowiedzi 120 s,
-  * **Jeden plik programu:** program to pojedynczy plik `MapoTero.exe` z folderem `warstwy` obok niego.
-* **20.10.2026 – Wersja 3.14:**
-  * **Obszar pobierania wzdłuż trasy** (menu *Sesja pobierania*): po wskazaniu pliku GPX, KML lub KMZ (np. trasy zaplanowanej w Mapy.com, Komoot czy Locus Map) i szerokości pasa pobierane są tylko segmenty leżące wzdłuż trasy, a nie cały prostokąt - przy trasie ukośnej lub krętej wielokrotnie mniej danych; trasa i wybrane segmenty widoczne są na mapie, a korytarz zapisywany jest w folderze sesji (`korytarz.txt`),
-  * **Przezroczyste nakładki:** opcja *przezroczyste tło* w ustawieniach (parametr `TRANSPARENT=TRUE` zapytań WMS dla segmentów PNG / GIF), w eksporcie opcja *nakładka* (kafle PNG, w MBTiles typ `overlay`) oraz zamiana białego tła na przezroczyste dla serwerów, które przezroczystości nie obsługują,
-  * **Łączenie warstw podczas eksportu:** na mapę można nałożyć warstwy z innych folderów sesji (np. granice działek lub cieniowanie rzeźby na ortofotomapie) z regulacją krycia - także pobrane w innym układzie współrzędnych,
-  * **Nowe formaty eksportu:** SQLiteDB (format RMaps dla OsmAnd i Locus Map) oraz mapy offline OruxMaps (folder z bazą `OruxMapsImages.db` i kalibracją `.otrk2.xml`); bazy po eksporcie można otwierać tylko do odczytu,
-  * **Rozmiar pliku:** szacowanie rozmiaru mapy przed eksportem (na podstawie próbnych kafli) i dobór najwyższego poziomu powiększenia do limitu w MB,
-  * **Opis mapy:** data pobrania i źródło danych zapisywane w `conf.txt` oraz w eksportowanych mapach (nazwa mapy z datą pobrania, opis i atrybucja w MBTiles, opis w KMZ), a polecenie *odśwież mapę* pobiera ponownie wszystkie segmenty sesji (stary plik segmentu jest zastępowany dopiero po udanym pobraniu nowego).
-* **08.10.2026 – Wersja 3.13:**
-  * **Wydajność scalania segmentów:** jednokrotne buforowanie wiersza segmentów w pamięci RAM zamiast wielokrotnego dekodowania kafli z dysku (wielokrotne przyspieszenie tworzenia dużych arkuszy),
-  * **Eksport MBTiles:** naprawa transakcji SQLite i zapytań (rozwiązanie błędu `InvalidOperationException`), optymalizacja parametrów SQL, włączenie trybów `PRAGMA synchronous = OFF` oraz `WAL`, buforowanie kodeka JPEG,
-  * **Odporność pobierania:** naprawa wznawiania sesji – brakujące segmenty są identyfikowane na podstawie fizycznego istnienia plików na dysku; atomowe przenoszenie plików tymczasowych; izolacja anulowania zadań WMTS,
-  * **Zarządzanie pamięcią i zasobami natywnymi:** gwarantowane zwalnianie uchwytów plików KMZ (`FileStream`) w blokach `Finally`, bezpieczne zamykanie LibTiff w GeoTIFF, obsługa paletowych obrazów PNG w `MakeTransparent`, zwalnianie zasobów GDI+ dla znaczników `GMarkerGoogle`,
-  * **Stabilność UI (WinForms):** ochrona przed `ObjectDisposedException` przy zamknięciu formularzy w trakcie pracy w tle; precyzyjne porównywanie rozmiaru plików w bajtach w oknie usuwania pustych segmentów i buforowanie listy plików w RAM; bezpieczne otwieranie forum pomocy przez HTTPS w przeglądarce,
-  * **Nowe okno ustawień:** zmiany stosowane po kliknięciu OK (Anuluj - bez zmian), okno zawsze pokazuje aktualne ustawienia, pola liczbowe z zakresem wartości, listy tylko do wyboru, poprawione opisy i podpowiedzi, przywracanie domyślnych z potwierdzeniem i przeliczeniem do PL-1992, tryb TrekBuddy bez kasowania plików kalibracji, usunięcie formatu svg+xml,
-  * **Baza warstw i testy:** dodanie nowych warstw WMTS (m.in. BDOT10k, ortofotomapa wysokiej rozdzielczości, TrueOrtho), uporządkowanie nieaktywnych źródeł w `_archiwalne/` oraz nowy zestaw testów scalania (482 testy jednostkowe).
-* **07.10.2026 – Wersja 3.12:**
-  * Przejście na platformę .NET 8 (program 64-bitowy) i aktualizacja bibliotek zależnych (GMap.NET, SQLite); automatyczna kompilacja i testy w GitHub Actions,
-  * Pobieranie z usług WMTS: wystarczy podać w pliku zbioru map adres usługi WMTS (przykład: zbiór *ortofotomapa_WMTS*); program sam wybiera poziom kafli odpowiadający rozmiarowi piksela, a segmenty składa z kafli i w razie potrzeby przelicza do wybranego układu - mają te same pliki georeferencji co segmenty WMS,
-  * Wybór układu współrzędnych segmentów: PL-1992, PL-2000 (strefy 5-8), UTM 33N-35N, WGS84 - współrzędne obszaru i rozmiar piksela przeliczane są przy zmianie układu, a pliki georeferencji zapisywane w wybranym układzie,
-  * Wbudowane scalanie segmentów do GeoTIFF (także BigTIFF, kompresja Deflate lub JPEG), JPEG i PNG - zamiast zewnętrznego programu NoToCONS; arkusz zapisywany jest strumieniowo, więc jego wielkość nie jest ograniczona pamięcią RAM,
-  * Eksport mapy (menu Narzędzia > Eksport mapy, Ctrl+E) do KMZ dla odbiorników Garmin (kafle do 1024 px, limit liczby kafli), KMZ dla Locus Map / OruxMaps i MBTiles z piramidą poziomów powiększenia,
-  * Kilka segmentów pobieranych jednocześnie (liczba wątków w ustawieniach), przerywanie pobierania w dowolnej chwili, okno programu nie zamraża się podczas pobierania i scalania,
-  * Parametr SERVICE=WMS dodawany do zapytań (wymagany przez serwery MapServer i GeoServer), kolejność osi w zapytaniach WMS 1.3.0 zgodna z definicją układu, a opcja zamiany X i Y dotyczy tylko zapytania - nie zamienia współrzędnych zapisywanych w plikach georeferencji,
-  * Domyślny podkład mapy OpenStreetMap, ostre wyświetlanie okien na ekranach o dużej rozdzielczości (skalowanie DPI),
-  * Przeliczenia współrzędnych w jednej, dokładnej implementacji (szereg Krügera, zgodność z biblioteką PROJ do 1 mm) i testy jednostkowe biblioteki MapoTero.Core,
-  * Uporządkowanie struktury projektu i usunięcie przestarzałego kodu v2,
-  * Poprawki konfiguracji kompilacji i wsparcia dla nowoczesnych środowisk Visual Studio,
-  * Naprawa ponawiania pobierania nieudanych segmentów (ustawienia "ilość prób" i "przerwa między próbami" nie były uwzględniane); okno programu nie zamraża się podczas oczekiwania na kolejną próbę,
-  * Odporniejsze pobieranie segmentów: limit czasu połączenia, zapis obrazu bez ponownej kompresji JPEG, przyczyna błędu (np. komunikat serwera WMS) zapisywana w pliku error.txt,
-  * Naprawa wznawiania pobierania przy numeracji segmentów NrWiersza_NrKolumny,
-  * Naprawa wczytywania sesji z pliku conf.txt za jednym razem oraz zawieszania się programu przy starcie, gdy zapisany zbiór map nie istnieje,
-  * Scalanie segmentów zgłasza sukces dopiero po faktycznym utworzeniu arkusza; pliki georeferencyjne scalonego arkusza zapisywane są obok niego, z poprawną nazwą i rozszerzeniem pliku,
-  * Naprawa awarii przy tworzeniu plików .points dla formatu PNG oraz błędnych współrzędnych pikselowych w pliku .tab scalonego arkusza,
-  * Nakładanie map: zwalnianie pamięci po każdym segmencie i obsługa plików PNG z paletą barw (png8),
-  * Usuwanie pustych segmentów: brak limitu 10 000 plików, usuwanie także plików .kml, .pngw i .png.points,
-  * Gdy w katalogu programu nie można zapisywać (np. Program Files), ustawienia i pobrane mapy trafiają do %LocalAppData%\MapoTero,
-  * Dokładna kalibracja plików KML: zapis dokładnych narożników obrazu (gx:LatLonQuad) oraz LatLonBox z obrotem uwzględniającym zbieżność południków - dawniej kafle na wschodzie i zachodzie Polski były w KML obrócone i przeskalowane (przesunięcie narożników kafla 1 km o ok. 40 m),
-  * Pliki world file (.jpgw, .pngw, ...) podają środek lewego górnego piksela zgodnie ze standardem (dawniej przesunięcie o pół piksela),
-  * Dokładny zasięg segmentów o niecałkowitym wymiarze terenowym (np. 0,1 m x 2048 px) i zapis liczb z kropką dziesiętną niezależnie od ustawień regionalnych systemu,
-  * Usunięcie nieużywanych bibliotek (GMap.NET.WindowsPresentation, System.Text.Encoding.CodePages) i wersji testowych (preview) bibliotek.
-* **19.10.2021 – Wersja 3.11:**
-  * Naprawa niedziałającej warstwy Ortofotomapa,
-  * Aktualizacja adresów warstw WMS.
-* **20.10.2020 – Wersja 3.10:**
-  * Usunięcie usterki związanej z niewyświetlaniem podkładowej warstwy OpenStreetMap w systemie Windows 10,
-  * Aktualizacja warstw WMS,
-  * Zmiana platformy programistycznej .NET Framework z wersji 4.5 na 4.7.2.
-* **09.09.2019 – Wersja 3.0.0.9:**
-  * Aktualizacja warstw WMS,
-  * Zmiana platformy programistycznej .NET Framework z wersji 3.5 na 4.5,
-  * Naprawa błędu wyświetlania podkładowej warstwy OpenStreetMap.
-
-</details>
-
----
-
-## Skrócona instrukcja obsługi
-
-1. **Wybór mapy:** W drzewie *Wybierz mapy* po prawej stronie okna programu rozwiń (kliknięciem nazwy) grupę tematyczną i podgrupę z interesującą Cię mapą - np. *Mapy topograficzne > Skany map topograficznych GUGiK* (rozwinięte przy nowej sesji). Przycisk ⊞/⊟ rozwija lub zwija wszystkie zbiory, a pole *szukaj warstwy…* pokazuje tylko warstwy pasujące do wpisanych słów.
-2. **Wybór warstwy:** Zaznacz pole wyboru interesującej Cię warstwy albo kliknij jej nazwę (np. *"1:25 000, układ 1965"* lub *"1:10 000, układ 1965"*); odznaczenie usuwa warstwę. Nazwa zaznaczonej warstwy wyświetli się w polu *"Wybrane warstwy oraz ich kolejność"* - pierwsza wybrana warstwa jest podkładem, kolejne kładą się na niej. Zaznaczoną tam warstwę (lub jedyną wybraną) usuniesz przyciskiem kosza albo ✕ (lub klawiszem Delete), przesuniesz przyciskami ▲ ▼ albo przeciągając ją myszą, a w polu *Krycie %* nadasz jej przezroczystość (np. 50% - widać przez nią warstwę leżącą niżej). Przycisk … otwiera okno z suwakami krycia i podglądem kanapki. Warstwy możesz brać z różnych zbiorów map (także WMS i WMTS razem): rozwiń inną grupę w drzewie i zaznacz jej warstwę - wybrane wcześniej warstwy zostają.
-3. **Zaznaczenie obszaru:** Na podglądzie mapy zaznacz prawym przyciskiem myszy zasięg pobieranego obszaru albo wskaż plik trasy (*Sesja pobierania > obszar pobierania wzdłuż trasy*).
-4. **Pobieranie:** Kliknij przycisk **"Pobierz"**. Rozpocznie się pobieranie segmentów do dedykowanego podfolderu sesji w katalogu `download` (np. `download/sesja_ortofotomapa_...`), dzięki czemu pliki nie zaśmiecają folderu nadrzędnego. Ponowne kliknięcie wznawia pobieranie w tym samym folderze i dociąga brakujące kafle.
-5. **Przeglądanie i scalanie:**
-   * Kliknij żółty folder, aby otworzyć katalog z pobranymi plikami bieżącej sesji.
-   * Opcjonalnie scal pobrane segmenty w jeden arkusz ikoną szachownicy albo poleceniem *Narzędzia > Scalanie segmentów* – otworzy się okno *Eksport mapy* z formatem *Arkusz* (GeoTIFF, JPEG lub PNG). Arkusz zapisywany jest pasami, więc może mieć dowolną wielkość (JPEG - do 65 500 px na bok).
-   * Opcjonalnie wyeksportuj mapę do JNX, KMZ, MBTiles, SQLiteDB, OruxMaps albo paczki TrekBuddy / Locus Map (*Narzędzia > Eksport mapy*), aby wgrać ją do odbiornika GPS lub aplikacji mobilnej.
-   * Opcjonalnie wyeksportuj mapę do programu CAD (*Narzędzia > Eksport do CAD*): rysunek DXF otwórz w programie CAD, a skrypt SCR uruchom poleceniem `SCRIPT` w otwartym rysunku (jednostki: metry). Program LISP (AutoCAD, BricsCAD, ZWCAD, AutoCAD LT od wersji 2024) wczytaj poleceniem `APPLOAD` - wstawia też numery segmentów i opis, a po zakończeniu przywraca ustawienia rysunku. Oś X rysunku to wschód, oś Y - północ; mapa trafia na warstwy `MAPOTERO_...`. Przy setkach segmentów wygodniej wstawić scalony arkusz (GeoTIFF albo JPEG z plikiem world file) - przycisk *Scal segmenty...* w oknie eksportu do CAD.
-
-## Wygląd okien programu
-
-### Główne okno programu
-![Główne okno programu](pomoc/obrazy/03-okno-glowne.png)
-
-### Szybki kreator mapy
+### Szybki kreator mapy (`Ctrl+K`)
 ![Szybki kreator mapy](pomoc/obrazy/16-szybki-kreator.png)
 
-### Okno ustawień
-![Okno ustawień](pomoc/obrazy/07-ustawienia.png)
+### Bezpośredni transfer mapy na telefon przez Wi-Fi i kod QR
+![Bezpośredni transfer mapy na telefon przez Wi-Fi i kod QR](pomoc/obrazy/16-wyslij-telefon.png)
 
-### Eksport mapy (formaty mobilne, arkusze GeoTIFF, transfer Wi-Fi)
+### Eksport mapy (formaty mobilne, arkusze GeoTIFF, Garmin USB)
 ![Okno eksportu mapy](pomoc/obrazy/10-eksport-mapy.png)
 
----
+### Kompozycje warstw, krycie i rzeźba terenu (LiDAR)
+![Okno Warstwy - zaawansowane z suwakami krycia i podglądem](pomoc/obrazy/03-warstwy-zaawansowane.png)
 
-## Obsługiwane serwery WMS i WMTS
+## Co nowego
 
-* **Geoportal2** (Główny Urząd Geodezji i Kartografii)
-* **Państwowy Instytut Geologiczny (PIG)**
-* **Generalna Dyrekcja Ochrony Środowiska (GDOŚ)**
-* **Narodowy Instytut Dziedzictwa (NID)** i **Instytut Historii PAN (IHPAN)**
-* **Służby geodezyjne krajów sąsiednich:** Czechy (**ČÚZK**), Słowacja (**ZBGIS**, **Freemap**), Niemcy (**BKG**, **GeoBasis-BB Brandenburgia**, **GeoSN Saksonia**), Litwa (**INSPIRE**) oraz europejskie bazy morskie (**EMODnet Bathymetry**) i **OpenTopoMap**.
+### Wersja 3.19 (23.11.2026)
 
-Zbiory map to pliki tekstowe w katalogu `warstwy`: w pierwszym wierszu adres serwera, dalej pary wierszy - nazwa warstwy i zalecany rozmiar piksela. Grupy drzewa *Wybierz mapy* i zrozumiałe nazwy warstw opisuje plik `warstwy/katalog.txt` (UTF-8): wiersz `> Grupa` otwiera grupę, `>> Podgrupa` - podgrupę, a wiersz `zbiór | warstwa | nazwa` dodaje do niej warstwę ze zbioru map; warstwy spoza katalogu program pokazuje w grupie *Dodane serwery*. Adres usługi WMTS (np. zawierający `SERVICE=WMTS` lub `/WMTS`) oznacza pobieranie kafli WMTS; nazwą warstwy jest wtedy identyfikator warstwy z dokumentu GetCapabilities usługi.
+* **Szybki kreator map (`Ctrl+K`):** 4-krokowy kreator z gotowymi stylami (turystyka, góry, MTB, dziedzictwo z LiDAR i zabytkami NID, mapy historyczne, działki EGiB), mapami wieloskalowymi, szacowaniem rozmiaru i zapisem własnych szablonów.
+* **Wysyłanie map na telefon przez Wi-Fi i kod QR:** przycisk *Wyślij na telefon…* w oknie eksportu udostępnia gotowy plik (`.mbtiles`, `.gpkg`, `.tif`, `.kmz`, `.sqlitedb`) w lokalnej sieci bez kabla USB i chmury.
+* **Bezpośredni zapis na odbiornik Garmin (USB):** automatyczne wykrywanie podłączonych urządzeń Garmin oraz kart microSD i kopiowanie prosto do folderów `Garmin/CustomMaps` lub `Garmin/BirdsEye`.
+* **Obsługa OGC GeoPackage (`.gpkg`) i kafelkowany GeoTIFF (COG):** eksport kafelków `.gpkg`, wczytywanie poligonów i tras z `.gpkg` jako obszaru pobierania oraz zapis GeoTIFF z kaflami 256×256 i piramidą pomniejszeń.
+* **Odświeżony interfejs i tryb *7 Rzeźba terenu*:** wyszukiwarka miejsc i działek ULDK (`Ctrl+F`) nad mapą, edycja krycia wprost na liście warstw, mieszanie cieniowania LiDAR bez przyciemniania płaskich powierzchni oraz scalanie segmentów zintegrowane w oknie *Eksport mapy*.
+
+📜 Pełną historię wcześniejszych zmian i opisy wszystkich wydań znajdziesz w zakładce **[GitHub Releases](https://github.com/Eksploracja/MapoTero/releases)**.
+
+## Obsługiwane źródła map (WMS, WMTS, XYZ/TMS)
+
+Program zawiera bogaty zestaw wbudowanych warstw pogrupowanych tematycznie oraz **kreator serwerów (`[+]`)** z katalogiem ponad 100 sprawdzonych usług publicznych, wyszukiwarką rejestru EZiUDP i możliwością dodania dowolnego własnego adresu WMS, WMTS lub XYZ/TMS.
+
+Dostępne źródła map możesz także wygodnie przeglądać i dodawać do programu bezpośrednio z internetowej **[Galerii warstw](https://eksploracja.github.io/MapoTero/pomoc/galeria-warstw/)**.
+
+Główne wbudowane źródła danych:
+
+* **Geoportal (GUGiK):** ortofotomapy, TrueOrtho, skany map topograficznych, BDOT10k, cieniowanie i hipsometria NMT/LiDAR, ewidencja gruntów (EGiB), uzbrojenie terenu (KIUT/K-GESUT), granice i adresy (PRG).
+* **Państwowy Instytut Geologiczny (PIG-PIB):** mapy geologiczne, regiony fizycznogeograficzne, osuwiska i jaskinie.
+* **Generalna Dyrekcja Ochrony Środowiska (GDOŚ):** formy ochrony przyrody.
+* **Narodowy Instytut Dziedzictwa (NID) i Instytut Historii PAN (IHPAN):** zabytki, pomniki historii, cmentarze wojenne oraz bogaty zbiór map historycznych (m.in. WIG 1:25k/1:100k, niemieckie mapy topograficzne, mapy XVIII–XX w., plany historyczne miast).
+* **Mapy kafelkowe XYZ/TMS:** OSMapa.pl, UMP-pcPL, szlaki Waymarked Trails (piesze, rowerowe, MTB i inne), OpenTopoMap oraz usługi z katalogu QuickMapServices.
+* **Służby geodezyjne krajów sąsiednich i Bałtyku:** Czechy (**ČÚZK**), Słowacja (**ZBGIS**, **Freemap**), Niemcy (**BKG**, **GeoBasis-BB Brandenburgia**, **GeoSN Saksonia**), Litwa (**INSPIRE**) oraz **EMODnet Bathymetry**.
 
 ### Wskazówki dla map w strefie przygranicznej
 
 * **Dobór układu współrzędnych:**
-  * **Warstwy WMTS i XYZ** (np. czeska *ZTM_WM*, słowacka *Freemap Outdoor*, niemiecka *basemap.de*, *OpenTopoMap*): działają bez problemu w każdym układzie (PL-1992, PL-2000, UTM, WGS84) – program przelicza je w locie na siatkę wybranego układu.
-  * **Warstwy czystego WMS** (szczegółowe skany czeskie *ZTM 10/25/50*, słowackie *ZM10/25/50*, brandenburskie *DTK10/25/50*): serwery te nie obsługują polskiego układu PL-1992. W oknie głównym MapoTero wybierz dla nich układ **WGS84 (EPSG:4326)** lub strefę **UTM 33N/34N** (wspólne dla Polski i sąsiadów; Saksonia dodatkowo wspiera bezpośrednio PL-1992).
-* **Nakładanie map i przezroczystość (łączenie bez białych plam):**
-  * Jeśli tworzysz kompozycję z polskiego podkładu i warstwy zagranicznej, a serwer zagraniczny wypełnia obszar poza swoją granicą białym kolorem zamiast przezroczystości (np. Saksonia lub Brandenburgia), w oknie *Warstwy zaawansowane* (przycisk `…`) zmień tryb mieszania górnej warstwy na **Mnożenie (Multiply)**. W tym trybie biel staje się niewidoczna, a treść obu map (drogi, warstwice, napisy) łączy się idealnie na granicy.
+  * **Warstwy WMTS i XYZ** (np. czeska *ZTM_WM*, słowacka *Freemap Outdoor*, niemiecka *basemap.de*, *OpenTopoMap*): działają w każdym układzie (PL-1992, PL-2000, UTM, WGS84), ponieważ program przelicza je w locie na siatkę wybranego układu.
+  * **Warstwy czystego WMS** (szczegółowe skany czeskie *ZTM 10/25/50*, słowackie *ZM10/25/50*, brandenburskie *DTK10/25/50*): serwery te nie obsługują polskiego układu PL-1992. Wybierz dla nich w oknie głównym układ **WGS84 (EPSG:4326)** lub strefę **UTM 33N/34N** (Saksonia dodatkowo wspiera bezpośrednio PL-1992).
+* **Łączenie na granicy bez białych plam:**
+  * Gdy zagraniczny serwer wypełnia obszar poza granicą białym kolorem zamiast przezroczystości (np. Saksonia lub Brandenburgia), w oknie *Warstwy zaawansowane* (przycisk `…`) zmień tryb mieszania górnej warstwy na **Mnożenie (Multiply)**. Biel stanie się niewidoczna, a drogi, warstwice i napisy obu map płynnie się połączą.
 
----
+> [!TIP]
+> **Własne zbiory map:** zaawansowani użytkownicy mogą dodawać i organizować własne pliki definicji warstw w katalogu `warstwy/` oraz konfigurować strukturę grup w pliku `katalog.txt`. Szczegółowy opis formatów znajdziesz w [Podręczniku online](https://eksploracja.github.io/MapoTero/pomoc/warstwy/).
 
-## Kompilacja
+## Budowanie ze źródeł (dla programistów)
 
-* Wymagany Visual Studio 2026 (wersja 18.0 lub nowsza) z obsługą .NET 10 albo samo .NET 10 SDK (Visual Studio 2022 nie kompiluje projektów .NET 10).
-* Kod źródłowy: `MapoTero.App` - program (okna Windows Forms), `MapoTero.Core` - obliczenia i formaty plików, `MapoTero.Tests` - testy jednostkowe, `warstwy` - zbiory map; w Visual Studio otwórz `MapoTero.sln`.
-* **Program wydawany jest wyłącznie jako jeden plik `MapoTero.exe`.** Tworzy go polecenie
-  `dotnet publish MapoTero.App/MapoTero_v3.vbproj -c Release -o MapoTero_SingleFile` - w folderze `MapoTero_SingleFile` powstaje `MapoTero.exe`
-  z folderem `warstwy` i plikiem `README.md`. Projekt nie pozwala opublikować wersji wieloplikowej.
-* Kompilacja do sprawdzenia kodu: `dotnet build MapoTero.App/MapoTero_v3.vbproj -c Release` (folder `bin` zawiera tylko pliki pośrednie kompilacji),
-  testy jednostkowe: `dotnet test MapoTero.Tests/MapoTero.Tests.vbproj -c Release`.
-* Każda zmiana w repozytorium jest kompilowana i testowana w GitHub Actions; gotowy program (`MapoTero.exe` z folderem `warstwy`)
-  można pobrać jako artefakt *MapoTero* z zakładki **Actions**.
-* Do uruchomienia programu potrzebne jest środowisko [.NET Desktop Runtime 10](https://dotnet.microsoft.com/download/dotnet/10.0) (x64).
+**Wymagania:** **Visual Studio 2026 (18.0+)** z obsługą .NET 10 albo samo **.NET 10 SDK** (*Visual Studio 2022 nie kompiluje projektów .NET 10*).
 
----
+**Struktura rozwiązania (`MapoTero.sln`):**
 
-## Źródła informacji i społeczność
+* `MapoTero.App`: aplikacja desktopowa (Windows Forms),
+* `MapoTero.Core`: obliczenia geodezyjne, obsługa usług i formatów plików,
+* `MapoTero.Silnik`: potok obrazów, nakładanie warstw, scalanie i eksport map,
+* `MapoTero.Tests`: testy jednostkowe,
+* `warstwy`: definicje zbiorów map i katalog warstw.
 
-* 📖 **Podręcznik użytkownika online:** [eksploracja.github.io/MapoTero/pomoc/](https://eksploracja.github.io/MapoTero/pomoc/) – pełna dokumentacja z opisem wszystkich okien, narzędzi, formatów plików i poradnikami dla aplikacji mobilnych oraz CAD,
-* 👥 **Oficjalny fanpage na Facebooku:** [facebook.com/mapotero.opensource](https://www.facebook.com/mapotero.opensource) – aktualności, informacje o kolejnych wydaniach, dyskusje i ciekawostki,
-* 💬 **Dyskusja i wsparcie techniczne:** dział *"Programy GPS/GIS wspierające eksplorację"* na [Pomorskim Forum Eksploracyjnym](https://forum.eksploracja.pl/viewforum.php?f=205),
-* ☕ **Wesprzyj rozwój programu:** [buycoffee.to/mapy](https://buycoffee.to/mapy) – postaw kawę autorowi (także z menu *Pomoc* w programie).
+**Kompilacja, testy i publikacja jednego pliku `MapoTero.exe`:**
 
----
+Program wydawany jest wyłącznie jako pojedynczy plik `MapoTero.exe` (projekt nie pozwala na publikację wersji wieloplikowej). Polecenie `dotnet publish` tworzy katalog `MapoTero_SingleFile` z plikiem `MapoTero.exe`, folderem `warstwy` i plikiem `README.md`:
+
+```powershell
+# Sprawdzenie kompilacji (katalog bin zawiera tylko pliki pośrednie)
+dotnet build MapoTero.App/MapoTero_v3.vbproj -c Release
+
+# Uruchomienie testów jednostkowych
+dotnet test MapoTero.Tests/MapoTero.Tests.vbproj -c Release
+
+# Publikacja jednoplikowego wydania
+dotnet publish MapoTero.App/MapoTero_v3.vbproj -c Release -o MapoTero_SingleFile
+```
+
+Każda zmiana w repozytorium jest automatycznie budowana i testowana w **GitHub Actions**. Aktualną kompilację testową (`MapoTero.exe` + `warstwy`) można pobrać jako artefakt *MapoTero* w zakładce **Actions**.
+
+## Dokumentacja, społeczność i wsparcie
+
+* 📖 **[Podręcznik użytkownika online](https://eksploracja.github.io/MapoTero/pomoc/):** pełna dokumentacja okien, narzędzi i formatów oraz poradniki dla aplikacji mobilnych i CAD.
+* 🌐 **[Internetowa Galeria warstw](https://eksploracja.github.io/MapoTero/pomoc/galeria-warstw/):** katalog gotowych źródeł map z podglądem i możliwością bezpośredniego dodania do programu.
+* 🐛 **[Zgłaszanie błędów i propozycji (GitHub Issues)](https://github.com/Eksploracja/MapoTero/issues):** miejsce na raporty usterek i pomysły na nowe funkcje.
+* 👥 **[Oficjalny profil na Facebooku](https://www.facebook.com/mapotero.opensource):** aktualności, informacje o wydaniach i ciekawostki.
+* 💬 **[Pomorskie Forum Eksploracyjne](https://forum.eksploracja.pl/viewforum.php?f=205):** dyskusje i wsparcie techniczne w dziale *„Programy GPS/GIS wspierające eksplorację”*.
+* ☕ **[Wesprzyj rozwój projektu (buycoffee.to/mapy)](https://buycoffee.to/mapy):** postaw kawę autorowi (link dostępny także w menu *Pomoc* w programie).
 
 ## Zespół projektu
 
 * **Twórca programu:** Pajakt (2009–2014)
 * **Rozwój projektu:** [Kazimierz Niecikowski](http://labgis.pl/) (od 2015)
 * **Współpraca programistyczna:**
-  * Paweł_gdn
-  * AAA222 (moduł NoTo - scalanie segmentów do wersji 3.11)
+  * Paweł\_gdn
+  * AAA222 (moduł NoTo, scalanie segmentów do wersji 3.11)
   * Edward Zadorski (kod modułu przeliczania współrzędnych)
-
----
 
 ## Licencja
 
-Program jest wolnym oprogramowaniem udostępnianym na warunkach licencji **GNU General Public License v3 (GPLv3)**. Szczegóły licencji znajdują się w pliku [LICENSE](LICENSE).
+Program jest wolnym oprogramowaniem udostępnianym na warunkach licencji **GNU General Public License v3 (GPLv3)**. Szczegóły znajdują się w pliku [LICENSE](LICENSE).
