@@ -120,8 +120,20 @@ Public Class KatalogWarstw
                     k.Bledy.Add("wiersz " & nr & ": podgrupa poziomu " & poziom & " bez grupy nadrzędnej")
                     Continue For
                 End If
-                Dim grupa As New WezelKatalogu With {.Nazwa = nazwa}
-                If poziom = 1 Then k.Grupy.Add(grupa) Else otwarte(poziom - 2).Dzieci.Add(grupa)
+                Dim istniejaca As WezelKatalogu = Nothing
+                If poziom = 1 Then
+                    istniejaca = k.Grupy.FirstOrDefault(Function(g) String.Equals(g.Nazwa, nazwa, StringComparison.OrdinalIgnoreCase))
+                ElseIf otwarte.Count >= poziom - 1 Then
+                    istniejaca = otwarte(poziom - 2).Dzieci.FirstOrDefault(Function(d) Not d.CzyWarstwa AndAlso String.Equals(d.Nazwa, nazwa, StringComparison.OrdinalIgnoreCase))
+                End If
+
+                Dim grupa As WezelKatalogu
+                If istniejaca IsNot Nothing Then
+                    grupa = istniejaca
+                Else
+                    grupa = New WezelKatalogu With {.Nazwa = nazwa}
+                    If poziom = 1 Then k.Grupy.Add(grupa) Else otwarte(poziom - 2).Dzieci.Add(grupa)
+                End If
                 otwarte.RemoveRange(poziom - 1, otwarte.Count - (poziom - 1))
                 otwarte.Add(grupa)
                 Continue For

@@ -11,10 +11,6 @@
 # w grupie „Dodane serwery”. Plik zapisuj w kodowaniu UTF-8.
 
 > Mapy topograficzne
-TOPO_WMTS | MAPA TOPOGRAFICZNA | Mapa topograficzna GUGiK (kafle WMTS) | Topo_GUGiK
-BDOT10k_WMTS | BDOT10k | Baza danych obiektów topograficznych BDOT10k (kafle WMTS) | BDOT10k
-BDOO_WMTS | BDOOCieniowanie | Mapa ogólnogeograficzna BDOO z cieniowaniem (kafle WMTS) | BDOO_Cien
-krajobrazowa | Krajobrazowa | Mapa krajobrazowa GUGiK (przeglądowa) | Topo_Krajobraz
 >> Skany map topograficznych GUGiK
 skany_map_topograficznych | Raster_10_1942 | 1:10 000, układ 1942 | Topo_42_10k
 skany_map_topograficznych | Raster_10_1965 | 1:10 000, układ 1965 | Topo_65_10k
@@ -25,6 +21,7 @@ skany_map_topograficznych | Raster_50_1965 | 1:50 000, układ 1965 | Topo_65_50k
 skany_map_topograficznych | Raster_50_1992 | 1:50 000, układ 1992 | Topo_92_50k
 skany_map_topograficznych | Raster_50_UTM | 1:50 000, układ UTM | Topo_UTM_50k
 skany_map_topograficznych | Raster_50tys_VMap | 1:50 000, VMap L2 | Topo_VMap_50k
+TOPO_WMTS | MAPA TOPOGRAFICZNA | Skala automatyczna | Topo_GUGiK
 >> Mapy społecznościowe i turystyczne (kafle XYZ)
 OSMapa_PL | osmapa | OSMapa.pl – mapa topograficzno-turystyczna (OpenStreetMap) | OSMapa
 UMP_pcPL | ump_pcPL | UMP-pcPL – Uzupełniająca Mapa Polski | UMP
@@ -35,6 +32,10 @@ Waymarked_Trails | mtb | Szlaki MTB – nakładka (Waymarked Trails) | Szlaki_MT
 Waymarked_Trails | riding | Szlaki konne – nakładka (Waymarked Trails) | Szlaki_Konne
 Waymarked_Trails | skating | Trasy rolkowe – nakładka (Waymarked Trails) | Szlaki_Rolki
 Waymarked_Trails | slopes | Trasy narciarskie – nakładka (Waymarked Trails) | Szlaki_Narty
+> Mapy topograficzne
+BDOT10k_WMTS | BDOT10k | Baza danych obiektów topograficznych BDOT10k (kafle WMTS) | BDOT10k
+BDOO_WMTS | BDOOCieniowanie | Mapa ogólnogeograficzna BDOO z cieniowaniem (kafle WMTS) | BDOO_Cien
+krajobrazowa | Krajobrazowa | Mapa krajobrazowa GUGiK (przeglądowa) | Topo_Krajobraz
 
 > Rzeźba terenu
 numer_mod_terenu_cieniowanie_WMTS | ISOK_Cien | Cieniowanie rzeźby NMT 1 m (kafle WMTS) | NMT_Cien_1m
@@ -152,7 +153,8 @@ obszary_chronione_GDOS | GDOS:ZespolyPrzyrodniczoKrajobrazowe | Zespoły przyrod
 obszary_chronione_GDOS | GDOS:UzytkiEkologiczne | Użytki ekologiczne | GDOS_UzytkiEkol
 obszary_chronione_GDOS | GDOS:StanowiskaDokumentacyjne | Stanowiska dokumentacyjne | GDOS_StanDokument
 obszary_chronione_GDOS | GDOS:PomnikiPrzyrody | Pomniki przyrody | GDOS_PomnikiPrzyr
->> Lasy (Bank Danych o Lasach)
+>> Lasy Państwowe (BDL)
+>>> Leśny podział terytorialny (BDL)
 Lasy_Panstwowe_BDL | 6 | Regionalne dyrekcje Lasów Państwowych (RDLP) | Lasy_RDLP
 Lasy_Panstwowe_BDL | 5 | Nadleśnictwa | Lasy_Nadlesnictwa
 Lasy_Panstwowe_BDL | 4 | Leśnictwa | Lasy_Lesnictwa
@@ -160,7 +162,7 @@ Lasy_Panstwowe_BDL | 3 | Oddziały leśne (Lasy Państwowe) | Lasy_LP_Oddzialy
 Lasy_Panstwowe_BDL | 1 | Wydzielenia leśne (Lasy Państwowe) | Lasy_LP_Wydziel
 Lasy_Panstwowe_BDL | 2 | Oddziały poza Lasami Państwowymi | Lasy_Inne_Oddzialy
 Lasy_Panstwowe_BDL | 0 | Wydzielenia poza Lasami Państwowymi | Lasy_Inne_Wydziel
->> Turystyka w lasach (BDL)
+>>> Turystyka w lasach (BDL)
 Lasy_Panstwowe_Turystyka | 0 | Obszar „Zanocuj w lesie” (biwaki) | Lasy_Tur_Zanocuj
 Lasy_Panstwowe_Turystyka | 15 | Miejsca postoju, wiaty i ogniska | Lasy_Tur_Wypoczynek
 Lasy_Panstwowe_Turystyka | 17 | Powierzchniowe obiekty rekreacyjne | Lasy_Tur_Rekreacja
@@ -168,12 +170,12 @@ Lasy_Panstwowe_Turystyka | 1 | Ścieżki dydaktyczne | Lasy_Tur_Dydaktyka
 Lasy_Panstwowe_Turystyka | 4 | Ścieżki konne | Lasy_Tur_Konne
 Lasy_Panstwowe_Turystyka | 13 | Ośrodki edukacyjne i izby leśne | Lasy_Tur_Edukacja
 
->> Drogi leśne i dojazdy pożarowe (BDL)
+>>> Drogi leśne i dojazdy pożarowe (BDL)
 Lasy_Panstwowe_Dojazdy_Ppoz | 0 | Dojazdy pożarowe (drogi leśne z numeracją) | Lasy_DojazdyPpoz
 Lasy_Panstwowe_Dojazdy_Ppoz | 1 | Punkty czerpania wody | Lasy_PunktyWody
 Lasy_Panstwowe_Dojazdy_Ppoz | 2 | Lokalizacje pożarów | Lasy_Pozary
 
->> Drzewostany i siedliska leśne (BDL)
+>>> Drzewostany i siedliska leśne (BDL)
 Lasy_Panstwowe_Drzewostany | 1 | Skład gatunkowy drzewostanów (LP) | Lasy_Drzewostan_LP
 Lasy_Panstwowe_Drzewostany | 0 | Skład gatunkowy (poza LP wg PUL) | Lasy_DrzewostanInne
 Lasy_Panstwowe_Drzewostany | 3 | Klasy odnowienia KO i KDO (LP) | Lasy_KO_KDO_LP
@@ -182,7 +184,7 @@ Lasy_Panstwowe_Drzewostany | 5 | Wydzielenia niezalesione (LP) | Lasy_Niezalesio
 Lasy_Panstwowe_Drzewostany | 4 | Wydzielenia niezalesione (poza LP) | Lasy_NiezalesInne
 Lasy_Panstwowe_Siedliska | 0 | Siedliska leśne (typy TSL) | Lasy_Siedliska
 
->> Własność i ochrona lasów (BDL)
+>>> Własność i ochrona lasów (BDL)
 Lasy_Panstwowe_Wlasnosc | 1 | Lasy Państwowe (PGL LP) | Lasy_Wlasnosc_LP
 Lasy_Panstwowe_Wlasnosc | 0 | Lasy pozostałe (prywatne, PN, inne) | Lasy_Wlasnosc_Inne
 Lasy_Panstwowe_Ochronnosc | 1 | Lasy wodochronne | Lasy_Ochr_Wodochr
@@ -195,7 +197,7 @@ Lasy_Panstwowe_Ochronnosc | 7 | Lasy uzdrowiskowe | Lasy_Ochr_Uzdrow
 Lasy_Panstwowe_Ochronnosc | 8 | Powierzchnie badawcze i doświadczalne | Lasy_Ochr_Badawcze
 Lasy_Panstwowe_Ochronnosc | 9 | Drzewostany nasienne (WDN/GDN) | Lasy_Ochr_Nasienne
 
->> Obwody łowieckie (BDL)
+>>> Obwody łowieckie (BDL)
 Lasy_Panstwowe_Lowiectwo | 0 | Obwody łowieckie | Lasy_ObwodyLowiec
 >> Mapa hydrograficzna (GUGiK)
 hydrograficzna_50 | Raster | Mapa hydrograficzna 1:50 000 | Hydro_50k

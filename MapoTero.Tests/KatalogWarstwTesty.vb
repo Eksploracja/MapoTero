@@ -78,6 +78,45 @@ Public Class KatalogWarstwTesty
         Assert.Equal(2, mapa.Count)
     End Sub
 
+    <Fact>
+    Public Sub PonowneOtwarcieGrupyIPodgrupyTrzeciegoPoziomu()
+        Dim tekst =
+            "> Topo" & vbLf &
+            ">> Skany" & vbLf &
+            "skany | s1 | Skan 1" & vbLf &
+            ">> Spolecznosciowe" & vbLf &
+            "osm | o1 | OSM 1" & vbLf &
+            "> Topo" & vbLf &
+            "bdot | b1 | BDOT 1" & vbLf &
+            "> Przyroda" & vbLf &
+            ">> Lasy" & vbLf &
+            ">>> Dzielnice" & vbLf &
+            "lasy | d1 | Dzielnica 1"
+        Dim k = KatalogWarstw.ZTekstu(tekst)
+        Assert.Empty(k.Bledy)
+        Assert.Equal(2, k.Grupy.Count)
+        Dim topo = k.Grupy(0)
+        Assert.Equal("Topo", topo.Nazwa)
+        Assert.Equal(3, topo.Dzieci.Count)
+        Assert.False(topo.Dzieci(0).CzyWarstwa)
+        Assert.Equal("Skany", topo.Dzieci(0).Nazwa)
+        Assert.False(topo.Dzieci(1).CzyWarstwa)
+        Assert.Equal("Spolecznosciowe", topo.Dzieci(1).Nazwa)
+        Assert.True(topo.Dzieci(2).CzyWarstwa)
+        Assert.Equal("BDOT 1", topo.Dzieci(2).Nazwa)
+
+        Dim przyroda = k.Grupy(1)
+        Assert.Equal("Przyroda", przyroda.Nazwa)
+        Assert.Single(przyroda.Dzieci)
+        Dim lasy = przyroda.Dzieci(0)
+        Assert.Equal("Lasy", lasy.Nazwa)
+        Assert.Single(lasy.Dzieci)
+        Dim dzielnice = lasy.Dzieci(0)
+        Assert.Equal("Dzielnice", dzielnice.Nazwa)
+        Assert.Single(dzielnice.Dzieci)
+        Assert.Equal("Dzielnica 1", dzielnice.Dzieci(0).Nazwa)
+    End Sub
+
     ''' <summary>
     ''' Katalog z repozytorium zgadza się z plikami zbiorów map: każdy odnośnik wskazuje istniejący zbiór i warstwę,
     ''' każda warstwa zbiorów z warstwy.txt jest w katalogu, nazwy wyświetlane się nie powtarzają w grupie, a programowi
