@@ -178,7 +178,7 @@ Public Class SzablonyMapTesty
     End Sub
 
     Private Shared ReadOnly FolderWarstwTestow As String =
-        IO.Path.GetFullPath(IO.Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "MapoTero_SingleFile", "warstwy"))
+        IO.Path.GetFullPath(IO.Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "warstwy"))
 
     <Fact>
     Public Sub Szablony_WarstwyIstniejaWZbiorachMap()
