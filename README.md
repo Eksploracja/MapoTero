@@ -23,8 +23,13 @@
 | **Praca w GIS i wydruki** | Kafelkowany GeoTIFF z piramidą pomniejszeń (COG), scalony JPEG / PNG oraz pojedyncze segmenty z georeferencją | [QGIS](https://www.qgis.org/), ArcGIS, [Google Earth](https://www.google.pl/intl/pl/earth/) |
 | **Podkłady do CAD** | Rysunek DXF (R2000) z obrysem, siatką i numeracją, skrypt SCR oraz program LISP (`.lsp`) | AutoCAD, AutoCAD LT, BricsCAD, ZWCAD |
 
+![Przykład działania mapy wieloskalowej w telefonie – Góra Ślęża](pomoc/obrazy/11-mapa-wieloskalowa-przyklad.gif)
+
+*Przykład działania mapy wieloskalowej w telefonie: jedna baza MBTiles lub GeoPackage automatycznie przełącza mapy wraz ze zmianą powiększenia (od skali 1:50 000 przez 1:25 000 i 1:10 000 po cieniowanie rzeźby LiDAR i ortofotomapę wysokiej rozdzielczości).*
+
 ### Najważniejsze możliwości
 
+* **Mapy wieloskalowe w jednym pliku:** jedna baza MBTiles lub GeoPackage zastępuje kilka osobnych map – w telefonie przybliżasz, a mapa automatycznie przełącza się z widoku ogólnego na szczegółowe topo, cieniowanie rzeźby LiDAR i ortofotomapę wysokiej rozdzielczości.
 * **Szybki kreator map (`Ctrl+K`):** w 4 krokach prowadzi od wyboru urządzenia i gotowego stylu mapy do gotowego pliku offline.
 * **Transfer na telefon przez Wi-Fi i kod QR:** bez kabla USB i bez zewnętrznej chmury. Wystarczy zeskanować kod QR aparatem telefonu, aby pobrać mapę bezpośrednio przez sieć lokalną.
 * **Własne kompozycje warstw:** łączenie warstw z różnych serwerów (WMS, WMTS i XYZ razem), regulacja krycia, tryby mieszania (w tym tryb *7 Rzeźba terenu* dla cieniowania LiDAR) oraz podgląd efektu na żywo przed pobieraniem.
