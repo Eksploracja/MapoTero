@@ -11,8 +11,8 @@ nav_exclude: true
 Darmowy, otwartoźródłowy program dla systemu Windows do pobierania map rastrowych z usług **WMS, WMTS oraz XYZ/TMS**. Przygotuj gotowe mapy offline na telefon, odbiornik Garmin, do programów GIS i projektów CAD.
 {: .fs-6 .fw-300 }
 
-[Pobierz MapoTero](https://github.com/Eksploracja/MapoTero/releases/latest){: .btn .btn-primary .fs-5 .mb-2 .mr-2 }
-[Podręcznik użytkownika](pomoc/){: .btn .fs-5 .mb-2 }
+[Pobierz MapoTero](https://github.com/Eksploracja/MapoTero/releases/latest){: .btn .btn-primary .mr-2 .mb-2 }
+[Podręcznik użytkownika](pomoc/){: .btn .mb-2 }
 {: .mb-2 }
 
 Darmowy program na Windows (64-bit) · Bez instalacji (portable, pojedynczy plik .exe) · Licencja wolnego oprogramowania GPLv3
