@@ -6,7 +6,7 @@ nav_order: 17
 # Katalog zbiorów map
 {: .no_toc }
 
-Opis zbiorów map dostarczanych z programem (66 plików w folderze `warstwy`): skąd pochodzą, w jakich grupach drzewa je znaleźć, jakiego są typu (WMS / WMTS / XYZ) i jaki mają zalecany rozmiar piksela.
+Opis zbiorów map dostarczanych z programem (64 zbiory w folderze `warstwy`): skąd pochodzą, w jakich grupach drzewa je znaleźć, jakiego są typu (WMS / WMTS / XYZ) i jaki mają zalecany rozmiar piksela.
 {: .fs-5 .fw-300 }
 
 **Gdzie w programie:** drzewo *Warstwy do pobrania* w oknie głównym  
@@ -48,21 +48,20 @@ Zbiory i warstwy niewymienione w `katalog.txt` (np. dodane [kreatorem serwerów]
 | `krajobrazowa` | GUGiK / Geoportal | WMS | 1 | 16 m/px |
 | `Lasy_Panstwowe_BDL` | Lasy Państwowe (BDL) | WMS | 7 | 2–32 m/px |
 | `mapa_glebowo_rolnicza` | GUGiK / Geoportal | WMS | 2 | 1 m/px |
-| `mapy_historyczne_IHPAN` | IHPAN / Pastmaps | WMS | 28 | 1–40 m/px |
+| `mapy_historyczne_IHPAN` | IHPAN / Pastmaps | WMS | 22 | 2–40 m/px |
 | `numer_mod_terenu_cieniowanie_WMTS` | GUGiK / Geoportal | WMTS | 1 | 1 m/px |
 | `numer_mod_terenu_hipsometria_WMTS` | GUGiK / Geoportal | WMTS | 1 | 1 m/px |
 | `numer_mod_terenu_WMTS` | GUGiK / Geoportal | WMTS | 1 | 2 m/px |
 | `obszary_chronione_GDOS` | GDOŚ | WMS | 10 | 1–4 m/px |
-| `OpenStreetMap_Terrestris` | terrestris (OSM, znak wodny) | WMS | 6 | 2–10 m/px |
+| `OpenStreetMap_Terrestris` | terrestris (OSM, znak wodny) | WMS | 1 | 10 m/px |
 | `ortofotomapa` | GUGiK / Geoportal | WMS | 1 | 1 m/px |
 | `ortofotomapa_HighResolution_WMTS` | GUGiK / Geoportal | WMTS | 1 | 0,1 m/px |
 | `ortofotomapa_TrueOrtho` | GUGiK / Geoportal | WMS | 1 | 0,1 m/px |
 | `ortofotomapa_WMTS` | GUGiK / Geoportal | WMTS | 1 | 0,25 m/px |
 | `OSMapa_PL` | OSMapa.pl / OSM | XYZ | 1 | 2 m/px |
 | `osnowy_geodezyjne` | GUGiK / Geoportal | WMS | 3 | 1 m/px |
-| `plany_miast_1944_IHPAN` | IHPAN / Pastmaps | WMS | 20 | 2 m/px |
 | `regiony_fizycznogeograficzne` | PIG-PIB (Geologia) | WMS | 2 | 25–50 m/px |
-| `rejestr_granic_jednostki_teryt` | GUGiK / Geoportal | WMS | 52 | 1–16 m/px |
+| `rejestr_granic_jednostki_teryt` | GUGiK / Geoportal | WMS | 22 | 1–16 m/px |
 | `rejestr_granic_punkty_adresowe` | GUGiK / Geoportal | WMS | 1 | 1 m/px |
 | `rejestr_nazw_geograficznych` | GUGiK / Geoportal | WMS | 5 | 2–4 m/px |
 | `skany_map_topograficznych` | GUGiK / Geoportal | WMS | 9 | 1–4 m/px |
@@ -80,17 +79,6 @@ Zbiory i warstwy niewymienione w `katalog.txt` (np. dodane [kreatorem serwerów]
 | `zabytki_pomniki_historii_NID` | NID | WMS | 1 | 4 m/px |
 | `zabytki_unesco_NID` | NID | WMS | 1 | 4 m/px |
 | `zabytki_zasiegi_NID` | NID | WMS | 1 | 1 m/px |
-
----
-
-## Ortofotomapy
-
-| Nazwa w drzewie | Zbiór map | Warstwa na serwerze | Typ | Piksel |
-|---|---|---|---|---|
-| Ortofotomapa standardowa 25 cm (kafle WMTS) | `ortofotomapa_WMTS` | `ORTOFOTOMAPA` | WMTS | 0,25 m/px |
-| Ortofotomapa wysokiej rozdzielczości do 10 cm (kafle WMTS) | `ortofotomapa_HighResolution_WMTS` | `ORTOFOTOMAPA` | WMTS | 0,1 m/px |
-| Ortofotomapa wysokiej rozdzielczości (WMS) | `ortofotomapa` | `Raster` | WMS | 1 m/px |
-| Prawdziwa ortofotomapa (TrueOrtho) | `ortofotomapa_TrueOrtho` | `PrawdziwaOrtofotomapa` | WMS | 0,1 m/px |
 
 ---
 
@@ -133,47 +121,32 @@ Warstwy *Waymarked Trails* są przezroczystymi nakładkami. Po dodaniu mapy podk
 | Trasy rolkowe: nakładka (Waymarked Trails) | `Waymarked_Trails` | `skating` | XYZ | 2 m/px |
 | Trasy narciarskie: nakładka (Waymarked Trails) | `Waymarked_Trails` | `slopes` | XYZ | 2 m/px |
 
-### OpenStreetMap (terrestris.de, ze znakiem wodnym)
-
-{: .informacja }
-Darmowa usługa terrestris.de dokleja do każdego pobranego obrazu reklamowy znak wodny.
-
-| Nazwa w drzewie | Zbiór map | Warstwa na serwerze | Typ | Piksel |
-|---|---|---|---|---|
-| Mapa ogólna OpenStreetMap | `OpenStreetMap_Terrestris` | `OSM-WMS` | WMS | 2 m/px |
-| Mapa topograficzna OpenStreetMap | `OpenStreetMap_Terrestris` | `TOPO-OSM-WMS` | WMS | 4 m/px |
-| Mapa turystyczna OpenStreetMap | `OpenStreetMap_Terrestris` | `HikeMap` | WMS | 4 m/px |
-| Nakładka: drogi i nazwy (przezroczysta) | `OpenStreetMap_Terrestris` | `OSM-Overlay-WMS` | WMS | 2 m/px |
-
 ---
 
 ## Rzeźba terenu
 
 | Nazwa w drzewie | Zbiór map | Warstwa na serwerze | Typ | Piksel |
 |---|---|---|---|---|
-| Hipsometria z cieniowaniem NMT 1 m (kafle WMTS) | `numer_mod_terenu_WMTS` | `HipsoCien` | WMTS | 2 m/px |
 | Cieniowanie rzeźby NMT 1 m (kafle WMTS) | `numer_mod_terenu_cieniowanie_WMTS` | `ISOK_Cien` | WMTS | 1 m/px |
 | Hipsometria NMT 1 m: kolory wysokości (kafle WMTS) | `numer_mod_terenu_hipsometria_WMTS` | `Hipsometria` | WMTS | 1 m/px |
-| Cieniowanie rzeźby SRTM 30 m (terrestris, ze znakiem wodnym) | `OpenStreetMap_Terrestris` | `SRTM30-Hillshade` | WMS | 10 m/px |
+| Hipsometria z cieniowaniem NMT 1 m (kafle WMTS) | `numer_mod_terenu_WMTS` | `HipsoCien` | WMTS | 2 m/px |
 | Poziomice SRTM 30 m (terrestris, ze znakiem wodnym) | `OpenStreetMap_Terrestris` | `SRTM30-Contour` | WMS | 10 m/px |
 | Szczyty górskie i wzniesienia (GUGiK) | `szczyty` | `szczyty` | WMS | 4 m/px |
 
 ---
 
-## Mapy historyczne i zabytki
-
-### Zabytki i dziedzictwo (NID)
+## Ortofotomapy
 
 | Nazwa w drzewie | Zbiór map | Warstwa na serwerze | Typ | Piksel |
 |---|---|---|---|---|
-| Rejestr zabytków nieruchomych: zasięgi i typy | `zabytki_zasiegi_NID` | `Zabytki_nieruchome_I` | WMS | 1 m/px |
-| Rejestr zabytków nieruchomych (INSPIRE) | `zabytki_NID` | `Immovable_Monuments` | WMS | 1 m/px |
-| Rejestr zabytków archeologicznych | `zabytki_archeo_NID` | `Archaeological_Monuments` | WMS | 2 m/px |
-| Ewidencja zabytków nieruchomych | `zabytki_ewidencja_nieruchomych_NID` | `Ewidencja_zabytkow_nieruchomych_I` | WMS | 1 m/px |
-| Ewidencja zabytków archeologicznych | `zabytki_ewidencja_archeo_NID` | `Ewidencja_zabytków_archeologicznych` | WMS | 2 m/px |
-| Pomniki Historii | `zabytki_pomniki_historii_NID` | `Monuments_of_History` | WMS | 4 m/px |
-| Obiekty światowego dziedzictwa UNESCO | `zabytki_unesco_NID` | `World_Heritage_Properties_List` | WMS | 4 m/px |
-| Groby i cmentarze wojenne | `zabytki_groby_wojenne_NID` | `Groby_i_cmentarze_wojenne_I` | WMS | 1 m/px |
+| Ortofotomapa standardowa 25 cm (kafle WMTS) | `ortofotomapa_WMTS` | `ORTOFOTOMAPA` | WMTS | 0,25 m/px |
+| Ortofotomapa wysokiej rozdzielczości do 10 cm (kafle WMTS) | `ortofotomapa_HighResolution_WMTS` | `ORTOFOTOMAPA` | WMTS | 0,1 m/px |
+| Ortofotomapa wysokiej rozdzielczości (WMS) | `ortofotomapa` | `Raster` | WMS | 1 m/px |
+| Prawdziwa ortofotomapa (TrueOrtho) | `ortofotomapa_TrueOrtho` | `PrawdziwaOrtofotomapa` | WMS | 0,1 m/px |
+
+---
+
+## Mapy historyczne i zabytki
 
 ### Mapy historyczne (IHPAN)
 
@@ -202,41 +175,18 @@ Darmowa usługa terrestris.de dokleja do każdego pobranego obrazu reklamowy zna
 | Mapa Polski i krajów ościennych WIG 1:500 000 (1939) | `mapy_historyczne_IHPAN` | `wig500k1939_3857` | WMS | 40 m/px |
 | Mapa WIG 1:100 000 w układzie „Borowa Góra” (1947–1954) | `mapy_historyczne_IHPAN` | `wig_1947_1952_3857` | WMS | 8 m/px |
 
-### Ziemie polskie Korony w drugiej połowie XVI w. (IHPAN)
+### Zabytki i dziedzictwo (NID)
 
 | Nazwa w drzewie | Zbiór map | Warstwa na serwerze | Typ | Piksel |
 |---|---|---|---|---|
-| Ziemie polskie Korony 1:250 000 | `mapy_historyczne_IHPAN` | `ahp_ziemie_polskie_3857` | WMS | 20 m/px |
-| Podziały kościelne 1:500 000 | `mapy_historyczne_IHPAN` | `ahp_koscielne_3857` | WMS | 40 m/px |
-| Rozmieszczenie własności ziemskiej 1:500 000 | `mapy_historyczne_IHPAN` | `ahp_wlasnosc_3857` | WMS | 40 m/px |
-
-### Plany miast (IHPAN)
-
-| Nazwa w drzewie | Zbiór map | Warstwa na serwerze | Typ | Piksel |
-|---|---|---|---|---|
-| Białystok (1944) | `plany_miast_1944_IHPAN` | `bialystok_2180` | WMS | 2 m/px |
-| Bydgoszcz (1944) | `plany_miast_1944_IHPAN` | `bydgoszcz_2180` | WMS | 2 m/px |
-| Częstochowa (1944) | `plany_miast_1944_IHPAN` | `czestochowa_2180` | WMS | 2 m/px |
-| Gdańsk (1944) | `plany_miast_1944_IHPAN` | `gdansk_2180` | WMS | 2 m/px |
-| Grudziądz (1944) | `plany_miast_1944_IHPAN` | `grudziadz_2180` | WMS | 2 m/px |
-| Inowrocław (1943) | `plany_miast_1944_IHPAN` | `inowroclaw_2180` | WMS | 2 m/px |
-| Jasło (1944) | `plany_miast_1944_IHPAN` | `jaslo_2180` | WMS | 2 m/px |
-| Katowice (1944) | `plany_miast_1944_IHPAN` | `katowice_2180` | WMS | 2 m/px |
-| Kielce (1944) | `plany_miast_1944_IHPAN` | `kielce_2180` | WMS | 2 m/px |
-| Kraków (1944) | `plany_miast_1944_IHPAN` | `krakow_2180` | WMS | 2 m/px |
-| Lublin (1944) | `plany_miast_1944_IHPAN` | `lublin_2180` | WMS | 2 m/px |
-| Łódź (1944) | `plany_miast_1944_IHPAN` | `lodz_2180` | WMS | 2 m/px |
-| Poznań (1944) | `plany_miast_1944_IHPAN` | `poznan_2180` | WMS | 2 m/px |
-| Radom (1944) | `plany_miast_1944_IHPAN` | `radom_2180` | WMS | 2 m/px |
-| Rzeszów (1944) | `plany_miast_1944_IHPAN` | `rzeszow_2180` | WMS | 2 m/px |
-| Siedlce (1944) | `plany_miast_1944_IHPAN` | `siedlce_2180` | WMS | 2 m/px |
-| Tarnów (1944) | `plany_miast_1944_IHPAN` | `tarnow_2180` | WMS | 2 m/px |
-| Toruń (1944) | `plany_miast_1944_IHPAN` | `torun_2180` | WMS | 2 m/px |
-| Warszawa (1944) | `plany_miast_1944_IHPAN` | `warszawa_2180` | WMS | 2 m/px |
-| Warszawa (1822) | `mapy_historyczne_IHPAN` | `warszawaOKI_2180` | WMS | 2 m/px |
-| Warszawa: plan Lindleyów 1:2500 (1897–1901) | `mapy_historyczne_IHPAN` | `lindley_3857` | WMS | 1 m/px |
-| Warszawa-Praga (1796) | `mapy_historyczne_IHPAN` | `rauch_2180` | WMS | 2 m/px |
-| Wrocław (1944) | `plany_miast_1944_IHPAN` | `wroclaw_3857` | WMS | 2 m/px |
+| Rejestr zabytków nieruchomych: zasięgi i typy | `zabytki_zasiegi_NID` | `Zabytki_nieruchome_I` | WMS | 1 m/px |
+| Rejestr zabytków nieruchomych (INSPIRE) | `zabytki_NID` | `Immovable_Monuments` | WMS | 1 m/px |
+| Rejestr zabytków archeologicznych | `zabytki_archeo_NID` | `Archaeological_Monuments` | WMS | 2 m/px |
+| Ewidencja zabytków nieruchomych | `zabytki_ewidencja_nieruchomych_NID` | `Ewidencja_zabytkow_nieruchomych_I` | WMS | 1 m/px |
+| Ewidencja zabytków archeologicznych | `zabytki_ewidencja_archeo_NID` | `Ewidencja_zabytków_archeologicznych` | WMS | 2 m/px |
+| Pomniki Historii | `zabytki_pomniki_historii_NID` | `Monuments_of_History` | WMS | 4 m/px |
+| Obiekty światowego dziedzictwa UNESCO | `zabytki_unesco_NID` | `World_Heritage_Properties_List` | WMS | 4 m/px |
+| Groby i cmentarze wojenne | `zabytki_groby_wojenne_NID` | `Groby_i_cmentarze_wojenne_I` | WMS | 1 m/px |
 
 ---
 
@@ -304,51 +254,6 @@ Darmowa usługa terrestris.de dokleja do każdego pobranego obrazu reklamowy zna
 | Urzędowe nazwy obiektów fizjograficznych (PRNG) | `rejestr_nazw_geograficznych` | `O1_UrzedoweNazwyObiektowFizjograficznych` | WMS | 4 m/px |
 | Zestandaryzowane nazwy obiektów fizjograficznych (PRNG) | `rejestr_nazw_geograficznych` | `O2_ZestandaryzowaneNazwyObiektowFizjograficznych` | WMS | 4 m/px |
 | Pozostałe nazwy obiektów fizjograficznych (PRNG) | `rejestr_nazw_geograficznych` | `O3_PozostaleNazwyObiektowFizjograficznych` | WMS | 2 m/px |
-
-### Sądy i prokuratury (PRG)
-
-| Nazwa w drzewie | Zbiór map | Warstwa na serwerze | Typ | Piksel |
-|---|---|---|---|---|
-| Sądy apelacyjne | `rejestr_granic_jednostki_teryt` | `S01_Sad_apelacyjny` | WMS | 8 m/px |
-| Sądy okręgowe | `rejestr_granic_jednostki_teryt` | `S02_Sad_okregowy` | WMS | 8 m/px |
-| Sądy rejonowe | `rejestr_granic_jednostki_teryt` | `S03_Sad_rejonowy` | WMS | 8 m/px |
-| Wojewódzkie sądy administracyjne | `rejestr_granic_jednostki_teryt` | `S04_Wojewodzki_sad_administracyjny` | WMS | 8 m/px |
-| Prokuratury regionalne | `rejestr_granic_jednostki_teryt` | `P01_Prokuratura_regionalna` | WMS | 8 m/px |
-| Prokuratury okręgowe | `rejestr_granic_jednostki_teryt` | `P02_Prokuratura_okregowa` | WMS | 8 m/px |
-| Prokuratury rejonowe | `rejestr_granic_jednostki_teryt` | `P03_Prokuratura_rejonowa` | WMS | 8 m/px |
-
-### Policja, straże i obrona cywilna (PRG)
-
-| Nazwa w drzewie | Zbiór map | Warstwa na serwerze | Typ | Piksel |
-|---|---|---|---|---|
-| Komendy wojewódzkie policji | `rejestr_granic_jednostki_teryt` | `K01_Komenda_wojewodzka_policji` | WMS | 8 m/px |
-| Komenda stołeczna policji | `rejestr_granic_jednostki_teryt` | `K03_Komenda_stoleczna_policji` | WMS | 4 m/px |
-| Komendy powiatowe policji | `rejestr_granic_jednostki_teryt` | `K02_Komenda_powiatowa_policji` | WMS | 8 m/px |
-| Komendy rejonowe policji | `rejestr_granic_jednostki_teryt` | `K04_Komenda_rejonowa_policji` | WMS | 4 m/px |
-| Komisariaty policji | `rejestr_granic_jednostki_teryt` | `K05_Komisariat_policji` | WMS | 2 m/px |
-| Komendy wojewódzkie straży pożarnej | `rejestr_granic_jednostki_teryt` | `K06_Komenda_wojewodzka_strazy_pozarnej` | WMS | 8 m/px |
-| Komendy powiatowe straży pożarnej | `rejestr_granic_jednostki_teryt` | `K07_Komenda_powiatowa_strazy_pozarnej` | WMS | 8 m/px |
-| Oddziały straży granicznej | `rejestr_granic_jednostki_teryt` | `K08_Oddzial_strazy_granicznej` | WMS | 8 m/px |
-| Placówki straży granicznej | `rejestr_granic_jednostki_teryt` | `K09_Placowka_strazy_granicznej` | WMS | 4 m/px |
-| Dywizjony straży granicznej | `rejestr_granic_jednostki_teryt` | `K10_Dywizjon_strazy_granicznej` | WMS | 8 m/px |
-| Obrona cywilna: województwa | `rejestr_granic_jednostki_teryt` | `K11_Obszar_dzialania_szefa_obrony_cywilnej_wojewodztwa` | WMS | 8 m/px |
-| Obrona cywilna: powiaty | `rejestr_granic_jednostki_teryt` | `K12_Obszar_dzialania_szefa_obrony_cywilnej_powiatu` | WMS | 8 m/px |
-| Obrona cywilna: gminy | `rejestr_granic_jednostki_teryt` | `K13_Obszar_dzialania_szefa_obrony_cywilnej_gminy` | WMS | 4 m/px |
-
-### Urzędy, lasy i wody (PRG)
-
-| Nazwa w drzewie | Zbiór map | Warstwa na serwerze | Typ | Piksel |
-|---|---|---|---|---|
-| Izby administracji skarbowej | `rejestr_granic_jednostki_teryt` | `U05_Izba_administracji_skarbowej` | WMS | 8 m/px |
-| Urzędy skarbowe | `rejestr_granic_jednostki_teryt` | `U02_Urzad_skarbowy` | WMS | 8 m/px |
-| Wyspecjalizowane urzędy skarbowe | `rejestr_granic_jednostki_teryt` | `U03_Wyspecjalizowany_urzad_skarbowy` | WMS | 8 m/px |
-| Urzędy celno-skarbowe | `rejestr_granic_jednostki_teryt` | `U04_Urzad_celno-skarbowy` | WMS | 8 m/px |
-| Archiwa państwowe | `rejestr_granic_jednostki_teryt` | `U01_Archiwum_panstwowe` | WMS | 8 m/px |
-| Regionalne dyrekcje Lasów Państwowych | `rejestr_granic_jednostki_teryt` | `U07_Regionalna_dyrekcja_lasow_panstwowych` | WMS | 8 m/px |
-| Nadleśnictwa | `rejestr_granic_jednostki_teryt` | `U06_Nadlesnictwo` | WMS | 4 m/px |
-| Regionalne zarządy gospodarki wodnej | `rejestr_granic_jednostki_teryt` | `U09_Regionalny_zarzad_gospodarki_wodnej_PGWWP` | WMS | 8 m/px |
-| Zarządy zlewni (Wody Polskie) | `rejestr_granic_jednostki_teryt` | `U08_Zarzad_zlewni_PGWWP` | WMS | 4 m/px |
-| Urzędy żeglugi śródlądowej | `rejestr_granic_jednostki_teryt` | `U11_Urzad_zeglugi_srodladowej` | WMS | 8 m/px |
 
 ### Obszary morskie (PRG)
 

@@ -152,7 +152,7 @@ Pod mapą znajdują się trzy karty w jednolitym, przejrzystym stylu:
 Prawy panel programu organizuje źródła danych i kompozycję wielowarstwową:
 
 * **Warstwy do pobrania (katalog tematyczny):**
-  * Grupy tematyczne: *Ortofotomapy*, *Mapy topograficzne*, *Rzeźba terenu (cieniowanie, hipsometria)*, *Mapy historyczne i zabytki*, *Ewidencja, geodezja i uzbrojenie (EGiB, GESUT)*, *Granice i adresy (PRG, PRNG)*, *Przyroda i środowisko (GDOŚ, BDL)*, *Kraje sąsiednie i strefa przygraniczna (Czechy, Słowacja, Niemcy, Litwa, Bałtyk)* oraz serwery dodane przez użytkownika.
+  * Grupy tematyczne: *Mapy topograficzne*, *Rzeźba terenu (cieniowanie, hipsometria)*, *Ortofotomapy*, *Mapy historyczne i zabytki*, *Ewidencja, geodezja i uzbrojenie (EGiB, GESUT)*, *Granice i adresy (PRG, PRNG)*, *Przyroda i środowisko (GDOŚ, BDL)*, *Geologia (PIG-PIB)*, *Kraje sąsiednie i strefa przygraniczna (Czechy, Słowacja, Niemcy, Litwa, Bałtyk)* oraz serwery dodane przez użytkownika.
   * Zaznaczenie pola wyboru dodaje warstwę do listy wybranych. Odznaczenie ją usuwa.
   * Pole wyszukiwarki pozwala przefiltrować drzewo według dowolnych słów kluczowych. Klawisz <kbd>Esc</kbd> czyści filtr.
   * Przycisk **Zwiń / Rozwiń** zwija lub rozwija wszystkie grupy w katalogu, ikona galerii otwiera [Galerię warstw map online](../galeria-warstw/), a przycisk **+ Serwer…** w nagłówku karty uruchamia kreator usług WMS, WMTS i kafelkowych XYZ/TMS.
