@@ -43,6 +43,8 @@ Folder bieżącej sesji jest widoczny na pasku stanu u dołu okna głównego.
 | `lastsettings.txt` | folder danych | konfiguracja programu: opcje z okna *Ustawienia*, widok mapy, szerokość panelu i parametry eksportu do CAD. Zapisywany przy zamykaniu programu i po kliknięciu *OK* w *Ustawieniach* |
 | `szablony_wlasne.json` | folder danych | własne style kompozycji map zapisane w Szybkim kreatorze mapy (zob. [Narzędzia dodatkowe](../../narzedzia/#szybki-kreator-mapy)) |
 | `download\` | folder danych | domyślny folder sesji oraz podfoldery kolejnych pobrań (zob. [Sesje pobierania](../../sesje/)) |
+| `cache_katalogu\` | folder danych | lokalny bufor katalogu usług publicznych pobieranego w kreatorze serwerów |
+| `galeria_cache\` | `%LocalAppData%\MapoTero` | lokalny bufor miniaturek i opisów używany przy podglądzie próbek warstw w drzewie |
 | `awarie.log` | folder danych | rejestr nieoczekiwanych błędów programu, pomocny przy zgłaszaniu usterek (zob. [Problemy](../../problemy/)) |
 
 Zawartość folderu pojedynczej sesji pobierania opisuje rozdział [Sesje pobierania](../../sesje/).

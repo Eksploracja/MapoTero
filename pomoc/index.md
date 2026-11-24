@@ -31,6 +31,7 @@ na stronie głównej oraz w samym programie (menu *Pomoc > Krótka instrukcja (b
 |---|---|
 | najszybciej przygotować gotową mapę w 4 krokach (smartfon, Garmin, wydruk, CAD) | [Szybki kreator mapy](narzedzia/#szybki-kreator-mapy) |
 | dowiedzieć się, do czego służy program i co potrafi | [Do czego służy MapoTero](do-czego-sluzy/) |
+| obejrzeć próbki i zasięgi map online oraz ułożyć kompozycję w przeglądarce | [Galeria warstw](galeria-warstw/) · [Poradnik: Galeria i Mikser warstw](galeria-i-mikser/) |
 | przesłać wyeksportowaną mapę prosto na telefon przez Wi-Fi i kod QR | [Przesyłanie przez Wi-Fi](narzedzia/#przesyłanie-mapy-na-telefon-przez-wi-fi-i-kod-qr) · [Mapa w telefonie](eksport/aplikacje/#przeniesienie-pliku-do-telefonu) |
 | skopiować mapę bezpośrednio na Garmina przez USB jednym kliknięciem | [Kopiowanie na Garmina przez USB](narzedzia/#kopiowanie-mapy-do-odbiornika-garmin-usb) · [Garmin](eksport/aplikacje/#garmin) |
 | mapę offline w telefonie z Androidem (Locus Map, OsmAnd, OruxMaps, AlpineQuest) | [Wybór obszaru](obszar/) → [Pobieranie](pobieranie/) → [Eksport mapy](eksport/) → [Mapa w telefonie](eksport/aplikacje/) |

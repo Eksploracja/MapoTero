@@ -30,7 +30,7 @@ przełącza mapę wraz z przybliżaniem (np. w Locus Map, OruxMaps, OsmAnd, Guru
 * z bliska (zoom `17–19`): ortofotomapa o wysokiej rozdzielczości (opcjonalnie z nałożoną półprzezroczystą mapą topo
   lub granicami działek w trybie *Mnożenie*).
 
-![Przykład działania mapy wieloskalowej w telefonie – Góra Ślęża]({{ '/pomoc/obrazy/11-mapa-wieloskalowa-przyklad.gif' | relative_url }})
+![Przykład działania mapy wieloskalowej w telefonie (Góra Ślęża)]({{ '/pomoc/obrazy/11-mapa-wieloskalowa-przyklad.gif' | relative_url }})
 
 *Rysunek 1. Przykład działania mapy wieloskalowej w telefonie: wraz z przybliżaniem ekranu mapa automatycznie zmienia treść (od skali 1:50 000 przez 1:25 000 i 1:10 000 po cieniowanie rzeźby LiDAR i ortofotomapę wysokiej rozdzielczości).*
 

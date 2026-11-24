@@ -37,14 +37,17 @@ Gdy wszystkie warstwy pochodzą z tego samego serwera WMS i mają krycie 100%, �
 
 Do dokładnego zestrojenia kompozycji służy okno **Warstwy - zaawansowane** (mikser warstw), otwierane przyciskiem **Mikser…** w nagłówku karty *Wybrane warstwy* (albo kliknięciem próbki podglądu). Znajdziesz w nim suwaki krycia dla każdej warstwy, wybór trybu mieszania, podgląd na żywo na rzeczywistej próbce terenu (300 × 300 px) z lupą rastrową (`-`, `1:1`, `+` lub kółko myszy), przycisk *Korekta obrazu...* oraz podręczną instrukcję (przycisk **Pomoc** i klawisz <kbd>F1</kbd>).
 
+Jeśli wolisz układać i sprawdzać warstwy na dużym ekranie przed dodaniem ich do programu, skorzystaj z przeglądarkowego [Miksera warstw w Galerii online](../../galeria-i-mikser/). Gotową kanapkę prześlesz jednym kliknięciem do MapoTero albo zapiszesz jako plik `.mapotero`, który wczytasz przeciągając go na okno programu.
+
 | Tryb mieszania | Jak działa | Kiedy stosować |
 |---|---|---|
-| **Rzeźba terenu (Hillshade)** | Dedykowany tryb dla numerycznego modelu terenu: jasność 180 (płaski teren przy słońcu 45° nad horyzontem) jest neutralna. Płaski teren zachowuje w 100% oryginalne barwy, stoki w cieniu ciemnieją, a oświetlone lekko jaśnieją. | **Zalecany dla cieniowania rzeźby NMT** na ortofotomapie i mapach topograficznych. Rozwiązuje problem trybu Mnożenie, który kładł na całej mapie szarą zasłonę. |
-| **Zwykły (Normal)** | Standardowe przenikanie przezroczystości (alfa). | Nakładki wektorowe z przezroczystym tłem (granice działek, numery, szlaki). W przypadku cieniowania NMT na ortofotomapie wymaga niskiego krycia (35–50%), inaczej tworzy szare zamglenie. |
-| **Mnożenie (Multiply)** | Piksele warstwy górnej mnożą się z tłem. Biel staje się całkowicie niewidoczna, a cienie i ciemne linie przenikają w podkład. | Mapy topograficzne ze skanów papierowych i BDOT10k łączone z cieniowaniem NMT lub hipsometrią. Zachowuje ostrość czarnych napisów i siatki ulic. |
-| **Nakładka (Overlay)** | Wzmacnia kontrasty: rozjaśnia partie jasne i przyciemnia cienie, nie zamulając barw pośrednich szarością. | Plastyczna ortofotomapa 3D z cieniowaniem NMT. Pozwala uwypuklić zbocza i doliny bez efektu przymglenia zdjęcia lotniczego. |
-| **Ciemniej / Jaśniej** | Wybiera odpowiednio ciemniejszy lub jaśniejszy kolor z obu warstw. | Specjalne efekty nakładania jasnych szlaków lub ciemnych granic. |
-| **Ekran (Screen)** | Rozjaśnia tło, czerń staje się niewidoczna (odwrotność mnożenia). | Warstwy nocne, radary lub rozświetlenia. |
+| **7 Rzeźba terenu (Hillshade)** | Dedykowany tryb dla numerycznego modelu terenu: jasność 180 (płaski teren przy słońcu 45° nad horyzontem) jest neutralna. Płaski teren zachowuje w 100% oryginalne barwy, stoki w cieniu ciemnieją, a oświetlone lekko jaśnieją. | **Zalecany dla cieniowania rzeźby NMT** na ortofotomapie i mapach topograficznych. Rozwiązuje problem trybu Mnożenie, który kładł na całej mapie szarą zasłonę. |
+| **1 Zwykły (Normal)** | Standardowe przenikanie przezroczystości (alfa). | Nakładki wektorowe z przezroczystym tłem (granice działek, numery, szlaki). W przypadku cieniowania NMT na ortofotomapie wymaga niskiego krycia (35–50%), inaczej tworzy szare zamglenie. |
+| **2 Mnożenie (Multiply)** | Piksele warstwy górnej mnożą się z tłem. Biel staje się całkowicie niewidoczna, a cienie i ciemne linie przenikają w podkład. | Mapy topograficzne ze skanów papierowych i BDOT10k łączone z cieniowaniem NMT lub hipsometrią. Zachowuje ostrość czarnych napisów i siatki ulic. |
+| **3 Ciemniej (Darken)** | Wybiera ciemniejszy kolor z obu warstw dla każdego kanału. | Nakładanie ciemnych linii, siatek lub napisów na jasny podkład bez rozjaśniania tła. |
+| **4 Jaśniej (Lighten)** | Wybiera jaśniejszy kolor z obu warstw dla każdego kanału. | Wydobywanie jasnych linii, napisów lub warstwic na ciemniejszym podkładzie. |
+| **5 Ekran (Screen)** | Rozjaśnia tło, czerń staje się niewidoczna (odwrotność mnożenia). | Warstwy nocne, radary lub rozświetlenia. |
+| **6 Nakładka (Overlay)** | Wzmacnia kontrasty: rozjaśnia partie jasne i przyciemnia cienie, nie zamulając barw pośrednich szarością. | Plastyczna ortofotomapa 3D z cieniowaniem NMT. Pozwala uwypuklić zbocza i doliny bez efektu przymglenia zdjęcia lotniczego. |
 
 ---
 
@@ -98,7 +101,7 @@ Wielowarstwowa kompozycja krajobrazowa. Łączy treść mapy topograficznej z g�
 
 * **Warstwa 1 (podkład):** *Mapy topograficzne > Skany map topograficznych GUGiK > 1:10 000, układ 1965*, krycie 100%.
 * **Warstwa 2:** *Rzeźba terenu > Cieniowanie rzeźby NMT 1 m (kafle WMTS)*, tryb **Mnożenie**, krycie **90%**.
-* **Warstwa 3:** *Rzeźba terenu > Dynamiczna hipsometria ISOK (WMS)*, tryb **Mnożenie**, krycie **50%**.
+* **Warstwa 3:** *Rzeźba terenu > Hipsometria NMT 1 m: kolory wysokości (kafle WMTS)*, tryb **Mnożenie**, krycie **50%**.
 * **Zalecany piksel:** 1 m/pix lub 1,32 m/pix.
 * **Format zapisu:** JPEG lub PNG.
 

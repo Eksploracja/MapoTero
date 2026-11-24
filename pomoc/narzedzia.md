@@ -102,14 +102,14 @@ Narzędzie rozwiązuje problem niewygodnego podłączania kabli USB i wysyłania
 
 *Rysunek 4. Konwerter kalibrowanych map OziExplorer do formatów mobilnych i GPS.*
 
-Narzędzie przetwarza kalibrowane skany papierowych map turystycznych i archiwalnych (pliki `.map` wraz z rastrami JPG, PNG, TIF lub BMP) do nowoczesnych formatów mobilnych: **Garmin BirdsEye (JNX v4)**, **Garmin Custom Maps (KMZ)**, **MBTiles**, **OGC GeoPackage (.gpkg)**, **SQLiteDB** oraz **OruxMaps**:
+Narzędzie przetwarza kalibrowane skany papierowych map turystycznych i archiwalnych (pliki `.map` wraz z rastrami JPG, PNG, TIF lub BMP) do nowoczesnych formatów mobilnych: **Garmin BirdsEye (JNX v4)**, **Garmin Custom Maps (KMZ)**, **MBTiles**, **SQLiteDB** oraz **OruxMaps**:
 * **Automatyczna transformacja Datum (elipsoid historycznych):** program automatycznie wykrywa i przelicza historyczne elipsoidy odniesienia do współczesnej WGS84:
   * **Borowa Góra** (mapy Wojskowego Instytutu Geograficznego WIG 1:100 000 i 1:25 000),
   * **Potsdam / Rauenberg** (niemieckie mapy Messtischblatt 1:25 000 i Grossblatt),
   * **Pulkovo 1942 / Układ 1965 / Układ 1942** (mapy topograficzne z okresu PRL).
   Eliminuje to uciążliwe przesunięcie arkusza o 100–200 metrów względem śladu GPS.
 * **Modele kalibracji nieliniowej:** dla dużych arkuszy stosowany jest model rzutowy (4–6 punktów) lub wielomian 2. stopnia (7+ punktów), korygujący zniekształcenia skanera papieru.
-* **Pełna piramida powiększeń:** bazy JNX, MBTiles i GeoPackage tworzone są z kompletem 5 poziomów skali.
+* **Pełna piramida powiększeń:** bazy JNX i MBTiles tworzone są z kompletem 5 poziomów skali.
 * **Praca wsadowa (Batch):** po wskazaniu całego folderu program automatycznie przetwarza dziesiątki arkuszy jeden po drugim.
 
 ---

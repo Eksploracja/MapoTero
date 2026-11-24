@@ -15,6 +15,7 @@ Krótkie objaśnienia najważniejszych terminów używanych w programie MapoTero
 |---|---|
 | **CRS / EPSG** | Oznaczenie układu współrzędnych (np. `EPSG:2180` dla układu PL-1992, `EPSG:4326` dla WGS84). |
 | **EZiUDP** | Ewidencja Zbiorów i Usług Danych Przestrzennych: oficjalny państwowy rejestr usług mapowych (krajowych, wojewódzkich, powiatowych i gminnych), przeszukiwany bezpośrednio przez kreator serwerów MapoTero. |
+| **Galeria warstw** | Przeglądarkowy katalog wszystkich warstw z próbkami map na żywo i mapami zasięgów. Pozwala wysłać warstwę lub całą kompozycję z Miksera wprost do programu. |
 | **Georeferencja (kalibracja)** | Informacja zapisana w pliku obrazu (GeoTIFF) lub w osobnym pliku obok niego (`.jpgw`, `.prj`, `.map`, `.kml`, `.tab`), pozwalająca innym programom ustalić położenie mapy w terenie. |
 | **GeoPackage (`.gpkg`)** | Otwarty międzynarodowy standard OGC jednoplikowej bazy SQLite przechowującej kafelkowe mapy rastrowe Web Mercator dla aplikacji mobilnego GIS (QField, Mergin Maps, SW Maps, QGIS) oraz Locus Map i OruxMaps. |
 | **GetCapabilities** | Dokument XML udostępniany przez serwer WMS lub WMTS z listą wszystkich dostępnych warstw, obsługiwanych układów i zakresów skal. |
@@ -25,6 +26,7 @@ Krótkie objaśnienia najważniejszych terminów używanych w programie MapoTero
 | **Krycie (%)** | Stopień nieprzezroczystości warstwy (`5–100%`). Mniejsze krycie pozwala prześwitywać warstwie znajdującej się niżej. |
 | **LISP (`.lsp`)** | Program automatyzacji w środowisku CAD (AutoCAD, BricsCAD, ZWCAD itp.) wczytywany poleceniem `APPLOAD`, który wstawia podkłady rastrowe MapoTero pod istniejące obiekty rysunku poleceniem `MAPOTERO_WSTAW`. |
 | **MBTiles / SQLiteDB** | Jednoplikowe bazy danych SQLite przechowujące piramidę kafelków mapy dla aplikacji mobilnych (Locus Map, OsmAnd, OruxMaps). |
+| **Mikser warstw** | Narzędzie w Galerii warstw online do układania kanapki warstw z podglądem na żywo, wyborem trybów mieszania, zaznaczaniem obszaru i zapisem do pliku `.mapotero`. |
 | **NMT (Numeryczny Model Terenu)** | Dane wysokościowe (lotniczy skaning laserowy LIDAR) udostępniane przez GUGiK w postaci plastycznego cieniowania rzeźby, hipsometrii oraz profili wysokościowych wzdłuż tras. |
 | **Piksel terenowy (`[m/pix]`)** | Wielkość jednego piksela obrazu w terenie. Decyduje o ostrości mapy i objętości pobieranych danych. |
 | **Segment** | Pojedynczy kwadratowy plik obrazu pobierany przez MapoTero (do `2048 × 2048 px`). Cały obszar dzielony jest na siatkę segmentów. |

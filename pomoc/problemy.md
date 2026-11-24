@@ -99,7 +99,10 @@ Tak, bezpośrednio na karcie *Wybrane warstwy* w oknie głównym (z regulacją k
 albo później z gotowych sesji w oknie [Eksport mapy](../eksport/nakladki/) czy [Wielowarstwowy MBTiles](../mbtiles-wielowarstwowy/).
 
 **Jak najszybciej przygotować gotową mapę bez ręcznego ustawiania siatki i układu?**  
-Wciśnij skrót <kbd>Ctrl</kbd>+<kbd>K</kbd> albo kliknij przycisk **Szybki kreator…** na górnym pasku nad mapą. [Szybki kreator mapy](../narzedzia/#szybki-kreator-mapy) poprowadzi Cię w 4 krokach: wybierzesz cel (telefon, Garmin, wydruk, GIS, CAD), wskażesz obszar (miejscowość, działkę lub trasę), wybierzesz szablon i jednym kliknięciem wygenerujesz gotowy plik.
+Wciśnij skrót <kbd>Ctrl</kbd>+<kbd>K</kbd> albo kliknij ikonę różdżki pod przyciskami powiększenia mapy. [Szybki kreator mapy](../narzedzia/#szybki-kreator-mapy) poprowadzi Cię w 4 krokach: wybierzesz cel (telefon, Garmin, wydruk, GIS, CAD), wskażesz obszar (miejscowość, działkę lub trasę), wybierzesz szablon i jednym kliknięciem wygenerujesz gotowy plik.
+
+**Dlaczego przeglądarka pyta o dostęp do sieci lokalnej (`127.0.0.1`) podczas wysyłania warstw z Galerii online?**  
+Program MapoTero nasłuchuje lokalnie na komputerze, aby przeglądarka mogła przekazać wybrane warstwy lub kompozycję z Miksera bezpośrednio do otwartego okna programu. Jest to wyłącznie połączenie wewnątrz Twojego komputera. Jeśli zezwolisz na dostęp w oknie przeglądarki, warstwy pojawią się od razu na liście *Wybrane warstwy*. Zamiast tego możesz też zapisać kompozycję jako plik `.mapotero` i przeciągnąć go na okno programu.
 
 ---
 

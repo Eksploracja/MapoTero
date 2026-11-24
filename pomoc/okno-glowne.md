@@ -23,7 +23,7 @@ Opis każdego elementu nowoczesnego okna głównego: paska narzędziowego, mapy 
 
 ![Okno główne programu MapoTero]({{ '/pomoc/obrazy/03-okno-glowne.png' | relative_url }})
 
-*Rysunek 1. Okno główne programu MapoTero — mapa podglądu z siatką segmentów, katalog warstw, kompozycja warstw z podglądem na żywo oraz karty obszaru, parametrów i stanu sesji.*
+*Rysunek 1. Okno główne programu MapoTero: mapa podglądu z siatką segmentów, katalog warstw, kompozycja warstw z podglądem na żywo oraz karty obszaru, parametrów i stanu sesji.*
 
 | Nr | Element okna | Do czego służy |
 |---|---|---|
@@ -164,12 +164,14 @@ Prawy panel programu organizuje źródła danych i kompozycję wielowarstwową:
   * Grupy tematyczne: *Mapy topograficzne*, *Rzeźba terenu (cieniowanie, hipsometria)*, *Ortofotomapy*, *Mapy historyczne i zabytki*, *Ewidencja, geodezja i uzbrojenie (EGiB, GESUT)*, *Granice i adresy (PRG, PRNG)*, *Przyroda i środowisko (GDOŚ, BDL)*, *Geologia (PIG-PIB)*, *Kraje sąsiednie i strefa przygraniczna (Czechy, Słowacja, Niemcy, Litwa, Bałtyk)* oraz serwery dodane przez użytkownika.
   * Zaznaczenie pola wyboru dodaje warstwę do listy wybranych. Odznaczenie ją usuwa.
   * Pole wyszukiwarki pozwala przefiltrować drzewo według dowolnych słów kluczowych. Klawisz <kbd>Esc</kbd> czyści filtr.
-  * Przycisk **Zwiń / Rozwiń** zwija lub rozwija wszystkie grupy w katalogu, ikona galerii otwiera [Galerię warstw map online](../galeria-warstw/), a przycisk **+ Serwer…** w nagłówku karty uruchamia kreator usług WMS, WMTS i kafelkowych XYZ/TMS.
+  * Przycisk **Zwiń / Rozwiń** zwija lub rozwija wszystkie grupy w katalogu, ikona galerii otwiera [Galerię warstw map online](../galeria-warstw/) (zob. też [poradnik Galerii i Miksera](../galeria-i-mikser/)), a przycisk **+ Serwer…** w nagłówku karty uruchamia kreator usług WMS, WMTS i kafelkowych XYZ/TMS.
+  * **Szybki podgląd po najechaniu myszą:** gdy zatrzymasz kursor na warstwie w drzewie *Warstwy do pobrania*, po prawej stronie wiersza pojawią się dwie małe ikony: **próbka mapy** oraz **zasięg przestrzenny**. Kliknięcie ikony otwiera okienko podglądu z rzeczywistym fragmentem mapy lub jej zasięgiem na tle Polski, jeszcze zanim dodasz warstwę do listy.
 
 * **Wybrane warstwy:**
   * Lista mieści do 12 warstw ułożonych w kanapkę (warstwa na dole listy to podkład, warstwy wyżej leżą na wierzchu).
   * **Krycie bezpośrednio w wierszu:** zaznaczenie warstwy wyświetla pole liczbowe do zmiany przezroczystości (5–100%).
   * **Usuwanie i kolejność:** przycisk **✕** w wierszu usuwa warstwę. Kolejność zmienisz, przeciągając wiersz myszą lub skrótem <kbd>Ctrl</kbd>+<kbd>↑</kbd>/<kbd>↓</kbd>.
+  * **Menu kontekstowe i przepisy `.mapotero`:** kliknięcie prawym przyciskiem myszy na liście *Wybrane warstwy* pozwala wybrać **Kopiuj kanapkę (JSON)**, **Wklej kanapkę ze schowka** lub **Wczytaj kanapkę z pliku...**. Możesz też przeciągnąć plik `.mapotero` lub `.json` z Eksploratora Windows wprost na okno programu, aby natychmiast wczytać zapisaną kompozycję.
   * Przycisk **Mikser…** w nagłówku karty otwiera okno *Warstwy - zaawansowane*.
 
 ### Okno *Warstwy - zaawansowane* (Mikser)
@@ -178,7 +180,7 @@ Prawy panel programu organizuje źródła danych i kompozycję wielowarstwową:
 
 *Rysunek 2. Okno zaawansowanego miksera warstw: mapa topograficzna 1:10 000 połączona z cieniowaniem NMT LiDAR w trybie mnożenia (pełne krycie 100%).*
 
-* Pozwala przypisać każdej warstwie niezależny tryb mieszania: *Zwykły*, *Nakładka*, *Mnożenie*, *Ekran*, *Ciemniej*, *Jaśniej*, *Różnica* oraz **Rzeźba terenu**.
+* Pozwala przypisać każdej warstwie niezależny tryb mieszania: **1 Zwykły**, **2 Mnożenie**, **3 Ciemniej**, **4 Jaśniej**, **5 Ekran**, **6 Nakładka** oraz **7 Rzeźba terenu**.
 * **Tryb „Rzeźba terenu”:** eliminuje problem szarej zasłony przy nakładaniu cieniowania NMT LiDAR. Płaski teren pozostaje neutralny, stoki w cieniu ciemnieją, a zbocza oświetlone delikatnie jaśnieją.
 * Wyświetla podgląd złożenia warstw na żywo z lupą powiększającą oraz przycisk *Korekta obrazu...* (filtr MIP, wyostrzanie krawędzi, rozjaśnienie lasów).
 

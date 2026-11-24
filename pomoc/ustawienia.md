@@ -94,6 +94,7 @@ OziExplorer, MapInfo, Google Earth, GPS Tuner). Opis każdego formatu znajdziesz
 | *Przerwa między próbami [s]* | `5` | `0–300` | Czas oczekiwania między kolejnymi rundami prób. Przy błędach przeciążenia serwera (HTTP 429/503) warto wydłużyć np. do `30–60 s`. |
 | *Równoczesne pobrania* | `4` | `1–16` | Maksymalna liczba jednoczesnych zapytań do jednego serwera (obejmuje też pojedyncze kafle WMTS/XYZ/TMS). Dla wolnych serwerów (np. map historycznych IHPAN) zmniejsz do `1–2`. |
 | *Limit czasu odpowiedzi [s]* | `120` | `10–600` (krok 10) | Maksymalny czas oczekiwania na odpowiedź na pojedyncze zapytanie. Zwiększ np. do `240–300 s`, jeśli serwer długo generuje duże segmenty. |
+| *Jakość JPEG przy składaniu* | `90` | `50–100` | Jakość kompresji segmentów JPEG, które program składa z kilku obrazów (z kafli WMTS/XYZ/TMS, z kilku serwerów WMS albo z warstw o kryciu poniżej 100% lub innym trybem mieszania). Segment z jednego zapytania WMS zapisuje bez ponownej kompresji. |
 
 ---
 
@@ -104,7 +105,6 @@ Dotyczy usług kafelkowych (WMTS, XYZ i TMS):
 | Opcja | Domyślnie | Zakres | Co robi |
 |---|---|---|---|
 | *zachowuj pobrane kafle w folderze sesji* | wyłączone | brak | Pozostawia podfolder `_kafle_wmts` po zakończeniu pobierania. Ułatwia powtórne złożenie tego samego obszaru z innym bokiem segmentu bez ponownego pobierania z sieci, ale zajmuje miejsce na dysku. |
-| *Jakość JPEG przy składaniu* | `90` | `50–100` | Jakość kompresji segmentów JPEG, które program składa z kilku obrazów (z kafli WMTS/XYZ/TMS, z kilku serwerów WMS albo z warstw o kryciu poniżej 100% lub innym trybem mieszania). Segment z jednego zapytania WMS zapisuje bez ponownej kompresji. |
 
 ---
 

@@ -95,6 +95,13 @@ oraz kompletnym planem stopni dla map wieloskalowych. Usunięcie szablonu przyci
 
 ---
 
+## Przepisy kompozycji (.mapotero)
+
+Pliki `.mapotero` (oraz kompatybilne `.json` z formatem `mapotero-zestaw`) służą do zapisywania i udostępniania gotowych kanapek warstw utworzonych w [Mikserze warstw](../galeria-i-mikser/) lub skopiowanych z listy *Wybrane warstwy* w programie.
+Przechowują listę warstw z nazwami zbiorów, stopniem krycia, trybem mieszania oraz opcjonalnym obszarem zasięgu. Taki plik możesz wczytać przez menu kontekstowe listy *Wybrane warstwy* (*Wczytaj kanapkę z pliku...*) albo przeciągając go myszą na okno programu.
+
+---
+
 ➡️ **Kolejny krok:** [Słownik pojęć programu MapoTero →](../slownik/)
 
 *Zobacz też: [Sesje pobierania](../sesje/) · [Plik zbioru map](../serwery/plik-zbioru-map/) · [Gdzie program zapisuje dane](../pierwsze-kroki/dane-programu/)*

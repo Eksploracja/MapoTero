@@ -6,7 +6,7 @@ nav_order: 11
 # Scalanie segmentów
 {: .no_toc }
 
-Złączenie pobranych segmentów w jeden duży arkusz GeoTIFF, JPEG lub PNG z plikami kalibracji - format *Arkusz* w oknie *Eksport mapy*.
+Złączenie pobranych segmentów w jeden duży arkusz GeoTIFF, JPEG lub PNG z plikami kalibracji (format *Arkusz* w oknie *Eksport mapy*).
 {: .fs-5 .fw-300 }
 
 **Gdzie w programie:** menu *Narzędzia > Scalanie segmentów* (<kbd>Ctrl</kbd>+<kbd>L</kbd>) albo okno *Eksport mapy* (<kbd>Ctrl</kbd>+<kbd>E</kbd>) z wybranym formatem *Arkusz*  
@@ -90,8 +90,8 @@ Po wybraniu formatu **Arkusz** poniżej sekcji formatu pojawia się panel *Opcje
 
 ## Nakładki i korekta obrazu
 
-Na arkusz można nałożyć warstwy z innych folderów sesji (grupa *Warstwy i przezroczystość*, np. granice działek na
-ortofotomapę) - także o innej siatce i w innym układzie. Pole *Korekta obrazu* z przyciskiem *Korekta obrazu...*
+Na arkusz można nałożyć warstwy z innych folderów sesji (grupa *Warstwy i przezroczystość*, na przykład granice działek na
+ortofotomapę), nawet gdy mają inną siatkę i inny układ współrzędnych. Pole *Korekta obrazu* z przyciskiem *Korekta obrazu...*
 poprawia kontrast, nasycenie i ostrość całego arkusza. Zob. [Nakładki](../eksport/nakladki/).
 
 ---

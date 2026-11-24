@@ -104,7 +104,7 @@ Narzędzia korzystające z sesji uwzględniają korytarz:
 ## Profil wysokościowy trasy
 
 Profil wysokościowy z NMT (wysokości terenu dla punktów trasy, wykres i zapis GPX z wysokościami) jest od wersji 3.19
-osobnym narzędziem: menu *Narzędzia > Profil wysokościowy trasy (GPX, KML)...* - zob. [Narzędzia dodatkowe](../../narzedzia/#profil-wysokościowy-trasy).
+osobnym narzędziem dostępnym w menu *Narzędzia > Profil wysokościowy trasy (GPX, KML)...*. Szczegóły znajdziesz w rozdziale [Narzędzia dodatkowe](../../narzedzia/#profil-wysokościowy-trasy).
 
 ---
 
