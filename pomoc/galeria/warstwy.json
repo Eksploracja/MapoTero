@@ -47,7 +47,7 @@
       "zalecany_piksel": 25,
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/BDOO_WMTS__BDOOCieniowanie.webp",
-      "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "miejsce_probki": "Tatry / Zakopane (49.25, 19.96)",
       "hash_definicji": "f0d7cb02"
     },
     {
@@ -287,7 +287,7 @@
       "zalecany_piksel": 2,
       "zrodlo": "Waymarked Trails / © autorzy OpenStreetMap",
       "obrazek": "obrazy/galeria/Waymarked_Trails__cycling.webp",
-      "miejsce_probki": "Tatry / Zakopane (49.25, 19.96)",
+      "miejsce_probki": "Kraków / Wiślana Trasa Rowerowa (50.05, 19.91)",
       "hash_definicji": "effa55c9"
     },
     {
@@ -303,7 +303,7 @@
       "zalecany_piksel": 2,
       "zrodlo": "Waymarked Trails / © autorzy OpenStreetMap",
       "obrazek": "obrazy/galeria/Waymarked_Trails__mtb.webp",
-      "miejsce_probki": "Tatry / Zakopane (49.25, 19.96)",
+      "miejsce_probki": "Świeradów-Zdrój / Single Track (50.90, 15.35)",
       "hash_definicji": "e2f68615"
     },
     {
@@ -319,7 +319,7 @@
       "zalecany_piksel": 2,
       "zrodlo": "Waymarked Trails / © autorzy OpenStreetMap",
       "obrazek": "obrazy/galeria/Waymarked_Trails__riding.webp",
-      "miejsce_probki": "Tatry / Zakopane (49.25, 19.96)",
+      "miejsce_probki": "Jura Krakowsko-Częstochowska (50.56, 19.53)",
       "hash_definicji": "57ddc295"
     },
     {
@@ -335,7 +335,7 @@
       "zalecany_piksel": 2,
       "zrodlo": "Waymarked Trails / © autorzy OpenStreetMap",
       "obrazek": "obrazy/galeria/Waymarked_Trails__skating.webp",
-      "miejsce_probki": "Tatry / Zakopane (49.25, 19.96)",
+      "miejsce_probki": "Fläming-Skate k. Berlina (51.99, 13.15)",
       "hash_definicji": "bcac1272"
     },
     {
@@ -351,7 +351,7 @@
       "zalecany_piksel": 2,
       "zrodlo": "Waymarked Trails / © autorzy OpenStreetMap",
       "obrazek": "obrazy/galeria/Waymarked_Trails__slopes.webp",
-      "miejsce_probki": "Tatry / Zakopane (49.25, 19.96)",
+      "miejsce_probki": "Białka Tatrzańska (49.39, 20.10)",
       "hash_definicji": "cc1c46b5"
     },
     {
@@ -367,7 +367,7 @@
       "zalecany_piksel": 1,
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/numer_mod_terenu_cieniowanie_WMTS__ISOK_Cien.webp",
-      "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "miejsce_probki": "Tatry / Zakopane (49.25, 19.96)",
       "hash_definicji": "47bb5b5d"
     },
     {
@@ -383,7 +383,7 @@
       "zalecany_piksel": 1,
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/numer_mod_terenu_hipsometria_WMTS__Hipsometria.webp",
-      "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "miejsce_probki": "Tatry / Zakopane (49.25, 19.96)",
       "hash_definicji": "d3bb73db"
     },
     {
@@ -399,7 +399,7 @@
       "zalecany_piksel": 2,
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/numer_mod_terenu_WMTS__HipsoCien.webp",
-      "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "miejsce_probki": "Tatry / Zakopane (49.25, 19.96)",
       "hash_definicji": "25808f75"
     },
     {
@@ -495,7 +495,7 @@
       "zalecany_piksel": 0.1,
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/ortofotomapa_TrueOrtho__PrawdziwaOrtofotomapa.webp",
-      "miejsce_probki": "Kraków Stare Miasto (50.06, 19.94)",
+      "miejsce_probki": "Warszawa Centrum (52.23, 21.01)",
       "hash_definicji": "549cf842"
     },
     {
@@ -719,7 +719,7 @@
       "zalecany_piksel": 16,
       "zrodlo": "IHPAN / Pastmaps",
       "obrazek": "obrazy/galeria/mapy_historyczne_IHPAN__textor_3857.webp",
-      "miejsce_probki": "Rzeszów (50.04, 22.00)",
+      "miejsce_probki": "Białystok (53.13, 23.17)",
       "hash_definicji": "3554c749"
     },
     {
@@ -975,7 +975,7 @@
       "zalecany_piksel": 1,
       "zrodlo": "NID",
       "obrazek": "obrazy/galeria/zabytki_groby_wojenne_NID__Groby_i_cmentarze_wojenne_I.webp",
-      "miejsce_probki": "Kraków Stare Miasto (50.06, 19.94)",
+      "miejsce_probki": "Kraków / Rakowice (50.08, 19.95)",
       "hash_definicji": "d537e8b8"
     },
     {
@@ -991,7 +991,7 @@
       "zalecany_piksel": 0.5,
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/dzialki_ewid_EGIB__dzialki.webp",
-      "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "miejsce_probki": "Warszawa Centrum (52.23, 21.01)",
       "hash_definicji": "2049aba4"
     },
     {
@@ -1007,7 +1007,7 @@
       "zalecany_piksel": 0.5,
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/dzialki_ewid_EGIB__numery_dzialek.webp",
-      "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "miejsce_probki": "Warszawa Centrum (52.23, 21.01)",
       "hash_definicji": "5e5078d9"
     },
     {
@@ -1023,7 +1023,7 @@
       "zalecany_piksel": 0.5,
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/dzialki_ewid_EGIB__budynki.webp",
-      "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "miejsce_probki": "Warszawa Centrum (52.23, 21.01)",
       "hash_definicji": "c8d9e59b"
     },
     {
@@ -1039,7 +1039,7 @@
       "zalecany_piksel": 0.5,
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/dzialki_ewid_EGIB__uzytki.webp",
-      "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "miejsce_probki": "Łabędzie / pow. drawski (53.65, 15.81)",
       "hash_definicji": "efe92006"
     },
     {
@@ -1055,7 +1055,7 @@
       "zalecany_piksel": 0.5,
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/dzialki_ewid_EGIB__kontury.webp",
-      "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "miejsce_probki": "Łabędzie / pow. drawski (53.65, 15.81)",
       "hash_definicji": "8fef89f7"
     },
     {
@@ -1071,7 +1071,7 @@
       "zalecany_piksel": 4,
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/dzialki_ewid_EGIB__obreby.webp",
-      "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "miejsce_probki": "Warszawa Centrum (52.23, 21.01)",
       "hash_definicji": "33c00611"
     },
     {
@@ -1087,7 +1087,7 @@
       "zalecany_piksel": 0.25,
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/uzbrojenie_terenu_KIUT__przewod_wodociagowy.webp",
-      "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "miejsce_probki": "Warszawa Centrum (52.23, 21.01)",
       "hash_definicji": "d13ca1f3"
     },
     {
@@ -1103,7 +1103,7 @@
       "zalecany_piksel": 0.25,
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/uzbrojenie_terenu_KIUT__przewod_kanalizacyjny.webp",
-      "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "miejsce_probki": "Warszawa Centrum (52.23, 21.01)",
       "hash_definicji": "ded612e7"
     },
     {
@@ -1119,7 +1119,7 @@
       "zalecany_piksel": 0.25,
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/uzbrojenie_terenu_KIUT__przewod_elektroenergetyczny.webp",
-      "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "miejsce_probki": "Warszawa Centrum (52.23, 21.01)",
       "hash_definicji": "9d18c9e3"
     },
     {
@@ -1135,7 +1135,7 @@
       "zalecany_piksel": 0.25,
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/uzbrojenie_terenu_KIUT__przewod_gazowy.webp",
-      "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "miejsce_probki": "Warszawa Centrum (52.23, 21.01)",
       "hash_definicji": "fe1cfe04"
     },
     {
@@ -1151,7 +1151,7 @@
       "zalecany_piksel": 0.25,
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/uzbrojenie_terenu_KIUT__przewod_cieplowniczy.webp",
-      "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "miejsce_probki": "Warszawa Centrum (52.23, 21.01)",
       "hash_definicji": "9d8dd43c"
     },
     {
@@ -1167,7 +1167,7 @@
       "zalecany_piksel": 0.25,
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/uzbrojenie_terenu_KIUT__przewod_telekomunikacyjny.webp",
-      "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "miejsce_probki": "Warszawa Centrum (52.23, 21.01)",
       "hash_definicji": "b4981729"
     },
     {
@@ -1183,7 +1183,7 @@
       "zalecany_piksel": 0.25,
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/uzbrojenie_terenu_KIUT__przewod_specjalny.webp",
-      "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "miejsce_probki": "Warszawa Centrum (52.23, 21.01)",
       "hash_definicji": "35a48f0c"
     },
     {
@@ -1199,7 +1199,7 @@
       "zalecany_piksel": 0.25,
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/uzbrojenie_terenu_KIUT__przewod_niezidentyfikowany.webp",
-      "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "miejsce_probki": "Warszawa Centrum (52.23, 21.01)",
       "hash_definicji": "1afdd945"
     },
     {
@@ -1215,7 +1215,7 @@
       "zalecany_piksel": 0.25,
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/uzbrojenie_terenu_KIUT__przewod_urzadzenia.webp",
-      "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "miejsce_probki": "Warszawa Centrum (52.23, 21.01)",
       "hash_definicji": "f08636db"
     },
     {
@@ -1727,7 +1727,7 @@
       "zalecany_piksel": 4,
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/rejestr_granic_jednostki_teryt__W10_Reda.webp",
-      "miejsce_probki": "Port Gdańsk / Reda (54.41, 18.68)",
+      "miejsce_probki": "Zatoka Gdańska / Reda (54.45, 18.70)",
       "hash_definicji": "2df7b9a8"
     },
     {
@@ -1871,7 +1871,7 @@
       "zalecany_piksel": 2,
       "zrodlo": "GDOŚ",
       "obrazek": "obrazy/galeria/obszary_chronione_GDOS__GDOS_StanowiskaDokumentacyjne.webp",
-      "miejsce_probki": "Kielce / Świętokrzyskie (50.87, 20.63)",
+      "miejsce_probki": "Wieliczka / Małopolska (49.98, 20.06)",
       "hash_definicji": "53ceb3a2"
     },
     {
@@ -2063,7 +2063,7 @@
       "zalecany_piksel": 1,
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/mapa_glebowo_rolnicza__0.webp",
-      "miejsce_probki": "Katowice / Śląsk (50.26, 19.02)",
+      "miejsce_probki": "Kujawy / Inowrocław (52.79, 18.26)",
       "hash_definicji": "374d69f8"
     },
     {
@@ -2079,7 +2079,7 @@
       "zalecany_piksel": 1,
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/mapa_glebowo_rolnicza__2.webp",
-      "miejsce_probki": "Katowice / Śląsk (50.26, 19.02)",
+      "miejsce_probki": "Kujawy / Inowrocław (52.77, 18.20)",
       "hash_definicji": "f9b72fa6"
     },
     {
@@ -2383,7 +2383,7 @@
       "zalecany_piksel": 2,
       "zrodlo": "Serwer map",
       "obrazek": "obrazy/galeria/niemcy_basemapde_WMTS__de_basemapde_web_raster_farbe.webp",
-      "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "miejsce_probki": "Berlin (52.52, 13.41)",
       "hash_definicji": "fad06aef"
     },
     {
@@ -2399,7 +2399,7 @@
       "zalecany_piksel": 2,
       "zrodlo": "Serwer map",
       "obrazek": "obrazy/galeria/niemcy_basemapde_WMTS__de_basemapde_web_raster_grau.webp",
-      "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "miejsce_probki": "Berlin (52.52, 13.41)",
       "hash_definicji": "0c0a8414"
     },
     {
@@ -2479,7 +2479,7 @@
       "zalecany_piksel": 2,
       "zrodlo": "Serwer map",
       "obrazek": "obrazy/galeria/niemcy_brandenburgia_dgm_wms__dgmshade.webp",
-      "miejsce_probki": "Poczdam (52.40, 13.07)",
+      "miejsce_probki": "Bad Freienwalde (52.79, 14.03)",
       "hash_definicji": "668b235c"
     },
     {
@@ -2543,7 +2543,7 @@
       "zalecany_piksel": 2,
       "zrodlo": "Serwer map",
       "obrazek": "obrazy/galeria/niemcy_saksonia_hoehe_wms__relief_standard.webp",
-      "miejsce_probki": "Drezno (51.05, 13.74)",
+      "miejsce_probki": "Szwajcaria Saksońska (50.93, 14.14)",
       "hash_definicji": "2608b80a"
     },
     {
@@ -2559,7 +2559,7 @@
       "zalecany_piksel": 2,
       "zrodlo": "Serwer map",
       "obrazek": "obrazy/galeria/niemcy_saksonia_hoehe_wms__hangneigung.webp",
-      "miejsce_probki": "Drezno (51.05, 13.74)",
+      "miejsce_probki": "Szwajcaria Saksońska (50.93, 14.14)",
       "hash_definicji": "a4ac7634"
     },
     {
@@ -2671,7 +2671,7 @@
       "zalecany_piksel": 10,
       "zrodlo": "Serwer map",
       "obrazek": "obrazy/galeria/baltyk_batymetria_wms__emodnet_contours.webp",
-      "miejsce_probki": "Zatoka Gdańska (54.55, 18.85)",
+      "miejsce_probki": "Otwarty Bałtyk (55.05, 17.50)",
       "hash_definicji": "be329e60"
     },
     {
