@@ -10,7 +10,7 @@ parent: Wybór obszaru
 Dokładny zasięg można wpisać z klawiatury, np. narożniki arkusza mapy, działki albo obszaru opracowania.
 {: .fs-5 .fw-300 }
 
-**Gdzie w programie:** pola zasięgu XY w oknie głównym  
+**Gdzie w programie:** karta *Obszar pobierania > Zmień ▾ > Wpisz współrzędne…* lub menu *Sesja pobierania*  
 **Dotyczy wersji:** {{ site.wersja_programu }}
 
 <details open markdown="block">
@@ -24,14 +24,14 @@ Dokładny zasięg można wpisać z klawiatury, np. narożniki arkusza mapy, dzia
 
 Najwygodniejszym sposobem wpisania dokładnych granic obszaru jest dedykowane okno współrzędnych:
 
-1. W karcie **Obszar** pod mapą kliknij odnośnik **Zmień ▾** i wybierz **Wpisz współrzędne…** (polecenie dostępne także w menu *Sesja pobierania*).
-2. W oknie wpisz wartości krawędzi:
-   * **x dolne** (południowa granica) i **x górne** (północna granica),
-   * **y lewe** (zachodnia granica) i **y prawe** (wschodnia granica).
-3. Dla układów w metrach (PL-1992, PL-2000, UTM) możesz użyć przycisku **Zaokrąglij do km** — program automatycznie rozszerzy krawędzie na zewnątrz do pełnych kilometrów, co ułatwia wpasowanie siatki w równe moduły kilometrowe.
-4. Kliknij **OK**.
+1. W karcie **Obszar pobierania** pod mapą kliknij odnośnik **Zmień ▾** i wybierz **Wpisz współrzędne…** (polecenie dostępne także w menu *Sesja pobierania*).
+2. W oknie wpisz wartości krawędzi w wybranym układzie:
+   * **Południe (X dolny / S)** i **Północ (X górny / N)**,
+   * **Zachód (Y lewy / W)** i **Wschód (Y prawy / E)**.
+3. Dla układów w metrach (PL-1992, PL-2000, UTM) możesz użyć przycisku **Zaokrąglij do km**. Program rozszerzy krawędzie na zewnątrz do pełnych kilometrów, co ułatwia wpasowanie siatki w równe moduły kilometrowe.
+4. Kliknij **Zastosuj**.
 
-Program automatycznie wyznaczy siatkę segmentów, zaktualizuje pola i wycentruje widok mapy na podanym obszarze.
+Program wyznaczy siatkę segmentów, zaktualizuje kartę *Obszar pobierania* i wycentruje widok mapy na podanym obszarze.
 
 ---
 
@@ -61,9 +61,7 @@ Współrzędne wpisuje się w **układzie pobierania** (wybranym w oknie główn
 W programie **X oznacza północ, a Y wschód** (konwencja geodezyjna). Współrzędne z programu GIS lub CAD, gdzie
 zwykle X = wschód, trzeba wpisać odwrotnie: wartość „X” z GIS do pola *y*, a „Y” do pola *x*.
 
-Liczby dziesiętne można wpisywać z kropką lub przecinkiem. Po każdej zmianie program przelicza rozmiar siatki.
-Siatkę na mapie dla wpisanego zasięgu pokazuje przycisk z pinezką (*wyświetl rzeczywisty zasięg pobieranego obszaru…*).
-Program centruje wtedy mapę na siatce, a gdy siatka się nie mieści, oddala widok.
+Liczby dziesiętne można wpisywać z kropką lub przecinkiem. Po kliknięciu **Zastosuj** program przelicza rozmiar siatki i przybliża widok na wyznaczony obszar. Do siatki w dowolnym momencie wrócisz także przez *Obszar pobierania > Zmień ▾ > Pokaż na mapie*.
 
 Siatka zaczyna się w punkcie (*x dolne*, *y lewe*) i obejmuje pełne segmenty w górę oraz w prawo. Żeby siatka
 pokryła obszar bez naddatku, dobierz zasięg jako wielokrotność terenowego boku segmentu (bok × piksel), np. przy

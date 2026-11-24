@@ -81,17 +81,17 @@ Pozwala to sprawdzić aktualność kafli przy ponownym pobieraniu bez przesyłan
 * **`warstwy\*.txt`**: pojedyncze zbiory map w formacie klasycznym (Windows-1250) lub JSON (UTF-8), opisane szczegółowo
   w rozdziale [Plik zbioru map](../serwery/plik-zbioru-map/).
 * **`warstwy\warstwy.txt`**: indeks zbiorów wczytywanych do programu (jedna nazwa pliku bez `.txt` w wierszu).
-* **`warstwy\katalog.txt`** (UTF-8): buduje grupy drzewa *Wybierz mapy* i przypisuje warstwom czytelne nazwy:
+* **`warstwy\katalog.txt`** (UTF-8): buduje grupy drzewa *Warstwy do pobrania* i przypisuje warstwom czytelne nazwy:
   `> Grupa`, `>> Podgrupa`, `zbiór | warstwa | nazwa wyświetlana` (wiersze zaczynające się od `#` to komentarze).
 
 ---
 
 ## szablony_wlasne.json
 
-Plik przechowuje style użytkownika utworzone w Szybkim kreatorze mapy poleceniem *Zapisz jako mój styl...*.
+Plik przechowuje szablony użytkownika utworzone w Szybkim kreatorze mapy poleceniem *Zapisz jako szablon...*.
 Zapisywany jest w formacie JSON (UTF-8 bez BOM) w katalogu programu lub w `%LocalAppData%\MapoTero\szablony_wlasne.json`.
 Zawiera listę własnych kompozycji wraz z nazwami warstw, stopniami krycia, trybami mieszania, profilami korekcji rastrowej
-oraz kompletnym planem stopni dla map wieloskalowych. Usunięcie stylu przyciskiem *Usuń mój styl* aktualizuje ten plik.
+oraz kompletnym planem stopni dla map wieloskalowych. Usunięcie szablonu przyciskiem *Usuń szablon* aktualizuje ten plik.
 
 ---
 

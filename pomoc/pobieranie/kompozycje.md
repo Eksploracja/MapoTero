@@ -22,12 +22,12 @@ parent: Pobieranie map
 
 ## Zasada działania kanapki warstw
 
-W MapoTero możesz wybrać do 12 warstw jednocześnie i złożyć z nich spójną mapę już na etapie pobierania. Warstwy układają się w stos (kanapkę) w panelu *Wybrane warstwy oraz ich kolejność*:
+W MapoTero możesz wybrać do 12 warstw jednocześnie i złożyć z nich spójną mapę już na etapie pobierania. Warstwy układają się w stos (kanapkę) na karcie *Wybrane warstwy*:
 
 * **Warstwa nr 1 (na samym dole):** to nieprzezroczysty podkład bazowy. Najczęściej jest to ortofotomapa, mapa topograficzna (np. BDOT10k lub skan 1:10 000) albo mapa archiwalna.
 * **Warstwy wyższe (2, 3…):** nakładają się na podkład. Mogą to być przezroczyste wektory (działki ewidencyjne, szlaki turystyczne) lub rastry modelujące teren (cieniowanie rzeźby NMT, hipsometria).
-* **Kolejność warstw:** zmieniasz przeciągając pozycję myszą, skrótem <kbd>Ctrl</kbd>+<kbd>↑</kbd>/<kbd>↓</kbd> albo z menu kontekstowego prawego przycisku myszy. Górna warstwa na liście leży na wierzchu stosu.
-* **Krycie bezpośrednio na liście:** zaznaczona warstwa na liście wyświetla miniaturowy suwak krycia bezpośrednio w swoim wierszu, a krzyżyk ✕ na końcu wiersza natychmiast ją usuwa.
+* **Kolejność warstw:** zmieniasz, przeciągając pozycję myszą, skrótem <kbd>Ctrl</kbd>+<kbd>↑</kbd>/<kbd>↓</kbd> albo z menu kontekstowego prawego przycisku myszy. Górna warstwa na liście leży na wierzchu stosu.
+* **Krycie bezpośrednio na liście:** zaznaczona warstwa na liście ma pole liczbowe krycia (`%`) bezpośrednio w swoim wierszu, a krzyżyk **✕** na końcu wiersza ją usuwa.
 
 Gdy wszystkie warstwy pochodzą z tego samego serwera WMS i mają krycie 100%, łączy je bezpośrednio serwer w jednym zapytaniu. Jeśli warstwy pochodzą z różnych źródeł (np. podkład z kafelków WMTS, a nakładka z serwera WMS) lub mają zmniejszone krycie, program pobiera każdą warstwę osobno z przezroczystym tłem i precyzyjnie nakłada je w segment wynikowy.
 
@@ -129,7 +129,7 @@ Działki ewidencyjne i numery działek są udostępniane przez serwer KIEG w pos
 ## Wskazówki praktyczne
 
 1. **Dobór piksela siatki:** Program po wybraniu kilku warstw automatycznie ustawia najmniejszy zalecany piksel spośród nich. Łącząc ortofotomapę (0,25 m) z cieniowaniem NMT (1 m), program przyjmie 0,25 m. Cieniowanie zostanie gładko przeskalowane, a zdjęcie lotnicze zachowa maksymalną ostrość.
-2. **Kolejność w kanapce:** Podkład zawsze musi znajdować się na pozycji 1 na dole listy. Jeśli przez pomyłkę dodasz nieprzezroczystą mapę na górę listy, zasłoni ona wszystkie warstwy leżące pod nią. W takim wypadku kliknij ją prawym przyciskiem myszy i wybierz *Ustaw jako podkład*.
+2. **Kolejność w kanapce:** Podkład powinien znajdować się na samym dole listy. Jeśli przez pomyłkę dodasz nieprzezroczystą mapę na górę, zasłoni warstwy leżące pod nią. Przeciągnij ją wtedy w dół myszą, użyj skrótu <kbd>Ctrl</kbd>+<kbd>↓</kbd> albo kliknij prawym przyciskiem myszy i wybierz *Przesuń niżej*.
 3. **Format segmentów przy nakładkach:** Jeśli przygotowujesz mapę, która ma służyć jako przezroczysta warstwa w telefonie (np. same granice działek nad mapą wektorową w Locus Map lub OsmAnd), w oknie *Ustawienia* wybierz format **PNG** z opcją *przezroczyste tło*. Format JPEG nie obsługuje przezroczystości i zamieni puste tło na białe.
 4. **Zapis sesji:** Każdą udaną kompozycję warto zapisać poleceniem *Sesja pobierania > Zapisz ustawienia sesji (conf.txt)*. Plik sesji zapamiętuje wszystkie wybrane warstwy wraz z ich kolejnością i wartościami krycia.
 

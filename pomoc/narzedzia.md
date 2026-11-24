@@ -21,47 +21,44 @@ Szybki kreator mapy, wyszukiwarka działek i miejscowości ULDK, transfer Wi-Fi 
 
 ## Szybki kreator mapy
 
-**Gdzie:** menu *Narzędzia > Szybki kreator mapy...*, skrót **Ctrl+K** albo przycisk z różdżką **🪄 Szybki kreator...** na pasku nad mapą.
+**Gdzie:** menu *Narzędzia > Szybki kreator mapy...*, skrót <kbd>Ctrl</kbd>+<kbd>K</kbd> albo przycisk **Szybki kreator…** na pasku nad mapą.
 
 ![Szybki kreator generowania mapy w 4 krokach]({{ '/pomoc/obrazy/16-szybki-kreator.png' | relative_url }})
 
-*Rysunek 1. Szybki kreator generowania mapy prowadzi krok po kroku od wyboru celu po gotowy plik.*
+*Rysunek 1. Szybki kreator generowania mapy prowadzi krok po kroku od wyboru celu i obszaru przez dobór szablonu po gotowy plik.*
 
-Kreator prowadzi początkujących w czterech intuicyjnych krokach od pomysłu do gotowego pliku mapy – bez konieczności ręcznego ustawiania układu współrzędnych, siatki segmentów i parametrów eksportu:
+Kreator prowadzi w czterech krokach od pomysłu do gotowego pliku mapy, bez ręcznego ustawiania układu współrzędnych, siatki segmentów i parametrów eksportu:
 
-1. **Cel** – wybierz przeznaczenie mapy:
-   * **Smartfon lub tablet**: uniwersalny format MBTiles (dla Locus Map, OsmAnd, OruxMaps), nowoczesna baza OGC GeoPackage (.gpkg) lub SQLiteDB,
-   * **Aplikacje terenowe GIS**: format OGC GeoPackage (.gpkg) dla QField, Mergin Maps oraz QGIS,
-   * **Odbiornik Garmin**: format KMZ (dla Garmin Custom Maps) albo wielopoziomowy JNX (dla Garmin BirdsEye bez limitu 100 kafli),
-   * **Wydruk na papierze**: scalony arkusz GeoTIFF ze wskazaniem wymiaru w centymetrach i najmniejszego formatu arkusza A (A4, A3, A2, A1, A0),
-   * **Podkład CAD / GIS**: arkusz GeoTIFF w państwowym układzie PL-1992 do bezpośredniego wstawienia do projektu.
-2. **Obszar** – wskaż interesujący Cię teren:
-   * Miejscowość z promieniem w kilometrach,
-   * Prostokąt otaczający miejscowość (*wg granic*),
-   * Wklejone współrzędne punktu (np. `53.6536, 15.8058` z Google Maps, `53°39'13"N 15°48'21"E` lub metry w PL-1992/PL-2000),
-   * Działka katastralna: identyfikator TERYT (np. `320302_5.0001.123/4`) lub nazwa „działka Drawsko Pomorskie 123/4” – program pobiera urzędowy obrys z bazy ULDK GUGiK i dodaje bezpieczny margines 150 m,
-   * Pas wzdłuż trasy wycieczki (plik GPX, KML, KMZ lub wektor GeoPackage .gpkg przeciągnięty na okno),
-   * Jeśli przed otwarciem kreatora zaznaczysz obszar na mapie prawym przyciskiem myszy, kreator automatycznie pominie ten krok. Przycisk **Profil…** pozwala od razu obejrzeć profil wysokościowy wczytanego śladu.
-3. **Styl** – gotowa kompozycja kartograficzna dopasowana do aktywności:
-   * **Turystyka piesza**: szczegółowa mapa topograficzna GUGiK z cieniowaniem LiDAR i szlakami turystycznymi,
-   * **Góry z poziomicami**: warstwice i cieniowanie OpenTopoMap z pokryciem Polski, Czech i Słowacji,
-   * **Trasy rowerowe i MTB**: dedykowana sieć szlaków rowerowych z rzeźbą terenu,
-   * **Dziedzictwo kulturowe**: rzeźba terenu LiDAR z prześwitującą mapą topograficzną i zabytkami Narodowego Instytutu Dziedzictwa (rejestr i ewidencja zabytków nieruchomych oraz stanowisk archeologicznych),
-   * **Mapy WIG 1918–1939**: archiwalne arkusze Wojskowego Instytutu Geograficznego uzupełnione Messtischblattami tam, gdzie brakowało map 1:25 000,
-   * **Mapy niemieckie do 1945**: Messtischblatt 1:25 000 i Karte des Deutschen Reiches 1:100 000,
-   * **Działki ewidencyjne**: granice i numery działek z ewidencji gruntów i budynków (EGiB) na ortofotomapie,
-   * **Własne warstwy**: kompozycja warstw aktualnie wybrana w oknie głównym programu.
-   * Suwaki pozwalają regulować krycie podkładu, szlaków i cieniowania. Przycisk **Zapisz jako mój styl…** umożliwia utrwalenie własnej kompozycji na stałe w kategorii *Moje style*.
-4. **Zapis** – generowanie mapy:
-   * Program automatycznie dobiera właściwy rozmiar piksela, format oraz szacuje objętość pliku w MB i czas pobierania,
-   * W opcjach zaawansowanych dostępne jest okno korekty obrazu z gotowymi profilami (np. *Garmin MIP* dla zegarków i nawigacji),
-   * Kliknięcie **Generuj mapę** pobiera dane w tle ze wskaźnikiem rzeczywistego czasu do końca, a po ukończeniu przycisk **Otwórz mapę** natychmiast wyświetla wynik w domyślnym programie.
+1. **Cel:** wybierz przeznaczenie mapy:
+   * **Smartfon lub tablet (Locus Map, OsmAnd, OruxMaps):** plik MBTiles (albo SQLiteDB dla OsmAnd) z piramidą powiększeń do płynnego przybliżania i pracy offline,
+   * **Odbiornik turystyczny lub zegarek Garmin (Fenix, GPSMAP, eTrex):** plik KMZ (Garmin Custom Maps) albo JNX (Garmin BirdsEye bez limitu 100 kafli),
+   * **Arkusz graficzny do druku lub przeglądania na komputerze:** scalony arkusz GeoTIFF z georeferencją, ze wskazaniem rozmiaru wydruku (np. A4–A0),
+   * **Systemy GIS i aplikacje mobilne (QGIS, QField, Avenza Maps):** arkusz GeoTIFF w układzie PL-1992 (albo baza kafelkowa GeoPackage `.gpkg`),
+   * **Projekt CAD (AutoCAD, ZWCAD, BricsCAD):** podkład rastrowy w wybranym pasie PL-2000 (strefy 5–8) lub PL-1992 ze skryptem wpasowania (`.scr`).
+2. **Obszar:** wskaż interesujący Cię teren:
+   * Prostokąt zaznaczony bezpośrednio na mapie (jeśli zaznaczyłeś obszar na mapie przed otwarciem kreatora, ten krok jest pomijany automatycznie, a w każdej chwili wrócisz do niego klikając *Obszar* na pasku kroków),
+   * Miejscowość, adres, współrzędne (WGS84, PL-1992 lub PL-2000) albo działka ewidencyjna z promieniem (w km) lub prostokątem według granic z rejestru ULDK GUGiK (z bezpiecznym marginesem),
+   * Pas wzdłuż trasy wycieczki (plik GPX, KML, KMZ albo wektor GeoPackage `.gpkg` wybrany przyciskiem lub przeciągnięty na okno). Przycisk **Profil…** pozwala od razu obejrzeć profil wysokościowy wczytanego śladu.
+3. **Szablon:** wybierz gotową kompozycję dopasowaną do celu i aktywności:
+   * **Turystyka piesza:** mapa topograficzna GUGiK z cieniowaniem rzeźby terenu i szlakami pieszymi,
+   * **Góry z poziomicami:** warstwice i cieniowanie OpenTopoMap (także dla Czech i Słowacji),
+   * **Trasy rowerowe i MTB:** sieć szlaków rowerowych na podkładzie OSMapa z cieniowaniem rzeźby terenu,
+   * **Dziedzictwo kulturowe:** rzeźba terenu LiDAR z prześwitującą mapą topograficzną i zabytkami Narodowego Instytutu Dziedzictwa (rejestr i ewidencja zabytków nieruchomych oraz stanowisk archeologicznych),
+   * **Mapy WIG 1918–1939:** archiwalne arkusze Wojskowego Instytutu Geograficznego uzupełnione mapami 1:25 000 tam, gdzie brakuje arkuszy WIG,
+   * **Mapy niemieckie do 1945:** *Messtischblatt* 1:25 000 i *Karte des Deutschen Reiches* 1:100 000,
+   * **Działka i granice katastralne:** ortofotomapa z granicami i numerami działek EGiB (oraz warianty dla CAD/GIS),
+   * **Moje warstwy z okna głównego:** kompozycja wybrana aktualnie w oknie głównym programu.
+   * Suwaki w panelu po prawej regulują krycie warstw (np. cieniowania i szlaków), przycisk **Dostosuj warstwy...** otwiera pełny mikser, a przycisk **Zapisz jako szablon...** utrwala własny zestaw na liście szablonów (**Usuń szablon** go usuwa).
+4. **Zapis:** sprawdzenie szacunków i generowanie mapy:
+   * Wybierasz szczegółowość mapy, strukturę pliku (wielopoziomowa piramida powiększeń albo pojedynczy raster), folder docelowy oraz ewentualne opcje zaawansowane (korektę obrazu, własny zakres powiększeń, rozmiar piksela, układ CAD czy podział KMZ na tomy),
+   * Program szacuje liczbę segmentów, rozmiar i czas,
+   * Kliknięcie **Generuj mapę** pobiera dane i zapisuje wynik z szacowanym czasem do końca, a po ukończeniu udostępnia przyciski **Pokaż w folderze** oraz **Przejdź do mapy w oknie głównym**.
 
 ### Mapy wieloskalowe (Multi-Scale)
-W stylach *Turystyka piesza*, *Góry z poziomicami*, *Rower i MTB* oraz stylach historycznych formaty MBTiles, GeoPackage, SQLiteDB i JNX tworzone są jako **mapy wieloskalowe**:
+W szablonach turystycznych i historycznych formaty MBTiles, GeoPackage, SQLiteDB i JNX tworzone są jako **mapy wieloskalowe**:
 * Przy dużym zbliżeniu widoczna jest mapa szczegółowa 1:10 000,
-* W miarę oddalania widok płynnie przełącza się na mapy 1:25 000, 1:50 000, 1:100 000 aż po mapę przeglądową, eliminując nieczytelne, zlane napisy.
-* Opcja **Ortofotomapa przy zbliżeniu** w kroku 4 dodaje na najwyższym poziomie zoomu (powiększenie 17, piksel 0,75 m) ortofotomapę lotniczą ze szlakami, odsłaniając ścieżki i polany niewidoczne na mapach topograficznych.
+* W miarę oddalania widok płynnie przełącza się na mapy 1:25 000, 1:50 000, 1:100 000 aż po mapę przeglądową, bez zlewających się napisów.
+* Opcja w kroku 4 pozwala dołączyć na dużym zbliżeniu ortofotomapę ze szlakami albo otworzyć pełne okno **MBTiles wieloskalowy**, jeśli chcesz ręcznie zmienić zakresy poziomów powiększeń.
 
 ---
 
@@ -117,18 +114,22 @@ Narzędzie przetwarza kalibrowane skany papierowych map turystycznych i archiwal
 
 ---
 
-## Konwerter GeoTIFF (kafelkowanie i piramidy)
+## Konwerter map GeoTIFF
 
 **Gdzie:** menu *Narzędzia > Konwertuj mapę GeoTIFF...*
 
-![Konwerter GeoTIFF]({{ '/pomoc/obrazy/16-konwerter-geotiff.png' | relative_url }})
+![Okno konwertera map GeoTIFF]({{ '/pomoc/obrazy/16-konwerter-geotiff.png' | relative_url }})
 
-*Rysunek 5. Narzędzie optymalizacji arkuszy GeoTIFF do standardu Cloud-Optimized GeoTIFF.*
+*Rysunek 5. Okno konwersji pliku GeoTIFF do formatów map mobilnych i odbiorników Garmin.*
 
-Przekształca tradycyjne, ciężkie arkusze GeoTIFF zapisane wierszami (strip-based) w nowoczesne, kafelkowane pliki o strukturze **Cloud-Optimized GeoTIFF**:
-* **Kafelkowanie wewnętrzne 256×256 px**: podział obrazu na miniaturowe kafle wewnątrz pliku TIFF,
-* **Łańcuch piramid pomniejszeń (IFD reduced overviews)**: podkatalogi pomniejszeń umożliwiające błyskawiczne renderowanie mapy przy dowolnym oddaleniu widoku w QGIS, ArcGIS czy Avenza Maps bez konieczności dekompresowania wielogigabajtowego pliku z dysku,
-* **Wybór kompresji**: bezstratna kompresja Deflate (zoptymalizowana pod rysunki CAD i mapy wektorowe) lub kompresja JPEG z regulacją jakości (dla ortofotomap i skanów papierowych).
+Przekształca pojedynczy plik GeoTIFF (`.tif` lub `.tiff`, na przykład arkusz wyeksportowany wcześniej z MapoTero albo wyrenderowany w QGIS) w gotową mapę mobilną lub paczkę dla odbiornika Garmin:
+
+* **Wczytywanie georeferencji:** program automatycznie odczytuje zasięg, rozdzielczość oraz układ współrzędnych z nagłówka GeoTIFF (albo z plików `.tfw` / `.prj`), a gdy brakuje kodu EPSG, pozwala wybrać układ z listy.
+* **Obsługiwane formaty wynikowe:** **MBTiles** (Locus Map, OsmAnd), **GeoPackage (`.gpkg`)** (QField, Mergin Maps), **KMZ** (Garmin Custom Maps, z opcją podziału na tomy po 100 kafli), **JNX** (Garmin BirdsEye), **SQLiteDB** (OsmAnd) oraz **OruxMaps**.
+* **Parametry konwersji:** ustawisz tu zakres poziomów powiększeń (**Zoom od–do**) i **jakość JPEG**.
+
+{: .wskazowka }
+Aby zapisać kafelkowany plik GeoTIFF z wewnętrznymi piramidami powiększeń (Cloud-Optimized GeoTIFF), wybierz w oknie [Eksport mapy]({{ '/pomoc/eksport/' | relative_url }}) format **Arkusz** i zaznacz opcję *piramidy w GeoTIFF*.
 
 ---
 
@@ -181,7 +182,7 @@ Ekrany transrefleksyjne Garmin Memory-In-Pixel (seria Fenix, Epix, Forerunner, E
 
 ## Kopiowanie mapy do odbiornika Garmin (USB)
 
-**Gdzie:** menu *Narzędzia > Kopiuj mapę do Garmina (USB)...* oraz przycisk w oknie eksportu mapy.
+**Gdzie:** menu *Narzędzia > Kopiuj mapę do Garmina (USB)...* oraz przycisk **Wyślij na telefon...** w oknie eksportu po wygenerowaniu `.jnx` lub `.kmz`.
 
 Automatycznie skanuje podłączone do komputera napędy wymienne, wykrywa odbiorniki turystyczne Garmin pracujące w trybie pamięci masowej USB (oraz karty microSD) i jednym kliknięciem kopiuje wygenerowany plik `.kmz` lub `.jnx` bezpośrednio do właściwego folderu systemowego:
 * pliki KMZ trafiają automatycznie do `Garmin/CustomMaps`,

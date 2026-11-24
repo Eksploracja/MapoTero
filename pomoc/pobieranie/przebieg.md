@@ -23,15 +23,15 @@ przerwać i później wznowić.
 
 ## Rozpoczęcie pobierania
 
-Po kliknięciu **Pobierz** program najpierw sprawdza parametry. Jeśli coś się nie zgadza, pobieranie nie rusza,
+Po kliknięciu **Pobierz segmenty** program najpierw sprawdza parametry. Jeśli coś się nie zgadza, pobieranie nie rusza,
 a czerwony komunikat mówi, co poprawić:
 
 | Komunikat | Co zrobić |
 |---|---|
-| *Nie wybrano żadnej warstwy…* | zaznacz warstwę w drzewie *Wybierz mapy* |
-| *Nie podano rozmiaru pojedynczego piksela…* / *…musi być większy od zera* | wpisz piksel, np. `1` |
-| *Długość boku segmentu nie może przekraczać 2048 px.* | zmniejsz *Segment [pix]* |
-| *Niepoprawne współrzędne X, Y.* | zaznacz obszar albo popraw pola XY (dolne muszą być mniejsze od górnych) |
+| *Nie wybrano żadnej warstwy…* | zaznacz warstwę w karcie *Warstwy do pobrania* |
+| *Nie podano rozmiaru pojedynczego piksela…* / *…musi być większy od zera* | wpisz piksel, np. `1` w oknie *Parametry segmentów > Zmień…* |
+| *Długość boku segmentu nie może przekraczać 2048 px.* | zmniejsz bok segmentu (*Parametry segmentów > Zmień…*) |
+| *Niepoprawne współrzędne X, Y.* | zaznacz obszar albo popraw współrzędne (*Obszar pobierania > Zmień ▾ > Wpisz współrzędne…*) |
 | *Zbyt wiele segmentów do pobrania…* | zmniejsz obszar albo zwiększ piksel lub segment (limit 10 mln) |
 | *Trasa nie przecina obszaru pobierania…* | wybierz trasę ponownie albo usuń obszar wzdłuż trasy |
 | błąd przedrostka nazw segmentów | popraw przedrostek w oknie *Ustawienia* (bez znaków niedozwolonych w nazwach plików) |
@@ -89,7 +89,7 @@ Aby dokończyć przerwane lub niepełne pobieranie:
 1. Jeśli program był zamknięty, uruchom go. Ostatnia sesja (z podfolderu `download\sesja_...`) wczyta się automatycznie. Sesję z innego folderu
    wczytaj z menu *Sesja pobierania > Wczytaj ustawienia sesji (conf.txt)*.
 2. Nie zmieniaj zasięgu, segmentu, piksela, układu ani warstw.
-3. Kliknij **Pobierz**.
+3. Kliknij **Pobierz segmenty**.
 
 Program pominie segmenty, które już są w folderze, i pobierze tylko brakujące, także te z luk w środku mapy.
 Pozostałości po zapisie przerwanym w połowie (pliki `.tmp`) usuwa sam.

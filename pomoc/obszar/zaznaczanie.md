@@ -20,22 +20,22 @@ Prostokąt zaznaczony prawym przyciskiem myszy, siatka segmentów na mapie i zmi
 {:toc}
 </details>
 
-## Zaznaczanie prawym przyciskiem myszy
+## Zaznaczanie prawym przyciskiem myszy lub przyciskiem „Zaznacz obszar”
 
-1. Ustaw najpierw zbiór map, warstwę, segment i piksel (od nich zależy siatka).
-2. Przybliż mapę tak, by widzieć cały obszar.
-3. Wciśnij **prawy** przycisk myszy w jednym narożniku obszaru, przeciągnij do przeciwległego i puść.
+1. Ustaw najpierw zbiór map, warstwę, bok segmentu i piksel (od nich zależy siatka).
+2. Przybliż mapę tak, aby widzieć cały obszar.
+3. Wciśnij **prawy** przycisk myszy w jednym narożniku obszaru, przeciągnij do przeciwległego i puść (albo kliknij **Zaznacz obszar** na górnym pasku narzędzi, a potem wskaż na mapie dwa przeciwległe narożniki).
 
 Program:
 
-* wpisze zasięg w pola XY (w układzie pobierania, zaokrąglony do pełnych metrów na zewnątrz zaznaczenia),
-* narysuje siatkę segmentów i uchwyty,
-* wyświetli w polu *Komunikaty* powierzchnię obszaru, a w polu *Wynikowy rozmiar siatki* liczbę segmentów.
+* wyznacza zasięg w układzie pobierania (zaokrąglony do pełnych metrów na zewnątrz zaznaczenia),
+* rysuje na mapie niebieską siatkę segmentów oraz białe uchwyty,
+* pokazuje wymiary i liczbę segmentów w karcie **Obszar pobierania** pod mapą.
 
 Nowe zaznaczenie zastępuje poprzednie, w tym również aktywny [obszar wzdłuż trasy](../korytarz/).
 
 {: .informacja }
-Zaznaczanie myszą jest zablokowane w trakcie aktywnego pobierania oraz gdy zaznaczone jest pole wpisywania zasięgu XY z klawiatury (obok pola `x` górnego w schemacie siatki).
+Zaznaczanie myszą jest zablokowane podczas trwającego pobierania. Jeśli wolisz wyznaczyć obszar liczbowo, otwórz *Obszar pobierania > Zmień ▾ > Wpisz współrzędne…*.
 
 Zaznaczony prostokąt jest prostokątem na mapie podglądu (w stopniach geograficznych). W płaskim układzie pobierania (np. PL-1992) tworzy lekko obrócony czworokąt, więc program wyznacza prostokąt opisany obejmujący wszystkie jego narożniki.
 
@@ -69,7 +69,7 @@ Program automatycznie przesunie mapę podglądu i ustawi optymalny poziom powię
 
 1. Wpisz pełny identyfikator TERYT działki (np. `022503_5.0003.134`) albo nazwę obrębu/miejscowości i numer (np. `Krzewina 134`) i kliknij **Szukaj**.
 2. Wybierz działkę z listy wyników (zostanie podany numer działki, obręb, gmina i kod TERYT).
-3. Ustaw **Margines wokół działki na mapie [m]** (domyślnie `50 m`) – bufor terenu wokół granic parceli, by na pobranej mapie widoczne było również najbliższe otoczenie i dojazd.
+3. Ustaw **Margines wokół działki na mapie [m]** (domyślnie `50 m`), czyli bufor terenu wokół granic parceli, żeby na pobranej mapie zmieściło się też najbliższe otoczenie i dojazd.
 4. Opcja **Włącz warstwy: Ortofotomapa i Działki ewidencyjne (EGiB GUGiK)** automatycznie zaznacza w drzewie map fotomapę lotniczą oraz urzędowe granice i numery działek.
 5. Kliknij **Zaznacz na mapie**.
 
@@ -85,7 +85,7 @@ Program pobierze geometrię granic działki z państwowego rejestru, wycentruje 
 
 Możesz wyznaczyć obszar pobierania na podstawie istniejącego pliku wektorowego z granicami (np. granica gminy, obrębu, nadleśnictwa, parku narodowego lub działki narysowanej w programie GIS):
 
-1. Wybierz polecenie *Sesja pobierania > Obszar pobierania z poligonu (KML, GeoJSON)...* albo kliknij odnośnik **Zmień ▾** w karcie *Obszar* pod mapą i wybierz *Obszar z poligonu...*. Możesz także po prostu **przeciągnąć plik** `.kml`, `.geojson`, `.json` lub `.gpkg` z Eksploratora Windows na mapę (Drag & Drop).
+1. Wybierz polecenie *Sesja pobierania > Obszar pobierania z poligonu (KML, GeoJSON, GPKG)...* albo kliknij odnośnik **Zmień ▾** w karcie *Obszar pobierania* pod mapą i wybierz *Obszar z poligonu (KML, GeoJSON, GPKG)…*. Możesz też po prostu **przeciągnąć plik** `.kml`, `.geojson`, `.json` lub `.gpkg` z Eksploratora Windows na mapę (Drag & Drop).
 2. Jeśli plik **GeoPackage (.gpkg)** zawiera kilka warstw wektorowych, program wyświetli okno wyboru warstwy.
 3. Program wczyta geometrię wielokąta, wyznaczy prostokątny obszar opisany na granicach poligonu, wyświetli żółty obrys na mapie i automatycznie obliczy optymalną siatkę segmentów.
 
@@ -105,7 +105,7 @@ narożnika z uwzględnieniem pełnych segmentów (rzeczywisty zasięg pobieranej
 * Przy więcej niż **3000 segmentów** program rysuje wyłącznie zewnętrzny obrys siatki i wyświetla pomarańczowy komunikat. Przyspiesza to przesuwanie mapy.
 * Siatkę można wyłączyć w oknie *Ustawienia* (*siatka segmentów na mapie*). Na mapie pozostają wtedy same znaczniki narożników.
 * Zmiana boku segmentu, piksela lub układu natychmiast odświeża siatkę.
-* Po przesunięciu mapy przycisk z pinezką (*wyświetl rzeczywisty zasięg…*) wraca widokiem do siatki.
+* Po przesunięciu mapy wrócisz do siatki przez *Obszar pobierania > Zmień ▾ > Pokaż na mapie* (lub klikając wymiary obszaru w tej karcie).
 
 ---
 

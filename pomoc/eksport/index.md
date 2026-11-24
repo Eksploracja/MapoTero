@@ -10,7 +10,7 @@ has_children: true
 Zapis pobranej mapy w formatach dla odbiorników GPS i aplikacji mobilnych, kafelkowanego GeoTIFF, a także bezpośredni transfer przez Wi-Fi z kodem QR lub USB.
 {: .fs-5 .fw-300 }
 
-**Gdzie w programie:** menu *Narzędzia > Eksport mapy (KMZ, JNX, MBTiles, GeoPackage, SQLiteDB, OruxMaps, GeoTIFF)* (<kbd>Ctrl</kbd>+<kbd>E</kbd>) albo przycisk **Eksportuj pobraną mapę…** w karcie stanu okna głównego  
+**Gdzie w programie:** menu *Narzędzia > Eksport z pobranych segmentów…* (<kbd>Ctrl</kbd>+<kbd>E</kbd>) albo przycisk **Eksportuj pobraną mapę…** w karcie *Stan sesji* okna głównego  
 **Dotyczy wersji:** {{ site.wersja_programu }}
 
 <details open markdown="block">
@@ -26,7 +26,7 @@ Zapis pobranej mapy w formatach dla odbiorników GPS i aplikacji mobilnych, kafe
 2. Naciśnij <kbd>Ctrl</kbd>+<kbd>E</kbd> (lub kliknij przycisk **Eksportuj pobraną mapę…**). Okno otworzy się z automatycznie wczytaną sesją.
 3. Wybierz format docelowy (zob. [Wybór formatu](formaty/)).
 4. Kliknij **Eksportuj**.
-5. Po zakończeniu kliknij **Wyślij na telefon...** (aby zeskanować kod QR przez Wi-Fi) albo **Kopiuj na Garmina...** (kopiowanie na dysk USB).
+5. Po zakończeniu kliknij **Wyślij na telefon...** (dla kodów QR przez Wi-Fi albo wysyłki na Garmina przez USB). Pliki dla Garmina skopiujesz też przez *Narzędzia > Kopiuj mapę do Garmina (USB)...*.
 
 ![Okno eksportu mapy z ponumerowanymi sekcjami]({{ '/pomoc/obrazy/10-eksport-mapy.png' | relative_url }})
 
@@ -35,22 +35,22 @@ Zapis pobranej mapy w formatach dla odbiorników GPS i aplikacji mobilnych, kafe
 | Nr | Sekcja okna | Opis |
 |---|---|---|
 | **1** | *Folder sesji* | folder eksportowanej sesji (`conf.txt`) oraz zestawienie: liczba segmentów, rozdzielczość piksela, układ, opis mapy i data pobrania |
-| **2** | *Format* | wybór formatu: **Garmin BirdsEye (JNX)**, **KMZ dla Garmin** (z automatycznym podziałem na tomy), uniwersalny **KMZ**, **MBTiles**, nowoczesny **GeoPackage (.gpkg)**, **SQLiteDB**, **OruxMaps**, **Arkusz** (scalanie: kafelkowany GeoTIFF z piramidami, JPEG, PNG) oraz **TrekBuddy / Locus Map (.tar)** |
-| **3** | *Kafle Web Mercator* | zakres poziomów powiększenia (zoom min–max) oraz opcja przezroczystych kafli PNG |
-| **4** | *Warstwy, przezroczystość i filtr MIP* | nakładka, zamiana białego tła na przezroczyste, łączenie z warstwami innych sesji oraz profil korekty obrazu / filtr MIP dla ekranów Garmin |
+| **2** | *Format* | wybór formatu: **Garmin BirdsEye (JNX)**, **KMZ dla Garmin** (z automatycznym podziałem na tomy), uniwersalny **KMZ**, **MBTiles** (i przycisk **Wieloskalowy...**), **GeoPackage (.gpkg)**, **SQLiteDB**, **OruxMaps**, **Arkusz** (scalanie z opcjami kalibracji i piramid w GeoTIFF) oraz **TrekBuddy / Locus Map (.tar)** |
+| **3** | *Kafle Web Mercator* | zakres poziomów powiększenia (zoom min–max) oraz opcja przezroczystych kafli PNG (przy formacie *Arkusz* tutaj pojawiają się *Opcje arkusza*: siatka km i ślad GPX/KML) |
+| **4** | *Warstwy, przezroczystość i korekta obrazu* | nakładka, zamiana białego tła na przezroczyste, łączenie z warstwami innych sesji oraz korekta obrazu (m.in. filtr MIP dla ekranów Garmin) |
 | **5** | *Rozmiar pliku* i *Jakość JPEG* | dynamiczne szacowanie wagi pliku w MB, dopasowanie poziomu do zadanego limitu oraz suwak jakości kompresji JPEG |
-| **6** | Plan eksportu i przyciski | podsumowanie liczby generowanych kafelków, przycisk **Pomoc** (<kbd>F1</kbd>), **Eksportuj**, a po zakończeniu: **Pokaż w folderze**, **Wyślij na telefon...** i **Kopiuj na Garmina...** |
+| **6** | Plan eksportu i przyciski | podsumowanie liczby generowanych kafelków, przycisk **Pomoc** (<kbd>F1</kbd>), **Eksportuj**, a po zakończeniu: **Pokaż w folderze** i **Wyślij na telefon...** |
 
 ---
 
 ## Nowe funkcje eksportu
 
-* **Bezpośredni transfer Wi-Fi z kodem QR:** po wygenerowaniu mapy przycisk **Wyślij na telefon...** uruchamia wbudowany serwer lokalny i wyświetla kod QR. Wystarczy skierować aparat smartfona na ekran, aby pobrać mapę do telefonu bez podłączania kabla USB i bez wysyłania plików do chmury internetowej.
-* **Wykrywanie odbiorników Garmin przez USB:** przycisk **Kopiuj na Garmina...** automatycznie wykrywa podłączony odbiornik w trybie pamięci masowej USB i kopiuje plik do odpowiedniego folderu (`Garmin/CustomMaps` dla KMZ lub `Garmin/BirdsEye` dla JNX).
-* **Format OGC GeoPackage (.gpkg):** standard otwartej bazy danych kafelków Web Mercator (EPSG:3857), bezpośrednio obsługiwany przez aplikacje mobilne GIS (QField, Mergin Maps) oraz turystyczne (Locus Map, OruxMaps, QGIS).
-* **Kafelkowany GeoTIFF z piramidami (Cloud-Optimized GeoTIFF):** format *Arkusz > GeoTIFF* tworzy kafelkowanie 256×256 i wewnętrzny łańcuch pomniejszeń (IFD reduced overviews), dzięki czemu wielogigabajtowe arkusze otwierają się w programach QGIS, ArcGIS czy Avenza Maps natychmiastowo.
-* **Automatyczny podział KMZ na tomy:** przy eksporcie map przekraczających limit 100 kafli odbiornika Garmin program oferuje inteligentny podział na tomy (`_tom1.kmz`, `_tom2.kmz`) bez konieczności sztucznego obniżania rozdzielczości.
-* **Płynne skalowanie okna:** na mniejszych ekranach laptopów okno eksportu wyświetla pionowy pasek przewijania, gwarantując pełny dostęp do wszystkich opcji i przycisków.
+* **Bezpośredni transfer Wi-Fi z kodem QR:** po wygenerowaniu mapy przycisk **Wyślij na telefon...** uruchamia lokalny serwer i wyświetla kod QR. Skieruj aparat smartfona na ekran, aby pobrać mapę do telefonu bez kabla USB i bez wysyłania plików do chmury.
+* **Wykrywanie odbiorników Garmin przez USB:** dla wyeksportowanych plików `.jnx` i `.kmz` przycisk **Wyślij na telefon...** (oraz polecenie *Narzędzia > Kopiuj mapę do Garmina (USB)...*) wykrywa podłączony odbiornik w trybie pamięci masowej USB i kopiuje plik do odpowiedniego folderu (`Garmin/CustomMaps` lub `Garmin/BirdsEye`).
+* **Format OGC GeoPackage (.gpkg):** standard otwartej bazy danych kafelków Web Mercator (EPSG:3857), obsługiwany bezpośrednio przez aplikacje mobilne GIS (QField, Mergin Maps) oraz turystyczne (Locus Map, OruxMaps, QGIS).
+* **Kafelkowany GeoTIFF z piramidami (Cloud-Optimized GeoTIFF):** po wybraniu *Arkusz > GeoTIFF* i zaznaczeniu *piramidy w GeoTIFF* powstaje plik z kafelkowaniem 256×256 i wewnętrznym łańcuchem pomniejszeń (IFD reduced overviews), który w QGIS, ArcGIS czy Avenza Maps otwiera się bez wczytywania całego obrazu do RAM.
+* **Automatyczny podział KMZ na tomy:** przy eksporcie map przekraczających limit 100 kafli odbiornika Garmin program dzieli wynik na tomy (`_tom1.kmz`, `_tom2.kmz`) bez obniżania rozdzielczości.
+* **Dopasowanie do mniejszych ekranów:** na mniejszych ekranach laptopów okno eksportu wyświetla pionowy pasek przewijania z pełnym dostępem do wszystkich opcji i przycisków.
 
 ---
 

@@ -23,7 +23,7 @@ Każde pobieranie tworzy sesję: folder z segmentami, plikami kalibracji i pliki
 
 Każda nowa sesja pobierania zapisuje się automatycznie do dedykowanego podfolderu w katalogu `download\`:
 `download\sesja_<nazwa_zbioru>_<RRRR-MM-DD_GGMMSS>\` (ścieżkę aktywnego folderu widać na pasku stanu u dołu okna).
-Dzięki temu główny katalog `download\` pozostaje czysty, a różne sesje i pobrane mapy nie mieszają się ze sobą.
+Różne sesje i pobrane mapy leżą w osobnych folderach i nie mieszają się ze sobą w głównym katalogu `download\`.
 Kiedy wznawiasz pobieranie tej samej mapy, program kontynuuje zapis w tym samym podfolderze i dociąga brakujące kafle.
 Możesz także zapisać sesję w wybranym przez siebie miejscu na dysku (*Sesja pobierania > Zapisz ustawienia sesji*).
 
@@ -56,7 +56,7 @@ Pliki `conf.txt` zapisane w starszych wersjach MapoTero wczytują się poprawnie
 
 ## Zapisywanie i wczytywanie sesji
 
-* **Automatycznie przy starcie:** program przywraca ostatnio używany folder sesji z pliku `lastsettings.txt` (lub najnowszy podfolder w `download\`, jeśli zawiera `conf.txt`), dzięki czemu możesz od razu kontynuować pracę, scalić arkusz lub wyeksportować mapę.
+* **Automatycznie przy starcie:** program przywraca ostatnio używany folder sesji z pliku `lastsettings.txt` (lub najnowszy podfolder w `download\`, jeśli zawiera `conf.txt`), więc możesz od razu kontynuować pracę, scalić arkusz albo wyeksportować mapę.
 * **Zapisz ustawienia sesji (`Alt`+`Z`):** *Sesja pobierania > Zapisz ustawienia sesji (conf.txt)* pozwala wskazać dowolny
   folder (np. `D:\Mapy\Okolica_topo\`), zapisać tam `conf.txt` (i ewentualnie `korytarz.txt`) i od razu przestawić
   program na zapis kolejnych segmentów do tego folderu. Jeśli w wybranym folderze leżą segmenty innej sesji, program
@@ -103,13 +103,13 @@ danych (np. Geoportal / GUGiK, IHPAN, PIG-PIB, OpenStreetMap) oraz data pobrania
 ## Pobieranie innego obszaru do tego samego folderu
 
 Jeśli w bieżącym folderze sesji znajdują się już segmenty innego obszaru, innej siatki, innych warstw, innego krycia lub innego
-układu współrzędnych (albo pliki bez `conf.txt`), po kliknięciu **Pobierz** program zatrzymuje się i pyta:
+układu współrzędnych (albo pliki bez `conf.txt`), po kliknięciu **Pobierz segmenty** program zatrzymuje się i pyta:
 
-* **Tak**: tworzy nowy podfolder `download\sesja_RRRR-MM-DD_GGMMSS\` i pobiera nową mapę do niego, pozostawiając poprzednie pliki nienaruszone.
+* **Tak**: tworzy nowy podfolder `download\sesja_<nazwa_zbioru>_<RRRR-MM-DD_GGMMSS>\` i pobiera nową mapę do niego, pozostawiając poprzednie pliki nienaruszone.
 * **Nie**: anuluje pobieranie, co pozwala wczytać poprzednią sesję lub zmienić folder ręcznie.
 
 {: .informacja }
-Jeżeli w folderze są tylko segmenty pobrane w dokładnie tej samej konfiguracji, kliknięcie **Pobierz** wznawia sesję
+Jeżeli w folderze są tylko segmenty pobrane w dokładnie tej samej konfiguracji, kliknięcie **Pobierz segmenty** wznawia sesję
 i dopobiera wyłącznie brakujące segmenty.
 
 ---

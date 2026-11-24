@@ -11,7 +11,7 @@ Zamiast całego prostokąta program pobiera tylko segmenty leżące w pasie wzd�
 krętej to wielokrotnie mniej danych.
 {: .fs-5 .fw-300 }
 
-**Gdzie w programie:** menu *Sesja pobierania > Obszar pobierania wzdłuż trasy (GPX, KML, KMZ)...*, odnośnik **Zmień ▾** w karcie *Obszar* pod mapą albo przeciągnięcie pliku trasy na mapę (Drag & Drop)  
+**Gdzie w programie:** menu *Sesja pobierania > Obszar pobierania wzdłuż trasy (GPX, KML, KMZ, GPKG)...*, odnośnik **Zmień ▾** w karcie *Obszar pobierania* pod mapą albo przeciągnięcie pliku trasy na mapę (Drag & Drop)  
 **Dotyczy wersji:** {{ site.wersja_programu }}
 
 <details open markdown="block">
@@ -23,12 +23,12 @@ krętej to wielokrotnie mniej danych.
 
 ## Najkrótsza droga
 
-1. Ustaw zbiór map, warstwę, segment i piksel.
-2. Wybierz *Sesja pobierania > Obszar pobierania wzdłuż trasy (GPX, KML, KMZ)...* albo po prostu przeciągnij plik trasy z Eksploratora Windows na okno programu lub mapę (Drag &amp; Drop).
+1. Ustaw zbiór map, warstwę, bok segmentu i piksel.
+2. Wybierz *Sesja pobierania > Obszar pobierania wzdłuż trasy (GPX, KML, KMZ, GPKG)...* albo przeciągnij plik trasy z Eksploratora Windows na okno programu lub mapę (Drag &amp; Drop).
 3. Kliknij **Wybierz...** i wskaż plik trasy (jeśli nie przeciągnięto go myszą).
 4. Ustaw *Szerokość pasa po każdej stronie trasy [m]* i kliknij **OK**.
-5. Sprawdź na mapie przebieg trasy (czerwona linia) oraz siatkę segmentów (kolor niebieski). W komunikacie u dołu zobaczysz liczbę wyznaczonych segmentów.
-6. Kliknij **Pobierz**.
+5. Sprawdź na mapie przebieg trasy (czerwona linia) oraz siatkę segmentów (kolor niebieski). W oknie zobaczysz liczbę wyznaczonych segmentów i oszczędność danych.
+6. Kliknij **Pobierz segmenty**.
 
 ---
 
@@ -55,7 +55,7 @@ Takie pliki generują serwisy i aplikacje turystyczne (np. Mapy.com, Komoot, Loc
 
 | Pole | Opis |
 |---|---|
-| *Plik trasy (GPX, KML, KMZ)* | przycisk **Wybierz...** wskazuje plik |
+| *Plik trasy (GPX, KML, KMZ, GPKG)* | przycisk **Wybierz...** wskazuje plik |
 | *Szerokość pasa po każdej stronie trasy [m]* | od 10 do 50 000 m (domyślnie 1000 m). Pobrane zostaną segmenty, które choć częściowo leżą w zadanej odległości od trasy |
 
 Pas mierzony jest symetrycznie od osi trasy, więc szerokość 1000 m daje korytarz o łącznej rozpiętości 2 km.
@@ -74,7 +74,7 @@ Po kliknięciu **OK** program:
 * ustawia zasięg pobierania na prostokąt obejmujący cały pas trasy (pola XY),
 * rysuje trasę czerwoną linią, a segmenty do pobrania zaznacza na niebiesko,
 * centruje i przybliża widok mapy do pełnej trasy,
-* podaje w komunikacie nazwę i długość trasy, szerokość pasa oraz liczbę segmentów (np. na powyższym zrzucie przy segmencie `500 px` i pikselu `1 m` wyznaczono `113` z `144` segmentów, czyli o `22%` mniej danych, a dla długiej trasy oszczędność może przekroczyć `70%`).
+* podaje w oknie długość trasy oraz liczbę segmentów (np. na powyższym zrzucie przy segmencie `1000 px`, pikselu `1 m` i pasie `1000 m` wyznaczono `31` z `36` segmentów, czyli `14%` mniej danych, a dla dłuższych lub ukośnych tras oszczędność przekracza `70%`).
 
 Narożniki prostokąta są oznaczone pinezkami. Uchwytów nie ma, ponieważ zasięg wynika bezpośrednio z geometrii trasy. Zmiana boku segmentu lub piksela automatycznie przelicza segmenty korytarza.
 

@@ -23,9 +23,9 @@ Który format wybrać dla której aplikacji lub urządzenia.
 
 | Format | Dla | Budowa | Uwagi |
 |---|---|---|---|
-| **KMZ: Garmin Custom Maps** | odbiorniki Garmin | kafle JPEG do 1024 × 1024 px w WGS84 | opcjonalny automatyczny podział na tomy przy ponad 100 kaflach; obsługa kolejności rysowania (z-order) |
+| **KMZ: Garmin Custom Maps** | odbiorniki Garmin | kafle JPEG do 1024 × 1024 px w WGS84 | opcjonalny automatyczny podział na tomy przy ponad 100 kaflach i obsługa kolejności rysowania (z-order) |
 | **Garmin BirdsEye (JNX)** | odbiorniki Garmin (firmware z obsługą JNX) | wielopoziomowy raster z piramidą powiększeń | brak limitu 100 kafli, kopiowany bezpośrednio do folderu `Garmin/BirdsEye` |
-| **Arkusz** (scalanie segmentów) | Avenza Maps, QField, ArcGIS, CAD, QGIS | kafelkowany GeoTIFF (256×256) z piramidami, JPEG albo PNG z georeferencją | pliki world file i `.prj`, `.map`, `.tab`, `.kml`; natychmiastowe otwieranie w aplikacjach GIS |
+| **Arkusz** (scalanie segmentów) | Avenza Maps, QField, ArcGIS, CAD, QGIS | kafelkowany GeoTIFF (256×256) z piramidami, JPEG albo PNG z georeferencją | pliki world file i `.prj`, `.map`, `.tab`, `.kml`, szybkie otwieranie w aplikacjach GIS |
 | **TrekBuddy / Locus Map** | Locus Map, TrekBuddy | archiwum `.tar` z kaflami 512 px, `.map` i `.set` | z dowolnej pobranej sesji, z nakładkami i korektą |
 | **KMZ** | Locus Map, OruxMaps, Google Earth | kafle do 1024 × 1024 px w WGS84 | brak limitu kafli, może być przezroczystą nakładką (PNG) |
 | **MBTiles** | Locus Map, OsmAnd, OruxMaps i wiele innych | baza SQLite z piramidą kafli Web Mercator 256 px | najbardziej uniwersalny, z poziomami powiększenia |
@@ -46,8 +46,8 @@ kafle JPEG o boku najwyżej 1024 px i ograniczoną liczbę kafli (zazwyczaj do 1
 * *Maksymalna liczba kafli*: od 1 do 1000, domyślnie **100**.
 * **Automatyczny podział na tomy:** jeśli mapa w pełnej rozdzielczości wymaga więcej niż 100 kafli, włącz opcję podziału na tomy. Program utworzy spójne części (`_tom1.kmz`, `_tom2.kmz` itd.) bez konieczności sztucznego obniżania rozdzielczości czy obcinania terenu.
 * **Kolejność rysowania (z-order):** możesz określić warstwę wyświetlania mapy w odbiorniku (np. pod wektorową siatką dróg lub na wierzchu).
-* **Filtr MIP dla Garmina:** opcja korekcji kontrastu, nasycenia i ostrości splotowej Laplaciana 3×3, specjalnie zoptymalizowana pod kątem ekranów Memory-In-Pixel, dzięki czemu mapa zachowuje maksymalną czytelność w ostrym słońcu.
-* **Kopiowanie przez USB:** przycisk **Kopiuj na Garmina...** po zakończeniu eksportu automatycznie wykrywa podłączony dysk odbiornika i przenosi plik do folderu `Garmin/CustomMaps`.
+* **Korekta obrazu (filtr MIP dla Garmina):** opcja korekcji kontrastu, nasycenia i ostrości zoptymalizowana pod kątem ekranów Memory-In-Pixel, żeby mapa pozostała czytelna w ostrym słońcu.
+* **Kopiowanie przez USB:** po wyeksportowaniu `.kmz` możesz kliknąć **Wyślij na telefon...** (gdy Garmin jest podłączony, program zapyta o kopiowanie na urządzenie) albo wybrać z menu *Narzędzia > Kopiuj mapę do Garmina (USB)...*, żeby zapisać plik w folderze `Garmin/CustomMaps`.
 
 ---
 
@@ -57,15 +57,15 @@ Format dedykowany dla odbiorników turystycznych Garmin (np. GPSMAP, eTrex, Mont
 
 * **Brak limitu 100 kafli:** pozwala wyeksportować mapę obejmującą całe pasma górskie lub województwa w jednym pliku (do 50 000 kafli na plik).
 * **Wielopoziomowa piramida:** zawiera automatycznie wyliczone poziomy powiększenia od przeglądowego do szczegółowego.
-* Przycisk **Kopiuj na Garmina...** automatycznie umieszcza plik `.jnx` w katalogu `Garmin/BirdsEye` w pamięci urządzenia lub na karcie microSD.
+* **Kopiowanie przez USB:** kliknięcie **Wyślij na telefon...** po eksporcie `.jnx` (lub polecenie *Narzędzia > Kopiuj mapę do Garmina (USB)...*) zapisuje plik bezpośrednio w katalogu `Garmin/BirdsEye` w pamięci urządzenia lub na karcie microSD.
 
 ---
 
 ## Arkusz (scalanie segmentów i kafelkowany GeoTIFF)
 
-Jeden plik obrazu z georeferencją w układzie sesji – ten sam format otwiera polecenie *Narzędzia > Scalanie segmentów*:
+Jeden plik obrazu z georeferencją w układzie sesji (ten sam tryb otwiera polecenie *Narzędzia > Scalanie segmentów*):
 
-* **Kafelkowany GeoTIFF z piramidami (Cloud-Optimized GeoTIFF):** pliki tworzone są z kafelkowaniem wewnętrznym 256×256 px i łańcuchem podkatalogów pomniejszeń (IFD reduced overviews). Dzięki temu wielogigabajtowe arkusze otwierają się w aplikacjach mobilnych (Avenza Maps) i stacjonarnych (QGIS, ArcGIS) natychmiastowo, bez wczytywania całego pliku do pamięci RAM.
+* **Kafelkowany GeoTIFF z piramidami (Cloud-Optimized GeoTIFF):** z zaznaczoną opcją *piramidy w GeoTIFF* pliki powstają z kafelkowaniem wewnętrznym 256×256 px i łańcuchem podkatalogów pomniejszeń (IFD reduced overviews). Wielogigabajtowe arkusze otwierają się w aplikacjach mobilnych (Avenza Maps) i stacjonarnych (QGIS, ArcGIS) bez wczytywania całego obrazu naraz do pamięci RAM.
 * **Formaty zapisu:** GeoTIFF bezstratny (kompresja Deflate), GeoTIFF z kompresją JPEG, tradycyjny JPEG (do 65 500 px na bok) albo PNG z przezroczystością.
 * **Zastosowanie:** Avenza Maps, QField, QGIS, ArcGIS i programy CAD (AutoCAD, MicroStation, BricsCAD, ZWCAD).
 * **Pliki towarzyszące:** world file i `.prj`, kalibracja OziExplorer `.map`, MapInfo `.tab`, Google Earth `.kml`.

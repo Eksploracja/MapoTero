@@ -20,11 +20,11 @@ Kilka pojęć, bez których trudno świadomie dobrać ustawienia: segment, pikse
 
 ## Zbiór map i warstwa
 
-**Zbiór map** to plik tekstowy w folderze `warstwy`, który opisuje jeden serwer map: jego adres i listę dostępnych warstw. Zbiory to np. *skany_map_topograficznych*, *ortofotomapa*, *geologiczna_50_SMGP*. W drzewie *Wybierz mapy* warstwy są pogrupowane tematycznie i mają czytelne nazwy (np. *Mapy topograficzne > Skany map topograficznych GUGiK > 1:25 000, układ 1965*).
+**Zbiór map** to plik tekstowy w folderze `warstwy`, który opisuje jeden serwer map: jego adres i listę dostępnych warstw. Zbiory to np. *skany_map_topograficznych*, *ortofotomapa*, *geologiczna_50_SMGP*. W drzewie *Warstwy do pobrania* warstwy są pogrupowane tematycznie i mają czytelne nazwy (np. *Mapy topograficzne > Skany map topograficznych GUGiK > 1:25 000, układ 1965*).
 
 **Warstwa** to jedna mapa udostępniana przez serwer, np. *Raster_25_1965* (mapa topograficzna 1:25 000) w zbiorze skanów map topograficznych. Przy każdej warstwie zbiór podaje zalecany rozmiar piksela.
 
-W oknie głównym możesz wybrać **kilka warstw naraz** (do 12 pozycji) i ułożyć z nich kanapkę w panelu *Wybrane warstwy oraz ich kolejność*:
+W oknie głównym możesz wybrać **kilka warstw naraz** (do 12 pozycji) i ułożyć z nich kanapkę w panelu *Wybrane warstwy*:
 
 * **Warstwa nr 1** jest podkładem na samym spodzie, a warstwy o wyższych numerach (2, 3…) nakładają się na nią.
 * Możesz łączyć warstwy z tego samego serwera albo z zupełnie różnych źródeł (np. ortofotomapę WMTS, granice działek z WMS i szlaki turystyczne z kafli XYZ).

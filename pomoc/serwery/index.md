@@ -13,7 +13,7 @@ Własne zbiory map z dowolnych serwerów WMS, WMTS oraz kafelkowych XYZ i TMS: p
 **Gdzie w programie:** przycisk **+ Serwer…** w nagłówku karty katalogu map lub menu *Narzędzia > Dodaj nowy serwer WMS / WMTS...*  
 **Dotyczy wersji:** {{ site.wersja_programu }}
 
-Dodane zbiory trafiają do drzewa *Wybierz mapy* w gałęzi **Dodane serwery** (chyba że dopiszesz je ręcznie do `warstwy\katalog.txt`).
+Dodane zbiory trafiają do drzewa *Warstwy do pobrania* w gałęzi **Dodane serwery** (chyba że dopiszesz je ręcznie do `warstwy\katalog.txt`).
 
 * **[Kreator serwerów WMS, WMTS, XYZ i TMS](kreator/)**: wygodne wyszukiwanie usług we wbudowanym katalogu oraz oficjalnych wykazach (Geoportal, EZiUDP, powiaty i gminy), podgląd próbnego kafelka i zapis bez znajomości składni plików.
 * **[Plik zbioru map](plik-zbioru-map/)**: budowa plików w folderze `warstwy\` (klasyczny format tekstowy oraz nowy format JSON z dodatkowymi opcjami dla XYZ/TMS).

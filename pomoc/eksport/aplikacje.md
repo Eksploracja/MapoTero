@@ -25,7 +25,7 @@ typowe. Jeśli coś wygląda inaczej, sprawdź pomoc aplikacji, hasło „mapy o
 
 ## Przeniesienie pliku do telefonu
 
-* **Bezpośrednio przez Wi-Fi i kod QR (najwygodniej):** po wygenerowaniu mapy w oknie *Eksport mapy* kliknij przycisk **Wyślij na telefon...** (funkcja dostępna także w menu *Narzędzia > Prześlij mapę na telefon (Wi-Fi)...*). Program uruchamia lokalny micro-serwer i wyświetla na ekranie duży kod QR. Skieruj aparat telefonu na ekran, otwórz wyświetlony link i pobierz plik bezpośrednio do pamięci urządzenia z pełną prędkością domowej sieci Wi-Fi — bez szukania kabla USB, bez logowania i bez przesyłania danych przez chmurę (zob. [opis narzędzia](../../narzedzia/#przesyłanie-mapy-na-telefon-przez-wi-fi-i-kod-qr)).
+* **Bezpośrednio przez Wi-Fi i kod QR (najwygodniej):** po wygenerowaniu mapy w oknie *Eksport mapy* kliknij przycisk **Wyślij na telefon...** (funkcja dostępna także w menu *Narzędzia > Prześlij mapę na telefon (Wi-Fi)...*). Program uruchamia lokalny serwer i wyświetla na ekranie kod QR. Skieruj aparat telefonu na ekran, otwórz wyświetlony link i pobierz plik bezpośrednio do pamięci urządzenia przez domową sieć Wi-Fi, bez kabla USB, bez logowania i bez chmury (zob. [opis narzędzia](../../narzedzia/#przesyłanie-mapy-na-telefon-przez-wi-fi-i-kod-qr)).
 * **Kabel USB:** podłącz telefon do komputera, wybierz w telefonie tryb *Przesyłanie plików (MTP)* i skopiuj plik do wskazanego folderu aplikacji.
 * **Chmura lub komunikator:** prześlij plik na telefon przez własną chmurę (Dysk Google, OneDrive, Dropbox, Nextcloud) albo komunikator i otwórz go w aplikacji poleceniem *Otwórz za pomocą* / *Udostępnij*.
 
@@ -119,7 +119,7 @@ Dla odbiorników turystycznych Garmin (seria GPSMAP, Oregon, Montana, eTrex, Alp
 
 ### Kopiowanie bezpośrednie przez USB w programie
 
-W oknie *Eksport mapy* po wygenerowaniu pliku KMZ lub JNX kliknij przycisk **Kopiuj na Garmina przez USB...** (dostępny także w menu *Narzędzia*). Program:
+Po wyeksportowaniu pliku `.jnx` lub `.kmz` w oknie *Eksport mapy* kliknij **Wyślij na telefon...** (dla `.jnx` otwiera od razu kopiowanie na Garmina, a dla `.kmz` przy podłączonym urządzeniu proponuje wysyłkę na Garmina lub przez Wi-Fi) albo otwórz w dowolnym momencie menu *Narzędzia > Kopiuj mapę do Garmina (USB)...*. Program:
 1. Automatycznie wykrywa podłączone urządzenia Garmin oraz włożone do nich karty microSD.
 2. Sprawdza dostępną pamięć urządzenia.
 3. Kopiuje plik do właściwego folderu docelowego (`Garmin/CustomMaps` dla plików KMZ lub `Garmin/BirdsEye` dla plików JNX) z zabezpieczeniem przed zapełnieniem dysku.
@@ -128,7 +128,7 @@ W oknie *Eksport mapy* po wygenerowaniu pliku KMZ lub JNX kliknij przycisk **Kop
 
 | Format | Folder docelowy w urządzeniu / karcie SD | Cechy i ograniczenia |
 |---|---|---|
-| **JNX (Garmin BirdsEye)** | `Garmin/BirdsEye` | **Brak limitu 100 kafli** — jedna mapa może obejmować cały region lub województwo. Wyświetla się pod nazwą produktu w menu *Ustawienia mapy > Informacje o mapie*. Wymaga odbiornika z obsługą BirdsEye (w nowszych modelach z oprogramowaniem patched firmware dla niepodpisanych plików JNX). |
+| **JNX (Garmin BirdsEye)** | `Garmin/BirdsEye` | **Brak limitu 100 kafli**, więc jedna mapa może obejmować cały region lub województwo. Wyświetla się pod nazwą produktu w menu *Ustawienia mapy > Informacje o mapie*. Wymaga odbiornika z obsługą BirdsEye (w nowszych modelach z oprogramowaniem patched firmware dla niepodpisanych plików JNX). |
 | **KMZ dla Garmin** | `Garmin/CustomMaps` | Standardowy format Garmin Custom Maps obsługiwany fabrycznie przez wszystkie modele. Gdy mapa przekracza limit 100 kafli, program automatycznie dzieli ją na tomy (`…_tom1.kmz`, `…_tom2.kmz` itd.). |
 
 Jeśli kopiujesz plik ręcznie:
@@ -137,7 +137,7 @@ Jeśli kopiujesz plik ręcznie:
 3. Bezpiecznie odłącz urządzenie i włącz mapę w menu mapy odbiornika (*Ustawienia mapy > Wybierz mapę*).
 
 {: .wskazowka }
-Dla odbiorników Garmin z ekranami transreflektywnymi warto w oknie eksportu włączyć opcję **Filtr MIP dla Garmin (podgląd MIP)** — wzmacnia ona kontrast i nasycenie barw, dzięki czemu podkład pozostaje krystalicznie czytelny w ostrym, bezpośrednim słońcu. Zob. [Filtr MIP](../../narzedzia/#podgląd-mip-ekrany-garmin-memory-in-pixel).
+Dla odbiorników Garmin z ekranami transreflektywnymi warto w oknie eksportu włączyć opcję **Korekta obrazu (filtr MIP, ostrość, kontrast)** i wybrać profil *Ekran w słońcu / Garmin MIP*. Zwiększa ona kontrast i nasycenie barw, co wyraźnie poprawia czytelność podkładu w ostrym słońcu. Zob. [Podgląd MIP](../../narzedzia/#podgląd-mip-ekrany-garmin-memory-in-pixel).
 
 ---
 

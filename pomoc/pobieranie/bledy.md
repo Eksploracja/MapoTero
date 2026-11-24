@@ -19,10 +19,10 @@ Co oznaczają nieudane, puste lub białe segmenty i jak je naprawić.
 {:toc}
 </details>
 
-## Najpierw: kliknij Pobierz jeszcze raz
+## Najpierw: kliknij Pobierz segmenty jeszcze raz
 
 Większość błędów jest chwilowa: serwer był przeciążony, połączenie się zerwało. Po komunikacie
-*Nie udało się ściągnąć wszystkich segmentów…* zwykle wystarczy po chwili kliknąć **Pobierz** jeszcze raz.
+*Nie udało się ściągnąć wszystkich segmentów…* zwykle wystarczy po chwili kliknąć **Pobierz segmenty** jeszcze raz.
 Program pobierze tylko brakujące segmenty.
 
 ---
@@ -89,9 +89,7 @@ Segment pobrany bez błędów sieciowych, ale pozbawiony treści graficznej, wyn
 
 ## Puste segmenty
 
-Biały segment (np. poza zasięgiem danych serwera) program od razu pobiera drugi raz; drugi biały wynik przyjmuje jako
-prawdziwy obraz. Eksport do formatów kafelkowych nie zapisuje pustych kafli, a [obszar wzdłuż trasy](../../obszar/korytarz/)
-nie pobiera segmentów poza pasem. Dawne narzędzie *Usuwanie pustych segmentów* zostało usunięte w wersji 3.19.
+Biały segment (np. poza zasięgiem danych serwera) program od razu pobiera drugi raz, a jeśli wynik nadal jest pusty, przyjmuje go jako prawdziwy obraz. Eksport do formatów kafelkowych nie zapisuje pustych kafli, a [obszar wzdłuż trasy](../../obszar/korytarz/) nie pobiera segmentów poza pasem. Dawne narzędzie *Usuwanie pustych segmentów* zostało usunięte w wersji 3.19.
 
 ---
 

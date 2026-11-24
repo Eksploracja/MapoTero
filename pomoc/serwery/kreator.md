@@ -11,7 +11,7 @@ Kreator pobiera opis usługi (`GetCapabilities`, `TileJSON`, `tilemapresource.xm
 próbkę obrazu i zapisuje nowy zbiór map na liście programu.
 {: .fs-5 .fw-300 }
 
-**Gdzie w programie:** przycisk **+ Serwer…** w nagłówku karty katalogu map (prawy panel) lub menu *Narzędzia > Dodaj nowy serwer WMS / WMTS...*  
+**Gdzie w programie:** przycisk **+ Serwer…** w nagłówku karty *Warstwy do pobrania* (prawy panel) lub menu *Narzędzia > Dodaj nowy serwer WMS / WMTS...*  
 **Dotyczy wersji:** {{ site.wersja_programu }}
 
 <details open markdown="block">
@@ -61,7 +61,7 @@ zapamiętany wykaz przyciskiem **Odśwież z internetu**.
 
 Jeśli chcesz dodać serwer spoza katalogu:
 
-* kliknij przycisk **+ Wpisz własny adres URL…** pod listą katalogu, **albo**
+* kliknij przycisk **+ Wpisz własny adres URL (WMS / WMTS / XYZ)...** pod listą katalogu, **albo**
 * po prostu **wklej adres** zaczynający się od `http://` lub `https://` w pole wyszukiwania katalogu. Program automatycznie przełączy widok na formularz adresu.
 
 W polu adresu możesz podać:
@@ -76,7 +76,7 @@ Dla starszych serwerów powiatowych i gminnych z nieaktualnym certyfikatem zazna
 
 ## Krok 2: Wybór warstw, parametry i próbka
 
-Po kliknięciu **Połącz i wybierz warstwy** w katalogu (lub **Pobierz listę warstw** w widoku adresu) kreator analizuje usługę i otwiera panel konfiguracji warstw. Przycisk **← Wróć do listy usług** pozwala w każdej chwili wrócić do katalogu.
+Po kliknięciu **Dalej: pobierz warstwy →** w katalogu (lub **Pobierz listę warstw** w widoku adresu) kreator analizuje usługę i otwiera panel konfiguracji warstw. Przycisk **← Wróć do listy usług** pozwala w każdej chwili wrócić do katalogu.
 
 * pole **Filtruj warstwy** zawęża listę według nazwy technicznej lub tytułu warstwy,
 * zaznacz wybrane warstwy (albo użyj przycisków **Zaznacz wszystkie** / **Odznacz wszystkie**).
@@ -118,7 +118,7 @@ Przycisk **Pomoc** w prawym dolnym rogu okna (oraz klawisz <kbd>F1</kbd>) otwier
 2. Kliknij **Dodaj zbiór do MapoTero**.
 
 Program zapisze plik zbioru w folderze `warstwy\` (obok `MapoTero.exe`, a przy braku uprawnień do zapisu w folderze `%LocalAppData%\MapoTero\warstwy`),
-dopisze go do `warstwy.txt` i od razu pokaże w drzewie *Wybierz mapy* w grupie **Dodane serwery**.
+dopisze go do `warstwy.txt` i od razu pokaże w karcie *Warstwy do pobrania* w grupie **Dodane serwery**.
 Warstwy zapisane kreatorem zachowują w grupie *Dodane serwery* oraz na liście wybranych warstw swoje czytelne nazwy
 pobrane z metadanych serwera. Jeśli usługa wymagała dodatkowych parametrów (XYZ/TMS, subdomeny, limit zapytań, nagłówek referer),
 plik zbioru zostanie automatycznie sformatowany jako UTF-8 JSON.

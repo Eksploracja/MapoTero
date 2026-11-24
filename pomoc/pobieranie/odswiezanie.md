@@ -18,7 +18,7 @@ Ponowne pobranie wszystkich segmentów sesji, np. gdy serwer udostępnił nowsz�
 * Serwer opublikował nowszą wersję mapy (nowa ortofotomapa, aktualizacja działek, nowa edycja mapy tematycznej).
 * Część segmentów jest uszkodzona albo pochodzi z czasu awarii serwera, ale nie wiadomo które.
 
-Do zwykłego dokończenia przerwanego pobierania odświeżanie nie jest potrzebne. Wystarczy kliknąć *Pobierz*
+Do zwykłego dokończenia przerwanego pobierania odświeżanie nie jest potrzebne. Wystarczy kliknąć **Pobierz segmenty**
 ([Wznawianie](../przebieg/#wznawianie)).
 
 ---

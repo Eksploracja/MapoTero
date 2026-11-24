@@ -6,10 +6,10 @@ nav_order: 17
 # Katalog zbiorów map
 {: .no_toc }
 
-Opis 43 zbiorów map dostarczanych z programem: skąd pochodzą, w jakich grupach drzewa je znaleźć, jakiego są typu (WMS / WMTS / XYZ) i jaki mają zalecany rozmiar piksela.
+Opis zbiorów map dostarczanych z programem (66 plików w folderze `warstwy`): skąd pochodzą, w jakich grupach drzewa je znaleźć, jakiego są typu (WMS / WMTS / XYZ) i jaki mają zalecany rozmiar piksela.
 {: .fs-5 .fw-300 }
 
-**Gdzie w programie:** drzewo *Wybierz mapy* w oknie głównym  
+**Gdzie w programie:** drzewo *Warstwy do pobrania* w oknie głównym  
 **Dotyczy wersji:** {{ site.wersja_programu }}
 
 <details open markdown="block">
@@ -21,7 +21,7 @@ Opis 43 zbiorów map dostarczanych z programem: skąd pochodzą, w jakich grupac
 
 ## Jak czytać katalog
 
-W drzewie *Wybierz mapy* warstwy są pogrupowane tematycznie przez plik katalogu `warstwy\katalog.txt` (UTF-8) i opatrzone czytelnymi nazwami zamiast surowych nazw plików. Wiersz `> Grupa` otwiera grupę, `>> Podgrupa` tworzy podgrupę, a wiersz `zbiór | warstwa | nazwa` dodaje do niej warstwę ze zbioru map, np.:
+W drzewie *Warstwy do pobrania* warstwy są pogrupowane tematycznie przez plik katalogu `warstwy\katalog.txt` (UTF-8) i opatrzone czytelnymi nazwami zamiast surowych nazw plików. Wiersz `> Grupa` otwiera grupę, `>> Podgrupa` tworzy podgrupę, a wiersz `zbiór | warstwa | nazwa` dodaje do niej warstwę ze zbioru map, np.:
 
 ```text
 > Przyroda i środowisko

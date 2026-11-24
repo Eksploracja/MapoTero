@@ -84,20 +84,21 @@ Po prawej stronie okna znajduje się panel **Symulacja i podgląd zoomu**:
 
 ## Parametry pliku
 
-* **Format bazy (Typ):**
+* **Format pliku:**
   * **MBTiles (`.mbtiles`):** klasyczna baza kafelkowa dla Locus Map, OsmAnd, OruxMaps, Guru Maps,
-  * **OGC GeoPackage (`.gpkg`):** nowoczesna otwarta baza kafelkowa OGC, standard dla programów mobilnego GIS (QField, Mergin Maps, SW Maps) i QGIS.
-* **Plik wynikowy** (domyślnie `mapa_wielowarstwowa_RRRRMMDD_GGMM.mbtiles` lub `.gpkg` w `download\`) i przycisk **Pokaż w folderze** otwierający plik w Eksploratorze.
-* **Nazwa mapy**: nazwa widoczna na liście map w aplikacji mobilnej.
+  * **OGC GeoPackage (`.gpkg`):** otwarta baza kafelkowa OGC, standard dla programów mobilnego GIS (QField, Mergin Maps, SW Maps) i QGIS.
+* **Plik wynikowy** (domyślnie `mapa_wielowarstwowa_RRRRMMDD_GGMM.mbtiles` lub `.gpkg` w `download\`) oraz przyciski **Wybierz...** i **Pokaż w folderze**.
+* **Nazwa mapy:** nazwa widoczna na liście map w aplikacji mobilnej.
 * **Format kafli:**
   * *Smart Hybrid (JPG + PNG przezroczyste)* *(zalecany)*: kafle pełne zapisuje jako lekki JPEG, a kafle z przezroczystością lub na brzegach jako PNG.
   * *Tylko JPEG*: najmniejszy plik, ale z białym tłem w miejscach bez danych.
   * *Tylko PNG*: bezstratny zapis z pełną przezroczystością i znacznie większym rozmiarem.
-* **Jakość JPEG (%)**: od `10` do `100` (domyślnie `85`).
+* **Jakość JPEG (%):** od `10` do `100` (domyślnie `85`).
 * **Szybka piramida w pasmach warstw** *(domyślnie włączone)*: przyspiesza zapis nawet o ok. 70%, generując mniejsze poziomy
   przez szybkie dwukrotne zmniejszanie tam, gdzie aktywna jest ta sama warstwa.
-* **Wypełnij brakujące poziomy powiększeń przeskalowaną warstwą niższą**: zapobiega „dziurom” w zoomie, jeśli między zakresami warstw została luka.
-* **Przycisk Rozłączne zakresy:** automatycznie dzieli poziomy powiększeń pomiędzy dodane warstwy, by przełączały się płynnie bez nakładania.
+* **Wypełnij brakujące poziomy powiększeń przeskalowaną warstwą niższą:** zapobiega „dziurom” w zoomie, jeśli między zakresami warstw została luka.
+* **Korekta obrazu** (i przycisk **Korekta obrazu...**): poprawia kontrast, ostrość, gamma lub profil Garmin MIP na etapie zapisu gotowych kafli.
+* **Przyciski zarządzania listą warstw:** **Usuń**, **Wyczyść** (usuwa wszystkie warstwy z tabeli) oraz **Rozłączne skale** (automatycznie dzieli poziomy powiększeń między dodane warstwy, żeby płynnie przełączały się bez nakładania).
 
 ---
 

@@ -19,7 +19,7 @@ Instalacja programu, miejsca zapisu danych i samouczek, który prowadzi od puste
 | [Pierwsza mapa krok po kroku](pierwsza-mapa/) | Praktyczny samouczek: od zaznaczenia wycinka terenu po gotowy plik w telefonie oraz arkusz GeoTIFF do QGIS |
 
 {: .wskazowka }
-Chcesz od razu przygotować gotową mapę w kilka chwil? Użyj [Szybkiego kreatora mapy](../narzedzia/#szybki-kreator-mapy) (<kbd>Ctrl</kbd>+<kbd>K</kbd> lub przycisk różdżki pod mapą) – w 4 prostych krokach wybierzesz urządzenie, obszar, styl i zapiszesz plik. Aby poznać klasyczny, pełny tryb pracy w oknie głównym, przejdź do samouczka [Pierwsza mapa krok po kroku](pierwsza-mapa/).
+Chcesz od razu przygotować gotową mapę w kilka chwil? Użyj [Szybkiego kreatora mapy](../narzedzia/#szybki-kreator-mapy) (<kbd>Ctrl</kbd>+<kbd>K</kbd> lub przycisk **Szybki kreator…** na pasku nad mapą), żeby w 4 krokach wybrać urządzenie, obszar, szablon i zapisać plik. Aby poznać klasyczny tryb pracy w oknie głównym, przejdź do samouczka [Pierwsza mapa krok po kroku](pierwsza-mapa/).
 
 Przed ręczną zmianą parametrów zaawansowanych warto rzucić okiem na [Pojęcia podstawowe](../pojecia/), gdzie wyjaśniono dobór rozmiaru piksela i kanapkę warstw.
 

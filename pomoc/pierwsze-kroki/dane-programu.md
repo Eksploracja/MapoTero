@@ -48,7 +48,7 @@ Folder bieżącej sesji jest widoczny na pasku stanu u dołu okna głównego.
 Zawartość folderu pojedynczej sesji pobierania opisuje rozdział [Sesje pobierania](../../sesje/).
 
 {: .uwaga }
-Przycisk *usuń wszystkie pobrane mapy* w oknie głównym kasuje **cały folder `download`** wraz ze wszystkimi sesjami. Mapy, które chcesz zachować, przenieś wcześniej poza folder `download` lub wykonaj ich kopię zapasową.
+Przycisk *Usuń pobrane* w zakładce **Sesja** (oraz polecenie *Usuń pobrane pliki bieżącej sesji* w menu *Sesja pobierania*) przenosi do Kosza systemu Windows wyłącznie pliki z folderu bieżącej sesji, a nie cały katalog `download`. Mapy zapisane w osobnych podfolderach sesji pozostają nienaruszone.
 
 ---
 

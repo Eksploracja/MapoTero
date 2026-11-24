@@ -27,22 +27,22 @@ Opis każdego elementu nowoczesnego okna głównego: paska narzędziowego, mapy 
 
 | Nr | Element okna | Do czego służy |
 |---|---|---|
-| **1** | Pasek menu | menu *Sesja pobierania* (nowa sesja, zapis/odczyt `conf.txt`, obszar wzdłuż trasy i z poligonu, odświeżanie mapy), menu *Narzędzia* (szybki kreator mapy, wyszukiwarka miejscowości i działek ULDK, konwerter OziExplorer, konwerter GeoTIFF, profil wysokościowy NMT, scalanie i eksport mapy, eksport do CAD, korekta folderu, transfer Wi-Fi i USB Garmin, okno Ustawienia) oraz menu *Pomoc* (podręcznik online, galeria warstw map online, wbudowana instrukcja, zgłaszanie błędów, folder danych) |
-| **2** | Pasek narzędziowy nad mapą | trzy logiczne grupy: **Nowa sesja** i **🪄 Szybki kreator...** (<kbd>Ctrl</kbd>+<kbd>K</kbd>), przełącznik **Zaznacz obszar** z zintegrowaną wyszukiwarką **🔍 Szukaj miejsca lub działki...** (<kbd>Ctrl</kbd>+<kbd>F</kbd> / <kbd>Ctrl</kbd>+<kbd>D</kbd>), a po prawej przycisk **Galeria warstw**, zwijanie panelu oraz **📁 Folder pobrań** |
-| **3** | Mapa podglądu | interaktywny podkład (OpenStreetMap / Google / Bing) do wyboru obszaru, siatka segmentów z uchwytami regulacji, powiększone przyciski **+** i **-** w narożniku oraz podziałka liniowa w prawym dolnym rogu mapy |
-| **4** | Drzewo *Wybierz mapy* | tematyczny katalog zbiorów i warstw, szybki filtr *szukaj warstwy…* (działa bez polskich znaków i wielkości liter), przyciski rozwijania `⊞`/`⊟` oraz przycisk `+ Serwer…` otwierający kreator usług WMS/WMTS/XYZ/TMS |
-| **5** | *Wybrane warstwy oraz ich kolejność* | stos wybranych warstw (do 12) z dopiskiem *↑ na wierzchu*; regulacja `Krycie %` suwakiem bezpośrednio w wierszu zaznaczonej warstwy, szybkie usuwanie `✕`, zmiana kolejności przeciąganiem myszą lub <kbd>Ctrl</kbd>+<kbd>↑</kbd>/<kbd>↓</kbd> oraz przycisk **Mikser…** |
-| **6** | Karta *Obszar* pod mapą | wymiary terenu (np. 8 × 8 km), powierzchnia w km² i liczba segmentów siatki; kliknięcie wymiaru pokazuje obszar na mapie, a odnośnik **Zmień ▾** otwiera menu: *Pokaż na mapie*, *Zaznacz na mapie*, *Wpisz współrzędne…*, *Obszar wzdłuż trasy…* oraz *Obszar z poligonu…* |
-| **7** | Karta *Parametry segmentów* | podsumowanie parametrów pobierania (układ współrzędnych np. PL-1992, bok segmentu np. 2000 px, format JPEG, terenowy rozmiar piksela np. 2,00 m/pix); odnośnik **Zmień…** pozwala szybko dostosować te wartości |
-| **8** | Karta *Stan sesji* i pobieranie | dynamiczny przycisk **Pobierz segmenty** (wyróżniony kolorem, gdy sesja jest gotowa do startu), w trakcie pracy **Przerwij pobieranie**, a po skompletowaniu segmentów **Eksportuj pobraną mapę…**; ikona stanu pokazuje strzałkę, łuk postępu, zielony znak ✓ lub czerwony wykrzyknik |
-| **9** | Zakładki prawego panelu | trzy zakładki: **Podgląd** (próbka złożenia warstw na żywo ze środka siatki, powiększenie %, przyciski `1:1`, `-`, `+`, `Dopasuj` oraz `Mikser warstw i krycia...`), **Komunikaty** (dziennik zdarzeń; czerwona z licznikiem przy błędach) oraz **Sesja** (szczegóły techniczne i ścieżki) |
-| **10** | Pasek stanu | układ współrzędnych sesji, dokładne współrzędne kursora w tym układzie (X = północ, Y = wschód), przybliżona skala mapy na ekranie oraz nazwa sesji z kolorową diodą stanu (kliknięcie otwiera zakładkę komunikatów) |
+| **1** | Pasek menu | menu *Sesja pobierania* (<kbd>Alt</kbd>+<kbd>S</kbd>), menu *Narzędzia* oraz menu *Pomoc* (pełna lista poleceń i skrótów poniżej) |
+| **2** | Górny pasek narzędzi | trzy grupy: **Nowa sesja** i **Szybki kreator…** (<kbd>Ctrl</kbd>+<kbd>K</kbd>), **Zaznacz obszar** i wyszukiwarka **Szukaj miejsca lub działki…** (<kbd>Ctrl</kbd>+<kbd>F</kbd>), **Folder pobrań**, a po prawej lista **Podkład** (OpenStreetMap, Google Maps, Bing) |
+| **3** | Mapa podglądu | interaktywny podkład orientacyjny do wyboru obszaru, siatka segmentów z białymi uchwytami regulacji, przyciski **+** / **-** oraz podziałka liniowa w prawym dolnym rogu |
+| **4** | Karta *Warstwy do pobrania* | tematyczny katalog zbiorów i warstw, filtr *Szukaj warstwy…*, przycisk **Zwiń / Rozwiń**, ikona galerii warstw online oraz przycisk **+ Serwer…** |
+| **5** | Karta *Wybrane warstwy* | stos wybranych warstw (do 12), pole liczbowe krycia (`%`) w wierszu wybranej warstwy, krzyżyk `✕` do usuwania, zmiana kolejności myszą lub <kbd>Ctrl</kbd>+<kbd>↑</kbd>/<kbd>↓</kbd> oraz przycisk **Mikser…** |
+| **6** | Karta *Obszar pobierania* | wymiary terenu (np. `8 × 8 km`) i liczba segmentów. Kliknięcie wymiarów wraca do siatki na mapie, a **Zmień ▾** otwiera menu metod wyznaczania obszaru |
+| **7** | Karta *Parametry segmentów* | rozmiar piksela (np. `2 m/px`), układ współrzędnych, bok segmentu i format plików. Odnośnik **Zmień…** rozwija panel edycji parametrów |
+| **8** | Karta *Stan sesji* | przycisk **Pobierz segmenty** (w trakcie pracy **Przerwij pobieranie**), a po skompletowaniu segmentów **Eksportuj pobraną mapę…**. Ikona i kolor sygnalizują stan sesji |
+| **9** | Zakładki prawego panelu | trzy zakładki: **Podgląd** (próbka kompozycji z przyciskami `-`, `+`, `Dopasuj`, odświeżaniem i powiększeniem w %), **Komunikaty** (dziennik zdarzeń i błędów) oraz **Sesja** (szczegóły folderu sesji i przycisk *Usuń pobrane*) |
+| **10** | Pasek stanu | układ współrzędnych sesji, pozycja kursora (`X`, `Y`), przybliżona skala mapy oraz aktywna sesja z kolorową diodą stanu |
 
 Układ okna dzieli się na dwie główne kolumny:
-* **po lewej**: mapa podglądu z górnym paskiem narzędzi oraz trzema ergonomicznymi kartami pod mapą (*Obszar*, *Parametry segmentów*, *Stan sesji*),
-* **po prawej**: regulowany panel *Dane źródłowe* z katalogiem map, listą wybranych warstw i zakładkami podglądu/komunikatów. Wysokość sekcji w prawym panelu można płynnie regulować, przeciągając uchwyt `═` między kartami (dwuklik przywraca domyślny podział).
+* **po lewej**: mapa podglądu z górnym paskiem narzędzi oraz trzema kartami pod mapą (*Obszar pobierania*, *Parametry segmentów*, *Stan sesji*),
+* **po prawej**: regulowany panel z kartami *Warstwy do pobrania*, *Wybrane warstwy* i dolnymi zakładkami. Szerokość prawego panelu i wysokość jego sekcji można płynnie regulować, przeciągając dzielniki (dwuklik przywraca domyślny podział).
 
-Program uruchamia się domyślnie w pełnym oknie zmaksymalizowanym, zapewniając optymalny obszar roboczy.
+Program uruchamia się domyślnie w pełnym oknie zmaksymalizowanym.
 
 ---
 
@@ -51,24 +51,28 @@ Program uruchamia się domyślnie w pełnym oknie zmaksymalizowanym, zapewniają
 | Menu | Polecenie | Skrót | Opis |
 |---|---|---|---|
 | **Sesja pobierania** | Nowa sesja | | czyści wybrane warstwy, zasięg, zaznaczenie i siatkę, obszar wzdłuż trasy i kontur działki, przywracając domyślny stan programu (zob. [Sesje pobierania](../sesje/)) |
+| | Otwórz folder pobrań | | otwiera w Eksploratorze Windows bieżący folder sesji z pobranymi segmentami |
+| | Pokaż siatkę na mapie | | włącza lub ukrywa siatkę segmentów na mapie podglądu |
 | | Zapisz ustawienia sesji (conf.txt) | <kbd>Alt</kbd>+<kbd>Z</kbd> | zapisuje parametry bieżącej sesji we wskazanym folderze. Wybrany folder staje się folderem sesji |
 | | Wczytaj ustawienia sesji (conf.txt) | <kbd>Alt</kbd>+<kbd>W</kbd> | wczytuje sesję ze wskazanego folderu (wymaga pliku `conf.txt`) |
-| | Obszar pobierania wzdłuż trasy (GPX, KML, KMZ, GPKG)... | | [Obszar wzdłuż trasy](../obszar/korytarz/) – pobieranie segmentów tylko w zadanym pasie wzdłuż śladu wycieczki |
-| | Obszar pobierania z poligonu (KML, GeoJSON, GPKG)... | | [Obszar z poligonu](../obszar/zaznaczanie/#obszar-z-poligonu-kml-geojson-geopackage) – automatyczny prostokąt wokół wektora |
-| | Usuń obszar wzdłuż trasy | | usuwa korytarz i wraca do pobierania pełnego prostokąta |
-| | Odśwież mapę (pobierz ponownie wszystkie segmenty) | | [Odświeżanie mapy](../pobieranie/odswiezanie/) – bezpieczne dociąganie nowych kafelków |
-| **Narzędzia** | Szybki kreator mapy... | <kbd>Ctrl</kbd>+<kbd>K</kbd> | [Szybki kreator mapy](../narzedzia/#szybki-kreator-mapy) – przygotowanie gotowej mapy w 4 krokach od celu do pliku |
-| | Dodaj nowy serwer WMS / WMTS... | | [Kreator serwerów](../serwery/kreator/) – dodawanie usług WMS, WMTS oraz kafelków XYZ/TMS |
+| | Obszar pobierania wzdłuż trasy (GPX, KML, KMZ, GPKG)... | | [Obszar wzdłuż trasy](../obszar/korytarz/), pobieranie segmentów tylko w zadanym pasie wzdłuż śladu trasy |
+| | Obszar pobierania z poligonu (KML, GeoJSON, GPKG)... | | [Obszar z poligonu](../obszar/zaznaczanie/#obszar-z-poligonu-kml-geojson-geopackage), automatyczny prostokąt wokół wektora |
+| | Usuń obszar wzdłuż trasy (pobieranie całego prostokąta) | | usuwa korytarz i wraca do pobierania pełnego prostokąta |
+| | Odśwież mapę (pobierz ponownie wszystkie segmenty) | | [Odświeżanie mapy](../pobieranie/odswiezanie/), bezpieczne dociąganie nowych kafelków |
+| | Usuń pobrane pliki bieżącej sesji... (do Kosza) | | przenosi pobrane segmenty bieżącej sesji do Kosza (zob. [Dane programu](../pierwsze-kroki/dane-programu/)) |
+| **Narzędzia** | Szybki kreator mapy... | <kbd>Ctrl</kbd>+<kbd>K</kbd> | [Szybki kreator mapy](../narzedzia/#szybki-kreator-mapy), przygotowanie gotowej mapy w 4 krokach od celu do pliku |
+| | Dodaj nowy serwer WMS / WMTS... | | [Kreator serwerów](../serwery/kreator/), dodawanie usług WMS, WMTS oraz kafelków XYZ/TMS |
+| | Otwórz folder własnych warstw... | | otwiera folder `warstwy` w katalogu danych programu |
 | | Wyszukaj miejscowość lub działkę... | <kbd>Ctrl</kbd>+<kbd>F</kbd> | [Wyszukiwarka miejscowości i działek ULDK](../obszar/zaznaczanie/#wyszukiwarka-miejscowości-adresów-i-działek-katastralnych) (<kbd>Ctrl</kbd>+<kbd>D</kbd> dla działek) |
-| | Konwertuj mapę OziExplorer (.map)... | | [Konwerter map OziExplorer](../narzedzia/#konwerter-map-oziexplorer-map) – kalibrowane skany do JNX, KMZ, MBTiles i GeoPackage |
-| | Konwertuj mapę GeoTIFF... | | [Konwerter GeoTIFF](../narzedzia/#konwerter-geotiff-kafelkowanie-i-piramidy) – kafelkowanie wewnętrzne 256×256 i generowanie piramid |
-| | Profil wysokościowy trasy (GPX, KML)... | | [Profil wysokościowy trasy](../narzedzia/#profil-wysokościowy-trasy) – rzędne z laserowego skaningu NMT/LIDAR i wzbogacanie GPX |
-| | Scalanie segmentów | <kbd>Ctrl</kbd>+<kbd>L</kbd> | okno [Eksport mapy](../eksport/) z wybranym formatem *Arkusz* – [Scalanie segmentów](../scalanie/) |
-| | Eksport mapy (JNX, KMZ, MBTiles, GeoPackage, SQLiteDB, OruxMaps, arkusz, TrekBuddy) | <kbd>Ctrl</kbd>+<kbd>E</kbd> | [Eksport mapy](../eksport/) do formatów mobilnych i arkuszy |
-| | Eksport do CAD (DXF, skrypt SCR, LISP)... | | [Eksport do CAD](../cad/) – rysunek DXF, skrypt SCR i program LISP dla programów CAD |
-| | Korekta obrazów w folderze... | | [Korekta obrazów w folderze](../narzedzia/#korekta-obrazów-w-folderze) – wsadowa optymalizacja kontrastu, gamma i filtr MIP |
-| | Prześlij mapę na telefon (Wi-Fi)... | | [Transfer mapy na telefon](../narzedzia/#przesyłanie-mapy-na-telefon-przez-wi-fi-i-kod-qr) – lokalny serwer Wi-Fi i kod QR |
-| | Kopiuj mapę do Garmina (USB)... | | [Kopiowanie do Garmina](../narzedzia/#kopiowanie-mapy-do-odbiornika-garmin-usb) – wykrywanie odbiornika w trybie pamięci masowej |
+| | Konwertuj mapę OziExplorer (.map)... | | [Konwerter map OziExplorer](../narzedzia/#konwerter-map-oziexplorer-map), kalibrowane skany do JNX, KMZ, MBTiles i GeoPackage |
+| | Konwertuj mapę GeoTIFF... | | [Konwerter map GeoTIFF](../narzedzia/#konwerter-map-geotiff), konwersja pliku GeoTIFF do MBTiles, GeoPackage, KMZ, JNX, SQLiteDB lub OruxMaps |
+| | Profil wysokościowy trasy (GPX, KML)... | | [Profil wysokościowy trasy](../narzedzia/#profil-wysokościowy-trasy), rzędne z laserowego skaningu NMT/LIDAR i wzbogacanie GPX |
+| | Scalanie segmentów | <kbd>Ctrl</kbd>+<kbd>L</kbd> | okno [Eksport mapy](../eksport/) z wybranym formatem *Arkusz*, zobacz [Scalanie segmentów](../scalanie/) |
+| | Eksport z pobranych segmentów… | <kbd>Ctrl</kbd>+<kbd>E</kbd> | [Eksport mapy](../eksport/) do formatów mobilnych (JNX, KMZ, MBTiles, GeoPackage, SQLiteDB, OruxMaps, TrekBuddy) i arkuszy |
+| | Eksport do CAD (DXF, skrypt SCR, LISP)... | | [Eksport do CAD](../cad/), rysunek DXF, skrypt SCR i program LISP dla programów CAD |
+| | Korekta obrazów w folderze... | | [Korekta obrazów w folderze](../narzedzia/#korekta-obrazów-w-folderze), wsadowa optymalizacja kontrastu, gamma i filtr MIP |
+| | Prześlij mapę na telefon (Wi-Fi)... | | [Transfer mapy na telefon](../narzedzia/#przesyłanie-mapy-na-telefon-przez-wi-fi-i-kod-qr), lokalny serwer Wi-Fi i kod QR |
+| | Kopiuj mapę do Garmina (USB)... | | [Kopiowanie do Garmina](../narzedzia/#kopiowanie-mapy-do-odbiornika-garmin-usb), wykrywanie odbiornika w trybie pamięci masowej |
 | | Ustawienia | | okno [Ustawienia programu](../ustawienia/) |
 | **Pomoc** | Podręcznik użytkownika (online) | <kbd>F1</kbd> | otwiera ten podręcznik w przeglądarce internetowej |
 | | Galeria warstw map (podgląd online) | | [Galeria warstw map online](../galeria-warstw/) z bezpośrednim dodawaniem warstw do programu |
@@ -86,18 +90,17 @@ Każde samodzielne okno narzędziowe w programie posiada dedykowany przycisk **P
 
 ## Pasek narzędziowy nad mapą
 
-Pasek nad mapą grupuje najważniejsze funkcje w trzech przejrzystych blokach:
+Pasek nad mapą grupuje główne polecenia w trzech blokach po lewej oraz wybór podkładu po prawej:
 
 1. **Sesja i kreator:**
-   * **Nowa sesja** (kartka z zielonym plusem): jednym kliknięciem czyści obszar roboczy i przygotowuje program do pobrania nowej mapy w nowym podfolderze.
-   * **🪄 Szybki kreator...** (<kbd>Ctrl</kbd>+<kbd>K</kbd>): prowadzi użytkownika krok po kroku przez przygotowanie mapy (wybór urządzenia, obszaru, stylu i zapisu).
+   * **Nowa sesja**: czyści obszar roboczy i przygotowuje program do pobrania nowej mapy do nowego podfolderu.
+   * **Szybki kreator…** (<kbd>Ctrl</kbd>+<kbd>K</kbd>): otwiera 4-etapowy kreator przygotowania mapy (wybór celu, obszaru, szablonu i zapisu).
 2. **Wybór obszaru i wyszukiwarka:**
-   * **Zaznacz obszar**: włącza tryb zaznaczania prostokąta na mapie.
-   * **🔍 Szukaj miejsca lub działki...**: pole wyszukiwania z autouzupełnianiem miejscowości i adresów (OpenStreetMap Nominatim) oraz działek katastralnych ULDK (GUGiK). Wpisz np. *Drawsko Pomorskie*, *Łabędzie 1* albo identyfikator działki (np. *działka Wieliczka 123/4*) i naciśnij <kbd>Enter</kbd> – mapa wycentruje się, a program automatycznie ustawi siatkę pobierania. Skrót <kbd>Ctrl</kbd>+<kbd>F</kbd> przenosi kursor wprost do tego pola.
-3. **Akcje pomocnicze:**
-   * **Galeria warstw**: otwiera w przeglądarce [galerię warstw online](../galeria-warstw/), pozwalającą jednym kliknięciem dodawać sprawdzone warstwy bezpośrednio do działającego MapoTero.
-   * **Zwiń / Rozwiń**: ukrywa lub przywraca prawy panel warstw, maksymalizując widok mapy.
-   * **📁 Folder pobrań**: otwiera folder `download` w Eksploratorze Windows.
+   * **Zaznacz obszar**: włącza tryb wskazywania prostokąta na mapie dwoma kliknięciami w przeciwległych narożnikach.
+   * **Szukaj miejsca lub działki…**: pole wyszukiwania miejscowości i adresów, działek katastralnych ULDK (np. `działka Wieliczka 123/4`) oraz współrzędnych (WGS84, PL-1992, PL-2000). Skrót <kbd>Ctrl</kbd>+<kbd>F</kbd> przenosi kursor wprost do tego pola.
+3. **Folder pobrań i podkład:**
+   * **Folder pobrań**: otwiera katalog `download\` w Eksploratorze Windows.
+   * **Podkład** *(lista rozwijana po prawej)*: przełącza mapę orientacyjną podglądu między **OpenStreetMap** (domyślny), **Google Maps** oraz **Bing (zdjęcia lotnicze)**.
 
 ---
 
@@ -108,14 +111,12 @@ Interaktywna mapa podglądu służy do lokalizacji w terenie i precyzyjnego wyzn
 | Czynność | Sposób wykonania |
 |---|---|
 | przesuwanie mapy | przeciągnij lewym przyciskiem myszy |
-| przybliżanie i oddalanie | kółko myszy, duże przyciski **+** i **-** w narożniku mapy, dwuklik lewym (przybliża) lub prawym (oddala) |
-| zaznaczanie obszaru | przeciągnij **prawym** przyciskiem myszy – zobacz [Zaznaczanie na mapie](../obszar/zaznaczanie/) |
-| regulacja zasięgu siatki | przeciągnij uchwyty w narożnikach, na środkach boków lub uchwyt centralny siatki |
+| przybliżanie i oddalanie | kółko myszy, przyciski **+** i **-** w lewym górnym rogu mapy, dwuklik lewym (przybliża) lub prawym (oddala) |
+| zaznaczanie obszaru | przeciągnij **prawym** przyciskiem myszy albo użyj przycisku **Zaznacz obszar** (zob. [Zaznaczanie na mapie](../obszar/zaznaczanie/)) |
+| regulacja zasięgu siatki | przeciągnij białe uchwyty w narożnikach, na środkach boków lub uchwyt centralny siatki |
 | anulowanie zaznaczania | naciśnij klawisz <kbd>Esc</kbd> |
 
-**Wybór podkładu:** przełączniki radiowe w górnej części mapy pozwalają przełączać podkłady orientacyjne: *OpenStreetMap* (domyślny), *GoogleMap* oraz *SatelliteBingsMap* (zdjęcia satelitarne). Program pamięta Twój wybór po ponownym uruchomieniu.
-
-**Podziałka liniowa:** w prawym dolnym rogu mapy widoczna jest czytelna podziałka metryczna ułatwiająca ocenę odległości w terenie.
+**Podziałka liniowa:** w prawym dolnym rogu mapy widoczna jest podziałka metryczna ułatwiająca ocenę odległości w terenie.
 
 ---
 
@@ -123,19 +124,19 @@ Interaktywna mapa podglądu służy do lokalizacji w terenie i precyzyjnego wyzn
 
 Pod mapą znajdują się trzy karty w jednolitym, przejrzystym stylu:
 
-### 1. Karta *Obszar*
-* Pokazuje rzeczywisty wymiar terenowy siatki (np. *8,0 × 8,0 km*), powierzchnię (np. *64,0 km²*) oraz liczbę segmentów (*4 kolumny × 4 wiersze = 16 segmentów*).
+### 1. Karta *Obszar pobierania*
+* Pokazuje rzeczywisty wymiar terenowy siatki (np. `8 × 8 km`) i liczbę segmentów (np. `4 segmenty`), a przy obszarze wzdłuż trasy informację o korytarzu.
 * Kliknięcie wymiaru obszaru centruje mapę na siatce pobierania.
-* Odnośnik **Zmień ▾** rozwija menu szybkiej modyfikacji obszaru:
-  * **Pokaż na mapie**: centruje widok na obszarze,
-  * **Zaznacz na mapie**: uaktywnia zaznaczanie prostokąta,
-  * **Wpisz współrzędne…**: otwiera okno ręcznego wprowadzania współrzędnych X/Y,
-  * **Obszar pobierania wzdłuż trasy (GPX, KML, KMZ, GPKG)…**: wyznacza segmenty wzdłuż śladu wycieczki,
-  * **Obszar pobierania z poligonu (KML, GeoJSON, GPKG)…**: dopasowuje siatkę do obrysu wektora.
+* Odnośnik **Zmień ▾** rozwija menu modyfikacji obszaru:
+  * **Pokaż na mapie**: centruje widok na wyznaczonym obszarze,
+  * **Zaznacz na mapie**: uruchamia zaznaczanie prostokąta na mapie,
+  * **Wpisz współrzędne…**: otwiera okno ręcznego wpisywania granic zasięgu,
+  * **Obszar wzdłuż trasy (GPX, KML, KMZ, GPKG)…**: wyznacza segmenty w pasie wzdłuż śladu,
+  * **Obszar z poligonu (KML, GeoJSON, GPKG)…**: dopasowuje siatkę do obrysu obiektu wektorowego.
 
 ### 2. Karta *Parametry segmentów*
-* Przedstawia kluczowe parametry techniczne: **układ współrzędnych** (np. *PL-1992*, *PL-2000*, *UTM*, *WGS84*), **bok segmentu** (np. *2000 px*), **format pliku** (np. *JPEG*, *PNG*) oraz **terenowy rozmiar piksela** (np. *2,00 m/pix*).
-* Odnośnik **Zmień…** rozwija panel parametrów, umożliwiając zmianę układu, rozmiaru segmentu i rozdzielczości piksela. Po wybraniu warstwy program automatycznie podpowiada najmniejszy zalecany piksel spośród warstw kanapki.
+* Przedstawia **terenowy rozmiar piksela** (np. `2 m/px`), **układ współrzędnych** (np. `PL-1992`), **bok segmentu** (np. `2000 px`) oraz **format plików** (`JPEG`, `PNG`…).
+* Odnośnik **Zmień…** rozwija panel parametrów, gdzie można zmienić piksel, bok segmentu i układ współrzędnych. Po wybraniu warstwy program automatycznie dobiera najmniejszy zalecany piksel spośród warstw kanapki.
 
 ### 3. Karta *Stan sesji*
 * Wyświetla duży, czytelny przycisk akcji:
@@ -150,17 +151,17 @@ Pod mapą znajdują się trzy karty w jednolitym, przejrzystym stylu:
 
 Prawy panel programu organizuje źródła danych i kompozycję wielowarstwową:
 
-* **Wybierz mapy (katalog tematyczny):**
+* **Warstwy do pobrania (katalog tematyczny):**
   * Grupy tematyczne: *Ortofotomapy*, *Mapy topograficzne*, *Rzeźba terenu (cieniowanie, hipsometria)*, *Mapy historyczne i zabytki*, *Ewidencja, geodezja i uzbrojenie (EGiB, GESUT)*, *Granice i adresy (PRG, PRNG)*, *Przyroda i środowisko (GDOŚ, BDL)*, *Kraje sąsiednie i strefa przygraniczna (Czechy, Słowacja, Niemcy, Litwa, Bałtyk)* oraz serwery dodane przez użytkownika.
   * Zaznaczenie pola wyboru dodaje warstwę do listy wybranych. Odznaczenie ją usuwa.
-  * Pole **szukaj warstwy…** błyskawicznie filtruje całe drzewo według dowolnych słów kluczowych. Klawisz <kbd>Esc</kbd> czyści filtr.
-  * Przycisk **+ Serwer…** otwiera kreator usług WMS/WMTS/XYZ.
+  * Pole wyszukiwarki pozwala przefiltrować drzewo według dowolnych słów kluczowych. Klawisz <kbd>Esc</kbd> czyści filtr.
+  * Przycisk **Zwiń / Rozwiń** zwija lub rozwija wszystkie grupy w katalogu, ikona galerii otwiera [Galerię warstw map online](../galeria-warstw/), a przycisk **+ Serwer…** w nagłówku karty uruchamia kreator usług WMS, WMTS i kafelkowych XYZ/TMS.
 
-* **Wybrane warstwy oraz ich kolejność:**
+* **Wybrane warstwy:**
   * Lista mieści do 12 warstw ułożonych w kanapkę (warstwa na dole listy to podkład, warstwy wyżej leżą na wierzchu).
-  * **Krycie bezpośrednio w wierszu:** kliknięcie wartości krycia w wierszu warstwy pozwala błyskawicznie zmienić przezroczystość (5–100%).
-  * **Usuwanie i kolejność:** przycisk **✕** na końcu wiersza natychmiast usuwa warstwę. Kolejność zmienia się przeciągając wiersz myszą lub skrótem <kbd>Ctrl</kbd>+<kbd>↑</kbd>/<kbd>↓</kbd>.
-  * Przycisk **Mikser…** w nagłówku karty otwiera zaawansowane okno miksera warstw.
+  * **Krycie bezpośrednio w wierszu:** zaznaczenie warstwy wyświetla pole liczbowe do zmiany przezroczystości (5–100%).
+  * **Usuwanie i kolejność:** przycisk **✕** w wierszu usuwa warstwę. Kolejność zmienisz, przeciągając wiersz myszą lub skrótem <kbd>Ctrl</kbd>+<kbd>↑</kbd>/<kbd>↓</kbd>.
+  * Przycisk **Mikser…** w nagłówku karty otwiera okno *Warstwy - zaawansowane*.
 
 ### Okno *Warstwy - zaawansowane* (Mikser)
 
@@ -168,7 +169,7 @@ Prawy panel programu organizuje źródła danych i kompozycję wielowarstwową:
 
 *Rysunek 2. Okno zaawansowanego miksera warstw z suwakami krycia, trybami mieszania i podglądem na żywo.*
 
-* Pozwala przypisać każdej warstwie niezależny tryb mieszania: *Zwykły*, *Mnożenie (Multiply)*, *Ciemniej*, *Jaśniej*, *Ekran*, *Nakładka (Overlay)* oraz innowacyjny tryb **7 Rzeźba terenu**.
+* Pozwala przypisać każdej warstwie niezależny tryb mieszania: *Zwykły*, *Nakładka*, *Mnożenie*, *Ekran*, *Ciemniej*, *Jaśniej*, *Różnica* oraz **Rzeźba terenu**.
 * **Tryb „Rzeźba terenu”:** eliminuje problem szarej zasłony przy nakładaniu cieniowania NMT LiDAR. Płaski teren pozostaje neutralny, stoki w cieniu ciemnieją, a zbocza oświetlone delikatnie jaśnieją.
 * Wyświetla podgląd złożenia warstw na żywo z lupą powiększającą oraz przycisk *Korekta obrazu...* (filtr MIP, wyostrzanie krawędzi, rozjaśnienie lasów).
 
@@ -180,13 +181,13 @@ Dolna część prawego panelu zawiera trzy funkcjonalne zakładki:
 
 1. **Podgląd:**
    * Renderuje w tle rzeczywistą próbkę złożonych warstw ze środka siatki w docelowej rozdzielczości piksela.
-   * Pokazuje bieżące powiększenie w procentach. Przyciski **1:1** (piksel w piksel), **-**, **+** oraz **Dopasuj** pozwalają precyzyjnie ocenić czytelność napisów i dróg.
-   * Przycisk **Mikser warstw i krycia...** (lub kliknięcie podglądu) otwiera okno zaawansowanych parametrów kompozycji.
+   * Pokazuje bieżące powiększenie w procentach, przyciski **−**, **+**, **Dopasuj** oraz przycisk odświeżania próbki z serwerów.
+   * Kliknięcie próbki podglądu otwiera okno zaawansowanego miksera warstw.
 2. **Komunikaty:**
    * Dziennik zdarzeń informujący o postępie pobierania, liczbie pobranych segmentów, transferze danych i ewentualnych błędach serwerów.
    * Przy wystąpieniu błędów zakładka staje się czerwona i wyświetla liczbę problematycznych fragmentów (np. *Komunikaty (2)*).
 3. **Sesja:**
-   * Szczegółowe metadane bieżącej sesji: dokładne ścieżki na dysku, data utworzenia, plik `conf.txt`, podsumowanie siatki i format plików.
+   * Szczegółowe dane bieżącej sesji: dokładne ścieżki na dysku, plik `conf.txt`, podsumowanie siatki, format plików oraz przycisk **Usuń pobrane** (przenosi pobrane segmenty bieżącej sesji do Kosza).
 
 ---
 
@@ -196,7 +197,7 @@ Na dolnej krawędzi okna głównego pasek stanu prezentuje najważniejsze parame
 * **Układ współrzędnych sesji** (np. *PL-1992*),
 * **Pozycja kursora myszy** w wybranym układzie: współrzędne `x` (północna) i `y` (wschodnia) w metrach lub stopniach,
 * **Przybliżona skala mapy** na ekranie (np. *1 : 25 000*),
-* **Nazwa sesji i wskaźnik stanu** z kolorową diodą: zielona dioda oznacza pomyślne ukończenie pobierania, czerwona – błędy serwerów (kliknięcie natychmiast przełącza do zakładki *Komunikaty*).
+* **Nazwa sesji i wskaźnik stanu** z kolorową diodą: zielona dioda oznacza pomyślne ukończenie pobierania, czerwona oznacza błędy serwerów (kliknięcie przełącza do zakładki *Komunikaty*).
 
 ---
 

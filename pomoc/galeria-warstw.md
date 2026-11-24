@@ -6,17 +6,17 @@ nav_order: 17.5
 # Galeria warstw map
 {: .no_toc }
 
-Przegląd wyglądu warstw WMS, WMTS i XYZ dostępnych w MapoTero – z podziałem na grupy tematyczne, filtrowaniem oraz parametrami przydatnymi przed pobraniem.
+Przegląd wyglądu warstw WMS, WMTS i XYZ dostępnych w MapoTero z podziałem na grupy tematyczne, filtrowaniem oraz parametrami przydatnymi przed pobraniem.
 {: .fs-5 .fw-300 }
 
-**Gdzie w programie:** drzewo *Wybierz mapy* w oknie głównym  
+**Gdzie w programie:** karta *Warstwy do pobrania* w oknie głównym (ikona siatki po prawej stronie wyszukiwarki)  
 **Zobacz też:** [Katalog zbiorów map]({{ '/pomoc/zbiory-map/' | relative_url }}) · [Dotyczy wersji]({{ '/pomoc/' | relative_url }}): {{ site.wersja_programu }}
 
 {: .informacja }
 Próbki nakładek przezroczystych (np. działek ewidencyjnych lub szlaków) są oznaczone etykietą **Nakładka** i prezentowane na stonowanym podkładzie, aby zachować czytelność linii oraz napisów.
 
 {: .wskazowka }
-**Dodawanie warstw prosto do programu:** jeśli otworzyłeś tę stronę z okna MapoTero, przeglądarka (np. Chrome, Edge) może wyświetlić jednorazowe okienko z pytaniem o zgodę na połączenie z siecią lokalną / tym komputerem. **Wyraź zgodę** — służy to wyłącznie do przekazania klikniętej warstwy do działającego na Twoim dysku programu `MapoTero.exe` (połączenie odbywa się lokalnie pod `127.0.0.1` i nie wysyła żadnych danych na zewnątrz).
+**Dodawanie warstw prosto do programu:** jeśli otworzyłeś tę stronę z okna MapoTero, przeglądarka (np. Chrome, Edge) może wyświetlić jednorazowe okienko z pytaniem o zgodę na połączenie z siecią lokalną lub tym komputerem. **Wyraź zgodę**, ponieważ służy to wyłącznie do przekazania klikniętej warstwy do działającego na Twoim dysku programu `MapoTero.exe` (połączenie odbywa się lokalnie pod `127.0.0.1` i nie wysyła żadnych danych na zewnątrz).
 
 <link rel="stylesheet" href="{{ '/pomoc/galeria/galeria.css' | relative_url }}">
 

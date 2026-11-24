@@ -38,8 +38,8 @@ Objaw, najczęstsza przyczyna i sprawdzony sposób rozwiązania.
   obejmują tylko Polskę.
 * **Wybrano układ nieobsługiwany przez serwer:** niektóre serwery zewnętrzne nie obsługują np. PL-2000 lub UTM i zwracają
   pusty obraz bez błędu. Przełącz układ pobierania z powrotem na **PL-1992**.
-* **Przykryta nakładka w kanapce:** jeśli w panelu *Wybrane warstwy* nieprzezroczysta warstwa leży wyżej (ma wyższy numer)
-  niż nakładka lub mapa pod spodem, zakryje ją w całości. Sprawdź kolejność w oknie głównym albo przyciskiem **…** (okno warstw zaawansowanych).
+* **Przykryta nakładka w kanapce:** jeśli na karcie *Wybrane warstwy* nieprzezroczysta warstwa leży wyżej (bliżej góry listy)
+  niż nakładka lub mapa pod spodem, zakryje ją w całości. Sprawdź kolejność w oknie głównym albo przyciskiem **Mikser…**.
 * **Zamieniona kolejność osi X i Y (zewnętrzne serwery WMS):** dla serwera niezgodnego ze standardem WMS 1.3.0 zmień
   w jego adresie w pliku zbioru map `VERSION=1.3.0` na `VERSION=1.1.1` (zob. [Błędy pobierania](../pobieranie/bledy/)).
 
@@ -63,7 +63,7 @@ Objaw, najczęstsza przyczyna i sprawdzony sposób rozwiązania.
   i zwiększ *Limit czasu odpowiedzi*.
 * **Błąd `HTTP 403` na serwerze XYZ/TMS:** serwer wymaga odpowiedniego nagłówka `referer` (pobieranie zatrzymuje się od razu).
 * **Błąd certyfikatu SSL w kreatorze:** włącz w oknie dodawania serwera opcję *Ignoruj błędy certyfikatów SSL (starsze serwery)*.
-* **Brakujące segmenty po zakończeniu:** sprawdź przyczynę w pliku `error.txt` w folderze sesji i kliknij **Pobierz** ponownie,
+* **Brakujące segmenty po zakończeniu:** sprawdź przyczynę w pliku `error.txt` w folderze sesji i kliknij **Pobierz segmenty** ponownie,
   aby dopobrać braki.
 
 ---
@@ -87,20 +87,19 @@ Jeśli błąd się powtarza, zgłoś go na [forum](https://forum.eksploracja.pl/
 
 ## Najczęstsze pytania
 
-**Dlaczego przycisk scalania (szachownica) jest nieaktywny?**  
-Ponieważ bieżący folder sesji nie ma jeszcze `conf.txt` (nowa sesja przed pierwszym pobraniem) albo zawiera plik `error.txt`
-(pobieranie nie jest kompletne). W przypadku zamierzonych braków usuń `error.txt` ręcznie.
+**Dlaczego przycisk Eksportuj pobraną mapę… jest ukryty albo polecenie Scalanie segmentów jest nieaktywne?**  
+Ponieważ bieżący folder sesji nie ma jeszcze `conf.txt` (nowa sesja przed pierwszym pobraniem) albo w folderze brakuje pobranych segmentów. Jeśli wcześniejsze pobieranie nie było pełne (istnieje `error.txt`), okno eksportu otwiera się z ostrzeżeniem o brakach.
 
 **Jak pobrać nową mapę, nie nadpisując poprzedniej?**  
 Zapisz sesję w nowym folderze (<kbd>Alt</kbd>+<kbd>Z</kbd>) przed pobieraniem albo zgódź się na utworzenie nowego podfolderu
-`download\sesja_RRRR-MM-DD_GGMMSS\`, gdy program zapyta o to po kliknięciu **Pobierz**.
+`download\sesja_<nazwa_zbioru>_<RRRR-MM-DD_GGMMSS>\`, gdy program zapyta o to po kliknięciu **Pobierz segmenty**.
 
 **Czy mogę połączyć dwie mapy z różnych serwerów?**  
-Tak, bezpośrednio w panelu *Wybrane warstwy oraz ich kolejność* w oknie głównym (z regulacją krycia i podglądem w oknie `…`)
+Tak, bezpośrednio na karcie *Wybrane warstwy* w oknie głównym (z regulacją krycia i podglądem w oknie **Mikser…**)
 albo później z gotowych sesji w oknie [Eksport mapy](../eksport/nakladki/) czy [Wielowarstwowy MBTiles](../mbtiles-wielowarstwowy/).
 
 **Jak najszybciej przygotować gotową mapę bez ręcznego ustawiania siatki i układu?**  
-Wciśnij skrót <kbd>Ctrl</kbd>+<kbd>K</kbd> albo kliknij ikonę różdżki 🪄 pod suwakiem powiększenia mapy. [Szybki kreator mapy](../narzedzia/#szybki-kreator-mapy) poprowadzi Cię w 4 krokach: wybierzesz urządzenie (telefon, Garmin, wydruk, CAD), wskażesz obszar (miejscowość, działkę lub trasę), wybierzesz styl i jednym kliknięciem wygenerujesz gotowy plik.
+Wciśnij skrót <kbd>Ctrl</kbd>+<kbd>K</kbd> albo kliknij przycisk **Szybki kreator…** na górnym pasku nad mapą. [Szybki kreator mapy](../narzedzia/#szybki-kreator-mapy) poprowadzi Cię w 4 krokach: wybierzesz cel (telefon, Garmin, wydruk, GIS, CAD), wskażesz obszar (miejscowość, działkę lub trasę), wybierzesz szablon i jednym kliknięciem wygenerujesz gotowy plik.
 
 ---
 

@@ -27,7 +27,7 @@ Program oferuje dwie wygodne ścieżki przygotowania mapy:
 ### 1. Eksploracja terenu i poszukiwanie śladów historii
 To z tej potrzeby narodził się program na Pomorskim Forum Eksploracyjnym. W lesie albo na bagnach nie ma zasięgu sieci komórkowej, a odczytanie terenu wymaga porównania kilku niezależnych źródeł:
 * **Numeryczny model terenu (cieniowanie LiDAR):** rzeźba terenu pobrana z Geoportalu odsłania ukryte pod koronami drzew transzeje, okopy, kurhany, grodziska i dawne wały graniczne. Nowy **tryb mieszania „Rzeźba terenu”** pozwala nałożyć światłocień na mapę lub zdjęcie lotnicze bez szarej zasłony na płaskich obszarach.
-* **Styl Dziedzictwo kulturowe:** gotowa kompozycja łącząca plastyczną rzeźbę terenu LiDAR z czytelnym podkładem mapy topograficznej oraz urzędowymi danymi Narodowego Instytutu Dziedzictwa (NID) – rejestrem i ewidencją zabytków nieruchomych oraz stanowisk archeologicznych.
+* **Styl Dziedzictwo kulturowe:** gotowa kompozycja łącząca plastyczną rzeźbę terenu LiDAR z czytelnym podkładem mapy topograficznej oraz urzędowymi danymi Narodowego Instytutu Dziedzictwa (NID), w tym rejestrem i ewidencją zabytków nieruchomych oraz stanowisk archeologicznych.
 * **Nakładanie map archiwalnych na współczesne:** dawne mapy topograficzne (WIG 1918–1939, pruskie *Messtischblatty* i *Grossblatty* do 1945 r., mapy zaborcze) nałożone na dzisiejsze zdjęcia lotnicze ujawniają zatarte dukty, fundamenty dawnych osad, leśniczówek, młynów czy zapomnianych cmentarzy. Program sam uzupełnia brakujące arkusze szczegółowe mapami w mniejszej skali.
 * **Konwerter map OziExplorer (.map):** przetwarza kalibrowane skany papierowych map turystycznych i archiwalnych do nowoczesnych formatów mobilnych (MBTiles, SQLiteDB, OruxMaps, Garmin JNX/KMZ). Automatycznie przelicza historyczne elipsoidy (Borowa Góra, Potsdam, Pulkovo 1942) do WGS84, likwidując typowe przesunięcie o 100–200 m względem wskazań GPS.
 * **Mapa zawsze pod ręką:** gotowy plik w telefonie lub odbiorniku turystycznym działa w 100% offline, bez internetu i bez opóźnień.
@@ -60,12 +60,12 @@ Podłączanie serwerów WMS bezpośrednio w programie QGIS bywa uciążliwe przy
 
 ## Udogodnienia ułatwiające pracę
 
-* **Bezpośredni transfer map na telefon przez Wi-Fi i kod QR:** błyskawiczne przesyłanie wyeksportowanej mapy (.mbtiles, .gpkg, .tif, .kmz, .sqlitedb, .tar) prosto do pamięci telefonu przez domowe Wi-Fi — bez szukania kabla USB, bez logowania i bez chmury (zob. [Przesyłanie przez Wi-Fi](../narzedzia/#przesyłanie-mapy-na-telefon-przez-wi-fi-i-kod-qr)).
+* **Przesyłanie map na telefon przez Wi-Fi i kod QR:** wyeksportowaną mapę (`.mbtiles`, `.gpkg`, `.tif`, `.kmz`, `.sqlitedb`, `.tar`) prześlesz prosto do pamięci telefonu przez domowe Wi-Fi, bez kabla USB, bez logowania i bez chmury (zob. [Przesyłanie przez Wi-Fi](../narzedzia/#przesyłanie-mapy-na-telefon-przez-wi-fi-i-kod-qr)).
 * **Bezpośrednie kopiowanie na odbiornik Garmin przez USB:** program automatycznie wykrywa podłączony odbiornik Garmin oraz karty microSD, sprawdza wolną pamięć i jednym kliknięciem kopiuje pliki KMZ lub JNX do właściwych folderów (`Garmin/CustomMaps` lub `Garmin/BirdsEye`).
 * **Wyszukiwarka z autouzupełnianiem (<kbd>Ctrl</kbd>+<kbd>F</kbd>):** podpowiedzi miejscowości i adresów w trakcie pisania (geokodery Photon i OSM Nominatim) z priorytetem odległości od centrum mapy. Obsługuje także bezpośrednie wklejanie współrzędnych (WGS84, PL-1992, PL-2000).
 * **Podgląd zestawu warstw na żywo:** zakładka *Podgląd* w prawym panelu renderuje próbkę miksowania warstw ze środka siatki w skali 1:1, z lupą ×2 i widokiem oddalonym ×½, od razu uwzględniając krycie i tryby mieszania.
 * **Korekta obrazów w folderze:** narzędzie do wsadowej optymalizacji kontrastu, ostrości i nasycenia dla całych folderów map lub skanów z zachowaniem plików georeferencji.
-* **Konwerter kafelkowanego GeoTIFF:** automatyczne kafelkowanie 256×256 i piramida podkatalogów pomniejszeń (Cloud-Optimized GeoTIFF) dla natychmiastowego otwierania wielkich arkuszy.
+* **Konwerter map GeoTIFF:** zamienia pojedynczy plik GeoTIFF (`.tif`/`.tiff`) w gotową mapę mobilną (MBTiles, GeoPackage, Garmin KMZ/JNX, SQLiteDB, OruxMaps), a przy eksporcie arkusza z programu możesz włączyć wewnętrzne kafelkowanie i piramidy (Cloud-Optimized GeoTIFF).
 * **Dedykowany przycisk „Pomoc” w każdym oknie:** każde niezależne narzędzie programu posiada przycisk *Pomoc* (oraz skrót klawiszowy <kbd>F1</kbd>), który otwiera podręczną instrukcję z bezpośrednim odnośnikiem do odpowiedniego rozdziału podręcznika.
 
 ---

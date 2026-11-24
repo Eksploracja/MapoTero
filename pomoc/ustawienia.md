@@ -9,7 +9,7 @@ nav_order: 9
 Wszystkie opcje okna *Ustawienia*: co robi każda, jaka jest wartość domyślna i kiedy warto ją zmienić.
 {: .fs-5 .fw-300 }
 
-**Gdzie w programie:** menu *Narzędzia > Ustawienia* albo kliknięcie formatu segmentów na pasku stanu u dołu okna głównego  
+**Gdzie w programie:** menu *Narzędzia > Ustawienia*  
 **Dotyczy wersji:** {{ site.wersja_programu }}
 
 <details open markdown="block">
@@ -29,11 +29,10 @@ Wszystkie opcje okna *Ustawienia*: co robi każda, jaka jest wartość domyślna
 |---|---|---|
 | **1** | [Sesja pobierania](#sesja-pobierania) | format, przezroczyste tło, przedrostek i numeracja segmentów (`conf.txt`) |
 | **2** | [Nowa sesja](#nowa-sesja) | domyślny układ współrzędnych dla czystego startu programu (`lastsettings.txt`) |
-| **3** | [Widok okna głównego](#widok-okna-głównego) | etykiety współrzędnych, skala i wyświetlanie siatki na mapie |
+| **3** | [Widok okna głównego](#widok-okna-głównego) | etykiety współrzędnych i wyświetlanie siatki segmentów na mapie |
 | **4** | [Pliki kalibracji segmentów](#pliki-kalibracji-segmentów) | dodatkowe pliki georeferencji: `.map`, `.kml`, world file + `.prj`, `.tab`, `.wld` + `.points`, `.gmi` |
-| **5** | [Pobieranie](#pobieranie) | liczba prób, przerwy, równoczesne pobrania, limit czasu i jakość JPEG składanych segmentów |
-| **6** | [Usługi kafelkowe](#usługi-kafelkowe) | zachowywanie kafli w podfolderze `_kafle_wmts` |
-| **7** | [Nietypowe serwery WMS](#nietypowe-serwery-wms) | obsługa starszych serwerów z nieaktualnymi certyfikatami SSL |
+| **5** | [Pobieranie](#pobieranie) | liczba prób, przerwy, równoczesne pobrania i limit czasu odpowiedzi |
+| **6** | [Usługi kafelkowe](#usługi-kafelkowe) | zachowywanie kafli w podfolderze `_kafle_wmts` i jakość JPEG przy składaniu |
 
 Okienko grupuje zarówno parametry zapisywane dla konkretnej sesji pobierania (`conf.txt`), jak i ogólne opcje pracy programu (`lastsettings.txt`).
 
@@ -72,7 +71,7 @@ Te ustawienia opisują sposób zapisu segmentów bieżącej sesji i trafiają do
 
 | Opcja | Domyślnie | Co robi |
 |---|---|---|
-| *współrzędne kursora i środka mapy* | włączone | Pokazuje na pasku stanu bieżącą pozycję kursora w wybranym układzie sesji (`x=` północ, `y=` wschód) oraz współrzędne środka mapy. |
+| *współrzędne kursora i środka mapy* | włączone | Pokazuje na pasku stanu bieżącą pozycję kursora w wybranym układzie sesji (`x=` północ, `y=` wschód). |
 | *współrzędne kursora w WGS84* | wyłączone | Wyświetla dodatkowo stopnie geograficzne bezpośrednio przy wskaźniku myszy. |
 | *współrzędne zaznaczenia w WGS84* | wyłączone | Pokazuje granice zaznaczonego obszaru w stopniach WGS84. |
 | *siatka segmentów na mapie* | włączone | Rysuje niebieską siatkę poszczególnych segmentów na mapie (do 3000 segmentów). Po wyłączeniu widać same znaczniki narożników. |
@@ -95,7 +94,6 @@ OziExplorer, MapInfo, Google Earth, GPS Tuner). Opis każdego formatu znajdziesz
 | *Przerwa między próbami [s]* | `5` | `0–300` | Czas oczekiwania między kolejnymi rundami prób. Przy błędach przeciążenia serwera (HTTP 429/503) warto wydłużyć np. do `30–60 s`. |
 | *Równoczesne pobrania* | `4` | `1–16` | Maksymalna liczba jednoczesnych zapytań do jednego serwera (obejmuje też pojedyncze kafle WMTS/XYZ/TMS). Dla wolnych serwerów (np. map historycznych IHPAN) zmniejsz do `1–2`. |
 | *Limit czasu odpowiedzi [s]* | `120` | `10–600` (krok 10) | Maksymalny czas oczekiwania na odpowiedź na pojedyncze zapytanie. Zwiększ np. do `240–300 s`, jeśli serwer długo generuje duże segmenty. |
-| *Jakość JPEG przy składaniu* | `90` | `50–100` | Jakość kompresji segmentów JPEG, które program składa z kilku obrazów: z kafli WMTS/XYZ/TMS, z kilku serwerów WMS albo z warstw o kryciu poniżej 100% lub z innym trybem mieszania. Segment z jednego zapytania WMS program zapisuje bez ponownej kompresji. |
 
 ---
 
@@ -106,20 +104,13 @@ Dotyczy usług kafelkowych (WMTS, XYZ i TMS):
 | Opcja | Domyślnie | Zakres | Co robi |
 |---|---|---|---|
 | *zachowuj pobrane kafle w folderze sesji* | wyłączone | brak | Pozostawia podfolder `_kafle_wmts` po zakończeniu pobierania. Ułatwia powtórne złożenie tego samego obszaru z innym bokiem segmentu bez ponownego pobierania z sieci, ale zajmuje miejsce na dysku. |
+| *Jakość JPEG przy składaniu* | `90` | `50–100` | Jakość kompresji segmentów JPEG, które program składa z kilku obrazów (z kafli WMTS/XYZ/TMS, z kilku serwerów WMS albo z warstw o kryciu poniżej 100% lub innym trybem mieszania). Segment z jednego zapytania WMS zapisuje bez ponownej kompresji. |
 
 ---
 
-## Nietypowe serwery WMS
+## Przeniesione i usunięte opcje
 
-| Opcja | Domyślnie | Co robi |
-|---|---|---|
-| *ignoruj błędy certyfikatów SSL* | wyłączone | Umożliwia pobieranie danych ze starszych serwerów gminnych i uczelnianych, które posiadają nieaktualne, samopodpisane lub niekompletne łańcuchy certyfikatów SSL/TLS. |
-
----
-
-## Usunięte opcje
-
-W nowoczesnych wersjach programu uporządkowano okno ustawień, usuwając zbędne i mylące opcje:
+* **Ignoruj błędy certyfikatu SSL** (dla starszych serwerów gminnych i uczelnianych z samopodpisanymi lub niekompletnymi certyfikatami): opcja została przeniesiona do [kreatora dodawania serwerów](../serwery/kreator/), gdzie ustawia się ją osobno dla konkretnej usługi.
 * **Tryb TrekBuddy**: paczki `.tar` generuje bezpośrednio okno [Eksport mapy](../eksport/aplikacje/#trekbuddy) z dowolnej sesji (stare sesje z trybem w `conf.txt` nadal wznawiają się poprawnie).
 * **Zamień kolejność X i Y w zapytaniu**: usunięta, ponieważ żaden ze współczesnych serwerów jej nie wymaga (a pozostawiona włączona psuła pobieranie z Geoportalu).
 * **Pobieraj tylko segmenty o numerze wyższym niż ostatni**: usunięta, ponieważ program automatycznie pomija istniejące już pliki na dysku i bezbłędnie uzupełnia brakujące luki.

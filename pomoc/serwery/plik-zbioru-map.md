@@ -98,7 +98,7 @@ Aby ręcznie utworzony plik `<moj_zbior>.txt` pojawił się w programie:
 
 1. Zapisz go w folderze `warstwy\` (albo `%LocalAppData%\MapoTero\warstwy\`).
 2. Dopisz jego nazwę (bez `.txt`) jako nowy wiersz w pliku `warstwy\warstwy.txt`.
-3. Po ponownym uruchomieniu MapoTero zbiór pojawi się w drzewie *Wybierz mapy* w grupie **Dodane serwery** (chyba że dopiszesz go także do grup w pliku `warstwy\katalog.txt`, kodowanie UTF-8).
+3. Po ponownym uruchomieniu MapoTero zbiór pojawi się w drzewie *Warstwy do pobrania* w grupie **Dodane serwery** (chyba że dopiszesz go także do grup w pliku `warstwy\katalog.txt`, kodowanie UTF-8).
 
 ---
 
