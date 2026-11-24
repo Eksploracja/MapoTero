@@ -167,10 +167,10 @@ Każda zmiana w repozytorium jest automatycznie budowana i testowana w **GitHub 
 
 ## Twórcy projektu
 
-* **Twórca programu:** Pajakt (2009–2014)
+* **Twórca programu:** „Pajakt” (2009–2014)
 * **Rozwój projektu:** [Kazimierz Niecikowski](https://www.labgis.pl/) (od 2015)
 
-Podziękowania za pomoc w programowaniu: **Paweł\_gdn**, **AAA222** (moduł NoTo, scalanie segmentów do wersji 3.11) oraz **† Edward Zadorski** (kod modułu przeliczania współrzędnych).
+Podziękowania za pomoc w programowaniu: **„Paweł\_gdn”**, **„AAA222”** (moduł NoTo, scalanie segmentów do wersji 3.11) oraz **† Edward Zadorski** (kod modułu przeliczania współrzędnych), a także dla użytkowników [Pomorskiego Forum Eksploracyjnego](https://forum.eksploracja.pl/viewforum.php?f=205) za liczne sugestie i uwagi.
 
 ## Licencja
 
