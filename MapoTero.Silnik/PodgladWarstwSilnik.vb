@@ -229,29 +229,40 @@ Public Class PodgladWarstwSilnik
 
     ''' <summary>
     ''' Składa wynikową bitmapę z warstw znajdujących się w buforze, uwzględniając krycie i tryby mieszania.
-    ''' Tło stanowi subtelna szachownica ilustrująca przezroczystość.
+    ''' Gdy <paramref name="przezroczysteTlo"/> jest True, pod spodem nie jest rysowana szachownica (zachowanie kanału alfa).
     ''' </summary>
-    Public Function ZlozObraz(zestaw As ZestawWarstw) As Bitmap
+    Public Function ZlozObraz(zestaw As ZestawWarstw, Optional przezroczysteTlo As Boolean = False) As Bitmap
         If zestaw Is Nothing OrElse zestaw.Liczba = 0 Then Return Nothing
-        Return ZlozObrazZWarstw(zestaw.Warstwy)
+        Return ZlozObrazZWarstw(zestaw.Warstwy, przezroczysteTlo)
     End Function
 
     ''' <summary>
     ''' Składa wynikową bitmapę z podanych warstw znajdujących się w buforze, uwzględniając ich krycie i tryb mieszania.
     ''' </summary>
-    Public Function ZlozObrazZWarstw(warstwy As IEnumerable(Of WarstwaWybrana)) As Bitmap
+    Public Function ZlozObrazZWarstw(warstwy As IEnumerable(Of WarstwaWybrana), Optional przezroczysteTlo As Boolean = False) As Bitmap
         If warstwy Is Nothing Then Return Nothing
         Dim lista = warstwy.ToList()
         If lista.Count = 0 Then Return Nothing
 
+        If przezroczysteTlo AndAlso lista.Count = 1 Then
+            Dim w0 = lista(0)
+            Dim obraz0() As Integer = Nothing
+            If _buforWarstw.TryGetValue(Klucz(w0, True), obraz0) OrElse _buforWarstw.TryGetValue(Klucz(w0, False), obraz0) Then
+                Return NakladanieObrazow.DoBitmapy(CType(obraz0.Clone(), Integer()), Bok, Bok)
+            End If
+            Return Nothing
+        End If
+
         Dim piksele(Bok * Bok - 1) As Integer
-        ' Tło szachownicy 8x8 px dla wizualizacji przezroczystości
-        For y = 0 To Bok - 1
-            For x = 0 To Bok - 1
-                Dim jasny = ((x \ 8) + (y \ 8)) Mod 2 = 0
-                piksele(y * Bok + x) = If(jasny, &HFFFFFFFF, &HFFF2F2F2)
+        If Not przezroczysteTlo Then
+            ' Tło szachownicy 8x8 px dla wizualizacji przezroczystości
+            For y = 0 To Bok - 1
+                For x = 0 To Bok - 1
+                    Dim jasny = ((x \ 8) + (y \ 8)) Mod 2 = 0
+                    piksele(y * Bok + x) = If(jasny, &HFFFFFFFF, &HFFF2F2F2)
+                Next
             Next
-        Next
+        End If
 
         For i = 0 To lista.Count - 1
             Dim w = lista(i)
@@ -270,7 +281,8 @@ Public Class PodgladWarstwSilnik
     ''' oraz listę błędów. Gdy w trakcie zmienią się parametry próbki, pobieranie kończy się bez zapisu wyników.
     ''' </summary>
     Public Async Function PobierzPodgladAsync(zadanie As ZadaniePobierania, zestaw As ZestawWarstw,
-                                             token As CancellationToken, Optional postep As IProgress(Of String) = Nothing) As Task(Of Tuple(Of Bitmap, List(Of String)))
+                                             token As CancellationToken, Optional postep As IProgress(Of String) = Nothing,
+                                             Optional przezroczysteTlo As Boolean = False) As Task(Of Tuple(Of Bitmap, List(Of String)))
         Dim bledy As New List(Of String)()
         Dim zasieg = ZasiegProbki()
         If zestaw Is Nothing OrElse zestaw.Liczba = 0 OrElse Not zasieg.HasValue Then
@@ -290,7 +302,7 @@ Public Class PodgladWarstwSilnik
         Next
 
         If brakujace.Count = 0 Then
-            Return Tuple.Create(ZlozObraz(zestaw), bledy)
+            Return Tuple.Create(ZlozObraz(zestaw, przezroczysteTlo), bledy)
         End If
 
         ' Przygotowanie brakujących usług WMTS/XYZ równolegle (po jednej na unikalny adres usługi)
@@ -424,7 +436,7 @@ Public Class PodgladWarstwSilnik
             End If
         Next
 
-        Dim wynikBmp = ZlozObraz(zestaw)
+        Dim wynikBmp = ZlozObraz(zestaw, przezroczysteTlo)
         Return Tuple.Create(wynikBmp, bledy)
     End Function
 

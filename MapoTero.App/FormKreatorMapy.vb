@@ -45,6 +45,11 @@ Public Class FormKreatorMapy
     Private Shared _ostatniSzablonId As String = ""
     Private Shared _pokazZaawansowane As Boolean = True
 
+    ''' <summary>Wskazuje szablon (np. zapisany z galerii WWW), który kreator zaznaczy przy najbliższym otwarciu.</summary>
+    Friend Shared Sub WybierzSzablonNaStarcie(id As String)
+        _ostatniSzablonId = If(id, "")
+    End Sub
+
     Private ReadOnly _form1 As Form1
     Private _biezacyKrok As Integer = 1
 

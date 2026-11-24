@@ -301,4 +301,18 @@ Public Module Program
         End Try
     End Sub
 
+    Private ReadOnly _blokadaMagazynuGalerii As New Object()
+    Private _magazynGalerii As MagazynPodgladuGalerii
+
+    ''' <summary>Wspólny magazyn podglądu próbek i zasięgów warstw (współdzielony przez okno główne i kreator warstw).</summary>
+    Public Function PobierzMagazynGalerii(Optional wylaczSiec As Boolean = False) As MagazynPodgladuGalerii
+        SyncLock _blokadaMagazynuGalerii
+            If _magazynGalerii Is Nothing Then
+                Dim katalog = If(String.IsNullOrWhiteSpace(FolderDanych), UstalFolderDanych(If(String.IsNullOrWhiteSpace(FolderProgramu), AppContext.BaseDirectory, FolderProgramu)), FolderDanych)
+                _magazynGalerii = New MagazynPodgladuGalerii(katalog, Form1.UrlPomocyOnline, Nothing, Nothing, wylaczSiec)
+            End If
+            Return _magazynGalerii
+        End SyncLock
+    End Function
+
 End Module

@@ -1,5 +1,270 @@
-(function () {
+(function (global) {
   "use strict";
+
+  const MAKS_WARSTW_KANAPKI = 12;
+  const MIN_KRYCIE = 5;
+  const PELNE_KRYCIE = 100;
+  const KLUCZ_LOCAL_STORAGE = "mapotero_galeria_kanapka_v1";
+
+  const TRYBY_MIESZANIA = [
+    { kod: "Zwykly", numer: 0, nazwa: "1 Zwykły", css: "source-over" },
+    { kod: "Mnozenie", numer: 1, nazwa: "2 Mnożenie", css: "multiply" },
+    { kod: "Ciemniej", numer: 2, nazwa: "3 Ciemniej", css: "darken" },
+    { kod: "Jasniej", numer: 3, nazwa: "4 Jaśniej", css: "lighten" },
+    { kod: "Ekran", numer: 4, nazwa: "5 Ekran", css: "screen" },
+    { kod: "Nakladka", numer: 5, nazwa: "6 Nakładka", css: "overlay" },
+    { kod: "RzezbaTerenu", numer: 6, nazwa: "7 Rzeźba terenu", css: null }
+  ];
+
+  const SKROTY_MIEJSC = [
+    { nazwa: "Warszawa", lat: 52.2297, lon: 21.0122 },
+    { nazwa: "Tatry", lat: 49.275, lon: 19.975 },
+    { nazwa: "Kraków", lat: 50.0614, lon: 19.9366 },
+    { nazwa: "Gdańsk", lat: 54.352, lon: 18.6466 },
+    { nazwa: "Wrocław", lat: 51.1079, lon: 17.0385 }
+  ];
+
+  function poprawneKrycie(k) {
+    const num = Math.round(Number(k));
+    if (!Number.isFinite(num)) return PELNE_KRYCIE;
+    return Math.max(MIN_KRYCIE, Math.min(PELNE_KRYCIE, num));
+  }
+
+  function znajdzTryb(kodLubNumer) {
+    if (kodLubNumer === undefined || kodLubNumer === null) return TRYBY_MIESZANIA[0];
+    const s = String(kodLubNumer).trim().toLowerCase();
+    for (let i = 0; i < TRYBY_MIESZANIA.length; i++) {
+      const t = TRYBY_MIESZANIA[i];
+      if (String(t.numer) === s || t.kod.toLowerCase() === s || t.nazwa.toLowerCase() === s) {
+        return t;
+      }
+    }
+    return TRYBY_MIESZANIA[0];
+  }
+
+  function czyWarstwaCieniowania(w) {
+    if (!w) return false;
+    const tekst = ((w.zbior || "") + " " + (w.warstwa || "") + " " + (w.nazwa || "")).toLowerCase();
+    return tekst.includes("cieniow") || tekst.includes("hillshade") || tekst.includes("shaded");
+  }
+
+  function utworzPozycjeKanapki(w, krycie, tryb) {
+    return {
+      id: w.id || (w.zbior + "__" + w.warstwa),
+      zbior: w.zbior,
+      warstwa: w.warstwa,
+      nazwa: w.nazwa || w.warstwa,
+      typ: w.typ || "WMS",
+      nakladka: Boolean(w.nakladka),
+      zalecany_piksel: Number(w.zalecany_piksel) || 0,
+      zasieg: w.zasieg || { typ: "kraj", kod: "PL", etykieta: "Cała Polska" },
+      probka_miksu: w.probka_miksu || null,
+      obrazek: w.obrazek || null,
+      krycie: poprawneKrycie(krycie === undefined ? PELNE_KRYCIE : krycie),
+      tryb: znajdzTryb(tryb).kod
+    };
+  }
+
+  function znajdzPrzykrytaNakladke(kanapka) {
+    for (let i = 0; i < kanapka.length - 1; i++) {
+      if (!kanapka[i].nakladka) continue;
+      for (let j = i + 1; j < kanapka.length; j++) {
+        if (!kanapka[j].nakladka && kanapka[j].krycie >= PELNE_KRYCIE && kanapka[j].tryb === "Zwykly") {
+          return kanapka[i];
+        }
+      }
+    }
+    return null;
+  }
+
+  function najdokladniejszyPikselKanapki(kanapka) {
+    let minPx = 0;
+    for (let i = 0; i < kanapka.length; i++) {
+      const px = Number(kanapka[i].zalecany_piksel) || 0;
+      if (px > 0 && (minPx === 0 || px < minPx)) minPx = px;
+    }
+    return minPx;
+  }
+
+  function ostrzezeniaKanapki(kanapka) {
+    const lista = [];
+    if (!kanapka || kanapka.length === 0) return lista;
+
+    const przykryta = znajdzPrzykrytaNakladke(kanapka);
+    if (przykryta) {
+      lista.push("Uwaga: nakładka „" + przykryta.nazwa + "” leży pod pełnokryjącą warstwą i może zostać zasłonięta.");
+    }
+
+    if (kanapka.every(function (x) { return x.nakladka; })) {
+      lista.push("Wybrano same przezroczyste nakładki — warto dodać podkład na dół kanapki (np. topo lub ortofoto).");
+    }
+
+    const kodyZagraniczne = new Set();
+    let maPl = false;
+    kanapka.forEach(function (x) {
+      const z = x.zasieg || {};
+      if (z.typ === "zagranica" && z.kod) kodyZagraniczne.add(z.kod);
+      else if (z.typ === "kraj" || z.typ === "regionalny") maPl = true;
+    });
+    if (kodyZagraniczne.size > 1 || (kodyZagraniczne.size > 0 && maPl)) {
+      lista.push("Warstwy w kanapce mają różne zasięgi geograficzne (np. Polska i zagranica) — upewnij się, że pokrywają Twój obszar.");
+    }
+
+    return lista;
+  }
+
+  function ulozKanapkeAutomatycznie(kanapka) {
+    const podklady = [];
+    const cieniowanie = [];
+    const nakladki = [];
+    kanapka.forEach(function (item) {
+      const kopia = Object.assign({}, item);
+      if (czyWarstwaCieniowania(kopia)) {
+        if (kopia.tryb === "Zwykly") kopia.tryb = "RzezbaTerenu";
+        if (kopia.krycie === PELNE_KRYCIE) kopia.krycie = 70;
+        cieniowanie.push(kopia);
+      } else if (kopia.nakladka) {
+        nakladki.push(kopia);
+      } else {
+        podklady.push(kopia);
+      }
+    });
+    return podklady.concat(cieniowanie, nakladki);
+  }
+
+  function kodujKanapkeUrl(kanapka) {
+    if (!kanapka || kanapka.length === 0) return "";
+    return kanapka.map(function (item) {
+      const t = znajdzTryb(item.tryb).numer;
+      return item.id + ":" + poprawneKrycie(item.krycie) + ":" + t;
+    }).join(";");
+  }
+
+  function dekodujKanapkeUrl(tekst, wszystkieWarstwy) {
+    if (!tekst || !Array.isArray(wszystkieWarstwy)) return [];
+    const poId = new Map();
+    const poKluczu = new Map();
+    wszystkieWarstwy.forEach(function (w) {
+      if (w.id) poId.set(w.id.toLowerCase(), w);
+      poKluczu.set((w.zbior + "~" + w.warstwa).toLowerCase(), w);
+    });
+
+    const wynik = [];
+    const uzyte = new Set();
+    tekst.split(";").forEach(function (czesc) {
+      if (wynik.length >= MAKS_WARSTW_KANAPKI) return;
+      const seg = czesc.trim();
+      if (!seg) return;
+      const pola = seg.split(":");
+      const klucz = (pola[0] || "").trim().toLowerCase();
+      const warstwa = poId.get(klucz) || poKluczu.get(klucz);
+      if (!warstwa) return;
+      const kluczUnikalny = (warstwa.zbior + "|" + warstwa.warstwa).toLowerCase();
+      if (uzyte.has(kluczUnikalny)) return;
+      uzyte.add(kluczUnikalny);
+      const krycie = pola.length > 1 ? parseInt(pola[1], 10) : PELNE_KRYCIE;
+      const tryb = pola.length > 2 ? pola[2] : "0";
+      wynik.push(utworzPozycjeKanapki(warstwa, krycie, tryb));
+    });
+    return wynik;
+  }
+
+  function budujPrzepisJson(kanapka, opcje) {
+    const o = opcje || {};
+    return {
+      format: "mapotero-zestaw",
+      wersja: 1,
+      nazwa: (o.nazwa || "").trim(),
+      cel: o.cel || "okno_glowne",
+      zapiszStyl: Boolean(o.zapiszStyl),
+      warstwy: (kanapka || []).map(function (item) {
+        return {
+          zbior: item.zbior,
+          warstwa: item.warstwa,
+          krycie: poprawneKrycie(item.krycie),
+          tryb: znajdzTryb(item.tryb).kod
+        };
+      })
+    };
+  }
+
+  function wspolczynnikRzezby(szarosc01) {
+    const neutralna = 180.0 / 255.0;
+    return Math.max(0.0, Math.min(1.2, szarosc01 / neutralna));
+  }
+
+  function nalozRzezbeTerenuNaPiksele(bazaData, warstwaData, krycieProcent) {
+    const alphaWsp = poprawneKrycie(krycieProcent) / 100.0;
+    const len = bazaData.length;
+    for (let i = 0; i < len; i += 4) {
+      const wa = warstwaData[i + 3] / 255.0;
+      const eff = wa * alphaWsp;
+      if (eff <= 0) continue;
+
+      const szarosc = (0.299 * warstwaData[i] + 0.587 * warstwaData[i + 1] + 0.114 * warstwaData[i + 2]) / 255.0;
+      const wsp = wspolczynnikRzezby(szarosc);
+
+      const br = bazaData[i];
+      const bg = bazaData[i + 1];
+      const bb = bazaData[i + 2];
+      const ba = bazaData[i + 3];
+
+      const docR = Math.min(255, Math.round(br * wsp));
+      const docG = Math.min(255, Math.round(bg * wsp));
+      const docB = Math.min(255, Math.round(bb * wsp));
+
+      if (ba === 0) {
+        bazaData[i] = warstwaData[i];
+        bazaData[i + 1] = warstwaData[i + 1];
+        bazaData[i + 2] = warstwaData[i + 2];
+        bazaData[i + 3] = Math.round(255 * eff);
+      } else {
+        bazaData[i] = Math.round(br * (1 - eff) + docR * eff);
+        bazaData[i + 1] = Math.round(bg * (1 - eff) + docG * eff);
+        bazaData[i + 2] = Math.round(bb * (1 - eff) + docB * eff);
+      }
+    }
+  }
+
+  // Konwersja kafelków Web Mercator dla lekkiej mini-mapy wyboru miejsca próbki
+  function latLonDoKafelka(lat, lon, zoom) {
+    const n = Math.pow(2, zoom);
+    const x = ((lon + 180) / 360) * n;
+    const latRad = (lat * Math.PI) / 180;
+    const y = ((1 - Math.log(Math.tan(latRad) + 1 / Math.cos(latRad)) / Math.PI) / 2) * n;
+    return { x: x, y: y };
+  }
+
+  function kafelekDoLatLon(x, y, zoom) {
+    const n = Math.pow(2, zoom);
+    const lon = (x / n) * 360 - 180;
+    const latRad = Math.atan(Math.sinh(Math.PI * (1 - (2 * y) / n)));
+    const lat = (latRad * 180) / Math.PI;
+    return { lat: lat, lon: lon };
+  }
+
+  if (typeof module !== "undefined" && module.exports) {
+    module.exports = {
+      MAKS_WARSTW_KANAPKI,
+      TRYBY_MIESZANIA,
+      poprawneKrycie,
+      znajdzTryb,
+      utworzPozycjeKanapki,
+      znajdzPrzykrytaNakladke,
+      najdokladniejszyPikselKanapki,
+      ostrzezeniaKanapki,
+      ulozKanapkeAutomatycznie,
+      kodujKanapkeUrl,
+      dekodujKanapkeUrl,
+      budujPrzepisJson,
+      wspolczynnikRzezby,
+      nalozRzezbeTerenuNaPiksele,
+      latLonDoKafelka,
+      kafelekDoLatLon
+    };
+  }
+
+  if (typeof document === "undefined") return;
 
   const kontener = document.getElementById("galeria-warstw-app");
   if (!kontener) return;
@@ -20,8 +285,26 @@
     indeksModala: -1,
     widokModala: "probka",
     port: 0,
-    token: ""
+    token: "",
+    funkcjeProgramu: [],
+    wersjaProgramu: "",
+    kanapka: [],
+    kanapkaUrlStart: "",
+    nazwaKanapki: "",
+    zapiszJakoStyl: false,
+    mikserOtwarty: false,
+    obszarProgramu: null,
+    podgladLat: 52.2297,
+    podgladLon: 21.0122,
+    podgladPiksel: 0,
+    minimapaOtwarta: false,
+    minimapaBazaKafelki: null,
+    abortPodglad: null,
+    timerPodgladu: null,
+    cacheObrazow: new Map()
   };
+
+  let ref = {};
 
   function escapeHtml(tekst) {
     if (!tekst) return "";
@@ -87,7 +370,7 @@
   }
 
   function formatujPiksel(wartosc) {
-    if (wartosc === null || wartosc === undefined || wartosc === "") return "—";
+    if (wartosc === null || wartosc === undefined || wartosc === "" || Number(wartosc) <= 0) return "—";
     return String(wartosc).replace(".", ",") + " m/px";
   }
 
@@ -105,12 +388,21 @@
     return "gw-odznaka";
   }
 
+  function czyPolaczonoZProgramem() {
+    return stan.port > 0 && stan.token !== "";
+  }
+
+  function maFunkcjeProgramu(nazwa) {
+    return Array.isArray(stan.funkcjeProgramu) && stan.funkcjeProgramu.indexOf(nazwa) >= 0;
+  }
+
   function wczytajParametryUrl() {
     const params = new URLSearchParams(window.location.search);
     if (params.has("q")) stan.szukaj = params.get("q") || "";
     if (params.has("grupa")) stan.grupa = params.get("grupa") || "WSZYSTKIE";
     if (params.has("typ")) stan.typ = (params.get("typ") || "WSZYSTKIE").toUpperCase();
     if (params.has("rola")) stan.rola = params.get("rola") || "WSZYSTKIE";
+    if (params.has("kanapka")) stan.kanapkaUrlStart = (params.get("kanapka") || "").trim();
     const p = parseInt(params.get("port") || "0", 10);
     const t = (params.get("token") || "").trim();
     if (p > 0 && p <= 65535 && t) {
@@ -119,16 +411,15 @@
     }
   }
 
-  function czyPolaczonoZProgramem() {
-    return stan.port > 0 && stan.token !== "";
-  }
-
   function zapiszParametryUrl() {
     const params = new URLSearchParams();
     if (stan.szukaj.trim()) params.set("q", stan.szukaj.trim());
     if (stan.grupa !== "WSZYSTKIE") params.set("grupa", stan.grupa);
     if (stan.typ !== "WSZYSTKIE") params.set("typ", stan.typ);
     if (stan.rola !== "WSZYSTKIE") params.set("rola", stan.rola);
+    if (stan.kanapkaUrlStart && stan.kanapka.length > 0) {
+      params.set("kanapka", kodujKanapkeUrl(stan.kanapka));
+    }
     if (czyPolaczonoZProgramem()) {
       params.set("port", String(stan.port));
       params.set("token", stan.token);
@@ -136,6 +427,117 @@
     const ciag = params.toString();
     const nowyUrl = window.location.pathname + (ciag ? "?" + ciag : "") + window.location.hash;
     window.history.replaceState(null, "", nowyUrl);
+  }
+
+  function zbudujLinkUdostepniania() {
+    const params = new URLSearchParams();
+    const kod = kodujKanapkeUrl(stan.kanapka);
+    if (kod) params.set("kanapka", kod);
+    return window.location.origin + window.location.pathname + (params.toString() ? "?" + params.toString() : "");
+  }
+
+  function zapiszKanapkeLocalStorage() {
+    try {
+      const payload = stan.kanapka.map(function (item) {
+        return { zbior: item.zbior, warstwa: item.warstwa, krycie: item.krycie, tryb: item.tryb };
+      });
+      global.localStorage.setItem(KLUCZ_LOCAL_STORAGE, JSON.stringify({
+        nazwa: stan.nazwaKanapki,
+        warstwy: payload
+      }));
+    } catch (e) {
+      // Brak dostępu do localStorage ignorujemy po cichu
+    }
+  }
+
+  function wczytajKanapkePoczatkowa() {
+    if (stan.kanapkaUrlStart) {
+      const zUrl = dekodujKanapkeUrl(stan.kanapkaUrlStart, stan.warstwy);
+      if (zUrl.length > 0) {
+        stan.kanapka = zUrl;
+        stan.mikserOtwarty = true;
+        return;
+      }
+    }
+    try {
+      const raw = global.localStorage.getItem(KLUCZ_LOCAL_STORAGE);
+      if (!raw) return;
+      const parsed = JSON.parse(raw);
+      if (!parsed || !Array.isArray(parsed.warstwy)) return;
+      if (parsed.nazwa) stan.nazwaKanapki = parsed.nazwa;
+      stan.kanapka = zmapujWarstwyZPrzepisu(parsed.warstwy);
+    } catch (e) {
+      // Ignorujemy uszkodzony zapis roboczy
+    }
+  }
+
+  function zmapujWarstwyZPrzepisu(pozycje) {
+    const mapa = new Map();
+    stan.warstwy.forEach(function (w) {
+      mapa.set((w.zbior + "|" + w.warstwa).toLowerCase(), w);
+    });
+    const wynik = [];
+    const uzyte = new Set();
+    (pozycje || []).forEach(function (p) {
+      if (wynik.length >= MAKS_WARSTW_KANAPKI) return;
+      const klucz = ((p.zbior || "") + "|" + (p.warstwa || "")).toLowerCase();
+      if (uzyte.has(klucz)) return;
+      const def = mapa.get(klucz);
+      if (!def) return;
+      uzyte.add(klucz);
+      wynik.push(utworzPozycjeKanapki(def, p.krycie, p.tryb));
+    });
+    return wynik;
+  }
+
+  function indeksWKanapce(w) {
+    for (let i = 0; i < stan.kanapka.length; i++) {
+      if (
+        stan.kanapka[i].zbior.toLowerCase() === (w.zbior || "").toLowerCase() &&
+        stan.kanapka[i].warstwa === w.warstwa
+      ) {
+        return i;
+      }
+    }
+    return -1;
+  }
+
+  function przelaczWarstweWKanapce(w) {
+    const idx = indeksWKanapce(w);
+    if (idx >= 0) {
+      stan.kanapka.splice(idx, 1);
+    } else {
+      if (stan.kanapka.length >= MAKS_WARSTW_KANAPKI) {
+        pokazStatusMiksera("Kanapka może mieć najwyżej " + MAKS_WARSTW_KANAPKI + " warstw. Usuń jedną przed dodaniem kolejnej.", true);
+        return;
+      }
+      const poz = utworzPozycjeKanapki(w, PELNE_KRYCIE, "Zwykly");
+      if (czyWarstwaCieniowania(poz)) {
+        poz.tryb = "RzezbaTerenu";
+        poz.krycie = 70;
+      }
+      if (!poz.nakladka && stan.kanapka.length > 0) {
+        // Nowy podkład wsuwamy pod końcowe nakładki, tak jak w MapoTero
+        let wstaw = stan.kanapka.length;
+        while (wstaw > 0 && stan.kanapka[wstaw - 1].nakladka) wstaw--;
+        stan.kanapka.splice(wstaw, 0, poz);
+      } else {
+        stan.kanapka.push(poz);
+      }
+    }
+    poZmianieKanapki();
+  }
+
+  function poZmianieKanapki(bezPodgladu) {
+    zapiszKanapkeLocalStorage();
+    if (stan.kanapkaUrlStart) zapiszParametryUrl();
+    odswiezZnacznikiKart();
+    odswiezPrzyciskModalaKanapki();
+    odswiezDokKanapki();
+    if (stan.mikserOtwarty) {
+      renderujListeMiksera();
+      if (!bezPodgladu) zglosOdswiezeniePodgladuMiksera();
+    }
   }
 
   function wyslijDoMapoTero(w, przycisk) {
@@ -192,6 +594,81 @@
       });
   }
 
+  function pobierzStanZMapoTero(nadpiszKanapkeJesliPusta, wymusNadpisanieKanapki) {
+    if (!czyPolaczonoZProgramem() || !maFunkcjeProgramu("stan")) return Promise.resolve(null);
+    return fetch("http://127.0.0.1:" + stan.port + "/stan?token=" + encodeURIComponent(stan.token))
+      .then(function (r) { return r.json(); })
+      .then(function (dane) {
+        if (!dane || !dane.ok) return null;
+        if (dane.obszar) {
+          stan.obszarProgramu = dane.obszar;
+          if (Number.isFinite(dane.obszar.lat) && Number.isFinite(dane.obszar.lon) && (dane.obszar.lat !== 0 || dane.obszar.lon !== 0)) {
+            stan.podgladLat = dane.obszar.lat;
+            stan.podgladLon = dane.obszar.lon;
+          }
+          if (stan.podgladPiksel === 0 && dane.obszar.piksel > 0) {
+            stan.podgladPiksel = 0; // Auto wg wybranej kanapki lub obszaru
+          }
+        }
+        if (dane.zestaw && Array.isArray(dane.zestaw.warstwy) && dane.zestaw.warstwy.length > 0) {
+          if (wymusNadpisanieKanapki || (nadpiszKanapkeJesliPusta && stan.kanapka.length === 0)) {
+            stan.kanapka = zmapujWarstwyZPrzepisu(dane.zestaw.warstwy);
+            if (dane.zestaw.nazwa) stan.nazwaKanapki = dane.zestaw.nazwa;
+            poZmianieKanapki();
+          }
+        }
+        if (stan.mikserOtwarty) {
+          odswiezMinimape();
+          zglosOdswiezeniePodgladuMiksera();
+        }
+        return dane;
+      })
+      .catch(function () { return null; });
+  }
+
+  function wyslijKanapkeDoMapoTero(cel, zapiszStyl) {
+    if (!czyPolaczonoZProgramem()) return;
+    if (stan.kanapka.length === 0) {
+      pokazStatusMiksera("Kanapka jest pusta — dodaj przynajmniej jedną warstwę.", true);
+      return;
+    }
+
+    if (!maFunkcjeProgramu("zestaw")) {
+      pokazStatusMiksera("Ta wersja MapoTero nie obsługuje jeszcze wysyłania całej kanapki. Zaktualizuj program lub pobierz plik .mapotero.", true);
+      return;
+    }
+
+    const przepis = budujPrzepisJson(stan.kanapka, {
+      nazwa: stan.nazwaKanapki,
+      cel: cel || "okno_glowne",
+      zapiszStyl: Boolean(zapiszStyl)
+    });
+
+    pokazStatusMiksera("Wysyłanie kanapki do programu MapoTero…", false);
+    fetch("http://127.0.0.1:" + stan.port + "/zestaw?token=" + encodeURIComponent(stan.token), {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(przepis)
+    })
+      .then(function (r) {
+        return r.json().catch(function () { return { ok: r.ok, komunikat: "" }; });
+      })
+      .then(function (wynik) {
+        if (wynik && wynik.ok) {
+          pokazStatusMiksera(wynik.komunikat || "Przekazano kanapkę do MapoTero!", false);
+          if (ref.pasekMapoTero) {
+            ref.pasekMapoTero.classList.remove("gw-pasek-blad");
+            ref.pasekMapoTero.textContent = wynik.komunikat || "Przekazano kanapkę do MapoTero.";
+          }
+        } else {
+          pokazStatusMiksera((wynik && wynik.komunikat) || "Program nie mógł ustawić kanapki.", true);
+        }
+      })
+      .catch(function () {
+        pokazStatusMiksera("Brak połączenia z MapoTero — sprawdź, czy program nadal jest otwarty.", true);
+      });
+  }
+
   function utworzObrazLubPlaceholder(w, opis) {
     const ramka = el("div", "gw-miniatura-ramka" + (w.nakladka ? " gw-nakladka-tlo" : ""));
     const odznaki = el("div", "gw-odznaki");
@@ -203,11 +680,8 @@
       let tekstOdznaki = "";
       let klasaOdznaki = "gw-odznaka gw-odznaka-zasieg";
       if (w.zasieg.typ === "regionalny") {
-        tekstOdznaki = w.zasieg.procent_pl ? "Region " + w.zasieg.procent_pl + "%" : "Region";
+        tekstOdznaki = "Region";
         klasaOdznaki += " gw-zasieg-region";
-      } else if (w.zasieg.typ === "czesciowy") {
-        tekstOdznaki = w.zasieg.procent_pl ? w.zasieg.procent_pl + "%" : "Część";
-        klasaOdznaki += " gw-zasieg-czesciowy";
       } else if (w.zasieg.typ === "zagranica") {
         const k = w.zasieg.kod;
         tekstOdznaki = k === "DE-BB" ? "Brandenburgia" : (k === "DE-SN" ? "Saksonia" : (k === "DE" ? "Niemcy" : (k === "CZ" ? "Czechy" : (k === "SK" ? "Słowacja" : (k === "LT" ? "Litwa" : "Zagranica")))));
@@ -277,14 +751,39 @@
     );
   }
 
-  let ref = {};
+  function odswiezZnacznikiKart() {
+    if (!ref.wyniki) return;
+    const karty = ref.wyniki.querySelectorAll(".gw-karta");
+    karty.forEach(function (karta) {
+      const zbior = karta.getAttribute("data-zbior") || "";
+      const warstwa = karta.getAttribute("data-warstwa") || "";
+      const idx = indeksWKanapce({ zbior: zbior, warstwa: warstwa });
+      const btn = karta.querySelector(".gw-btn-kanapka");
+      if (idx >= 0) {
+        karta.classList.add("gw-karta-w-kanapce");
+        if (btn) {
+          btn.classList.add("aktywny");
+          btn.textContent = "✓ W kanapce (#" + (idx + 1) + ")";
+        }
+      } else {
+        karta.classList.remove("gw-karta-w-kanapce");
+        if (btn) {
+          btn.classList.remove("aktywny");
+          btn.textContent = "☐ Do kanapki";
+        }
+      }
+    });
+  }
 
   function utworzKartySiatki(elementy) {
     const siatka = el("div", "gw-siatka" + (stan.rozmiar === "DUZE" ? " gw-siatka-duza" : ""));
     elementy.forEach(function (pozycja) {
       const w = pozycja.warstwa;
-      const karta = el("div", "gw-karta");
+      const idxWKanapce = indeksWKanapce(w);
+      const karta = el("div", "gw-karta" + (idxWKanapce >= 0 ? " gw-karta-w-kanapce" : ""));
       karta.setAttribute("role", "button");
+      karta.setAttribute("data-zbior", w.zbior);
+      karta.setAttribute("data-warstwa", w.warstwa);
       karta.tabIndex = 0;
       karta.addEventListener("click", function () {
         otworzModal(pozycja.indeks);
@@ -303,18 +802,33 @@
       const podtytul = [w.zbior, formatujPiksel(w.zalecany_piksel)].join(" · ");
       tresc.appendChild(el("div", "gw-meta-karty", podtytul));
 
+      const akcje = el("div", "gw-akcje-karty");
+      const btnKanapka = el(
+        "button",
+        "gw-btn-kanapka" + (idxWKanapce >= 0 ? " aktywny" : ""),
+        idxWKanapce >= 0 ? "✓ W kanapce (#" + (idxWKanapce + 1) + ")" : "☐ Do kanapki"
+      );
+      btnKanapka.type = "button";
+      btnKanapka.title = "Dodaj lub usuń warstwę z miksera kanapki";
+      btnKanapka.addEventListener("click", function (e) {
+        e.stopPropagation();
+        przelaczWarstweWKanapce(w);
+      });
+      akcje.appendChild(btnKanapka);
+
       if (czyPolaczonoZProgramem()) {
-        const btnDodaj = el("button", "gw-btn-dodaj", "+ Dodaj do MapoTero");
+        const btnDodaj = el("button", "gw-btn-dodaj", "+ MapoTero");
         btnDodaj.type = "button";
+        btnDodaj.title = "Dodaj od razu jako pojedynczą warstwę do MapoTero";
         btnDodaj.addEventListener("click", function (e) {
           e.stopPropagation();
           wyslijDoMapoTero(w, btnDodaj);
         });
-        tresc.appendChild(btnDodaj);
+        akcje.appendChild(btnDodaj);
       }
 
+      tresc.appendChild(akcje);
       karta.appendChild(tresc);
-
       siatka.appendChild(karta);
     });
     return siatka;
@@ -380,53 +894,17 @@
     };
   }
 
-  function dekodujMaskeHex(maskaHex) {
-    if (!maskaHex || typeof maskaHex !== "string" || maskaHex.length !== 140) return null;
-    const komorki = [];
-    const cols = 28;
-    const rows = 20;
-    const dLon = 10.2 / cols;
-    const dLat = 6.0 / rows;
-    for (let b = 0; b < 70; b++) {
-      const bajt = parseInt(maskaHex.substr(b * 2, 2), 16);
-      if (isNaN(bajt)) continue;
-      for (let bit = 0; bit < 8; bit++) {
-        if ((bajt & (1 << (7 - bit))) !== 0) {
-          const idx = b * 8 + bit;
-          const r = Math.floor(idx / cols);
-          const c = idx % cols;
-          const lon1 = 14.0 + c * dLon;
-          const lon2 = lon1 + dLon;
-          const latTop = 55.0 - r * dLat;
-          const latBottom = latTop - dLat;
-          const p1 = geoDoSvg(lon1, latTop);
-          const p2 = geoDoSvg(lon2, latBottom);
-          komorki.push({
-            x: Math.min(p1.x, p2.x),
-            y: Math.min(p1.y, p2.y),
-            w: Math.abs(p2.x - p1.x) + 0.35,
-            h: Math.abs(p2.y - p1.y) + 0.35
-          });
-        }
-      }
-    }
-    return komorki;
-  }
-
   function opisZasieguDlaTabeli(w) {
     const z = w.zasieg || { typ: "kraj", etykieta: "Cała Polska" };
-    if (z.typ === "kraj") return "Cała Polska (zasięg ogólnokrajowy 100%)";
+    if (z.typ === "kraj") return "Cała Polska (zasięg ogólnokrajowy)";
     if (z.typ === "zagranica") return z.etykieta || "Zasięg zagraniczny";
     if (z.typ === "morski") return z.etykieta || "Morze Bałtyckie";
     if (z.typ === "globalny") return "Globalny (cały świat)";
-    if (z.typ === "czesciowy") {
-      let tekst = z.etykieta || "Zasięg częściowy";
-      if (z.procent_pl) tekst += " · Pokrycie Polski: ok. " + z.procent_pl + "%";
-      return tekst;
-    }
     if (z.typ === "regionalny") {
       let tekst = z.etykieta || "Zasięg regionalny";
-      if (z.procent_pl) tekst += " · Obszar w Polsce: ok. " + z.procent_pl + "%";
+      if (z.bbox && Array.isArray(z.bbox) && z.bbox.length === 4) {
+        tekst += " · BBOX: [" + z.bbox.join(", ") + "]";
+      }
       return tekst;
     }
     return z.etykieta || "Cała Polska";
@@ -436,14 +914,12 @@
     const z = w.zasieg || { typ: "kraj", etykieta: "Cała Polska" };
     const typ = z.typ || "kraj";
     const kod = z.kod || "";
-    const komorki = z.maska_hex ? dekodujMaskeHex(z.maska_hex) : null;
-    const maKomorki = komorki && komorki.length > 0;
 
     const wrap = el("div", "gw-widok-zasiegu-kontener");
 
     let klasaPL = "gw-mapa-kraj gw-mapa-polska";
-    if (typ === "kraj" && !maKomorki) klasaPL += " gw-mapa-aktywny";
-    else if (typ === "regionalny" || typ === "czesciowy" || maKomorki) klasaPL += " gw-mapa-baza-regionalna";
+    if (typ === "kraj") klasaPL += " gw-mapa-aktywny";
+    else if (typ === "regionalny") klasaPL += " gw-mapa-baza-regionalna";
 
     let klasaBaltyk = "gw-mapa-akwen gw-mapa-baltyk";
     if (typ === "morski") klasaBaltyk += " gw-mapa-aktywny-morze";
@@ -471,45 +947,16 @@
     }
 
     let svgHtml = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="25 0 315 275" class="gw-zasieg-svg" role="img" aria-label="Mapa zasięgu warstwy">';
-
-    // Defs z clipPath obrysu Polski
-    svgHtml += '<defs>';
-    svgHtml += '<clipPath id="gw-clip-polska">';
-    svgHtml += '<path d="' + MAPA_GEOM.paths.PL + '" />';
-    svgHtml += '</clipPath>';
-    svgHtml += '</defs>';
-
-    // Tło akwenu Bałtyku
     svgHtml += '<path d="' + MAPA_GEOM.paths.BALTYK + '" class="' + klasaBaltyk + '" />';
-
-    // Kraje sąsiednie
     svgHtml += '<path d="' + MAPA_GEOM.paths.DE_REST + '" class="' + klasaDE_REST + '" />';
     svgHtml += '<path d="' + MAPA_GEOM.paths.DE_BB + '" class="' + klasaDE_BB + '" />';
     svgHtml += '<path d="' + MAPA_GEOM.paths.DE_SN + '" class="' + klasaDE_SN + '" />';
     svgHtml += '<path d="' + MAPA_GEOM.paths.CZ + '" class="' + klasaCZ + '" />';
     svgHtml += '<path d="' + MAPA_GEOM.paths.SK + '" class="' + klasaSK + '" />';
     svgHtml += '<path d="' + MAPA_GEOM.paths.LT + '" class="' + klasaLT + '" />';
-
-    // Podkład Polski
     svgHtml += '<path d="' + MAPA_GEOM.paths.PL + '" class="' + klasaPL + '" />';
-
-    // RYSOWANIE KOMÓREK RZECZYWISTEGO ZASIĘGU
-    if (maKomorki) {
-      const uzyjClip = z.clip_polska !== false;
-      svgHtml += '<g class="gw-mapa-komorki-grupa"' + (uzyjClip ? ' clip-path="url(#gw-clip-polska)"' : '') + '>';
-      komorki.forEach(function (k) {
-        svgHtml += '<rect x="' + k.x.toFixed(1) + '" y="' + k.y.toFixed(1) + '" width="' + k.w.toFixed(1) + '" height="' + k.h.toFixed(1) + '" class="gw-mapa-komorka" />';
-      });
-      svgHtml += '</g>';
-      // Obrys granicy Polski na wierzchu komórek
-      svgHtml += '<path d="' + MAPA_GEOM.paths.PL + '" fill="none" stroke="#475569" stroke-width="1.2" />';
-    }
-
-    // Rzeki główne
     svgHtml += '<path d="' + MAPA_GEOM.paths.WISLA + '" class="gw-mapa-rzeka" fill="none" />';
     svgHtml += '<path d="' + MAPA_GEOM.paths.ODRA + '" class="gw-mapa-rzeka" fill="none" />';
-
-    // Etykiety państw i mórz
     svgHtml += '<text x="180" y="48" class="gw-etykieta-kraju gw-etykieta-baltyk" text-anchor="middle">BAŁTYK</text>';
     svgHtml += '<text x="82" y="130" class="gw-etykieta-kraju" text-anchor="middle">NIEMCY</text>';
     svgHtml += '<text x="135" y="215" class="gw-etykieta-kraju" text-anchor="middle">CZECHY</text>';
@@ -517,7 +964,6 @@
     svgHtml += '<text x="278" y="55" class="gw-etykieta-kraju" text-anchor="middle">LITWA</text>';
     svgHtml += '<text x="195" y="145" class="gw-etykieta-kraju gw-etykieta-polska" text-anchor="middle">POLSKA</text>';
 
-    // Punkty orientacyjne miast (dla map nieglobalnych)
     if (typ !== "globalny") {
       MAPA_GEOM.miasta.forEach(function (m) {
         svgHtml += '<g class="gw-mapa-miasto" transform="translate(' + m.x.toFixed(1) + ',' + m.y.toFixed(1) + ')">';
@@ -527,11 +973,10 @@
       });
     }
 
-    // Dodatkowy prostokąt BBOX (dla warstw bez maski siatkowej)
-    if (typ === "regionalny" && !maKomorki) {
+    if (typ === "regionalny") {
       if (z.bbox && Array.isArray(z.bbox) && z.bbox.length === 4) {
-        const p1 = geoDoSvg(z.bbox[0], z.bbox[3]); // minLon, maxLat
-        const p2 = geoDoSvg(z.bbox[2], z.bbox[1]); // maxLon, minLat
+        const p1 = geoDoSvg(z.bbox[0], z.bbox[3]);
+        const p2 = geoDoSvg(z.bbox[2], z.bbox[1]);
         const x = Math.min(p1.x, p2.x);
         const y = Math.min(p1.y, p2.y);
         const wRect = Math.max(Math.abs(p2.x - p1.x), 6);
@@ -539,10 +984,17 @@
         svgHtml += '<rect x="' + x.toFixed(1) + '" y="' + y.toFixed(1) + '" width="' + wRect.toFixed(1) + '" height="' + hRect.toFixed(1) + '" class="gw-mapa-bbox" rx="3" ry="3">';
         svgHtml += '<title>' + escapeHtml(z.etykieta || "Obszar warstwy") + '</title>';
         svgHtml += '</rect>';
+      } else if (w.zbior && w.zbior.indexOf("PrawdziwaOrtofotomapa") >= 0) {
+        MAPA_GEOM.miastaTrueOrtho.forEach(function (m) {
+          svgHtml += '<g class="gw-mapa-punkt-trueortho" transform="translate(' + m.x.toFixed(1) + ',' + m.y.toFixed(1) + ')">';
+          svgHtml += '<circle r="6" class="gw-punkt-pierscien" />';
+          svgHtml += '<circle r="3" class="gw-punkt-kropka" />';
+          svgHtml += '<text y="-8" text-anchor="middle" class="gw-punkt-etykieta">' + m.n + '</text>';
+          svgHtml += '</g>';
+        });
       }
     }
 
-    // Nakładka dla warstw globalnych
     if (typ === "globalny") {
       svgHtml += '<rect x="25" y="0" width="315" height="275" class="gw-mapa-nakladka-globalna" />';
       svgHtml += '<g class="gw-mapa-globus" transform="translate(182, 137)">';
@@ -556,47 +1008,46 @@
     }
 
     svgHtml += '</svg>';
-
     wrap.innerHTML = svgHtml;
 
-    // Karta informacyjna pod mapą
     const info = el("div", "gw-zasieg-info-karta");
-    const ikona = typ === "morski" ? "🌊" : (typ === "zagranica" ? "🌐" : (typ === "czesciowy" ? "📊" : (typ === "regionalny" ? "📍" : (typ === "globalny" ? "🌍" : "🇵🇱"))));
+    const ikona = typ === "morski" ? "🌊" : (typ === "zagranica" ? "🌐" : (typ === "regionalny" ? "📍" : (typ === "globalny" ? "🌍" : "🇵🇱")));
 
     const infoTytul = el("div", "gw-zasieg-info-tytul");
     infoTytul.appendChild(el("span", "gw-zasieg-info-ikona", ikona));
     infoTytul.appendChild(el("strong", null, z.etykieta || "Cała Polska"));
     info.appendChild(infoTytul);
 
-    // Wskaźnik procentowy rzeczywistego pokrycia
-    if (z.procent_pl !== undefined) {
-      const badgePkt = el("div", "gw-zasieg-procent-wiersz");
-      const klasaBadge = z.procent_pl >= 85 ? "gw-zasieg-procent-pelne" : (z.procent_pl >= 30 ? "gw-zasieg-procent-czesciowe" : "gw-zasieg-procent-regionalne");
-      const badge = el("span", "gw-zasieg-procent-odznaka " + klasaBadge, "Rzeczywiste pokrycie Polski: ok. " + z.procent_pl + "%");
-      badgePkt.appendChild(badge);
-      info.appendChild(badgePkt);
-    }
-
-    let opisSzczegolowy = z.opis || "";
-    if (!opisSzczegolowy) {
-      if (typ === "kraj") {
-        opisSzczegolowy = "Warstwa obejmuje obszar całej Polski (pokrycie ogólnokrajowe 100%).";
-      } else if (typ === "zagranica") {
-        opisSzczegolowy = "Urzędowa warstwa zagraniczna (" + (z.kod || "sąsiedzi") + "). Przydatna przy planowaniu tras i pobieraniu map pogranicza.";
-      } else if (typ === "morski") {
-        opisSzczegolowy = "Polskie obszary morskie, wyłączna strefa ekonomiczna (WZE) lub międzynarodowe dane batymetryczne Bałtyku.";
-      } else if (typ === "czesciowy") {
-        opisSzczegolowy = "Pokrycie częściowe — mapa dostępna dla wydanych arkuszy.";
-      } else if (typ === "regionalny") {
-        opisSzczegolowy = "Zasięg regionalny ograniczony do wybranego obszaru historycznego lub geograficznego.";
-      } else if (typ === "globalny") {
-        opisSzczegolowy = "Warstwa o zasięgu globalnym (pokrycie całego świata z serwerów otwartych / międzynarodowych).";
-      }
+    let opisSzczegolowy = "";
+    if (typ === "kraj") {
+      opisSzczegolowy = "Warstwa obejmuje obszar całej Polski (pokrycie ogólnokrajowe).";
+    } else if (typ === "zagranica") {
+      opisSzczegolowy = "Urzędowa warstwa zagraniczna (" + (z.kod || "sąsiedzi") + "). Przydatna przy planowaniu tras i pobieraniu map pogranicza.";
+    } else if (typ === "morski") {
+      opisSzczegolowy = "Polskie obszary morskie, wyłączna strefa ekonomiczna (WZE) lub międzynarodowe dane batymetryczne Bałtyku.";
+    } else if (typ === "regionalny") {
+      opisSzczegolowy = z.bbox
+        ? "Zasięg regionalny ograniczony do wybranego obszaru historycznego lub geograficznego."
+        : "Zasięg regionalny obejmujący wybrane duże miasta i aglomeracje.";
+    } else if (typ === "globalny") {
+      opisSzczegolowy = "Warstwa o zasięgu globalnym (pokrycie całego świata z serwerów otwartych / międzynarodowych).";
     }
     info.appendChild(el("div", "gw-zasieg-info-opis", opisSzczegolowy));
-
     wrap.appendChild(info);
     return wrap;
+  }
+
+  function odswiezPrzyciskModalaKanapki() {
+    if (!ref.modalKanapka || stan.indeksModala < 0 || stan.indeksModala >= stan.widoczne.length) return;
+    const w = stan.widoczne[stan.indeksModala];
+    const idx = indeksWKanapce(w);
+    if (idx >= 0) {
+      ref.modalKanapka.classList.add("aktywny");
+      ref.modalKanapka.textContent = "✓ W kanapce (#" + (idx + 1) + ")";
+    } else {
+      ref.modalKanapka.classList.remove("aktywny");
+      ref.modalKanapka.textContent = "+ Do kanapki";
+    }
   }
 
   function otworzModal(indeks) {
@@ -604,7 +1055,6 @@
     stan.indeksModala = indeks;
     const w = stan.widoczne[indeks];
 
-    // 1. Obsługa próbki mapy
     ref.modalPanelProbka.innerHTML = "";
     if (w.nakladka) {
       ref.modalPanelProbka.classList.add("gw-nakladka-tlo");
@@ -628,11 +1078,9 @@
     }
     ref.modalPanelProbka.appendChild(brak);
 
-    // 2. Obsługa mapy zasięgu
     ref.modalPanelZasieg.innerHTML = "";
     ref.modalPanelZasieg.appendChild(utworzWidokZasieguSvg(w));
 
-    // Utrzymanie aktualnie wybranej zakładki (domyślnie probka)
     if (ref.przelaczWidokModala) {
       ref.przelaczWidokModala(stan.widokModala || "probka");
     }
@@ -677,6 +1125,7 @@
       ref.modalTabela.appendChild(tr);
     });
 
+    odswiezPrzyciskModalaKanapki();
     ref.modalKopiuj.textContent = "Kopiuj nazwę";
     ref.modalPoprz.disabled = indeks <= 0;
     ref.modalNast.disabled = indeks >= stan.widoczne.length - 1;
@@ -687,6 +1136,403 @@
   function zamknijModal() {
     ref.modalTlo.hidden = true;
     stan.indeksModala = -1;
+  }
+
+  // --- Mikser kanapki (UI, podgląd na żywo i eksport) ---
+
+  function odswiezDokKanapki() {
+    if (!ref.mikserDok) return;
+    const n = stan.kanapka.length;
+    ref.mikserDokLicznik.textContent = n + " / " + MAKS_WARSTW_KANAPKI + " warstw";
+    if (n === 0) {
+      ref.mikserDokOpis.textContent = "Zaznacz warstwy haczykiem „☐ Do kanapki”, aby ułożyć własny miks.";
+      ref.mikserDokOtworz.disabled = false;
+      if (ref.mikserDokWyslij) ref.mikserDokWyslij.disabled = true;
+    } else {
+      const minPx = najdokladniejszyPikselKanapki(stan.kanapka);
+      const podglad = stan.kanapka.map(function (x) { return x.nazwa; }).slice(0, 3).join(" + ");
+      ref.mikserDokOpis.textContent =
+        podglad + (n > 3 ? " (+" + (n - 3) + ")" : "") +
+        (minPx > 0 ? " · zalecany piksel: " + formatujPiksel(minPx) : "");
+      ref.mikserDokOtworz.disabled = false;
+      if (ref.mikserDokWyslij) ref.mikserDokWyslij.disabled = false;
+    }
+  }
+
+  function otworzMikser() {
+    stan.mikserOtwarty = true;
+    ref.mikserTlo.hidden = false;
+    renderujListeMiksera();
+    odswiezMinimape();
+    zglosOdswiezeniePodgladuMiksera(true);
+    ref.mikserZamknij.focus();
+  }
+
+  function zamknijMikser() {
+    stan.mikserOtwarty = false;
+    ref.mikserTlo.hidden = true;
+    if (stan.abortPodglad) {
+      stan.abortPodglad.abort();
+      stan.abortPodglad = null;
+    }
+  }
+
+  function pokazStatusMiksera(komunikat, czyBlad) {
+    if (!ref.mikserStatusWysylki) return;
+    if (!komunikat) {
+      ref.mikserStatusWysylki.hidden = true;
+      return;
+    }
+    ref.mikserStatusWysylki.hidden = false;
+    ref.mikserStatusWysylki.textContent = komunikat;
+    if (czyBlad) ref.mikserStatusWysylki.classList.add("blad");
+    else ref.mikserStatusWysylki.classList.remove("blad");
+  }
+
+  function renderujListeMiksera() {
+    if (!ref.mikserWarstwy) return;
+    ref.mikserWarstwy.innerHTML = "";
+
+    const ostrz = ostrzezeniaKanapki(stan.kanapka);
+    if (ostrz.length > 0) {
+      ref.mikserOstrzezenia.hidden = false;
+      ref.mikserOstrzezenia.textContent = ostrz.join(" ");
+    } else {
+      ref.mikserOstrzezenia.hidden = true;
+    }
+
+    if (ref.mikserBtnAuto) ref.mikserBtnAuto.disabled = stan.kanapka.length < 2;
+    if (ref.mikserBtnWyczysc) ref.mikserBtnWyczysc.disabled = stan.kanapka.length === 0;
+    if (ref.mikserBtnWyslijGlowne) ref.mikserBtnWyslijGlowne.disabled = stan.kanapka.length === 0;
+    if (ref.mikserBtnWyslijKreator) ref.mikserBtnWyslijKreator.disabled = stan.kanapka.length === 0;
+    if (ref.mikserBtnPobierzPlik) ref.mikserBtnPobierzPlik.disabled = stan.kanapka.length === 0;
+    if (ref.mikserBtnKopiujLink) ref.mikserBtnKopiujLink.disabled = stan.kanapka.length === 0;
+    if (ref.mikserBtnKopiujJson) ref.mikserBtnKopiujJson.disabled = stan.kanapka.length === 0;
+
+    if (stan.kanapka.length === 0) {
+      ref.mikserWarstwy.appendChild(
+        el("div", "gw-brak-wynikow", "Kanapka jest pusta. Wybierz warstwy z galerii przyciskiem „☐ Do kanapki”.")
+      );
+      return;
+    }
+
+    // Wyświetlamy od wierzchu (indeks n-1) do podkładu na dole (indeks 0), jak w FormWarstwyZaawansowane
+    for (let idx = stan.kanapka.length - 1; idx >= 0; idx--) {
+      (function (pozycjaIndeks) {
+        const poz = stan.kanapka[pozycjaIndeks];
+        const wiersz = el("div", "gw-mikser-wiersz");
+
+        const gora = el("div", "gw-mikser-wiersz-gora");
+        const nazwaWrap = el("div", "gw-mikser-poz-nazwa");
+        const nr = el("span", "gw-mikser-numer", String(pozycjaIndeks + 1));
+        nr.title = pozycjaIndeks === 0 ? "Podkład (na spodzie kanapki)" : "Warstwa #" + (pozycjaIndeks + 1);
+        nazwaWrap.appendChild(nr);
+
+        const tytul = el("span", "gw-mikser-tytul-warstwy", poz.nazwa);
+        tytul.title = poz.nazwa + " (" + poz.zbior + " / " + poz.warstwa + ")";
+        nazwaWrap.appendChild(tytul);
+
+        nazwaWrap.appendChild(
+          el("span", "gw-mikser-zbior-etykieta", pozycjaIndeks === 0 ? "Podkład" : (poz.nakladka ? "Nakładka" : poz.zbior))
+        );
+
+        const przyciski = el("div", "gw-mikser-przyciski-kolejnosci");
+        const btnWyzej = el("button", null, "▲");
+        btnWyzej.type = "button";
+        btnWyzej.title = "Przesuń warstwę wyżej (bliżej wierzchu)";
+        btnWyzej.disabled = pozycjaIndeks >= stan.kanapka.length - 1;
+        btnWyzej.addEventListener("click", function () {
+          const tmp = stan.kanapka[pozycjaIndeks + 1];
+          stan.kanapka[pozycjaIndeks + 1] = stan.kanapka[pozycjaIndeks];
+          stan.kanapka[pozycjaIndeks] = tmp;
+          poZmianieKanapki();
+        });
+
+        const btnNizej = el("button", null, "▼");
+        btnNizej.type = "button";
+        btnNizej.title = "Przesuń warstwę niżej (bliżej podkładu)";
+        btnNizej.disabled = pozycjaIndeks <= 0;
+        btnNizej.addEventListener("click", function () {
+          const tmp = stan.kanapka[pozycjaIndeks - 1];
+          stan.kanapka[pozycjaIndeks - 1] = stan.kanapka[pozycjaIndeks];
+          stan.kanapka[pozycjaIndeks] = tmp;
+          poZmianieKanapki();
+        });
+
+        const btnUsun = el("button", null, "✕");
+        btnUsun.type = "button";
+        btnUsun.title = "Usuń warstwę z kanapki";
+        btnUsun.addEventListener("click", function () {
+          stan.kanapka.splice(pozycjaIndeks, 1);
+          poZmianieKanapki();
+        });
+
+        przyciski.appendChild(btnWyzej);
+        przyciski.appendChild(btnNizej);
+        przyciski.appendChild(btnUsun);
+        gora.appendChild(nazwaWrap);
+        gora.appendChild(przyciski);
+
+        const dol = el("div", "gw-mikser-wiersz-dol");
+
+        const suwakGrupa = el("label", "gw-mikser-suwak-grupa");
+        suwakGrupa.appendChild(el("span", null, "Krycie:"));
+        const suwak = document.createElement("input");
+        suwak.type = "range";
+        suwak.min = String(MIN_KRYCIE);
+        suwak.max = String(PELNE_KRYCIE);
+        suwak.step = "5";
+        suwak.value = String(poz.krycie);
+        const wartoscSpan = el("span", "gw-mikser-krycie-wartosc", poz.krycie + "%");
+        suwak.addEventListener("input", function () {
+          poz.krycie = poprawneKrycie(suwak.value);
+          wartoscSpan.textContent = poz.krycie + "%";
+          zapiszKanapkeLocalStorage();
+          if (stan.kanapkaUrlStart) zapiszParametryUrl();
+          zglosOdswiezeniePodgladuMiksera();
+        });
+        suwakGrupa.appendChild(suwak);
+        suwakGrupa.appendChild(wartoscSpan);
+
+        const selectTryb = document.createElement("select");
+        selectTryb.className = "gw-mikser-tryb-select";
+        selectTryb.setAttribute("aria-label", "Tryb mieszania warstwy " + poz.nazwa);
+        TRYBY_MIESZANIA.forEach(function (t) {
+          const opt = document.createElement("option");
+          opt.value = t.kod;
+          opt.textContent = t.nazwa;
+          if (t.kod === poz.tryb) opt.selected = true;
+          selectTryb.appendChild(opt);
+        });
+        selectTryb.addEventListener("change", function () {
+          poz.tryb = selectTryb.value;
+          poZmianieKanapki();
+        });
+
+        dol.appendChild(suwakGrupa);
+        dol.appendChild(selectTryb);
+
+        wiersz.appendChild(gora);
+        wiersz.appendChild(dol);
+        ref.mikserWarstwy.appendChild(wiersz);
+      })(idx);
+    }
+  }
+
+  function zglosOdswiezeniePodgladuMiksera(natychmiast) {
+    if (!stan.mikserOtwarty) return;
+    if (stan.timerPodgladu) clearTimeout(stan.timerPodgladu);
+    if (natychmiast) {
+      odswiezPodgladMiksera();
+      return;
+    }
+    const opoznienie = czyPolaczonoZProgramem() && maFunkcjeProgramu("podglad") ? 180 : 30;
+    stan.timerPodgladu = setTimeout(odswiezPodgladMiksera, opoznienie);
+  }
+
+  function ladujObrazekZCache(url) {
+    if (stan.cacheObrazow.has(url)) {
+      return Promise.resolve(stan.cacheObrazow.get(url));
+    }
+    return new Promise(function (resolve) {
+      const img = new Image();
+      img.onload = function () {
+        stan.cacheObrazow.set(url, img);
+        resolve(img);
+      };
+      img.onerror = function () {
+        resolve(null);
+      };
+      img.src = url;
+    });
+  }
+
+  function odswiezPodgladMiksera() {
+    if (!stan.mikserOtwarty || !ref.mikserCanvas) return;
+    if (stan.kanapka.length === 0) {
+      const ctxPusty = ref.mikserCanvas.getContext("2d");
+      ctxPusty.clearRect(0, 0, ref.mikserCanvas.width, ref.mikserCanvas.height);
+      ref.mikserCanvas.hidden = false;
+      ref.mikserImgLive.hidden = true;
+      ref.mikserLadowanie.hidden = true;
+      ref.mikserStanPodgladu.classList.remove("ostrzezenie");
+      ref.mikserStanPodgladu.textContent = "Dodaj warstwy do kanapki, aby zobaczyć złożony podgląd.";
+      return;
+    }
+
+    if (czyPolaczonoZProgramem() && maFunkcjeProgramu("podglad")) {
+      odswiezPodgladZMapoTero();
+    } else {
+      odswiezPodgladCanvasOffline();
+    }
+  }
+
+  function odswiezPodgladZMapoTero() {
+    if (stan.abortPodglad) stan.abortPodglad.abort();
+    const ctrl = new AbortController();
+    stan.abortPodglad = ctrl;
+
+    ref.mikserLadowanie.hidden = false;
+    const payload = {
+      warstwy: stan.kanapka.map(function (x) {
+        return { zbior: x.zbior, warstwa: x.warstwa, krycie: x.krycie, tryb: x.tryb };
+      }),
+      lat: stan.podgladLat,
+      lon: stan.podgladLon,
+      piksel: stan.podgladPiksel > 0 ? stan.podgladPiksel : null
+    };
+
+    fetch("http://127.0.0.1:" + stan.port + "/podglad?token=" + encodeURIComponent(stan.token), {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+      signal: ctrl.signal
+    })
+      .then(function (resp) {
+        if (!resp.ok) {
+          return resp.json().catch(function () { return { komunikat: "Błąd podglądu" }; }).then(function (j) {
+            throw new Error(j.komunikat || "Błąd podglądu");
+          });
+        }
+        const latH = resp.headers.get("X-MapoTero-Lat");
+        const lonH = resp.headers.get("X-MapoTero-Lon");
+        const pxH = resp.headers.get("X-MapoTero-Piksel");
+        const brakH = resp.headers.get("X-MapoTero-Brakujace");
+        return resp.blob().then(function (blob) {
+          return { blob: blob, latH: latH, lonH: lonH, pxH: pxH, brakH: brakH };
+        });
+      })
+      .then(function (wynik) {
+        if (ctrl.signal.aborted) return;
+        const staryUrl = ref.mikserImgLive.getAttribute("data-blob-url");
+        if (staryUrl) URL.revokeObjectURL(staryUrl);
+        const nowyUrl = URL.createObjectURL(wynik.blob);
+        ref.mikserImgLive.setAttribute("data-blob-url", nowyUrl);
+        ref.mikserImgLive.src = nowyUrl;
+        ref.mikserImgLive.hidden = false;
+        ref.mikserCanvas.hidden = true;
+        ref.mikserLadowanie.hidden = true;
+
+        const opisPunktu = (wynik.latH || stan.podgladLat.toFixed(4)) + ", " + (wynik.lonH || stan.podgladLon.toFixed(4));
+        const opisPx = wynik.pxH ? " · " + wynik.pxH.replace(".", ",") + " m/px" : "";
+        let info = "Podgląd na żywo z MapoTero (" + opisPunktu + opisPx + ").";
+        if (wynik.brakH) {
+          const brakujace = decodeURIComponent(wynik.brakH).split("|").join(", ");
+          info += " Pominięto / brak odpowiedzi: " + brakujace + ".";
+          ref.mikserStanPodgladu.classList.add("ostrzezenie");
+        } else {
+          ref.mikserStanPodgladu.classList.remove("ostrzezenie");
+        }
+        ref.mikserStanPodgladu.textContent = info;
+      })
+      .catch(function (err) {
+        if (ctrl.signal.aborted) return;
+        ref.mikserLadowanie.hidden = true;
+        ref.mikserStanPodgladu.classList.add("ostrzezenie");
+        ref.mikserStanPodgladu.textContent = "Podgląd z MapoTero: " + (err && err.message ? err.message : "brak odpowiedzi.");
+      });
+  }
+
+  function odswiezPodgladCanvasOffline() {
+    ref.mikserCanvas.hidden = false;
+    ref.mikserImgLive.hidden = true;
+    ref.mikserLadowanie.hidden = false;
+
+    const zProbka = [];
+    const bezProbki = [];
+    stan.kanapka.forEach(function (item) {
+      if (item.probka_miksu) zProbka.push(item);
+      else bezProbki.push(item);
+    });
+
+    const ctx = ref.mikserCanvas.getContext("2d");
+    const szer = ref.mikserCanvas.width;
+    const wys = ref.mikserCanvas.height;
+
+    if (zProbka.length === 0) {
+      ctx.clearRect(0, 0, szer, wys);
+      ref.mikserLadowanie.hidden = true;
+      ref.mikserStanPodgladu.classList.add("ostrzezenie");
+      ref.mikserStanPodgladu.textContent =
+        "Wybrane warstwy nie mają wspólnej próbki statycznej offline. Otwórz galerię z programu MapoTero, aby zobaczyć podgląd na żywo z serwerów.";
+      return;
+    }
+
+    const obietnice = zProbka.map(function (item) {
+      return ladujObrazekZCache(sciezkaObrazka(item.probka_miksu)).then(function (img) {
+        return { item: item, img: img };
+      });
+    });
+
+    Promise.all(obietnice).then(function (zaladowane) {
+      ctx.clearRect(0, 0, szer, wys);
+
+      const tempCanvas = document.createElement("canvas");
+      tempCanvas.width = szer;
+      tempCanvas.height = wys;
+      const tempCtx = tempCanvas.getContext("2d");
+
+      const bledne = [];
+      zaladowane.forEach(function (para) {
+        if (!para.img) {
+          bledne.push(para.item.nazwa);
+          return;
+        }
+        const trybInfo = znajdzTryb(para.item.tryb);
+        if (trybInfo.kod === "RzezbaTerenu") {
+          tempCtx.clearRect(0, 0, szer, wys);
+          tempCtx.drawImage(para.img, 0, 0, szer, wys);
+          const bazaImgData = ctx.getImageData(0, 0, szer, wys);
+          const warstwaImgData = tempCtx.getImageData(0, 0, szer, wys);
+          nalozRzezbeTerenuNaPiksele(bazaImgData.data, warstwaImgData.data, para.item.krycie);
+          ctx.putImageData(bazaImgData, 0, 0);
+        } else {
+          ctx.save();
+          ctx.globalAlpha = poprawneKrycie(para.item.krycie) / 100.0;
+          ctx.globalCompositeOperation = trybInfo.css || "source-over";
+          ctx.drawImage(para.img, 0, 0, szer, wys);
+          ctx.restore();
+        }
+      });
+
+      ref.mikserLadowanie.hidden = true;
+      const miejsce = (stan.dane && stan.dane.mikser_miejsce) || "wspólny kadr testowy";
+      if (bezProbki.length > 0 || bledne.length > 0) {
+        const pomin = bezProbki.map(function (x) { return x.nazwa; }).concat(bledne);
+        ref.mikserStanPodgladu.classList.add("ostrzezenie");
+        ref.mikserStanPodgladu.textContent =
+          "Podgląd offline (" + miejsce + "). Bez wspólnej próbki (" + pomin.join(", ") + ") — pełny podgląd działa po otwarciu galerii z MapoTero.";
+      } else {
+        ref.mikserStanPodgladu.classList.remove("ostrzezenie");
+        ref.mikserStanPodgladu.textContent = "Podgląd miksera na wspólnej próbce: " + miejsce + ".";
+      }
+    });
+  }
+
+  function odswiezMinimape() {
+    if (!ref.minimapaSiatka || !stan.minimapaOtwarta) return;
+    const zoom = stan.podgladPiksel > 0 && stan.podgladPiksel <= 1.5 ? 14 : (stan.podgladPiksel >= 10 ? 11 : 13);
+    const pt = latLonDoKafelka(stan.podgladLat, stan.podgladLon, zoom);
+    const txCenter = Math.floor(pt.x);
+    const tyCenter = Math.floor(pt.y);
+    const fracX = pt.x - txCenter;
+    const fracY = pt.y - tyCenter;
+
+    stan.minimapaBazaKafelki = { zoom: zoom, txMin: txCenter - 1, tyMin: tyCenter - 1 };
+
+    ref.minimapaSiatka.innerHTML = "";
+    for (let dy = -1; dy <= 1; dy++) {
+      for (let dx = -1; dx <= 1; dx++) {
+        const img = document.createElement("img");
+        img.alt = "";
+        img.src = "https://tile.openstreetmap.org/" + zoom + "/" + (txCenter + dx) + "/" + (tyCenter + dy) + ".png";
+        ref.minimapaSiatka.appendChild(img);
+      }
+    }
+    const celownik = el("div", "gw-minimapa-celownik");
+    celownik.style.left = (((1 + fracX) / 3) * 100).toFixed(2) + "%";
+    celownik.style.top = (((1 + fracY) / 3) * 100).toFixed(2) + "%";
+    ref.minimapaSiatka.appendChild(celownik);
   }
 
   function utworzGrupePigulek(etykieta, opcje, pobierzAktualna, onZmiana) {
@@ -716,6 +1562,346 @@
 
     odswiez();
     return { element: grupa, odswiez: odswiez };
+  }
+
+  function zbudujMikserUi() {
+    // Dok u dołu ekranu
+    const mikserDok = el("div", "gw-mikser-dok");
+    const dokInfo = el("div", "gw-mikser-dok-info");
+    const dokLicznik = el("span", "gw-mikser-badge", "0 / " + MAKS_WARSTW_KANAPKI + " warstw");
+    const dokOpis = el("span", null, "");
+    dokInfo.appendChild(el("strong", null, "🧩 Mikser kanapki:"));
+    dokInfo.appendChild(dokLicznik);
+    dokInfo.appendChild(dokOpis);
+
+    const dokAkcje = el("div", "gw-mikser-dok-akcje");
+    const dokOtworz = el("button", "gw-btn-glowny", "Otwórz mikser i podgląd");
+    dokOtworz.type = "button";
+    dokOtworz.addEventListener("click", otworzMikser);
+    dokAkcje.appendChild(dokOtworz);
+
+    let dokWyslij = null;
+    if (czyPolaczonoZProgramem()) {
+      dokWyslij = el("button", "gw-btn-zielony", "Wyślij do MapoTero");
+      dokWyslij.type = "button";
+      dokWyslij.addEventListener("click", function () {
+        wyslijKanapkeDoMapoTero("okno_glowne", false);
+      });
+      dokAkcje.appendChild(dokWyslij);
+    }
+
+    mikserDok.appendChild(dokInfo);
+    mikserDok.appendChild(dokAkcje);
+
+    // Okno modalne miksera
+    const mikserTlo = el("div", "gw-mikser-modal-tlo");
+    mikserTlo.hidden = true;
+    mikserTlo.setAttribute("role", "dialog");
+    mikserTlo.setAttribute("aria-modal", "true");
+    mikserTlo.addEventListener("click", function (e) {
+      if (e.target === mikserTlo) zamknijMikser();
+    });
+
+    const mikserModal = el("div", "gw-mikser-modal");
+    const mikserNaglowek = el("div", "gw-mikser-naglowek");
+    mikserNaglowek.appendChild(el("h3", null, "🧩 Mikser kanapki warstw"));
+    const mikserZamknij = el("button", "gw-modal-zamknij", "×");
+    mikserZamknij.type = "button";
+    mikserZamknij.setAttribute("aria-label", "Zamknij mikser");
+    mikserZamknij.addEventListener("click", zamknijMikser);
+    mikserNaglowek.appendChild(mikserZamknij);
+
+    const mikserCialo = el("div", "gw-mikser-cialo");
+
+    // Lewa kolumna: podgląd + wybór miejsca
+    const kolPodglad = el("div", "gw-mikser-kol-podglad");
+    const ramkaPodgladu = el("div", "gw-mikser-ramka-podgladu");
+    const mikserCanvas = document.createElement("canvas");
+    mikserCanvas.width = 360;
+    mikserCanvas.height = 360;
+    const mikserImgLive = document.createElement("img");
+    mikserImgLive.alt = "Podgląd złożonej kanapki z MapoTero";
+    mikserImgLive.hidden = true;
+    const mikserLadowanie = el("div", "gw-mikser-ladowanie", "Składanie podglądu…");
+    mikserLadowanie.hidden = true;
+    ramkaPodgladu.appendChild(mikserCanvas);
+    ramkaPodgladu.appendChild(mikserImgLive);
+    ramkaPodgladu.appendChild(mikserLadowanie);
+
+    const sterowaniePodgladu = el("div", "gw-mikser-sterowanie-podgladu");
+    if (czyPolaczonoZProgramem()) {
+      const selSkala = document.createElement("select");
+      selSkala.setAttribute("aria-label", "Rozdzielczość podglądu");
+      [
+        { val: "0", txt: "Skala: Auto" },
+        { val: "0.5", txt: "0,5 m/px" },
+        { val: "1", txt: "1 m/px" },
+        { val: "2", txt: "2 m/px" },
+        { val: "4", txt: "4 m/px" },
+        { val: "10", txt: "10 m/px" },
+        { val: "25", txt: "25 m/px" }
+      ].forEach(function (op) {
+        const opt = document.createElement("option");
+        opt.value = op.val;
+        opt.textContent = op.txt;
+        selSkala.appendChild(opt);
+      });
+      selSkala.addEventListener("change", function () {
+        stan.podgladPiksel = parseFloat(selSkala.value) || 0;
+        odswiezMinimape();
+        zglosOdswiezeniePodgladuMiksera(true);
+      });
+
+      const btnZMapoTero = el("button", "gw-btn-prosty", "↺ Obszar z MapoTero");
+      btnZMapoTero.type = "button";
+      btnZMapoTero.title = "Pobierz ponownie środek zaznaczenia z okna MapoTero";
+      btnZMapoTero.addEventListener("click", function () {
+        pobierzStanZMapoTero(false, false);
+      });
+
+      const btnMinimapa = el("button", "gw-btn-prosty", "🗺️ Wybierz miejsce");
+      btnMinimapa.type = "button";
+      btnMinimapa.addEventListener("click", function () {
+        stan.minimapaOtwarta = !stan.minimapaOtwarta;
+        minimapaBox.hidden = !stan.minimapaOtwarta;
+        if (stan.minimapaOtwarta) odswiezMinimape();
+      });
+
+      sterowaniePodgladu.appendChild(selSkala);
+      sterowaniePodgladu.appendChild(btnZMapoTero);
+      sterowaniePodgladu.appendChild(btnMinimapa);
+    }
+
+    const minimapaBox = el("div", "gw-mikser-minimapa-box");
+    minimapaBox.hidden = true;
+    minimapaBox.appendChild(el("div", null, "Kliknij na mapie miejsce do podglądu w MapoTero:"));
+    const minimapaSiatka = el("div", "gw-minimapa-siatka");
+    minimapaSiatka.addEventListener("click", function (e) {
+      if (!stan.minimapaBazaKafelki) return;
+      const rect = minimapaSiatka.getBoundingClientRect();
+      const rx = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+      const ry = Math.max(0, Math.min(1, (e.clientY - rect.top) / rect.height));
+      const tx = stan.minimapaBazaKafelki.txMin + rx * 3;
+      const ty = stan.minimapaBazaKafelki.tyMin + ry * 3;
+      const geo = kafelekDoLatLon(tx, ty, stan.minimapaBazaKafelki.zoom);
+      stan.podgladLat = Math.round(geo.lat * 10000) / 10000;
+      stan.podgladLon = Math.round(geo.lon * 10000) / 10000;
+      odswiezMinimape();
+      zglosOdswiezeniePodgladuMiksera(true);
+    });
+    const skrotyBox = el("div", "gw-minimapa-skroty");
+    SKROTY_MIEJSC.forEach(function (m) {
+      const b = el("button", null, m.nazwa);
+      b.type = "button";
+      b.addEventListener("click", function () {
+        stan.podgladLat = m.lat;
+        stan.podgladLon = m.lon;
+        odswiezMinimape();
+        zglosOdswiezeniePodgladuMiksera(true);
+      });
+      skrotyBox.appendChild(b);
+    });
+    minimapaBox.appendChild(minimapaSiatka);
+    minimapaBox.appendChild(skrotyBox);
+
+    const mikserStanPodgladu = el("div", "gw-mikser-stan-podgladu", "");
+
+    kolPodglad.appendChild(ramkaPodgladu);
+    kolPodglad.appendChild(sterowaniePodgladu);
+    kolPodglad.appendChild(minimapaBox);
+    kolPodglad.appendChild(mikserStanPodgladu);
+
+    // Prawa kolumna: warstwy, suwaki i eksport
+    const kolLista = el("div", "gw-mikser-kol-lista");
+    const pasekListy = el("div", "gw-mikser-pasek-listy");
+    pasekListy.appendChild(el("span", null, "Kolejność kanapki: na górze warstwa najwyższa, na dole podkład (1)."));
+
+    const przyciskiListy = el("div", "gw-modal-linki");
+    const btnAuto = el("button", "gw-btn-prosty", "⚡ Ułóż automatycznie");
+    btnAuto.type = "button";
+    btnAuto.title = "Przesuwa podkłady na spód, nakładki na górę i włącza tryb Rzeźba terenu dla cieniowania";
+    btnAuto.addEventListener("click", function () {
+      stan.kanapka = ulozKanapkeAutomatycznie(stan.kanapka);
+      poZmianieKanapki();
+    });
+
+    const btnWyczysc = el("button", "gw-btn-prosty", "Wyczyść");
+    btnWyczysc.type = "button";
+    btnWyczysc.addEventListener("click", function () {
+      stan.kanapka = [];
+      pokazStatusMiksera("", false);
+      poZmianieKanapki();
+    });
+
+    przyciskiListy.appendChild(btnAuto);
+    if (czyPolaczonoZProgramem()) {
+      const btnWczytajZProg = el("button", "gw-btn-prosty", "↺ Wczytaj z MapoTero");
+      btnWczytajZProg.type = "button";
+      btnWczytajZProg.title = "Zastępuje listę aktualną kanapką z okna MapoTero";
+      btnWczytajZProg.addEventListener("click", function () {
+        pobierzStanZMapoTero(false, true).then(function (dane) {
+          if (!dane || !dane.zestaw || !dane.zestaw.warstwy || dane.zestaw.warstwy.length === 0) {
+            pokazStatusMiksera("W oknie MapoTero nie ma obecnie wybranych warstw.", true);
+          } else {
+            pokazStatusMiksera("Wczytano bieżące warstwy z MapoTero.", false);
+          }
+        });
+      });
+      przyciskiListy.appendChild(btnWczytajZProg);
+    }
+    przyciskiListy.appendChild(btnWyczysc);
+    pasekListy.appendChild(przyciskiListy);
+
+    const mikserWarstwy = el("div", "gw-mikser-warstwy");
+    const mikserOstrzezenia = el("div", "gw-mikser-ostrzezenia");
+    mikserOstrzezenia.hidden = true;
+
+    const sekcjaEksport = el("div", "gw-mikser-eksport");
+    const nazwaWiersz = el("div", "gw-mikser-nazwa-wiersz");
+    nazwaWiersz.appendChild(el("label", null, "Nazwa stylu / pliku:"));
+    const inputNazwa = document.createElement("input");
+    inputNazwa.type = "text";
+    inputNazwa.className = "gw-mikser-nazwa-input";
+    inputNazwa.placeholder = "np. Orto + rzeźba + szlaki (opcjonalnie)";
+    inputNazwa.value = stan.nazwaKanapki;
+    inputNazwa.addEventListener("input", function () {
+      stan.nazwaKanapki = inputNazwa.value;
+      zapiszKanapkeLocalStorage();
+    });
+    nazwaWiersz.appendChild(inputNazwa);
+
+    const akcjeGlowne = el("div", "gw-mikser-akcje-glowne");
+    let btnWyslijGlowne = null;
+    let btnWyslijKreator = null;
+    if (czyPolaczonoZProgramem()) {
+      const chkStyl = document.createElement("input");
+      chkStyl.type = "checkbox";
+      chkStyl.checked = stan.zapiszJakoStyl;
+      chkStyl.addEventListener("change", function () {
+        stan.zapiszJakoStyl = chkStyl.checked;
+      });
+      const lblChk = el("label", null, " zapisz też jako własny styl kreatora");
+      lblChk.style.fontSize = "0.8rem";
+      lblChk.style.display = "inline-flex";
+      lblChk.style.alignItems = "center";
+      lblChk.style.gap = "0.25rem";
+      lblChk.prepend(chkStyl);
+
+      btnWyslijGlowne = el("button", "gw-btn-zielony", "▶ Wyślij do MapoTero (Okno główne)");
+      btnWyslijGlowne.type = "button";
+      btnWyslijGlowne.addEventListener("click", function () {
+        wyslijKanapkeDoMapoTero("okno_glowne", stan.zapiszJakoStyl);
+      });
+
+      btnWyslijKreator = el("button", "gw-btn-glowny", "✨ Otwórz w Szybkim Kreatorze");
+      btnWyslijKreator.type = "button";
+      btnWyslijKreator.addEventListener("click", function () {
+        wyslijKanapkeDoMapoTero("kreator", true);
+      });
+
+      akcjeGlowne.appendChild(btnWyslijGlowne);
+      akcjeGlowne.appendChild(btnWyslijKreator);
+      akcjeGlowne.appendChild(lblChk);
+    }
+
+    const akcjeZapasowe = el("div", "gw-mikser-akcje-zapasowe");
+    const btnPobierzPlik = el("button", "gw-btn-prosty", "💾 Pobierz plik (.mapotero)");
+    btnPobierzPlik.type = "button";
+    btnPobierzPlik.title = "Plik możesz przeciągnąć bezpośrednio na okno MapoTero";
+    btnPobierzPlik.addEventListener("click", function () {
+      const przepis = budujPrzepisJson(stan.kanapka, {
+        nazwa: stan.nazwaKanapki,
+        cel: "okno_glowne",
+        zapiszStyl: stan.zapiszJakoStyl
+      });
+      const blob = new Blob([JSON.stringify(przepis, null, 2)], { type: "application/json;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      const nazwaPliku = (stan.nazwaKanapki || "kanapka_mapotero")
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9_-]+/g, "_")
+        .replace(/^_+|_+$/g, "") || "kanapka_mapotero";
+      a.href = url;
+      a.download = nazwaPliku + ".mapotero";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      pokazStatusMiksera("Zapisano plik " + a.download + " — przeciągnij go na okno MapoTero lub wczytaj z menu listy warstw.", false);
+    });
+
+    const btnKopiujLink = el("button", "gw-btn-prosty", "🔗 Kopiuj link");
+    btnKopiujLink.type = "button";
+    btnKopiujLink.addEventListener("click", function () {
+      const link = zbudujLinkUdostepniania();
+      if (!navigator.clipboard) return;
+      navigator.clipboard.writeText(link).then(function () {
+        pokazStatusMiksera("Skopiowano link do udostępnienia tej kanapki.", false);
+      });
+    });
+
+    const btnKopiujJson = el("button", "gw-btn-prosty", "📋 Kopiuj JSON");
+    btnKopiujJson.type = "button";
+    btnKopiujJson.addEventListener("click", function () {
+      const przepis = budujPrzepisJson(stan.kanapka, {
+        nazwa: stan.nazwaKanapki,
+        cel: "okno_glowne",
+        zapiszStyl: stan.zapiszJakoStyl
+      });
+      if (!navigator.clipboard) return;
+      navigator.clipboard.writeText(JSON.stringify(przepis, null, 2)).then(function () {
+        pokazStatusMiksera("Skopiowano przepis JSON do schowka — kliknij prawym na liście warstw w MapoTero i wybierz „Wklej kanapkę ze schowka”.", false);
+      });
+    });
+
+    akcjeZapasowe.appendChild(btnPobierzPlik);
+    akcjeZapasowe.appendChild(btnKopiujLink);
+    akcjeZapasowe.appendChild(btnKopiujJson);
+
+    const statusWysylki = el("div", "gw-mikser-status-wysylki", "");
+    statusWysylki.hidden = true;
+
+    sekcjaEksport.appendChild(nazwaWiersz);
+    if (akcjeGlowne.childNodes.length > 0) sekcjaEksport.appendChild(akcjeGlowne);
+    sekcjaEksport.appendChild(akcjeZapasowe);
+    sekcjaEksport.appendChild(statusWysylki);
+
+    kolLista.appendChild(pasekListy);
+    kolLista.appendChild(mikserWarstwy);
+    kolLista.appendChild(mikserOstrzezenia);
+    kolLista.appendChild(sekcjaEksport);
+
+    mikserCialo.appendChild(kolPodglad);
+    mikserCialo.appendChild(kolLista);
+    mikserModal.appendChild(mikserNaglowek);
+    mikserModal.appendChild(mikserCialo);
+    mikserTlo.appendChild(mikserModal);
+
+    return {
+      mikserDok: mikserDok,
+      mikserDokLicznik: dokLicznik,
+      mikserDokOpis: dokOpis,
+      mikserDokOtworz: dokOtworz,
+      mikserDokWyslij: dokWyslij,
+      mikserTlo: mikserTlo,
+      mikserZamknij: mikserZamknij,
+      mikserCanvas: mikserCanvas,
+      mikserImgLive: mikserImgLive,
+      mikserLadowanie: mikserLadowanie,
+      mikserStanPodgladu: mikserStanPodgladu,
+      minimapaSiatka: minimapaSiatka,
+      mikserWarstwy: mikserWarstwy,
+      mikserOstrzezenia: mikserOstrzezenia,
+      mikserBtnAuto: btnAuto,
+      mikserBtnWyczysc: btnWyczysc,
+      mikserBtnWyslijGlowne: btnWyslijGlowne,
+      mikserBtnWyslijKreator: btnWyslijKreator,
+      mikserBtnPobierzPlik: btnPobierzPlik,
+      mikserBtnKopiujLink: btnKopiujLink,
+      mikserBtnKopiujJson: btnKopiujJson,
+      mikserStatusWysylki: statusWysylki
+    };
   }
 
   function zbudujInterfejs() {
@@ -829,7 +2015,7 @@
 
     const wyniki = el("div");
 
-    // Modal
+    // Modal pojedynczej warstwy
     const modalTlo = el("div", "gw-modal-tlo");
     modalTlo.hidden = true;
     modalTlo.setAttribute("role", "dialog");
@@ -870,18 +2056,14 @@
         tabZasieg.classList.add("aktywny");
         tabZasieg.setAttribute("aria-selected", "true");
         modalPanelProbka.hidden = true;
-        modalPanelProbka.style.display = "none";
         modalPanelZasieg.hidden = false;
-        modalPanelZasieg.style.display = "flex";
       } else {
         tabZasieg.classList.remove("aktywny");
         tabZasieg.setAttribute("aria-selected", "false");
         tabProbka.classList.add("aktywny");
         tabProbka.setAttribute("aria-selected", "true");
         modalPanelZasieg.hidden = true;
-        modalPanelZasieg.style.display = "none";
         modalPanelProbka.hidden = false;
-        modalPanelProbka.style.display = "flex";
       }
     }
 
@@ -893,7 +2075,6 @@
     modalObrazKol.appendChild(modalPanelZasieg);
 
     const modalInfoKol = el("div", "gw-modal-info-kol");
-
     const modalNaglowek = el("div", "gw-modal-naglowek");
     const modalTytul = el("h3", "gw-modal-tytul");
     const modalZamknij = el("button", "gw-modal-zamknij", "×");
@@ -904,12 +2085,19 @@
     modalNaglowek.appendChild(modalZamknij);
 
     const modalSciezka = el("div", "gw-modal-sciezka");
-
     const modalTabela = document.createElement("table");
     modalTabela.className = "gw-modal-tabela";
 
     const modalAkcje = el("div", "gw-modal-akcje");
     const modalLinki = el("div", "gw-modal-linki");
+
+    const modalKanapka = el("button", "gw-btn-kanapka", "+ Do kanapki");
+    modalKanapka.type = "button";
+    modalKanapka.addEventListener("click", function () {
+      const w = stan.widoczne[stan.indeksModala];
+      if (w) przelaczWarstweWKanapce(w);
+    });
+    modalLinki.appendChild(modalKanapka);
 
     let modalDodaj = null;
     if (czyPolaczonoZProgramem()) {
@@ -966,7 +2154,13 @@
     modal.appendChild(modalInfoKol);
     modalTlo.appendChild(modal);
 
+    const mikserUi = zbudujMikserUi();
+
     document.addEventListener("keydown", function (e) {
+      if (stan.mikserOtwarty && e.key === "Escape") {
+        zamknijMikser();
+        return;
+      }
       if (modalTlo.hidden) return;
       if (e.key === "Escape") zamknijModal();
       else if (e.key === "ArrowLeft" && stan.indeksModala > 0) otworzModal(stan.indeksModala - 1);
@@ -984,8 +2178,17 @@
       fetch("http://127.0.0.1:" + stan.port + "/ping?token=" + encodeURIComponent(stan.token))
         .then(function (r) {
           if (!r.ok) throw new Error();
+          return r.json().catch(function () { return { ok: true }; });
+        })
+        .then(function (pingDane) {
+          stan.funkcjeProgramu = Array.isArray(pingDane.funkcje) ? pingDane.funkcje : ["dodaj"];
+          stan.wersjaProgramu = pingDane.wersja || "";
+          pasekMapoTero.classList.remove("gw-pasek-blad");
           pasekMapoTero.textContent =
-            "Połączono z programem MapoTero — kliknij „+ Dodaj do MapoTero” przy dowolnej warstwie.";
+            "Połączono z MapoTero" +
+            (stan.wersjaProgramu ? " " + stan.wersjaProgramu : "") +
+            " — zaznacz warstwy haczykami „Do kanapki” i otwórz Mikser na dole ekranu albo dodawaj pojedynczo.";
+          return pobierzStanZMapoTero(!stan.kanapkaUrlStart, false);
         })
         .catch(function () {
           pasekMapoTero.classList.add("gw-pasek-blad");
@@ -996,7 +2199,9 @@
 
     kontener.appendChild(panel);
     kontener.appendChild(wyniki);
+    kontener.appendChild(mikserUi.mikserDok);
     kontener.appendChild(modalTlo);
+    kontener.appendChild(mikserUi.mikserTlo);
 
     if (stan.dane && stan.dane.wygenerowano) {
       kontener.appendChild(
@@ -1010,7 +2215,7 @@
       );
     }
 
-    ref = {
+    ref = Object.assign({
       pasekMapoTero: pasekMapoTero,
       licznik: licznik,
       btnReset: btnReset,
@@ -1025,13 +2230,18 @@
       modalTytul: modalTytul,
       modalSciezka: modalSciezka,
       modalTabela: modalTabela,
+      modalKanapka: modalKanapka,
       modalKopiuj: modalKopiuj,
       modalPoprz: modalPoprz,
       modalNast: modalNast,
       modalZamknij: modalZamknij
-    };
+    }, mikserUi);
 
     renderujSiatke();
+    odswiezDokKanapki();
+    if (stan.mikserOtwarty) {
+      otworzMikser();
+    }
   }
 
   wczytajParametryUrl();
@@ -1044,6 +2254,7 @@
     .then(function (dane) {
       stan.dane = dane;
       stan.warstwy = Array.isArray(dane.warstwy) ? dane.warstwy : [];
+      wczytajKanapkePoczatkowa();
       zbudujInterfejs();
     })
     .catch(function () {
@@ -1056,4 +2267,4 @@
         )
       );
     });
-})();
+})(typeof window !== "undefined" ? window : globalThis);

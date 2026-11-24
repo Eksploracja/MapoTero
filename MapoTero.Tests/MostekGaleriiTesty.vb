@@ -4,9 +4,12 @@ Option Infer On
 
 Imports System.Net
 Imports System.Net.Http
+Imports System.Text
 Imports System.Text.Json
+Imports System.Threading
 Imports System.Threading.Tasks
 Imports MapoTero
+Imports MapoTero.Core
 Imports Xunit
 
 Public Class MostekGaleriiTesty
@@ -90,6 +93,59 @@ Public Class MostekGaleriiTesty
                 Assert.Equal(HttpStatusCode.NoContent, resp.StatusCode)
                 Assert.Equal("https://eksploracja.github.io", String.Join("", resp.Headers.GetValues("Access-Control-Allow-Origin")))
                 Assert.Equal("true", String.Join("", resp.Headers.GetValues("Access-Control-Allow-Private-Network")))
+            End Using
+        End Using
+    End Function
+
+    <Fact>
+    Public Async Function Zestaw_Stan_IPodglad_ObslugujaPelnyPrzeplyw() As Task
+        Dim odebranaLiczba As Integer = 0
+        Dim opcje As New OpcjeMostkaGalerii With {
+            .WersjaProgramu = "3.19",
+            .ObslugaDodaj = Function(z, w) WynikMostkaGalerii.Dodano("ok"),
+            .ObslugaPobierzStan = Function()
+                                       Dim stan As New StanMostkaGalerii()
+                                       stan.Obszar.Lat = 52.23
+                                       stan.Obszar.Lon = 21.01
+                                       stan.Obszar.Piksel = 2.0
+                                       stan.Zestaw.Warstwy.Add(New PozycjaZestawuGalerii With {
+                                           .Zbior = "TOPO_WMTS", .Warstwa = "MAPA TOPOGRAFICZNA", .Krycie = 100, .Tryb = "Zwykly"
+                                       })
+                                       Return stan
+                                   End Function,
+            .ObslugaZastosujZestaw = Function(dane)
+                                         odebranaLiczba = dane.Warstwy.Count
+                                         Return WynikMostkaGalerii.Ustawiono("Ustawiono zestaw", dane.Warstwy.Count)
+                                     End Function,
+            .ObslugaPodglad = Function(zad, ct)
+                                  Dim png = New Byte() {&H89, &H50, &H4E, &H47}
+                                  Return Task.FromResult(WynikPodgladuGalerii.Sukces(png, 50.06, 19.94, 2.0, {"brak1"}))
+                              End Function
+        }
+
+        Using mostek As New MostekGalerii(opcje)
+            Using klient As New HttpClient()
+                Dim pingResp = Await klient.GetStringAsync($"http://127.0.0.1:{mostek.Port}/ping?token={mostek.Token}")
+                Assert.Contains("""zestaw""", pingResp)
+                Assert.Contains("""podglad""", pingResp)
+
+                Dim stanResp = Await klient.GetStringAsync($"http://127.0.0.1:{mostek.Port}/stan?token={mostek.Token}")
+                Assert.Contains("TOPO_WMTS", stanResp)
+                Assert.Contains("52.23", stanResp)
+
+                Dim jsonZestaw = "{""format"":""mapotero-zestaw"",""warstwy"":[{""zbior"":""TOPO_WMTS"",""warstwa"":""MAPA TOPOGRAFICZNA"",""krycie"":80,""tryb"":""Mnozenie""}]}"
+                Dim postZestaw = Await klient.PostAsync($"http://127.0.0.1:{mostek.Port}/zestaw?token={mostek.Token}",
+                                                        New StringContent(jsonZestaw, Encoding.UTF8, "application/json"))
+                Assert.Equal(HttpStatusCode.OK, postZestaw.StatusCode)
+                Assert.Equal(1, odebranaLiczba)
+
+                Dim jsonPodglad = "{""warstwy"":[{""zbior"":""TOPO_WMTS"",""warstwa"":""MAPA TOPOGRAFICZNA"",""krycie"":100,""tryb"":""Zwykly""}],""lat"":50.06,""lon"":19.94,""piksel"":2}"
+                Dim postPodglad = Await klient.PostAsync($"http://127.0.0.1:{mostek.Port}/podglad?token={mostek.Token}",
+                                                         New StringContent(jsonPodglad, Encoding.UTF8, "application/json"))
+                Assert.Equal(HttpStatusCode.OK, postPodglad.StatusCode)
+                Assert.Equal("image/png", postPodglad.Content.Headers.ContentType?.MediaType)
+                Assert.Equal("50.06", String.Join("", postPodglad.Headers.GetValues("X-MapoTero-Lat")))
+                Assert.Equal("brak1", Uri.UnescapeDataString(String.Join("", postPodglad.Headers.GetValues("X-MapoTero-Brakujace"))))
             End Using
         End Using
     End Function

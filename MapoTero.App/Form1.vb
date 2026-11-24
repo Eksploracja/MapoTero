@@ -15,6 +15,7 @@
 
 Imports System.IO
 Imports System.Threading
+Imports System.Threading.Tasks
 Imports GMap.NET
 Imports GMap.NET.MapProviders
 Imports GMap.NET.WindowsForms
@@ -63,8 +64,11 @@ Public Class Form1
 
     ''' <summary>Zbiory map z warstwy.txt w kolejności drzewa warstw.</summary>
     Private ReadOnly _zbiory As New List(Of ZbiorMapy)
-    ''' <summary>Lokalny nasłuch HTTP pozwalający stronie galerii warstw dodać wybraną warstwę do programu.</summary>
+    ''' <summary>Lokalny nasłuch HTTP pozwalający stronie galerii warstw dodać wybraną warstwę lub kanapkę do programu.</summary>
     Private _mostekGalerii As MostekGalerii
+    Private _silnikPodgladuGalerii As PodgladWarstwSilnik
+    Private _ikonyPodgladuDrzewa As PomocnikIkonPodgladuDrzewa
+    Private ReadOnly _semaforPodgladuGalerii As New SemaphoreSlim(1, 1)
 
     ''' <summary>
     ''' Ostatnio wskazany zbiór map (kliknięty w drzewie, z conf.txt) - nazwa sesji, gdy kanapka jest pusta
@@ -511,6 +515,14 @@ Public Class Form1
         'drzewo zbiorów map - warstwy wczytane z conf.txt zostają (każda pamięta swój serwer, więc zbiór sesji na liście
         'ich nie czyści; dawniej po ponownym uruchomieniu warstwy sesji znikały i trzeba je było wybrać od nowa)
         WczytajListeZbiorowMap(_biezacyZbior)
+        _ikonyPodgladuDrzewa = New PomocnikIkonPodgladuDrzewa(
+            tvWarstwy,
+            Program.PobierzMagazynGalerii(TrybTestowyBezSieci),
+            Function(wezel)
+                Dim w = DrzewoWarstw.WarstwaWezla(wezel)
+                If w Is Nothing OrElse w.Zbior Is Nothing Then Return ("", "")
+                Return (w.Zbior.Nazwa, w.Warstwa)
+            End Function)
         If _zestaw.Liczba > 0 Then
             Komunikat("Wczytano sesję pobierania z pliku conf.txt, warstwy: " & OpisWarstw() & ".", Color.Green)
         End If
@@ -545,6 +557,10 @@ Public Class Form1
         _silnikPodgladu.Dispose()
         _mostekGalerii?.Dispose()
         _mostekGalerii = Nothing
+        _silnikPodgladuGalerii?.Dispose()
+        _silnikPodgladuGalerii = Nothing
+        _ikonyPodgladuDrzewa?.Dispose()
+        _ikonyPodgladuDrzewa = Nothing
         WyczyscZnaczniki()
         _pedzelZewnetrzny.Dispose()
         _pioroZewnetrzne.Dispose()
@@ -1416,6 +1432,7 @@ Public Class Form1
 
     ''' <summary>Kliknięcie nazwy warstwy zaznacza ją lub odznacza (jak pole wyboru), kliknięcie nazwy grupy rozwija ją lub zwija.</summary>
     Private Sub tvWarstwy_NodeMouseClick(sender As Object, e As TreeNodeMouseClickEventArgs) Handles tvWarstwy.NodeMouseClick
+        If _ikonyPodgladuDrzewa IsNot Nothing AndAlso _ikonyPodgladuDrzewa.CzyPunktNaIkonie(e.Location) Then Exit Sub
         If e.Button <> MouseButtons.Left OrElse tvWarstwy.HitTest(e.Location).Location <> TreeViewHitTestLocations.Label Then Exit Sub
         If DrzewoWarstw.CzyGrupa(e.Node) Then
             e.Node.Toggle()
@@ -1475,26 +1492,50 @@ Public Class Form1
         lstWybraneWarstwy.ZrodloWarstwy = AddressOf ZrodloWarstwy
 
         _menuWarstwy = New ContextMenuStrip(components)
-        _menuWarstwy.Items.Add("Przesuń wyżej", Nothing, Sub() PrzesunZaznaczonaWarstwe(1))
-        _menuWarstwy.Items.Add("Przesuń niżej", Nothing, Sub() PrzesunZaznaczonaWarstwe(-1))
-        _menuWarstwy.Items.Add(New ToolStripSeparator())
+        Dim miWyzej = New ToolStripMenuItem("Przesuń wyżej", Nothing, Sub() PrzesunZaznaczonaWarstwe(1))
+        Dim miNizej = New ToolStripMenuItem("Przesuń niżej", Nothing, Sub() PrzesunZaznaczonaWarstwe(-1))
+        Dim sepKrycie As New ToolStripSeparator()
+        Dim pozycjeKrycia As New List(Of ToolStripMenuItem)()
+        _menuWarstwy.Items.Add(miWyzej)
+        _menuWarstwy.Items.Add(miNizej)
+        _menuWarstwy.Items.Add(sepKrycie)
         For Each k In {100, 75, 50, 25}
             Dim krycie As Integer = k
             Dim poz As New ToolStripMenuItem("Krycie " & krycie & " %", Nothing, Sub() UstawKrycieZaznaczonej(krycie)) With {.Tag = krycie}
+            pozycjeKrycia.Add(poz)
             _menuWarstwy.Items.Add(poz)
         Next
-        _menuWarstwy.Items.Add("Krycie - zaawansowane…", Nothing, Sub() OtworzWarstwyZaawansowane())
-        _menuWarstwy.Items.Add(New ToolStripSeparator())
-        _menuWarstwy.Items.Add("Usuń warstwę", My.Resources.kosz, Sub() UsunZaznaczonaWarstwe())
+        Dim miZaaw = New ToolStripMenuItem("Krycie - zaawansowane...", Nothing, Sub() OtworzWarstwyZaawansowane())
+        Dim sepUsun As New ToolStripSeparator()
+        Dim miUsun = New ToolStripMenuItem("Usuń warstwę", My.Resources.kosz, Sub() UsunZaznaczonaWarstwe())
+        Dim sepKanapka As New ToolStripSeparator()
+        Dim miKopiujKanapke = New ToolStripMenuItem("Kopiuj kanapkę (JSON)", Nothing, Sub() KopiujKanapkeDoSchowka())
+        Dim miWklejKanapke = New ToolStripMenuItem("Wklej kanapkę ze schowka", Nothing, Sub() WklejKanapkeZeSchowka())
+        Dim miWczytajKanapke = New ToolStripMenuItem("Wczytaj kanapkę z pliku...", Nothing, Sub() WczytajKanapkeZPliku())
+        _menuWarstwy.Items.AddRange({miZaaw, sepUsun, miUsun, sepKanapka, miKopiujKanapke, miWklejKanapke, miWczytajKanapke})
+
         AddHandler _menuWarstwy.Opening,
             Sub(s, e)
                 Dim i As Integer = lstWybraneWarstwy.Zaznaczona
-                If i < 0 Then e.Cancel = True : Exit Sub
-                _menuWarstwy.Items(0).Enabled = i < _zestaw.Liczba - 1
-                _menuWarstwy.Items(1).Enabled = i > 0
-                For Each poz In _menuWarstwy.Items.OfType(Of ToolStripMenuItem)()
-                    If TypeOf poz.Tag Is Integer Then poz.Checked = CInt(poz.Tag) = _zestaw(i).Krycie
+                Dim maZaznaczona As Boolean = i >= 0 AndAlso i < _zestaw.Liczba
+                miWyzej.Visible = maZaznaczona
+                miNizej.Visible = maZaznaczona
+                sepKrycie.Visible = maZaznaczona
+                miZaaw.Visible = maZaznaczona
+                sepUsun.Visible = maZaznaczona
+                miUsun.Visible = maZaznaczona
+                sepKanapka.Visible = maZaznaczona
+                If maZaznaczona Then
+                    miWyzej.Enabled = i < _zestaw.Liczba - 1
+                    miNizej.Enabled = i > 0
+                End If
+                For Each poz In pozycjeKrycia
+                    poz.Visible = maZaznaczona
+                    If maZaznaczona Then poz.Checked = CInt(poz.Tag) = _zestaw(i).Krycie
                 Next
+                miKopiujKanapke.Enabled = _zestaw.Liczba > 0
+                miWklejKanapke.Enabled = _przerwanie Is Nothing
+                miWczytajKanapke.Enabled = _przerwanie Is Nothing
             End Sub
         lstWybraneWarstwy.MenuWarstwy = _menuWarstwy
     End Sub
@@ -3702,7 +3743,7 @@ Public Class Form1
             Dim pliki = TryCast(e.Data.GetData(DataFormats.FileDrop), String())
             If pliki IsNot Nothing AndAlso pliki.Length > 0 Then
                 Dim ext = Path.GetExtension(pliki(0)).ToLowerInvariant()
-                If ext = ".gpx" OrElse ext = ".kml" OrElse ext = ".kmz" OrElse ext = ".map" OrElse ext = ".geojson" OrElse ext = ".json" OrElse ext = ".gpkg" OrElse Directory.Exists(pliki(0)) Then
+                If ext = ".gpx" OrElse ext = ".kml" OrElse ext = ".kmz" OrElse ext = ".map" OrElse ext = ".geojson" OrElse ext = ".json" OrElse ext = ".mapotero" OrElse ext = ".gpkg" OrElse Directory.Exists(pliki(0)) Then
                     e.Effect = DragDropEffects.Copy
                     Return
                 End If
@@ -3778,6 +3819,22 @@ Public Class Form1
 
         Dim plik = pliki(0)
         Dim ext = Path.GetExtension(plik).ToLowerInvariant()
+        If ext = ".mapotero" OrElse ext = ".json" Then
+            Try
+                Dim tresc = File.ReadAllText(plik, System.Text.Encoding.UTF8)
+                If ext = ".mapotero" OrElse PrzekazZestawu.CzyWygladaJakZestawGalerii(tresc) Then
+                    Dim dane = PrzekazZestawu.ZTekstu(tresc)
+                    Dim wynik = ZastosujPrzepisZestawu(dane, "z pliku " & Path.GetFileName(plik))
+                    If Not wynik.Ok Then
+                        MsgBox(wynik.Komunikat, MsgBoxStyle.Exclamation, "Kanapka warstw")
+                    End If
+                    Exit Sub
+                End If
+            Catch ex As Exception
+                MsgBox("Nie udało się wczytać kanapki warstw: " & OpisBledu.Z(ex), MsgBoxStyle.Critical, "Kanapka warstw")
+                Exit Sub
+            End Try
+        End If
         If ext = ".geojson" OrElse ext = ".json" OrElse ext = ".gpkg" Then
             Try
                 WczytajObszarPoligonu(plik)
@@ -4085,13 +4142,20 @@ Public Class Form1
 
     ''' <summary>
     ''' Uruchamia lokalny nasłuch MostekGalerii (jeśli nie działa) i otwiera stronę galerii warstw w przeglądarce
-    ''' z parametrami połączenia (port i token), aby użytkownik mógł jednym kliknięciem dodać warstwę do programu.
+    ''' z parametrami połączenia (port i token), aby użytkownik mógł jednym kliknięciem dodać warstwę lub całą kanapkę.
     ''' Zmienna środowiskowa MAPOTERO_GALERIA_URL pozwala wskazać lokalny serwer podglądu podczas testów.
     ''' </summary>
     Public Sub OtworzGalerieWarstw()
         Try
             If _mostekGalerii Is Nothing Then
-                _mostekGalerii = New MostekGalerii(AddressOf ObsluzWarstweZGalerii)
+                Dim opcje As New OpcjeMostkaGalerii With {
+                    .WersjaProgramu = Program.Wersja,
+                    .ObslugaDodaj = AddressOf ObsluzWarstweZGalerii,
+                    .ObslugaPobierzStan = AddressOf PobierzStanDlaGalerii,
+                    .ObslugaZastosujZestaw = AddressOf ObsluzZestawZGalerii,
+                    .ObslugaPodglad = AddressOf ObsluzPodgladZGaleriiAsync
+                }
+                _mostekGalerii = New MostekGalerii(opcje)
             End If
         Catch ex As Exception
             Komunikat("Nie udało się uruchomić połączenia z galerią warstw: " & OpisBledu.Z(ex), Color.DarkOrange)
@@ -4116,7 +4180,7 @@ Public Class Form1
         End If
 
         If _przerwanie IsNot Nothing Then
-            Return WynikMostkaGalerii.Blad("zajety", "Trwa pobieranie mapy – zatrzymaj je przed zmianą listy warstw.")
+            Return WynikMostkaGalerii.Blad("zajety", "Trwa pobieranie mapy - zatrzymaj je przed zmianą listy warstw.")
         End If
 
         Dim zbior = _zbiory.FirstOrDefault(Function(z) String.Equals(z.Nazwa, zbiorNazwa, StringComparison.OrdinalIgnoreCase))
@@ -4145,6 +4209,299 @@ Public Class Form1
         PrzywrocOknoNaWierzch()
         Return WynikMostkaGalerii.Dodano($"Dodano warstwę '{nazwaWyswietlana}'.")
     End Function
+
+    Private Function PobierzStanDlaGalerii() As StanMostkaGalerii
+        If Me.IsDisposed Then Return New StanMostkaGalerii()
+        If Me.InvokeRequired Then
+            Return DirectCast(Me.Invoke(New Func(Of StanMostkaGalerii)(AddressOf PobierzStanDlaGalerii)), StanMostkaGalerii)
+        End If
+
+        Dim punkt As PunktXY, piksel As Double
+        ParametryProbki(punkt, piksel)
+        Dim geo = Ustawienia.Uklad.DoWgs84(punkt)
+        Dim pikselMetry = If(Ustawienia.Uklad.Geograficzny,
+                             Ustawienia.Uklad.PrzeliczRozmiarPiksela(UkladWspolrzednych.PL1992, piksel, geo),
+                             piksel)
+
+        Dim obszar As New DaneObszaruGalerii With {
+            .Lat = Math.Round(geo.Szerokosc, 5),
+            .Lon = Math.Round(geo.Dlugosc, 5),
+            .Piksel = Math.Round(If(pikselMetry > 0, pikselMetry, 1.0), 3),
+            .Uklad = "EPSG:" & Ustawienia.Uklad.Epsg
+        }
+
+        Dim s = BiezacaSiatka()
+        If s.Poprawna Then
+            obszar.MaSiatke = True
+            Dim sw = Ustawienia.Uklad.DoWgs84(s.Obszar.XDol, s.Obszar.YLewy)
+            Dim ne = Ustawienia.Uklad.DoWgs84(s.Obszar.XGora, s.Obszar.YPrawy)
+            obszar.BboxWgs84 = {
+                Math.Round(Math.Min(sw.Dlugosc, ne.Dlugosc), 5),
+                Math.Round(Math.Min(sw.Szerokosc, ne.Szerokosc), 5),
+                Math.Round(Math.Max(sw.Dlugosc, ne.Dlugosc), 5),
+                Math.Round(Math.Max(sw.Szerokosc, ne.Szerokosc), 5)
+            }
+        End If
+
+        Return New StanMostkaGalerii With {
+            .Ok = True,
+            .Zestaw = PrzekazZestawu.ZZestawuWarstw(_zestaw, OpisWarstw()),
+            .Obszar = obszar
+        }
+    End Function
+
+    Private Function ObsluzZestawZGalerii(dane As DaneZestawuGalerii) As WynikMostkaGalerii
+        If Me.IsDisposed Then Return WynikMostkaGalerii.Blad("blad", "Okno programu zostało zamknięte.")
+        If Me.InvokeRequired Then
+            Return DirectCast(Me.Invoke(New Func(Of DaneZestawuGalerii, WynikMostkaGalerii)(AddressOf ObsluzZestawZGalerii), dane), WynikMostkaGalerii)
+        End If
+        If _przerwanie IsNot Nothing Then
+            Return WynikMostkaGalerii.Blad("zajety", "Trwa pobieranie mapy - zatrzymaj je przed zmianą listy warstw.")
+        End If
+
+        Dim wynik = ZastosujPrzepisZestawu(dane, "z galerii")
+        If wynik.Ok Then PrzywrocOknoNaWierzch()
+        Return wynik
+    End Function
+
+    Private Function ZastosujPrzepisZestawu(dane As DaneZestawuGalerii, Optional zrodloOpis As String = "z galerii") As WynikMostkaGalerii
+        If dane Is Nothing Then Return WynikMostkaGalerii.Blad("blad_parametrow", "Pusty przepis kanapki.")
+        Dim wynikBudowy = PrzekazZestawu.ZbudujZestaw(dane, ZrodlaMapSesji(), _zestaw)
+        If wynikBudowy.Zestaw.Liczba = 0 Then
+            Dim szczegoly = If(wynikBudowy.Pominiete.Count > 0, " (" & String.Join(", ", wynikBudowy.Pominiete) & ")", "")
+            Return WynikMostkaGalerii.Blad("nie_znaleziono", "Nie rozpoznano żadnej warstwy z przepisu" & szczegoly & ".")
+        End If
+
+        Dim opisPiksela As String = ""
+        If wynikBudowy.Cel <> "kreator" Then
+            Dim bylaPusta As Boolean = _zestaw.Liczba = 0
+            _zestaw = wynikBudowy.Zestaw
+            PoZmianieWarstw(Math.Max(0, _zestaw.Liczba - 1))
+            opisPiksela = DobierzRozmiarPiksela(bylaPusta)
+            DobierzBokSegmentu(bylaPusta)
+        End If
+
+        Dim zapisanyStyl As SzablonMapy = Nothing
+        If wynikBudowy.ZapiszStyl OrElse wynikBudowy.Cel = "kreator" Then
+            zapisanyStyl = ZapiszStylZPrzepisu(wynikBudowy.Zestaw, wynikBudowy.Nazwa)
+        End If
+
+        Dim czesci As New List(Of String)()
+        If wynikBudowy.Cel = "kreator" Then
+            czesci.Add("Zapisano kanapkę jako styl kreatora" & If(zapisanyStyl IsNot Nothing, " '" & zapisanyStyl.Nazwa & "'", "") & " (" & wynikBudowy.Zestaw.Liczba & " warstw)")
+        Else
+            czesci.Add("Wczytano kanapkę " & zrodloOpis & " (" & wynikBudowy.Zestaw.Liczba & " warstw)")
+            If zapisanyStyl IsNot Nothing Then czesci.Add("zapisano też styl '" & zapisanyStyl.Nazwa & "'")
+        End If
+        If opisPiksela <> "" Then czesci.Add(opisPiksela)
+        If wynikBudowy.Pominiete.Count > 0 Then czesci.Add("pominięto: " & String.Join(", ", wynikBudowy.Pominiete))
+
+        Dim przykryta = wynikBudowy.Zestaw.ZnajdzPrzykrytaNakladke()
+        Dim komunikatKoncowy = String.Join(". ", czesci) & "."
+        If przykryta IsNot Nothing Then
+            komunikatKoncowy &= " Uwaga: nakładka " & NazwaWarstwy(przykryta) & " może zostać zasłonięta przez warstwę nad nią."
+            Komunikat(komunikatKoncowy, Color.DarkOrange)
+        Else
+            Komunikat(komunikatKoncowy, If(wynikBudowy.Pominiete.Count > 0, Color.DarkOrange, Color.Green))
+        End If
+
+        If wynikBudowy.Cel = "kreator" AndAlso zapisanyStyl IsNot Nothing Then
+            FormKreatorMapy.WybierzSzablonNaStarcie(zapisanyStyl.Id)
+            OtworzKreatorMapy()
+        End If
+
+        Return WynikMostkaGalerii.Ustawiono(komunikatKoncowy, wynikBudowy.Zestaw.Liczba, wynikBudowy.Pominiete)
+    End Function
+
+    Private Function ZapiszStylZPrzepisu(zestaw As ZestawWarstw, nazwa As String) As SzablonMapy
+        Dim punkt As PunktXY, piksel As Double
+        ParametryProbki(punkt, piksel)
+        Dim geo = Ustawienia.Uklad.DoWgs84(punkt)
+        Dim pikselMetry = If(Ustawienia.Uklad.Geograficzny,
+                             Ustawienia.Uklad.PrzeliczRozmiarPiksela(UkladWspolrzednych.PL1992, piksel, geo),
+                             piksel)
+
+        Dim styl = PrzekazZestawu.UtworzStylSzablonu(zestaw, nazwa, geo.Szerokosc, geo.Dlugosc, pikselMetry)
+        If styl Is Nothing Then Return Nothing
+
+        Dim sciezka = Path.Combine(If(String.IsNullOrEmpty(FolderDanych), AppDomain.CurrentDomain.BaseDirectory, FolderDanych), SzablonyWlasne.NazwaPliku)
+        Dim lista As List(Of SzablonMapy)
+        Try
+            lista = SzablonyWlasne.Wczytaj(sciezka)
+        Catch
+            lista = ZarzadcaSzablonow.PobierzWlasne().ToList()
+        End Try
+
+        Dim istniejacy = lista.FindIndex(Function(x) String.Equals(x.Nazwa, styl.Nazwa, StringComparison.CurrentCultureIgnoreCase))
+        If istniejacy >= 0 Then
+            lista(istniejacy) = styl
+        Else
+            lista.Add(styl)
+        End If
+
+        SzablonyWlasne.Zapisz(sciezka, lista)
+        ZarzadcaSzablonow.UstawWlasne(lista)
+        Return styl
+    End Function
+
+    Private Async Function ObsluzPodgladZGaleriiAsync(zadanie As ZadaniePodgladuGalerii, ct As CancellationToken) As Task(Of WynikPodgladuGalerii)
+        If Me.IsDisposed Then Return WynikPodgladuGalerii.Blad("Okno programu zostało zamknięte.")
+
+        Await _semaforPodgladuGalerii.WaitAsync(ct).ConfigureAwait(False)
+        Try
+            ct.ThrowIfCancellationRequested()
+
+            Dim stanMigawki = CType(Me.Invoke(New Func(Of (
+                Zrodla As Dictionary(Of String, PlikWarstw),
+                Uklad As UkladWspolrzednych,
+                DomyslnyPunkt As PunktXY,
+                DomyslnyPiksel As Double,
+                Format As String,
+                LimitCzasu As Integer,
+                IloscProb As Integer,
+                JakoscJpegWmts As Integer
+            ))(Function()
+                   Dim p As PunktXY, px As Double
+                   ParametryProbki(p, px)
+                   Return (ZrodlaMapSesji(), Ustawienia.Uklad, p, px, Ustawienia.Format,
+                           Ustawienia.LimitCzasuSekundy, Ustawienia.IloscProbPobrania, Ustawienia.JakoscJpegWmts)
+               End Function)), (
+                Zrodla As Dictionary(Of String, PlikWarstw),
+                Uklad As UkladWspolrzednych,
+                DomyslnyPunkt As PunktXY,
+                DomyslnyPiksel As Double,
+                Format As String,
+                LimitCzasu As Integer,
+                IloscProb As Integer,
+                JakoscJpegWmts As Integer
+            ))
+
+            Dim wynikZestawu = PrzekazZestawu.ZbudujZestaw(
+                New DaneZestawuGalerii With {.Warstwy = zadanie.Warstwy},
+                stanMigawki.Zrodla)
+            If wynikZestawu.Zestaw.Liczba = 0 Then
+                Return WynikPodgladuGalerii.Blad("Nie rozpoznano żadnej warstwy do podglądu.")
+            End If
+
+            Dim uklad = stanMigawki.Uklad
+            Dim punkt As PunktXY
+            Dim latOut As Double, lonOut As Double
+            If zadanie.Lat.HasValue AndAlso zadanie.Lon.HasValue Then
+                latOut = zadanie.Lat.Value
+                lonOut = zadanie.Lon.Value
+                punkt = uklad.ZWgs84(latOut, lonOut)
+            Else
+                punkt = stanMigawki.DomyslnyPunkt
+                Dim geo = uklad.DoWgs84(punkt)
+                latOut = geo.Szerokosc
+                lonOut = geo.Dlugosc
+            End If
+
+            Dim najdokladniejsza = wynikZestawu.Zestaw.NajdokladniejszaWarstwa()
+            Dim pikselMetry As Double
+            If zadanie.Piksel.HasValue AndAlso zadanie.Piksel.Value > 0 Then
+                pikselMetry = zadanie.Piksel.Value
+            ElseIf najdokladniejsza IsNot Nothing AndAlso najdokladniejsza.ZalecanyPiksel > 0 Then
+                pikselMetry = najdokladniejsza.ZalecanyPiksel
+            Else
+                pikselMetry = If(uklad.Geograficzny,
+                                 uklad.PrzeliczRozmiarPiksela(UkladWspolrzednych.PL1992, stanMigawki.DomyslnyPiksel, New PunktGeo(latOut, lonOut)),
+                                 stanMigawki.DomyslnyPiksel)
+            End If
+            If pikselMetry <= 0 Then pikselMetry = 2.0
+
+            Dim pikselUkladu = If(uklad.Geograficzny,
+                                  UkladWspolrzednych.PL1992.PrzeliczRozmiarPiksela(uklad, pikselMetry, New PunktGeo(latOut, lonOut)),
+                                  pikselMetry)
+
+            If _silnikPodgladuGalerii Is Nothing Then
+                _silnikPodgladuGalerii = New PodgladWarstwSilnik() With {.Bok = 360}
+            End If
+            _silnikPodgladuGalerii.SprawdzIZaktualizujParametry(punkt, pikselUkladu, uklad)
+
+            Dim pol = _silnikPodgladuGalerii.Bok * pikselUkladu / 2.0
+            Dim zasiegProbki As New Zasieg(punkt.X - pol, punkt.Y - pol, punkt.X + pol, punkt.Y + pol)
+            Dim siatkaProbki As New Siatka(zasiegProbki, pikselUkladu, _silnikPodgladuGalerii.Bok)
+
+            Dim zadaniePob As New ZadaniePobierania With {
+                .Uklad = uklad,
+                .Siatka = siatkaProbki,
+                .Zbiory = wynikZestawu.Zestaw.Zbiory(),
+                .ZrodlaMap = stanMigawki.Zrodla,
+                .Format = stanMigawki.Format,
+                .LimitCzasuSekundy = Math.Max(5, stanMigawki.LimitCzasu),
+                .IloscProb = Math.Max(1, stanMigawki.IloscProb),
+                .JakoscJpegWmts = stanMigawki.JakoscJpegWmts,
+                .Przezroczystosc = True,
+                .Folder = Path.Combine(Path.GetTempPath(), "MapoTero_galeria_podglad") & Path.DirectorySeparatorChar
+            }
+
+            Dim wynik = Await _silnikPodgladuGalerii.PobierzPodgladAsync(zadaniePob, wynikZestawu.Zestaw, ct).ConfigureAwait(False)
+            ct.ThrowIfCancellationRequested()
+
+            Using bmp = wynik.Item1
+                If bmp Is Nothing Then
+                    Dim blad = If(wynik.Item2 IsNot Nothing AndAlso wynik.Item2.Count > 0,
+                                  String.Join("; ", wynik.Item2),
+                                  "Serwer mapowy nie zwrócił obrazu dla tego obszaru.")
+                    Return WynikPodgladuGalerii.Blad(blad)
+                End If
+                Using ms As New MemoryStream()
+                    bmp.Save(ms, System.Drawing.Imaging.ImageFormat.Png)
+                    Dim brakujace = _silnikPodgladuGalerii.BrakujaceWarstwy(wynikZestawu.Zestaw).
+                        Select(Function(w) w.Zbior & "/" & w.Nazwa).
+                        Concat(wynikZestawu.Pominiete).
+                        ToList()
+                    Return WynikPodgladuGalerii.Sukces(ms.ToArray(), latOut, lonOut, pikselMetry, brakujace)
+                End Using
+            End Using
+        Finally
+            _semaforPodgladuGalerii.Release()
+        End Try
+    End Function
+
+    Private Sub KopiujKanapkeDoSchowka()
+        If _zestaw.Liczba = 0 Then Exit Sub
+        Try
+            Dim tekst = PrzekazZestawu.DoTekstu(PrzekazZestawu.ZZestawuWarstw(_zestaw, OpisWarstw()))
+            Clipboard.SetText(tekst)
+            Komunikat("Skopiowano przepis kanapki (" & _zestaw.Liczba & " warstw) do schowka.", Color.Green)
+        Catch ex As Exception
+            MsgBox("Nie udało się skopiować kanapki do schowka: " & OpisBledu.Z(ex), MsgBoxStyle.Exclamation, "Kanapka warstw")
+        End Try
+    End Sub
+
+    Private Sub WklejKanapkeZeSchowka()
+        If PobieranieTrwa("Wklejenie kanapki warstw") Then Exit Sub
+        Try
+            If Not Clipboard.ContainsText() Then
+                MsgBox("W schowku nie ma tekstu z przepisem kanapki.", MsgBoxStyle.Information, "Kanapka warstw")
+                Exit Sub
+            End If
+            Dim dane = PrzekazZestawu.ZTekstu(Clipboard.GetText())
+            Dim wynik = ZastosujPrzepisZestawu(dane, "ze schowka")
+            If Not wynik.Ok Then MsgBox(wynik.Komunikat, MsgBoxStyle.Exclamation, "Kanapka warstw")
+        Catch ex As Exception
+            MsgBox("Nie udało się wkleić kanapki ze schowka: " & OpisBledu.Z(ex), MsgBoxStyle.Exclamation, "Kanapka warstw")
+        End Try
+    End Sub
+
+    Private Sub WczytajKanapkeZPliku()
+        If PobieranieTrwa("Wczytanie kanapki warstw") Then Exit Sub
+        Using dlg As New OpenFileDialog With {
+            .Title = "Wczytaj kanapkę warstw z galerii",
+            .Filter = "Przepis kanapki MapoTero (*.mapotero;*.json)|*.mapotero;*.json|Wszystkie pliki (*.*)|*.*"
+        }
+            If dlg.ShowDialog(Me) <> DialogResult.OK Then Exit Sub
+            Try
+                Dim dane = PrzekazZestawu.ZTekstu(File.ReadAllText(dlg.FileName, System.Text.Encoding.UTF8))
+                Dim wynik = ZastosujPrzepisZestawu(dane, "z pliku " & Path.GetFileName(dlg.FileName))
+                If Not wynik.Ok Then MsgBox(wynik.Komunikat, MsgBoxStyle.Exclamation, "Kanapka warstw")
+            Catch ex As Exception
+                MsgBox("Nie udało się wczytać pliku kanapki: " & OpisBledu.Z(ex), MsgBoxStyle.Exclamation, "Kanapka warstw")
+            End Try
+        End Using
+    End Sub
 
     Private Sub PrzywrocOknoNaWierzch()
         If Me.WindowState = FormWindowState.Minimized Then Me.WindowState = FormWindowState.Normal

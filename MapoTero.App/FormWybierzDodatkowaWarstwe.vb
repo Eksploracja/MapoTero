@@ -134,6 +134,7 @@ Public Class FormWybierzDodatkowaWarstwe
     Private ReadOnly _lblInfo As New Label()
     Private ReadOnly _btnDodaj As New Button()
     Private ReadOnly _btnAnuluj As New Button()
+    Private _ikonyPodgladuDrzewa As PomocnikIkonPodgladuDrzewa
 
     Private _wybranaWarstwa As WarstwaWybrana = Nothing
 
@@ -219,6 +220,15 @@ Public Class FormWybierzDodatkowaWarstwe
 
         ZaladujWarstwyZeZrodel()
         ZbudujDrzewo("")
+
+        _ikonyPodgladuDrzewa = New PomocnikIkonPodgladuDrzewa(
+            _tvWarstwy,
+            Program.PobierzMagazynGalerii(Form1.TrybTestowyBezSieci),
+            Function(wezel)
+                Dim el = TryCast(wezel?.Tag, ElementWarstwy)
+                If el Is Nothing Then Return ("", "")
+                Return (Path.GetFileNameWithoutExtension(el.ZbiorKlucz), el.NazwaTechniczna)
+            End Function)
     End Sub
 
     Public ReadOnly Property WybranaWarstwa As WarstwaWybrana
@@ -438,6 +448,7 @@ Public Class FormWybierzDodatkowaWarstwe
     End Sub
 
     Private Sub tvWarstwy_NodeMouseDoubleClick(sender As Object, e As TreeNodeMouseClickEventArgs)
+        If _ikonyPodgladuDrzewa IsNot Nothing AndAlso _ikonyPodgladuDrzewa.CzyPunktNaIkonie(e.Location) Then Exit Sub
         If e.Node IsNot Nothing AndAlso e.Node.Tag IsNot Nothing Then
             Dim el = TryCast(e.Node.Tag, ElementWarstwy)
             If el IsNot Nothing AndAlso Not el.CzyJuzDodana Then

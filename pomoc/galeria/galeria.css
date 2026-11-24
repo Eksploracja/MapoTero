@@ -962,3 +962,545 @@
   background: #0f766e;
   border-color: #0f766e;
 }
+
+/* Haczyki kanapki na kartach galerii */
+.gw-karta.gw-karta-w-kanapce {
+  border-color: #7253ed;
+  box-shadow: 0 0 0 2px rgba(114, 83, 237, 0.22);
+}
+
+.gw-akcje-karty {
+  margin-top: 0.45rem;
+  display: flex;
+  gap: 0.35rem;
+  align-items: center;
+}
+
+.gw-akcje-karty .gw-btn-dodaj {
+  margin-top: 0;
+  flex: 1 1 auto;
+}
+
+.gw-btn-kanapka {
+  flex: 1 1 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+  border: 1px solid #d5d0d8;
+  background: #f5f6fa;
+  color: #27262b;
+  border-radius: 4px;
+  padding: 0.34rem 0.55rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.gw-btn-kanapka:hover {
+  border-color: #7253ed;
+  color: #7253ed;
+}
+
+.gw-btn-kanapka.aktywny {
+  background: #ede9fe;
+  border-color: #7253ed;
+  color: #4c1d95;
+}
+
+/* Dolny dok Miksera kanapki */
+.gw-mikser-dok {
+  position: sticky;
+  bottom: 0.65rem;
+  z-index: 30;
+  margin-top: 1.5rem;
+  background: #ffffff;
+  border: 1px solid #7253ed;
+  border-radius: 8px;
+  box-shadow: 0 10px 28px rgba(39, 38, 43, 0.16);
+  padding: 0.65rem 0.9rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+}
+
+.gw-mikser-dok-info {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.85rem;
+  font-size: 0.86rem;
+  color: #27262b;
+}
+
+.gw-mikser-badge {
+  background: #7253ed;
+  color: #ffffff;
+  border-radius: 999px;
+  padding: 0.15rem 0.6rem;
+  font-weight: 700;
+  font-size: 0.8rem;
+}
+
+.gw-mikser-dok-akcje {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  align-items: center;
+}
+
+.gw-btn-glowny {
+  border: 1px solid #7253ed;
+  background: #7253ed;
+  color: #ffffff;
+  border-radius: 4px;
+  padding: 0.38rem 0.78rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.gw-btn-glowny:hover:not(:disabled) {
+  background: #5b3fd4;
+  border-color: #5b3fd4;
+}
+
+.gw-btn-glowny:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.gw-btn-zielony {
+  border: 1px solid #0f766e;
+  background: #0f766e;
+  color: #ffffff;
+  border-radius: 4px;
+  padding: 0.38rem 0.78rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.gw-btn-zielony:hover:not(:disabled) {
+  background: #0d5c56;
+  border-color: #0d5c56;
+}
+
+/* Okno Miksera kanapki */
+.gw-mikser-modal-tlo {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  background: rgba(24, 24, 32, 0.62);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.gw-mikser-modal-tlo[hidden] {
+  display: none;
+}
+
+.gw-mikser-modal {
+  background: #ffffff;
+  border-radius: 8px;
+  width: 100%;
+  max-width: 1080px;
+  max-height: 92vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 22px 60px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+}
+
+.gw-mikser-naglowek {
+  padding: 0.8rem 1.15rem;
+  border-bottom: 1px solid #e6e1e8;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  background: #f5f6fa;
+}
+
+.gw-mikser-naglowek h3 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.gw-mikser-cialo {
+  padding: 1rem 1.15rem;
+  overflow-y: auto;
+  display: grid;
+  grid-template-columns: 380px 1fr;
+  gap: 1.15rem;
+  align-items: start;
+}
+
+@media (max-width: 860px) {
+  .gw-mikser-cialo {
+    grid-template-columns: 1fr;
+  }
+}
+
+.gw-mikser-kol-podglad {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.gw-mikser-ramka-podgladu {
+  position: relative;
+  width: 100%;
+  max-width: 360px;
+  aspect-ratio: 1 / 1;
+  border: 1px solid #d5d0d8;
+  border-radius: 6px;
+  overflow: hidden;
+  background-color: #ffffff;
+  background-image:
+    linear-gradient(45deg, #f2f2f2 25%, transparent 25%),
+    linear-gradient(-45deg, #f2f2f2 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #f2f2f2 75%),
+    linear-gradient(-45deg, transparent 75%, #f2f2f2 75%);
+  background-size: 16px 16px;
+  background-position: 0 0, 0 8px, 8px -8px, -8px 0;
+}
+
+.gw-mikser-ramka-podgladu canvas,
+.gw-mikser-ramka-podgladu img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: contain;
+}
+
+.gw-mikser-ladowanie {
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.72);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: #27262b;
+}
+
+.gw-mikser-ladowanie[hidden] {
+  display: none;
+}
+
+.gw-mikser-sterowanie-podgladu {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  align-items: center;
+  font-size: 0.8rem;
+}
+
+.gw-mikser-sterowanie-podgladu select {
+  padding: 0.25rem 0.45rem;
+  border: 1px solid #d5d0d8;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  background: #ffffff;
+}
+
+.gw-mikser-stan-podgladu {
+  font-size: 0.78rem;
+  color: #5c5962;
+  background: #f5f6fa;
+  border: 1px solid #e6e1e8;
+  border-radius: 4px;
+  padding: 0.4rem 0.6rem;
+  line-height: 1.35;
+}
+
+.gw-mikser-stan-podgladu.ostrzezenie {
+  background: #fffbeb;
+  border-color: #fde68a;
+  color: #92400e;
+}
+
+.gw-mikser-minimapa-box {
+  border: 1px solid #d5d0d8;
+  border-radius: 6px;
+  padding: 0.55rem;
+  background: #fafafa;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.gw-mikser-minimapa-box[hidden] {
+  display: none;
+}
+
+.gw-minimapa-siatka {
+  position: relative;
+  width: 100%;
+  max-width: 344px;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  border-radius: 4px;
+  border: 1px solid #cbd5e1;
+  cursor: crosshair;
+  background: #e2e8f0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+}
+
+.gw-minimapa-siatka img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  pointer-events: none;
+  user-select: none;
+}
+
+.gw-minimapa-celownik {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  border: 2px solid #dc2626;
+  border-radius: 50%;
+  background: rgba(220, 38, 38, 0.2);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.gw-minimapa-skroty {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+
+.gw-minimapa-skroty button {
+  border: 1px solid #d5d0d8;
+  background: #ffffff;
+  border-radius: 4px;
+  padding: 0.18rem 0.45rem;
+  font-size: 0.74rem;
+  cursor: pointer;
+}
+
+.gw-minimapa-skroty button:hover {
+  border-color: #7253ed;
+  color: #7253ed;
+}
+
+/* Prawa kolumna miksera: lista warstw i akcje */
+.gw-mikser-kol-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.gw-mikser-pasek-listy {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  color: #5c5962;
+}
+
+.gw-mikser-warstwy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  max-height: 44vh;
+  overflow-y: auto;
+  padding-right: 0.2rem;
+}
+
+.gw-mikser-wiersz {
+  border: 1px solid #e6e1e8;
+  border-radius: 6px;
+  padding: 0.5rem 0.65rem;
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.gw-mikser-wiersz-gora {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  justify-content: space-between;
+}
+
+.gw-mikser-poz-nazwa {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.gw-mikser-numer {
+  flex-shrink: 0;
+  min-width: 1.5rem;
+  height: 1.4rem;
+  border-radius: 4px;
+  background: #f5f6fa;
+  border: 1px solid #d5d0d8;
+  font-size: 0.75rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #27262b;
+}
+
+.gw-mikser-tytul-warstwy {
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: #27262b;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.gw-mikser-zbior-etykieta {
+  font-size: 0.74rem;
+  color: #5c5962;
+  flex-shrink: 0;
+}
+
+.gw-mikser-przyciski-kolejnosci {
+  display: inline-flex;
+  gap: 0.25rem;
+  flex-shrink: 0;
+}
+
+.gw-mikser-przyciski-kolejnosci button {
+  border: 1px solid #d5d0d8;
+  background: #f5f6fa;
+  color: #27262b;
+  border-radius: 4px;
+  width: 1.7rem;
+  height: 1.6rem;
+  font-size: 0.78rem;
+  cursor: pointer;
+  padding: 0;
+}
+
+.gw-mikser-przyciski-kolejnosci button:hover:not(:disabled) {
+  border-color: #7253ed;
+  color: #7253ed;
+}
+
+.gw-mikser-przyciski-kolejnosci button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.gw-mikser-wiersz-dol {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+  font-size: 0.8rem;
+}
+
+.gw-mikser-suwak-grupa {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex: 1 1 180px;
+}
+
+.gw-mikser-suwak-grupa input[type="range"] {
+  flex: 1 1 auto;
+  accent-color: #7253ed;
+}
+
+.gw-mikser-krycie-wartosc {
+  min-width: 2.6rem;
+  text-align: right;
+  font-weight: 600;
+  color: #27262b;
+}
+
+.gw-mikser-tryb-select {
+  padding: 0.24rem 0.45rem;
+  border: 1px solid #d5d0d8;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  background: #ffffff;
+}
+
+.gw-mikser-ostrzezenia {
+  font-size: 0.8rem;
+  color: #92400e;
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: 5px;
+  padding: 0.45rem 0.65rem;
+  line-height: 1.4;
+}
+
+.gw-mikser-ostrzezenia[hidden] {
+  display: none;
+}
+
+.gw-mikser-eksport {
+  border-top: 1px solid #e6e1e8;
+  padding-top: 0.7rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.gw-mikser-nazwa-wiersz {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  font-size: 0.82rem;
+}
+
+.gw-mikser-nazwa-input {
+  flex: 1 1 200px;
+  padding: 0.35rem 0.55rem;
+  border: 1px solid #d5d0d8;
+  border-radius: 4px;
+  font-size: 0.84rem;
+}
+
+.gw-mikser-akcje-glowne,
+.gw-mikser-akcje-zapasowe {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  align-items: center;
+}
+
+.gw-mikser-status-wysylki {
+  font-size: 0.82rem;
+  padding: 0.4rem 0.6rem;
+  border-radius: 4px;
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  color: #065f46;
+}
+
+.gw-mikser-status-wysylki.blad {
+  background: #fef2f2;
+  border-color: #fecaca;
+  color: #991b1b;
+}
+
+.gw-mikser-status-wysylki[hidden] {
+  display: none;
+}
+
