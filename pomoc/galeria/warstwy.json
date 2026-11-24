@@ -1,5 +1,5 @@
 {
-  "wygenerowano": "2026-11-23",
+  "wygenerowano": "2026-11-24",
   "wersja_programu": "3.19",
   "warstwy": [
     {
@@ -63,7 +63,7 @@
       "zalecany_piksel": 0.1,
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/ortofotomapa_TrueOrtho__PrawdziwaOrtofotomapa.webp",
-      "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "miejsce_probki": "Kraków Stare Miasto (50.06, 19.94)",
       "hash_definicji": "549cf842"
     },
     {
@@ -559,7 +559,7 @@
       "zalecany_piksel": 10,
       "zrodlo": "terrestris (OSM)",
       "obrazek": "obrazy/galeria/OpenStreetMap_Terrestris__SRTM30-Contour.webp",
-      "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "miejsce_probki": "Tatry / Zakopane (49.25, 19.96)",
       "hash_definicji": "db9b3e82"
     },
     {
@@ -591,7 +591,7 @@
       "zalecany_piksel": 1,
       "zrodlo": "NID",
       "obrazek": "obrazy/galeria/zabytki_zasiegi_NID__Zabytki_nieruchome_I.webp",
-      "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "miejsce_probki": "Kraków Stare Miasto (50.06, 19.94)",
       "hash_definicji": "2ba3e8bb"
     },
     {
@@ -607,7 +607,7 @@
       "zalecany_piksel": 1,
       "zrodlo": "NID",
       "obrazek": "obrazy/galeria/zabytki_NID__Immovable_Monuments.webp",
-      "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "miejsce_probki": "Kraków Stare Miasto (50.06, 19.94)",
       "hash_definicji": "8cd7c76d"
     },
     {
@@ -623,7 +623,7 @@
       "zalecany_piksel": 2,
       "zrodlo": "NID",
       "obrazek": "obrazy/galeria/zabytki_archeo_NID__Archaeological_Monuments.webp",
-      "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "miejsce_probki": "Kraków Stare Miasto (50.06, 19.94)",
       "hash_definicji": "5ff5698e"
     },
     {
@@ -639,7 +639,7 @@
       "zalecany_piksel": 1,
       "zrodlo": "NID",
       "obrazek": "obrazy/galeria/zabytki_ewidencja_nieruchomych_NID__Ewidencja_zabytkow_nieruchomych_I.webp",
-      "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "miejsce_probki": "Kraków Stare Miasto (50.06, 19.94)",
       "hash_definicji": "93768859"
     },
     {
@@ -655,7 +655,7 @@
       "zalecany_piksel": 2,
       "zrodlo": "NID",
       "obrazek": "obrazy/galeria/zabytki_ewidencja_archeo_NID__Ewidencja_zabytków_archeologicznych.webp",
-      "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "miejsce_probki": "Kraków Stare Miasto (50.06, 19.94)",
       "hash_definicji": "88fcc30d"
     },
     {
@@ -671,7 +671,7 @@
       "zalecany_piksel": 4,
       "zrodlo": "NID",
       "obrazek": "obrazy/galeria/zabytki_pomniki_historii_NID__Monuments_of_History.webp",
-      "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "miejsce_probki": "Kraków Stare Miasto (50.06, 19.94)",
       "hash_definicji": "52ff4938"
     },
     {
@@ -687,7 +687,7 @@
       "zalecany_piksel": 4,
       "zrodlo": "NID",
       "obrazek": "obrazy/galeria/zabytki_unesco_NID__World_Heritage_Properties_List.webp",
-      "miejsce_probki": "Kraków (50.06, 19.94)",
+      "miejsce_probki": "Kraków Stare Miasto (50.06, 19.94)",
       "hash_definicji": "d1627f3f"
     },
     {
@@ -703,7 +703,7 @@
       "zalecany_piksel": 1,
       "zrodlo": "NID",
       "obrazek": "obrazy/galeria/zabytki_groby_wojenne_NID__Groby_i_cmentarze_wojenne_I.webp",
-      "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "miejsce_probki": "Kraków Stare Miasto (50.06, 19.94)",
       "hash_definicji": "d537e8b8"
     },
     {
@@ -719,7 +719,7 @@
       "zalecany_piksel": 2,
       "zrodlo": "IHPAN / Pastmaps",
       "obrazek": "obrazy/galeria/mapy_historyczne_IHPAN__m25k_2180.webp",
-      "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "miejsce_probki": "Poznań (52.41, 16.93)",
       "hash_definicji": "1f24d557"
     },
     {
@@ -895,7 +895,7 @@
       "zalecany_piksel": 16,
       "zrodlo": "IHPAN / Pastmaps",
       "obrazek": "obrazy/galeria/mapy_historyczne_IHPAN__schroetter_3857.webp",
-      "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "miejsce_probki": "Olsztyn (53.78, 20.48)",
       "hash_definicji": "1ecc8f85"
     },
     {
@@ -927,7 +927,7 @@
       "zalecany_piksel": 16,
       "zrodlo": "IHPAN / Pastmaps",
       "obrazek": "obrazy/galeria/mapy_historyczne_IHPAN__textor_3857.webp",
-      "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "miejsce_probki": "Rzeszów (50.04, 22.00)",
       "hash_definicji": "3554c749"
     },
     {
@@ -1007,7 +1007,7 @@
       "zalecany_piksel": 8,
       "zrodlo": "IHPAN / Pastmaps",
       "obrazek": "obrazy/galeria/mapy_historyczne_IHPAN__dwuwiorstowka_3857.webp",
-      "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "miejsce_probki": "Lublin (51.25, 22.57)",
       "hash_definicji": "6161585b"
     },
     {
@@ -1119,7 +1119,7 @@
       "zalecany_piksel": 2,
       "zrodlo": "IHPAN / Pastmaps",
       "obrazek": "obrazy/galeria/plany_miast_1944_IHPAN__bialystok_2180.webp",
-      "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "miejsce_probki": "Białystok (53.13, 23.17)",
       "hash_definicji": "27e8e794"
     },
     {
@@ -1135,7 +1135,7 @@
       "zalecany_piksel": 2,
       "zrodlo": "IHPAN / Pastmaps",
       "obrazek": "obrazy/galeria/plany_miast_1944_IHPAN__bydgoszcz_2180.webp",
-      "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "miejsce_probki": "Bydgoszcz (53.12, 18.01)",
       "hash_definicji": "4bbff53e"
     },
     {
@@ -1167,7 +1167,7 @@
       "zalecany_piksel": 2,
       "zrodlo": "IHPAN / Pastmaps",
       "obrazek": "obrazy/galeria/plany_miast_1944_IHPAN__gdansk_2180.webp",
-      "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "miejsce_probki": "Gdańsk (54.35, 18.65)",
       "hash_definicji": "abe64a1e"
     },
     {
@@ -1183,7 +1183,7 @@
       "zalecany_piksel": 2,
       "zrodlo": "IHPAN / Pastmaps",
       "obrazek": "obrazy/galeria/plany_miast_1944_IHPAN__grudziadz_2180.webp",
-      "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "miejsce_probki": "Grudziądz (53.48, 18.75)",
       "hash_definicji": "dd97e135"
     },
     {
@@ -1199,7 +1199,7 @@
       "zalecany_piksel": 2,
       "zrodlo": "IHPAN / Pastmaps",
       "obrazek": "obrazy/galeria/plany_miast_1944_IHPAN__inowroclaw_2180.webp",
-      "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "miejsce_probki": "Inowrocław (52.79, 18.26)",
       "hash_definicji": "302db621"
     },
     {
@@ -1215,7 +1215,7 @@
       "zalecany_piksel": 2,
       "zrodlo": "IHPAN / Pastmaps",
       "obrazek": "obrazy/galeria/plany_miast_1944_IHPAN__jaslo_2180.webp",
-      "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "miejsce_probki": "Jasło (49.75, 21.47)",
       "hash_definicji": "cd62d08b"
     },
     {
@@ -1231,7 +1231,7 @@
       "zalecany_piksel": 2,
       "zrodlo": "IHPAN / Pastmaps",
       "obrazek": "obrazy/galeria/plany_miast_1944_IHPAN__katowice_2180.webp",
-      "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "miejsce_probki": "Katowice (50.26, 19.02)",
       "hash_definicji": "b5662a89"
     },
     {
@@ -1247,7 +1247,7 @@
       "zalecany_piksel": 2,
       "zrodlo": "IHPAN / Pastmaps",
       "obrazek": "obrazy/galeria/plany_miast_1944_IHPAN__kielce_2180.webp",
-      "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "miejsce_probki": "Kielce (50.87, 20.63)",
       "hash_definicji": "eb7c151c"
     },
     {
@@ -1263,7 +1263,7 @@
       "zalecany_piksel": 2,
       "zrodlo": "IHPAN / Pastmaps",
       "obrazek": "obrazy/galeria/plany_miast_1944_IHPAN__krakow_2180.webp",
-      "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "miejsce_probki": "Kraków (50.06, 19.94)",
       "hash_definicji": "ae74430d"
     },
     {
@@ -1279,7 +1279,7 @@
       "zalecany_piksel": 2,
       "zrodlo": "IHPAN / Pastmaps",
       "obrazek": "obrazy/galeria/plany_miast_1944_IHPAN__lublin_2180.webp",
-      "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "miejsce_probki": "Lublin (51.25, 22.57)",
       "hash_definicji": "fc2e934e"
     },
     {
@@ -1295,7 +1295,7 @@
       "zalecany_piksel": 2,
       "zrodlo": "IHPAN / Pastmaps",
       "obrazek": "obrazy/galeria/plany_miast_1944_IHPAN__lodz_2180.webp",
-      "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "miejsce_probki": "Łódź (51.76, 19.46)",
       "hash_definicji": "52e2aaaf"
     },
     {
@@ -1311,7 +1311,7 @@
       "zalecany_piksel": 2,
       "zrodlo": "IHPAN / Pastmaps",
       "obrazek": "obrazy/galeria/plany_miast_1944_IHPAN__poznan_2180.webp",
-      "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "miejsce_probki": "Poznań (52.41, 16.93)",
       "hash_definicji": "d70eec4f"
     },
     {
@@ -1327,7 +1327,7 @@
       "zalecany_piksel": 2,
       "zrodlo": "IHPAN / Pastmaps",
       "obrazek": "obrazy/galeria/plany_miast_1944_IHPAN__radom_2180.webp",
-      "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "miejsce_probki": "Radom (51.40, 21.15)",
       "hash_definicji": "6e03dbda"
     },
     {
@@ -1343,7 +1343,7 @@
       "zalecany_piksel": 2,
       "zrodlo": "IHPAN / Pastmaps",
       "obrazek": "obrazy/galeria/plany_miast_1944_IHPAN__rzeszow_2180.webp",
-      "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "miejsce_probki": "Rzeszów (50.04, 22.00)",
       "hash_definicji": "9ce61285"
     },
     {
@@ -1375,7 +1375,7 @@
       "zalecany_piksel": 2,
       "zrodlo": "IHPAN / Pastmaps",
       "obrazek": "obrazy/galeria/plany_miast_1944_IHPAN__tarnow_2180.webp",
-      "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "miejsce_probki": "Tarnów (50.01, 20.99)",
       "hash_definicji": "d5a83661"
     },
     {
@@ -1391,7 +1391,7 @@
       "zalecany_piksel": 2,
       "zrodlo": "IHPAN / Pastmaps",
       "obrazek": "obrazy/galeria/plany_miast_1944_IHPAN__torun_2180.webp",
-      "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "miejsce_probki": "Toruń (53.01, 18.60)",
       "hash_definicji": "2466250f"
     },
     {
@@ -1455,7 +1455,7 @@
       "zalecany_piksel": 2,
       "zrodlo": "IHPAN / Pastmaps",
       "obrazek": "obrazy/galeria/mapy_historyczne_IHPAN__rauch_2180.webp",
-      "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "miejsce_probki": "Sandomierz (50.68, 21.75)",
       "hash_definicji": "854affa2"
     },
     {
@@ -1471,7 +1471,7 @@
       "zalecany_piksel": 2,
       "zrodlo": "IHPAN / Pastmaps",
       "obrazek": "obrazy/galeria/plany_miast_1944_IHPAN__wroclaw_3857.webp",
-      "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "miejsce_probki": "Wrocław (51.11, 17.04)",
       "hash_definicji": "3567aebc"
     },
     {
@@ -1775,7 +1775,7 @@
       "zalecany_piksel": 16,
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/rejestr_granic_jednostki_teryt__A00_Granice_panstwa.webp",
-      "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "miejsce_probki": "Warszawa i okolice (52.23, 21.01)",
       "hash_definicji": "ac7c0507"
     },
     {
@@ -1791,7 +1791,7 @@
       "zalecany_piksel": 16,
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/rejestr_granic_jednostki_teryt__A01_Granice_wojewodztw.webp",
-      "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "miejsce_probki": "Warszawa i okolice (52.23, 21.01)",
       "hash_definicji": "68db273a"
     },
     {
@@ -1807,7 +1807,7 @@
       "zalecany_piksel": 8,
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/rejestr_granic_jednostki_teryt__A02_Granice_powiatow.webp",
-      "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "miejsce_probki": "Warszawa i okolice (52.23, 21.01)",
       "hash_definicji": "8e801a0a"
     },
     {
@@ -1823,7 +1823,7 @@
       "zalecany_piksel": 4,
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/rejestr_granic_jednostki_teryt__A03_Granice_gmin.webp",
-      "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "miejsce_probki": "Warszawa i okolice (52.23, 21.01)",
       "hash_definicji": "4f2f0e82"
     },
     {
@@ -1839,7 +1839,7 @@
       "zalecany_piksel": 2,
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/rejestr_granic_jednostki_teryt__A04_Granice_miast.webp",
-      "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "miejsce_probki": "Warszawa i okolice (52.23, 21.01)",
       "hash_definicji": "192fef59"
     },
     {
@@ -1855,7 +1855,7 @@
       "zalecany_piksel": 2,
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/rejestr_granic_jednostki_teryt__A05_Granice_jednostek_ewidencyjnych.webp",
-      "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "miejsce_probki": "Warszawa i okolice (52.23, 21.01)",
       "hash_definicji": "b103d797"
     },
     {
@@ -1871,7 +1871,7 @@
       "zalecany_piksel": 1,
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/rejestr_granic_jednostki_teryt__A06_Granice_obrebow_ewidencyjnych.webp",
-      "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "miejsce_probki": "Warszawa i okolice (52.23, 21.01)",
       "hash_definicji": "f67f21ac"
     },
     {
@@ -1887,7 +1887,7 @@
       "zalecany_piksel": 2,
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/rejestr_granic_jednostki_teryt__R01_Granice_rejonow_statystycznych.webp",
-      "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "miejsce_probki": "Warszawa i okolice (52.23, 21.01)",
       "hash_definicji": "ba87ff83"
     },
     {
@@ -1903,7 +1903,7 @@
       "zalecany_piksel": 1,
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/rejestr_granic_jednostki_teryt__R02_Granice_obwodow_spisowych.webp",
-      "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "miejsce_probki": "Warszawa i okolice (52.23, 21.01)",
       "hash_definicji": "db5c12a9"
     },
     {
@@ -1967,7 +1967,7 @@
       "zalecany_piksel": 2,
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/rejestr_nazw_geograficznych__M2_PozostaleNazwyMiejscowosci.webp",
-      "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "miejsce_probki": "Podhale (49.45, 20.05)",
       "hash_definicji": "15e9037d"
     },
     {
@@ -2031,7 +2031,7 @@
       "zalecany_piksel": 8,
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/rejestr_granic_jednostki_teryt__S01_Sad_apelacyjny.webp",
-      "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "miejsce_probki": "Warszawa i okolice (52.23, 21.01)",
       "hash_definicji": "a6260acc"
     },
     {
@@ -2047,7 +2047,7 @@
       "zalecany_piksel": 8,
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/rejestr_granic_jednostki_teryt__S02_Sad_okregowy.webp",
-      "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "miejsce_probki": "Warszawa i okolice (52.23, 21.01)",
       "hash_definicji": "05a4d3f3"
     },
     {
@@ -2063,7 +2063,7 @@
       "zalecany_piksel": 8,
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/rejestr_granic_jednostki_teryt__S03_Sad_rejonowy.webp",
-      "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "miejsce_probki": "Warszawa i okolice (52.23, 21.01)",
       "hash_definicji": "4e12e55a"
     },
     {
@@ -2079,7 +2079,7 @@
       "zalecany_piksel": 8,
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/rejestr_granic_jednostki_teryt__S04_Wojewodzki_sad_administracyjny.webp",
-      "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "miejsce_probki": "Warszawa i okolice (52.23, 21.01)",
       "hash_definicji": "12e06650"
     },
     {
@@ -2095,7 +2095,7 @@
       "zalecany_piksel": 8,
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/rejestr_granic_jednostki_teryt__P01_Prokuratura_regionalna.webp",
-      "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "miejsce_probki": "Warszawa i okolice (52.23, 21.01)",
       "hash_definicji": "77994730"
     },
     {
@@ -2111,7 +2111,7 @@
       "zalecany_piksel": 8,
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/rejestr_granic_jednostki_teryt__P02_Prokuratura_okregowa.webp",
-      "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "miejsce_probki": "Warszawa i okolice (52.23, 21.01)",
       "hash_definicji": "6b232c9c"
     },
     {
@@ -2127,7 +2127,7 @@
       "zalecany_piksel": 8,
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/rejestr_granic_jednostki_teryt__P03_Prokuratura_rejonowa.webp",
-      "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "miejsce_probki": "Warszawa i okolice (52.23, 21.01)",
       "hash_definicji": "77ddc1fa"
     },
     {
@@ -2143,7 +2143,7 @@
       "zalecany_piksel": 8,
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/rejestr_granic_jednostki_teryt__K01_Komenda_wojewodzka_policji.webp",
-      "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "miejsce_probki": "Polska centralna (52.23, 21.01)",
       "hash_definicji": "6943c60f"
     },
     {
@@ -2159,7 +2159,7 @@
       "zalecany_piksel": 4,
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/rejestr_granic_jednostki_teryt__K03_Komenda_stoleczna_policji.webp",
-      "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "miejsce_probki": "Warszawa i okolice (52.23, 21.01)",
       "hash_definicji": "4cdf757e"
     },
     {
@@ -2175,7 +2175,7 @@
       "zalecany_piksel": 8,
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/rejestr_granic_jednostki_teryt__K02_Komenda_powiatowa_policji.webp",
-      "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "miejsce_probki": "Warszawa i okolice (52.23, 21.01)",
       "hash_definicji": "08d43a02"
     },
     {
@@ -2191,7 +2191,7 @@
       "zalecany_piksel": 4,
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/rejestr_granic_jednostki_teryt__K04_Komenda_rejonowa_policji.webp",
-      "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "miejsce_probki": "Warszawa i okolice (52.23, 21.01)",
       "hash_definicji": "849bf5ab"
     },
     {
@@ -2207,7 +2207,7 @@
       "zalecany_piksel": 2,
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/rejestr_granic_jednostki_teryt__K05_Komisariat_policji.webp",
-      "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "miejsce_probki": "Warszawa i okolice (52.23, 21.01)",
       "hash_definicji": "cdda9066"
     },
     {
@@ -2223,7 +2223,7 @@
       "zalecany_piksel": 8,
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/rejestr_granic_jednostki_teryt__K06_Komenda_wojewodzka_strazy_pozarnej.webp",
-      "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "miejsce_probki": "Warszawa i okolice (52.23, 21.01)",
       "hash_definicji": "1b568798"
     },
     {
@@ -2239,7 +2239,7 @@
       "zalecany_piksel": 8,
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/rejestr_granic_jednostki_teryt__K07_Komenda_powiatowa_strazy_pozarnej.webp",
-      "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "miejsce_probki": "Warszawa i okolice (52.23, 21.01)",
       "hash_definicji": "884c024b"
     },
     {
@@ -2255,7 +2255,7 @@
       "zalecany_piksel": 8,
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/rejestr_granic_jednostki_teryt__K08_Oddzial_strazy_granicznej.webp",
-      "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "miejsce_probki": "Warszawa i okolice (52.23, 21.01)",
       "hash_definicji": "a759f6d7"
     },
     {
@@ -2271,7 +2271,7 @@
       "zalecany_piksel": 4,
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/rejestr_granic_jednostki_teryt__K09_Placowka_strazy_granicznej.webp",
-      "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "miejsce_probki": "Warszawa i okolice (52.23, 21.01)",
       "hash_definicji": "5368864c"
     },
     {
@@ -2287,7 +2287,7 @@
       "zalecany_piksel": 8,
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/rejestr_granic_jednostki_teryt__K10_Dywizjon_strazy_granicznej.webp",
-      "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "miejsce_probki": "Polska centralna (52.23, 21.01)",
       "hash_definicji": "f7cf6ec6"
     },
     {
@@ -2303,7 +2303,7 @@
       "zalecany_piksel": 8,
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/rejestr_granic_jednostki_teryt__K11_Obszar_dzialania_szefa_obrony_cywilnej_wojewodztwa.webp",
-      "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "miejsce_probki": "Warszawa i okolice (52.23, 21.01)",
       "hash_definicji": "f986b32a"
     },
     {
@@ -2319,7 +2319,7 @@
       "zalecany_piksel": 8,
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/rejestr_granic_jednostki_teryt__K12_Obszar_dzialania_szefa_obrony_cywilnej_powiatu.webp",
-      "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "miejsce_probki": "Warszawa i okolice (52.23, 21.01)",
       "hash_definicji": "a7c6e3d6"
     },
     {
@@ -2335,7 +2335,7 @@
       "zalecany_piksel": 4,
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/rejestr_granic_jednostki_teryt__K13_Obszar_dzialania_szefa_obrony_cywilnej_gminy.webp",
-      "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "miejsce_probki": "Warszawa i okolice (52.23, 21.01)",
       "hash_definicji": "7c860116"
     },
     {
@@ -2351,7 +2351,7 @@
       "zalecany_piksel": 8,
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/rejestr_granic_jednostki_teryt__U05_Izba_administracji_skarbowej.webp",
-      "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "miejsce_probki": "Warszawa i okolice (52.23, 21.01)",
       "hash_definicji": "d0caa53c"
     },
     {
@@ -2367,7 +2367,7 @@
       "zalecany_piksel": 8,
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/rejestr_granic_jednostki_teryt__U02_Urzad_skarbowy.webp",
-      "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "miejsce_probki": "Warszawa i okolice (52.23, 21.01)",
       "hash_definicji": "00682a16"
     },
     {
@@ -2383,7 +2383,7 @@
       "zalecany_piksel": 8,
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/rejestr_granic_jednostki_teryt__U03_Wyspecjalizowany_urzad_skarbowy.webp",
-      "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "miejsce_probki": "Warszawa i okolice (52.23, 21.01)",
       "hash_definicji": "2c77ff80"
     },
     {
@@ -2399,7 +2399,7 @@
       "zalecany_piksel": 8,
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/rejestr_granic_jednostki_teryt__U04_Urzad_celno-skarbowy.webp",
-      "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "miejsce_probki": "Warszawa i okolice (52.23, 21.01)",
       "hash_definicji": "e45322dd"
     },
     {
@@ -2415,7 +2415,7 @@
       "zalecany_piksel": 8,
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/rejestr_granic_jednostki_teryt__U01_Archiwum_panstwowe.webp",
-      "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "miejsce_probki": "Warszawa i okolice (52.23, 21.01)",
       "hash_definicji": "f1cb1eb6"
     },
     {
@@ -2431,7 +2431,7 @@
       "zalecany_piksel": 8,
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/rejestr_granic_jednostki_teryt__U07_Regionalna_dyrekcja_lasow_panstwowych.webp",
-      "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "miejsce_probki": "Warszawa i okolice (52.23, 21.01)",
       "hash_definicji": "cca8b5e4"
     },
     {
@@ -2447,7 +2447,7 @@
       "zalecany_piksel": 4,
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/rejestr_granic_jednostki_teryt__U06_Nadlesnictwo.webp",
-      "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "miejsce_probki": "Warszawa i okolice (52.23, 21.01)",
       "hash_definicji": "80c7cdd2"
     },
     {
@@ -2463,7 +2463,7 @@
       "zalecany_piksel": 8,
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/rejestr_granic_jednostki_teryt__U09_Regionalny_zarzad_gospodarki_wodnej_PGWWP.webp",
-      "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "miejsce_probki": "Warszawa i okolice (52.23, 21.01)",
       "hash_definicji": "cce64dd4"
     },
     {
@@ -2479,7 +2479,7 @@
       "zalecany_piksel": 4,
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/rejestr_granic_jednostki_teryt__U08_Zarzad_zlewni_PGWWP.webp",
-      "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "miejsce_probki": "Warszawa i okolice (52.23, 21.01)",
       "hash_definicji": "80b3bca7"
     },
     {
@@ -2495,7 +2495,7 @@
       "zalecany_piksel": 8,
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/rejestr_granic_jednostki_teryt__U11_Urzad_zeglugi_srodladowej.webp",
-      "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "miejsce_probki": "Warszawa i okolice (52.23, 21.01)",
       "hash_definicji": "98fcbc9f"
     },
     {
@@ -2511,7 +2511,7 @@
       "zalecany_piksel": 4,
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/rejestr_granic_jednostki_teryt__W03_Morskie_wody_wewnetrzne.webp",
-      "miejsce_probki": "Zatoka Gdańska (54.42, 18.67)",
+      "miejsce_probki": "Półwysep Helski / Bałtyk (54.78, 18.60)",
       "hash_definicji": "4b6a165c"
     },
     {
@@ -2527,7 +2527,7 @@
       "zalecany_piksel": 8,
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/rejestr_granic_jednostki_teryt__W02_Morze_terytorialne_RP.webp",
-      "miejsce_probki": "Zatoka Gdańska (54.42, 18.67)",
+      "miejsce_probki": "Półwysep Helski / Bałtyk (54.78, 18.60)",
       "hash_definicji": "6c8eb421"
     },
     {
@@ -2543,7 +2543,7 @@
       "zalecany_piksel": 4,
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/rejestr_granic_jednostki_teryt__W01_Linia_podstawowa_morza_terytorialnego.webp",
-      "miejsce_probki": "Zatoka Gdańska (54.42, 18.67)",
+      "miejsce_probki": "Półwysep Helski / Bałtyk (54.78, 18.60)",
       "hash_definicji": "1b3fa02f"
     },
     {
@@ -2559,7 +2559,7 @@
       "zalecany_piksel": 8,
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/rejestr_granic_jednostki_teryt__W05_Strefa_przylegla.webp",
-      "miejsce_probki": "Zatoka Gdańska (54.42, 18.67)",
+      "miejsce_probki": "Półwysep Helski / Bałtyk (54.78, 18.60)",
       "hash_definicji": "5707dd81"
     },
     {
@@ -2575,7 +2575,7 @@
       "zalecany_piksel": 16,
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/rejestr_granic_jednostki_teryt__W04_Wylaczna_strefa_ekonomiczna.webp",
-      "miejsce_probki": "Zatoka Gdańska (54.42, 18.67)",
+      "miejsce_probki": "Otwarty Bałtyk (55.15, 17.50)",
       "hash_definicji": "15362267"
     },
     {
@@ -2591,7 +2591,7 @@
       "zalecany_piksel": 2,
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/rejestr_granic_jednostki_teryt__W06_Morskie_linie_brzegowe.webp",
-      "miejsce_probki": "Zatoka Gdańska (54.42, 18.67)",
+      "miejsce_probki": "Półwysep Helski / Bałtyk (54.78, 18.60)",
       "hash_definicji": "13f7d82b"
     },
     {
@@ -2607,7 +2607,7 @@
       "zalecany_piksel": 2,
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/rejestr_granic_jednostki_teryt__W09_Pas_techniczny.webp",
-      "miejsce_probki": "Zatoka Gdańska (54.42, 18.67)",
+      "miejsce_probki": "Półwysep Helski / Bałtyk (54.78, 18.60)",
       "hash_definicji": "2e4b6749"
     },
     {
@@ -2623,7 +2623,7 @@
       "zalecany_piksel": 2,
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/rejestr_granic_jednostki_teryt__W08_Pas_ochronny.webp",
-      "miejsce_probki": "Zatoka Gdańska (54.42, 18.67)",
+      "miejsce_probki": "Półwysep Helski / Bałtyk (54.78, 18.60)",
       "hash_definicji": "321a054f"
     },
     {
@@ -2639,7 +2639,7 @@
       "zalecany_piksel": 2,
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/rejestr_granic_jednostki_teryt__W07_Pas_nadbrzezny.webp",
-      "miejsce_probki": "Zatoka Gdańska (54.42, 18.67)",
+      "miejsce_probki": "Półwysep Helski / Bałtyk (54.78, 18.60)",
       "hash_definicji": "7b845533"
     },
     {
@@ -2655,7 +2655,7 @@
       "zalecany_piksel": 8,
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/rejestr_granic_jednostki_teryt__U10_Urzad_morski.webp",
-      "miejsce_probki": "Zatoka Gdańska (54.42, 18.67)",
+      "miejsce_probki": "Półwysep Helski / Bałtyk (54.78, 18.60)",
       "hash_definicji": "1467433a"
     },
     {
@@ -2671,7 +2671,7 @@
       "zalecany_piksel": 2,
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/rejestr_granic_jednostki_teryt__W11_Port_morski.webp",
-      "miejsce_probki": "Zatoka Gdańska (54.42, 18.67)",
+      "miejsce_probki": "Półwysep Helski / Bałtyk (54.78, 18.60)",
       "hash_definicji": "cce11761"
     },
     {
@@ -2687,7 +2687,7 @@
       "zalecany_piksel": 2,
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/rejestr_granic_jednostki_teryt__W12_Przystan_morska.webp",
-      "miejsce_probki": "Zatoka Gdańska (54.42, 18.67)",
+      "miejsce_probki": "Półwysep Helski / Bałtyk (54.78, 18.60)",
       "hash_definicji": "f69c3d23"
     },
     {
@@ -2703,7 +2703,7 @@
       "zalecany_piksel": 4,
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/rejestr_granic_jednostki_teryt__W10_Reda.webp",
-      "miejsce_probki": "Zatoka Gdańska (54.42, 18.67)",
+      "miejsce_probki": "Port Gdańsk / Reda (54.41, 18.68)",
       "hash_definicji": "2df7b9a8"
     },
     {
@@ -2719,7 +2719,7 @@
       "zalecany_piksel": 4,
       "zrodlo": "GDOŚ",
       "obrazek": "obrazy/galeria/obszary_chronione_GDOS__GDOS_ParkiNarodowe.webp",
-      "miejsce_probki": "Puszcza Kampinoska (52.32, 20.75)",
+      "miejsce_probki": "Warszawa i okolice (52.23, 21.01)",
       "hash_definicji": "e62f546d"
     },
     {
@@ -2735,7 +2735,7 @@
       "zalecany_piksel": 4,
       "zrodlo": "GDOŚ",
       "obrazek": "obrazy/galeria/obszary_chronione_GDOS__GDOS_ParkiKrajobrazowe.webp",
-      "miejsce_probki": "Puszcza Kampinoska (52.32, 20.75)",
+      "miejsce_probki": "Mazowiecki Park Krajobrazowy (52.13, 21.33)",
       "hash_definicji": "6753111f"
     },
     {
@@ -2751,7 +2751,7 @@
       "zalecany_piksel": 2,
       "zrodlo": "GDOŚ",
       "obrazek": "obrazy/galeria/obszary_chronione_GDOS__GDOS_Rezerwaty.webp",
-      "miejsce_probki": "Puszcza Kampinoska (52.32, 20.75)",
+      "miejsce_probki": "Rezerwat Las Kabacki (52.12, 21.06)",
       "hash_definicji": "af76e3fc"
     },
     {
@@ -2767,7 +2767,7 @@
       "zalecany_piksel": 4,
       "zrodlo": "GDOŚ",
       "obrazek": "obrazy/galeria/obszary_chronione_GDOS__GDOS_ObszarySpecjalnejOchrony.webp",
-      "miejsce_probki": "Puszcza Kampinoska (52.32, 20.75)",
+      "miejsce_probki": "Warszawa i okolice (52.23, 21.01)",
       "hash_definicji": "55e51005"
     },
     {
@@ -2783,7 +2783,7 @@
       "zalecany_piksel": 4,
       "zrodlo": "GDOŚ",
       "obrazek": "obrazy/galeria/obszary_chronione_GDOS__GDOS_SpecjalneObszaryOchrony.webp",
-      "miejsce_probki": "Puszcza Kampinoska (52.32, 20.75)",
+      "miejsce_probki": "Warszawa i okolice (52.23, 21.01)",
       "hash_definicji": "014b1cbb"
     },
     {
@@ -2799,7 +2799,7 @@
       "zalecany_piksel": 4,
       "zrodlo": "GDOŚ",
       "obrazek": "obrazy/galeria/obszary_chronione_GDOS__GDOS_ObszaryChronionegoKrajobrazu.webp",
-      "miejsce_probki": "Puszcza Kampinoska (52.32, 20.75)",
+      "miejsce_probki": "Warszawa i okolice (52.23, 21.01)",
       "hash_definicji": "5d7851f5"
     },
     {
@@ -2815,7 +2815,7 @@
       "zalecany_piksel": 2,
       "zrodlo": "GDOŚ",
       "obrazek": "obrazy/galeria/obszary_chronione_GDOS__GDOS_ZespolyPrzyrodniczoKrajobrazowe.webp",
-      "miejsce_probki": "Puszcza Kampinoska (52.32, 20.75)",
+      "miejsce_probki": "Mazowiecki Park Krajobrazowy (52.13, 21.33)",
       "hash_definicji": "d52c53f4"
     },
     {
@@ -2831,7 +2831,7 @@
       "zalecany_piksel": 2,
       "zrodlo": "GDOŚ",
       "obrazek": "obrazy/galeria/obszary_chronione_GDOS__GDOS_UzytkiEkologiczne.webp",
-      "miejsce_probki": "Puszcza Kampinoska (52.32, 20.75)",
+      "miejsce_probki": "Warszawa i okolice (52.23, 21.01)",
       "hash_definicji": "32450ad0"
     },
     {
@@ -2847,7 +2847,7 @@
       "zalecany_piksel": 2,
       "zrodlo": "GDOŚ",
       "obrazek": "obrazy/galeria/obszary_chronione_GDOS__GDOS_StanowiskaDokumentacyjne.webp",
-      "miejsce_probki": "Puszcza Kampinoska (52.32, 20.75)",
+      "miejsce_probki": "Kielce / Świętokrzyskie (50.87, 20.63)",
       "hash_definicji": "53ceb3a2"
     },
     {
@@ -2863,7 +2863,7 @@
       "zalecany_piksel": 1,
       "zrodlo": "GDOŚ",
       "obrazek": "obrazy/galeria/obszary_chronione_GDOS__GDOS_PomnikiPrzyrody.webp",
-      "miejsce_probki": "Puszcza Kampinoska (52.32, 20.75)",
+      "miejsce_probki": "Warszawa i okolice (52.23, 21.01)",
       "hash_definicji": "893cc127"
     },
     {
@@ -2879,7 +2879,7 @@
       "zalecany_piksel": 32,
       "zrodlo": "Lasy Państwowe (BDL)",
       "obrazek": "obrazy/galeria/Lasy_Panstwowe_BDL__6.webp",
-      "miejsce_probki": "Puszcza Kampinoska (52.32, 20.75)",
+      "miejsce_probki": "Puszcza Kozienicka (51.48, 21.45)",
       "hash_definicji": "db83c43f"
     },
     {
@@ -2895,7 +2895,7 @@
       "zalecany_piksel": 16,
       "zrodlo": "Lasy Państwowe (BDL)",
       "obrazek": "obrazy/galeria/Lasy_Panstwowe_BDL__5.webp",
-      "miejsce_probki": "Puszcza Kampinoska (52.32, 20.75)",
+      "miejsce_probki": "Puszcza Kozienicka (51.48, 21.45)",
       "hash_definicji": "aa643392"
     },
     {
@@ -2911,7 +2911,7 @@
       "zalecany_piksel": 8,
       "zrodlo": "Lasy Państwowe (BDL)",
       "obrazek": "obrazy/galeria/Lasy_Panstwowe_BDL__4.webp",
-      "miejsce_probki": "Puszcza Kampinoska (52.32, 20.75)",
+      "miejsce_probki": "Puszcza Kozienicka (51.48, 21.45)",
       "hash_definicji": "ddf6f9e3"
     },
     {
@@ -2927,7 +2927,7 @@
       "zalecany_piksel": 2,
       "zrodlo": "Lasy Państwowe (BDL)",
       "obrazek": "obrazy/galeria/Lasy_Panstwowe_BDL__3.webp",
-      "miejsce_probki": "Puszcza Kampinoska (52.32, 20.75)",
+      "miejsce_probki": "Puszcza Kozienicka (51.48, 21.45)",
       "hash_definicji": "a2acbd96"
     },
     {
@@ -2943,7 +2943,7 @@
       "zalecany_piksel": 2,
       "zrodlo": "Lasy Państwowe (BDL)",
       "obrazek": "obrazy/galeria/Lasy_Panstwowe_BDL__1.webp",
-      "miejsce_probki": "Puszcza Kampinoska (52.32, 20.75)",
+      "miejsce_probki": "Puszcza Kozienicka (51.48, 21.45)",
       "hash_definicji": "c093ef7c"
     },
     {
@@ -2959,7 +2959,7 @@
       "zalecany_piksel": 4,
       "zrodlo": "Lasy Państwowe (BDL)",
       "obrazek": "obrazy/galeria/Lasy_Panstwowe_BDL__2.webp",
-      "miejsce_probki": "Puszcza Kampinoska (52.32, 20.75)",
+      "miejsce_probki": "Puszcza Kozienicka (51.48, 21.45)",
       "hash_definicji": "62d0efc9"
     },
     {
@@ -2975,7 +2975,7 @@
       "zalecany_piksel": 4,
       "zrodlo": "Lasy Państwowe (BDL)",
       "obrazek": "obrazy/galeria/Lasy_Panstwowe_BDL__0.webp",
-      "miejsce_probki": "Puszcza Kampinoska (52.32, 20.75)",
+      "miejsce_probki": "Puszcza Kozienicka (51.48, 21.45)",
       "hash_definicji": "5eefb82c"
     },
     {
@@ -2991,7 +2991,7 @@
       "zalecany_piksel": 4,
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/hydrograficzna_50__Raster.webp",
-      "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "miejsce_probki": "Katowice / Śląsk (50.26, 19.02)",
       "hash_definicji": "8842a887"
     },
     {
@@ -3007,7 +3007,7 @@
       "zalecany_piksel": 4,
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/hydrograficzna_50__Raster_enviDMS_50k.webp",
-      "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "miejsce_probki": "Katowice / Śląsk (50.26, 19.02)",
       "hash_definicji": "586121d6"
     },
     {
@@ -3023,7 +3023,7 @@
       "zalecany_piksel": 4,
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/sozologiczna_50__0.webp",
-      "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "miejsce_probki": "Katowice / Śląsk (50.26, 19.02)",
       "hash_definicji": "43435433"
     },
     {
@@ -3039,7 +3039,7 @@
       "zalecany_piksel": 1,
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/mapa_glebowo_rolnicza__0.webp",
-      "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "miejsce_probki": "Katowice / Śląsk (50.26, 19.02)",
       "hash_definicji": "374d69f8"
     },
     {
@@ -3055,7 +3055,7 @@
       "zalecany_piksel": 1,
       "zrodlo": "GUGiK / Geoportal",
       "obrazek": "obrazy/galeria/mapa_glebowo_rolnicza__2.webp",
-      "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "miejsce_probki": "Katowice / Śląsk (50.26, 19.02)",
       "hash_definicji": "f9b72fa6"
     },
     {
@@ -3103,7 +3103,7 @@
       "zalecany_piksel": 4,
       "zrodlo": "PIG-PIB (Geologia)",
       "obrazek": "obrazy/galeria/geologiczna_50_SMGP__0.webp",
-      "miejsce_probki": "Warszawa (52.23, 21.01)",
+      "miejsce_probki": "Katowice / Śląsk (50.26, 19.02)",
       "hash_definicji": "8490786e"
     },
     {
@@ -3615,7 +3615,7 @@
       "zalecany_piksel": 10,
       "zrodlo": "Serwer map",
       "obrazek": "obrazy/galeria/baltyk_batymetria_wms__emodnet_mean_atlas_land.webp",
-      "miejsce_probki": "Zatoka Gdańska (54.42, 18.67)",
+      "miejsce_probki": "Zatoka Gdańska (54.55, 18.85)",
       "hash_definicji": "0b040b97"
     },
     {
@@ -3631,7 +3631,7 @@
       "zalecany_piksel": 10,
       "zrodlo": "Serwer map",
       "obrazek": "obrazy/galeria/baltyk_batymetria_wms__emodnet_mean_rainbowcolour.webp",
-      "miejsce_probki": "Zatoka Gdańska (54.42, 18.67)",
+      "miejsce_probki": "Zatoka Gdańska (54.55, 18.85)",
       "hash_definicji": "645ec46d"
     },
     {
@@ -3647,7 +3647,7 @@
       "zalecany_piksel": 10,
       "zrodlo": "Serwer map",
       "obrazek": "obrazy/galeria/baltyk_batymetria_wms__emodnet_contours.webp",
-      "miejsce_probki": "Zatoka Gdańska (54.42, 18.67)",
+      "miejsce_probki": "Zatoka Gdańska (54.55, 18.85)",
       "hash_definicji": "be329e60"
     },
     {
@@ -3663,7 +3663,7 @@
       "zalecany_piksel": 10,
       "zrodlo": "Serwer map",
       "obrazek": "obrazy/galeria/baltyk_batymetria_wms__coastlines.webp",
-      "miejsce_probki": "Zatoka Gdańska (54.42, 18.67)",
+      "miejsce_probki": "Zatoka Gdańska (54.55, 18.85)",
       "hash_definicji": "50e9dd60"
     }
   ]
