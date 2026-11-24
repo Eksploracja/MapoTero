@@ -481,7 +481,9 @@ Public Class FormDodajSerwer
         End If
         nudRozmiarPiksela.Enabled = w.CzyWarstwaDoPobrania
         btnPobierzProbke.Enabled = w.CzyWarstwaDoPobrania
-        picPodglad.Image = Nothing
+        Using staryImg = picPodglad.Image
+            picPodglad.Image = Nothing
+        End Using
     End Sub
 
     Private Sub PokazSzczegolyWmts(w As WarstwaWmts)
@@ -556,7 +558,9 @@ Public Class FormDodajSerwer
         nudRozmiarPiksela.Value = 1.0D
         nudRozmiarPiksela.Enabled = False
         btnPobierzProbke.Enabled = False
-        picPodglad.Image = Nothing
+        Using staryImg = picPodglad.Image
+            picPodglad.Image = Nothing
+        End Using
     End Sub
 
     Private Sub nudRozmiarPiksela_ValueChanged(sender As Object, e As EventArgs) Handles nudRozmiarPiksela.ValueChanged
@@ -689,6 +693,10 @@ Public Class FormDodajSerwer
                         If sukcessPobrania Then
                             If Not String.IsNullOrEmpty(znalezionaNazwa) AndAlso znalezionaNazwa <> _wybranaWarstwaWms.Nazwa Then
                                 Dim staraNazwa As String = _wybranaWarstwaWms.Nazwa
+                                Dim wpisanyPx As Double
+                                If _rozmiaryPiksela.TryGetValue(staraNazwa, wpisanyPx) Then
+                                    _rozmiaryPiksela(znalezionaNazwa) = wpisanyPx
+                                End If
                                 _wybranaWarstwaWms.Nazwa = znalezionaNazwa
                                 lblNazwaWartosc.Text = znalezionaNazwa & " (" & staraNazwa & ")"
                                 MessageBox.Show("Serwer odrzucił nazwę '" & staraNazwa & "' (błąd konfiguracji serwera LayerNotDefined), ale zaakceptował identyfikator '" & znalezionaNazwa & "'." & vbCrLf &
@@ -699,7 +707,7 @@ Public Class FormDodajSerwer
                             Dim podgladBledu As String = ""
                             If ostatnieBajty IsNot Nothing AndAlso ostatnieBajty.Length > 0 Then
                                 podgladBledu = vbCrLf & "Odpowiedź serwera: " &
-                                    System.Text.Encoding.UTF8.GetString(ostatnieBajty, 0, Math.Min(ostatnieBajty.Length, 250)).Replace(vbCr, " ").Replace(vbLf, " ").Trim()
+                                    MetadaneMapy.MaskujSekrety(System.Text.Encoding.UTF8.GetString(ostatnieBajty, 0, Math.Min(ostatnieBajty.Length, 250))).Replace(vbCr, " ").Replace(vbLf, " ").Trim()
                             Else
                                 podgladBledu = vbCrLf & "Serwer zwrócił pustą odpowiedź (0 bajtów). Możliwe, że dane nie pokrywają centralnej Polski lub wybranej skali."
                             End If
@@ -782,7 +790,7 @@ Public Class FormDodajSerwer
                             Dim podgladBledu As String = ""
                             If ostatnieBajty IsNot Nothing AndAlso ostatnieBajty.Length > 0 Then
                                 podgladBledu = vbCrLf & "Odpowiedź serwera: " &
-                                    System.Text.Encoding.UTF8.GetString(ostatnieBajty, 0, Math.Min(ostatnieBajty.Length, 250)).Replace(vbCr, " ").Replace(vbLf, " ").Trim()
+                                    MetadaneMapy.MaskujSekrety(System.Text.Encoding.UTF8.GetString(ostatnieBajty, 0, Math.Min(ostatnieBajty.Length, 250))).Replace(vbCr, " ").Replace(vbLf, " ").Trim()
                             Else
                                 podgladBledu = vbCrLf & "Serwer zwrócił pustą odpowiedź (0 bajtów). Kafelki w tym obszarze mogą nie być wygenerowane w pamięci podręcznej serwera."
                             End If

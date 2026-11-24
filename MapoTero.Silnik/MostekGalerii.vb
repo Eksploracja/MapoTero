@@ -161,7 +161,7 @@ Public NotInheritable Class MostekGalerii
 
     Public Sub New(opcje As OpcjeMostkaGalerii)
         If opcje Is Nothing Then Throw New ArgumentNullException(NameOf(opcje))
-        If opcje.ObslugaDodaj Is Nothing Then Throw New ArgumentNullException(NameOf(opcje.ObslugaDodaj))
+        If opcje.ObslugaDodaj Is Nothing Then Throw New ArgumentException("Brak obsługi dodawania warstwy (ObslugaDodaj).", NameOf(opcje))
         _opcje = opcje
         Token = Guid.NewGuid().ToString("N")
         Port = ZnajdzWolnyPort()

@@ -280,6 +280,7 @@ Public Class Form1
 
     ''' <summary>Wyświetla komunikat w polu komunikatów okna głównego.</summary>
     Public Sub Komunikat(tekst As String, kolor As Color)
+        Dim doDziennika As String = tekst
         'w trakcie uruchamiania kolejne komunikaty (np. „Wczytano ostatnio zapisane ustawienia”) zastępowały wcześniejszy
         'błąd (uszkodzony conf.txt, brak zbiorów map) - błędy startu zostają widoczne, następne błędy są dopisywane
         If Not _zaladowany AndAlso txtKomunikaty.ForeColor = Color.Red AndAlso txtKomunikaty.Text <> "" Then
@@ -288,7 +289,7 @@ Public Class Form1
         End If
         txtKomunikaty.ForeColor = kolor
         txtKomunikaty.Text = tekst
-        DopiszKomunikatSesji(tekst, kolor)
+        DopiszKomunikatSesji(doDziennika, kolor)
     End Sub
 
     ''' <summary>Włącza lub wyłącza ręczną edycję współrzędnych zasięgu.</summary>
@@ -858,6 +859,7 @@ Public Class Form1
         ZapamietajPolozenieMapy()
 
         'obszar wzdłuż trasy zapisany w folderze sesji
+        _dzialkaKatastralna = Nothing
         _korytarz = Korytarz.ZFolderu(folder)
         UsunKorytarzToolStripMenuItem.Enabled = _korytarz IsNot Nothing
         WyczyscZnaczniki()
@@ -2585,6 +2587,7 @@ Public Class Form1
             okno.YPrawy = txtYPrawy.Text
             If okno.ShowDialog(Me) = DialogResult.OK Then
                 _korytarz = Nothing
+                _dzialkaKatastralna = Nothing
                 UsunKorytarzToolStripMenuItem.Enabled = False
                 WpiszPolaZasiegu(okno.XDol, okno.YLewy, okno.XGora, okno.YPrawy)
                 WyczyscZnaczniki()
@@ -3367,6 +3370,7 @@ Public Class Form1
         ZakonczWyborNaroznikow()
         If _podpowiedzZaznaczenia IsNot Nothing Then _podpowiedzZaznaczenia.Text = ""
         If _korytarz IsNot Nothing Then UsunKorytarz(False)
+        _dzialkaKatastralna = Nothing
         UstawObszarZZaznaczenia(Selection)
         _zasiegZaznaczonyMysza = ZasiegPolXY()
         Dim s = BiezacaSiatka()
@@ -3781,6 +3785,7 @@ Public Class Form1
     Private Sub UstawObszarPoligonu(zestaw As ZestawPoligonow, plik As String)
         If zestaw Is Nothing OrElse zestaw.Wielokaty.Count = 0 Then Return
         _korytarz = Nothing
+        _dzialkaKatastralna = Nothing
         UsunKorytarzToolStripMenuItem.Enabled = False
         Dim z = ZaokraglonyZasieg(zestaw.ZasiegWUkladzie(Ustawienia.Uklad))
         WpiszPolaZasiegu(Liczba(z.XDol), Liczba(z.YLewy), Liczba(z.XGora), Liczba(z.YPrawy))
@@ -3893,6 +3898,7 @@ Public Class Form1
     ''' </summary>
     Public Sub UstawKorytarz(k As Korytarz)
         _korytarz = k
+        _dzialkaKatastralna = Nothing
         UsunKorytarzToolStripMenuItem.Enabled = True
         mapa.SelectedArea = RectLatLng.Empty
         Dim z = ZaokraglonyZasieg(k.Zasieg(Ustawienia.Uklad))

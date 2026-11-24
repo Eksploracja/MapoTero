@@ -2694,7 +2694,11 @@ Public Class FormKreatorMapy
         End If
         Dim wieloskalowa = CzyWieloskalowaAktywna()
         Dim plan = If(wieloskalowa, PlanBiezacy(), Nothing)
-        If wieloskalowa AndAlso plan.Count = 0 Then Exit Sub
+        If wieloskalowa AndAlso plan.Count = 0 Then
+            MessageBox.Show("Plan mapy wieloskalowej nie zawiera żadnej aktywnej skali. Włącz co najmniej jedną skalę w 'Ustawienia skal...' albo odznacz mapę wieloskalową.",
+                            "Kreator mapy", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+            Exit Sub
+        End If
 
         ' Pytanie o duży obszar - te same progi i ten sam format, co szacunek w kroku 4
         Dim szacunek = SzacujWynik(piksel, korytarz, plan, zestaw)
@@ -3168,8 +3172,10 @@ Public Class FormKreatorMapy
         If _form1 IsNot Nothing AndAlso Not _form1.IsDisposed Then
             _form1.Enabled = True
             PrzywrocZMinimalizacji(_form1)
-            _form1.Activate()
-            _form1.BringToFront()
+            If Not Form1.TrybOkienBezAktywacji Then
+                _form1.Activate()
+                _form1.BringToFront()
+            End If
         End If
     End Sub
 
