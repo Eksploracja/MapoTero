@@ -21,9 +21,9 @@ Opis każdego elementu nowoczesnego okna głównego: paska narzędziowego, mapy 
 
 ## Widok całego okna
 
-![Okno główne programu MapoTero z ponumerowanymi elementami]({{ '/pomoc/obrazy/03-okno-glowne.png' | relative_url }})
+![Okno główne programu MapoTero]({{ '/pomoc/obrazy/03-okno-glowne.png' | relative_url }})
 
-*Rysunek 1. Nowy, czytelny układ okna głównego programu MapoTero z ponumerowanymi sekcjami.*
+*Rysunek 1. Okno główne programu MapoTero — mapa podglądu z siatką segmentów, katalog warstw, kompozycja warstw z podglądem na żywo oraz karty obszaru, parametrów i stanu sesji.*
 
 | Nr | Element okna | Do czego służy |
 |---|---|---|
@@ -37,6 +37,15 @@ Opis każdego elementu nowoczesnego okna głównego: paska narzędziowego, mapy 
 | **8** | Karta *Stan sesji* | przycisk **Pobierz segmenty** (w trakcie pracy **Przerwij pobieranie**), a po skompletowaniu segmentów **Eksportuj pobraną mapę…**. Ikona i kolor sygnalizują stan sesji |
 | **9** | Zakładki prawego panelu | trzy zakładki: **Podgląd** (próbka kompozycji z przyciskami `-`, `+`, `Dopasuj`, odświeżaniem i powiększeniem w %), **Komunikaty** (dziennik zdarzeń i błędów) oraz **Sesja** (szczegóły folderu sesji i przycisk *Usuń pobrane*) |
 | **10** | Pasek stanu | układ współrzędnych sesji, pozycja kursora (`X`, `Y`), przybliżona skala mapy oraz aktywna sesja z kolorową diodą stanu |
+
+<details markdown="block">
+<summary><b>Pokaż schemat okna z ponumerowanymi sekcjami (1–10)</b></summary>
+
+![Okno główne programu MapoTero z ponumerowanymi sekcjami]({{ '/pomoc/obrazy/03-okno-glowne-sekcje.png' | relative_url }})
+
+*Schemat rozmieszczenia sekcji okna głównego opisanych w tabeli powyżej (1–10).*
+
+</details>
 
 Układ okna dzieli się na dwie główne kolumny:
 * **po lewej**: mapa podglądu z górnym paskiem narzędzi oraz trzema kartami pod mapą (*Obszar pobierania*, *Parametry segmentów*, *Stan sesji*),
