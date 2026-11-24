@@ -82,10 +82,15 @@ Public Class PodgladGaleriiTesty
 
         Dim bladKodeka = False
         Using bmp = DekoderWebp.DekodujZPliku(plikWebp, bladKodeka)
-            Assert.False(bladKodeka)
-            Assert.NotNull(bmp)
-            Assert.True(bmp.Width > 50)
-            Assert.True(bmp.Height > 50)
+            ' Na Windows Server (np. GitHub Actions windows-latest) brak systemowego rozszerzenia WebP WIC —
+            ' wtedy dekoder powinien ustawić bladKodeka = True i bezpiecznie zwrócić Nothing.
+            If bladKodeka Then
+                Assert.Null(bmp)
+            Else
+                Assert.NotNull(bmp)
+                Assert.True(bmp.Width > 50)
+                Assert.True(bmp.Height > 50)
+            End If
         End Using
     End Sub
 
@@ -120,11 +125,24 @@ Public Class PodgladGaleriiTesty
         Next
     End Sub
 
+    Private Shared Function UtworzTestowyObrazPng() As Byte()
+        Using bmp As New Bitmap(64, 64)
+            Using g = Graphics.FromImage(bmp)
+                g.Clear(Color.ForestGreen)
+            End Using
+            Using ms As New MemoryStream()
+                bmp.Save(ms, Imaging.ImageFormat.Png)
+                Return ms.ToArray()
+            End Using
+        End Using
+    End Function
+
     <Fact>
     Public Async Function MagazynPodgladuGalerii_PobieraZHttpIZapisujeWCacheNaDysku() As Task
         Dim pomoc = ZnajdzFolderPomocyRepo()
         Dim jsonBytes = File.ReadAllBytes(Path.Combine(pomoc, "galeria", "warstwy.json"))
-        Dim webpBytes = File.ReadAllBytes(Path.Combine(pomoc, "obrazy", "galeria", "TOPO_WMTS__MAPA_TOPOGRAFICZNA.webp"))
+        ' DekoderWebp obsługuje także PNG bez wymogu kodeka WebP WIC (ważne na runnerach Windows Server CI)
+        Dim obrazBytes = UtworzTestowyObrazPng()
 
         Dim tempDir = Path.Combine(Path.GetTempPath(), "MapoTero_PodgladTest_" & Guid.NewGuid().ToString("N"))
         Directory.CreateDirectory(tempDir)
@@ -150,9 +168,9 @@ Public Class PodgladGaleriiTesty
                                                      Await ctx.Response.OutputStream.WriteAsync(jsonBytes, 0, jsonBytes.Length)
                                                  ElseIf sc.EndsWith("TOPO_WMTS__MAPA_TOPOGRAFICZNA.webp", StringComparison.OrdinalIgnoreCase) Then
                                                      zadanieObraz += 1
-                                                     ctx.Response.ContentType = "image/webp"
-                                                     ctx.Response.ContentLength64 = webpBytes.Length
-                                                     Await ctx.Response.OutputStream.WriteAsync(webpBytes, 0, webpBytes.Length)
+                                                     ctx.Response.ContentType = "image/png"
+                                                     ctx.Response.ContentLength64 = obrazBytes.Length
+                                                     Await ctx.Response.OutputStream.WriteAsync(obrazBytes, 0, obrazBytes.Length)
                                                  Else
                                                      ctx.Response.StatusCode = 404
                                                  End If

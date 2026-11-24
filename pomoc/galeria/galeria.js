@@ -4,6 +4,8 @@
   const MAKS_WARSTW_KANAPKI = 12;
   const MIN_KRYCIE = 5;
   const PELNE_KRYCIE = 100;
+  const MAKS_PIKSEL_PODGLADU = 25;
+  const MAKS_PIKSEL_DOPASOWANIA_BBOX = 15;
   const KLUCZ_LOCAL_STORAGE = "mapotero_galeria_kanapka_v1";
 
   const TRYBY_MIESZANIA = [
@@ -284,9 +286,49 @@
     return 5;
   }
 
+  // Dla dużego zaznaczonego obszaru nie rozciągamy próbki 360x360 na setki metrów/piksel
+  // (serwery WMTS/WMS blokują zbyt grube skale) — zostajemy przy skali roboczej ze środka obszaru.
+  function wybierzPikselPoZaznaczeniuBbox(bbox, aktualnyPiksel) {
+    const obszarPiksel = obliczPikselDlaBbox(bbox, 360);
+    if (obszarPiksel <= MAKS_PIKSEL_DOPASOWANIA_BBOX) {
+      return {
+        piksel: obszarPiksel,
+        obszarPiksel: obszarPiksel,
+        rozdzielony: false
+      };
+    }
+    const bezpieczny = Number(aktualnyPiksel) > 0 && Number(aktualnyPiksel) <= MAKS_PIKSEL_PODGLADU
+      ? Number(aktualnyPiksel)
+      : 0;
+    return {
+      piksel: bezpieczny,
+      obszarPiksel: obszarPiksel,
+      rozdzielony: true
+    };
+  }
+
+  // Grupuje sąsiednie elementy o tej samej podgrupie w kolejności z katalogu (bez wypychania pustej podgrupy na początek).
+  function zgrupujPodgrupyWKolejnosci(elementy) {
+    const bloki = [];
+    if (!Array.isArray(elementy)) return bloki;
+    elementy.forEach(function (pozycja) {
+      const warstwa = pozycja && pozycja.warstwa && typeof pozycja.warstwa === "object" ? pozycja.warstwa : pozycja;
+      const nazwaPod = (warstwa && warstwa.podgrupa) || "";
+      const ostatni = bloki.length > 0 ? bloki[bloki.length - 1] : null;
+      if (ostatni && ostatni.nazwa === nazwaPod) {
+        ostatni.elementy.push(pozycja);
+      } else {
+        bloki.push({ nazwa: nazwaPod, elementy: [pozycja] });
+      }
+    });
+    return bloki;
+  }
+
   if (typeof module !== "undefined" && module.exports) {
     module.exports = {
       MAKS_WARSTW_KANAPKI,
+      MAKS_PIKSEL_PODGLADU,
+      MAKS_PIKSEL_DOPASOWANIA_BBOX,
       TRYBY_MIESZANIA,
       poprawneKrycie,
       znajdzTryb,
@@ -304,7 +346,9 @@
       kafelekDoLatLon,
       obliczPikselDlaBbox,
       bboxZCentrumIPiksela,
-      dopasujZoomDoBbox
+      dopasujZoomDoBbox,
+      wybierzPikselPoZaznaczeniuBbox,
+      zgrupujPodgrupyWKolejnosci
     };
   }
 
@@ -344,7 +388,8 @@
     ostatniPikselRenderu: 2.0,
     zaznaczonyBbox: null,
     przekazObszarDoMapoTero: true,
-    minimapaOtwarta: true,
+    dokZwiniety: false,
+    zakladkaMiksera: "podglad",
     mapaZoom: 11,
     mapaCenterLat: 52.2297,
     mapaCenterLon: 21.0122,
@@ -489,6 +534,10 @@
 
   function zapiszKanapkeLocalStorage() {
     try {
+      if (stan.kanapka.length === 0 && !stan.nazwaKanapki.trim()) {
+        global.localStorage.removeItem(KLUCZ_LOCAL_STORAGE);
+        return;
+      }
       const payload = stan.kanapka.map(function (item) {
         return { zbior: item.zbior, warstwa: item.warstwa, krycie: item.krycie, tryb: item.tryb };
       });
@@ -822,13 +871,15 @@
         karta.classList.add("gw-karta-w-kanapce");
         if (btn) {
           btn.classList.add("aktywny");
-          btn.textContent = "✓ W mikserze (#" + (idx + 1) + ")";
+          btn.textContent = "✓ W miksie (#" + (idx + 1) + ")";
+          btn.title = "Usuń tę warstwę z kompozycji w Mikserze warstw";
         }
       } else {
         karta.classList.remove("gw-karta-w-kanapce");
         if (btn) {
           btn.classList.remove("aktywny");
-          btn.textContent = "☐ do miksera warstw";
+          btn.textContent = "☐ Dodaj do miksu";
+          btn.title = "Dodaj warstwę do kompozycji w Mikserze warstw (ułożysz tam kolejność, krycie i tryb nakładania)";
         }
       }
     });
@@ -865,10 +916,12 @@
       const btnKanapka = el(
         "button",
         "gw-btn-kanapka" + (idxWKanapce >= 0 ? " aktywny" : ""),
-        idxWKanapce >= 0 ? "✓ W mikserze (#" + (idxWKanapce + 1) + ")" : "☐ do miksera warstw"
+        idxWKanapce >= 0 ? "✓ W miksie (#" + (idxWKanapce + 1) + ")" : "☐ Dodaj do miksu"
       );
       btnKanapka.type = "button";
-      btnKanapka.title = "Dodaj lub usuń warstwę z miksera warstw";
+      btnKanapka.title = idxWKanapce >= 0
+        ? "Usuń tę warstwę z kompozycji w Mikserze warstw"
+        : "Dodaj warstwę do kompozycji w Mikserze warstw (ułożysz tam kolejność, krycie i tryb nakładania)";
       btnKanapka.addEventListener("click", function (e) {
         e.stopPropagation();
         przelaczWarstweWKanapce(w);
@@ -876,9 +929,9 @@
       akcje.appendChild(btnKanapka);
 
       if (czyPolaczonoZProgramem()) {
-        const btnDodaj = el("button", "gw-btn-dodaj", "+ MapoTero");
+        const btnDodaj = el("button", "gw-btn-dodaj", "Wyślij");
         btnDodaj.type = "button";
-        btnDodaj.title = "Dodaj od razu jako pojedynczą warstwę do MapoTero";
+        btnDodaj.title = "Pomiń mikser i dodaj od razu tylko tę pojedynczą warstwę do MapoTero";
         btnDodaj.addEventListener("click", function (e) {
           e.stopPropagation();
           wyslijDoMapoTero(w, btnDodaj);
@@ -923,21 +976,12 @@
       naglowek.appendChild(el("span", "gw-liczba-w-grupie", elementy.length + " warstw"));
       sekcja.appendChild(naglowek);
 
-      const podgrupy = new Map();
-      elementy.forEach(function (pozycja) {
-        const kluczPod = pozycja.warstwa.podgrupa || "";
-        if (!podgrupy.has(kluczPod)) podgrupy.set(kluczPod, []);
-        podgrupy.get(kluczPod).push(pozycja);
-      });
-
-      if (podgrupy.has("")) {
-        sekcja.appendChild(utworzKartySiatki(podgrupy.get("")));
-      }
-
-      podgrupy.forEach(function (podElementy, nazwaPodgrupy) {
-        if (!nazwaPodgrupy) return;
-        sekcja.appendChild(el("h3", "gw-podgrupa-tytul", nazwaPodgrupy));
-        sekcja.appendChild(utworzKartySiatki(podElementy));
+      const bloki = zgrupujPodgrupyWKolejnosci(elementy);
+      bloki.forEach(function (blok) {
+        if (blok.nazwa) {
+          sekcja.appendChild(el("h3", "gw-podgrupa-tytul", blok.nazwa));
+        }
+        sekcja.appendChild(utworzKartySiatki(blok.elementy));
       });
 
       ref.wyniki.appendChild(sekcja);
@@ -1177,10 +1221,12 @@
     const idx = indeksWKanapce(w);
     if (idx >= 0) {
       ref.modalKanapka.classList.add("aktywny");
-      ref.modalKanapka.textContent = "✓ W mikserze (#" + (idx + 1) + ")";
+      ref.modalKanapka.textContent = "✓ W miksie (#" + (idx + 1) + ")";
+      ref.modalKanapka.title = "Usuń tę warstwę z kompozycji w Mikserze warstw";
     } else {
       ref.modalKanapka.classList.remove("aktywny");
-      ref.modalKanapka.textContent = "+ do miksera warstw";
+      ref.modalKanapka.textContent = "☐ Dodaj do miksu";
+      ref.modalKanapka.title = "Dodaj warstwę do kompozycji w Mikserze warstw";
     }
   }
 
@@ -1274,12 +1320,41 @@
 
   // --- Mikser kanapki (UI, podgląd na żywo i eksport) ---
 
+  function czyJestCoResetowac() {
+    return stan.kanapka.length > 0 || stan.nazwaKanapki.trim() !== "" || Array.isArray(stan.zaznaczonyBbox);
+  }
+
+  function resetujMikser() {
+    stan.kanapka = [];
+    stan.kanapkaUrlStart = "";
+    stan.nazwaKanapki = "";
+    stan.zaznaczonyBbox = null;
+    stan.podgladPiksel = 0;
+    stan.zapiszJakoStyl = false;
+    if (ref.mikserInputNazwa) ref.mikserInputNazwa.value = "";
+    if (ref.mikserSelSkala) ref.mikserSelSkala.value = "0";
+    if (ref.mikserChkStyl) ref.mikserChkStyl.checked = false;
+    pokazStatusMiksera("", false);
+    poZmianieKanapki();
+    rysujMinimape();
+  }
+
   function odswiezDokKanapki() {
     if (!ref.mikserDok) return;
     const n = stan.kanapka.length;
     ref.mikserDokLicznik.textContent = n + " / " + MAKS_WARSTW_KANAPKI + " warstw";
+    ref.mikserDok.classList.toggle("zwiniety", stan.dokZwiniety);
+    if (ref.mikserDokZwin) {
+      ref.mikserDokZwin.textContent = stan.dokZwiniety ? "▴ Rozwiń" : "✕ Zwiń";
+      ref.mikserDokZwin.title = stan.dokZwiniety
+        ? "Rozwiń dolny pasek Miksera warstw"
+        : "Zwiń pasek do małej pigułki w rogu ekranu, aby nie zasłaniał kart";
+    }
+    if (ref.mikserDokReset) {
+      ref.mikserDokReset.hidden = !czyJestCoResetowac();
+    }
     if (n === 0) {
-      ref.mikserDokOpis.textContent = "Zaznacz warstwy haczykiem „☐ do miksera warstw”, aby ułożyć własny miks.";
+      ref.mikserDokOpis.textContent = "Wybierz warstwy przyciskiem „☐ Dodaj do miksu”, aby ułożyć własny miks.";
       ref.mikserDokOtworz.disabled = false;
       if (ref.mikserDokWyslij) ref.mikserDokWyslij.disabled = true;
     } else {
@@ -1296,6 +1371,7 @@
   function otworzMikser() {
     stan.mikserOtwarty = true;
     ref.mikserTlo.hidden = false;
+    if (ref.przelaczZakladkeMiksera) ref.przelaczZakladkeMiksera(stan.zakladkaMiksera || "podglad");
     renderujListeMiksera();
     rysujMinimape();
     zglosOdswiezeniePodgladuMiksera(true);
@@ -1336,7 +1412,7 @@
     }
 
     if (ref.mikserBtnAuto) ref.mikserBtnAuto.disabled = stan.kanapka.length < 2;
-    if (ref.mikserBtnWyczysc) ref.mikserBtnWyczysc.disabled = stan.kanapka.length === 0;
+    if (ref.mikserBtnWyczysc) ref.mikserBtnWyczysc.disabled = !czyJestCoResetowac();
     if (ref.mikserBtnWyslijGlowne) ref.mikserBtnWyslijGlowne.disabled = stan.kanapka.length === 0;
     if (ref.mikserBtnWyslijKreator) ref.mikserBtnWyslijKreator.disabled = stan.kanapka.length === 0;
     if (ref.mikserBtnPobierzPlik) ref.mikserBtnPobierzPlik.disabled = stan.kanapka.length === 0;
@@ -1345,7 +1421,7 @@
 
     if (stan.kanapka.length === 0) {
       ref.mikserWarstwy.appendChild(
-        el("div", "gw-brak-wynikow", "Mikser warstw jest pusty. Wybierz warstwy z galerii przyciskiem „☐ do miksera warstw”.")
+        el("div", "gw-brak-wynikow", "Mikser warstw jest pusty. Wybierz warstwy z galerii przyciskiem „☐ Dodaj do miksu”.")
       );
       return;
     }
@@ -1428,23 +1504,28 @@
         suwakGrupa.appendChild(suwak);
         suwakGrupa.appendChild(wartoscSpan);
 
-        const selectTryb = document.createElement("select");
-        selectTryb.className = "gw-mikser-tryb-select";
-        selectTryb.setAttribute("aria-label", "Tryb mieszania warstwy " + poz.nazwa);
-        TRYBY_MIESZANIA.forEach(function (t) {
-          const opt = document.createElement("option");
-          opt.value = t.kod;
-          opt.textContent = t.nazwa;
-          if (t.kod === poz.tryb) opt.selected = true;
-          selectTryb.appendChild(opt);
-        });
-        selectTryb.addEventListener("change", function () {
-          poz.tryb = selectTryb.value;
-          poZmianieKanapki();
-        });
-
         dol.appendChild(suwakGrupa);
-        dol.appendChild(selectTryb);
+        if (pozycjaIndeks === 0) {
+          const bazaOpis = el("span", "gw-mikser-baza-etykieta", "Podkład bazowy (spód)");
+          bazaOpis.title = "Warstwa leży na samym spodzie kanapki — jej tryb mieszania nie ma warstwy poniżej";
+          dol.appendChild(bazaOpis);
+        } else {
+          const selectTryb = document.createElement("select");
+          selectTryb.className = "gw-mikser-tryb-select";
+          selectTryb.setAttribute("aria-label", "Tryb mieszania warstwy " + poz.nazwa);
+          TRYBY_MIESZANIA.forEach(function (t) {
+            const opt = document.createElement("option");
+            opt.value = t.kod;
+            opt.textContent = t.nazwa;
+            if (t.kod === poz.tryb) opt.selected = true;
+            selectTryb.appendChild(opt);
+          });
+          selectTryb.addEventListener("change", function () {
+            poz.tryb = selectTryb.value;
+            poZmianieKanapki();
+          });
+          dol.appendChild(selectTryb);
+        }
 
         wiersz.appendChild(gora);
         wiersz.appendChild(dol);
@@ -1507,13 +1588,16 @@
     stan.abortPodglad = ctrl;
 
     ref.mikserLadowanie.hidden = false;
+    const pikselDoWyslania = stan.podgladPiksel > 0
+      ? Math.min(MAKS_PIKSEL_PODGLADU, stan.podgladPiksel)
+      : null;
     const payload = {
       warstwy: stan.kanapka.map(function (x) {
         return { zbior: x.zbior, warstwa: x.warstwa, krycie: x.krycie, tryb: x.tryb };
       }),
       lat: stan.podgladLat,
       lon: stan.podgladLon,
-      piksel: stan.podgladPiksel > 0 ? stan.podgladPiksel : null
+      piksel: pikselDoWyslania
     };
 
     fetch("http://127.0.0.1:" + stan.port + "/podglad?token=" + encodeURIComponent(stan.token), {
@@ -1554,10 +1638,20 @@
           rysujMinimape();
         }
         const opisPx = wynik.pxH ? " · " + wynik.pxH.replace(".", ",") + " m/px (" + Math.round((pxLiczba || 2) * 360) + " m)" : "";
-        let info = "Podgląd na żywo z MapoTero (" + opisPunktu + opisPx + ").";
+        let info = "Podgląd z MapoTero (" + opisPunktu + opisPx + ")";
+        if (stan.zaznaczonyBbox) {
+          const pxObszar = obliczPikselDlaBbox(stan.zaznaczonyBbox, 360);
+          const bokObszaruKm = ((pxObszar * 360) / 1000).toFixed(1).replace(".", ",");
+          info += " · Obszar eksportu ~" + bokObszaruKm + " km";
+        }
+        info += ".";
         if (wynik.brakH) {
           const brakujace = decodeURIComponent(wynik.brakH).split("|").join(", ");
-          info += " Pominięto / brak odpowiedzi: " + brakujace + ".";
+          info += " Brak obrazu dla: " + brakujace;
+          if (pxLiczba >= 10) {
+            info += " (część szczegółowych warstw nie wyświetla się przy tej skali — zmień na 1–4 m/px)";
+          }
+          info += ".";
           ref.mikserStanPodgladu.classList.add("ostrzezenie");
         } else {
           ref.mikserStanPodgladu.classList.remove("ostrzezenie");
@@ -1672,7 +1766,7 @@
     stan.cacheKafelkowOsm.set(klucz, wpis);
     wpis.img.onload = function () {
       wpis.status = "ok";
-      if (stan.mikserOtwarty && stan.minimapaOtwarta) rysujMinimape();
+      if (stan.mikserOtwarty && stan.zakladkaMiksera === "mapa") rysujMinimape();
     };
     wpis.img.onerror = function () {
       wpis.status = "err";
@@ -1708,7 +1802,46 @@
   }
 
   function rysujMinimape(tymczasowyProstokat) {
-    if (!ref.minimapaCanvas || !stan.minimapaOtwarta) return;
+    if (ref.minimapaBtnWyczyscZazn) {
+      ref.minimapaBtnWyczyscZazn.hidden = !stan.zaznaczonyBbox;
+    }
+    if (ref.mikserBtnWyczysc) {
+      ref.mikserBtnWyczysc.disabled = !czyJestCoResetowac();
+    }
+    if (ref.mikserDokReset) {
+      ref.mikserDokReset.hidden = !czyJestCoResetowac();
+    }
+    if (ref.mikserChkObszarWrap) {
+      ref.mikserChkObszarWrap.hidden = !stan.zaznaczonyBbox;
+    }
+    if (ref.minimapaBtnDopasujPodglad) {
+      const malyObszar = Array.isArray(stan.zaznaczonyBbox) &&
+        obliczPikselDlaBbox(stan.zaznaczonyBbox, 360) <= MAKS_PIKSEL_PODGLADU;
+      ref.minimapaBtnDopasujPodglad.hidden = !malyObszar;
+    }
+    if (ref.mikserZakladkaMapa) {
+      ref.mikserZakladkaMapa.textContent = stan.zaznaczonyBbox
+        ? "📍 Miejsce i obszar ✓"
+        : "📍 Miejsce i obszar";
+    }
+    if (ref.minimapaInfo) {
+      let txt = "Próbka (czerwona): " + stan.podgladLat.toFixed(4) + ", " + stan.podgladLon.toFixed(4);
+      if (stan.zaznaczonyBbox) {
+        const pxAuto = obliczPikselDlaBbox(stan.zaznaczonyBbox, 360);
+        const bokKm = ((pxAuto * 360) / 1000).toFixed(1).replace(".", ",");
+        txt += " · Obszar dla MapoTero: ~" + bokKm + " km";
+        if (pxAuto > MAKS_PIKSEL_DOPASOWANIA_BBOX) {
+          txt += " (duży obszar — podgląd pokazuje detal w skali roboczej)";
+        }
+      } else if (stan.obszarProgramu && stan.obszarProgramu.maSiatke) {
+        txt += " · Niebieska ramka: obszar z MapoTero";
+      } else {
+        txt += " · Kliknij, aby ustawić próbkę";
+      }
+      ref.minimapaInfo.textContent = txt;
+    }
+
+    if (!ref.minimapaCanvas || stan.zakladkaMiksera !== "mapa") return;
     const canvas = ref.minimapaCanvas;
     const ctx = canvas.getContext("2d");
     const szer = canvas.width;
@@ -1807,23 +1940,6 @@
     if (ref.minimapaZoomTekst) {
       ref.minimapaZoomTekst.textContent = "Zoom: " + z;
     }
-    if (ref.minimapaInfo) {
-      let txt = "Punkt podglądu: " + stan.podgladLat.toFixed(4) + ", " + stan.podgladLon.toFixed(4);
-      if (stan.zaznaczonyBbox) {
-        const pxAuto = obliczPikselDlaBbox(stan.zaznaczonyBbox, 360);
-        const bokKm = ((pxAuto * 360) / 1000).toFixed(2).replace(".", ",");
-        txt += " · Zaznaczony obszar (~" + bokKm + " km)";
-      } else if (stan.obszarProgramu && stan.obszarProgramu.maSiatke) {
-        txt += " · Niebieska ramka: obszar z MapoTero";
-      }
-      ref.minimapaInfo.textContent = txt;
-    }
-    if (ref.minimapaBtnWyczyscZazn) {
-      ref.minimapaBtnWyczyscZazn.hidden = !stan.zaznaczonyBbox;
-    }
-    if (ref.mikserChkObszarWrap) {
-      ref.mikserChkObszarWrap.hidden = !stan.zaznaczonyBbox;
-    }
   }
 
   function utworzGrupePigulek(etykieta, opcje, pobierzAktualna, onZmiana) {
@@ -1860,17 +1976,19 @@
     const mikserDok = el("div", "gw-mikser-dok");
     const dokInfo = el("div", "gw-mikser-dok-info");
     const dokLicznik = el("span", "gw-mikser-badge", "0 / " + MAKS_WARSTW_KANAPKI + " warstw");
-    const dokOpis = el("span", null, "");
+    const dokOpis = el("span", "gw-mikser-dok-opis", "");
     dokInfo.appendChild(el("strong", null, "🧩 Mikser warstw:"));
     dokInfo.appendChild(dokLicznik);
     dokInfo.appendChild(dokOpis);
 
     const dokAkcje = el("div", "gw-mikser-dok-akcje");
-    const dokOtworz = el("button", "gw-btn-glowny", "Otwórz mikser i podgląd");
+    const dokOtworz = el("button", "gw-btn-glowny", "Otwórz mikser");
     dokOtworz.type = "button";
+    dokOtworz.title = "Otwórz okno Miksera warstw z podglądem i ustawieniami krycia";
     dokOtworz.addEventListener("click", otworzMikser);
     dokAkcje.appendChild(dokOtworz);
 
+    const dokAkcjePelne = el("div", "gw-mikser-dok-akcje-pelne");
     let dokWyslij = null;
     if (czyPolaczonoZProgramem()) {
       dokWyslij = el("button", "gw-btn-zielony", "Wyślij do MapoTero");
@@ -1878,8 +1996,24 @@
       dokWyslij.addEventListener("click", function () {
         wyslijKanapkeDoMapoTero("okno_glowne", false);
       });
-      dokAkcje.appendChild(dokWyslij);
+      dokAkcjePelne.appendChild(dokWyslij);
     }
+
+    const dokReset = el("button", "gw-btn-prosty", "✕ Resetuj");
+    dokReset.type = "button";
+    dokReset.hidden = true;
+    dokReset.title = "Usuwa wszystkie warstwy z miksu i czyści zapamiętane ustawienia";
+    dokReset.addEventListener("click", resetujMikser);
+    dokAkcjePelne.appendChild(dokReset);
+    dokAkcje.appendChild(dokAkcjePelne);
+
+    const dokZwin = el("button", "gw-btn-prosty", "✕ Zwiń");
+    dokZwin.type = "button";
+    dokZwin.addEventListener("click", function () {
+      stan.dokZwiniety = !stan.dokZwiniety;
+      odswiezDokKanapki();
+    });
+    dokAkcje.appendChild(dokZwin);
 
     mikserDok.appendChild(dokInfo);
     mikserDok.appendChild(dokAkcje);
@@ -1895,17 +2029,39 @@
 
     const mikserModal = el("div", "gw-mikser-modal");
     const mikserNaglowek = el("div", "gw-mikser-naglowek");
-    mikserNaglowek.appendChild(el("h3", null, "🧩 Mikser warstw"));
-    const mikserZamknij = el("button", "gw-modal-zamknij", "×");
+    const mikserNaglowekTekst = el("div", "gw-mikser-naglowek-tekst");
+    mikserNaglowekTekst.appendChild(el("h3", null, "🧩 Mikser warstw"));
+    mikserNaglowekTekst.appendChild(
+      el("span", "gw-mikser-podtytul", "Ułóż kolejność, przeźroczystość i tryb mieszania warstw, a potem wyślij zestaw do MapoTero")
+    );
+    mikserNaglowek.appendChild(mikserNaglowekTekst);
+    const mikserZamknij = el("button", "gw-modal-zamknij gw-btn-zamknij-tekst", "Zamknij ×");
     mikserZamknij.type = "button";
     mikserZamknij.setAttribute("aria-label", "Zamknij mikser");
+    mikserZamknij.title = "Zamknij okno miksera (Esc)";
     mikserZamknij.addEventListener("click", zamknijMikser);
     mikserNaglowek.appendChild(mikserZamknij);
 
     const mikserCialo = el("div", "gw-mikser-cialo");
 
-    // Lewa kolumna: podgląd + wybór miejsca
+    // Lewa kolumna: przełączane zakładki [Podgląd | Miejsce i obszar]
     const kolPodglad = el("div", "gw-mikser-kol-podglad");
+
+    const mikserTabs = el("div", "gw-mikser-tabs");
+    mikserTabs.setAttribute("role", "tablist");
+    const tabPodglad = el("button", "gw-mikser-tab aktywny", "👁 Podgląd wyniku");
+    tabPodglad.type = "button";
+    tabPodglad.setAttribute("role", "tab");
+    tabPodglad.setAttribute("aria-selected", "true");
+
+    const tabMapa = el("button", "gw-mikser-tab", "📍 Miejsce i obszar");
+    tabMapa.type = "button";
+    tabMapa.setAttribute("role", "tab");
+    tabMapa.setAttribute("aria-selected", "false");
+    mikserTabs.appendChild(tabPodglad);
+    mikserTabs.appendChild(tabMapa);
+
+    const panelPodglad = el("div", "gw-mikser-panel");
     const ramkaPodgladu = el("div", "gw-mikser-ramka-podgladu");
     const mikserCanvas = document.createElement("canvas");
     mikserCanvas.width = 360;
@@ -1929,8 +2085,7 @@
       { val: "2", txt: "2 m/px" },
       { val: "4", txt: "4 m/px" },
       { val: "10", txt: "10 m/px" },
-      { val: "25", txt: "25 m/px" },
-      { val: "50", txt: "50 m/px" }
+      { val: "25", txt: "25 m/px" }
     ].forEach(function (op) {
       const opt = document.createElement("option");
       opt.value = op.val;
@@ -1944,42 +2099,44 @@
     });
     if (czyPolaczonoZProgramem()) {
       sterowaniePodgladu.appendChild(selSkala);
-    }
 
-    if (czyPolaczonoZProgramem()) {
-      const btnZMapoTero = el("button", "gw-btn-prosty", "↺ Obszar z MapoTero");
-      btnZMapoTero.type = "button";
-      btnZMapoTero.title = "Pobierz ponownie środek i obszar zaznaczenia z okna MapoTero";
-      btnZMapoTero.addEventListener("click", function () {
-        stan.zaznaczonyBbox = null;
-        pobierzStanZMapoTero(false, false);
+      const btnOdswiezPodglad = el("button", "gw-btn-prosty", "↻ Odśwież");
+      btnOdswiezPodglad.type = "button";
+      btnOdswiezPodglad.title = "Pobierz ponownie podgląd z MapoTero";
+      btnOdswiezPodglad.addEventListener("click", function () {
+        zglosOdswiezeniePodgladuMiksera(true);
       });
-      sterowaniePodgladu.appendChild(btnZMapoTero);
+      sterowaniePodgladu.appendChild(btnOdswiezPodglad);
     }
 
-    const btnMinimapa = el("button", "gw-btn-prosty", "🗺️ Ukryj mapkę");
-    btnMinimapa.type = "button";
-    btnMinimapa.addEventListener("click", function () {
-      stan.minimapaOtwarta = !stan.minimapaOtwarta;
-      minimapaBox.hidden = !stan.minimapaOtwarta;
-      btnMinimapa.textContent = stan.minimapaOtwarta ? "🗺️ Ukryj mapkę" : "🗺️ Pokaż mapkę";
-      if (stan.minimapaOtwarta) rysujMinimape();
+    const btnZmienMiejsce = el("button", "gw-btn-prosty", "📍 Zmień miejsce");
+    btnZmienMiejsce.type = "button";
+    btnZmienMiejsce.title = "Otwórz mapę wyboru miejsca próbki oraz obszaru dla MapoTero";
+    btnZmienMiejsce.addEventListener("click", function () {
+      przelaczZakladkeMiksera("mapa");
     });
-    sterowaniePodgladu.appendChild(btnMinimapa);
+    sterowaniePodgladu.appendChild(btnZmienMiejsce);
 
-    const minimapaBox = el("div", "gw-mikser-minimapa-box");
-    minimapaBox.hidden = !stan.minimapaOtwarta;
+    const mikserStanPodgladu = el("div", "gw-mikser-stan-podgladu", "");
+
+    panelPodglad.appendChild(ramkaPodgladu);
+    panelPodglad.appendChild(sterowaniePodgladu);
+    panelPodglad.appendChild(mikserStanPodgladu);
+
+    const minimapaBox = el("div", "gw-mikser-panel gw-mikser-minimapa-box");
+    minimapaBox.hidden = true;
 
     const minimapaNarzedzia = el("div", "gw-minimapa-narzedzia");
     const grupaTryby = el("div", "gw-minimapa-grupa-btn");
     const btnTrybPrzesun = el("button", "aktywny", "🖐 Przesuń / Punkt");
     btnTrybPrzesun.type = "button";
-    btnTrybPrzesun.title = "Przeciągaj mapę lub kliknij punkt podglądu (z Shift zaznaczasz obszar)";
+    btnTrybPrzesun.title = "Przeciągaj mapę lub kliknij punkt próbki (z Shift zaznaczasz obszar)";
     const btnTrybZaznacz = el("button", null, "⬜ Zaznacz obszar");
     btnTrybZaznacz.type = "button";
-    btnTrybZaznacz.title = "Narysuj prostokąt obszaru na mapie";
-    const btnWyczyscZazn = el("button", null, "✕ Wyczyść obszar");
+    btnTrybZaznacz.title = "Narysuj prostokąt obszaru do pobrania w MapoTero";
+    const btnWyczyscZazn = el("button", null, "✕ Wyczyść");
     btnWyczyscZazn.type = "button";
+    btnWyczyscZazn.title = "Usuń zaznaczony obszar";
     btnWyczyscZazn.hidden = true;
 
     function ustawTrybMapy(tryb) {
@@ -2034,8 +2191,8 @@
 
     const minimapaWrap = el("div", "gw-minimapa-canvas-wrap");
     const minimapaCanvas = document.createElement("canvas");
-    minimapaCanvas.width = 356;
-    minimapaCanvas.height = 258;
+    minimapaCanvas.width = 360;
+    minimapaCanvas.height = 290;
     minimapaCanvas.className = "gw-minimapa-canvas tryb-przesun";
     minimapaWrap.appendChild(minimapaCanvas);
 
@@ -2124,10 +2281,17 @@
           ];
           stan.podgladLat = Math.round(((nw.lat + se.lat) / 2) * 100000) / 100000;
           stan.podgladLon = Math.round(((nw.lon + se.lon) / 2) * 100000) / 100000;
-          stan.ostatniPikselRenderu = obliczPikselDlaBbox(stan.zaznaczonyBbox, 360);
+
+          const wyborPx = wybierzPikselPoZaznaczeniuBbox(stan.zaznaczonyBbox, stan.podgladPiksel);
           if (czyPolaczonoZProgramem()) {
-            stan.podgladPiksel = stan.ostatniPikselRenderu;
-            selSkala.value = "0";
+            if (!wyborPx.rozdzielony) {
+              stan.podgladPiksel = wyborPx.piksel;
+              stan.ostatniPikselRenderu = wyborPx.piksel;
+              selSkala.value = "0";
+            } else {
+              stan.podgladPiksel = wyborPx.piksel;
+              if (wyborPx.piksel === 0) selSkala.value = "0";
+            }
           }
           rysujMinimape();
           zglosOdswiezeniePodgladuMiksera(true);
@@ -2168,6 +2332,17 @@
     }, { passive: false });
 
     const skrotyBox = el("div", "gw-minimapa-skroty");
+    if (czyPolaczonoZProgramem()) {
+      const btnZMapoTero = el("button", null, "↺ Obszar z MapoTero");
+      btnZMapoTero.type = "button";
+      btnZMapoTero.title = "Pobierz ponownie środek i obszar zaznaczenia z okna MapoTero";
+      btnZMapoTero.addEventListener("click", function () {
+        stan.zaznaczonyBbox = null;
+        pobierzStanZMapoTero(false, false);
+      });
+      skrotyBox.appendChild(btnZMapoTero);
+    }
+
     const btnPolska = el("button", null, "Polska");
     btnPolska.type = "button";
     btnPolska.addEventListener("click", function () {
@@ -2193,22 +2368,61 @@
       skrotyBox.appendChild(b);
     });
 
+    const akcjeMapyDol = el("div", "gw-mikser-sterowanie-podgladu");
+    const btnGotoweMapa = el("button", "gw-btn-glowny", "✓ Gotowe — pokaż podgląd");
+    btnGotoweMapa.type = "button";
+    btnGotoweMapa.addEventListener("click", function () {
+      przelaczZakladkeMiksera("podglad");
+    });
+    akcjeMapyDol.appendChild(btnGotoweMapa);
+
+    let btnDopasujPodglad = null;
+    if (czyPolaczonoZProgramem()) {
+      btnDopasujPodglad = el("button", "gw-btn-prosty", "🔍 Dopasuj podgląd do obszaru");
+      btnDopasujPodglad.type = "button";
+      btnDopasujPodglad.hidden = true;
+      btnDopasujPodglad.title = "Ustawia skalę próbki tak, aby cały mały zaznaczony obszar zmieścił się w podglądzie";
+      btnDopasujPodglad.addEventListener("click", function () {
+        if (!Array.isArray(stan.zaznaczonyBbox)) return;
+        const px = Math.min(MAKS_PIKSEL_PODGLADU, obliczPikselDlaBbox(stan.zaznaczonyBbox, 360));
+        stan.podgladPiksel = px;
+        stan.ostatniPikselRenderu = px;
+        selSkala.value = "0";
+        przelaczZakladkeMiksera("podglad");
+        zglosOdswiezeniePodgladuMiksera(true);
+      });
+      akcjeMapyDol.appendChild(btnDopasujPodglad);
+    }
+
     minimapaBox.appendChild(minimapaNarzedzia);
     minimapaBox.appendChild(minimapaWrap);
     minimapaBox.appendChild(minimapaInfo);
     minimapaBox.appendChild(skrotyBox);
+    minimapaBox.appendChild(akcjeMapyDol);
 
-    const mikserStanPodgladu = el("div", "gw-mikser-stan-podgladu", "");
+    function przelaczZakladkeMiksera(nowa) {
+      stan.zakladkaMiksera = nowa === "mapa" ? "mapa" : "podglad";
+      const czyMapa = stan.zakladkaMiksera === "mapa";
+      tabPodglad.classList.toggle("aktywny", !czyMapa);
+      tabPodglad.setAttribute("aria-selected", czyMapa ? "false" : "true");
+      tabMapa.classList.toggle("aktywny", czyMapa);
+      tabMapa.setAttribute("aria-selected", czyMapa ? "true" : "false");
+      panelPodglad.hidden = czyMapa;
+      minimapaBox.hidden = !czyMapa;
+      if (czyMapa) rysujMinimape();
+    }
 
-    kolPodglad.appendChild(ramkaPodgladu);
-    kolPodglad.appendChild(sterowaniePodgladu);
+    tabPodglad.addEventListener("click", function () { przelaczZakladkeMiksera("podglad"); });
+    tabMapa.addEventListener("click", function () { przelaczZakladkeMiksera("mapa"); });
+
+    kolPodglad.appendChild(mikserTabs);
+    kolPodglad.appendChild(panelPodglad);
     kolPodglad.appendChild(minimapaBox);
-    kolPodglad.appendChild(mikserStanPodgladu);
 
     // Prawa kolumna: warstwy, suwaki i eksport
     const kolLista = el("div", "gw-mikser-kol-lista");
     const pasekListy = el("div", "gw-mikser-pasek-listy");
-    pasekListy.appendChild(el("span", null, "Kolejność kanapki: na górze warstwa najwyższa, na dole podkład (1)."));
+    pasekListy.appendChild(el("span", null, "Kolejność warstw (góra zasłania dół, spód = podkład 1.):"));
 
     const przyciskiListy = el("div", "gw-modal-linki");
     const btnAuto = el("button", "gw-btn-prosty", "⚡ Ułóż automatycznie");
@@ -2219,17 +2433,14 @@
       poZmianieKanapki();
     });
 
-    const btnWyczysc = el("button", "gw-btn-prosty", "Wyczyść");
+    const btnWyczysc = el("button", "gw-btn-prosty", "↺ Resetuj miks");
     btnWyczysc.type = "button";
-    btnWyczysc.addEventListener("click", function () {
-      stan.kanapka = [];
-      pokazStatusMiksera("", false);
-      poZmianieKanapki();
-    });
+    btnWyczysc.title = "Usuwa warstwy, nazwę stylu, zaznaczony obszar i wybraną skalę";
+    btnWyczysc.addEventListener("click", resetujMikser);
 
     przyciskiListy.appendChild(btnAuto);
     if (czyPolaczonoZProgramem()) {
-      const btnWczytajZProg = el("button", "gw-btn-prosty", "↺ Wczytaj z MapoTero");
+      const btnWczytajZProg = el("button", "gw-btn-prosty", "↺ Z programu");
       btnWczytajZProg.type = "button";
       btnWczytajZProg.title = "Zastępuje listę aktualną kanapką z okna MapoTero";
       btnWczytajZProg.addEventListener("click", function () {
@@ -2261,41 +2472,42 @@
     inputNazwa.addEventListener("input", function () {
       stan.nazwaKanapki = inputNazwa.value;
       zapiszKanapkeLocalStorage();
+      odswiezDokKanapki();
     });
     nazwaWiersz.appendChild(inputNazwa);
 
     const akcjeGlowne = el("div", "gw-mikser-akcje-glowne");
+    const opcjeWysylki = el("div", "gw-mikser-opcje-wiersz");
     let btnWyslijGlowne = null;
     let btnWyslijKreator = null;
+    let chkStyl = null;
     if (czyPolaczonoZProgramem()) {
-      const chkStyl = document.createElement("input");
-      chkStyl.type = "checkbox";
-      chkStyl.checked = stan.zapiszJakoStyl;
-      chkStyl.addEventListener("change", function () {
-        stan.zapiszJakoStyl = chkStyl.checked;
-      });
-      const lblChk = el("label", null, " zapisz też jako własny styl kreatora");
-      lblChk.style.fontSize = "0.8rem";
-      lblChk.style.display = "inline-flex";
-      lblChk.style.alignItems = "center";
-      lblChk.style.gap = "0.25rem";
-      lblChk.prepend(chkStyl);
-
-      btnWyslijGlowne = el("button", "gw-btn-zielony", "▶ Wyślij do MapoTero (Okno główne)");
+      btnWyslijGlowne = el("button", "gw-btn-zielony", "▶ Wyślij do MapoTero");
       btnWyslijGlowne.type = "button";
+      btnWyslijGlowne.title = "Ustawia ten miks warstw w głównym oknie programu MapoTero";
       btnWyslijGlowne.addEventListener("click", function () {
         wyslijKanapkeDoMapoTero("okno_glowne", stan.zapiszJakoStyl);
       });
 
       btnWyslijKreator = el("button", "gw-btn-glowny", "✨ Otwórz w Szybkim Kreatorze");
       btnWyslijKreator.type = "button";
+      btnWyslijKreator.title = "Przekazuje miks jako własny styl do Szybkiego Kreatora Mapy";
       btnWyslijKreator.addEventListener("click", function () {
         wyslijKanapkeDoMapoTero("kreator", true);
       });
 
       akcjeGlowne.appendChild(btnWyslijGlowne);
       akcjeGlowne.appendChild(btnWyslijKreator);
-      akcjeGlowne.appendChild(lblChk);
+
+      chkStyl = document.createElement("input");
+      chkStyl.type = "checkbox";
+      chkStyl.checked = stan.zapiszJakoStyl;
+      chkStyl.addEventListener("change", function () {
+        stan.zapiszJakoStyl = chkStyl.checked;
+      });
+      const lblChk = el("label", "gw-mikser-opcja-chk", " zapisz też jako własny styl kreatora");
+      lblChk.prepend(chkStyl);
+      opcjeWysylki.appendChild(lblChk);
     }
 
     const chkObszar = document.createElement("input");
@@ -2304,19 +2516,15 @@
     chkObszar.addEventListener("change", function () {
       stan.przekazObszarDoMapoTero = chkObszar.checked;
     });
-    const chkObszarWrap = el("label", null, " ustaw też zaznaczony obszar z mapki w MapoTero");
-    chkObszarWrap.style.fontSize = "0.8rem";
-    chkObszarWrap.style.display = "inline-flex";
-    chkObszarWrap.style.alignItems = "center";
-    chkObszarWrap.style.gap = "0.25rem";
+    const chkObszarWrap = el("label", "gw-mikser-opcja-chk", " ustaw zaznaczony obszar w MapoTero");
     chkObszarWrap.hidden = !stan.zaznaczonyBbox;
     chkObszarWrap.prepend(chkObszar);
     if (czyPolaczonoZProgramem()) {
-      akcjeGlowne.appendChild(chkObszarWrap);
+      opcjeWysylki.appendChild(chkObszarWrap);
     }
 
     const akcjeZapasowe = el("div", "gw-mikser-akcje-zapasowe");
-    const btnPobierzPlik = el("button", "gw-btn-prosty", "💾 Pobierz plik (.mapotero)");
+    const btnPobierzPlik = el("button", czyPolaczonoZProgramem() ? "gw-btn-prosty" : "gw-btn-zielony", "💾 Pobierz plik (.mapotero)");
     btnPobierzPlik.type = "button";
     btnPobierzPlik.title = "Plik możesz przeciągnąć bezpośrednio na okno MapoTero";
     btnPobierzPlik.addEventListener("click", function () {
@@ -2349,7 +2557,7 @@
       const link = zbudujLinkUdostepniania();
       if (!navigator.clipboard) return;
       navigator.clipboard.writeText(link).then(function () {
-        pokazStatusMiksera("Skopiowano link do udostępnienia tej kanapki.", false);
+        pokazStatusMiksera("Skopiowano link do udostępnienia tego miksu.", false);
       });
     });
 
@@ -2376,7 +2584,21 @@
 
     sekcjaEksport.appendChild(nazwaWiersz);
     if (akcjeGlowne.childNodes.length > 0) sekcjaEksport.appendChild(akcjeGlowne);
-    sekcjaEksport.appendChild(akcjeZapasowe);
+    if (opcjeWysylki.childNodes.length > 0) sekcjaEksport.appendChild(opcjeWysylki);
+    if (czyPolaczonoZProgramem()) {
+      const wiecejEksport = document.createElement("details");
+      wiecejEksport.className = "gw-mikser-wiecej";
+      const sumEksport = document.createElement("summary");
+      sumEksport.textContent = "Plik .mapotero, link i udostępnianie";
+      wiecejEksport.appendChild(sumEksport);
+      wiecejEksport.appendChild(akcjeZapasowe);
+      sekcjaEksport.appendChild(wiecejEksport);
+    } else {
+      sekcjaEksport.appendChild(akcjeZapasowe);
+      sekcjaEksport.appendChild(
+        el("p", "gw-mikser-podpowiedz-offline", "Przeciągnij pobrany plik .mapotero bezpośrednio na okno programu MapoTero.")
+      );
+    }
     sekcjaEksport.appendChild(statusWysylki);
 
     kolLista.appendChild(pasekListy);
@@ -2396,16 +2618,24 @@
       mikserDokOpis: dokOpis,
       mikserDokOtworz: dokOtworz,
       mikserDokWyslij: dokWyslij,
+      mikserDokReset: dokReset,
+      mikserDokZwin: dokZwin,
       mikserTlo: mikserTlo,
       mikserZamknij: mikserZamknij,
+      mikserInputNazwa: inputNazwa,
+      mikserSelSkala: selSkala,
+      mikserChkStyl: chkStyl,
       mikserCanvas: mikserCanvas,
       mikserImgLive: mikserImgLive,
       mikserLadowanie: mikserLadowanie,
       mikserStanPodgladu: mikserStanPodgladu,
+      mikserZakladkaMapa: tabMapa,
+      przelaczZakladkeMiksera: przelaczZakladkeMiksera,
       minimapaCanvas: minimapaCanvas,
       minimapaZoomTekst: zoomTekst,
       minimapaInfo: minimapaInfo,
       minimapaBtnWyczyscZazn: btnWyczyscZazn,
+      minimapaBtnDopasujPodglad: btnDopasujPodglad,
       mikserChkObszarWrap: chkObszarWrap,
       mikserWarstwy: mikserWarstwy,
       mikserOstrzezenia: mikserOstrzezenia,
@@ -2611,8 +2841,9 @@
     const modalAkcje = el("div", "gw-modal-akcje");
     const modalLinki = el("div", "gw-modal-linki");
 
-    const modalKanapka = el("button", "gw-btn-kanapka", "+ do miksera warstw");
+    const modalKanapka = el("button", "gw-btn-kanapka", "☐ Dodaj do miksu");
     modalKanapka.type = "button";
+    modalKanapka.title = "Dodaj warstwę do kompozycji w Mikserze warstw";
     modalKanapka.addEventListener("click", function () {
       const w = stan.widoczne[stan.indeksModala];
       if (w) przelaczWarstweWKanapce(w);
@@ -2621,8 +2852,9 @@
 
     let modalDodaj = null;
     if (czyPolaczonoZProgramem()) {
-      modalDodaj = el("button", "gw-btn-dodaj-modal", "+ Dodaj do MapoTero");
+      modalDodaj = el("button", "gw-btn-dodaj-modal", "Wyślij");
       modalDodaj.type = "button";
+      modalDodaj.title = "Pomiń mikser i dodaj od razu tylko tę pojedynczą warstwę do MapoTero";
       modalDodaj.addEventListener("click", function () {
         const w = stan.widoczne[stan.indeksModala];
         if (w) wyslijDoMapoTero(w, modalDodaj);
@@ -2707,7 +2939,7 @@
           pasekMapoTero.textContent =
             "Połączono z MapoTero" +
             (stan.wersjaProgramu ? " " + stan.wersjaProgramu : "") +
-            " — zaznacz warstwy haczykami „do miksera warstw” i otwórz Mikser warstw na dole ekranu albo dodawaj pojedynczo.";
+            " — dodawaj warstwy przyciskiem „Dodaj do miksu” i ułóż je w Mikserze warstw, albo kliknij „Wyślij”, aby dodać warstwę pojedynczo.";
           return pobierzStanZMapoTero(!stan.kanapkaUrlStart, false);
         })
         .catch(function () {

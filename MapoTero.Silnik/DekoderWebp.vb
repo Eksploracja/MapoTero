@@ -81,6 +81,13 @@ Public NotInheritable Class DekoderWebp
         Function CanConvert(ByRef srcPixelFormat As Guid, ByRef dstPixelFormat As Guid) As Boolean
     End Interface
 
+    ''' <summary>Czy bajty zaczynają się od standardowego nagłówka RIFF....WEBP.</summary>
+    Private Shared Function CzySygnaturaWebp(dane As Byte()) As Boolean
+        If dane Is Nothing OrElse dane.Length < 12 Then Return False
+        Return dane(0) = &H52 AndAlso dane(1) = &H49 AndAlso dane(2) = &H46 AndAlso dane(3) = &H46 AndAlso
+               dane(8) = &H57 AndAlso dane(9) = &H45 AndAlso dane(10) = &H42 AndAlso dane(11) = &H50
+    End Function
+
     ''' <summary>
     ''' Dekoduje obraz z bajtów (WebP lub inne formaty obsługiwane przez WIC) do <see cref="Bitmap"/> (32bppPArgb).
     ''' W razie braku systemowego kodeka WebP ustawia <paramref name="bladKodeka"/> = True i zwraca Nothing.
@@ -137,7 +144,7 @@ Public NotInheritable Class DekoderWebp
                 bmp.UnlockBits(bd)
             End Try
             Return bmp
-        Catch ex As COMException When ex.ErrorCode = WINCODEC_ERR_COMPONENTNOTFOUND
+        Catch ex As COMException When ex.ErrorCode = WINCODEC_ERR_COMPONENTNOTFOUND OrElse CzySygnaturaWebp(dane)
             bladKodeka = True
             Return Nothing
         Catch

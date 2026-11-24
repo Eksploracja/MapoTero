@@ -966,19 +966,45 @@
 }
 
 .gw-akcje-karty {
-  margin-top: 0.45rem;
+  margin-top: auto;
+  padding-top: 0.5rem;
   display: flex;
-  gap: 0.35rem;
-  align-items: center;
+  gap: 0.4rem;
+  align-items: stretch;
 }
 
 .gw-akcje-karty .gw-btn-dodaj {
   margin-top: 0;
-  flex: 1 1 auto;
+  flex: 0 0 auto;
+  width: auto;
+  white-space: nowrap;
+  min-height: 2rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.34rem 0.65rem;
+  border-color: #c4b5fd;
+  background: #ffffff;
+  color: #5b3fd4;
+}
+
+.gw-akcje-karty .gw-btn-dodaj:hover:not(:disabled) {
+  background: #7253ed;
+  border-color: #7253ed;
+  color: #ffffff;
+}
+
+.gw-akcje-karty .gw-btn-dodaj.gw-dodano {
+  background: #0f766e;
+  border-color: #0f766e;
+  color: #ffffff;
 }
 
 .gw-btn-kanapka {
   flex: 1 1 auto;
+  min-width: 0;
+  min-height: 2rem;
+  white-space: nowrap;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -1041,11 +1067,39 @@
   font-size: 0.8rem;
 }
 
+.gw-mikser-dok.zwiniety {
+  width: fit-content;
+  margin-left: auto;
+  padding: 0.45rem 0.75rem;
+}
+
+.gw-mikser-dok.zwiniety .gw-mikser-dok-opis,
+.gw-mikser-dok.zwiniety .gw-mikser-dok-akcje-pelne {
+  display: none;
+}
+
 .gw-mikser-dok-akcje {
   display: flex;
   flex-wrap: wrap;
   gap: 0.4rem;
   align-items: center;
+}
+
+.gw-mikser-dok-akcje-pelne {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  align-items: center;
+}
+
+.gw-btn-zamknij-tekst {
+  width: auto;
+  padding: 0 0.75rem;
+  font-size: 0.84rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
 }
 
 .gw-btn-glowny {
@@ -1114,7 +1168,7 @@
 }
 
 .gw-mikser-naglowek {
-  padding: 0.8rem 1.15rem;
+  padding: 0.75rem 1.15rem;
   border-bottom: 1px solid #e6e1e8;
   display: flex;
   align-items: center;
@@ -1123,9 +1177,21 @@
   background: #f5f6fa;
 }
 
+.gw-mikser-naglowek-tekst {
+  display: flex;
+  flex-direction: column;
+  gap: 0.12rem;
+  min-width: 0;
+}
+
 .gw-mikser-naglowek h3 {
   margin: 0;
   font-size: 1.05rem;
+}
+
+.gw-mikser-podtytul {
+  font-size: 0.78rem;
+  color: #5c5962;
 }
 
 .gw-mikser-cialo {
@@ -1147,6 +1213,48 @@
   display: flex;
   flex-direction: column;
   gap: 0.55rem;
+}
+
+.gw-mikser-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.35rem;
+  background: #f1f0f5;
+  padding: 0.25rem;
+  border-radius: 6px;
+}
+
+.gw-mikser-tab {
+  border: 1px solid transparent;
+  background: transparent;
+  color: #5c5962;
+  border-radius: 4px;
+  padding: 0.36rem 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.gw-mikser-tab:hover {
+  color: #27262b;
+}
+
+.gw-mikser-tab.aktywny {
+  background: #ffffff;
+  color: #4c1d95;
+  border-color: #ddd6fe;
+  box-shadow: 0 1px 3px rgba(39, 38, 43, 0.08);
+}
+
+.gw-mikser-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.gw-mikser-panel[hidden] {
+  display: none !important;
 }
 
 .gw-mikser-ramka-podgladu {
@@ -1290,8 +1398,8 @@
 .gw-minimapa-canvas-wrap {
   position: relative;
   width: 100%;
-  max-width: 356px;
-  aspect-ratio: 360 / 260;
+  max-width: 360px;
+  aspect-ratio: 360 / 290;
   overflow: hidden;
   border-radius: 4px;
   border: 1px solid #cbd5e1;
@@ -1525,12 +1633,65 @@
   font-size: 0.84rem;
 }
 
+.gw-mikser-opcje-wiersz {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem 0.9rem;
+  align-items: center;
+}
+
+.gw-mikser-opcja-chk {
+  font-size: 0.8rem;
+  color: #4b4852;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  cursor: pointer;
+}
+
+.gw-mikser-opcja-chk[hidden] {
+  display: none !important;
+}
+
+.gw-mikser-baza-etykieta {
+  font-size: 0.76rem;
+  color: #6b6772;
+  background: #f5f6fa;
+  border: 1px solid #e6e1e8;
+  border-radius: 4px;
+  padding: 0.2rem 0.5rem;
+}
+
+.gw-mikser-wiecej {
+  border-top: 1px dashed #e6e1e8;
+  padding-top: 0.45rem;
+}
+
+.gw-mikser-wiecej summary {
+  font-size: 0.8rem;
+  color: #5c5962;
+  cursor: pointer;
+  font-weight: 600;
+  user-select: none;
+  margin-bottom: 0.45rem;
+}
+
+.gw-mikser-wiecej summary:hover {
+  color: #4c1d95;
+}
+
 .gw-mikser-akcje-glowne,
 .gw-mikser-akcje-zapasowe {
   display: flex;
   flex-wrap: wrap;
   gap: 0.45rem;
   align-items: center;
+}
+
+.gw-mikser-podpowiedz-offline {
+  font-size: 0.78rem;
+  color: #5c5962;
+  margin: 0;
 }
 
 .gw-mikser-status-wysylki {

@@ -4424,13 +4424,14 @@ Public Class Form1
             Dim najdokladniejsza = wynikZestawu.Zestaw.NajdokladniejszaWarstwa()
             Dim pikselMetry As Double
             If zadanie.Piksel.HasValue AndAlso zadanie.Piksel.Value > 0 Then
-                pikselMetry = zadanie.Piksel.Value
+                pikselMetry = Math.Max(0.25, Math.Min(50.0, zadanie.Piksel.Value))
             ElseIf najdokladniejsza IsNot Nothing AndAlso najdokladniejsza.ZalecanyPiksel > 0 Then
-                pikselMetry = Math.Max(0.5, najdokladniejsza.ZalecanyPiksel)
+                pikselMetry = Math.Max(0.5, Math.Min(25.0, najdokladniejsza.ZalecanyPiksel))
             Else
                 pikselMetry = If(uklad.Geograficzny,
                                  uklad.PrzeliczRozmiarPiksela(UkladWspolrzednych.PL1992, stanMigawki.DomyslnyPiksel, New PunktGeo(latOut, lonOut)),
                                  stanMigawki.DomyslnyPiksel)
+                pikselMetry = Math.Max(0.25, Math.Min(50.0, pikselMetry))
             End If
             If pikselMetry <= 0 Then pikselMetry = 2.0
 
