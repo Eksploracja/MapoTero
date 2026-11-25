@@ -166,10 +166,9 @@ Każda zmiana w repozytorium jest automatycznie budowana i testowana w **GitHub 
 * 🤝 **Współtworzenie zbiorów map:** znasz ciekawy serwer WMS/WMTS albo chcesz poprawić/dodać warstwę? Zgłoś Issue lub wyślij Pull Request z nowym plikiem w katalogu `warstwy/`.
 * ☕ **[Wesprzyj rozwój projektu (buycoffee.to/mapy)](https://buycoffee.to/mapy):** postaw kawę autorowi (link dostępny także w menu *Pomoc* w programie).
 
-## Twórcy projektu
+## Autorzy projektu
 
-* **Twórca programu:** „Pajakt” (2009–2014)
-* **Rozwój projektu:** [Kazimierz Niecikowski](https://www.labgis.pl/) (od 2015)
+Program powstał w latach 2009–2014 z inicjatywy **„Pajakta”** z [Pomorskiego Forum Eksploracyjnego](https://forum.eksploracja.pl/), który stworzył jego pierwszą wersję. Od 2015 roku projekt samodzielnie prowadzi i rozwija **[Kazimierz Niecikowski](https://www.labgis.pl/)**, nadając MapoTero obecną architekturę i kształt.
 
 Podziękowania za pomoc w programowaniu: **„Paweł\_gdn”**, **„AAA222”** (moduł NoTo, scalanie segmentów do wersji 3.11) oraz **† Edward Zadorski** (kod modułu przeliczania współrzędnych), a także dla użytkowników [Pomorskiego Forum Eksploracyjnego](https://forum.eksploracja.pl/viewforum.php?f=205) za liczne sugestie i uwagi.
 
