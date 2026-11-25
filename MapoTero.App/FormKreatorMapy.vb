@@ -43,11 +43,13 @@ Public Class FormKreatorMapy
     ' Wybory zapamiętane między kolejnymi otwarciami kreatora w jednej sesji programu
     Private Shared _ostatniCel As CelMapy? = Nothing
     Private Shared _ostatniSzablonId As String = ""
+    Private Shared _poczatkowyPlanWlasny As List(Of PlanStopnia) = Nothing
     Private Shared _pokazZaawansowane As Boolean = True
 
     ''' <summary>Wskazuje szablon (np. zapisany z galerii WWW), który kreator zaznaczy przy najbliższym otwarciu.</summary>
-    Friend Shared Sub WybierzSzablonNaStarcie(id As String)
+    Friend Shared Sub WybierzSzablonNaStarcie(id As String, Optional planWlasny As List(Of PlanStopnia) = Nothing)
         _ostatniSzablonId = If(id, "")
+        _poczatkowyPlanWlasny = If(planWlasny IsNot Nothing AndAlso planWlasny.Count > 1, planWlasny, Nothing)
     End Sub
 
     Private ReadOnly _form1 As Form1
@@ -65,6 +67,8 @@ Public Class FormKreatorMapy
     Private btnProfilTrasy As Button
     Private _plikTrasy As String = ""
     Private btnUsunStyl As Button
+    Private btnUdostepnijStyl As Button
+    Private mnuUdostepnijStyl As ContextMenuStrip
     Private lblNazwaWyniku As Label
     ' Rodzaj grupy warstw regulowanej suwakiem w każdym z dwóch wierszy i pola wyboru grup warstw
     Private ReadOnly _rodzajeWierszy(1) As RodzajRegulacji
@@ -322,17 +326,28 @@ Public Class FormKreatorMapy
             End Sub
         grpSzczegolySzablonu.Controls.Add(cboSkalaPodgladu)
 
-        ' Własne szablony: zapis bieżącej kompozycji pod nazwą i usuwanie zapisanych (pod listą szablonów)
+        ' Własne szablony: zapis bieżącej kompozycji pod nazwą, usuwanie oraz eksport/import .mapotero.json
         lstSzablony.Height = 360
-        btnZapiszStyl = New Button With {.Name = "btnZapiszStyl", .Text = "Zapisz jako szablon...", .Location = New Point(lstSzablony.Left, lstSzablony.Bottom + 6),
-                                         .Size = New Size(200, 28), .UseVisualStyleBackColor = True}
-        btnUsunStyl = New Button With {.Name = "btnUsunStyl", .Text = "Usuń szablon", .Location = New Point(lstSzablony.Left + 206, lstSzablony.Bottom + 6),
-                                       .Size = New Size(lstSzablony.Width - 206, 28), .UseVisualStyleBackColor = True, .Enabled = False}
+        btnZapiszStyl = New Button With {.Name = "btnZapiszStyl", .Text = "Zapisz szablon...", .Location = New Point(lstSzablony.Left, lstSzablony.Bottom + 6),
+                                         .Size = New Size(148, 28), .UseVisualStyleBackColor = True}
+        btnUsunStyl = New Button With {.Name = "btnUsunStyl", .Text = "Usuń", .Location = New Point(lstSzablony.Left + 154, lstSzablony.Bottom + 6),
+                                       .Size = New Size(76, 28), .UseVisualStyleBackColor = True, .Enabled = False}
+        btnUdostepnijStyl = New Button With {.Name = "btnUdostepnijStyl", .Text = "Plik / JSON ▾", .Location = New Point(lstSzablony.Left + 236, lstSzablony.Bottom + 6),
+                                             .Size = New Size(lstSzablony.Width - 236, 28), .UseVisualStyleBackColor = True}
+        mnuUdostepnijStyl = New ContextMenuStrip()
+        mnuUdostepnijStyl.Items.Add("Eksportuj szablon do pliku (.mapotero.json)...", Nothing, AddressOf mnuEksportujStylPlik_Click)
+        mnuUdostepnijStyl.Items.Add("Kopiuj przepis (JSON) do schowka", Nothing, AddressOf mnuKopiujStylSchowek_Click)
+        mnuUdostepnijStyl.Items.Add(New ToolStripSeparator())
+        mnuUdostepnijStyl.Items.Add("Importuj szablon z pliku (.mapotero.json)...", Nothing, AddressOf mnuImportujStylPlik_Click)
+        mnuUdostepnijStyl.Items.Add("Wklej przepis (JSON) ze schowka", Nothing, AddressOf mnuWklejStylSchowek_Click)
         AddHandler btnZapiszStyl.Click, AddressOf btnZapiszStyl_Click
         AddHandler btnUsunStyl.Click, AddressOf btnUsunStyl_Click
-        lstSzablony.Parent.Controls.AddRange({btnZapiszStyl, btnUsunStyl})
+        AddHandler btnUdostepnijStyl.Click, Sub() mnuUdostepnijStyl.Show(btnUdostepnijStyl, New Point(0, btnUdostepnijStyl.Height))
+        lstSzablony.ContextMenuStrip = mnuUdostepnijStyl
+        lstSzablony.Parent.Controls.AddRange({btnZapiszStyl, btnUsunStyl, btnUdostepnijStyl})
         _podpowiedzi.SetToolTip(btnZapiszStyl, "Zapisuje bieżący skład warstw z kryciem, trybami mieszania i skalami jako własny szablon na liście - także po ponownym uruchomieniu programu.")
         _podpowiedzi.SetToolTip(btnUsunStyl, "Usuwa zaznaczony szablon zapisany przez Ciebie (wbudowanych szablonów nie można usunąć).")
+        _podpowiedzi.SetToolTip(btnUdostepnijStyl, "Eksportuje albo importuje szablon (także wieloskalowy) w formacie .mapotero.json przez plik lub schowek.")
         _podpowiedzi.SetToolTip(cboSkalaPodgladu, "Wybierz stopień skali, aby zobaczyć jego warstwy w granicach zaznaczenia.")
 
         ' Uwagi o pokryciu map (np. arkusze 1:25 000 tylko dla części kraju) pod treścią kroków 2, 3 i 4
@@ -555,6 +570,12 @@ Public Class FormKreatorMapy
             End If
         Next
         lstSzablony.SelectedIndex = indeks
+        If _poczatkowyPlanWlasny IsNot Nothing AndAlso _styl.Szablon IsNot Nothing AndAlso
+           String.Equals(_styl.Szablon.Id, idDoZaznaczenia, StringComparison.OrdinalIgnoreCase) Then
+            _styl.PlanWlasny = _poczatkowyPlanWlasny
+            _poczatkowyPlanWlasny = Nothing
+            PokazSzczegolySzablonu(_styl.Szablon, True)
+        End If
     End Sub
 
     ''' <param name="zachowajUstawienia">True - ten sam styl wybrany ponownie (np. po powrocie z kroku 3): suwak cieniowania
@@ -2408,6 +2429,118 @@ Public Class FormKreatorMapy
         _styl.Szablon = Nothing
         _ostatniSzablonId = ""
         OdswiezListeSzablonow()
+    End Sub
+
+    Private Function BudujPrzepisBiezacegoStylu() As DaneZestawuGalerii
+        If _styl.Szablon Is Nothing Then Return Nothing
+        Dim biezacy = UtworzStylWlasny(_styl.Szablon.Nazwa)
+        If biezacy Is Nothing Then Return Nothing
+        Dim plan = If(_styl.PlanWlasny IsNot Nothing AndAlso _styl.PlanWlasny.Count > 1, _styl.PlanWlasny, Nothing)
+        Return PrzekazZestawu.ZSzablonuMapy(biezacy, plan, _styl.Szablon.Nazwa)
+    End Function
+
+    Private Sub mnuEksportujStylPlik_Click(sender As Object, e As EventArgs)
+        Dim dane = BudujPrzepisBiezacegoStylu()
+        If dane Is Nothing OrElse (dane.Warstwy.Count = 0 AndAlso (dane.Skale Is Nothing OrElse dane.Skale.Count = 0)) Then
+            MessageBox.Show(Me, "Wybierz szablon zawierający warstwy.", "Eksport szablonu", MessageBoxButtons.OK, MessageBoxIcon.Information)
+            Exit Sub
+        End If
+        Using dlg As New SaveFileDialog()
+            dlg.Title = "Eksportuj szablon mapy"
+            dlg.Filter = "Przepis zestawu MapoTero (*.mapotero.json)|*.mapotero.json|Wszystkie pliki (*.*)|*.*"
+            dlg.FileName = System.Text.RegularExpressions.Regex.Replace(If(dane.Nazwa, "szablon"), "[^\w\-]+", "_").Trim("_"c) & ".mapotero.json"
+            If dlg.ShowDialog(Me) <> DialogResult.OK Then Exit Sub
+            Try
+                File.WriteAllText(dlg.FileName, PrzekazZestawu.DoTekstu(dane), New System.Text.UTF8Encoding(False))
+            Catch ex As Exception
+                MessageBox.Show(Me, "Nie udało się zapisać pliku: " & OpisBledu.Z(ex), "Eksport szablonu", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+            End Try
+        End Using
+    End Sub
+
+    Private Sub mnuKopiujStylSchowek_Click(sender As Object, e As EventArgs)
+        Dim dane = BudujPrzepisBiezacegoStylu()
+        If dane Is Nothing Then Exit Sub
+        Try
+            Clipboard.SetText(PrzekazZestawu.DoTekstu(dane))
+        Catch ex As Exception
+            MessageBox.Show(Me, "Nie udało się skopiować przepisu do schowka: " & OpisBledu.Z(ex), "Eksport szablonu", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+        End Try
+    End Sub
+
+    Private Sub mnuImportujStylPlik_Click(sender As Object, e As EventArgs)
+        Using dlg As New OpenFileDialog()
+            dlg.Title = "Importuj szablon mapy"
+            dlg.Filter = "Przepis zestawu MapoTero (*.mapotero.json;*.mapotero)|*.mapotero.json;*.mapotero;*.json|Wszystkie pliki (*.*)|*.*"
+            If dlg.ShowDialog(Me) <> DialogResult.OK Then Exit Sub
+            Try
+                ImportujPrzepisStylu(File.ReadAllText(dlg.FileName, System.Text.Encoding.UTF8))
+            Catch ex As Exception
+                MessageBox.Show(Me, "Nie udało się wczytać szablonu: " & OpisBledu.Z(ex), "Import szablonu", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+            End Try
+        End Using
+    End Sub
+
+    Private Sub mnuWklejStylSchowek_Click(sender As Object, e As EventArgs)
+        Try
+            If Not Clipboard.ContainsText() Then
+                MessageBox.Show(Me, "Schowek nie zawiera tekstu z przepisem JSON.", "Import szablonu", MessageBoxButtons.OK, MessageBoxIcon.Information)
+                Exit Sub
+            End If
+            ImportujPrzepisStylu(Clipboard.GetText())
+        Catch ex As Exception
+            MessageBox.Show(Me, "Nie udało się wczytać szablonu ze schowka: " & OpisBledu.Z(ex), "Import szablonu", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+        End Try
+    End Sub
+
+    Private Sub ImportujPrzepisStylu(json As String)
+        Dim dane = PrzekazZestawu.ZTekstu(json)
+        Dim zrodla = _styl.ZrodlaMap()
+        Dim styl As SzablonMapy = Nothing
+        Dim planWlasny As List(Of PlanStopnia) = Nothing
+        Dim pominiete As New List(Of String)()
+
+        If dane.Skale IsNot Nothing AndAlso dane.Skale.Count > 1 Then
+            Dim wynik = PrzekazZestawu.ZbudujSzablonWieloskalowy(dane, zrodla)
+            styl = wynik.Szablon
+            planWlasny = wynik.PlanWlasny
+            pominiete.AddRange(wynik.Pominiete)
+        Else
+            Dim wynik = PrzekazZestawu.ZbudujZestaw(dane, zrodla)
+            pominiete.AddRange(wynik.Pominiete)
+            If wynik.Zestaw.Liczba > 0 Then
+                Dim rozdziel = PrzekazZestawu.WykryjRozpietoscSkal(wynik.Zestaw) AndAlso
+                               MessageBox.Show(Me, "Przepis ma warstwy o dużej rozpiętości skal. Rozdzielić je automatycznie na osobne stopnie skali?",
+                                               "Mapa wieloskalowa", MessageBoxButtons.YesNo, MessageBoxIcon.Question) = DialogResult.Yes
+                styl = PrzekazZestawu.UtworzStylSzablonu(wynik.Zestaw, dane.Nazwa, rozdzielSkale:=rozdziel)
+            End If
+        End If
+
+        If styl Is Nothing Then
+            Dim szczegoly = If(pominiete.Count > 0, " (" & String.Join(", ", pominiete) & ")", "")
+            MessageBox.Show(Me, "Nie rozpoznano żadnej warstwy z przepisu" & szczegoly & ".", "Import szablonu", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+            Exit Sub
+        End If
+
+        Dim lista = ZarzadcaSzablonow.PobierzWlasne().ToList()
+        Dim istniejacy = lista.FindIndex(Function(x) String.Equals(x.Nazwa, styl.Nazwa, StringComparison.CurrentCultureIgnoreCase))
+        If istniejacy >= 0 Then
+            If MessageBox.Show(Me, "Szablon '" & styl.Nazwa & "' już istnieje. Zastąpić go?", "Import szablonu",
+                               MessageBoxButtons.YesNo, MessageBoxIcon.Question) <> DialogResult.Yes Then Exit Sub
+            lista(istniejacy) = styl
+        Else
+            lista.Add(styl)
+        End If
+        SzablonyWlasne.Zapisz(PlikStylowWlasnych, lista)
+        ZarzadcaSzablonow.UstawWlasne(lista)
+        _styl.Szablon = Nothing
+        _ostatniSzablonId = styl.Id
+        _poczatkowyPlanWlasny = If(planWlasny IsNot Nothing AndAlso planWlasny.Count > 1, planWlasny, Nothing)
+        OdswiezListeSzablonow()
+        If pominiete.Count > 0 Then
+            MessageBox.Show(Me, "Zaimportowano szablon '" & styl.Nazwa & "', ale pominięto niedostępne warstwy: " & String.Join(", ", pominiete),
+                            "Import szablonu", MessageBoxButtons.OK, MessageBoxIcon.Information)
+        End If
     End Sub
 
 #End Region

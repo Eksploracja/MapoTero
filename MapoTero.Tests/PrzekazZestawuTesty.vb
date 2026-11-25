@@ -153,4 +153,139 @@ Public Class PrzekazZestawuTesty
         End Try
     End Sub
 
+    Private Shared Function UtworzZrodlaWieloskalowe() As Dictionary(Of String, PlikWarstw)
+        Dim zrodla = UtworzTestoweZrodla()
+        Dim topo As New PlikWarstw With {.Adres = "https://example.com/topo", .Typ = TypUslugiMapowej.Wmts}
+        topo.Warstwy.Add(New WarstwaMapy With {.Nazwa = "MAPA_TOPOGRAFICZNA", .RozmiarPiksela = "2"})
+        zrodla("TOPO_WMTS") = topo
+
+        Dim bdoo As New PlikWarstw With {.Adres = "https://example.com/bdoo", .Typ = TypUslugiMapowej.Wmts}
+        bdoo.Warstwy.Add(New WarstwaMapy With {.Nazwa = "BDOO", .RozmiarPiksela = "15"})
+        zrodla("BDOO_WMTS") = bdoo
+
+        Dim dzialki As New PlikWarstw With {.Adres = "https://example.com/egib", .Typ = TypUslugiMapowej.Wms, .Nakladka = True}
+        dzialki.Warstwy.Add(New WarstwaMapy With {.Nazwa = "dzialki", .RozmiarPiksela = "0.5"})
+        zrodla("dzialki_ewid_EGIB") = dzialki
+
+        Return zrodla
+    End Function
+
+    <Fact>
+    Public Sub WykryjRozpietoscSkal_RozpoznajeDuzaRozpietoscINieAlarmujeDlaJednoskalowej()
+        Dim zrodla = UtworzZrodlaWieloskalowe()
+
+        Dim jednoSkalowy = PrzekazZestawu.ZbudujZestaw(PrzekazZestawu.ZTekstu("{
+            ""format"": ""mapotero-zestaw"",
+            ""warstwy"": [
+                { ""zbior"": ""TOPO_WMTS"", ""warstwa"": ""MAPA_TOPOGRAFICZNA"", ""krycie"": 100 },
+                { ""zbior"": ""NMT_CIENIOWANIE"", ""warstwa"": ""Raster"", ""krycie"": 70, ""tryb"": ""RzezbaTerenu"" },
+                { ""zbior"": ""waymarkedtrails"", ""warstwa"": ""hiking"", ""krycie"": 100 }
+            ]
+        }"), zrodla).Zestaw
+        Assert.False(PrzekazZestawu.WykryjRozpietoscSkal(jednoSkalowy))
+
+        Dim wieloSkalowy = PrzekazZestawu.ZbudujZestaw(PrzekazZestawu.ZTekstu("{
+            ""format"": ""mapotero-zestaw"",
+            ""warstwy"": [
+                { ""zbior"": ""BDOO_WMTS"", ""warstwa"": ""BDOO"", ""krycie"": 100 },
+                { ""zbior"": ""TOPO_WMTS"", ""warstwa"": ""MAPA_TOPOGRAFICZNA"", ""krycie"": 100 },
+                { ""zbior"": ""ORTOFOTOMAPA"", ""warstwa"": ""Raster"", ""krycie"": 100 }
+            ]
+        }"), zrodla).Zestaw
+        Assert.True(PrzekazZestawu.WykryjRozpietoscSkal(wieloSkalowy))
+    End Sub
+
+    <Fact>
+    Public Sub UtworzStylSzablonu_ZRozdzieleniemSkal_BudujePoprawnyPlanWieloskalowy()
+        Dim zrodla = UtworzZrodlaWieloskalowe()
+        Dim zestaw = PrzekazZestawu.ZbudujZestaw(PrzekazZestawu.ZTekstu("{
+            ""format"": ""mapotero-zestaw"",
+            ""warstwy"": [
+                { ""zbior"": ""BDOO_WMTS"", ""warstwa"": ""BDOO"", ""krycie"": 100 },
+                { ""zbior"": ""TOPO_WMTS"", ""warstwa"": ""MAPA_TOPOGRAFICZNA"", ""krycie"": 100 },
+                { ""zbior"": ""ORTOFOTOMAPA"", ""warstwa"": ""Raster"", ""krycie"": 100 },
+                { ""zbior"": ""NMT_CIENIOWANIE"", ""warstwa"": ""Raster"", ""krycie"": 65, ""tryb"": ""RzezbaTerenu"" },
+                { ""zbior"": ""dzialki_ewid_EGIB"", ""warstwa"": ""dzialki"", ""krycie"": 90 },
+                { ""zbior"": ""waymarkedtrails"", ""warstwa"": ""hiking"", ""krycie"": 85, ""tryb"": ""Mnozenie"" }
+            ]
+        }"), zrodla).Zestaw
+
+        Dim styl = PrzekazZestawu.UtworzStylSzablonu(zestaw, "Miks wieloskalowy", 50.06, 19.94, rozdzielSkale:=True)
+        Assert.True(styl.Wieloskalowy)
+        Assert.Equal(3, styl.StopnieSkali.Count)
+        Assert.Equal(0.25, styl.StopnieSkali(0).Piksel)
+        Assert.Equal(2.0, styl.StopnieSkali(1).Piksel)
+        Assert.Equal(15.0, styl.StopnieSkali(2).Piksel)
+
+        ' Działki tylko w najdokładniejszym stopniu (<= 2 m), cieniowanie i szlaki do 10 m, przeglądowe BDOO bez nakładek szczegółowych
+        Assert.Contains(styl.StopnieSkali(0).Warstwy, Function(w) w.Zbior = "dzialki_ewid_EGIB")
+        Assert.Contains(styl.StopnieSkali(1).Warstwy, Function(w) w.Zbior = "NMT_CIENIOWANIE" AndAlso w.Krycie = 65 AndAlso w.TrybMieszania = TrybMieszania.RzezbaTerenu)
+        Assert.Contains(styl.StopnieSkali(1).Warstwy, Function(w) w.Zbior = "waymarkedtrails" AndAlso w.Krycie = 85 AndAlso w.TrybMieszania = TrybMieszania.Mnozenie)
+        Assert.DoesNotContain(styl.StopnieSkali(2).Warstwy, Function(w) w.Zbior = "dzialki_ewid_EGIB")
+
+        Dim plan = ZarzadcaSzablonow.PlanStopni(styl, styl.DomyslnyPiksel, 50.06)
+        Assert.True(plan.Count >= 2)
+        Assert.Equal("", ZarzadcaSzablonow.SprawdzPlan(plan))
+    End Sub
+
+    <Fact>
+    Public Sub ZSzablonuMapy_IZbudujSzablonWieloskalowy_RoundTripZZoomami()
+        Dim zrodla = UtworzZrodlaWieloskalowe()
+        Dim styl As New SzablonMapy("styl_uzytkownika_test", "Beskidy test", SzablonyWlasne.KategoriaWlasna, "Opis", "⭐", 0.5, ProfilKorektyRastra.Brak, CelMapy.TelefonTablet)
+        Dim st1 = styl.DodajStopien("Orto", 0.5, New WarstwaSzablonu("ORTOFOTOMAPA", "Raster", 100), New WarstwaSzablonu("waymarkedtrails", "hiking", 85, True, TrybMieszania.Mnozenie))
+        Dim st2 = styl.DodajStopien("Topo", 2.0, New WarstwaSzablonu("TOPO_WMTS", "MAPA_TOPOGRAFICZNA", 100), New WarstwaSzablonu("NMT_CIENIOWANIE", "Raster", 70, False, TrybMieszania.RzezbaTerenu))
+        Dim st3 = styl.DodajStopien("Przegląd", 15.0, New WarstwaSzablonu("BDOO_WMTS", "BDOO", 100))
+
+        Dim plan As New List(Of PlanStopnia) From {
+            New PlanStopnia With {.Stopien = st1, .Piksel = 0.5, .PoziomMin = 17, .PoziomMax = 19},
+            New PlanStopnia With {.Stopien = st2, .Piksel = 2.0, .PoziomMin = 14, .PoziomMax = 16},
+            New PlanStopnia With {.Stopien = st3, .Piksel = 15.0, .PoziomMin = 11, .PoziomMax = 13}
+        }
+
+        Dim dane = PrzekazZestawu.ZSzablonuMapy(styl, plan)
+        Assert.Equal(2, dane.Wersja)
+        Assert.Equal("kreator", dane.Cel)
+        Assert.Equal(3, dane.Skale.Count)
+        Assert.NotEmpty(dane.Warstwy)
+
+        Dim json = PrzekazZestawu.DoTekstu(dane)
+        Assert.True(PrzekazZestawu.CzyWygladaJakZestawGalerii(json))
+
+        Dim odczyt = PrzekazZestawu.ZTekstu(json)
+        Dim wynik = PrzekazZestawu.ZbudujSzablonWieloskalowy(odczyt, zrodla)
+
+        Assert.NotNull(wynik.Szablon)
+        Assert.Empty(wynik.Pominiete)
+        Assert.Equal(3, wynik.Szablon.StopnieSkali.Count)
+        Assert.NotNull(wynik.PlanWlasny)
+        Assert.Equal(3, wynik.PlanWlasny.Count)
+        Assert.Equal(17, wynik.PlanWlasny(0).PoziomMin)
+        Assert.Equal(19, wynik.PlanWlasny(0).PoziomMax)
+        Assert.Equal(11, wynik.PlanWlasny(2).PoziomMin)
+        Assert.Equal(13, wynik.PlanWlasny(2).PoziomMax)
+
+        ' Fallback jednowarstwowy dla starszych wersji i okna głównego nadal działa
+        Dim fallback = PrzekazZestawu.ZbudujZestaw(odczyt, zrodla)
+        Assert.Equal(2, fallback.Zestaw.Liczba)
+    End Sub
+
+    <Fact>
+    Public Sub ZbudujSzablonWieloskalowy_NakladajaceSieZoomy_OdrzucaPlanWlasnyAleZachowujeSkale()
+        Dim zrodla = UtworzZrodlaWieloskalowe()
+        Dim json = "{
+            ""format"": ""mapotero-zestaw"",
+            ""wersja"": 2,
+            ""nazwa"": ""Błędne zoomy"",
+            ""skale"": [
+                { ""opis"": ""Orto"", ""piksel"": 0.5, ""zoomMin"": 15, ""zoomMax"": 18, ""warstwy"": [{ ""zbior"": ""ORTOFOTOMAPA"", ""warstwa"": ""Raster"", ""krycie"": 100 }] },
+                { ""opis"": ""Topo"", ""piksel"": 2.0, ""zoomMin"": 13, ""zoomMax"": 16, ""warstwy"": [{ ""zbior"": ""TOPO_WMTS"", ""warstwa"": ""MAPA_TOPOGRAFICZNA"", ""krycie"": 100 }] }
+            ]
+        }"
+
+        Dim wynik = PrzekazZestawu.ZbudujSzablonWieloskalowy(PrzekazZestawu.ZTekstu(json), zrodla)
+        Assert.NotNull(wynik.Szablon)
+        Assert.Equal(2, wynik.Szablon.StopnieSkali.Count)
+        Assert.Null(wynik.PlanWlasny)
+    End Sub
+
 End Class

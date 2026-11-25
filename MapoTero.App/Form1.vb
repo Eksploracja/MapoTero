@@ -4277,6 +4277,25 @@ Public Class Form1
 
     Private Function ZastosujPrzepisZestawu(dane As DaneZestawuGalerii, Optional zrodloOpis As String = "z galerii") As WynikMostkaGalerii
         If dane Is Nothing Then Return WynikMostkaGalerii.Blad("blad_parametrow", "Pusty przepis kanapki.")
+
+        If dane.Skale IsNot Nothing AndAlso dane.Skale.Count > 1 Then
+            Dim punkt As PunktXY, piksel As Double
+            ParametryProbki(punkt, piksel)
+            Dim geo = Ustawienia.Uklad.DoWgs84(punkt)
+            Dim wynikWieloskalowy = PrzekazZestawu.ZbudujSzablonWieloskalowy(dane, ZrodlaMapSesji(), geo.Szerokosc, geo.Dlugosc)
+            If wynikWieloskalowy.Szablon Is Nothing Then
+                Dim szczegoly = If(wynikWieloskalowy.Pominiete.Count > 0, " (" & String.Join(", ", wynikWieloskalowy.Pominiete) & ")", "")
+                Return WynikMostkaGalerii.Blad("nie_znaleziono", "Nie rozpoznano żadnej warstwy z przepisu wieloskalowego" & szczegoly & ".")
+            End If
+            ZapiszGotowyStylDoPliku(wynikWieloskalowy.Szablon)
+            Dim info = "Wczytano styl wieloskalowy '" & wynikWieloskalowy.Szablon.Nazwa & "' (" & wynikWieloskalowy.Szablon.StopnieSkali.Count & " skale)."
+            If wynikWieloskalowy.Pominiete.Count > 0 Then info &= " Pominięto: " & String.Join(", ", wynikWieloskalowy.Pominiete) & "."
+            Komunikat(info, If(wynikWieloskalowy.Pominiete.Count > 0, Color.DarkOrange, Color.Green))
+            FormKreatorMapy.WybierzSzablonNaStarcie(wynikWieloskalowy.Szablon.Id, wynikWieloskalowy.PlanWlasny)
+            OtworzKreatorMapy()
+            Return WynikMostkaGalerii.Ustawiono(info, wynikWieloskalowy.Szablon.StopnieSkali.Sum(Function(s) s.Warstwy.Count), wynikWieloskalowy.Pominiete)
+        End If
+
         Dim wynikBudowy = PrzekazZestawu.ZbudujZestaw(dane, ZrodlaMapSesji(), _zestaw)
         If wynikBudowy.Zestaw.Liczba = 0 Then
             Dim szczegoly = If(wynikBudowy.Pominiete.Count > 0, " (" & String.Join(", ", wynikBudowy.Pominiete) & ")", "")
@@ -4317,7 +4336,17 @@ Public Class Form1
 
         Dim zapisanyStyl As SzablonMapy = Nothing
         If wynikBudowy.ZapiszStyl OrElse wynikBudowy.Cel = "kreator" Then
-            zapisanyStyl = ZapiszStylZPrzepisu(wynikBudowy.Zestaw, wynikBudowy.Nazwa)
+            Dim rozdzielSkale = False
+            If wynikBudowy.Cel = "kreator" AndAlso PrzekazZestawu.WykryjRozpietoscSkal(wynikBudowy.Zestaw) Then
+                rozdzielSkale = MessageBox.Show(
+                    Me,
+                    "Wybrane warstwy mają dużą rozpiętość skal (np. mapa przeglądowa oraz dokładna mapa lub ortofotomapa)." & vbCrLf & vbCrLf &
+                    "Rozdzielić je automatycznie na osobne stopnie skali (mapa wieloskalowa w MBTiles)?",
+                    "Mapa wieloskalowa",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Question) = DialogResult.Yes
+            End If
+            zapisanyStyl = ZapiszStylZPrzepisu(wynikBudowy.Zestaw, wynikBudowy.Nazwa, rozdzielSkale)
         End If
 
         Dim czesci As New List(Of String)()
@@ -4348,7 +4377,7 @@ Public Class Form1
         Return WynikMostkaGalerii.Ustawiono(komunikatKoncowy, wynikBudowy.Zestaw.Liczba, wynikBudowy.Pominiete)
     End Function
 
-    Private Function ZapiszStylZPrzepisu(zestaw As ZestawWarstw, nazwa As String) As SzablonMapy
+    Private Function ZapiszStylZPrzepisu(zestaw As ZestawWarstw, nazwa As String, Optional rozdzielSkale As Boolean = False) As SzablonMapy
         Dim punkt As PunktXY, piksel As Double
         ParametryProbki(punkt, piksel)
         Dim geo = Ustawienia.Uklad.DoWgs84(punkt)
@@ -4356,9 +4385,15 @@ Public Class Form1
                              Ustawienia.Uklad.PrzeliczRozmiarPiksela(UkladWspolrzednych.PL1992, piksel, geo),
                              piksel)
 
-        Dim styl = PrzekazZestawu.UtworzStylSzablonu(zestaw, nazwa, geo.Szerokosc, geo.Dlugosc, pikselMetry)
+        Dim styl = PrzekazZestawu.UtworzStylSzablonu(zestaw, nazwa, geo.Szerokosc, geo.Dlugosc, pikselMetry, rozdzielSkale)
         If styl Is Nothing Then Return Nothing
 
+        ZapiszGotowyStylDoPliku(styl)
+        Return styl
+    End Function
+
+    Private Sub ZapiszGotowyStylDoPliku(styl As SzablonMapy)
+        If styl Is Nothing Then Exit Sub
         Dim sciezka = Path.Combine(If(String.IsNullOrEmpty(FolderDanych), AppDomain.CurrentDomain.BaseDirectory, FolderDanych), SzablonyWlasne.NazwaPliku)
         Dim lista As List(Of SzablonMapy)
         Try
@@ -4376,8 +4411,7 @@ Public Class Form1
 
         SzablonyWlasne.Zapisz(sciezka, lista)
         ZarzadcaSzablonow.UstawWlasne(lista)
-        Return styl
-    End Function
+    End Sub
 
     Private Async Function ObsluzPodgladZGaleriiAsync(zadanie As ZadaniePodgladuGalerii, ct As CancellationToken) As Task(Of WynikPodgladuGalerii)
         If Me.IsDisposed Then Return WynikPodgladuGalerii.Blad("Okno programu zostało zamknięte.")

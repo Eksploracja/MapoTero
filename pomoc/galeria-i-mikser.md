@@ -90,7 +90,7 @@ Lewa część okna Miksera ma dwie zakładki przełączane u góry:
 Gdy kompozycja wygląda tak, jak trzeba, możesz ją wykorzystać na kilka sposobów:
 
 * **Wyślij do MapoTero:** przekazuje cały stos warstw (wraz z kolejnością, kryciem i trybami mieszania) wprost na listę *Wybrane warstwy* w otwartym programie. Jeśli w Mikserze zaznaczyłeś także obszar na mini-mapie, program przejmie również ten zasięg.
-* **Otwórz w Szybkim Kreatorze:** uruchamia w MapoTero [Szybki kreator mapy](../narzedzia/#szybki-kreator-mapy) z przygotowanym już własnym zestawem warstw. W kreatorze możesz od razu zapisać taką kompozycję jako swój stały szablon albo pobrać mapę w wybranej skali.
+* **Otwórz w Szybkim Kreatorze:** uruchamia w MapoTero [Szybki kreator mapy](../narzedzia/#szybki-kreator-mapy) z przygotowanym już własnym zestawem warstw. Jeśli w miksie łączysz mapy o dużej rozpiętości skal (np. mapę przeglądową, topograficzną i ortofotomapę), MapoTero zaproponuje automatyczne rozdzielenie ich na osobne stopnie skali (mapę wieloskalową MBTiles). W kreatorze możesz zapisać taki zestaw jako swój stały szablon albo wyeksportować go (wraz z zakresami zoom) do pliku `.mapotero.json`.
 * **Zapisz jako plik `.mapotero`:** pobiera niewielki plik przepisu w formacie JSON (`mapotero-zestaw`). Taki plik możesz zachować na dysku, wysłać znajomym albo przeciągnąć myszą z Eksploratora Windows wprost na okno MapoTero (Drag & Drop), aby natychmiast wczytać całą kompozycję.
 * **Kopiuj link lub JSON:** kopiuje adres URL galerii z zakodowaną kompozycją (`?kanapka=...`) albo surowy tekst JSON do schowka. W programie MapoTero wystarczy kliknąć prawym przyciskiem myszy na liście *Wybrane warstwy* i wybrać **Wklej kanapkę ze schowka**.
 
