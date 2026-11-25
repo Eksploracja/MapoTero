@@ -535,6 +535,82 @@
     return bloki;
   }
 
+  function utworzDaneOdznakiZasiegu(zasieg) {
+    if (!zasieg || !zasieg.typ || zasieg.typ === "kraj") return null;
+    let tekst = "";
+    let klasa = "gw-odznaka gw-odznaka-zasieg";
+    if (zasieg.typ === "regionalny") {
+      tekst = zasieg.procent_pl ? "Region " + zasieg.procent_pl + "%" : "Region";
+      klasa += " gw-zasieg-region";
+    } else if (zasieg.typ === "czesciowy") {
+      tekst = zasieg.procent_pl ? zasieg.procent_pl + "%" : "Część";
+      klasa += " gw-zasieg-czesciowy";
+    } else if (zasieg.typ === "zagranica") {
+      const k = zasieg.kod;
+      tekst = k === "DE-BB" ? "Brandenburgia" : (k === "DE-SN" ? "Saksonia" : (k === "DE" ? "Niemcy" : (k === "CZ" ? "Czechy" : (k === "SK" ? "Słowacja" : (k === "LT" ? "Litwa" : "Zagranica")))));
+      klasa += " gw-zasieg-kraj";
+    } else if (zasieg.typ === "morski") {
+      tekst = "Bałtyk";
+      klasa += " gw-zasieg-morze";
+    } else if (zasieg.typ === "globalny") {
+      tekst = "Świat";
+      klasa += " gw-zasieg-swiat";
+    }
+    if (!tekst) return null;
+    return {
+      tekst: tekst,
+      klasa: klasa,
+      tytul: "Zasięg: " + (zasieg.etykieta || tekst)
+    };
+  }
+
+  function czySynchronizowacKanapkeWUrl(kanapkaUrlStart, dlugoscKanapki, polaczono) {
+    if (dlugoscKanapki <= 0) return false;
+    if (!polaczono) return true;
+    return Boolean(kanapkaUrlStart);
+  }
+
+  function wykryjKierunekSwipe(dx, dy, czasMs) {
+    if (czasMs > 650) return null;
+    if (Math.abs(dx) < 55) return null;
+    if (Math.abs(dy) > Math.abs(dx) * 0.7) return null;
+    return dx < 0 ? "nastepna" : "poprzednia";
+  }
+
+  function obliczKrokPinch(dystansStart, dystansTeraz, zoomAktualny) {
+    const z = Math.max(5, Math.min(16, Number(zoomAktualny) || 11));
+    if (!Number.isFinite(dystansStart) || !Number.isFinite(dystansTeraz) || dystansStart <= 10 || dystansTeraz <= 10) {
+      return { nowyZoom: z, zmieniono: false };
+    }
+    const ratio = dystansTeraz / dystansStart;
+    if (ratio >= 1.32 && z < 16) {
+      return { nowyZoom: z + 1, zmieniono: true };
+    }
+    if (ratio <= 0.75 && z > 5) {
+      return { nowyZoom: z - 1, zmieniono: true };
+    }
+    return { nowyZoom: z, zmieniono: false };
+  }
+
+  function obliczNoweCentrumPoPinch(lat, lon, zoomStart, zoomNow, midStartPx, midNowPx, szer, wys) {
+    const cStart = latLonDoKafelka(lat, lon, zoomStart);
+    const ptGeo = kafelekDoLatLon(
+      cStart.x + (midStartPx.x - szer / 2) / 256,
+      cStart.y + (midStartPx.y - wys / 2) / 256,
+      zoomStart
+    );
+    const tilePo = latLonDoKafelka(ptGeo.lat, ptGeo.lon, zoomNow);
+    const noweC = kafelekDoLatLon(
+      tilePo.x - (midNowPx.x - szer / 2) / 256,
+      tilePo.y - (midNowPx.y - wys / 2) / 256,
+      zoomNow
+    );
+    return {
+      lat: Math.max(-80, Math.min(80, noweC.lat)),
+      lon: Math.max(-179, Math.min(179, noweC.lon))
+    };
+  }
+
   if (typeof module !== "undefined" && module.exports) {
     module.exports = {
       MAKS_WARSTW_KANAPKI,
@@ -564,7 +640,12 @@
       dopasujZoomDoBbox,
       wybierzPikselPoZaznaczeniuBbox,
       wybierzNastepnyStopienSkali,
-      zgrupujPodgrupyWKolejnosci
+      zgrupujPodgrupyWKolejnosci,
+      utworzDaneOdznakiZasiegu,
+      czySynchronizowacKanapkeWUrl,
+      wykryjKierunekSwipe,
+      obliczKrokPinch,
+      obliczNoweCentrumPoPinch
     };
   }
 
@@ -580,14 +661,17 @@
   const stan = {
     dane: null,
     warstwy: [],
+    warstwaPoId: new Map(),
     widoczne: [],
     szukaj: "",
     grupa: "WSZYSTKIE",
     typ: "WSZYSTKIE",
     rola: "WSZYSTKIE",
     rozmiar: "STANDARD",
+    filtryMobileOtwarte: false,
     indeksModala: -1,
     widokModala: "probka",
+    warstwaUrlStart: "",
     port: 0,
     token: "",
     funkcjeProgramu: [],
@@ -597,6 +681,9 @@
     nazwaKanapki: "",
     zapiszJakoStyl: false,
     mikserOtwarty: false,
+    podgladMikseraZwiniety: false,
+    ostatnioUsunieta: null,
+    timerCofnij: null,
     obszarProgramu: null,
     podgladLat: 52.2297,
     podgladLon: 21.0122,
@@ -613,8 +700,15 @@
     cacheKafelkowOsm: new Map(),
     abortPodglad: null,
     timerPodgladu: null,
+    timerSzukania: null,
+    rafPodgladu: 0,
+    rafMinimapy: 0,
+    tempCanvasOffline: null,
+    tempCtxOffline: null,
     tokenPodgladuOffline: 0,
-    cacheObrazow: new Map()
+    cacheObrazow: new Map(),
+    cacheKartDom: new Map(),
+    ostatniFocusPrzedModalem: null
   };
 
   let ref = {};
@@ -705,6 +799,43 @@
     return stan.port > 0 && stan.token !== "";
   }
 
+  function jestDotykowy() {
+    if (typeof window === "undefined") return false;
+    if (window.matchMedia && window.matchMedia("(pointer: coarse)").matches) return true;
+    return Number(navigator.maxTouchPoints || 0) > 0;
+  }
+
+  function aktualizujBlokadeScrollaTla() {
+    const czyOtwarte = stan.mikserOtwarty || stan.indeksModala >= 0;
+    document.documentElement.classList.toggle("gw-bez-scrolla", czyOtwarte);
+    document.body.classList.toggle("gw-bez-scrolla", czyOtwarte);
+  }
+
+  function oznaczHistorieNakladki(typ) {
+    try {
+      const biezacy = window.history.state;
+      if (biezacy && biezacy.gwOverlay) {
+        if (biezacy.gwOverlay !== typ) {
+          window.history.replaceState(Object.assign({}, biezacy, { gwOverlay: typ }), "");
+        }
+        return;
+      }
+      window.history.pushState(Object.assign({}, biezacy || {}, { gwOverlay: typ }), "");
+    } catch (e) {
+      // Ignorujemy ograniczenia history w trybie file://
+    }
+  }
+
+  function cofnijHistorieNakladki() {
+    try {
+      if (window.history.state && window.history.state.gwOverlay) {
+        window.history.back();
+      }
+    } catch (e) {
+      // Ignorujemy ograniczenia history
+    }
+  }
+
   function maFunkcjeProgramu(nazwa) {
     return Array.isArray(stan.funkcjeProgramu) && stan.funkcjeProgramu.indexOf(nazwa) >= 0;
   }
@@ -751,6 +882,7 @@
     if (params.has("typ")) stan.typ = (params.get("typ") || "WSZYSTKIE").toUpperCase();
     if (params.has("rola")) stan.rola = (params.get("rola") || "WSZYSTKIE").toUpperCase();
     if (params.has("kanapka")) stan.kanapkaUrlStart = (params.get("kanapka") || "").trim();
+    if (params.has("warstwa")) stan.warstwaUrlStart = (params.get("warstwa") || "").trim();
     const p = parseInt(params.get("port") || "0", 10);
     const t = (params.get("token") || "").trim();
     if (p > 0 && p <= 65535 && t) {
@@ -765,7 +897,7 @@
     if (stan.grupa !== "WSZYSTKIE") params.set("grupa", stan.grupa);
     if (stan.typ !== "WSZYSTKIE") params.set("typ", stan.typ);
     if (stan.rola !== "WSZYSTKIE") params.set("rola", stan.rola);
-    if (stan.kanapkaUrlStart && stan.kanapka.length > 0) {
+    if (czySynchronizowacKanapkeWUrl(stan.kanapkaUrlStart, stan.kanapka.length, czyPolaczonoZProgramem())) {
       params.set("kanapka", kodujKanapkeUrl(stan.kanapka));
     }
     if (czyPolaczonoZProgramem()) {
@@ -774,13 +906,21 @@
     }
     const ciag = params.toString();
     const nowyUrl = window.location.pathname + (ciag ? "?" + ciag : "") + window.location.hash;
-    window.history.replaceState(null, "", nowyUrl);
+    window.history.replaceState(window.history.state, "", nowyUrl);
   }
 
   function zbudujLinkUdostepniania() {
     const params = new URLSearchParams();
     const kod = kodujKanapkeUrl(stan.kanapka);
     if (kod) params.set("kanapka", kod);
+    return window.location.origin + window.location.pathname + (params.toString() ? "?" + params.toString() : "");
+  }
+
+  function zbudujLinkWarstwy(w) {
+    const params = new URLSearchParams();
+    if (w) {
+      params.set("warstwa", w.id || (w.zbior + "__" + w.warstwa));
+    }
     return window.location.origin + window.location.pathname + (params.toString() ? "?" + params.toString() : "");
   }
 
@@ -888,7 +1028,11 @@
 
   function poZmianieKanapki(bezPodgladu) {
     zapiszKanapkeLocalStorage();
-    if (stan.kanapkaUrlStart) zapiszParametryUrl();
+    if (czySynchronizowacKanapkeWUrl(stan.kanapkaUrlStart, stan.kanapka.length, czyPolaczonoZProgramem())) {
+      zapiszParametryUrl();
+    } else if (!czyPolaczonoZProgramem() && stan.kanapka.length === 0) {
+      zapiszParametryUrl();
+    }
     odswiezZnacznikiKart();
     odswiezPrzyciskModalaKanapki();
     odswiezDokKanapki();
@@ -1034,38 +1178,18 @@
       });
   }
 
-  function utworzObrazLubPlaceholder(w, opis) {
+  function utworzObrazLubPlaceholder(w, opis, priorytet) {
     const ramka = el("div", "gw-miniatura-ramka" + (w.nakladka ? " gw-nakladka-tlo" : ""));
     const odznaki = el("div", "gw-odznaki");
     odznaki.appendChild(el("span", klasaTypu(w.typ), w.typ || "WMS"));
     if (w.nakladka) {
       odznaki.appendChild(el("span", "gw-odznaka gw-odznaka-nakladka", "Nakładka"));
     }
-    if (w.zasieg && w.zasieg.typ && w.zasieg.typ !== "kraj") {
-      let tekstOdznaki = "";
-      let klasaOdznaki = "gw-odznaka gw-odznaka-zasieg";
-      if (w.zasieg.typ === "regionalny") {
-        tekstOdznaki = w.zasieg.procent_pl ? "Region " + w.zasieg.procent_pl + "%" : "Region";
-        klasaOdznaki += " gw-zasieg-region";
-      } else if (w.zasieg.typ === "czesciowy") {
-        tekstOdznaki = w.zasieg.procent_pl ? w.zasieg.procent_pl + "%" : "Część";
-        klasaOdznaki += " gw-zasieg-czesciowy";
-      } else if (w.zasieg.typ === "zagranica") {
-        const k = w.zasieg.kod;
-        tekstOdznaki = k === "DE-BB" ? "Brandenburgia" : (k === "DE-SN" ? "Saksonia" : (k === "DE" ? "Niemcy" : (k === "CZ" ? "Czechy" : (k === "SK" ? "Słowacja" : (k === "LT" ? "Litwa" : "Zagranica")))));
-        klasaOdznaki += " gw-zasieg-kraj";
-      } else if (w.zasieg.typ === "morski") {
-        tekstOdznaki = "Bałtyk";
-        klasaOdznaki += " gw-zasieg-morze";
-      } else if (w.zasieg.typ === "globalny") {
-        tekstOdznaki = "Świat";
-        klasaOdznaki += " gw-zasieg-swiat";
-      }
-      if (tekstOdznaki) {
-        const odznakaZasieg = el("span", klasaOdznaki, tekstOdznaki);
-        odznakaZasieg.title = "Zasięg: " + (w.zasieg.etykieta || tekstOdznaki);
-        odznaki.appendChild(odznakaZasieg);
-      }
+    const daneZasiegu = utworzDaneOdznakiZasiegu(w.zasieg);
+    if (daneZasiegu) {
+      const odznakaZasieg = el("span", daneZasiegu.klasa, daneZasiegu.tekst);
+      odznakaZasieg.title = daneZasiegu.tytul;
+      odznaki.appendChild(odznakaZasieg);
     }
     ramka.appendChild(odznaki);
 
@@ -1076,7 +1200,9 @@
       const img = document.createElement("img");
       img.src = sciezkaObrazka(w.obrazek);
       img.alt = opis;
-      img.loading = "lazy";
+      img.decoding = "async";
+      img.loading = priorytet ? "eager" : "lazy";
+      if (priorytet && "fetchPriority" in img) img.fetchPriority = "high";
       img.addEventListener("error", function () {
         img.hidden = true;
         brak.hidden = false;
@@ -1110,65 +1236,79 @@
     });
   }
 
+  function policzAktywneFiltry() {
+    let n = 0;
+    if (stan.grupa !== "WSZYSTKIE") n++;
+    if (stan.typ !== "WSZYSTKIE") n++;
+    if (stan.rola !== "WSZYSTKIE") n++;
+    return n;
+  }
+
   function czyAktywneFiltry() {
-    return (
-      stan.szukaj.trim() !== "" ||
-      stan.grupa !== "WSZYSTKIE" ||
-      stan.typ !== "WSZYSTKIE" ||
-      stan.rola !== "WSZYSTKIE"
-    );
+    return stan.szukaj.trim() !== "" || policzAktywneFiltry() > 0;
+  }
+
+  function odswiezPrzyciskFiltrowMobile() {
+    if (!ref.btnFiltryMobile) return;
+    const ile = policzAktywneFiltry();
+    ref.btnFiltryMobile.textContent = ile > 0 ? "Filtry (" + ile + ")" : "Filtry";
+    ref.btnFiltryMobile.classList.toggle("ma-aktywne", ile > 0);
+    ref.btnFiltryMobile.classList.toggle("otwarte", stan.filtryMobileOtwarte);
+    ref.btnFiltryMobile.setAttribute("aria-expanded", stan.filtryMobileOtwarte ? "true" : "false");
+    if (ref.filtryRozwijane) {
+      ref.filtryRozwijane.classList.toggle("otwarte", stan.filtryMobileOtwarte);
+    }
+  }
+
+  function odswiezZnacznikiKarty(karta) {
+    const zbior = karta.getAttribute("data-zbior") || "";
+    const warstwa = karta.getAttribute("data-warstwa") || "";
+    const idx = indeksWKanapce({ zbior: zbior, warstwa: warstwa });
+    const btn = karta.querySelector(".gw-btn-kanapka");
+    const btnWyslij = karta.querySelector(".gw-btn-dodaj");
+    if (idx >= 0) {
+      karta.classList.add("gw-karta-w-kanapce");
+      if (btn) {
+        btn.classList.add("aktywny");
+        btn.textContent = "✓ W miksie (#" + (idx + 1) + ")";
+        btn.title = "Usuń tę warstwę z kompozycji w Mikserze warstw";
+      }
+      if (btnWyslij) btnWyslij.hidden = true;
+    } else {
+      karta.classList.remove("gw-karta-w-kanapce");
+      if (btn) {
+        btn.classList.remove("aktywny");
+        btn.textContent = "☐ Dodaj do miksu";
+        btn.title = "Dodaj warstwę do kompozycji w Mikserze warstw (ułożysz tam kolejność, krycie i tryb nakładania)";
+      }
+      if (btnWyslij) btnWyslij.hidden = false;
+    }
   }
 
   function odswiezZnacznikiKart() {
+    if (stan.cacheKartDom.size > 0) {
+      stan.cacheKartDom.forEach(function (karta) {
+        odswiezZnacznikiKarty(karta);
+      });
+      return;
+    }
     if (!ref.wyniki) return;
-    const karty = ref.wyniki.querySelectorAll(".gw-karta");
-    karty.forEach(function (karta) {
-      const zbior = karta.getAttribute("data-zbior") || "";
-      const warstwa = karta.getAttribute("data-warstwa") || "";
-      const idx = indeksWKanapce({ zbior: zbior, warstwa: warstwa });
-      const btn = karta.querySelector(".gw-btn-kanapka");
-      const btnWyslij = karta.querySelector(".gw-btn-dodaj");
-      if (idx >= 0) {
-        karta.classList.add("gw-karta-w-kanapce");
-        if (btn) {
-          btn.classList.add("aktywny");
-          btn.textContent = "✓ W miksie (#" + (idx + 1) + ")";
-          btn.title = "Usuń tę warstwę z kompozycji w Mikserze warstw";
-        }
-        if (btnWyslij) btnWyslij.hidden = true;
-      } else {
-        karta.classList.remove("gw-karta-w-kanapce");
-        if (btn) {
-          btn.classList.remove("aktywny");
-          btn.textContent = "☐ Dodaj do miksu";
-          btn.title = "Dodaj warstwę do kompozycji w Mikserze warstw (ułożysz tam kolejność, krycie i tryb nakładania)";
-        }
-        if (btnWyslij) btnWyslij.hidden = false;
-      }
-    });
+    ref.wyniki.querySelectorAll(".gw-karta").forEach(odswiezZnacznikiKarty);
   }
 
-  function utworzKartySiatki(elementy) {
-    const siatka = el("div", "gw-siatka" + (stan.rozmiar === "DUZE" ? " gw-siatka-duza" : ""));
-    elementy.forEach(function (pozycja) {
-      const w = pozycja.warstwa;
+  function pobierzLubUtworzKarteDom(w, indeksPoczatkowy) {
+    const idKlucz = w.id || (w.zbior + "__" + w.warstwa);
+    let karta = stan.cacheKartDom.get(idKlucz);
+    if (!karta) {
       const idxWKanapce = indeksWKanapce(w);
-      const karta = el("div", "gw-karta" + (idxWKanapce >= 0 ? " gw-karta-w-kanapce" : ""));
+      karta = el("div", "gw-karta" + (idxWKanapce >= 0 ? " gw-karta-w-kanapce" : ""));
       karta.setAttribute("role", "button");
+      karta.setAttribute("data-id", idKlucz);
       karta.setAttribute("data-zbior", w.zbior);
       karta.setAttribute("data-warstwa", w.warstwa);
       karta.tabIndex = 0;
-      karta.addEventListener("click", function () {
-        otworzModal(pozycja.indeks);
-      });
-      karta.addEventListener("keydown", function (e) {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          otworzModal(pozycja.indeks);
-        }
-      });
 
-      karta.appendChild(utworzObrazLubPlaceholder(w, "Podgląd warstwy: " + w.nazwa));
+      karta.appendChild(utworzObrazLubPlaceholder(w, "Podgląd warstwy: " + w.nazwa, indeksPoczatkowy < 4));
 
       const tresc = el("div", "gw-tresc-karty");
       tresc.appendChild(el("div", "gw-nazwa-warstwy", w.nazwa));
@@ -1185,10 +1325,6 @@
       btnKanapka.title = idxWKanapce >= 0
         ? "Usuń tę warstwę z kompozycji w Mikserze warstw"
         : "Dodaj warstwę do kompozycji w Mikserze warstw (ułożysz tam kolejność, krycie i tryb nakładania)";
-      btnKanapka.addEventListener("click", function (e) {
-        e.stopPropagation();
-        przelaczWarstweWKanapce(w);
-      });
       akcje.appendChild(btnKanapka);
 
       if (czyPolaczonoZProgramem()) {
@@ -1196,18 +1332,34 @@
         btnDodaj.type = "button";
         btnDodaj.hidden = idxWKanapce >= 0;
         btnDodaj.title = "Pomiń mikser i dodaj od razu tylko tę pojedynczą warstwę do MapoTero";
-        btnDodaj.addEventListener("click", function (e) {
-          e.stopPropagation();
-          wyslijDoMapoTero(w, btnDodaj);
-        });
         akcje.appendChild(btnDodaj);
       }
 
       tresc.appendChild(akcje);
       karta.appendChild(tresc);
-      siatka.appendChild(karta);
+      stan.cacheKartDom.set(idKlucz, karta);
+    }
+    karta.setAttribute("data-indeks", String(indeksPoczatkowy));
+    return karta;
+  }
+
+  function utworzKartySiatki(elementy) {
+    const siatka = el("div", "gw-siatka" + (stan.rozmiar === "DUZE" ? " gw-siatka-duza" : ""));
+    elementy.forEach(function (pozycja) {
+      siatka.appendChild(pobierzLubUtworzKarteDom(pozycja.warstwa, pozycja.indeks));
     });
     return siatka;
+  }
+
+  function odswiezChipyGrup() {
+    if (!ref.pasekGrup) return;
+    const przyciski = ref.pasekGrup.querySelectorAll("button[data-grupa]");
+    przyciski.forEach(function (btn) {
+      const g = btn.getAttribute("data-grupa");
+      const aktywny = g === stan.grupa;
+      btn.classList.toggle("aktywny", aktywny);
+      btn.setAttribute("aria-pressed", aktywny ? "true" : "false");
+    });
   }
 
   function renderujSiatke() {
@@ -1217,6 +1369,8 @@
     ref.licznik.textContent =
       "Pokazano " + stan.widoczne.length + " z " + stan.warstwy.length + " warstw";
     ref.btnReset.hidden = !czyAktywneFiltry();
+    odswiezPrzyciskFiltrowMobile();
+    odswiezChipyGrup();
 
     ref.wyniki.innerHTML = "";
     if (stan.widoczne.length === 0) {
@@ -1233,6 +1387,7 @@
       grupy.get(klucz).push({ warstwa: w, indeks: idx });
     });
 
+    const frag = document.createDocumentFragment();
     grupy.forEach(function (elementy, nazwaGrupy) {
       const sekcja = el("section", "gw-sekcja-grupy");
       const naglowek = el("div", "gw-naglowek-grupy");
@@ -1248,8 +1403,9 @@
         sekcja.appendChild(utworzKartySiatki(blok.elementy));
       });
 
-      ref.wyniki.appendChild(sekcja);
+      frag.appendChild(sekcja);
     });
+    ref.wyniki.appendChild(frag);
   }
 
   const MAPA_GEOM = {"scale":30.9524,"offX":42.46,"offY":10,"cosLat0":0.61291,"lonMin":11,"latMax":56.4,"paths":{"PL":"M 281.6,161.1 L 283.0,164.9 L 282.7,167.5 L 286.5,173.2 L 288.8,179.0 L 290.9,181.1 L 291.1,181.9 L 288.7,183.8 L 290.0,185.7 L 290.9,189.0 L 290.8,191.7 L 288.6,195.4 L 283.6,196.4 L 270.8,211.2 L 264.5,220.3 L 263.5,222.4 L 265.0,229.9 L 264.5,233.7 L 267.2,236.5 L 266.5,238.4 L 262.1,236.7 L 260.1,236.5 L 251.5,232.6 L 250.5,229.8 L 249.1,228.4 L 244.3,226.3 L 238.8,225.8 L 233.7,226.1 L 232.2,228.5 L 229.7,229.3 L 224.9,226.9 L 220.1,227.1 L 216.3,229.3 L 214.3,233.4 L 211.6,232.2 L 209.4,233.1 L 208.6,232.7 L 209.2,230.7 L 208.9,227.5 L 206.2,226.5 L 202.6,220.5 L 199.0,223.2 L 197.1,226.7 L 193.6,226.8 L 193.1,223.6 L 191.0,223.2 L 190.6,220.1 L 186.5,215.6 L 185.9,211.8 L 181.9,210.3 L 181.0,210.8 L 175.8,207.0 L 174.9,208.1 L 172.9,209.0 L 172.1,208.6 L 169.2,205.0 L 168.2,204.5 L 167.5,203.2 L 169.7,202.1 L 170.2,201.0 L 169.6,198.6 L 166.8,199.9 L 164.2,200.2 L 159.2,196.4 L 154.0,194.9 L 156.1,200.8 L 153.3,202.3 L 150.2,205.1 L 149.4,204.9 L 143.7,196.7 L 141.7,195.9 L 141.3,195.0 L 142.7,193.1 L 144.1,192.6 L 145.3,190.3 L 142.7,187.8 L 137.5,189.2 L 136.3,187.3 L 132.2,185.2 L 125.1,183.0 L 123.6,180.8 L 123.2,178.4 L 118.2,176.7 L 118.0,180.7 L 114.7,181.5 L 117.7,174.2 L 118.7,169.3 L 116.6,162.8 L 113.1,160.9 L 113.1,156.7 L 110.8,151.4 L 112.2,149.1 L 113.6,143.7 L 112.7,142.8 L 112.3,138.5 L 111.1,137.6 L 109.9,135.1 L 111.1,129.8 L 109.1,126.2 L 104.2,122.0 L 101.8,119.0 L 102.0,117.3 L 104.9,114.4 L 106.4,112.0 L 107.2,109.1 L 107.2,106.5 L 104.3,92.7 L 110.4,95.4 L 109.8,93.3 L 110.0,89.8 L 103.4,88.3 L 103.4,85.8 L 106.7,86.6 L 113.0,83.7 L 123.8,80.0 L 140.9,75.3 L 147.9,67.1 L 154.1,65.8 L 161.3,61.7 L 176.9,58.4 L 181.4,58.3 L 189.7,63.1 L 190.4,64.7 L 184.8,61.3 L 183.5,61.2 L 188.0,70.9 L 191.1,72.8 L 193.8,73.5 L 202.0,72.3 L 205.7,70.1 L 217.1,71.3 L 254.3,73.1 L 265.0,73.4 L 266.8,72.0 L 268.1,72.2 L 270.4,73.5 L 270.9,74.9 L 275.5,76.8 L 278.7,79.8 L 279.2,85.6 L 281.5,96.7 L 285.1,106.9 L 286.9,114.4 L 287.2,124.4 L 286.1,125.6 L 277.9,130.2 L 273.4,137.3 L 273.8,138.2 L 281.5,143.0 L 282.5,144.9 L 281.6,149.9 L 282.0,152.1 L 280.4,155.2 L 280.4,158.0 L 281.6,161.1 Z","BALTYK":"M 25.0,0.0 L 340.0,0.0 L 340.0,102.0 L 25.0,102.0 Z","CZ":"M 191.0,223.2 L 186.6,223.8 L 183.1,226.9 L 182.2,228.6 L 178.3,231.1 L 176.9,237.0 L 173.6,239.1 L 170.7,242.5 L 168.2,243.9 L 165.4,244.4 L 159.9,243.4 L 158.9,244.0 L 157.5,245.8 L 155.4,251.5 L 154.1,248.2 L 150.8,247.3 L 147.6,245.4 L 146.4,245.2 L 144.3,247.1 L 138.4,246.6 L 134.0,243.2 L 131.6,243.4 L 124.2,239.9 L 121.4,240.7 L 119.6,239.1 L 118.2,239.0 L 116.9,246.1 L 115.0,246.0 L 114.3,246.9 L 112.8,249.2 L 112.5,251.5 L 108.6,250.6 L 106.3,252.2 L 103.0,252.1 L 100.3,251.4 L 99.2,248.6 L 95.9,246.3 L 90.8,240.3 L 88.8,240.4 L 85.9,236.0 L 83.1,234.1 L 78.8,228.8 L 76.9,228.9 L 74.4,226.2 L 68.8,216.2 L 71.1,211.3 L 70.1,209.5 L 65.4,205.1 L 63.1,198.8 L 64.0,198.5 L 64.7,199.2 L 66.7,202.5 L 70.0,197.3 L 71.8,195.9 L 76.0,194.8 L 79.3,195.5 L 80.7,192.9 L 83.8,192.3 L 84.9,190.2 L 87.5,188.9 L 88.7,189.5 L 91.0,186.3 L 97.4,184.5 L 106.4,180.3 L 104.2,177.1 L 104.7,176.2 L 105.4,176.0 L 109.7,177.3 L 110.7,179.7 L 111.2,179.8 L 111.0,181.6 L 113.1,182.9 L 113.9,182.8 L 114.7,181.5 L 118.0,180.7 L 118.2,176.7 L 123.2,178.4 L 123.6,180.8 L 125.1,183.0 L 132.2,185.2 L 136.3,187.3 L 137.5,189.2 L 142.7,187.8 L 144.1,188.9 L 145.3,190.3 L 144.5,192.1 L 142.7,193.1 L 141.3,195.0 L 141.7,195.9 L 143.7,196.7 L 149.4,204.9 L 150.2,205.1 L 153.3,202.3 L 156.1,200.8 L 154.0,194.9 L 159.2,196.4 L 164.2,200.2 L 166.8,199.9 L 169.6,198.6 L 170.2,201.0 L 169.7,202.1 L 167.5,203.2 L 168.2,204.5 L 169.2,205.0 L 172.1,208.6 L 172.9,209.0 L 174.9,208.1 L 175.8,207.0 L 181.0,210.8 L 181.9,210.3 L 185.9,211.8 L 186.5,215.6 L 190.6,220.1 L 191.0,223.2 Z","SK":"M 261.4,236.8 L 258.5,243.0 L 256.7,248.8 L 253.9,252.4 L 253.3,257.8 L 246.7,259.5 L 245.9,259.3 L 242.9,254.7 L 240.7,252.9 L 233.4,254.3 L 229.6,253.1 L 225.4,253.0 L 222.5,253.7 L 219.5,260.9 L 211.3,265.9 L 206.1,263.1 L 204.9,263.4 L 203.1,266.6 L 199.3,267.7 L 192.6,268.4 L 190.3,270.0 L 189.5,271.9 L 189.8,275.0 L 167.3,275.0 L 162.3,270.3 L 159.1,269.8 L 157.9,268.8 L 153.7,258.0 L 153.7,256.3 L 155.2,252.9 L 156.0,249.0 L 158.9,244.0 L 159.9,243.4 L 165.4,244.4 L 168.2,243.9 L 170.7,242.5 L 173.6,239.1 L 176.9,237.0 L 178.3,231.1 L 182.2,228.6 L 183.1,226.9 L 186.6,223.8 L 191.0,223.2 L 193.1,223.6 L 193.6,226.8 L 197.1,226.7 L 199.0,223.2 L 202.6,220.5 L 206.2,226.5 L 208.9,227.5 L 209.2,230.7 L 208.6,232.7 L 209.4,233.1 L 211.6,232.2 L 214.3,233.4 L 216.3,229.3 L 220.1,227.1 L 224.9,226.9 L 227.0,227.6 L 228.4,228.9 L 231.2,229.2 L 233.7,226.1 L 238.8,225.8 L 244.3,226.3 L 249.1,228.4 L 250.5,229.8 L 251.5,232.6 L 261.4,236.8 Z","DE_REST":"M 25.0,275.0 L 25.0,69.3 L 26.2,69.2 L 27.5,71.6 L 30.3,70.7 L 37.4,74.5 L 42.7,72.6 L 43.7,75.6 L 42.6,78.7 L 38.9,82.0 L 39.7,84.0 L 40.9,84.4 L 44.4,84.0 L 50.0,86.0 L 57.6,79.8 L 63.5,79.1 L 64.6,77.3 L 72.3,69.8 L 80.9,71.6 L 83.2,75.5 L 88.9,79.9 L 94.1,79.5 L 96.0,83.7 L 96.8,88.8 L 99.8,91.5 L 104.3,92.7 L 107.2,106.5 L 107.2,109.1 L 106.4,112.0 L 104.9,114.4 L 102.0,117.3 L 101.8,119.0 L 104.2,122.0 L 109.1,126.2 L 111.1,129.8 L 109.9,135.1 L 111.1,137.6 L 112.3,138.5 L 112.7,142.8 L 113.6,143.7 L 112.2,149.1 L 110.8,151.4 L 113.1,156.7 L 113.1,160.9 L 116.6,162.8 L 118.7,169.3 L 116.8,176.9 L 114.5,182.0 L 113.1,182.9 L 111.0,181.6 L 111.2,179.8 L 110.7,179.7 L 109.7,177.3 L 105.4,176.0 L 104.7,176.2 L 104.2,177.1 L 106.4,180.3 L 97.4,184.5 L 91.0,186.3 L 88.7,189.5 L 87.5,188.9 L 84.9,190.2 L 83.8,192.3 L 80.7,192.9 L 79.3,195.5 L 76.0,194.8 L 71.8,195.9 L 70.0,197.3 L 66.7,202.5 L 64.7,199.2 L 64.0,198.5 L 63.1,198.8 L 65.4,205.1 L 70.1,209.5 L 71.1,211.3 L 68.8,216.2 L 74.4,226.2 L 76.9,228.9 L 78.8,228.8 L 83.1,234.1 L 85.9,236.0 L 88.0,239.7 L 88.8,240.4 L 90.8,240.3 L 95.9,246.3 L 95.3,251.8 L 94.1,253.2 L 93.2,253.8 L 89.6,252.0 L 87.5,258.8 L 78.5,263.7 L 75.9,266.7 L 75.9,267.6 L 79.5,273.4 L 79.5,275.0 Z M 93.9,72.4 L 94.3,74.5 L 93.8,75.6 L 91.7,73.8 L 89.5,73.8 L 88.3,76.6 L 87.3,76.7 L 84.0,74.2 L 83.4,72.0 L 83.8,67.4 L 84.8,66.2 L 85.0,64.5 L 86.8,62.7 L 88.4,62.6 L 89.7,65.2 L 92.9,67.0 L 93.1,67.7 L 91.4,69.9 L 91.8,71.1 L 93.9,72.4 Z M 103.4,85.8 L 103.4,88.3 L 98.0,88.0 L 97.5,86.2 L 97.9,84.4 L 96.1,82.4 L 96.1,80.3 L 103.4,85.8 Z M 47.8,71.3 L 44.9,71.4 L 42.7,69.9 L 43.3,68.3 L 44.1,67.8 L 46.9,68.8 L 47.8,71.3 Z","DE_BB":"M 97.1,99.7 L 97.8,102.2 L 99.4,101.8 L 100.4,102.5 L 101.7,101.6 L 103.9,102.0 L 103.8,103.8 L 101.3,107.1 L 104.3,107.2 L 105.4,105.6 L 107.0,104.9 L 107.8,106.7 L 106.3,109.7 L 106.7,111.0 L 106.2,113.2 L 102.1,116.4 L 102.3,119.0 L 101.7,120.2 L 105.8,122.7 L 108.2,125.8 L 111.5,128.2 L 110.8,129.7 L 111.3,130.7 L 109.7,132.6 L 109.4,133.9 L 110.5,136.6 L 110.2,137.2 L 112.6,138.7 L 112.1,142.4 L 113.4,143.9 L 112.3,149.1 L 110.5,151.2 L 110.7,152.2 L 111.7,152.5 L 111.8,154.5 L 113.1,155.8 L 113.5,157.9 L 112.9,159.0 L 112.4,158.6 L 112.0,160.1 L 111.0,160.3 L 110.2,159.4 L 109.4,160.2 L 106.9,160.5 L 105.9,161.6 L 104.8,160.7 L 102.3,160.3 L 102.4,160.9 L 101.1,161.8 L 101.4,162.3 L 100.3,162.3 L 100.9,163.3 L 99.7,165.6 L 98.8,164.8 L 95.2,165.9 L 92.2,165.7 L 92.0,165.1 L 91.0,165.7 L 90.6,164.6 L 88.4,163.1 L 87.9,164.0 L 86.8,163.5 L 86.2,164.8 L 85.6,164.7 L 85.8,165.2 L 84.8,164.8 L 84.6,163.8 L 84.1,163.9 L 84.7,160.9 L 84.3,159.9 L 83.5,159.8 L 83.6,158.6 L 83.0,158.0 L 82.3,158.4 L 81.6,157.1 L 84.2,155.0 L 83.0,150.9 L 83.5,150.1 L 81.3,150.2 L 81.5,149.3 L 80.1,149.3 L 79.9,148.2 L 77.8,148.3 L 77.7,147.3 L 76.6,147.5 L 74.4,145.9 L 73.4,146.8 L 71.9,146.8 L 70.5,145.2 L 69.7,145.7 L 66.8,143.0 L 65.6,141.1 L 67.2,139.4 L 66.2,138.4 L 67.5,135.6 L 67.0,135.1 L 67.4,133.8 L 66.8,133.4 L 67.9,131.5 L 66.7,131.2 L 66.0,130.1 L 65.3,131.0 L 64.8,130.6 L 65.1,129.8 L 64.3,130.0 L 65.0,128.6 L 64.8,127.0 L 66.1,126.9 L 66.0,125.0 L 65.3,124.2 L 65.6,122.4 L 66.4,121.7 L 66.0,119.7 L 65.2,119.2 L 63.9,119.9 L 63.9,118.8 L 63.6,119.2 L 62.0,118.8 L 61.1,119.2 L 58.5,118.2 L 58.7,116.9 L 56.7,115.7 L 55.6,116.0 L 55.5,115.1 L 54.5,115.0 L 54.6,114.0 L 52.4,113.9 L 51.2,112.8 L 49.1,113.6 L 47.6,111.5 L 50.0,111.9 L 50.0,111.0 L 52.7,111.5 L 53.4,110.2 L 53.2,108.7 L 54.5,107.8 L 55.8,107.8 L 56.4,108.6 L 58.3,108.3 L 57.7,107.5 L 59.0,107.7 L 59.5,106.7 L 60.5,107.0 L 62.0,106.0 L 62.5,103.9 L 63.6,104.7 L 64.5,104.2 L 64.7,104.9 L 65.9,104.3 L 66.5,105.4 L 69.0,106.0 L 69.9,107.6 L 74.2,107.5 L 74.3,108.3 L 75.9,108.4 L 75.5,109.2 L 76.0,109.6 L 77.6,109.2 L 78.2,109.9 L 80.0,109.2 L 79.4,110.0 L 80.1,110.4 L 82.4,108.7 L 82.7,107.9 L 83.9,107.6 L 84.8,108.6 L 85.2,107.4 L 86.1,106.7 L 87.3,106.7 L 88.1,107.7 L 88.7,106.1 L 89.5,106.4 L 89.9,105.2 L 90.4,105.5 L 90.8,102.9 L 92.2,102.6 L 92.5,101.5 L 93.9,100.4 L 95.1,100.7 L 96.1,99.9 L 95.2,99.4 L 95.4,98.0 L 95.9,99.3 L 97.1,99.7 Z","DE_SN":"M 78.1,156.3 L 78.2,156.9 L 78.7,156.6 L 78.6,157.1 L 79.5,157.4 L 80.7,156.5 L 82.3,158.4 L 83.0,158.0 L 83.6,158.6 L 83.5,159.8 L 84.3,159.9 L 84.7,160.9 L 84.1,163.9 L 84.6,163.8 L 84.8,164.8 L 85.8,165.2 L 85.6,164.7 L 86.2,164.8 L 86.8,163.5 L 87.9,164.0 L 88.4,163.1 L 90.6,164.6 L 91.0,165.7 L 92.0,165.1 L 92.2,165.7 L 95.2,165.9 L 98.8,164.8 L 99.7,165.6 L 100.9,163.3 L 100.3,162.3 L 101.4,162.3 L 101.1,161.8 L 102.4,160.9 L 102.3,160.3 L 104.8,160.7 L 105.9,161.6 L 106.9,160.5 L 109.4,160.2 L 110.2,159.4 L 111.0,160.3 L 112.0,160.1 L 112.5,158.6 L 113.4,160.9 L 116.6,161.9 L 117.7,163.1 L 117.7,166.2 L 118.9,167.6 L 119.1,169.7 L 118.4,170.6 L 117.9,174.7 L 116.5,178.6 L 114.9,180.5 L 114.6,182.4 L 112.9,182.5 L 112.9,182.1 L 111.0,181.6 L 111.7,179.2 L 110.0,179.5 L 110.7,177.5 L 108.9,176.6 L 108.9,175.5 L 108.7,176.5 L 107.9,176.2 L 106.9,176.9 L 106.1,176.1 L 105.4,176.4 L 105.0,175.5 L 104.1,178.0 L 107.0,178.9 L 106.4,180.6 L 104.2,180.7 L 103.4,181.9 L 100.5,183.3 L 98.5,183.2 L 98.4,183.8 L 97.4,183.8 L 97.5,185.1 L 96.5,185.9 L 93.5,185.9 L 93.1,185.4 L 90.8,186.0 L 90.4,188.4 L 89.2,189.6 L 87.5,188.2 L 86.6,190.1 L 85.1,189.8 L 84.1,192.6 L 81.0,192.4 L 80.9,194.2 L 80.0,195.3 L 79.2,195.5 L 77.2,193.9 L 76.8,194.7 L 75.9,194.5 L 74.8,195.8 L 73.1,195.1 L 71.2,195.7 L 70.8,197.3 L 69.1,198.2 L 69.2,198.9 L 68.3,199.5 L 67.6,202.5 L 66.8,202.4 L 66.8,201.1 L 65.9,200.3 L 66.2,199.6 L 65.1,199.5 L 65.1,198.1 L 63.7,198.4 L 61.0,197.1 L 61.1,195.9 L 59.4,194.3 L 60.2,193.6 L 60.6,194.0 L 60.9,192.9 L 60.1,191.7 L 59.3,192.0 L 59.1,191.2 L 60.2,190.7 L 60.2,189.8 L 61.8,188.3 L 62.2,190.8 L 63.0,190.7 L 63.1,190.0 L 64.6,190.1 L 64.4,188.5 L 65.3,188.9 L 65.4,188.1 L 66.8,188.3 L 67.8,186.8 L 66.9,186.6 L 66.5,185.7 L 66.9,185.3 L 66.0,185.0 L 66.3,184.1 L 67.2,183.9 L 66.4,182.6 L 68.3,182.4 L 68.8,181.5 L 70.0,181.9 L 70.8,180.3 L 73.8,180.1 L 74.1,179.4 L 73.2,177.1 L 72.7,177.5 L 71.6,177.0 L 71.9,176.3 L 71.3,176.5 L 71.2,175.1 L 70.6,175.1 L 70.3,174.4 L 69.4,174.8 L 68.1,173.9 L 67.1,174.2 L 65.8,173.6 L 66.2,173.1 L 65.4,172.7 L 65.6,171.5 L 65.0,171.4 L 65.5,170.4 L 64.4,167.2 L 65.2,166.9 L 65.3,164.0 L 64.4,162.8 L 65.4,162.1 L 65.2,161.0 L 66.1,159.6 L 69.7,159.1 L 70.0,158.3 L 70.8,158.8 L 72.7,157.8 L 73.7,158.1 L 74.7,156.7 L 76.4,157.2 L 77.4,156.1 L 78.1,156.3 Z","LT":"M 231.4,44.7 L 230.3,44.5 L 232.4,40.9 L 234.3,34.3 L 234.1,38.2 L 232.8,42.5 L 231.4,44.7 Z M 265.7,73.2 L 264.0,69.0 L 264.1,66.9 L 266.8,57.3 L 263.0,54.2 L 261.9,51.5 L 252.5,51.4 L 242.7,47.3 L 239.6,44.8 L 236.6,45.2 L 236.0,42.7 L 236.7,39.2 L 233.3,28.2 L 233.0,20.2 L 244.6,12.6 L 252.7,9.8 L 262.3,10.8 L 267.8,10.1 L 269.5,10.6 L 270.9,12.4 L 272.4,12.1 L 273.8,11.0 L 285.5,12.2 L 291.4,14.2 L 298.1,13.6 L 302.4,10.6 L 305.0,9.7 L 306.2,10.1 L 309.4,16.2 L 320.6,19.1 L 328.6,25.6 L 332.4,30.1 L 334.6,31.5 L 338.3,32.7 L 337.8,36.4 L 335.7,42.7 L 336.4,43.5 L 340.0,43.9 L 340.0,46.3 L 338.4,49.3 L 332.6,49.0 L 331.8,49.5 L 330.3,53.2 L 328.8,54.5 L 324.4,55.8 L 322.9,58.5 L 321.8,62.1 L 321.8,66.8 L 319.8,70.0 L 318.4,74.0 L 318.6,74.7 L 321.4,75.2 L 322.2,76.2 L 322.3,79.4 L 318.9,80.0 L 317.7,79.3 L 318.1,77.6 L 316.8,75.2 L 315.1,76.5 L 313.4,76.5 L 311.5,77.7 L 308.9,80.2 L 305.6,79.8 L 304.7,80.6 L 303.7,85.1 L 300.9,84.9 L 295.1,87.6 L 292.7,85.8 L 284.0,87.0 L 280.7,86.8 L 279.3,86.1 L 278.7,79.8 L 277.1,78.1 L 273.3,75.6 L 270.9,74.9 L 270.4,73.5 L 268.1,72.2 L 266.8,72.0 L 265.7,73.2 Z","BY":"M 340.0,152.9 L 335.6,152.0 L 334.5,151.0 L 323.0,148.5 L 313.1,148.1 L 298.5,149.8 L 295.9,150.3 L 294.4,153.2 L 288.7,158.8 L 285.1,157.4 L 282.4,157.7 L 281.7,158.2 L 281.6,161.1 L 280.4,158.0 L 280.4,155.2 L 282.0,152.1 L 281.6,149.9 L 282.5,144.9 L 281.5,143.0 L 273.8,138.2 L 273.4,137.3 L 277.9,130.2 L 286.1,125.6 L 287.2,124.4 L 287.5,122.3 L 286.4,111.8 L 281.5,96.7 L 279.3,86.1 L 284.0,87.0 L 292.7,85.8 L 295.1,87.6 L 300.9,84.9 L 303.7,85.1 L 304.7,80.6 L 305.6,79.8 L 308.9,80.2 L 311.5,77.7 L 313.4,76.5 L 315.1,76.5 L 316.8,75.2 L 318.1,77.6 L 317.7,79.3 L 318.9,80.0 L 322.3,79.4 L 322.2,76.2 L 321.4,75.2 L 318.6,74.7 L 318.4,74.0 L 319.8,70.0 L 321.8,66.8 L 321.8,62.1 L 322.9,58.5 L 324.4,55.8 L 328.8,54.5 L 330.3,53.2 L 331.8,49.5 L 332.6,49.0 L 338.4,49.3 L 340.0,46.3 L 340.0,43.9 L 336.4,43.5 L 335.7,42.7 L 337.8,36.4 L 338.3,32.7 L 340.0,32.1 Z","UA":"M 340.0,260.3 L 338.8,262.0 L 332.8,263.7 L 332.3,266.5 L 330.1,270.2 L 316.9,272.8 L 312.3,275.0 L 302.6,275.0 L 300.1,272.1 L 298.3,271.6 L 292.5,272.9 L 290.2,271.7 L 289.1,272.0 L 282.8,270.2 L 277.9,270.3 L 274.0,267.4 L 272.8,267.3 L 271.2,269.8 L 267.8,271.6 L 267.4,269.1 L 265.7,266.6 L 264.0,266.8 L 262.2,265.9 L 261.0,263.6 L 257.8,262.1 L 256.0,257.4 L 253.6,257.5 L 253.9,252.4 L 256.7,248.8 L 258.5,243.0 L 261.4,236.8 L 266.5,238.4 L 267.3,237.1 L 264.5,233.7 L 265.0,229.9 L 263.5,222.4 L 264.5,220.3 L 270.8,211.2 L 283.6,196.4 L 288.6,195.4 L 290.8,191.7 L 290.9,189.0 L 290.0,185.7 L 288.7,183.8 L 291.1,181.9 L 290.9,181.1 L 288.8,179.0 L 286.5,173.2 L 282.7,167.5 L 283.0,164.9 L 281.6,161.1 L 281.7,158.2 L 283.5,157.3 L 285.1,157.4 L 288.2,159.0 L 291.5,156.6 L 295.9,150.3 L 305.5,149.3 L 309.3,148.3 L 325.6,148.9 L 340.0,152.9 Z","RU":"M 231.4,44.7 L 224.5,53.9 L 230.0,56.1 L 232.1,56.3 L 235.8,55.3 L 236.6,45.2 L 239.6,44.8 L 242.7,47.3 L 252.5,51.4 L 261.9,51.5 L 263.0,54.2 L 266.8,57.3 L 264.1,66.9 L 264.0,69.0 L 265.7,73.2 L 217.1,71.3 L 205.7,70.1 L 208.6,67.4 L 210.5,64.7 L 212.1,61.1 L 212.7,55.8 L 215.2,54.7 L 220.7,54.8 L 223.1,53.5 L 230.3,44.5 L 231.4,44.7 Z","SE":"M 147.3,13.4 L 146.4,14.9 L 145.5,14.8 L 144.9,12.8 L 145.1,4.8 L 147.2,0.0 L 151.3,0.0 L 147.3,13.4 Z M 144.1,0.0 L 141.4,4.1 L 137.3,15.5 L 135.8,17.2 L 134.0,18.5 L 130.2,16.6 L 124.5,17.7 L 119.3,17.1 L 114.2,17.4 L 112.9,18.2 L 113.7,21.4 L 111.8,21.8 L 110.0,20.9 L 107.0,23.1 L 103.5,27.6 L 103.2,30.8 L 105.9,37.0 L 102.7,41.1 L 95.7,40.1 L 86.5,42.6 L 78.2,40.6 L 79.3,38.4 L 79.9,30.2 L 70.4,13.4 L 74.8,15.1 L 76.6,14.2 L 73.9,8.7 L 77.7,8.4 L 78.9,6.4 L 78.2,3.3 L 75.0,1.9 L 74.0,0.0 Z","DK":"M 72.2,29.0 L 71.8,33.0 L 67.5,35.1 L 66.0,36.7 L 65.5,38.9 L 66.7,40.5 L 68.7,41.4 L 69.3,44.5 L 67.5,46.0 L 63.1,47.5 L 62.4,59.0 L 58.8,60.4 L 56.5,56.0 L 54.9,47.5 L 51.5,46.8 L 47.9,47.0 L 45.7,43.2 L 46.1,38.9 L 44.9,36.8 L 44.8,34.7 L 42.6,33.4 L 42.1,31.0 L 48.6,30.0 L 51.3,26.1 L 51.5,24.1 L 54.4,23.7 L 55.7,25.2 L 55.6,30.8 L 58.0,31.7 L 60.0,27.7 L 60.2,25.6 L 58.9,23.4 L 65.6,18.7 L 67.6,18.6 L 72.4,20.4 L 73.0,21.4 L 71.4,24.9 L 72.2,29.0 Z M 25.0,0.0 L 29.0,0.0 L 28.9,3.2 L 30.8,5.2 L 32.8,6.3 L 39.5,6.2 L 41.1,8.7 L 39.7,13.2 L 37.8,14.9 L 35.3,16.1 L 33.7,16.2 L 31.6,13.8 L 30.6,14.6 L 29.5,15.8 L 27.0,26.6 L 26.5,26.9 L 25.0,26.3 Z M 35.7,34.5 L 39.0,43.4 L 38.4,45.0 L 38.8,47.0 L 38.4,49.2 L 35.3,51.7 L 31.9,51.8 L 25.0,49.1 L 25.0,36.1 L 28.9,34.4 L 31.5,36.0 L 33.1,36.1 L 35.7,34.5 Z M 49.3,56.7 L 52.7,58.6 L 54.9,58.5 L 56.5,59.3 L 57.0,63.3 L 51.1,64.8 L 43.1,60.4 L 43.6,55.2 L 47.4,54.8 L 49.3,56.7 Z M 37.4,61.0 L 36.6,61.2 L 35.3,57.9 L 39.7,51.7 L 41.0,48.4 L 41.5,48.5 L 37.4,61.0 Z M 71.9,54.4 L 71.1,54.9 L 68.2,54.5 L 64.9,56.7 L 63.7,56.0 L 64.5,54.1 L 66.3,52.7 L 66.6,51.3 L 67.3,52.1 L 70.3,52.8 L 71.9,54.4 Z M 74.1,34.9 L 71.9,36.1 L 71.3,34.3 L 72.8,32.3 L 74.1,34.9 Z M 32.7,58.1 L 31.4,58.4 L 29.9,57.7 L 27.3,54.5 L 33.1,57.6 L 32.7,58.1 Z M 35.0,29.1 L 34.7,29.7 L 33.5,29.1 L 33.8,25.3 L 33.3,23.7 L 33.9,22.6 L 36.0,26.2 L 35.0,29.1 Z M 120.0,52.7 L 119.3,53.2 L 116.2,52.3 L 112.4,50.2 L 112.9,46.0 L 113.9,44.1 L 120.9,48.9 L 120.9,50.6 L 120.0,52.7 Z","WISLA":"M 190.6,210.4 L 193.0,210.2 M 191.9,219.1 L 190.2,213.7 L 189.9,211.6 L 190.6,210.4 M 193.0,210.2 L 195.5,209.6 L 198.0,206.8 L 200.8,206.7 L 205.4,208.1 L 210.4,207.9 L 223.1,203.8 L 225.4,202.3 L 227.2,200.0 L 230.0,198.6 L 233.7,198.0 L 237.7,196.2 L 241.8,193.1 L 244.9,190.0 L 247.0,186.8 L 247.8,181.9 L 247.0,171.3 L 247.4,169.7 L 249.9,166.8 L 250.4,165.2 L 249.9,163.4 L 247.9,161.6 L 247.8,160.4 L 246.1,158.9 L 242.7,157.1 L 240.7,155.3 L 240.3,153.5 L 236.7,148.7 L 237.2,147.9 L 237.1,146.4 L 236.4,144.1 L 231.7,136.8 L 229.2,134.3 L 227.1,133.3 L 223.1,133.2 L 217.4,134.1 L 212.5,133.2 L 206.4,129.2 L 198.1,126.3 L 193.5,122.7 L 189.8,117.5 L 185.5,114.1 L 180.5,112.5 L 179.0,109.9 L 181.2,106.2 L 184.0,103.4 L 187.5,101.5 L 189.3,99.2 L 190.0,94.4 L 191.1,93.1 L 191.8,91.2 L 191.8,85.9 L 191.2,83.0 L 191.4,80.3 L 192.6,78.0 L 193.8,73.5","ODRA":"M 168.0,216.2 L 172.4,218.8 L 174.2,219.3 L 177.9,216.5 L 181.1,211.6 L 181.3,208.9 L 180.0,206.4 L 179.6,203.8 L 180.0,201.3 L 178.8,198.2 L 175.9,194.4 L 174.5,191.6 L 174.1,187.8 L 173.0,185.8 L 170.7,183.9 L 164.8,180.8 L 163.1,179.4 L 161.4,176.4 L 160.0,175.0 L 156.6,173.1 L 153.8,170.1 L 151.3,169.3 L 148.2,169.8 L 146.3,169.6 L 145.7,167.4 L 146.2,166.2 L 146.1,161.1 L 145.0,158.7 L 143.2,156.9 L 141.5,156.2 L 140.1,156.4 L 134.4,154.1 L 132.9,152.0 L 133.3,149.5 L 132.7,147.4 L 131.3,145.9 L 126.4,144.8 L 113.8,143.8 L 112.7,142.8 L 112.8,139.8 L 112.3,138.5 L 110.3,136.5 L 109.9,135.1 L 111.1,129.8 L 109.1,126.2 L 104.2,122.0 L 101.8,119.0 L 102.0,117.3 L 103.0,115.8 L 104.9,114.4 L 106.4,112.0 L 107.8,106.7 L 110.4,101.5 L 111.1,99.0 L 110.4,95.4"},"miasta":[{"n":"Warszawa","x":232.4,"y":139.1},{"n":"Kraków","x":212,"y":206.2},{"n":"Gdańsk","x":187.5,"y":73.4},{"n":"Wrocław","x":157,"y":173.8},{"n":"Poznań","x":154.9,"y":133.6}],"miastaTrueOrtho":[{"n":"Warszawa","x":232.4,"y":139.1},{"n":"Kraków","x":212,"y":206.2},{"n":"Trójmiasto","x":187.5,"y":73.4},{"n":"Wrocław","x":157,"y":173.8},{"n":"Poznań","x":154.9,"y":133.6},{"n":"Łódź","x":202.9,"y":153.6},{"n":"GOP / Katowice","x":194.7,"y":199.9}]};
@@ -1483,29 +1639,36 @@
     if (!ref.modalKanapka || stan.indeksModala < 0 || stan.indeksModala >= stan.widoczne.length) return;
     const w = stan.widoczne[stan.indeksModala];
     const idx = indeksWKanapce(w);
-    if (idx >= 0) {
-      ref.modalKanapka.classList.add("aktywny");
-      ref.modalKanapka.textContent = "✓ W miksie (#" + (idx + 1) + ")";
-      ref.modalKanapka.title = "Usuń tę warstwę z kompozycji w Mikserze warstw";
-    } else {
-      ref.modalKanapka.classList.remove("aktywny");
-      ref.modalKanapka.textContent = "☐ Dodaj do miksu";
-      ref.modalKanapka.title = "Dodaj warstwę do kompozycji w Mikserze warstw";
-    }
-    if (ref.modalDodaj) {
-      ref.modalDodaj.hidden = idx >= 0;
-    }
+    const wMiksie = idx >= 0;
+    const tekstBtn = wMiksie ? "✓ W miksie (#" + (idx + 1) + ")" : "☐ Dodaj do miksu";
+    const tytulBtn = wMiksie
+      ? "Usuń tę warstwę z kompozycji w Mikserze warstw"
+      : "Dodaj warstwę do kompozycji w Mikserze warstw";
+
+    [ref.modalKanapka, ref.modalMobileKanapka].forEach(function (btn) {
+      if (!btn) return;
+      btn.classList.toggle("aktywny", wMiksie);
+      btn.textContent = tekstBtn;
+      btn.title = tytulBtn;
+    });
+    if (ref.modalDodaj) ref.modalDodaj.hidden = wMiksie;
+    if (ref.modalMobileDodaj) ref.modalMobileDodaj.hidden = wMiksie;
     if (ref.modalOtworzMikser) {
       ref.modalOtworzMikser.hidden = stan.kanapka.length === 0;
       ref.modalOtworzMikser.textContent = "🧩 Mikser (" + stan.kanapka.length + ")";
     }
   }
 
-  function otworzModal(indeks) {
+  function otworzModal(indeks, bezHistorii) {
     if (indeks < 0 || indeks >= stan.widoczne.length) return;
+    const bylZamkniety = stan.indeksModala < 0;
+    if (bylZamkniety && document.activeElement && document.activeElement !== document.body) {
+      stan.ostatniFocusPrzedModalem = document.activeElement;
+    }
     stan.indeksModala = indeks;
     const w = stan.widoczne[indeks];
 
+    if (ref.modalCialo) ref.modalCialo.scrollTop = 0;
     if (ref.modalObrazKol) ref.modalObrazKol.scrollTop = 0;
 
     ref.modalPanelProbka.innerHTML = "";
@@ -1521,6 +1684,7 @@
       const img = document.createElement("img");
       img.src = sciezkaObrazka(w.obrazek);
       img.alt = "Powiększony podgląd warstwy: " + w.nazwa;
+      img.decoding = "async";
       img.addEventListener("error", function () {
         img.hidden = true;
         brak.hidden = false;
@@ -1539,6 +1703,7 @@
     }
 
     ref.modalTytul.textContent = w.nazwa;
+    if (ref.modalMobileTytul) ref.modalMobileTytul.textContent = w.nazwa;
     const sciezkaCzesci = ["Wybierz mapy", w.grupa];
     if (w.podgrupa) sciezkaCzesci.push(w.podgrupa);
     sciezkaCzesci.push(w.nazwa);
@@ -1580,15 +1745,42 @@
 
     odswiezPrzyciskModalaKanapki();
     ref.modalKopiuj.textContent = "Kopiuj nazwę";
-    ref.modalPoprz.disabled = indeks <= 0;
-    ref.modalNast.disabled = indeks >= stan.widoczne.length - 1;
+    if (ref.modalKopiujLink) ref.modalKopiujLink.textContent = "🔗 Link";
+    const czyPierwszy = indeks <= 0;
+    const czyOstatni = indeks >= stan.widoczne.length - 1;
+    ref.modalPoprz.disabled = czyPierwszy;
+    ref.modalNast.disabled = czyOstatni;
+    if (ref.modalMobilePoprz) ref.modalMobilePoprz.disabled = czyPierwszy;
+    if (ref.modalMobileNast) ref.modalMobileNast.disabled = czyOstatni;
+
     ref.modalTlo.hidden = false;
-    ref.modalZamknij.focus();
+    aktualizujBlokadeScrollaTla();
+    if (bylZamkniety && !bezHistorii) {
+      oznaczHistorieNakladki("modal");
+    }
+    if (window.innerWidth <= 768 && ref.modalZamknijMobile) {
+      ref.modalZamknijMobile.focus({ preventScroll: true });
+    } else {
+      ref.modalZamknij.focus({ preventScroll: true });
+    }
   }
 
-  function zamknijModal() {
+  function zamknijModal(bezHistorii) {
+    if (ref.modalTlo.hidden && stan.indeksModala < 0) return;
     ref.modalTlo.hidden = true;
     stan.indeksModala = -1;
+    aktualizujBlokadeScrollaTla();
+    if (!bezHistorii) {
+      cofnijHistorieNakladki();
+    }
+    if (stan.ostatniFocusPrzedModalem && document.contains(stan.ostatniFocusPrzedModalem)) {
+      try {
+        stan.ostatniFocusPrzedModalem.focus({ preventScroll: true });
+      } catch (e) {
+        // Ignorujemy błąd fokusu
+      }
+    }
+    stan.ostatniFocusPrzedModalem = null;
   }
 
   // --- Mikser kanapki (UI, podgląd na żywo i eksport) ---
@@ -1617,6 +1809,7 @@
     const n = stan.kanapka.length;
     ref.mikserDokLicznik.textContent = n + " / " + MAKS_WARSTW_KANAPKI + " warstw";
     ref.mikserDok.classList.toggle("zwiniety", stan.dokZwiniety);
+    ref.mikserDok.classList.toggle("pusty", n === 0);
     if (ref.mikserDokZwin) {
       ref.mikserDokZwin.textContent = stan.dokZwiniety ? "▴ Rozwiń" : "▾ Zwiń";
       ref.mikserDokZwin.title = stan.dokZwiniety
@@ -1642,23 +1835,43 @@
     }
   }
 
-  function otworzMikser() {
+  function otworzMikser(bezHistorii) {
+    if (!stan.mikserOtwarty && document.activeElement && document.activeElement !== document.body) {
+      stan.ostatniFocusPrzedModalem = document.activeElement;
+    }
     stan.mikserOtwarty = true;
     ref.mikserTlo.hidden = false;
+    aktualizujBlokadeScrollaTla();
+    if (!bezHistorii) {
+      oznaczHistorieNakladki("mikser");
+    }
     if (ref.przelaczZakladkeMiksera) ref.przelaczZakladkeMiksera(stan.zakladkaMiksera || "podglad");
     renderujListeMiksera();
     rysujMinimape();
     zglosOdswiezeniePodgladuMiksera(true);
-    ref.mikserZamknij.focus();
+    ref.mikserZamknij.focus({ preventScroll: true });
   }
 
-  function zamknijMikser() {
+  function zamknijMikser(bezHistorii) {
+    if (!stan.mikserOtwarty && ref.mikserTlo.hidden) return;
     stan.mikserOtwarty = false;
     ref.mikserTlo.hidden = true;
+    aktualizujBlokadeScrollaTla();
+    if (!bezHistorii) {
+      cofnijHistorieNakladki();
+    }
     if (stan.abortPodglad) {
       stan.abortPodglad.abort();
       stan.abortPodglad = null;
     }
+    if (stan.ostatniFocusPrzedModalem && document.contains(stan.ostatniFocusPrzedModalem)) {
+      try {
+        stan.ostatniFocusPrzedModalem.focus({ preventScroll: true });
+      } catch (e) {
+        // Ignorujemy błąd fokusu
+      }
+    }
+    stan.ostatniFocusPrzedModalem = null;
   }
 
   function pokazStatusMiksera(komunikat, czyBlad) {
@@ -1673,6 +1886,39 @@
     else ref.mikserStatusWysylki.classList.remove("blad");
   }
 
+  function pokazBanerCofnijUsuniecie() {
+    if (!ref.mikserStatusWysylki || !stan.ostatnioUsunieta) return;
+    if (stan.timerCofnij) clearTimeout(stan.timerCofnij);
+    const wpis = stan.ostatnioUsunieta;
+    ref.mikserStatusWysylki.hidden = false;
+    ref.mikserStatusWysylki.classList.remove("blad");
+    ref.mikserStatusWysylki.innerHTML = "";
+    ref.mikserStatusWysylki.appendChild(
+      document.createTextNode("Usunięto warstwę „" + wpis.pozycja.nazwa + "”. ")
+    );
+    const btnCofnij = el("button", "gw-btn-prosty gw-btn-cofnij", "↺ Cofnij");
+    btnCofnij.type = "button";
+    btnCofnij.addEventListener("click", function () {
+      if (!stan.ostatnioUsunieta) return;
+      const doPrzywrocenia = stan.ostatnioUsunieta;
+      stan.ostatnioUsunieta = null;
+      if (stan.timerCofnij) {
+        clearTimeout(stan.timerCofnij);
+        stan.timerCofnij = null;
+      }
+      const celIdx = Math.max(0, Math.min(stan.kanapka.length, doPrzywrocenia.indeks));
+      stan.kanapka.splice(celIdx, 0, doPrzywrocenia.pozycja);
+      pokazStatusMiksera("", false);
+      poZmianieKanapki();
+    });
+    ref.mikserStatusWysylki.appendChild(btnCofnij);
+    stan.timerCofnij = setTimeout(function () {
+      stan.ostatnioUsunieta = null;
+      stan.timerCofnij = null;
+      pokazStatusMiksera("", false);
+    }, 6000);
+  }
+
   function czyJestWybranyObszar() {
     return Array.isArray(stan.zaznaczonyBbox) ||
       Boolean(stan.obszarProgramu && stan.obszarProgramu.maSiatke && Array.isArray(stan.obszarProgramu.bboxWgs84));
@@ -1682,11 +1928,20 @@
     if (!ref.mikserOstrzezenia) return;
     const ostrz = ostrzezeniaKanapki(stan.kanapka, czyPolaczonoZProgramem());
     if (!czyJestWybranyObszar()) {
-      ostrz.push(
-        czyPolaczonoZProgramem()
-          ? "⚠️ Nie zaznaczono jeszcze obszaru na mapie (ani w MapoTero, ani tutaj w mikserze). Przejdź do „📍 Miejsce i obszar” i zaznacz teren prawym przyciskiem myszy (PPM), albo zaznacz obszar w MapoTero."
-          : "⚠️ Nie zaznaczono jeszcze obszaru dla pliku .mapotero — możesz zaznaczyć teren prawym przyciskiem myszy (PPM) w zakładce „📍 Miejsce i obszar”."
-      );
+      const dotyk = jestDotykowy();
+      if (czyPolaczonoZProgramem()) {
+        ostrz.push(
+          dotyk
+            ? "⚠️ Nie zaznaczono jeszcze obszaru na mapie. Przejdź do „📍 Miejsce i obszar”, przełącz na „⬜ Zaznacz obszar” i przeciągnij palcem."
+            : "⚠️ Nie zaznaczono jeszcze obszaru na mapie (ani w MapoTero, ani tutaj w mikserze). Przejdź do „📍 Miejsce i obszar” i zaznacz teren prawym przyciskiem myszy (PPM), albo zaznacz obszar w MapoTero."
+        );
+      } else {
+        ostrz.push(
+          dotyk
+            ? "⚠️ Nie zaznaczono jeszcze obszaru dla pliku .mapotero — możesz to zrobić w zakładce „📍 Miejsce i obszar” przyciskiem „⬜ Zaznacz obszar”."
+            : "⚠️ Nie zaznaczono jeszcze obszaru dla pliku .mapotero — możesz zaznaczyć teren prawym przyciskiem myszy (PPM) w zakładce „📍 Miejsce i obszar”."
+        );
+      }
     }
     ref.mikserOstrzezenia.innerHTML = "";
     if (ostrz.length > 0) {
@@ -1710,6 +1965,7 @@
     if (ref.mikserBtnWyslijGlowne) ref.mikserBtnWyslijGlowne.disabled = stan.kanapka.length === 0;
     if (ref.mikserBtnWyslijKreator) ref.mikserBtnWyslijKreator.disabled = stan.kanapka.length === 0;
     if (ref.mikserBtnPobierzPlik) ref.mikserBtnPobierzPlik.disabled = stan.kanapka.length === 0;
+    if (ref.mikserBtnUdostepnij) ref.mikserBtnUdostepnij.disabled = stan.kanapka.length === 0;
     if (ref.mikserBtnKopiujLink) ref.mikserBtnKopiujLink.disabled = stan.kanapka.length === 0;
     if (ref.mikserBtnKopiujJson) ref.mikserBtnKopiujJson.disabled = stan.kanapka.length === 0;
 
@@ -1763,12 +2019,17 @@
           poZmianieKanapki();
         });
 
-        const btnUsun = el("button", null, "✕");
+        const btnUsun = el("button", "gw-mikser-btn-usun", "✕");
         btnUsun.type = "button";
         btnUsun.title = "Usuń warstwę z kanapki";
+        btnUsun.setAttribute("aria-label", "Usuń warstwę " + poz.nazwa);
         btnUsun.addEventListener("click", function () {
-          stan.kanapka.splice(pozycjaIndeks, 1);
+          const usunieta = stan.kanapka.splice(pozycjaIndeks, 1)[0];
+          if (usunieta) {
+            stan.ostatnioUsunieta = { pozycja: usunieta, indeks: pozycjaIndeks };
+          }
           poZmianieKanapki();
+          pokazBanerCofnijUsuniecie();
         });
 
         przyciski.appendChild(btnWyzej);
@@ -1779,24 +2040,59 @@
 
         const dol = el("div", "gw-mikser-wiersz-dol");
 
-        const suwakGrupa = el("label", "gw-mikser-suwak-grupa");
-        suwakGrupa.appendChild(el("span", null, "Krycie:"));
+        const suwakGrupa = el("div", "gw-mikser-suwak-grupa");
+        suwakGrupa.appendChild(el("span", "gw-mikser-suwak-etykieta", "Krycie:"));
+
+        const btnKrycieMinus = el("button", "gw-mikser-btn-krok", "−");
+        btnKrycieMinus.type = "button";
+        btnKrycieMinus.title = "Zmniejsz krycie o 5%";
+        btnKrycieMinus.setAttribute("aria-label", "Zmniejsz krycie warstwy " + poz.nazwa);
+
         const suwak = document.createElement("input");
         suwak.type = "range";
         suwak.min = String(MIN_KRYCIE);
         suwak.max = String(PELNE_KRYCIE);
         suwak.step = "5";
         suwak.value = String(poz.krycie);
+        suwak.setAttribute("aria-label", "Krycie warstwy " + poz.nazwa);
+
+        const btnKryciePlus = el("button", "gw-mikser-btn-krok", "+");
+        btnKryciePlus.type = "button";
+        btnKryciePlus.title = "Zwiększ krycie o 5%";
+        btnKryciePlus.setAttribute("aria-label", "Zwiększ krycie warstwy " + poz.nazwa);
+
         const wartoscSpan = el("span", "gw-mikser-krycie-wartosc", poz.krycie + "%");
-        suwak.addEventListener("input", function () {
-          poz.krycie = poprawneKrycie(suwak.value);
+
+        function ustawKrycieWiersza(nowe, natychmiastZapisz) {
+          poz.krycie = poprawneKrycie(nowe);
+          suwak.value = String(poz.krycie);
           wartoscSpan.textContent = poz.krycie + "%";
-          zapiszKanapkeLocalStorage();
-          if (stan.kanapkaUrlStart) zapiszParametryUrl();
-          odswiezOstrzezeniaMiksera();
+          if (natychmiastZapisz) {
+            zapiszKanapkeLocalStorage();
+            if (czySynchronizowacKanapkeWUrl(stan.kanapkaUrlStart, stan.kanapka.length, czyPolaczonoZProgramem())) {
+              zapiszParametryUrl();
+            }
+            odswiezOstrzezeniaMiksera();
+          }
           zglosOdswiezeniePodgladuMiksera();
+        }
+
+        suwak.addEventListener("input", function () {
+          ustawKrycieWiersza(suwak.value, false);
         });
+        suwak.addEventListener("change", function () {
+          ustawKrycieWiersza(suwak.value, true);
+        });
+        btnKrycieMinus.addEventListener("click", function () {
+          ustawKrycieWiersza(poz.krycie - 5, true);
+        });
+        btnKryciePlus.addEventListener("click", function () {
+          ustawKrycieWiersza(poz.krycie + 5, true);
+        });
+
+        suwakGrupa.appendChild(btnKrycieMinus);
         suwakGrupa.appendChild(suwak);
+        suwakGrupa.appendChild(btnKryciePlus);
         suwakGrupa.appendChild(wartoscSpan);
 
         dol.appendChild(suwakGrupa);
@@ -1839,13 +2135,28 @@
 
   function zglosOdswiezeniePodgladuMiksera(natychmiast) {
     if (!stan.mikserOtwarty) return;
-    if (stan.timerPodgladu) clearTimeout(stan.timerPodgladu);
+    if (stan.timerPodgladu) {
+      clearTimeout(stan.timerPodgladu);
+      stan.timerPodgladu = null;
+    }
+    if (stan.rafPodgladu && typeof cancelAnimationFrame === "function") {
+      cancelAnimationFrame(stan.rafPodgladu);
+      stan.rafPodgladu = 0;
+    }
     if (natychmiast) {
       odswiezPodgladMiksera();
       return;
     }
-    const opoznienie = czyPolaczonoZProgramem() && maFunkcjeProgramu("podglad") ? 180 : 30;
-    stan.timerPodgladu = setTimeout(odswiezPodgladMiksera, opoznienie);
+    if (czyPolaczonoZProgramem() && maFunkcjeProgramu("podglad")) {
+      stan.timerPodgladu = setTimeout(odswiezPodgladMiksera, 180);
+    } else if (typeof requestAnimationFrame === "function") {
+      stan.rafPodgladu = requestAnimationFrame(function () {
+        stan.rafPodgladu = 0;
+        odswiezPodgladMiksera();
+      });
+    } else {
+      stan.timerPodgladu = setTimeout(odswiezPodgladMiksera, 30);
+    }
   }
 
   function ladujObrazekZCache(url) {
@@ -1989,7 +2300,7 @@
       else bezProbki.push(item);
     });
 
-    const ctx = ref.mikserCanvas.getContext("2d");
+    const ctx = ref.mikserCanvas.getContext("2d", { willReadFrequently: true });
     const szer = ref.mikserCanvas.width;
     const wys = ref.mikserCanvas.height;
 
@@ -2025,10 +2336,13 @@
       if (mojToken !== stan.tokenPodgladuOffline || !stan.mikserOtwarty) return;
       ctx.clearRect(0, 0, szer, wys);
 
-      const tempCanvas = document.createElement("canvas");
-      tempCanvas.width = szer;
-      tempCanvas.height = wys;
-      const tempCtx = tempCanvas.getContext("2d");
+      if (!stan.tempCanvasOffline || stan.tempCanvasOffline.width !== szer || stan.tempCanvasOffline.height !== wys) {
+        stan.tempCanvasOffline = document.createElement("canvas");
+        stan.tempCanvasOffline.width = szer;
+        stan.tempCanvasOffline.height = wys;
+        stan.tempCtxOffline = stan.tempCanvasOffline.getContext("2d", { willReadFrequently: true });
+      }
+      const tempCtx = stan.tempCtxOffline;
 
       const bledne = [];
       let czyCosNarysowano = false;
@@ -2122,6 +2436,9 @@
     ctx.restore();
   }
 
+  const MINIMAPA_SZER = 360;
+  const MINIMAPA_WYS = 290;
+
   function rysujMinimape(tymczasowyProstokat) {
     if (ref.minimapaBtnWyczyscZazn) {
       ref.minimapaBtnWyczyscZazn.hidden = !stan.zaznaczonyBbox;
@@ -2147,6 +2464,7 @@
     }
     odswiezOstrzezeniaMiksera();
     if (ref.minimapaInfo) {
+      const dotyk = jestDotykowy();
       let txt = czyPolaczonoZProgramem()
         ? (czyJestWybranyObszar()
             ? "Próbka (czerwona): " + stan.podgladLat.toFixed(4) + ", " + stan.podgladLon.toFixed(4)
@@ -2157,12 +2475,14 @@
         const bokKm = ((pxAuto * 360) / 1000).toFixed(1).replace(".", ",");
         txt += (czyPolaczonoZProgramem() ? " · Obszar dla MapoTero: ~" : ": ~") + bokKm + " km";
         if (!czyPolaczonoZProgramem()) {
-          txt += " (podgląd na żywo tego miejsca wymaga otwarcia galerii z MapoTero; tu widać stałą próbkę Tatr)";
+          txt += " (zapisze się w linku i pliku .mapotero)";
         } else if (pxAuto > MAKS_PIKSEL_DOPASOWANIA_BBOX) {
           txt += " (duży obszar — podgląd pokazuje detal w skali roboczej)";
         }
       } else if (stan.obszarProgramu && stan.obszarProgramu.maSiatke) {
         txt += " · Niebieska ramka: obszar z MapoTero";
+      } else if (dotyk) {
+        txt += " · Przesuwaj i przybliżaj dwoma palcami; wybierz „⬜ Zaznacz obszar”, aby narysować ramkę";
       } else {
         txt += czyPolaczonoZProgramem()
           ? " · Zaznacz prawym przyciskiem myszy (PPM) lub wybierz obszar w MapoTero"
@@ -2173,9 +2493,15 @@
 
     if (!ref.minimapaCanvas || stan.zakladkaMiksera !== "mapa") return;
     const canvas = ref.minimapaCanvas;
+    const dpr = typeof window !== "undefined" ? Math.min(2, window.devicePixelRatio || 1) : 1;
+    const szer = MINIMAPA_SZER;
+    const wys = MINIMAPA_WYS;
+    if (canvas.width !== Math.round(szer * dpr) || canvas.height !== Math.round(wys * dpr)) {
+      canvas.width = Math.round(szer * dpr);
+      canvas.height = Math.round(wys * dpr);
+    }
     const ctx = canvas.getContext("2d");
-    const szer = canvas.width;
-    const wys = canvas.height;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     const z = Math.max(5, Math.min(16, stan.mapaZoom));
 
     const centerTile = latLonDoKafelka(stan.mapaCenterLat, stan.mapaCenterLon, z);
@@ -2503,6 +2829,17 @@
     });
     sterowaniePodgladu.appendChild(btnZmienMiejsce);
 
+    const btnPodgladZwin = el("button", "gw-btn-prosty gw-mikser-btn-zwin-podglad", "▴ Ukryj podgląd");
+    btnPodgladZwin.type = "button";
+    btnPodgladZwin.setAttribute("aria-expanded", "true");
+    btnPodgladZwin.addEventListener("click", function () {
+      stan.podgladMikseraZwiniety = !stan.podgladMikseraZwiniety;
+      mikserModal.classList.toggle("gw-mikser-podglad-zwiniety", stan.podgladMikseraZwiniety);
+      btnPodgladZwin.textContent = stan.podgladMikseraZwiniety ? "▾ Pokaż podgląd" : "▴ Ukryj podgląd";
+      btnPodgladZwin.setAttribute("aria-expanded", stan.podgladMikseraZwiniety ? "false" : "true");
+    });
+    sterowaniePodgladu.appendChild(btnPodgladZwin);
+
     const mikserStanPodgladu = el("div", "gw-mikser-stan-podgladu", "");
 
     panelPodglad.appendChild(ramkaPodgladu);
@@ -2516,10 +2853,14 @@
     const grupaTryby = el("div", "gw-minimapa-grupa-btn");
     const btnTrybPrzesun = el("button", "aktywny", "🖐 Przesuń / Punkt");
     btnTrybPrzesun.type = "button";
-    btnTrybPrzesun.title = "Lewy: przesuwaj mapę lub kliknij punkt próbki. Prawy przycisk (PPM): od razu zaznacz obszar";
+    btnTrybPrzesun.title = jestDotykowy()
+      ? "Przesuwaj mapę palcem lub stuknij punkt próbki"
+      : "Lewy: przesuwaj mapę lub kliknij punkt próbki. Prawy przycisk (PPM): od razu zaznacz obszar";
     const btnTrybZaznacz = el("button", null, "⬜ Zaznacz obszar");
     btnTrybZaznacz.type = "button";
-    btnTrybZaznacz.title = "Zaznacz obszar lewym przyciskiem myszy (prawym przyciskiem zaznaczasz zawsze od razu)";
+    btnTrybZaznacz.title = jestDotykowy()
+      ? "Przeciągnij palcem po mapie, aby zaznaczyć prostokąt obszaru"
+      : "Zaznacz obszar lewym przyciskiem myszy (prawym przyciskiem zaznaczasz zawsze od razu)";
     const btnWyczyscZazn = el("button", null, "✕ Wyczyść");
     btnWyczyscZazn.type = "button";
     btnWyczyscZazn.title = "Usuń zaznaczony obszar";
@@ -2579,8 +2920,8 @@
 
     const minimapaWrap = el("div", "gw-minimapa-canvas-wrap");
     const minimapaCanvas = document.createElement("canvas");
-    minimapaCanvas.width = 360;
-    minimapaCanvas.height = 290;
+    minimapaCanvas.width = MINIMAPA_SZER;
+    minimapaCanvas.height = MINIMAPA_WYS;
     minimapaCanvas.className = "gw-minimapa-canvas tryb-przesun";
     minimapaWrap.appendChild(minimapaCanvas);
 
@@ -2589,27 +2930,81 @@
     function wspolrzedneCanvasaMapy(e) {
       const rect = minimapaCanvas.getBoundingClientRect();
       return {
-        x: ((e.clientX - rect.left) / rect.width) * minimapaCanvas.width,
-        y: ((e.clientY - rect.top) / rect.height) * minimapaCanvas.height
+        x: ((e.clientX - rect.left) / rect.width) * MINIMAPA_SZER,
+        y: ((e.clientY - rect.top) / rect.height) * MINIMAPA_WYS
       };
     }
 
     function pikselCanvasaNaGeo(pxX, pxY) {
       const c = latLonDoKafelka(stan.mapaCenterLat, stan.mapaCenterLon, stan.mapaZoom);
-      const tx = c.x + (pxX - minimapaCanvas.width / 2) / 256;
-      const ty = c.y + (pxY - minimapaCanvas.height / 2) / 256;
+      const tx = c.x + (pxX - MINIMAPA_SZER / 2) / 256;
+      const ty = c.y + (pxY - MINIMAPA_WYS / 2) / 256;
       return kafelekDoLatLon(tx, ty, stan.mapaZoom);
     }
 
+    function zglosRysowanieMinimapy(tymczasowyProstokat) {
+      if (tymczasowyProstokat) {
+        rysujMinimape(tymczasowyProstokat);
+        return;
+      }
+      if (stan.rafMinimapy || typeof requestAnimationFrame !== "function") {
+        if (typeof requestAnimationFrame !== "function") rysujMinimape();
+        return;
+      }
+      stan.rafMinimapy = requestAnimationFrame(function () {
+        stan.rafMinimapy = 0;
+        rysujMinimape();
+      });
+    }
+
+    const aktywneWskazniki = new Map();
     let gest = null;
+    let pinchStan = null;
+    let bylMultiTouchWGescie = false;
+
+    function odczytajParePinch() {
+      const iter = aktywneWskazniki.values();
+      const a = iter.next().value;
+      const b = iter.next().value;
+      if (!a || !b) return null;
+      return {
+        a: a,
+        b: b,
+        dystans: Math.hypot(b.x - a.x, b.y - a.y),
+        srodek: { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 }
+      };
+    }
+
     minimapaCanvas.addEventListener("contextmenu", function (e) {
       e.preventDefault();
     });
     minimapaCanvas.addEventListener("pointerdown", function (e) {
-      if (e.button !== 0 && e.button !== 2) return;
+      if (e.pointerType === "mouse" && e.button !== 0 && e.button !== 2) return;
       e.preventDefault();
-      minimapaCanvas.setPointerCapture(e.pointerId);
+      try {
+        minimapaCanvas.setPointerCapture(e.pointerId);
+      } catch (err) {
+        // Ignorujemy jeśli pointerCapture niedostępny
+      }
       const pt = wspolrzedneCanvasaMapy(e);
+      aktywneWskazniki.set(e.pointerId, pt);
+
+      if (aktywneWskazniki.size >= 2) {
+        bylMultiTouchWGescie = true;
+        gest = null;
+        minimapaCanvas.classList.remove("przeciaga");
+        const para = odczytajParePinch();
+        if (para) {
+          pinchStan = {
+            startDist: para.dystans,
+            prevMid: para.srodek
+          };
+        }
+        return;
+      }
+
+      bylMultiTouchWGescie = false;
+      pinchStan = null;
       const czyZaznaczanie = e.button === 2 || stan.mapaTryb === "zaznacz" || e.shiftKey;
       gest = {
         id: e.pointerId,
@@ -2626,8 +3021,37 @@
     });
 
     minimapaCanvas.addEventListener("pointermove", function (e) {
-      if (!gest || gest.id !== e.pointerId) return;
+      if (!aktywneWskazniki.has(e.pointerId)) return;
       const pt = wspolrzedneCanvasaMapy(e);
+      aktywneWskazniki.set(e.pointerId, pt);
+
+      if (aktywneWskazniki.size >= 2 && pinchStan) {
+        const para = odczytajParePinch();
+        if (!para) return;
+        const zoomPrzed = stan.mapaZoom;
+        const krok = obliczKrokPinch(pinchStan.startDist, para.dystans, zoomPrzed);
+        const nowyCenter = obliczNoweCentrumPoPinch(
+          stan.mapaCenterLat,
+          stan.mapaCenterLon,
+          zoomPrzed,
+          krok.nowyZoom,
+          pinchStan.prevMid,
+          para.srodek,
+          MINIMAPA_SZER,
+          MINIMAPA_WYS
+        );
+        stan.mapaZoom = krok.nowyZoom;
+        stan.mapaCenterLat = nowyCenter.lat;
+        stan.mapaCenterLon = nowyCenter.lon;
+        if (krok.zmieniono) {
+          pinchStan.startDist = para.dystans;
+        }
+        pinchStan.prevMid = para.srodek;
+        zglosRysowanieMinimapy();
+        return;
+      }
+
+      if (!gest || gest.id !== e.pointerId) return;
       const dx = pt.x - gest.startX;
       const dy = pt.y - gest.startY;
       if (Math.hypot(dx, dy) > 4) gest.przeciagano = true;
@@ -2641,19 +3065,54 @@
           );
           stan.mapaCenterLat = Math.max(-80, Math.min(80, nowyCenter.lat));
           stan.mapaCenterLon = Math.max(-179, Math.min(179, nowyCenter.lon));
-          rysujMinimape();
+          zglosRysowanieMinimapy();
         }
       } else {
         gest.aktX = pt.x;
         gest.aktY = pt.y;
-        rysujMinimape({ x1: gest.startX, y1: gest.startY, x2: gest.aktX, y2: gest.aktY });
+        zglosRysowanieMinimapy({ x1: gest.startX, y1: gest.startY, x2: gest.aktX, y2: gest.aktY });
       }
     });
 
     function zakonczGestMapy(e) {
-      if (!gest || gest.id !== e.pointerId) return;
+      const istnial = aktywneWskazniki.has(e.pointerId);
+      aktywneWskazniki.delete(e.pointerId);
+
+      if (pinchStan && aktywneWskazniki.size === 1) {
+        pinchStan = null;
+        const pozostalyWpis = aktywneWskazniki.entries().next().value;
+        if (pozostalyWpis) {
+          gest = {
+            id: pozostalyWpis[0],
+            przycisk: 0,
+            tryb: "przesun",
+            startX: pozostalyWpis[1].x,
+            startY: pozostalyWpis[1].y,
+            aktX: pozostalyWpis[1].x,
+            aktY: pozostalyWpis[1].y,
+            przeciagano: true,
+            startCenterTile: latLonDoKafelka(stan.mapaCenterLat, stan.mapaCenterLon, stan.mapaZoom)
+          };
+          minimapaCanvas.classList.add("przeciaga");
+        }
+        rysujMinimape();
+        return;
+      }
+
+      if (aktywneWskazniki.size === 0) {
+        pinchStan = null;
+      }
+
+      if (!gest || gest.id !== e.pointerId) {
+        if (istnial && aktywneWskazniki.size === 0) {
+          bylMultiTouchWGescie = false;
+        }
+        return;
+      }
       const aktGest = gest;
+      const bylMulti = bylMultiTouchWGescie;
       gest = null;
+      if (aktywneWskazniki.size === 0) bylMultiTouchWGescie = false;
       minimapaCanvas.classList.remove("przeciaga");
 
       const pt = wspolrzedneCanvasaMapy(e);
@@ -2685,13 +3144,16 @@
               zsynchronizujSelectSkali(wyborPx.piksel);
             }
           }
+          if (jestDotykowy() && stan.mapaTryb === "zaznacz") {
+            ustawTrybMapy("przesun");
+          }
           rysujMinimape();
           zglosOdswiezeniePodgladuMiksera(true);
           return;
         }
       }
 
-      if (!aktGest.przeciagano) {
+      if (!aktGest.przeciagano && !bylMulti) {
         const geo = pikselCanvasaNaGeo(pt.x, pt.y);
         stan.podgladLat = Math.round(geo.lat * 10000) / 10000;
         stan.podgladLon = Math.round(geo.lon * 10000) / 10000;
@@ -2714,8 +3176,8 @@
       stan.mapaZoom = nowyZoom;
       const poZoom = latLonDoKafelka(podKursorem.lat, podKursorem.lon, nowyZoom);
       const nowySrodek = kafelekDoLatLon(
-        poZoom.x - (pt.x - minimapaCanvas.width / 2) / 256,
-        poZoom.y - (pt.y - minimapaCanvas.height / 2) / 256,
+        poZoom.x - (pt.x - MINIMAPA_SZER / 2) / 256,
+        poZoom.y - (pt.y - MINIMAPA_WYS / 2) / 256,
         nowyZoom
       );
       stan.mapaCenterLat = Math.max(-80, Math.min(80, nowySrodek.lat));
@@ -2803,6 +3265,7 @@
       tabMapa.setAttribute("aria-selected", czyMapa ? "true" : "false");
       panelPodglad.hidden = czyMapa;
       minimapaBox.hidden = !czyMapa;
+      mikserModal.classList.toggle("gw-mikser-tryb-mapa", czyMapa);
       if (czyMapa) rysujMinimape();
     }
 
@@ -2976,6 +3439,27 @@
         });
     });
 
+    let btnUdostepnij = null;
+    if (typeof navigator !== "undefined" && typeof navigator.share === "function") {
+      btnUdostepnij = el("button", czyPolaczonoZProgramem() ? "gw-btn-prosty" : "gw-btn-glowny", "📤 Udostępnij");
+      btnUdostepnij.type = "button";
+      btnUdostepnij.title = "Wyślij link do tego miksu przez aplikację w telefonie (np. na komputer)";
+      btnUdostepnij.addEventListener("click", function () {
+        const link = zbudujLinkUdostepniania();
+        navigator.share({
+          title: (stan.nazwaKanapki || "Kompozycja map MapoTero").trim(),
+          text: "Zestaw warstw MapoTero (" + odmienWarstwy(stan.kanapka.length) + "):",
+          url: link
+        }).catch(function (err) {
+          if (err && err.name === "AbortError") return;
+          kopiujTekstDoSchowka(link).then(function () {
+            pokazStatusMiksera("Skopiowano link do udostępnienia tego miksu.", false);
+          }).catch(function () {});
+        });
+      });
+      akcjeZapasowe.appendChild(btnUdostepnij);
+    }
+
     akcjeZapasowe.appendChild(btnPobierzPlik);
     akcjeZapasowe.appendChild(btnKopiujLink);
     akcjeZapasowe.appendChild(btnKopiujJson);
@@ -2997,7 +3481,13 @@
     } else {
       sekcjaEksport.appendChild(akcjeZapasowe);
       sekcjaEksport.appendChild(
-        el("p", "gw-mikser-podpowiedz-offline", "Przeciągnij pobrany plik .mapotero bezpośrednio na okno programu MapoTero.")
+        el(
+          "p",
+          "gw-mikser-podpowiedz-offline",
+          jestDotykowy()
+            ? "Wyślij link na komputer („Udostępnij” lub „Kopiuj link”) albo zapisz plik .mapotero i otwórz go w MapoTero."
+            : "Przeciągnij pobrany plik .mapotero bezpośrednio na okno programu MapoTero."
+        )
       );
     }
     sekcjaEksport.appendChild(statusWysylki);
@@ -3051,6 +3541,7 @@
       mikserBtnWyslijGlowne: btnWyslijGlowne,
       mikserBtnWyslijKreator: btnWyslijKreator,
       mikserBtnPobierzPlik: btnPobierzPlik,
+      mikserBtnUdostepnij: btnUdostepnij,
       mikserBtnKopiujLink: btnKopiujLink,
       mikserBtnKopiujJson: btnKopiujJson,
       mikserStatusWysylki: statusWysylki
@@ -3059,6 +3550,7 @@
 
   function zbudujInterfejs() {
     kontener.innerHTML = "";
+    stan.cacheKartDom.clear();
 
     const panel = el("div", "gw-panel-filtrow");
     const wierszGorny = el("div", "gw-wiersz-gorny");
@@ -3068,11 +3560,37 @@
     szukaj.className = "gw-szukaj";
     szukaj.placeholder = "Szukaj warstwy, zbioru lub źródła (np. orto, BDOT, WIG)…";
     szukaj.value = stan.szukaj;
-    szukaj.setAttribute("aria-label", "Szukaj warstwy");
+    szukaj.setAttribute("aria-label", "Szukaj warstwy w galerii");
     szukaj.addEventListener("input", function () {
+      stan.szukaj = szukaj.value;
+      if (stan.timerSzukania) clearTimeout(stan.timerSzukania);
+      stan.timerSzukania = setTimeout(function () {
+        stan.timerSzukania = null;
+        renderujSiatke();
+      }, 150);
+    });
+    szukaj.addEventListener("search", function () {
+      if (stan.timerSzukania) {
+        clearTimeout(stan.timerSzukania);
+        stan.timerSzukania = null;
+      }
       stan.szukaj = szukaj.value;
       renderujSiatke();
     });
+    szukaj.addEventListener("keydown", function (e) {
+      if (e.key === "Enter") {
+        if (stan.timerSzukania) {
+          clearTimeout(stan.timerSzukania);
+          stan.timerSzukania = null;
+        }
+        stan.szukaj = szukaj.value;
+        renderujSiatke();
+      }
+    });
+
+    const btnFiltryMobile = el("button", "gw-btn-filtry-mobile", "Filtry");
+    btnFiltryMobile.type = "button";
+    btnFiltryMobile.setAttribute("aria-expanded", stan.filtryMobileOtwarte ? "true" : "false");
 
     const selectGrupa = document.createElement("select");
     selectGrupa.className = "gw-select-grupa";
@@ -3099,8 +3617,15 @@
     });
 
     wierszGorny.appendChild(szukaj);
+    wierszGorny.appendChild(btnFiltryMobile);
     wierszGorny.appendChild(selectGrupa);
     panel.appendChild(wierszGorny);
+
+    const filtryRozwijane = el("div", "gw-filtry-rozwijane");
+    btnFiltryMobile.addEventListener("click", function () {
+      stan.filtryMobileOtwarte = !stan.filtryMobileOtwarte;
+      odswiezPrzyciskFiltrowMobile();
+    });
 
     const wierszDolny = el("div", "gw-wiersz-dolny");
     const pigulkiKontener = el("div", "gw-grupy-pigulek");
@@ -3164,9 +3689,60 @@
 
     wierszDolny.appendChild(pigulkiKontener);
     wierszDolny.appendChild(prawaNarzedzia);
-    panel.appendChild(wierszDolny);
+    filtryRozwijane.appendChild(wierszDolny);
+    panel.appendChild(filtryRozwijane);
 
-    const wyniki = el("div");
+    // Pasek szybkich skrótów grup tematycznych (wygodny na mobile)
+    const pasekGrup = el("div", "gw-pasek-grup");
+    pasekGrup.setAttribute("role", "navigation");
+    pasekGrup.setAttribute("aria-label", "Grupy tematyczne");
+    const chipWszystkie = el("button", "gw-chip-grupa aktywny", "Wszystkie");
+    chipWszystkie.type = "button";
+    chipWszystkie.setAttribute("data-grupa", "WSZYSTKIE");
+    pasekGrup.appendChild(chipWszystkie);
+    unikalneGrupy.forEach(function (g) {
+      const chip = el("button", "gw-chip-grupa", g);
+      chip.type = "button";
+      chip.setAttribute("data-grupa", g);
+      pasekGrup.appendChild(chip);
+    });
+    pasekGrup.addEventListener("click", function (e) {
+      const btn = e.target.closest("button[data-grupa]");
+      if (!btn) return;
+      const g = btn.getAttribute("data-grupa") || "WSZYSTKIE";
+      stan.grupa = g;
+      selectGrupa.value = g;
+      renderujSiatke();
+    });
+
+    const wyniki = el("div", "gw-wyniki");
+    wyniki.addEventListener("click", function (e) {
+      const btnKanapka = e.target.closest(".gw-btn-kanapka");
+      const karta = e.target.closest(".gw-karta");
+      if (!karta) return;
+      const w = stan.warstwaPoId.get(karta.getAttribute("data-id") || "");
+      if (btnKanapka) {
+        e.stopPropagation();
+        if (w) przelaczWarstweWKanapce(w);
+        return;
+      }
+      const btnDodaj = e.target.closest(".gw-btn-dodaj");
+      if (btnDodaj) {
+        e.stopPropagation();
+        if (w) wyslijDoMapoTero(w, btnDodaj);
+        return;
+      }
+      const idx = parseInt(karta.getAttribute("data-indeks") || "-1", 10);
+      if (idx >= 0) otworzModal(idx);
+    });
+    wyniki.addEventListener("keydown", function (e) {
+      if (e.key !== "Enter" && e.key !== " ") return;
+      const karta = e.target.closest(".gw-karta");
+      if (!karta || e.target !== karta) return;
+      e.preventDefault();
+      const idx = parseInt(karta.getAttribute("data-indeks") || "-1", 10);
+      if (idx >= 0) otworzModal(idx);
+    });
 
     // Modal pojedynczej warstwy
     const modalTlo = el("div", "gw-modal-tlo");
@@ -3178,6 +3754,18 @@
     });
 
     const modal = el("div", "gw-modal");
+
+    // Stały pasek górny na mobile (tytuł + Zamknij zawsze widoczne u góry ekranu)
+    const modalMobileTop = el("div", "gw-modal-mobile-top");
+    const modalMobileTytul = el("span", "gw-modal-mobile-tytul");
+    const modalZamknijMobile = el("button", "gw-modal-zamknij", "×");
+    modalZamknijMobile.type = "button";
+    modalZamknijMobile.setAttribute("aria-label", "Zamknij podgląd");
+    modalZamknijMobile.addEventListener("click", function () { zamknijModal(); });
+    modalMobileTop.appendChild(modalMobileTytul);
+    modalMobileTop.appendChild(modalZamknijMobile);
+
+    const modalCialo = el("div", "gw-modal-cialo");
     const modalObrazKol = el("div", "gw-modal-obraz-kol");
 
     const modalTabs = el("div", "gw-modal-tabs");
@@ -3227,6 +3815,35 @@
     tabProbka.addEventListener("click", function () { przelaczWidokModala("probka"); });
     tabZasieg.addEventListener("click", function () { przelaczWidokModala("zasieg"); });
 
+    // Gest swipe lewo/prawo na podglądzie w modalu pojedynczej warstwy
+    let swipeStart = null;
+    modalObrazKol.addEventListener("touchstart", function (e) {
+      if (e.touches.length !== 1) {
+        swipeStart = null;
+        return;
+      }
+      swipeStart = {
+        x: e.touches[0].clientX,
+        y: e.touches[0].clientY,
+        czas: Date.now()
+      };
+    }, { passive: true });
+    modalObrazKol.addEventListener("touchend", function (e) {
+      if (!swipeStart || e.changedTouches.length !== 1) return;
+      const t = e.changedTouches[0];
+      const kierunek = wykryjKierunekSwipe(
+        t.clientX - swipeStart.x,
+        t.clientY - swipeStart.y,
+        Date.now() - swipeStart.czas
+      );
+      swipeStart = null;
+      if (kierunek === "nastepna" && stan.indeksModala < stan.widoczne.length - 1) {
+        otworzModal(stan.indeksModala + 1, true);
+      } else if (kierunek === "poprzednia" && stan.indeksModala > 0) {
+        otworzModal(stan.indeksModala - 1, true);
+      }
+    }, { passive: true });
+
     modalObrazKol.appendChild(modalTabs);
     modalObrazKol.appendChild(modalPanelProbka);
     modalObrazKol.appendChild(modalPanelZasieg);
@@ -3237,7 +3854,7 @@
     const modalZamknij = el("button", "gw-modal-zamknij", "×");
     modalZamknij.type = "button";
     modalZamknij.setAttribute("aria-label", "Zamknij podgląd");
-    modalZamknij.addEventListener("click", zamknijModal);
+    modalZamknij.addEventListener("click", function () { zamknijModal(); });
     modalNaglowek.appendChild(modalTytul);
     modalNaglowek.appendChild(modalZamknij);
 
@@ -3262,7 +3879,7 @@
     modalOtworzMikser.hidden = stan.kanapka.length === 0;
     modalOtworzMikser.title = "Przejdź bezpośrednio do Miksera warstw, aby ułożyć kolejność i krycie";
     modalOtworzMikser.addEventListener("click", function () {
-      zamknijModal();
+      zamknijModal(true);
       otworzMikser();
     });
     modalLinki.appendChild(modalOtworzMikser);
@@ -3299,21 +3916,43 @@
         });
     });
 
+    const modalKopiujLink = el("button", "gw-btn-prosty", "🔗 Link");
+    modalKopiujLink.type = "button";
+    modalKopiujLink.title = "Skopiuj bezpośredni link do tej warstwy";
+    modalKopiujLink.addEventListener("click", function () {
+      const w = stan.widoczne[stan.indeksModala];
+      if (!w) return;
+      kopiujTekstDoSchowka(zbudujLinkWarstwy(w))
+        .then(function () {
+          modalKopiujLink.textContent = "Skopiowano!";
+          setTimeout(function () {
+            modalKopiujLink.textContent = "🔗 Link";
+          }, 1400);
+        })
+        .catch(function () {
+          modalKopiujLink.textContent = "Błąd schowka";
+          setTimeout(function () {
+            modalKopiujLink.textContent = "🔗 Link";
+          }, 1400);
+        });
+    });
+
     const linkKatalog = el("a", "gw-btn-prosty", "Katalog zbiorów");
     linkKatalog.href = zbioryUrl;
     modalLinki.appendChild(modalKopiuj);
+    modalLinki.appendChild(modalKopiujLink);
     modalLinki.appendChild(linkKatalog);
 
     const nawigacja = el("div", "gw-modal-nawigacja");
     const modalPoprz = el("button", "gw-btn-prosty", "← Poprzednia");
     modalPoprz.type = "button";
     modalPoprz.addEventListener("click", function () {
-      otworzModal(stan.indeksModala - 1);
+      otworzModal(stan.indeksModala - 1, true);
     });
     const modalNast = el("button", "gw-btn-prosty", "Następna →");
     modalNast.type = "button";
     modalNast.addEventListener("click", function () {
-      otworzModal(stan.indeksModala + 1);
+      otworzModal(stan.indeksModala + 1, true);
     });
     nawigacja.appendChild(modalPoprz);
     nawigacja.appendChild(modalNast);
@@ -3326,8 +3965,50 @@
     modalInfoKol.appendChild(modalTabela);
     modalInfoKol.appendChild(modalAkcje);
 
-    modal.appendChild(modalObrazKol);
-    modal.appendChild(modalInfoKol);
+    modalCialo.appendChild(modalObrazKol);
+    modalCialo.appendChild(modalInfoKol);
+
+    // Stała dolna belka nawigacji na mobile
+    const modalMobileStopka = el("div", "gw-modal-mobile-stopka");
+    const modalMobilePoprz = el("button", "gw-btn-prosty gw-modal-mobile-nav", "←");
+    modalMobilePoprz.type = "button";
+    modalMobilePoprz.setAttribute("aria-label", "Poprzednia warstwa");
+    modalMobilePoprz.addEventListener("click", function () {
+      otworzModal(stan.indeksModala - 1, true);
+    });
+
+    const modalMobileKanapka = el("button", "gw-btn-kanapka gw-modal-mobile-miks", "☐ Dodaj do miksu");
+    modalMobileKanapka.type = "button";
+    modalMobileKanapka.addEventListener("click", function () {
+      const w = stan.widoczne[stan.indeksModala];
+      if (w) przelaczWarstweWKanapce(w);
+    });
+
+    let modalMobileDodaj = null;
+    if (czyPolaczonoZProgramem()) {
+      modalMobileDodaj = el("button", "gw-btn-dodaj-modal", "Wyślij");
+      modalMobileDodaj.type = "button";
+      modalMobileDodaj.addEventListener("click", function () {
+        const w = stan.widoczne[stan.indeksModala];
+        if (w) wyslijDoMapoTero(w, modalMobileDodaj);
+      });
+    }
+
+    const modalMobileNast = el("button", "gw-btn-prosty gw-modal-mobile-nav", "→");
+    modalMobileNast.type = "button";
+    modalMobileNast.setAttribute("aria-label", "Następna warstwa");
+    modalMobileNast.addEventListener("click", function () {
+      otworzModal(stan.indeksModala + 1, true);
+    });
+
+    modalMobileStopka.appendChild(modalMobilePoprz);
+    modalMobileStopka.appendChild(modalMobileKanapka);
+    if (modalMobileDodaj) modalMobileStopka.appendChild(modalMobileDodaj);
+    modalMobileStopka.appendChild(modalMobileNast);
+
+    modal.appendChild(modalMobileTop);
+    modal.appendChild(modalCialo);
+    modal.appendChild(modalMobileStopka);
     modalTlo.appendChild(modal);
 
     const mikserUi = zbudujMikserUi();
@@ -3339,8 +4020,16 @@
       }
       if (modalTlo.hidden) return;
       if (e.key === "Escape") zamknijModal();
-      else if (e.key === "ArrowLeft" && stan.indeksModala > 0) otworzModal(stan.indeksModala - 1);
-      else if (e.key === "ArrowRight" && stan.indeksModala < stan.widoczne.length - 1) otworzModal(stan.indeksModala + 1);
+      else if (e.key === "ArrowLeft" && stan.indeksModala > 0) otworzModal(stan.indeksModala - 1, true);
+      else if (e.key === "ArrowRight" && stan.indeksModala < stan.widoczne.length - 1) otworzModal(stan.indeksModala + 1, true);
+    });
+
+    window.addEventListener("popstate", function () {
+      if (stan.mikserOtwarty) {
+        zamknijMikser(true);
+      } else if (stan.indeksModala >= 0) {
+        zamknijModal(true);
+      }
     });
 
     let pasekMapoTero = null;
@@ -3374,6 +4063,7 @@
     }
 
     kontener.appendChild(panel);
+    kontener.appendChild(pasekGrup);
     kontener.appendChild(wyniki);
     kontener.appendChild(mikserUi.mikserDok);
     kontener.appendChild(modalTlo);
@@ -3393,10 +4083,16 @@
 
     ref = Object.assign({
       pasekMapoTero: pasekMapoTero,
+      btnFiltryMobile: btnFiltryMobile,
+      filtryRozwijane: filtryRozwijane,
+      pasekGrup: pasekGrup,
       licznik: licznik,
       btnReset: btnReset,
       wyniki: wyniki,
       modalTlo: modalTlo,
+      modalCialo: modalCialo,
+      modalMobileTytul: modalMobileTytul,
+      modalZamknijMobile: modalZamknijMobile,
       modalObrazKol: modalObrazKol,
       modalPanelProbka: modalPanelProbka,
       modalPanelZasieg: modalPanelZasieg,
@@ -3410,15 +4106,29 @@
       modalOtworzMikser: modalOtworzMikser,
       modalDodaj: modalDodaj,
       modalKopiuj: modalKopiuj,
+      modalKopiujLink: modalKopiujLink,
       modalPoprz: modalPoprz,
       modalNast: modalNast,
-      modalZamknij: modalZamknij
+      modalZamknij: modalZamknij,
+      modalMobileKanapka: modalMobileKanapka,
+      modalMobileDodaj: modalMobileDodaj,
+      modalMobilePoprz: modalMobilePoprz,
+      modalMobileNast: modalMobileNast
     }, mikserUi);
 
     renderujSiatke();
     odswiezDokKanapki();
     if (stan.mikserOtwarty) {
       otworzMikser();
+    } else if (stan.warstwaUrlStart) {
+      const cel = stan.warstwaUrlStart.toLowerCase();
+      const idxWarstwy = stan.widoczne.findIndex(function (w) {
+        const id = (w.id || (w.zbior + "__" + w.warstwa)).toLowerCase();
+        return id === cel;
+      });
+      if (idxWarstwy >= 0) {
+        otworzModal(idxWarstwy, true);
+      }
     }
   }
 
@@ -3432,6 +4142,10 @@
     .then(function (dane) {
       stan.dane = dane;
       stan.warstwy = Array.isArray(dane.warstwy) ? dane.warstwy : [];
+      stan.warstwaPoId = new Map();
+      stan.warstwy.forEach(function (w) {
+        stan.warstwaPoId.set(w.id || (w.zbior + "__" + w.warstwa), w);
+      });
       wczytajKanapkePoczatkowa();
       zbudujInterfejs();
     })

@@ -5,6 +5,12 @@
   box-sizing: border-box;
 }
 
+html.gw-bez-scrolla,
+body.gw-bez-scrolla {
+  overflow: hidden !important;
+  overscroll-behavior: none;
+}
+
 /* Neutralizacja globalnych stylów obrazów i linków z motywu Just the Docs (head_custom.html) */
 #galeria-warstw-app img {
   margin: 0 !important;
@@ -45,14 +51,49 @@
   border: 1px solid #e6e1e8;
   border-radius: 6px;
   padding: 0.9rem 1rem;
-  margin: 1.25rem 0;
+  margin: 1.25rem 0 0.85rem;
   box-shadow: 0 4px 12px rgba(39, 38, 43, 0.06);
   display: flex;
   flex-direction: column;
   gap: 0.65rem;
 }
 
-@media (max-height: 550px), (max-width: 600px) {
+.gw-btn-filtry-mobile {
+  display: none;
+  border: 1px solid #d5d0d8;
+  background: #ffffff;
+  color: #27262b;
+  border-radius: 4px;
+  padding: 0 0.8rem;
+  min-height: 44px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.gw-btn-filtry-mobile.ma-aktywne {
+  border-color: #7253ed;
+  color: #5b3fd4;
+  background: #f5f3ff;
+}
+
+.gw-btn-filtry-mobile.otwarte {
+  background: #7253ed;
+  border-color: #7253ed;
+  color: #ffffff;
+}
+
+.gw-filtry-rozwijane {
+  display: block;
+}
+
+.gw-pasek-grup {
+  display: none;
+}
+
+@media (max-height: 480px) {
   .gw-panel-filtrow {
     position: static;
     box-shadow: none;
@@ -176,6 +217,8 @@
 
 .gw-sekcja-grupy {
   margin-top: 2rem;
+  content-visibility: auto;
+  contain-intrinsic-size: auto 320px;
 }
 
 .gw-naglowek-grupy {
@@ -243,9 +286,15 @@
   transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
 }
 
-.gw-karta:hover,
+@media (hover: hover) and (pointer: fine) {
+  .gw-karta:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 14px rgba(39, 38, 43, 0.1);
+    border-color: #7253ed;
+  }
+}
+
 .gw-karta:focus-visible {
-  transform: translateY(-2px);
   box-shadow: 0 4px 14px rgba(39, 38, 43, 0.1);
   border-color: #7253ed;
   outline: none;
@@ -390,19 +439,25 @@
   border-radius: 8px;
   max-width: 860px;
   width: 100%;
-  max-height: 92vh;
+  max-height: 92dvh;
   box-shadow: 0 18px 48px rgba(0, 0, 0, 0.35);
-  display: grid;
-  grid-template-columns: minmax(300px, 1.05fr) 1fr;
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
+  overscroll-behavior: contain;
 }
 
-@media (max-width: 768px) {
-  .gw-modal {
-    grid-template-columns: 1fr;
-    max-height: 94vh;
-    overflow-y: auto;
-  }
+.gw-modal-mobile-top,
+.gw-modal-mobile-stopka {
+  display: none;
+}
+
+.gw-modal-cialo {
+  display: grid;
+  grid-template-columns: minmax(300px, 1.05fr) 1fr;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .gw-modal-obraz-kol {
@@ -413,14 +468,6 @@
   border-right: 1px solid #e6e1e8;
   overflow-y: auto;
   min-height: 380px;
-}
-
-@media (max-width: 768px) {
-  .gw-modal-obraz-kol {
-    border-right: none;
-    border-bottom: 1px solid #e6e1e8;
-    overflow-y: visible;
-  }
 }
 
 .gw-modal-tabs {
@@ -1798,7 +1845,484 @@
   color: #991b1b;
 }
 
+.gw-mikser-btn-zwin-podglad {
+  display: none;
+}
+
+.gw-mikser-btn-usun {
+  margin-left: 0.35rem;
+}
+
+.gw-mikser-btn-krok {
+  border: 1px solid #d5d0d8;
+  background: #f5f6fa;
+  color: #27262b;
+  border-radius: 4px;
+  min-width: 2rem;
+  min-height: 2rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.gw-mikser-btn-krok:hover {
+  border-color: #7253ed;
+  color: #7253ed;
+}
+
+.gw-mikser-suwak-etykieta {
+  font-size: 0.78rem;
+  color: #5c5962;
+  white-space: nowrap;
+}
+
+.gw-btn-cofnij {
+  margin-left: 0.45rem;
+  font-weight: 600;
+}
+
 .gw-mikser-status-wysylki[hidden] {
   display: none;
+}
+
+/* === RESPONSYWNOŚĆ MOBILE I DOTYK === */
+@media (max-width: 860px) {
+  .gw-mikser-modal-tlo {
+    padding: 0;
+    align-items: stretch;
+  }
+
+  .gw-mikser-modal {
+    max-width: 100%;
+    height: 100dvh;
+    max-height: 100dvh;
+    border-radius: 0;
+  }
+
+  .gw-mikser-naglowek {
+    padding: 0.6rem 0.85rem;
+  }
+
+  .gw-mikser-podtytul {
+    display: none;
+  }
+
+  .gw-mikser-wskazowka-polaczenie {
+    display: none;
+  }
+
+  .gw-mikser-cialo {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+    padding: 0.6rem 0.75rem;
+    gap: 0.6rem;
+  }
+
+  .gw-mikser-kol-podglad {
+    flex: 0 0 auto;
+    gap: 0.4rem;
+  }
+
+  .gw-mikser-ramka-podgladu {
+    max-width: min(220px, 28dvh);
+    margin: 0 auto;
+  }
+
+  .gw-mikser-btn-zwin-podglad {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .gw-mikser-modal.gw-mikser-podglad-zwiniety .gw-mikser-ramka-podgladu,
+  .gw-mikser-modal.gw-mikser-podglad-zwiniety .gw-mikser-stan-podgladu {
+    display: none;
+  }
+
+  .gw-mikser-stan-podgladu {
+    font-size: 0.74rem;
+    padding: 0.3rem 0.5rem;
+  }
+
+  .gw-mikser-modal.gw-mikser-tryb-mapa .gw-mikser-kol-podglad {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding-bottom: calc(0.75rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  .gw-mikser-modal.gw-mikser-tryb-mapa .gw-mikser-kol-lista {
+    display: none;
+  }
+
+  .gw-mikser-kol-lista {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: calc(0.85rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  .gw-mikser-warstwy {
+    max-height: none;
+    overflow-y: visible;
+    padding-right: 0;
+  }
+
+  .gw-minimapa-canvas-wrap {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  #galeria-warstw-app input[type="search"],
+  #galeria-warstw-app input[type="text"],
+  #galeria-warstw-app select {
+    font-size: 16px;
+  }
+
+  .gw-pasek-grup {
+    display: flex;
+    gap: 0.4rem;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding: 0.2rem 0 0.45rem;
+    margin: 0 -0.25rem 0.45rem;
+    scroll-snap-type: x proximity;
+  }
+
+  .gw-pasek-grup::-webkit-scrollbar {
+    display: none;
+  }
+
+  .gw-chip-grupa {
+    flex: 0 0 auto;
+    scroll-snap-align: start;
+    border: 1px solid #d5d0d8;
+    background: #ffffff;
+    color: #27262b;
+    border-radius: 999px;
+    padding: 0.45rem 0.85rem;
+    min-height: 40px;
+    font-size: 0.84rem;
+    font-weight: 500;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+
+  .gw-chip-grupa.aktywny {
+    background: #7253ed;
+    border-color: #7253ed;
+    color: #ffffff;
+    font-weight: 600;
+  }
+
+  .gw-modal-tlo {
+    padding: 0;
+    align-items: stretch;
+  }
+
+  .gw-modal {
+    max-width: 100%;
+    height: 100dvh;
+    max-height: 100dvh;
+    border-radius: 0;
+  }
+
+  .gw-modal-mobile-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.65rem;
+    padding: 0.65rem 0.85rem;
+    border-bottom: 1px solid #e6e1e8;
+    background: #f8fafc;
+    flex-shrink: 0;
+  }
+
+  .gw-modal-mobile-tytul {
+    font-size: 0.98rem;
+    font-weight: 700;
+    color: #0f172a;
+    line-height: 1.25;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
+  }
+
+  .gw-modal-mobile-top .gw-modal-zamknij {
+    min-width: 42px;
+    min-height: 42px;
+    font-size: 1.4rem;
+  }
+
+  .gw-modal-cialo {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .gw-modal-obraz-kol {
+    min-height: 0;
+    border-right: none;
+    border-bottom: 1px solid #e6e1e8;
+    overflow: visible;
+    flex-shrink: 0;
+  }
+
+  .gw-modal-tab {
+    flex: 1 1 0;
+    justify-content: center;
+    min-height: 42px;
+    font-size: 0.84rem;
+  }
+
+  .gw-modal-panel-probka,
+  .gw-modal-panel-zasieg {
+    min-height: 0;
+    padding: 0.65rem;
+  }
+
+  .gw-modal-panel-probka img {
+    max-height: 40dvh;
+    width: auto;
+    max-width: 100%;
+  }
+
+  .gw-zasieg-svg {
+    max-height: 36dvh;
+  }
+
+  .gw-modal-info-kol {
+    padding: 0.85rem;
+    gap: 0.6rem;
+  }
+
+  .gw-modal-info-kol > .gw-modal-naglowek {
+    display: none;
+  }
+
+  .gw-modal-info-kol > .gw-modal-akcje .gw-modal-nawigacja,
+  .gw-modal-info-kol > .gw-modal-akcje .gw-btn-kanapka,
+  .gw-modal-info-kol > .gw-modal-akcje .gw-btn-dodaj-modal {
+    display: none;
+  }
+
+  .gw-modal-mobile-stopka {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.6rem 0.75rem calc(0.6rem + env(safe-area-inset-bottom, 0px));
+    border-top: 1px solid #e6e1e8;
+    background: #ffffff;
+    flex-shrink: 0;
+  }
+
+  .gw-modal-mobile-nav {
+    min-width: 48px;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.05rem;
+    font-weight: 700;
+  }
+
+  .gw-modal-mobile-miks {
+    flex: 1 1 auto;
+    min-height: 44px;
+    font-size: 0.88rem;
+  }
+
+  .gw-modal-mobile-stopka .gw-btn-dodaj-modal {
+    min-height: 44px;
+    padding: 0 0.85rem;
+  }
+
+  .gw-btn-prosty,
+  .gw-btn-glowny,
+  .gw-btn-zielony {
+    min-height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .gw-mikser-przyciski-kolejnosci button {
+    min-width: 2.35rem;
+    min-height: 2.35rem;
+    font-size: 0.9rem;
+  }
+
+  .gw-mikser-btn-krok {
+    min-width: 2.4rem;
+    min-height: 2.4rem;
+  }
+
+  .gw-minimapa-narzedzia button,
+  .gw-minimapa-skroty button {
+    min-height: 38px;
+    padding: 0.35rem 0.65rem;
+    font-size: 0.82rem;
+  }
+
+  .gw-mikser-suwak-grupa input[type="range"] {
+    height: 28px;
+  }
+}
+
+@media (max-width: 600px) {
+  .gw-panel-filtrow {
+    top: 0;
+    padding: 0.6rem 0.65rem;
+    margin: 0.75rem 0 0.55rem;
+    gap: 0.5rem;
+  }
+
+  .gw-wiersz-gorny {
+    flex-wrap: nowrap;
+    gap: 0.45rem;
+  }
+
+  .gw-szukaj {
+    min-width: 0;
+    flex: 1 1 auto;
+    min-height: 44px;
+  }
+
+  .gw-btn-filtry-mobile {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .gw-wiersz-gorny .gw-select-grupa {
+    display: none;
+  }
+
+  .gw-filtry-rozwijane {
+    display: none;
+    border-top: 1px solid #e6e1e8;
+    padding-top: 0.6rem;
+  }
+
+  .gw-filtry-rozwijane.otwarte {
+    display: block;
+  }
+
+  .gw-btn-filtr {
+    min-height: 38px;
+    padding: 0.35rem 0.75rem;
+    font-size: 0.84rem;
+  }
+
+  .gw-siatka {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.6rem;
+  }
+
+  .gw-siatka.gw-siatka-duza {
+    grid-template-columns: 1fr;
+    gap: 0.85rem;
+  }
+
+  .gw-siatka:not(.gw-siatka-duza) .gw-tresc-karty {
+    padding: 0.5rem 0.55rem 0.55rem;
+  }
+
+  .gw-siatka:not(.gw-siatka-duza) .gw-nazwa-warstwy {
+    font-size: 0.82rem;
+    line-height: 1.25;
+  }
+
+  .gw-siatka:not(.gw-siatka-duza) .gw-meta-karty {
+    font-size: 0.71rem;
+  }
+
+  .gw-siatka:not(.gw-siatka-duza) .gw-odznaka {
+    font-size: 0.62rem;
+    padding: 0.12rem 0.35rem;
+  }
+
+  .gw-siatka:not(.gw-siatka-duza) .gw-odznaka-zasieg {
+    display: none;
+  }
+
+  .gw-akcje-karty {
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+
+  .gw-btn-kanapka,
+  .gw-akcje-karty .gw-btn-dodaj {
+    min-height: 40px;
+    font-size: 0.78rem;
+    padding: 0.35rem 0.45rem;
+  }
+
+  .gw-mikser-dok {
+    bottom: calc(0.45rem + env(safe-area-inset-bottom, 0px));
+    padding: 0.5rem 0.65rem;
+    gap: 0.45rem;
+    flex-wrap: nowrap;
+  }
+
+  .gw-mikser-dok-info > strong,
+  .gw-mikser-dok-opis,
+  .gw-mikser-dok-akcje-pelne {
+    display: none;
+  }
+
+  .gw-mikser-dok.pusty {
+    width: fit-content;
+    margin-left: auto;
+    padding: 0.4rem 0.6rem;
+  }
+
+  .gw-mikser-dok.pusty .gw-mikser-badge {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .gw-modal-tabela,
+  .gw-modal-tabela tbody,
+  .gw-modal-tabela tr,
+  .gw-modal-tabela th,
+  .gw-modal-tabela td {
+    display: block;
+    width: 100%;
+  }
+
+  .gw-modal-tabela tr {
+    padding: 0.4rem 0;
+    border-bottom: 1px solid #eeebee;
+  }
+
+  .gw-modal-tabela th,
+  .gw-modal-tabela td {
+    border-bottom: none;
+    padding: 0.1rem 0;
+    overflow-wrap: anywhere;
+  }
+
+  .gw-modal-tabela th {
+    font-size: 0.74rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
 }
 
