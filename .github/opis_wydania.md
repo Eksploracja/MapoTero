@@ -13,6 +13,16 @@ Ustawienia i zbiory map z poprzednich wersji (plik `lastsettings.txt`, folder `w
 
 ## Zmiany w wersji 3.19
 
+* **Czytelniejsze okno główne i eksport z wyborem pliku (poprawka 3.19, 25.11.2026):**
+  * Gdy pobieranie nie może się zacząć (brak warstwy, obszaru, zbyt wiele segmentów), karta *Stan sesji* pokazuje powód na czerwono - dawniej opis trafiał tylko do zakładki *Komunikaty*.
+  * Okno *Eksport mapy* ma pole **Plik wynikowy**: domyślna nazwa pochodzi od sesji (zamiast `_eksport_6x6`), przycisk *Zmień...* pozwala wybrać nazwę i folder, a przed zastąpieniem istniejącego pliku program pyta o zgodę. Okno pamięta ostatnio wybrany format.
+  * Przycisk *Eksportuj pobraną mapę…* jest widoczny także po pobraniu z brakami (eksport z białymi polami).
+  * Karta *Parametry segmentów* pozwala wybrać format pobieranych segmentów (JPEG albo PNG z przezroczystością).
+  * Menu *Sesja pobierania* w kolejności pracy: *Nowa sesja* (`Ctrl+N`), *Otwórz sesję* (`Ctrl+O`), **Ostatnie sesje**, *Zapisz* (`Ctrl+S`), polecenia obszaru, *Pobierz segmenty* (`F5`), *Eksportuj mapę* (`Ctrl+E`). *Ustawienia* pod `Ctrl+,`.
+  * Zapamiętany z dawnych wersji tryb „edycja XY” nie blokuje już zaznaczania obszaru.
+  * Jednolite nazwy: *Katalog warstw*, *Mikser warstw*, „styl” w kreatorze, „zestaw warstw”, „powiększenie”; konwertery w podmenu *Narzędzia > Konwertuj gotową mapę*, konwerter OziExplorer zapisuje też GeoPackage; okno współrzędnych ułożone jak strony świata; przycisk Pomoc i `F1` w kolejnych oknach.
+  * Nowa sesja zostawia widok mapy, a pusta próbka podglądu podpowiada, jak zacząć.
+
 * **Internetowa galeria warstw z zasięgiem przestrzennym i warstwy Lasów Państwowych (poprawka 3.19):**
   * W internetowej galerii warstw ([eksploracja.github.io/MapoTero/pomoc/galeria-warstw/](https://eksploracja.github.io/MapoTero/pomoc/galeria-warstw/)) dodano interaktywną mapę wektorową SVG prezentującą zasięg przestrzenny każdej warstwy (pokrycie ogólnokrajowe, sąsiedzi, Morze Bałtyckie, obwiednie BBOX dla map regionalnych/historycznych, wybrane aglomeracje dla TrueOrtho oraz zasięg globalny).
   * W oknie szczegółów wprowadzono zakładki widoku: *[ 🖼️ Próbka mapy ]* oraz *[ 🗺️ Zasięg na mapie ]*, zapamiętujące wybór podczas przeglądania warstw.
