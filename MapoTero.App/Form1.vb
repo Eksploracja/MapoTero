@@ -542,9 +542,8 @@ Public Class Form1
         End If
         AddHandler mapa.Paint, AddressOf RysujPodzialke
 
-        'błędy startu (brak zbiorów map, uszkodzony lastsettings.txt) - od razu widoczna zakładka z ich opisem (audyt ER-01)
-        If _liczbaBledowSesji > 0 AndAlso _zakladkiPracy IsNot Nothing Then _zakladkiPracy.SelectedTab = _zakladkaKomunikatow
-
+        'błędy startu sygnalizuje czerwony licznik na zakładce „Komunikaty”; automatyczne przełączenie na nią zasłaniało
+        'podgląd warstw (przyciski podglądu na ukrytej zakładce nie działały)
         _zaladowany = True
     End Sub
 
