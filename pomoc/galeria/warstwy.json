@@ -621,29 +621,6 @@
       "hash_definicji": "25808f75"
     },
     {
-      "id": "OpenStreetMap_Terrestris__SRTM30-Contour",
-      "zbior": "OpenStreetMap_Terrestris",
-      "warstwa": "SRTM30-Contour",
-      "nazwa": "Poziomice SRTM 30 m (terrestris, ze znakiem wodnym)",
-      "identyfikator": "SRTM_Poziomice",
-      "grupa": "Rzeźba terenu",
-      "podgrupa": "",
-      "typ": "WMS",
-      "nakladka": false,
-      "zalecany_piksel": 10,
-      "zrodlo": "terrestris (OSM)",
-      "obrazek": "obrazy/galeria/OpenStreetMap_Terrestris__SRTM30-Contour.webp",
-      "probka_miksu": "obrazy/mikser/OpenStreetMap_Terrestris__SRTM30-Contour.webp",
-      "miejsce_probki": "Tatry / Zakopane (49.25, 19.96)",
-      "zasieg": {
-        "typ": "globalny",
-        "kod": "SWIAT",
-        "etykieta": "Globalny / Europa (OpenStreetMap)",
-        "bbox": null
-      },
-      "hash_definicji": "db9b3e82"
-    },
-    {
       "id": "szczyty__szczyty",
       "zbior": "szczyty",
       "warstwa": "szczyty",

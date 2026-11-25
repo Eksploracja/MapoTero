@@ -112,6 +112,14 @@ Public Enum WynikDodania
     BrakMiejsca
 End Enum
 
+''' <summary>Rola warstwy w kanapce kartograficznej (od podkładu na spodzie do nakładek na wierzchu).</summary>
+Public Enum RolaWarstwy
+    Podklad = 0
+    Cieniowanie = 1
+    Hipsometria = 2
+    Nakladka = 3
+End Enum
+
 ''' <summary>
 ''' „Kanapka” wybranych warstw: kolejność nakładania (pierwsza - podkład na spodzie), źródło i krycie każdej warstwy.
 ''' Najwyżej 12 warstw - tyle miejsc ma plik conf.txt.
@@ -256,10 +264,10 @@ Public Class ZestawWarstw
             .IgnorujSsl = ignorujSsl,
             .TrybMieszania = trybMieszania
         }
-        If umiescPodNakladkami AndAlso Not nakladka AndAlso _warstwy.Count > 0 Then
-            'podkład dodany po wybraniu nakładki (np. szlaków) wsuwany jest pod końcowe nakładki, żeby nie zakrył ich sobą
+        If umiescPodNakladkami AndAlso RozpoznajRole(nowa) = RolaWarstwy.Podklad AndAlso _warstwy.Count > 0 Then
+            'podkład dodany po wybraniu nakładki lub cieniowania wsuwany jest pod nie, żeby nie zakrył ich sobą
             Dim indeksWstawienia As Integer = _warstwy.Count
-            While indeksWstawienia > 0 AndAlso _warstwy(indeksWstawienia - 1).Nakladka
+            While indeksWstawienia > 0 AndAlso RozpoznajRole(_warstwy(indeksWstawienia - 1)) <> RolaWarstwy.Podklad
                 indeksWstawienia -= 1
             End While
             _warstwy.Insert(indeksWstawienia, nowa)
@@ -269,22 +277,203 @@ Public Class ZestawWarstw
         Return WynikDodania.Dodano
     End Function
 
+    Private Shared ReadOnly ZbioryNakladek As New HashSet(Of String)(StringComparer.OrdinalIgnoreCase) From {
+        "Waymarked_Trails",
+        "dzialki_ewid_EGIB",
+        "uzbrojenie_terenu_KIUT",
+        "rejestr_granic_jednostki_teryt",
+        "rejestr_granic_punkty_adresowe",
+        "rejestr_nazw_geograficznych",
+        "osnowy_geodezyjne",
+        "szczyty",
+        "obszary_chronione_GDOS",
+        "zabytki_NID",
+        "zabytki_archeo_NID",
+        "zabytki_pomniki_historii_NID",
+        "zabytki_unesco_NID",
+        "zabytki_groby_wojenne_NID",
+        "zabytki_ewidencja_nieruchomych_NID",
+        "zabytki_ewidencja_archeo_NID",
+        "zabytki_zasiegi_NID",
+        "Lasy_Panstwowe_Turystyka",
+        "Lasy_Panstwowe_Dojazdy_Ppoz",
+        "Lasy_Panstwowe_Ochronnosc",
+        "Lasy_Panstwowe_Lowiectwo",
+        "litwa_inspire_wms"
+    }
+
+    ''' <summary>Rozpoznaje kartograficzną rolę warstwy (podkład, czyste cieniowanie, hipsometria, nakładka).</summary>
+    Public Shared Function RozpoznajRole(w As WarstwaWybrana) As RolaWarstwy
+        If w Is Nothing Then Return RolaWarstwy.Podklad
+        Return RozpoznajRole(w.Zbior, w.Nazwa, w.Nakladka)
+    End Function
+
+    ''' <summary>Rozpoznaje kartograficzną rolę warstwy na podstawie nazwy zbioru, nazwy technicznej i flagi nakładki.</summary>
+    Public Shared Function RozpoznajRole(zbior As String, nazwa As String, Optional nakladka As Boolean = False) As RolaWarstwy
+        Dim z = If(zbior, "").Trim()
+        Dim n = If(nazwa, "").Trim()
+        Dim zl = z.ToLowerInvariant()
+        Dim nl = n.ToLowerInvariant()
+
+        If zl = "numer_mod_terenu_cieniowanie_wmts" OrElse zl = "slowacja_dmr_wms" OrElse
+           zl = "niemcy_brandenburgia_dgm_wms" OrElse
+           (zl = "niemcy_saksonia_hoehe_wms" AndAlso nl = "relief_standard") OrElse
+           nl = "isok_cien" OrElse nl = "dgmshade" OrElse nl = "relief_standard" Then
+            Return RolaWarstwy.Cieniowanie
+        End If
+
+        If zl = "numer_mod_terenu_hipsometria_wmts" OrElse nl = "hipsometria" Then
+            Return RolaWarstwy.Hipsometria
+        End If
+
+        If nakladka OrElse ZbioryNakladek.Contains(z) Then
+            Return RolaWarstwy.Nakladka
+        End If
+
+        If zl = "baltyk_batymetria_wms" AndAlso (nl = "emodnet:contours" OrElse nl = "coastlines") Then
+            Return RolaWarstwy.Nakladka
+        End If
+
+        ' Heurystyka dla serwerów dodanych ręcznie przez użytkownika: wyklucza pełne mapy z wbudowanym cieniowaniem
+        ' (np. OpenTopoMap, BDOOCieniowanie, HipsoCien), które nie powinny dostawać trybu Rzeźba terenu i 70%.
+        Dim polaczone = zl & " " & nl
+        Dim maZlozonaMape = polaczone.Contains("topo") OrElse polaczone.Contains("bdoo") OrElse
+                            polaczone.Contains("hipso") OrElse polaczone.Contains("hypso") OrElse
+                            polaczone.Contains("ogolnogeograf") OrElse polaczone.Contains("ogólnogeograf")
+        If Not maZlozonaMape AndAlso (polaczone.Contains("cieniow") OrElse polaczone.Contains("hillshade") OrElse
+                                      polaczone.Contains("shaded") OrElse polaczone.Contains("relief")) Then
+            Return RolaWarstwy.Cieniowanie
+        End If
+        If Not maZlozonaMape AndAlso (polaczone.Contains("hipsometr") OrElse polaczone.Contains("hypsometr")) Then
+            Return RolaWarstwy.Hipsometria
+        End If
+
+        Return RolaWarstwy.Podklad
+    End Function
+
+    ''' <summary>Czy warstwa jest czystym cieniowaniem rzeźby terenu (nadającym się do trybu Rzeźba terenu).</summary>
+    Public Shared Function CzyWarstwaCieniowania(zbior As String, nazwa As String) As Boolean
+        Return RozpoznajRole(zbior, nazwa, False) = RolaWarstwy.Cieniowanie
+    End Function
+
     ''' <summary>Czy wszystkie wybrane warstwy są przezroczystymi nakładkami (brak podkładu pod spodem).</summary>
     Public Function CzySameNakladki() As Boolean
         Return _warstwy.Count > 0 AndAlso _warstwy.All(Function(w) w.Nakladka)
     End Function
 
-    ''' <summary>Zwraca pierwszą nakładkę przykrytą przez pełnokryjącą warstwę niebędącą nakładką leżącą nad nią, albo Nothing.</summary>
+    ''' <summary>Zwraca pierwszą nakładkę przykrytą przez pełnokryjącą warstwę w trybie Zwykłym leżącą nad nią, albo Nothing.</summary>
     Public Function ZnajdzPrzykrytaNakladke() As WarstwaWybrana
         For i = 0 To _warstwy.Count - 2
             If Not _warstwy(i).Nakladka Then Continue For
             For j = i + 1 To _warstwy.Count - 1
-                If Not _warstwy(j).Nakladka AndAlso _warstwy(j).Krycie >= PelneKrycie Then
+                If Not _warstwy(j).Nakladka AndAlso _warstwy(j).Krycie >= PelneKrycie AndAlso _warstwy(j).TrybMieszania = TrybMieszania.Zwykly Then
                     Return _warstwy(i)
                 End If
             Next
         Next
         Return Nothing
+    End Function
+
+    ''' <summary>
+    ''' Zwraca czytelne ostrzeżenie o problemie z kolejnością lub kryciem warstw (np. zasłonięta nakładka,
+    ''' zasłonięte cieniowanie albo drugi pełnokryjący podkład zasłaniający warstwy poniżej), albo pusty tekst.
+    ''' </summary>
+    Public Function OstrzezenieKolejnosci(Optional nazwaWarstwy As Func(Of WarstwaWybrana, String) = Nothing) As String
+        If _warstwy.Count < 2 Then Return ""
+        Dim dajNazwe = If(nazwaWarstwy, Function(w As WarstwaWybrana) w.Nazwa)
+
+        For i = 0 To _warstwy.Count - 2
+            Dim rolaI = RozpoznajRole(_warstwy(i))
+            If rolaI = RolaWarstwy.Podklad Then Continue For
+            For j = i + 1 To _warstwy.Count - 1
+                If RozpoznajRole(_warstwy(j)) = RolaWarstwy.Podklad AndAlso
+                   _warstwy(j).Krycie >= PelneKrycie AndAlso
+                   _warstwy(j).TrybMieszania = TrybMieszania.Zwykly Then
+                    If rolaI = RolaWarstwy.Nakladka Then
+                        Return "Uwaga: nakładka """ & dajNazwe(_warstwy(i)) & """ leży pod pełnokryjącym podkładem i może zostać zasłonięta."
+                    End If
+                    Return "Uwaga: warstwa """ & dajNazwe(_warstwy(i)) & """ leży pod pełnokryjącym podkładem i może zostać zasłonięta (użyj ""Ułóż automatycznie"")."
+                End If
+            Next
+        Next
+
+        For j = 1 To _warstwy.Count - 1
+            If RozpoznajRole(_warstwy(j)) = RolaWarstwy.Podklad AndAlso
+               _warstwy(j).Krycie >= PelneKrycie AndAlso
+               _warstwy(j).TrybMieszania = TrybMieszania.Zwykly Then
+                Return "Uwaga: podkład """ & dajNazwe(_warstwy(j)) & """ (100%, Zwykły) całkowicie zasłania warstwy leżące poniżej."
+            End If
+        Next
+
+        Return ""
+    End Function
+
+    ''' <summary>
+    ''' Porządkuje kanapkę według ról kartograficznych (podkłady → cieniowanie → hipsometria → nakładki)
+    ''' z zachowaniem kolejności względnej w grupach. Dla cieniowania i hipsometrii nad innymi warstwami
+    ''' ustawia domyślny tryb mieszania i krycie (tylko gdy miały wartości domyślne Zwykły / 100%).
+    ''' Zwraca True, jeśli kolejność, krycie lub tryb mieszania uległy zmianie.
+    ''' </summary>
+    Public Function UlozAutomatycznie() As Boolean
+        If _warstwy.Count <= 1 Then Return False
+
+        Dim podklady As New List(Of WarstwaWybrana)()
+        Dim cieniowania As New List(Of WarstwaWybrana)()
+        Dim hipsometrie As New List(Of WarstwaWybrana)()
+        Dim nakladki As New List(Of WarstwaWybrana)()
+
+        For Each w In _warstwy
+            Select Case RozpoznajRole(w)
+                Case RolaWarstwy.Cieniowanie : cieniowania.Add(w)
+                Case RolaWarstwy.Hipsometria : hipsometrie.Add(w)
+                Case RolaWarstwy.Nakladka : nakladki.Add(w)
+                Case Else : podklady.Add(w)
+            End Select
+        Next
+
+        Dim nowaLista As New List(Of WarstwaWybrana)(_warstwy.Count)
+        nowaLista.AddRange(podklady)
+        nowaLista.AddRange(cieniowania)
+        nowaLista.AddRange(hipsometrie)
+        nowaLista.AddRange(nakladki)
+
+        Dim zmieniono As Boolean = False
+        For i = 0 To _warstwy.Count - 1
+            If Not Object.ReferenceEquals(_warstwy(i), nowaLista(i)) Then
+                zmieniono = True
+                Exit For
+            End If
+        Next
+
+        For i = 1 To nowaLista.Count - 1
+            Dim w = nowaLista(i)
+            Select Case RozpoznajRole(w)
+                Case RolaWarstwy.Cieniowanie
+                    If w.TrybMieszania = TrybMieszania.Zwykly Then
+                        w.TrybMieszania = TrybMieszania.RzezbaTerenu
+                        zmieniono = True
+                    End If
+                    If w.Krycie = PelneKrycie Then
+                        w.Krycie = 70
+                        zmieniono = True
+                    End If
+                Case RolaWarstwy.Hipsometria
+                    If w.TrybMieszania = TrybMieszania.Zwykly Then
+                        w.TrybMieszania = TrybMieszania.Mnozenie
+                        zmieniono = True
+                    End If
+                    If w.Krycie = PelneKrycie Then
+                        w.Krycie = 50
+                        zmieniono = True
+                    End If
+            End Select
+        Next
+
+        If zmieniono Then
+            _warstwy.Clear()
+            _warstwy.AddRange(nowaLista)
+        End If
+        Return zmieniono
     End Function
 
     Public Sub Usun(indeks As Integer)

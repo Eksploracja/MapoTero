@@ -49,6 +49,7 @@ Public Class FormWarstwyZaawansowane
     Private ReadOnly _btnPodglad As New Button()
     Private ReadOnly _lblStan As New Label()
     Private ReadOnly _btnDodajWarstwe As New Button()
+    Private ReadOnly _btnUlozAutomatycznie As New Button()
     Private ReadOnly _lblZapytania As New Label()
     Private ReadOnly _btnZoomMinus As New Button()
     Private ReadOnly _btnZoomReset As New Button()
@@ -131,10 +132,24 @@ Public Class FormWarstwyZaawansowane
         AddHandler _btnDodajWarstwe.Click, AddressOf DodajWarstwe_Click
         Controls.Add(_btnDodajWarstwe)
 
+        _btnUlozAutomatycznie.Name = "btnUlozAutomatycznie"
+        _btnUlozAutomatycznie.Location = New Point(_btnDodajWarstwe.Right + 6, pasekDolny)
+        _btnUlozAutomatycznie.Size = New Size(155, WysokoscPrzycisku)
+        _btnUlozAutomatycznie.Text = "⚡ Ułóż automatycznie"
+        _podpowiedz.SetToolTip(_btnUlozAutomatycznie, "Porządkuje kanapkę (podkłady → cieniowanie → hipsometria → nakładki) i dobiera domyślne krycie oraz tryb mieszania.")
+        AddHandler _btnUlozAutomatycznie.Click,
+            Sub(s, e)
+                If _zestaw.UlozAutomatycznie() Then
+                    _zaznaczona = Math.Min(_zaznaczona, _zestaw.Liczba - 1)
+                    PoZmianieListy()
+                End If
+            End Sub
+        Controls.Add(_btnUlozAutomatycznie)
+
         Dim btnPomoc As New Button With {
             .Name = "btnPomoc",
             .Text = "Pomoc",
-            .Location = New Point(_btnDodajWarstwe.Right + 6, pasekDolny),
+            .Location = New Point(_btnUlozAutomatycznie.Right + 6, pasekDolny),
             .Size = New Size(80, WysokoscPrzycisku)
         }
         _podpowiedz.SetToolTip(btnPomoc, "Instrukcja obsługi zaawansowanych warstw i trybów mieszania (F1)")
@@ -359,6 +374,7 @@ Public Class FormWarstwyZaawansowane
         Next
         _wiersze.RowStyles.Add(New RowStyle(SizeType.Percent, 100))
         _wiersze.ResumeLayout()
+        _btnUlozAutomatycznie.Enabled = _zestaw.Liczba > 1
         OdswiezLiczbeZapytan()
     End Sub
 
@@ -388,11 +404,8 @@ Public Class FormWarstwyZaawansowane
         Dim grupy = _zestaw.GrupyZapytan()
         Dim wms As Integer = grupy.Where(Function(g) Not g.CzyKafelkowa).Count()
         Dim serwery As Integer = grupy.Select(Function(g) g.Adres.ToLowerInvariant()).Distinct().Count()
-        Dim ostrzezenieNakladki As String = ""
-        Dim przykryta = _zestaw.ZnajdzPrzykrytaNakladke()
-        If przykryta IsNot Nothing Then
-            ostrzezenieNakladki = " Uwaga: nakładka """ & Form1.NazwaWarstwy(przykryta) & """ może zostać zasłonięta."
-        End If
+        Dim ostrzezenie = _zestaw.OstrzezenieKolejnosci(AddressOf Form1.NazwaWarstwy)
+        Dim ostrzezenieNakladki As String = If(ostrzezenie <> "", " " & ostrzezenie, "")
         _lblZapytania.Text = "Zapytań WMS na segment: " & wms &
             If(grupy.Count > wms, ", warstw z kafli: " & (grupy.Count - wms), "") &
             If(serwery > 1, "; serwerów: " & serwery, "") &

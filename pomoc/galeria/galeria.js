@@ -45,10 +45,80 @@
     return TRYBY_MIESZANIA[0];
   }
 
+  const ZBIORY_NAKLADEK = new Set([
+    "waymarked_trails",
+    "dzialki_ewid_egib",
+    "uzbrojenie_terenu_kiut",
+    "rejestr_granic_jednostki_teryt",
+    "rejestr_granic_punkty_adresowe",
+    "rejestr_nazw_geograficznych",
+    "osnowy_geodezyjne",
+    "szczyty",
+    "obszary_chronione_gdos",
+    "zabytki_nid",
+    "zabytki_archeo_nid",
+    "zabytki_pomniki_historii_nid",
+    "zabytki_unesco_nid",
+    "zabytki_groby_wojenne_nid",
+    "zabytki_ewidencja_nieruchomych_nid",
+    "zabytki_ewidencja_archeo_nid",
+    "zabytki_zasiegi_nid",
+    "lasy_panstwowe_turystyka",
+    "lasy_panstwowe_dojazdy_ppoz",
+    "lasy_panstwowe_ochronnosc",
+    "lasy_panstwowe_lowiectwo",
+    "litwa_inspire_wms"
+  ]);
+
+  function rozpoznajRoleWarstwy(w) {
+    if (!w) return "podklad";
+    const z = String(w.zbior || "").trim().toLowerCase();
+    const n = String(w.warstwa || "").trim().toLowerCase();
+
+    if (
+      z === "numer_mod_terenu_cieniowanie_wmts" ||
+      z === "slowacja_dmr_wms" ||
+      z === "niemcy_brandenburgia_dgm_wms" ||
+      (z === "niemcy_saksonia_hoehe_wms" && n === "relief_standard") ||
+      n === "isok_cien" ||
+      n === "dgmshade" ||
+      n === "relief_standard"
+    ) {
+      return "cieniowanie";
+    }
+
+    if (z === "numer_mod_terenu_hipsometria_wmts" || n === "hipsometria") {
+      return "hipsometria";
+    }
+
+    if (Boolean(w.nakladka) || ZBIORY_NAKLADEK.has(z)) {
+      return "nakladka";
+    }
+
+    if (z === "baltyk_batymetria_wms" && (n === "emodnet:contours" || n === "coastlines")) {
+      return "nakladka";
+    }
+
+    const tekst = (z + " " + n + " " + String(w.nazwa || "")).toLowerCase();
+    const maZlozonaMape =
+      tekst.includes("topo") ||
+      tekst.includes("bdoo") ||
+      tekst.includes("hipso") ||
+      tekst.includes("hypso") ||
+      tekst.includes("ogolnogeograf") ||
+      tekst.includes("ogólnogeograf");
+    if (!maZlozonaMape && (tekst.includes("cieniow") || tekst.includes("hillshade") || tekst.includes("shaded") || tekst.includes("relief"))) {
+      return "cieniowanie";
+    }
+    if (!maZlozonaMape && (tekst.includes("hipsometr") || tekst.includes("hypsometr"))) {
+      return "hipsometria";
+    }
+
+    return "podklad";
+  }
+
   function czyWarstwaCieniowania(w) {
-    if (!w) return false;
-    const tekst = ((w.zbior || "") + " " + (w.warstwa || "") + " " + (w.nazwa || "")).toLowerCase();
-    return tekst.includes("cieniow") || tekst.includes("hillshade") || tekst.includes("shaded");
+    return rozpoznajRoleWarstwy(w) === "cieniowanie";
   }
 
   function utworzPozycjeKanapki(w, krycie, tryb) {
@@ -89,7 +159,75 @@
     return minPx;
   }
 
-  function ostrzezeniaKanapki(kanapka) {
+  function pikselNaZoomOrientacyjny(pikselMetry) {
+    const px = Number(pikselMetry);
+    if (!Number.isFinite(px) || px <= 0) return 0;
+    const cosPolska = Math.cos((52 * Math.PI) / 180);
+    const z = Math.round(Math.log2((156543.034 * cosPolska) / px));
+    return Math.max(5, Math.min(20, z));
+  }
+
+  function formatujSkaleWarstwy(pikselMetry) {
+    const px = Number(pikselMetry);
+    if (!Number.isFinite(px) || px <= 0) return "";
+    const z = pikselNaZoomOrientacyjny(px);
+    return String(px).replace(".", ",") + " m/px" + (z > 0 ? " · ~z" + z : "");
+  }
+
+  function czyWarstwaReferencyjnaGranice(w) {
+    if (!w) return false;
+    const zbior = (w.zbior || "").toLowerCase();
+    return (
+      zbior.indexOf("rejestr_granic") >= 0 ||
+      zbior.indexOf("regiony_") >= 0 ||
+      zbior === "lasy_panstwowe_bdl" ||
+      zbior === "administracyjna"
+    );
+  }
+
+  function wykryjRozpietoscSkal(kanapka) {
+    if (!Array.isArray(kanapka) || kanapka.length < 2) return null;
+
+    let minKryjacy = 0;
+    let maxKryjacy = 0;
+    let ileKryjacych = 0;
+
+    let minRastrowy = 0;
+    let maxRastrowy = 0;
+    let ileRastrowych = 0;
+
+    for (let i = 0; i < kanapka.length; i++) {
+      const item = kanapka[i];
+      const px = Number(item && item.zalecany_piksel) || 0;
+      if (px <= 0 || item.nakladka || czyWarstwaCieniowania(item)) continue;
+
+      const jestKryjaca =
+        i === 0 ||
+        (poprawneKrycie(item.krycie) >= PELNE_KRYCIE && znajdzTryb(item.tryb).kod === "Zwykly");
+
+      if (jestKryjaca) {
+        ileKryjacych++;
+        if (minKryjacy === 0 || px < minKryjacy) minKryjacy = px;
+        if (px > maxKryjacy) maxKryjacy = px;
+      }
+
+      if (!czyWarstwaReferencyjnaGranice(item)) {
+        ileRastrowych++;
+        if (minRastrowy === 0 || px < minRastrowy) minRastrowy = px;
+        if (px > maxRastrowy) maxRastrowy = px;
+      }
+    }
+
+    if (ileKryjacych >= 2 && minKryjacy > 0 && maxKryjacy / minKryjacy >= 6) {
+      return { minPx: minKryjacy, maxPx: maxKryjacy };
+    }
+    if (ileRastrowych >= 2 && minRastrowy > 0 && maxRastrowy >= 15 && minRastrowy <= 2) {
+      return { minPx: minRastrowy, maxPx: maxRastrowy };
+    }
+    return null;
+  }
+
+  function ostrzezeniaKanapki(kanapka, polaczono) {
     const lista = [];
     if (!kanapka || kanapka.length === 0) return lista;
 
@@ -97,24 +235,33 @@
     if (przykryta) {
       lista.push("Uwaga: nakładka „" + przykryta.nazwa + "” leży pod pełnokryjącą warstwą i może zostać zasłonięta.");
     } else {
-      // Sprawdź także czy cieniowanie rzeźby nie zostało przykryte pełnokryjącym podkładem powyżej
-      for (let i = 0; i < kanapka.length - 1; i++) {
-        if (!czyWarstwaCieniowania(kanapka[i])) continue;
-        let zaslonieta = false;
+      let wykrytoZasloniecie = false;
+      for (let i = 0; i < kanapka.length - 1 && !wykrytoZasloniecie; i++) {
+        const rolaI = rozpoznajRoleWarstwy(kanapka[i]);
+        if (rolaI === "podklad") continue;
         for (let j = i + 1; j < kanapka.length; j++) {
-          if (!kanapka[j].nakladka && kanapka[j].krycie >= PELNE_KRYCIE && kanapka[j].tryb === "Zwykly") {
-            zaslonieta = true;
+          if (rozpoznajRoleWarstwy(kanapka[j]) === "podklad" && kanapka[j].krycie >= PELNE_KRYCIE && kanapka[j].tryb === "Zwykly") {
+            if (rolaI === "nakladka") {
+              lista.push("Uwaga: nakładka „" + kanapka[i].nazwa + "” leży pod pełnokryjącym podkładem i może zostać zasłonięta (użyj „⚡ Ułóż automatycznie”).");
+            } else {
+              lista.push("Uwaga: warstwa „" + kanapka[i].nazwa + "” leży pod pełnokryjącym podkładem i może zostać zasłonięta (użyj „⚡ Ułóż automatycznie”).");
+            }
+            wykrytoZasloniecie = true;
             break;
           }
         }
-        if (zaslonieta) {
-          lista.push("Uwaga: cieniowanie „" + kanapka[i].nazwa + "” leży pod pełnokryjącą warstwą i może zostać zasłonięte (użyj „⚡ Ułóż automatycznie”).");
-          break;
+      }
+      if (!wykrytoZasloniecie) {
+        for (let j = 1; j < kanapka.length; j++) {
+          if (rozpoznajRoleWarstwy(kanapka[j]) === "podklad" && kanapka[j].krycie >= PELNE_KRYCIE && kanapka[j].tryb === "Zwykly") {
+            lista.push("Uwaga: podkład „" + kanapka[j].nazwa + "” (100%, Zwykły) całkowicie zasłania warstwy leżące poniżej.");
+            break;
+          }
         }
       }
     }
 
-    if (kanapka.every(function (x) { return x.nakladka; })) {
+    if (kanapka.every(function (x) { return rozpoznajRoleWarstwy(x) === "nakladka"; })) {
       lista.push("Wybrano same przezroczyste nakładki — warto dodać podkład na dół kanapki (np. topo lub ortofoto).");
     }
 
@@ -129,26 +276,56 @@
       lista.push("Warstwy w kanapce mają różne zasięgi geograficzne (np. Polska i zagranica) — upewnij się, że pokrywają Twój obszar.");
     }
 
+    const rozpietosc = wykryjRozpietoscSkal(kanapka);
+    if (rozpietosc) {
+      lista.push(
+        "Duża rozpiętość skal w miksie (od " +
+          String(rozpietosc.minPx).replace(".", ",") +
+          " m/px do " +
+          String(rozpietosc.maxPx).replace(".", ",") +
+          " m/px) — w jednej płaskiej mapie stracisz szczegóły albo pobierzesz zbędnie duży plik. " +
+          (polaczono
+            ? "Kliknij „✨ Otwórz w Szybkim Kreatorze” i rozdziel je na osobne skale (tryb wieloskalowy)."
+            : "Po wczytaniu do Szybkiego Kreatora w MapoTero rozdziel je na osobne skale (tryb wieloskalowy).")
+      );
+    }
+
     return lista;
   }
 
   function ulozKanapkeAutomatycznie(kanapka) {
+    if (!kanapka || kanapka.length <= 1) {
+      return (kanapka || []).map(function (item) { return Object.assign({}, item); });
+    }
     const podklady = [];
     const cieniowanie = [];
+    const hipsometria = [];
     const nakladki = [];
     kanapka.forEach(function (item) {
       const kopia = Object.assign({}, item);
-      if (czyWarstwaCieniowania(kopia)) {
-        if (kopia.tryb === "Zwykly") kopia.tryb = "RzezbaTerenu";
-        if (kopia.krycie === PELNE_KRYCIE) kopia.krycie = 70;
+      const rola = rozpoznajRoleWarstwy(kopia);
+      if (rola === "cieniowanie") {
         cieniowanie.push(kopia);
-      } else if (kopia.nakladka) {
+      } else if (rola === "hipsometria") {
+        hipsometria.push(kopia);
+      } else if (rola === "nakladka") {
         nakladki.push(kopia);
       } else {
         podklady.push(kopia);
       }
     });
-    return podklady.concat(cieniowanie, nakladki);
+    const wynik = podklady.concat(cieniowanie, hipsometria, nakladki);
+    for (let i = 1; i < wynik.length; i++) {
+      const rola = rozpoznajRoleWarstwy(wynik[i]);
+      if (rola === "cieniowanie") {
+        if (wynik[i].tryb === "Zwykly") wynik[i].tryb = "RzezbaTerenu";
+        if (wynik[i].krycie === PELNE_KRYCIE) wynik[i].krycie = 70;
+      } else if (rola === "hipsometria") {
+        if (wynik[i].tryb === "Zwykly") wynik[i].tryb = "Mnozenie";
+        if (wynik[i].krycie === PELNE_KRYCIE) wynik[i].krycie = 50;
+      }
+    }
+    return wynik;
   }
 
   function kodujKanapkeUrl(kanapka) {
@@ -370,6 +547,9 @@
       utworzPozycjeKanapki,
       znajdzPrzykrytaNakladke,
       najdokladniejszyPikselKanapki,
+      pikselNaZoomOrientacyjny,
+      formatujSkaleWarstwy,
+      wykryjRozpietoscSkal,
       ostrzezeniaKanapki,
       ulozKanapkeAutomatycznie,
       kodujKanapkeUrl,
@@ -684,14 +864,20 @@
         return;
       }
       const poz = utworzPozycjeKanapki(w, PELNE_KRYCIE, "Zwykly");
-      if (czyWarstwaCieniowania(poz)) {
-        poz.tryb = "RzezbaTerenu";
-        poz.krycie = 70;
+      const rola = rozpoznajRoleWarstwy(poz);
+      if (stan.kanapka.length > 0) {
+        if (rola === "cieniowanie") {
+          poz.tryb = "RzezbaTerenu";
+          poz.krycie = 70;
+        } else if (rola === "hipsometria") {
+          poz.tryb = "Mnozenie";
+          poz.krycie = 50;
+        }
       }
-      if (!poz.nakladka && !czyWarstwaCieniowania(poz) && stan.kanapka.length > 0) {
-        // Nowy podkład wsuwamy pod końcowe nakładki i warstwy cieniowania, tak jak w MapoTero
+      if (rola === "podklad" && stan.kanapka.length > 0) {
+        // Nowy podkład wsuwamy pod końcowe nakładki, hipsometrię i warstwy cieniowania, tak jak w MapoTero
         let wstaw = stan.kanapka.length;
-        while (wstaw > 0 && (stan.kanapka[wstaw - 1].nakladka || czyWarstwaCieniowania(stan.kanapka[wstaw - 1]))) wstaw--;
+        while (wstaw > 0 && rozpoznajRoleWarstwy(stan.kanapka[wstaw - 1]) !== "podklad") wstaw--;
         stan.kanapka.splice(wstaw, 0, poz);
       } else {
         stan.kanapka.push(poz);
@@ -1446,10 +1632,11 @@
       if (ref.mikserDokWyslij) ref.mikserDokWyslij.disabled = true;
     } else {
       const minPx = najdokladniejszyPikselKanapki(stan.kanapka);
+      const minZoom = minPx > 0 ? pikselNaZoomOrientacyjny(minPx) : 0;
       const podglad = stan.kanapka.map(function (x) { return x.nazwa; }).slice(0, 3).join(" + ");
       ref.mikserDokOpis.textContent =
         podglad + (n > 3 ? " (+" + (n - 3) + ")" : "") +
-        (minPx > 0 ? " · zalecany piksel: " + formatujPiksel(minPx) : "");
+        (minPx > 0 ? " · zalecany piksel: " + formatujPiksel(minPx) + (minZoom > 0 ? " (~z" + minZoom + ")" : "") : "");
       ref.mikserDokOtworz.disabled = false;
       if (ref.mikserDokWyslij) ref.mikserDokWyslij.disabled = false;
     }
@@ -1493,7 +1680,7 @@
 
   function odswiezOstrzezeniaMiksera() {
     if (!ref.mikserOstrzezenia) return;
-    const ostrz = ostrzezeniaKanapki(stan.kanapka);
+    const ostrz = ostrzezeniaKanapki(stan.kanapka, czyPolaczonoZProgramem());
     if (!czyJestWybranyObszar()) {
       ostrz.push(
         czyPolaczonoZProgramem()
@@ -1501,9 +1688,12 @@
           : "⚠️ Nie zaznaczono jeszcze obszaru dla pliku .mapotero — możesz zaznaczyć teren prawym przyciskiem myszy (PPM) w zakładce „📍 Miejsce i obszar”."
       );
     }
+    ref.mikserOstrzezenia.innerHTML = "";
     if (ostrz.length > 0) {
       ref.mikserOstrzezenia.hidden = false;
-      ref.mikserOstrzezenia.textContent = ostrz.join(" ");
+      ostrz.forEach(function (t) {
+        ref.mikserOstrzezenia.appendChild(el("div", "gw-mikser-ostrzezenie-wiersz", t));
+      });
     } else {
       ref.mikserOstrzezenia.hidden = true;
     }
@@ -1630,6 +1820,14 @@
             poZmianieKanapki();
           });
           dol.appendChild(selectTryb);
+        }
+
+        const skalaTekst = formatujSkaleWarstwy(poz.zalecany_piksel);
+        if (skalaTekst) {
+          const skalaEtykieta = el("span", "gw-mikser-skala-etykieta", skalaTekst);
+          skalaEtykieta.title =
+            "Zalecana rozdzielczość warstwy i przybliżony poziom zoom w Web Mercator (środek Polski)";
+          dol.appendChild(skalaEtykieta);
         }
 
         wiersz.appendChild(gora);

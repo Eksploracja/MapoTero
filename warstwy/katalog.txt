@@ -41,7 +41,6 @@ krajobrazowa | Krajobrazowa | Mapa krajobrazowa GUGiK (przeglądowa) | Topo_Kraj
 numer_mod_terenu_cieniowanie_WMTS | ISOK_Cien | Cieniowanie rzeźby NMT 1 m (kafle WMTS) | NMT_Cien_1m
 numer_mod_terenu_hipsometria_WMTS | Hipsometria | Hipsometria NMT 1 m – kolory wysokości (kafle WMTS) | NMT_Hipso_1m
 numer_mod_terenu_WMTS | HipsoCien | Hipsometria z cieniowaniem NMT 1 m (kafle WMTS) | NMT_HipsoCien_1m
-OpenStreetMap_Terrestris | SRTM30-Contour | Poziomice SRTM 30 m (terrestris, ze znakiem wodnym) | SRTM_Poziomice
 szczyty | szczyty | Szczyty górskie i wzniesienia (GUGiK) | Szczyty_GUGiK
 
 > Ortofotomapy

@@ -79,7 +79,6 @@ Public Class FormWybierzDodatkowaWarstwe
         {"Waymarked_Trails", "Waymarked Trails – Szlaki turystyczne i nakładki (piesze, rowerowe, MTB)"},
         {"OpenTopoMap", "OpenTopoMap – Mapa topograficzna Europy"},
         {"UMP_pcPL", "UMP-pcPL – Uzupełniająca Mapa Polski"},
-        {"OpenStreetMap_Terrestris", "Terrestris – Poziomice SRTM 30 m"},
         {"Lasy_Panstwowe_BDL", "Lasy Państwowe – Bank Danych o Lasach (oddziały, drzewostan BDL)"},
         {"Lasy_Panstwowe_Turystyka", "Lasy Państwowe – Zagospodarowanie turystyczne i program Zanocuj w lesie (BDL)"},
         {"Lasy_Panstwowe_Dojazdy_Ppoz", "Lasy Państwowe – Dojazdy pożarowe i drogi leśne (BDL)"},
@@ -461,14 +460,18 @@ Public Class FormWybierzDodatkowaWarstwe
         Dim el = TryCast(_tvWarstwy.SelectedNode?.Tag, ElementWarstwy)
         If el Is Nothing OrElse el.CzyJuzDodana Then Exit Sub
 
-        ' Domyślny tryb mieszania: Rzeźba terenu dla cieniowania (płaski teren bez szarej zasłony), Zwykły dla pozostałych
-        Dim tryb = If(el.NazwaTechniczna.IndexOf("cien", StringComparison.OrdinalIgnoreCase) >= 0 OrElse
-                      el.NazwaWyswietlana.IndexOf("cieniow", StringComparison.OrdinalIgnoreCase) >= 0 OrElse
-                      el.NazwaTechniczna.IndexOf("shaded", StringComparison.OrdinalIgnoreCase) >= 0,
-                      TrybMieszania.RzezbaTerenu, TrybMieszania.Zwykly)
-
-        ' Domyślne krycie: 70% dla cieniowania, 100% dla reszty
-        Dim krycie = If(tryb = TrybMieszania.RzezbaTerenu, 70, 100)
+        ' Domyślny tryb mieszania i krycie zależne od roli kartograficznej (gdy warstwa trafia na istniejący podkład)
+        Dim rola = ZestawWarstw.RozpoznajRole(el.ZbiorKlucz, el.NazwaTechniczna, el.JestNakladka)
+        Dim maInneWarstwy = _juzDodane IsNot Nothing AndAlso _juzDodane.Liczba > 0
+        Dim tryb As TrybMieszania = TrybMieszania.Zwykly
+        Dim krycie As Integer = ZestawWarstw.PelneKrycie
+        If maInneWarstwy AndAlso rola = RolaWarstwy.Cieniowanie Then
+            tryb = TrybMieszania.RzezbaTerenu
+            krycie = 70
+        ElseIf maInneWarstwy AndAlso rola = RolaWarstwy.Hipsometria Then
+            tryb = TrybMieszania.Mnozenie
+            krycie = 50
+        End If
 
         _wybranaWarstwa = New WarstwaWybrana With {
             .Nazwa = el.NazwaTechniczna,

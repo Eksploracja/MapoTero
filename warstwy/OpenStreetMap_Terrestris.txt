@@ -1,3 +1,0 @@
-https://ows.terrestris.de/osm/service?request=GetMap&version=1.3.0&CRS=EPSG:2180&layers=
-SRTM30-Contour
-10

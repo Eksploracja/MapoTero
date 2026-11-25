@@ -263,4 +263,50 @@ Public Class StylKreatoraTesty
         Assert.True(zrodla.ContainsKey("TOPO_WMTS"))
     End Sub
 
+    <Fact>
+    Public Sub StylJednoskalowy_PoDodaniuSkalWPlanWlasny_JestWieloskalowyIZapisujeSkale()
+        Dim zOkna As New ZestawWarstw()
+        zOkna.Dodaj("ORTOFOTOMAPA", 100, "https://example.invalid/orto", "ortofotomapa_WMTS", 0.25, TypUslugiMapowej.Wmts)
+        Dim s As New StylKreatora(zestawOknaGlownego:=Function() zOkna)
+        s.Wybierz(ZarzadcaSzablonow.ZnajdzSzablon(StylKreatora.IdWlasnegoZestawu))
+
+        Assert.False(s.CzyWieloskalowy)
+        Dim plan = s.PlanDoEdycjiSkal(0.25, 52, False)
+        Assert.Single(plan)
+
+        Dim stPrzegl As New StopienSkali With {.Opis = "przeglądowa", .Piksel = 10.0}
+        stPrzegl.Warstwy.Add(New WarstwaSzablonu("TOPO_WMTS", "MAPA TOPOGRAFICZNA", 100))
+        plan.Add(New PlanStopnia With {.Stopien = stPrzegl, .Piksel = 10.0, .PoziomMin = 10, .PoziomMax = 14, .Warstwy = stPrzegl.Warstwy.ToList()})
+        s.PlanWlasny = plan
+
+        Assert.True(s.CzyWieloskalowy)
+        Assert.True(s.MozliwaWieloskalowa(RodzajEksportu.MBTiles))
+        Assert.Equal("MAPA TOPOGRAFICZNA", s.UtworzZestaw(12.0)(0).Nazwa)
+        Assert.Equal("ORTOFOTOMAPA", s.UtworzZestaw(0.3)(0).Nazwa)
+
+        Dim styl = s.UtworzStylWlasny("Mój wieloskalowy", New Zasieg(500000, 600000, 502000, 604000))
+        Assert.True(styl.Wieloskalowy)
+        Assert.Equal(2, styl.StopnieSkali.Count)
+        Assert.Equal(0.25, styl.DomyslnyPiksel, 4)
+    End Sub
+
+    <Fact>
+    Public Sub PrzyjmijZestawDlaSkali_ZmieniaTylkoWybranaSkaleINieNiszczyPozostalych()
+        Dim s = Styl("historia_wig")
+        Dim st25 = s.Szablon.StopnieGlowne(0)
+        Dim st100 = s.Szablon.StopnieGlowne(1)
+        Dim nowy As New ZestawWarstw()
+        nowy.Dodaj("wig25k_2180", 90, "https://example.invalid/wms", "mapy_historyczne_IHPAN", 2.0, TypUslugiMapowej.Wms)
+
+        s.PrzyjmijZestawDlaSkali(st25, nowy, 2.0, 52, False)
+
+        Assert.NotNull(s.PlanWlasny)
+        Assert.True(s.CzyWieloskalowy)
+        Assert.Equal(3, s.PlanWlasny.Count)
+        Assert.Single(s.UtworzZestaw(0, s.PlanWlasny(0).Stopien).Warstwy)
+        Assert.Equal(90, s.UtworzZestaw(0, s.PlanWlasny(0).Stopien)(0).Krycie)
+        ' Pozostałe skale zachowały swój skład
+        Assert.Equal(st100.Warstwy.Count, s.PlanWlasny(1).WarstwyEfektywne.Count)
+    End Sub
+
 End Class

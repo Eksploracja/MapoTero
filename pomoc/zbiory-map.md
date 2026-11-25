@@ -75,7 +75,6 @@ Zbiory i warstwy niewymienione w `katalog.txt` (np. dodane [kreatorem serwerów]
 | `numer_mod_terenu_hipsometria_WMTS` | GUGiK / Geoportal | WMTS | 1 | 1 m/px |
 | `numer_mod_terenu_WMTS` | GUGiK / Geoportal | WMTS | 1 | 2 m/px |
 | `obszary_chronione_GDOS` | GDOŚ | WMS | 10 | 1–4 m/px |
-| `OpenStreetMap_Terrestris` | terrestris (OSM, znak wodny) | WMS | 1 | 10 m/px |
 | `OpenTopoMap` | OpenTopoMap / OSM | XYZ | 1 | 2 m/px |
 | `ortofotomapa` | GUGiK / Geoportal | WMS | 1 | 1 m/px |
 | `ortofotomapa_HighResolution_WMTS` | GUGiK / Geoportal | WMTS | 1 | 0,1 m/px |
@@ -156,7 +155,6 @@ Warstwy *Waymarked Trails* są przezroczystymi nakładkami. Po dodaniu mapy podk
 | Cieniowanie rzeźby NMT 1 m (kafle WMTS) | `numer_mod_terenu_cieniowanie_WMTS` | `ISOK_Cien` | WMTS | 1 m/px |
 | Hipsometria NMT 1 m – kolory wysokości (kafle WMTS) | `numer_mod_terenu_hipsometria_WMTS` | `Hipsometria` | WMTS | 1 m/px |
 | Hipsometria z cieniowaniem NMT 1 m (kafle WMTS) | `numer_mod_terenu_WMTS` | `HipsoCien` | WMTS | 2 m/px |
-| Poziomice SRTM 30 m (terrestris, ze znakiem wodnym) | `OpenStreetMap_Terrestris` | `SRTM30-Contour` | WMS | 10 m/px |
 | Szczyty górskie i wzniesienia (GUGiK) | `szczyty` | `szczyty` | WMS | 4 m/px |
 
 ## Ortofotomapy

@@ -38,7 +38,6 @@ numer_mod_terenu_cieniowanie_WMTS
 numer_mod_terenu_hipsometria_WMTS
 numer_mod_terenu_WMTS
 obszary_chronione_GDOS
-OpenStreetMap_Terrestris
 OpenTopoMap
 ortofotomapa
 ortofotomapa_HighResolution_WMTS

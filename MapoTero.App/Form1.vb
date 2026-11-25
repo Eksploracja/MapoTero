@@ -1618,9 +1618,21 @@ Public Class Form1
         Dim bylaPusta As Boolean = _zestaw.Liczba = 0
         Dim typZrodla As TypUslugiMapowej = zbior.Plik.EfektywnyTyp
         Dim jestNakladka As Boolean = zbior.Plik.OpcjeKafli(w.Warstwa).Nakladka
-        Select Case _zestaw.Dodaj(w.Warstwa, adres:=zbior.Plik.Adres, zbior:=zbior.Nazwa, zalecanyPiksel:=zalecany,
+        Dim rola = ZestawWarstw.RozpoznajRole(zbior.Nazwa, w.Warstwa, jestNakladka)
+        Dim domyslneKrycie As Integer = ZestawWarstw.PelneKrycie
+        Dim domyslnyTryb As TrybMieszania = TrybMieszania.Zwykly
+        If Not bylaPusta Then
+            If rola = RolaWarstwy.Cieniowanie Then
+                domyslneKrycie = 70
+                domyslnyTryb = TrybMieszania.RzezbaTerenu
+            ElseIf rola = RolaWarstwy.Hipsometria Then
+                domyslneKrycie = 50
+                domyslnyTryb = TrybMieszania.Mnozenie
+            End If
+        End If
+        Select Case _zestaw.Dodaj(w.Warstwa, krycie:=domyslneKrycie, adres:=zbior.Plik.Adres, zbior:=zbior.Nazwa, zalecanyPiksel:=zalecany,
                                    typZrodla:=typZrodla, nakladka:=jestNakladka, umiescPodNakladkami:=True,
-                                   ignorujSsl:=zbior.Plik.IgnorujSsl)
+                                   ignorujSsl:=zbior.Plik.IgnorujSsl, trybMieszania:=domyslnyTryb)
             Case WynikDodania.BrakMiejsca
                 MsgBox("Nie można dodać warstwy - wybrano już " & ZestawWarstw.MaksLiczba & " warstw (więcej program nie łączy). Usuń którąś z listy wybranych warstw.", MsgBoxStyle.Exclamation, "Wybrane warstwy")
                 Exit Sub
@@ -1707,9 +1719,9 @@ Public Class Form1
         If PobieranieTrwa("Zmiana kolejności warstw") Then Exit Sub
         Dim nowa As Integer = _zestaw.Przenies(zIndeksu, naIndeks)
         PoZmianieWarstw(nowa)
-        Dim przykryta = _zestaw.ZnajdzPrzykrytaNakladke()
-        If przykryta IsNot Nothing Then
-            Komunikat("Uwaga: nakładka " & NazwaWarstwy(przykryta) & " może zostać zasłonięta przez warstwę nad nią.", Color.DarkOrange)
+        Dim ostrzezenie = _zestaw.OstrzezenieKolejnosci(AddressOf NazwaWarstwy)
+        If ostrzezenie <> "" Then
+            Komunikat(ostrzezenie, Color.DarkOrange)
         Else
             Komunikat("Warstwa " & NazwaWarstwy(_zestaw(nowa)) & " jest teraz na miejscu " & (nowa + 1) & If(nowa = 0, " (podkład)", "") & ".", Color.Green)
         End If
@@ -1746,9 +1758,9 @@ Public Class Form1
             _zestaw = okno.Zestaw
             PoZmianieWarstw(Math.Min(okno.Zaznaczona, _zestaw.Liczba - 1))
             Dim opisPiksela As String = DobierzRozmiarPiksela(False)
-            Dim przykryta = _zestaw.ZnajdzPrzykrytaNakladke()
-            If przykryta IsNot Nothing Then
-                Komunikat("Uwaga: nakładka " & NazwaWarstwy(przykryta) & " może zostać zasłonięta przez warstwę nad nią.", Color.DarkOrange)
+            Dim ostrzezenie = _zestaw.OstrzezenieKolejnosci(AddressOf NazwaWarstwy)
+            If ostrzezenie <> "" Then
+                Komunikat(ostrzezenie, Color.DarkOrange)
             Else
                 Komunikat("Wybrane warstwy: " & OpisWarstw() & "." & If(opisPiksela <> "", " " & opisPiksela, ""), Color.Green)
             End If

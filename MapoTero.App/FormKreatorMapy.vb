@@ -152,6 +152,7 @@ Public Class FormKreatorMapy
     ' Czy szablon i format pozwalają dodać ortofotomapę (Visible pola zależy też od widoczności panelu kroku)
     Private _ortofotomapaMozliwa As Boolean
     Private btnUstawieniaSkal As Button
+    Private btnSkaleStylu As Button
     Private lblRegulacja2 As Label
     Private tbRegulacja2 As TrackBar
     Private lblRegulacjaWartosc2 As Label
@@ -304,9 +305,15 @@ Public Class FormKreatorMapy
             _topyWierszaStanu(c) = c.Top
         Next
         btnDostosujWarstwy.Text = "Dostosuj warstwy..."
-        btnDostosujWarstwy.Width = 146
+        btnDostosujWarstwy.Width = 132
+        btnSkaleStylu = New Button With {.Name = "btnSkaleStylu", .Text = "Skale...",
+                                         .Location = New Point(150, 386), .Size = New Size(68, 25),
+                                         .UseVisualStyleBackColor = True}
+        AddHandler btnSkaleStylu.Click, Sub() OtworzUstawieniaSkal()
+        grpSzczegolySzablonu.Controls.Add(btnSkaleStylu)
+        _podpowiedzi.SetToolTip(btnSkaleStylu, "Dodawanie i edycja stopni skali (mapy wieloskalowe) oraz ich warstw.")
         cboSkalaPodgladu = New ComboBox With {.Name = "cboSkalaPodgladu", .AccessibleName = "Skala podglądu",
-            .DropDownStyle = ComboBoxStyle.DropDownList, .Location = New Point(174, 387), .Size = New Size(182, 23), .Visible = False}
+            .DropDownStyle = ComboBoxStyle.DropDownList, .Location = New Point(222, 387), .Size = New Size(136, 23), .Visible = False}
         AddHandler cboSkalaPodgladu.SelectionChangeCommitted,
             Sub()
                 _stopienPodgladu = TryCast(cboSkalaPodgladu.SelectedItem, StopienSkali)
@@ -755,7 +762,6 @@ Public Class FormKreatorMapy
         chkWlasnyZoom.Checked = False
         chkWieloskalowa.Checked = True
         chkOrtofotomapa.Checked = False
-        _styl.PlanWlasny = Nothing
     End Sub
 
     Private Sub UstawPiksel(piksel As Double)
@@ -896,6 +902,12 @@ Public Class FormKreatorMapy
 
         Dim ukladEfektywny = PobierzWybranyUklad()
         Dim bladUkladu = ZarzadcaSzablonow.SprawdzZgodnoscUkladu(zestaw, ukladEfektywny)
+        If String.IsNullOrEmpty(bladUkladu) AndAlso wieloskalowa AndAlso plan IsNot Nothing Then
+            For Each ps In plan
+                bladUkladu = ZarzadcaSzablonow.SprawdzZgodnoscUkladu(_styl.UtworzZestawStopnia(ps), ukladEfektywny)
+                If Not String.IsNullOrEmpty(bladUkladu) Then Exit For
+            Next
+        End If
         If Not String.IsNullOrEmpty(bladUkladu) Then
             lblSzacunekKomunikat.Text = bladUkladu
             lblSzacunekKomunikat.ForeColor = Color.FromArgb(200, 30, 30)
@@ -1139,6 +1151,7 @@ Public Class FormKreatorMapy
             End If
             ' Linia 2: składniki z wielokropkiem na szerokości pozycji (dawniej obcinane po 50 znakach)
             Dim opisTekst = If(s.Warstwy.Count > 0, s.OpisSkladnikow(), "Warstwy wybrane w oknie głównym")
+            If s.Wieloskalowy Then opisTekst = $"[{s.StopnieGlowne.Count} skale] " & opisTekst
             TextRenderer.DrawText(e.Graphics, opisTekst, fOpis, New Rectangle(e.Bounds.X + 14, e.Bounds.Y + 25, e.Bounds.Width - 22, 16),
                                   Color.FromArgb(95, 100, 110), TextFormatFlags.Left Or TextFormatFlags.EndEllipsis)
         End Using
@@ -1236,15 +1249,40 @@ Public Class FormKreatorMapy
                 _opcjeKorekty = okno.OpcjeKorekty
                 chkKorektaObrazu.Checked = _opcjeKorekty.Wlaczona
                 AktualizujOpisKorekty()
-                Select Case _styl.PrzyjmijZestawOkna(przed, zestaw,
-                        Function() MessageBox.Show("Zmieniono skład lub kolejność warstw. Użyć tego zestawu na wszystkich powiększeniach?",
-                                                   "Własny zestaw warstw", MessageBoxButtons.YesNo, MessageBoxIcon.Question) = DialogResult.Yes)
-                    Case ZmianaZestawuOkna.ZmianaWygladu
+                If _styl.CzyWieloskalowy AndAlso Not przed.TaSamaKompozycja(zestaw) Then
+                    Dim nazwaSkali = If(stopienTytulu IsNot Nothing, stopienTytulu.Opis, "bieżącej")
+                    Dim btnTylkoSkala As New TaskDialogButton($"Tylko dla skali '{nazwaSkali}'")
+                    Dim btnWszystkie As New TaskDialogButton("Dla wszystkich skal (jedna kompozycja)")
+                    Dim btnAnulujZmiane As New TaskDialogButton("Anuluj")
+                    Dim strona As New TaskDialogPage With {
+                        .Caption = "Własny zestaw warstw",
+                        .Heading = "Zmieniono skład lub kolejność warstw",
+                        .Text = "Czy zastosować tę zmianę tylko dla edytowanej skali, czy zastąpić wszystkie powiększenia jedną kompozycją?",
+                        .Buttons = New TaskDialogButtonCollection From {btnTylkoSkala, btnWszystkie, btnAnulujZmiane},
+                        .DefaultButton = btnTylkoSkala
+                    }
+                    Dim wybor = TaskDialog.ShowDialog(Me, strona)
+                    If wybor Is btnTylkoSkala Then
+                        _styl.PrzyjmijZestawDlaSkali(stopienTytulu, zestaw, _pikselPodgladuStylu,
+                                                    ObszarKreatora.SzerokoscGeo(_wybranyZasieg),
+                                                    _ortofotomapaMozliwa AndAlso chkOrtofotomapa.Checked)
                         PokazSzczegolySzablonu(_styl.Szablon, True)
-                    Case ZmianaZestawuOkna.ZestawNiestandardowy
+                    ElseIf wybor Is btnWszystkie Then
+                        _styl.PrzyjmijZestawOkna(przed, zestaw, Function() True)
                         _stopienPodgladu = Nothing
                         PokazSzczegolySzablonu(_styl.Szablon, False)
-                End Select
+                    End If
+                Else
+                    Select Case _styl.PrzyjmijZestawOkna(przed, zestaw,
+                            Function() MessageBox.Show("Zmieniono skład lub kolejność warstw. Użyć tego zestawu na wszystkich powiększeniach?",
+                                                       "Własny zestaw warstw", MessageBoxButtons.YesNo, MessageBoxIcon.Question) = DialogResult.Yes)
+                        Case ZmianaZestawuOkna.ZmianaWygladu
+                            PokazSzczegolySzablonu(_styl.Szablon, True)
+                        Case ZmianaZestawuOkna.ZestawNiestandardowy
+                            _stopienPodgladu = Nothing
+                            PokazSzczegolySzablonu(_styl.Szablon, False)
+                    End Select
+                End If
             End If
         End Using
     End Sub
@@ -2590,12 +2628,23 @@ Public Class FormKreatorMapy
     End Function
 
     Private Sub btnUstawieniaSkal_Click(sender As Object, e As EventArgs)
-        If _styl.Szablon Is Nothing OrElse Not _styl.Szablon.Wieloskalowy Then Exit Sub
-        Using okno As New FormSkaleMapy(_styl.Szablon, PlanBiezacy(), PlanAutomatyczny(), ObszarKreatora.SzerokoscGeo(_wybranyZasieg))
+        OtworzUstawieniaSkal()
+    End Sub
+
+    Private Sub OtworzUstawieniaSkal()
+        If _styl.Szablon Is Nothing Then Exit Sub
+        Dim piksel = If(_biezacyKrok = 4, CDbl(numRozmiarPiksela.Value), If(_styl.Szablon.DomyslnyPiksel > 0, _styl.Szablon.DomyslnyPiksel, 1.0))
+        Dim szerokoscGeo = ObszarKreatora.SzerokoscGeo(_wybranyZasieg)
+        Dim zOrto = _ortofotomapaMozliwa AndAlso chkOrtofotomapa.Checked
+        Dim planStart = _styl.PlanDoEdycjiSkal(piksel, szerokoscGeo, zOrto)
+        Dim planAuto = _styl.PlanAutomatyczny(piksel, szerokoscGeo, zOrto)
+        Dim punktProbki = _styl.PunktProbki(_wlasnyPunktStylu, _wybranyZasieg)
+        Using okno As New FormSkaleMapy(_styl.Szablon, planStart, planAuto, szerokoscGeo, _styl.ZrodlaMap(), punktProbki)
             If okno.ShowDialog(Me) = DialogResult.OK Then
                 _styl.PlanWlasny = okno.Wynik
-                OdswiezSkalePodgladu()
-                PrzygotujPodsumowanie()
+                _styl.ZestawNiestandardowy = Nothing
+                PokazSzczegolySzablonu(_styl.Szablon, True)
+                If _biezacyKrok = 4 Then PrzygotujPodsumowanie()
             End If
         End Using
     End Sub

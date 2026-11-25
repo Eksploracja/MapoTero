@@ -124,14 +124,20 @@ Public Class StylKreatora
         Dim zestaw As ZestawWarstw
         If ZestawNiestandardowy IsNot Nothing Then
             zestaw = ZestawNiestandardowy.Kopia()
+        ElseIf PlanWlasny IsNot Nothing AndAlso PlanWlasny.Count > 0 Then
+            Dim plan = If(stopien IsNot Nothing, PlanWlasny.FirstOrDefault(Function(ps) ps.Stopien Is stopien), Nothing)
+            If plan Is Nothing Then
+                plan = If(piksel <= 0,
+                          PlanWlasny.OrderBy(Function(ps) ps.Piksel).First(),
+                          PlanWlasny.OrderBy(Function(ps) Math.Abs(Math.Log(piksel / Math.Max(0.001, ps.Piksel)))).First())
+            End If
+            Return UtworzZestawStopnia(plan)
         ElseIf Szablon Is Nothing Then
             Return New ZestawWarstw()
         ElseIf CzyWlasnyZestaw Then
             Dim zOkna = ZestawZOknaGlownego()
             zestaw = If(zOkna IsNot Nothing, zOkna.Kopia(), New ZestawWarstw())
         Else
-            Dim plan = If(stopien Is Nothing, Nothing, PlanWlasny?.FirstOrDefault(Function(ps) ps.Stopien Is stopien))
-            If plan IsNot Nothing Then Return UtworzZestawStopnia(plan)
             Dim warstwy = SzablonMapy.BezGrup(If(stopien Is Nothing, Szablon.WarstwyDlaPiksela(piksel), stopien.Warstwy), WylaczoneGrupy)
             zestaw = Szablon.UtworzZestaw(ZrodlaMap(), warstwy)
             ZastosujRegulacje(zestaw, warstwy)
@@ -198,6 +204,14 @@ Public Class StylKreatora
                     wykryte.Add(New KeyValuePair(Of RodzajRegulacji, Integer)(r, zestawWlasny(i).Krycie))
                 End If
             Next
+        ElseIf PlanWlasny IsNot Nothing AndAlso PlanWlasny.Count > 0 Then
+            Dim najdokladniejszy = PlanWlasny.OrderBy(Function(ps) ps.Piksel).First().WarstwyEfektywne
+            For i = 0 To najdokladniejszy.Count - 1
+                Dim r = ZarzadcaSzablonow.RegulacjaWarstwy(najdokladniejszy(i), i)
+                If r <> RodzajRegulacji.Brak AndAlso Not wykryte.Any(Function(kv) kv.Key = r) Then
+                    wykryte.Add(New KeyValuePair(Of RodzajRegulacji, Integer)(r, najdokladniejszy(i).Krycie))
+                End If
+            Next
         Else
             wykryte = ZarzadcaSzablonow.RegulacjeSzablonu(Szablon)
         End If
@@ -217,6 +231,10 @@ Public Class StylKreatora
     ''' <summary>Grupy warstw z polami wyboru w kroku 3 (zestaw własny ich nie ma).</summary>
     Public Function GrupyDoWyboru() As List(Of String)
         If Szablon Is Nothing OrElse ZestawSuwakow() IsNot Nothing Then Return New List(Of String)()
+        If PlanWlasny IsNot Nothing AndAlso PlanWlasny.Count > 0 Then
+            Return PlanWlasny.SelectMany(Function(ps) ps.WarstwyEfektywne).
+                Select(Function(w) w.Grupa).Where(Function(g) Not String.IsNullOrEmpty(g)).Distinct().ToList()
+        End If
         Return Szablon.GrupyWarstw()
     End Function
 
@@ -226,15 +244,50 @@ Public Class StylKreatora
     ''' wieloskalowym dopiero po potwierdzeniu, bo wtedy wszystkie powiększenia dostaną jedną kompozycję.
     ''' </summary>
     Public Function PrzyjmijZestawOkna(przed As ZestawWarstw, po As ZestawWarstw, potwierdzJednaKompozycja As Func(Of Boolean)) As ZmianaZestawuOkna
-        If przed.TaSamaKompozycja(po) AndAlso Not CzyWlasnyZestaw AndAlso ZestawNiestandardowy Is Nothing Then
+        If przed.TaSamaKompozycja(po) AndAlso Not CzyWlasnyZestaw AndAlso ZestawNiestandardowy Is Nothing AndAlso PlanWlasny Is Nothing Then
             ZmianyWygladu.Zapisz(przed, po)
             Return ZmianaZestawuOkna.ZmianaWygladu
         End If
-        If Szablon IsNot Nothing AndAlso Szablon.Wieloskalowy AndAlso ZestawNiestandardowy Is Nothing AndAlso
-           (potwierdzJednaKompozycja Is Nothing OrElse Not potwierdzJednaKompozycja()) Then Return ZmianaZestawuOkna.Brak
+        If (PlanWlasny IsNot Nothing AndAlso PlanWlasny.Count > 1) OrElse
+           (Szablon IsNot Nothing AndAlso Szablon.Wieloskalowy AndAlso ZestawNiestandardowy Is Nothing) Then
+            If potwierdzJednaKompozycja Is Nothing OrElse Not potwierdzJednaKompozycja() Then Return ZmianaZestawuOkna.Brak
+        End If
+        PlanWlasny = Nothing
         ZestawNiestandardowy = po
         Return ZmianaZestawuOkna.ZestawNiestandardowy
     End Function
+
+    ''' <summary>
+    ''' Aktualizuje skład warstw wyłącznie dla wskazanego stopnia skali (materializuje roboczy <see cref="PlanWlasny"/>,
+    ''' aby nie modyfikować wbudowanych szablonów ani pozostałych skal).
+    ''' </summary>
+    Public Sub PrzyjmijZestawDlaSkali(stopien As StopienSkali, po As ZestawWarstw, pikselAktualny As Double,
+                                      szerokoscGeo As Double, Optional zOrtofotomapa As Boolean = False)
+        If po Is Nothing Then Exit Sub
+        Dim planRoboczy = PlanDoEdycjiSkal(pikselAktualny, szerokoscGeo, zOrtofotomapa)
+        Dim wzorce = If(Szablon IsNot Nothing,
+                        Szablon.Warstwy.Concat(Szablon.StopnieSkali.SelectMany(Function(st) st.Warstwy)).ToList(),
+                        New List(Of WarstwaSzablonu)())
+        Dim noweWarstwy = po.Warstwy.Select(
+            Function(w) WarstwaSzablonu.ZWarstwyWybranej(w, wzorce.FirstOrDefault(Function(x) String.Equals(x.Zbior, w.Zbior, StringComparison.OrdinalIgnoreCase) AndAlso
+                                                                                               String.Equals(x.Warstwa, w.Nazwa, StringComparison.OrdinalIgnoreCase)))).ToList()
+        Dim cel = If(stopien IsNot Nothing,
+                     planRoboczy.FirstOrDefault(Function(ps) ps.Stopien Is stopien OrElse String.Equals(ps.Stopien?.Opis, stopien.Opis, StringComparison.OrdinalIgnoreCase)),
+                     planRoboczy.OrderBy(Function(ps) ps.Piksel).FirstOrDefault())
+        If cel IsNot Nothing Then
+            Dim klonStopnia = New StopienSkali With {
+                .Opis = If(cel.Stopien?.Opis, "podstawowa"),
+                .Piksel = cel.Piksel,
+                .Opcjonalny = If(cel.Stopien?.Opcjonalny, False)
+            }
+            klonStopnia.Warstwy.AddRange(noweWarstwy)
+            cel.Stopien = klonStopnia
+            cel.Warstwy = New List(Of WarstwaSzablonu)(noweWarstwy)
+        End If
+        ZestawNiestandardowy = Nothing
+        ZmianyWygladu = New ZestawWarstw.ZmianyWygladu()
+        PlanWlasny = planRoboczy
+    End Sub
 
     ''' <summary>Warstwy zestawu z kryciem, np. „TOPO + ISOK_Cien (60%)”.</summary>
     Public Shared Function OpisZestawu(zestaw As ZestawWarstw) As String
@@ -246,6 +299,15 @@ Public Class StylKreatora
     Public Function OpisSkladu() As String
         If Szablon Is Nothing Then Return ""
         If ZestawNiestandardowy IsNot Nothing Then Return OpisZestawu(ZestawNiestandardowy)
+        If PlanWlasny IsNot Nothing AndAlso PlanWlasny.Count > 0 Then
+            Dim najdokladniejszy = PlanWlasny.OrderBy(Function(ps) ps.Piksel).First()
+            Dim opis = OpisZestawu(UtworzZestawStopnia(najdokladniejszy))
+            Dim glowne = PlanWlasny.Where(Function(ps) ps.Stopien Is Nothing OrElse Not ps.Stopien.Opcjonalny).ToList()
+            If glowne.Count > 1 Then
+                opis &= vbCrLf & "Skale: " & String.Join(" → ", glowne.Select(Function(ps) ps.Stopien?.Opis))
+            End If
+            Return opis
+        End If
         If CzyWlasnyZestaw Then
             Dim z = ZestawZOknaGlownego()
             Return If(z IsNot Nothing AndAlso z.Liczba > 0, OpisZestawu(z), "(w oknie głównym nie wybrano jeszcze żadnej warstwy)")
@@ -275,9 +337,17 @@ Public Class StylKreatora
         Return format = RodzajEksportu.MBTiles OrElse format = RodzajEksportu.SQLiteDB OrElse format = RodzajEksportu.Jnx
     End Function
 
+    ''' <summary>Czy styl ma więcej niż jedną skalę (fabrycznie albo z własnego planu skal).</summary>
+    Public ReadOnly Property CzyWieloskalowy As Boolean
+        Get
+            If PlanWlasny IsNot Nothing AndAlso PlanWlasny.Count > 1 Then Return True
+            Return Szablon IsNot Nothing AndAlso Szablon.Wieloskalowy AndAlso ZestawNiestandardowy Is Nothing
+        End Get
+    End Property
+
     ''' <summary>Czy styl i format pozwalają utworzyć mapę wieloskalową (pole „Mapa wieloskalowa” widoczne).</summary>
     Public Function MozliwaWieloskalowa(format As RodzajEksportu) As Boolean
-        Return Szablon IsNot Nothing AndAlso Szablon.Wieloskalowy AndAlso ZestawNiestandardowy Is Nothing AndAlso FormatWieloskalowy(format)
+        Return CzyWieloskalowy AndAlso FormatWieloskalowy(format)
     End Function
 
     ''' <summary>Czy kreator utworzy mapę wieloskalową (osobne pobranie każdego stopnia skali).</summary>
@@ -295,11 +365,40 @@ Public Class StylKreatora
         Return PlanAutomatyczny(piksel, szerokoscGeo, zOrtofotomapa)
     End Function
 
+    ''' <summary>
+    ''' Plan do otwarcia okna „Ustawienia skal” — dla stylu jednoskalowego lub własnego zestawu tworzy początkowy stopień
+    ''' z aktualnych warstw, aby użytkownik mógł dopisać kolejne skale.
+    ''' </summary>
+    Public Function PlanDoEdycjiSkal(piksel As Double, szerokoscGeo As Double, zOrtofotomapa As Boolean) As List(Of PlanStopnia)
+        If PlanWlasny IsNot Nothing AndAlso PlanWlasny.Count > 0 Then
+            Return PlanWlasny.Select(Function(ps) ps.Kopia()).ToList()
+        End If
+        If Szablon IsNot Nothing AndAlso Szablon.Wieloskalowy AndAlso ZestawNiestandardowy Is Nothing Then
+            Return PlanAutomatyczny(piksel, szerokoscGeo, zOrtofotomapa)
+        End If
+        Dim zestaw = UtworzZestaw(piksel)
+        Dim p = If(piksel > 0, piksel, PikselDomyslny(0))
+        Dim zakres = ZarzadcaSzablonow.ZalecanyZakresPowiekszen(p, szerokoscGeo)
+        Dim stopien As New StopienSkali With {.Opis = "podstawowa", .Piksel = p}
+        stopien.Warstwy.AddRange(zestaw.Warstwy.Select(Function(w) WarstwaSzablonu.ZWarstwyWybranej(w)))
+        Return New List(Of PlanStopnia) From {
+            New PlanStopnia With {
+                .Stopien = stopien,
+                .Piksel = p,
+                .PoziomMin = zakres.Item1,
+                .PoziomMax = zakres.Item2,
+                .Warstwy = New List(Of WarstwaSzablonu)(stopien.Warstwy)
+            }
+        }
+    End Function
+
     ''' <summary>Skale do wyboru na liście podglądu (poza „Skala automatyczna”).</summary>
     Public Function StopniePodgladu() As List(Of StopienSkali)
         If Szablon Is Nothing OrElse ZestawNiestandardowy IsNot Nothing Then Return New List(Of StopienSkali)()
-        If PlanWlasny Is Nothing Then Return Szablon.StopnieSkali.ToList()
-        Return PlanWlasny.Select(Function(ps) ps.Stopien).ToList()
+        If PlanWlasny IsNot Nothing AndAlso PlanWlasny.Count > 0 Then
+            Return PlanWlasny.Select(Function(ps) ps.Stopien).Where(Function(st) st IsNot Nothing).ToList()
+        End If
+        Return Szablon.StopnieSkali.ToList()
     End Function
 
     ''' <summary>
@@ -308,16 +407,23 @@ Public Class StylKreatora
     ''' Nothing - okno pokazuje warstwy podglądu (skala wybrana ręcznie, mapa jednoskalowa, zestaw własny).
     ''' </summary>
     Public Function StopienOknaWarstw(stopienPodgladu As StopienSkali) As StopienSkali
-        If stopienPodgladu IsNot Nothing OrElse Szablon Is Nothing OrElse Not Szablon.Wieloskalowy Then Return Nothing
-        If ZestawNiestandardowy IsNot Nothing OrElse CzyWlasnyZestaw Then Return Nothing
+        If stopienPodgladu IsNot Nothing OrElse Szablon Is Nothing OrElse ZestawNiestandardowy IsNot Nothing Then Return Nothing
         If PlanWlasny IsNot Nothing AndAlso PlanWlasny.Count > 0 Then Return PlanWlasny.OrderBy(Function(ps) ps.Piksel).First().Stopien
+        If Not Szablon.Wieloskalowy OrElse CzyWlasnyZestaw Then Return Nothing
         Return If(Szablon.StopnieGlowne.FirstOrDefault(), Szablon.StopnieSkali.FirstOrDefault())
     End Function
 
     ''' <summary>Status gotowej próbki stylu: skala pokazywana w podglądzie stylu wieloskalowego.</summary>
     Public Function OpisSkaliPodgladu(stopienPodgladu As StopienSkali, pikselPodgladu As Double) As String
-        If Szablon Is Nothing OrElse Not Szablon.Wieloskalowy OrElse ZestawNiestandardowy IsNot Nothing Then Return "Podgląd gotowy"
-        Dim st = If(stopienPodgladu, Szablon.StopienDlaPiksela(pikselPodgladu))
+        If Not CzyWieloskalowy Then Return "Podgląd gotowy"
+        Dim st = stopienPodgladu
+        If st Is Nothing Then
+            If PlanWlasny IsNot Nothing AndAlso PlanWlasny.Count > 0 Then
+                st = PlanWlasny.OrderBy(Function(ps) Math.Abs(Math.Log(Math.Max(0.05, pikselPodgladu) / Math.Max(0.001, ps.Piksel)))).First().Stopien
+            Else
+                st = Szablon?.StopienDlaPiksela(pikselPodgladu)
+            End If
+        End If
         Return If(st Is Nothing, "Podgląd gotowy", "Skala " & st.Opis)
     End Function
 
@@ -422,10 +528,16 @@ Public Class StylKreatora
         Dim konwertuj = Function(zestaw As ZestawWarstw) zestaw.Warstwy.Select(
             Function(w) WarstwaSzablonu.ZWarstwyWybranej(w, wzorce.FirstOrDefault(Function(x) String.Equals(x.Zbior, w.Zbior, StringComparison.OrdinalIgnoreCase) AndAlso
                                                                                                String.Equals(x.Warstwa, w.Nazwa, StringComparison.OrdinalIgnoreCase)))).ToArray()
-        If baza.Wieloskalowy AndAlso ZestawNiestandardowy Is Nothing Then
-            Dim skale = If(PlanWlasny IsNot Nothing AndAlso PlanWlasny.Count > 0,
+        Dim maPlanWlasny = PlanWlasny IsNot Nothing AndAlso PlanWlasny.Count > 0 AndAlso ZestawNiestandardowy Is Nothing
+        If (baza.Wieloskalowy AndAlso ZestawNiestandardowy Is Nothing) OrElse (maPlanWlasny AndAlso PlanWlasny.Count > 1) Then
+            Dim skale = If(maPlanWlasny,
                            PlanWlasny.Select(Function(ps) Tuple.Create(ps.Stopien, ps.Piksel)).ToList(),
                            baza.StopnieSkali.Select(Function(st) Tuple.Create(st, st.Piksel)).ToList())
+            Dim glownePiksele = skale.Where(Function(t) t.Item1 IsNot Nothing AndAlso Not t.Item1.Opcjonalny).ToList()
+            If glownePiksele.Count > 0 Then
+                s.DomyslnyPiksel = glownePiksele.Min(Function(t) t.Item2)
+                s.ProbkaPiksel = s.DomyslnyPiksel
+            End If
             For Each sk In skale.OrderBy(Function(t) If(t.Item1.Opcjonalny, 1, 0)).ThenBy(Function(t) t.Item2)
                 Dim warstwy = konwertuj(UtworzZestaw(0, sk.Item1))
                 If warstwy.Length = 0 Then Continue For

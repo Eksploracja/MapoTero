@@ -380,4 +380,97 @@ Public Class ZestawWarstwTesty
         Assert.Equal(300 * 300, piksele.Length)
     End Function
 
+    <Fact>
+    Public Sub RozpoznajRole_RozrozniaPodkladCieniowanieHipsometrieINakladki()
+        Assert.Equal(RolaWarstwy.Podklad, ZestawWarstw.RozpoznajRole("ortofotomapa_WMTS", "ORTOFOTOMAPA"))
+        Assert.Equal(RolaWarstwy.Podklad, ZestawWarstw.RozpoznajRole("OpenTopoMap", "opentopomap"))
+        Assert.Equal(RolaWarstwy.Podklad, ZestawWarstw.RozpoznajRole("BDOO_WMTS", "BDOOCieniowanie"))
+        Assert.Equal(RolaWarstwy.Podklad, ZestawWarstw.RozpoznajRole("numer_mod_terenu_WMTS", "HipsoCien"))
+
+        Assert.Equal(RolaWarstwy.Cieniowanie, ZestawWarstw.RozpoznajRole("numer_mod_terenu_cieniowanie_WMTS", "ISOK_Cien"))
+        Assert.Equal(RolaWarstwy.Cieniowanie, ZestawWarstw.RozpoznajRole("slowacja_dmr_wms", "0"))
+        Assert.Equal(RolaWarstwy.Cieniowanie, ZestawWarstw.RozpoznajRole("wlasny_serwer", "moje_hillshade"))
+
+        Assert.Equal(RolaWarstwy.Hipsometria, ZestawWarstw.RozpoznajRole("numer_mod_terenu_hipsometria_WMTS", "Hipsometria"))
+
+        Assert.Equal(RolaWarstwy.Nakladka, ZestawWarstw.RozpoznajRole("dzialki_ewid_EGIB", "dzialki"))
+        Assert.Equal(RolaWarstwy.Nakladka, ZestawWarstw.RozpoznajRole("uzbrojenie_terenu_KIUT", "przewod_wodociagowy"))
+        Assert.Equal(RolaWarstwy.Nakladka, ZestawWarstw.RozpoznajRole("Waymarked_Trails", "hiking"))
+        Assert.Equal(RolaWarstwy.Nakladka, ZestawWarstw.RozpoznajRole("baltyk_batymetria_wms", "emodnet:contours"))
+        Assert.Equal(RolaWarstwy.Podklad, ZestawWarstw.RozpoznajRole("baltyk_batymetria_wms", "emodnet:mean_atlas_land"))
+    End Sub
+
+    <Fact>
+    Public Sub UlozAutomatycznie_PorzadkujeRoleIDobieraDomyslneTryby()
+        Dim z As New ZestawWarstw()
+        ' Kolejność odwrócona: nakładka EGiB -> hipsometria -> cieniowanie -> podkład
+        z.Dodaj("dzialki", adres:="https://egib.example/wms", zbior:="dzialki_ewid_EGIB")
+        z.Dodaj("Hipsometria", adres:="https://hipso.example/wmts", zbior:="numer_mod_terenu_hipsometria_WMTS")
+        z.Dodaj("ISOK_Cien", adres:="https://cien.example/wmts", zbior:="numer_mod_terenu_cieniowanie_WMTS")
+        z.Dodaj("ORTOFOTOMAPA", adres:="https://orto.example/wmts", zbior:="ortofotomapa_WMTS")
+
+        Assert.True(z.UlozAutomatycznie())
+        Assert.Equal({"ORTOFOTOMAPA", "ISOK_Cien", "Hipsometria", "dzialki"}, z.Nazwy())
+
+        Assert.Equal(TrybMieszania.Zwykly, z(0).TrybMieszania)
+        Assert.Equal(100, z(0).Krycie)
+        Assert.Equal(TrybMieszania.RzezbaTerenu, z(1).TrybMieszania)
+        Assert.Equal(70, z(1).Krycie)
+        Assert.Equal(TrybMieszania.Mnozenie, z(2).TrybMieszania)
+        Assert.Equal(50, z(2).Krycie)
+        Assert.Equal(TrybMieszania.Zwykly, z(3).TrybMieszania)
+        Assert.Equal(100, z(3).Krycie)
+
+        ' Ponowne wywołanie nie wprowadza zmian
+        Assert.False(z.UlozAutomatycznie())
+    End Sub
+
+    <Fact>
+    Public Sub UlozAutomatycznie_NieZmieniaPojedynczejWarstwyAniRecznychUstawien()
+        Dim pojedyncze As New ZestawWarstw()
+        pojedyncze.Dodaj("ISOK_Cien", adres:="https://cien.example/wmts", zbior:="numer_mod_terenu_cieniowanie_WMTS")
+        Assert.False(pojedyncze.UlozAutomatycznie())
+        Assert.Equal(100, pojedyncze(0).Krycie)
+        Assert.Equal(TrybMieszania.Zwykly, pojedyncze(0).TrybMieszania)
+
+        Dim reczne As New ZestawWarstw()
+        reczne.Dodaj("ISOK_Cien", krycie:=90, adres:="https://cien.example/wmts", zbior:="numer_mod_terenu_cieniowanie_WMTS", trybMieszania:=TrybMieszania.Mnozenie)
+        reczne.Dodaj("opentopomap", adres:="https://opentopo.example/{z}/{x}/{y}.png", zbior:="OpenTopoMap")
+        Assert.True(reczne.UlozAutomatycznie())
+        Assert.Equal({"opentopomap", "ISOK_Cien"}, reczne.Nazwy())
+        ' Zachowane ręczne ustawienia cieniowania oraz pełny tryb OpenTopoMap
+        Assert.Equal(TrybMieszania.Zwykly, reczne(0).TrybMieszania)
+        Assert.Equal(100, reczne(0).Krycie)
+        Assert.Equal(TrybMieszania.Mnozenie, reczne(1).TrybMieszania)
+        Assert.Equal(90, reczne(1).Krycie)
+    End Sub
+
+    <Fact>
+    Public Sub OstrzezenieKolejnosci_UwzgledniaTrybMieszaniaICieniowanie()
+        Dim z As New ZestawWarstw()
+        z.Dodaj("hiking", adres:="https://tile.waymarkedtrails.org/{layer}/{z}/{x}/{y}.png", typZrodla:=TypUslugiMapowej.Xyz, nakladka:=True)
+        z.Dodaj("osmapa", adres:="https://osmapa.example/{z}/{x}/{y}.png", typZrodla:=TypUslugiMapowej.Xyz, trybMieszania:=TrybMieszania.Mnozenie)
+        ' Tryb Mnożenie (100%) nie zasłania nakładki pod spodem
+        Assert.Null(z.ZnajdzPrzykrytaNakladke())
+
+        Dim zCien As New ZestawWarstw()
+        zCien.Dodaj("ISOK_Cien", adres:="https://cien.example/wmts", zbior:="numer_mod_terenu_cieniowanie_WMTS")
+        zCien.Dodaj("ORTOFOTOMAPA", adres:="https://orto.example/wmts", zbior:="ortofotomapa_WMTS")
+        Assert.Contains("Ułóż automatycznie", zCien.OstrzezenieKolejnosci())
+
+        Assert.True(zCien.UlozAutomatycznie())
+        Assert.Equal("", zCien.OstrzezenieKolejnosci())
+    End Sub
+
+    <Fact>
+    Public Sub Dodaj_WsuwaPodkladPodCieniowanieINakladki()
+        Dim z As New ZestawWarstw()
+        z.Dodaj("ISOK_Cien", krycie:=70, adres:="https://cien.example/wmts", zbior:="numer_mod_terenu_cieniowanie_WMTS",
+                umiescPodNakladkami:=True, trybMieszania:=TrybMieszania.RzezbaTerenu)
+        z.Dodaj("dzialki", adres:="https://egib.example/wms", zbior:="dzialki_ewid_EGIB", umiescPodNakladkami:=True)
+        z.Dodaj("ORTOFOTOMAPA", adres:="https://orto.example/wmts", zbior:="ortofotomapa_WMTS", umiescPodNakladkami:=True)
+
+        Assert.Equal({"ORTOFOTOMAPA", "ISOK_Cien", "dzialki"}, z.Nazwy())
+    End Sub
+
 End Class
