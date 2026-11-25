@@ -295,6 +295,24 @@ Public Class FormKreatorMapy
         For Each c As Control In New Control() {lblStanPodgladuStyl, btnZoomMinusStyl, lblZoomStyl, btnZoomPlusStyl, btnZoomResetStyl, btnOdswiezStyl}
             c.Top -= 11
         Next
+        ' „100%” zamiast „1:1”: na mapie „1:1” czyta się jak skalę mapy, a chodzi o rzeczywistą wielkość pikseli (audyt ER-22);
+        ' odświeżanie ikoną zamiast skrótu „Odśw.” (ER-23).
+        Dim czcionkaMala As New Font("Segoe UI", 7.5!)
+        AddHandler Disposed, Sub() czcionkaMala.Dispose()
+        For Each b In {btnZoomResetStyl, btnZoomResetObszar}
+            b.Text = "100%"
+            b.Font = czcionkaMala
+            _podpowiedzi.SetToolTip(b, "Rzeczywista wielkość pikseli (100%) i powrót na środek obszaru.")
+        Next
+        btnOdswiezStyl.Text = ChrW(&H27F3)
+        btnOdswiezStyl.Font = New Font("Segoe UI Symbol", 10.0!)
+        btnOdswiezStyl.AccessibleName = "Odśwież podgląd"
+        _podpowiedzi.SetToolTip(btnOdswiezStyl, "Odśwież podgląd")
+        rbCelTelefon.Text = "Smartfon lub tablet (Locus Map, OsmAnd, OruxMaps, QField)"
+        rbCelWydruk.Text = "Arkusz do druku, Avenza Maps lub przeglądania na komputerze"
+        rbCelCadGis.Text = "Program GIS na komputerze (QGIS, ArcGIS)"
+        ' Dawniej cel GIS obiecywał też „aplikacje mobilne (QField, Avenza)” - pokrywał się z celem smartfona (ER-20).
+        lblOpisCelCadGis.Text = "Arkusz GeoTIFF z georeferencją w układzie PL-1992 jako podkład w QGIS lub ArcGIS."
         picPodgladStylu.Location = New Point(14, 169)
         picPodgladStylu.Size = New Size(374, 211)
         ' Przycisk dużego podglądu w dolnym wierszu obok listy skal (nad obrazem podglądu zasłaniałby mapę)
@@ -304,11 +322,11 @@ Public Class FormKreatorMapy
         AddHandler btnDuzyPodglad.Click, Sub() PokazDuzyPodglad()
         AddHandler picPodgladStylu.DoubleClick, Sub() PokazDuzyPodglad()
         grpSzczegolySzablonu.Controls.Add(btnDuzyPodglad)
-        _podpowiedzi.SetToolTip(btnDuzyPodglad, "Duży podgląd w skali 1:1 - pozwala ocenić czytelność napisów (także podwójne kliknięcie podglądu).")
+        _podpowiedzi.SetToolTip(btnDuzyPodglad, "Duży podgląd w rzeczywistej wielkości pikseli (100%) - pozwala ocenić czytelność napisów (także podwójne kliknięcie podglądu).")
         For Each c As Control In New Control() {lblStanPodgladuStyl, btnZoomMinusStyl, lblZoomStyl, btnZoomPlusStyl, btnZoomResetStyl, btnOdswiezStyl, picPodgladStylu}
             _topyWierszaStanu(c) = c.Top
         Next
-        btnDostosujWarstwy.Text = "Dostosuj warstwy..."
+        btnDostosujWarstwy.Text = "Mikser warstw..."
         btnDostosujWarstwy.Width = 124
         btnSkaleStylu = New Button With {.Name = "btnSkaleStylu", .Text = "Edytuj skale...",
                                          .Location = New Point(142, 386), .Size = New Size(88, 25),
@@ -328,26 +346,26 @@ Public Class FormKreatorMapy
 
         ' Własne szablony: zapis bieżącej kompozycji pod nazwą, usuwanie oraz eksport/import .mapotero.json
         lstSzablony.Height = 360
-        btnZapiszStyl = New Button With {.Name = "btnZapiszStyl", .Text = "Zapisz szablon...", .Location = New Point(lstSzablony.Left, lstSzablony.Bottom + 6),
+        btnZapiszStyl = New Button With {.Name = "btnZapiszStyl", .Text = "Zapisz styl...", .Location = New Point(lstSzablony.Left, lstSzablony.Bottom + 6),
                                          .Size = New Size(148, 28), .UseVisualStyleBackColor = True}
         btnUsunStyl = New Button With {.Name = "btnUsunStyl", .Text = "Usuń", .Location = New Point(lstSzablony.Left + 154, lstSzablony.Bottom + 6),
                                        .Size = New Size(76, 28), .UseVisualStyleBackColor = True, .Enabled = False}
         btnUdostepnijStyl = New Button With {.Name = "btnUdostepnijStyl", .Text = "Plik / JSON ▾", .Location = New Point(lstSzablony.Left + 236, lstSzablony.Bottom + 6),
                                              .Size = New Size(lstSzablony.Width - 236, 28), .UseVisualStyleBackColor = True}
         mnuUdostepnijStyl = New ContextMenuStrip()
-        mnuUdostepnijStyl.Items.Add("Eksportuj szablon do pliku (.mapotero.json)...", Nothing, AddressOf mnuEksportujStylPlik_Click)
-        mnuUdostepnijStyl.Items.Add("Kopiuj przepis (JSON) do schowka", Nothing, AddressOf mnuKopiujStylSchowek_Click)
+        mnuUdostepnijStyl.Items.Add("Eksportuj styl do pliku (.mapotero.json)...", Nothing, AddressOf mnuEksportujStylPlik_Click)
+        mnuUdostepnijStyl.Items.Add("Kopiuj styl (JSON) do schowka", Nothing, AddressOf mnuKopiujStylSchowek_Click)
         mnuUdostepnijStyl.Items.Add(New ToolStripSeparator())
-        mnuUdostepnijStyl.Items.Add("Importuj szablon z pliku (.mapotero.json)...", Nothing, AddressOf mnuImportujStylPlik_Click)
-        mnuUdostepnijStyl.Items.Add("Wklej przepis (JSON) ze schowka", Nothing, AddressOf mnuWklejStylSchowek_Click)
+        mnuUdostepnijStyl.Items.Add("Importuj styl z pliku (.mapotero.json)...", Nothing, AddressOf mnuImportujStylPlik_Click)
+        mnuUdostepnijStyl.Items.Add("Wklej styl (JSON) ze schowka", Nothing, AddressOf mnuWklejStylSchowek_Click)
         AddHandler btnZapiszStyl.Click, AddressOf btnZapiszStyl_Click
         AddHandler btnUsunStyl.Click, AddressOf btnUsunStyl_Click
         AddHandler btnUdostepnijStyl.Click, Sub() mnuUdostepnijStyl.Show(btnUdostepnijStyl, New Point(0, btnUdostepnijStyl.Height))
         lstSzablony.ContextMenuStrip = mnuUdostepnijStyl
         lstSzablony.Parent.Controls.AddRange({btnZapiszStyl, btnUsunStyl, btnUdostepnijStyl})
-        _podpowiedzi.SetToolTip(btnZapiszStyl, "Zapisuje bieżący skład warstw z kryciem, trybami mieszania i skalami jako własny szablon na liście - także po ponownym uruchomieniu programu.")
-        _podpowiedzi.SetToolTip(btnUsunStyl, "Usuwa zaznaczony szablon zapisany przez Ciebie (wbudowanych szablonów nie można usunąć).")
-        _podpowiedzi.SetToolTip(btnUdostepnijStyl, "Eksportuje albo importuje szablon (także wieloskalowy) w formacie .mapotero.json przez plik lub schowek.")
+        _podpowiedzi.SetToolTip(btnZapiszStyl, "Zapisuje bieżący skład warstw z kryciem, trybami mieszania i skalami jako własny styl na liście - także po ponownym uruchomieniu programu.")
+        _podpowiedzi.SetToolTip(btnUsunStyl, "Usuwa zaznaczony styl zapisany przez Ciebie (wbudowanych stylów nie można usunąć).")
+        _podpowiedzi.SetToolTip(btnUdostepnijStyl, "Eksportuje albo importuje styl (także wieloskalowy) w formacie .mapotero.json przez plik lub schowek.")
         _podpowiedzi.SetToolTip(cboSkalaPodgladu, "Przełącza skalę wyświetlaną wyłącznie w podglądzie powyżej (nie zmienia skal pliku wynikowego).")
 
         ' Uwagi o pokryciu map (np. arkusze 1:25 000 tylko dla części kraju) pod treścią kroków 2, 3 i 4
@@ -429,7 +447,7 @@ Public Class FormKreatorMapy
         cboProfilKorekty.Visible = False
         _podpowiedzi.SetToolTip(chkKorektaObrazu, "Włącz korektę obrazu (kontrast, wyostrzenie, filtr MIP), aby aktywować podgląd i wybór profilu.")
         _podpowiedzi.SetToolTip(btnDostosujKorekte, "Okno korekty obrazu: profil (np. Garmin MIP), suwaki i podgląd; przycisk „Resetuj korektę”” przywraca obraz bez zmian.")
-        chkWlasnyZoom.Text = "Własny zakres powiększeń (zoom) kafli:"
+        chkWlasnyZoom.Text = "Własny zakres powiększeń kafli:"
         chkWlasnyZoom.Location = New Point(16, 52)
         lblZoomMin.Location = New Point(330, 54)
         numZoomMin.Location = New Point(398, 51)
@@ -705,12 +723,12 @@ Public Class FormKreatorMapy
                 AktualizujPodgladObszaru()
 
             Case 3
-                lblTytulKroku.Text = "Krok 3 z 4: Wybierz szablon mapy"
+                lblTytulKroku.Text = "Krok 3 z 4: Wybierz styl mapy"
                 lblPodtytulKroku.Text = If(CzyPominacKrokObszaru(),
                                            "Obszar zaznaczony na mapie: " & ObszarKreatora.FormatujWymiary(_wybranyZasieg) & ". Inny obszar wybierzesz, klikając „Obszar”” na pasku kroków.",
                                            If(_wybranyZasieg.Poprawny,
-                                              "Gotowe szablony i zestawy warstw. Podgląd pokazuje środek Twojego obszaru - możesz go przesuwać i oddalać myszką.",
-                                              "Gotowe szablony i zestawy warstw. Bez wybranego obszaru podgląd pokazuje przykładowy fragment szablonu."))
+                                              "Gotowe style mapy. Podgląd pokazuje środek Twojego obszaru - możesz go przesuwać i oddalać myszką.",
+                                              "Gotowe style mapy. Bez wybranego obszaru podgląd pokazuje przykładowy fragment stylu."))
                 btnWstecz.Enabled = True
                 btnDalej.Visible = True
                 btnGeneruj.Visible = False
@@ -939,7 +957,7 @@ Public Class FormKreatorMapy
         btnOtworzWieloskalowy.Visible = mbtiles AndAlso Not mozliwaWieloskalowa
         lblWieloskalowyOpis.Visible = mbtiles AndAlso Not mozliwaWieloskalowa
         If mbtiles Then
-            lblWieloskalowyOpis.Text = "Warstwy: " & StylKreatora.OpisZestawu(zestaw) & vbCrLf & "Podgląd kafli na różnych zoomach, krycie i tryby mieszania warstw."
+            lblWieloskalowyOpis.Text = "Warstwy: " & StylKreatora.OpisZestawu(zestaw) & vbCrLf & "Zakresy powiększeń warstw, krycie, mieszanie i podgląd kafli."
         End If
 
         UstawSciezkeDocelowa()
@@ -1024,7 +1042,7 @@ Public Class FormKreatorMapy
                     If rbObszarMiejscowosc.Checked Then
                         wskazowka = "Wpisz nazwę miejscowości, kliknij „Szukaj”” i wybierz wynik z listy."
                     ElseIf rbObszarTrasa.Checked Then
-                        wskazowka = "Kliknij „Wskaż plik trasy…”” i wybierz plik GPX, KML lub KMZ."
+                        wskazowka = "Kliknij „Wybierz plik trasy…”” i wybierz plik GPX, KML lub KMZ."
                     Else
                         wskazowka = "Kliknij „Przejdź do mapy i zaznacz…”” i zaznacz prostokąt na mapie."
                     End If
@@ -1440,7 +1458,7 @@ Public Class FormKreatorMapy
             Dim stary = picPodgladStylu.Image
             picPodgladStylu.Image = Nothing
             stary?.Dispose()
-            lblZoomStyl.Text = "1:1"
+            lblZoomStyl.Text = "100%"
             Exit Sub
         End If
 
@@ -1455,7 +1473,7 @@ Public Class FormKreatorMapy
         picPodgladStylu.Image = powiekszony
         staryImg?.Dispose()
 
-        lblZoomStyl.Text = If(Math.Abs(zoom - 1.0) < 0.01, "1:1", "×" & zoom.ToString("0.0"))
+        lblZoomStyl.Text = If(Math.Abs(zoom - 1.0) < 0.01, "100%", "×" & zoom.ToString("0.0"))
         btnZoomMinusStyl.Enabled = (_indeksZoomuStylu > 0)
         btnZoomPlusStyl.Enabled = (_indeksZoomuStylu < _poziomyZoomu.Length - 1)
         btnZoomResetStyl.Enabled = (_indeksZoomuStylu <> IndeksZoomu1do1 OrElse _wlasnyPunktStylu.HasValue)
@@ -2146,7 +2164,7 @@ Public Class FormKreatorMapy
             Dim stary = picPodgladObszaru.Image
             picPodgladObszaru.Image = Nothing
             stary?.Dispose()
-            lblZoomObszar.Text = "1:1"
+            lblZoomObszar.Text = "100%"
             Exit Sub
         End If
 
@@ -2161,7 +2179,7 @@ Public Class FormKreatorMapy
         picPodgladObszaru.Image = powiekszony
         staryImg?.Dispose()
 
-        lblZoomObszar.Text = If(Math.Abs(zoom - 1.0) < 0.01, "1:1", "×" & zoom.ToString("0.0"))
+        lblZoomObszar.Text = If(Math.Abs(zoom - 1.0) < 0.01, "100%", "×" & zoom.ToString("0.0"))
         btnZoomMinusObszar.Enabled = (_indeksZoomuObszaru > 0)
         btnZoomPlusObszar.Enabled = (_indeksZoomuObszaru < _poziomyZoomu.Length - 1)
         btnZoomResetObszar.Enabled = (_indeksZoomuObszaru <> IndeksZoomu1do1 OrElse _wlasnyPunktObszaru.HasValue)
@@ -2378,23 +2396,23 @@ Public Class FormKreatorMapy
 
     Private Sub btnZapiszStyl_Click(sender As Object, e As EventArgs)
         If _styl.Szablon Is Nothing Then Exit Sub
-        Dim proponowana = If(SzablonyWlasne.CzyWlasny(_styl.Szablon), _styl.Szablon.Nazwa, "Mój szablon - " & _styl.Szablon.Nazwa)
-        Dim nazwa = Microsoft.VisualBasic.Interaction.InputBox("Nazwa szablonu na liście szablonów kreatora:", "Zapisz jako szablon", proponowana).Trim()
+        Dim proponowana = If(SzablonyWlasne.CzyWlasny(_styl.Szablon), _styl.Szablon.Nazwa, "Mój styl - " & _styl.Szablon.Nazwa)
+        Dim nazwa = Microsoft.VisualBasic.Interaction.InputBox("Nazwa stylu na liście stylów kreatora:", "Zapisz jako styl", proponowana).Trim()
         If nazwa = "" Then Exit Sub
-        ZapiszStylWlasny(nazwa, Function(pytanie) MessageBox.Show(pytanie, "Zapisz jako szablon", MessageBoxButtons.YesNo, MessageBoxIcon.Question) = DialogResult.Yes)
+        ZapiszStylWlasny(nazwa, Function(pytanie) MessageBox.Show(pytanie, "Zapisz jako styl", MessageBoxButtons.YesNo, MessageBoxIcon.Question) = DialogResult.Yes)
     End Sub
 
     ''' <summary>Zapisuje bieżącą kompozycję jako szablon i zaznacza go na liście; <paramref name="potwierdz"/> - pytanie o zastąpienie szablonu o tej nazwie.</summary>
     Friend Function ZapiszStylWlasny(nazwa As String, potwierdz As Func(Of String, Boolean)) As SzablonMapy
         Dim styl = UtworzStylWlasny(nazwa)
         If styl Is Nothing OrElse (styl.Warstwy.Count = 0 AndAlso styl.StopnieSkali.Count = 0) Then
-            MessageBox.Show("Szablon nie zawiera żadnej warstwy - nie ma czego zapisać.", "Kreator mapy", MessageBoxButtons.OK, MessageBoxIcon.Information)
+            MessageBox.Show("Styl nie zawiera żadnej warstwy - nie ma czego zapisać.", "Kreator mapy", MessageBoxButtons.OK, MessageBoxIcon.Information)
             Return Nothing
         End If
         Dim lista = ZarzadcaSzablonow.PobierzWlasne().ToList()
         Dim istniejacy = lista.FindIndex(Function(x) String.Equals(x.Nazwa, nazwa, StringComparison.CurrentCultureIgnoreCase))
         If istniejacy >= 0 Then
-            If Not potwierdz("Szablon „" & nazwa & "”” już istnieje. Zastąpić go bieżącą kompozycją?") Then Return Nothing
+            If Not potwierdz("Styl „" & nazwa & "”” już istnieje. Zastąpić go bieżącą kompozycją?") Then Return Nothing
             lista(istniejacy) = styl
         Else
             lista.Add(styl)
@@ -2402,7 +2420,7 @@ Public Class FormKreatorMapy
         Try
             SzablonyWlasne.Zapisz(PlikStylowWlasnych, lista)
         Catch ex As Exception
-            MessageBox.Show("Nie udało się zapisać szablonu: " & OpisBledu.Z(ex), "Kreator mapy", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+            MessageBox.Show("Nie udało się zapisać stylu: " & OpisBledu.Z(ex), "Kreator mapy", MessageBoxButtons.OK, MessageBoxIcon.Warning)
             Return Nothing
         End Try
         ZarzadcaSzablonow.UstawWlasne(lista)
@@ -2416,7 +2434,7 @@ Public Class FormKreatorMapy
     Private Sub btnUsunStyl_Click(sender As Object, e As EventArgs)
         Dim styl = _styl.Szablon
         If Not SzablonyWlasne.CzyWlasny(styl) Then Exit Sub
-        If MessageBox.Show("Usunąć szablon „" & styl.Nazwa & "”” z listy? Tej operacji nie można cofnąć.", "Usuń szablon",
+        If MessageBox.Show("Usunąć styl „" & styl.Nazwa & "”” z listy? Tej operacji nie można cofnąć.", "Usuń styl",
                            MessageBoxButtons.YesNo, MessageBoxIcon.Question) <> DialogResult.Yes Then Exit Sub
         UsunStylWlasny(styl)
     End Sub
@@ -2426,7 +2444,7 @@ Public Class FormKreatorMapy
         Try
             SzablonyWlasne.Zapisz(PlikStylowWlasnych, lista)
         Catch ex As Exception
-            MessageBox.Show("Nie udało się usunąć szablonu: " & OpisBledu.Z(ex), "Kreator mapy", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+            MessageBox.Show("Nie udało się usunąć stylu: " & OpisBledu.Z(ex), "Kreator mapy", MessageBoxButtons.OK, MessageBoxIcon.Warning)
             Exit Sub
         End Try
         ZarzadcaSzablonow.UstawWlasne(lista)
@@ -2446,18 +2464,18 @@ Public Class FormKreatorMapy
     Private Sub mnuEksportujStylPlik_Click(sender As Object, e As EventArgs)
         Dim dane = BudujPrzepisBiezacegoStylu()
         If dane Is Nothing OrElse (dane.Warstwy.Count = 0 AndAlso (dane.Skale Is Nothing OrElse dane.Skale.Count = 0)) Then
-            MessageBox.Show(Me, "Wybierz szablon zawierający warstwy.", "Eksport szablonu", MessageBoxButtons.OK, MessageBoxIcon.Information)
+            MessageBox.Show(Me, "Wybierz styl zawierający warstwy.", "Eksport stylu", MessageBoxButtons.OK, MessageBoxIcon.Information)
             Exit Sub
         End If
         Using dlg As New SaveFileDialog()
-            dlg.Title = "Eksportuj szablon mapy"
+            dlg.Title = "Eksportuj styl mapy"
             dlg.Filter = "Przepis zestawu MapoTero (*.mapotero.json)|*.mapotero.json|Wszystkie pliki (*.*)|*.*"
             dlg.FileName = System.Text.RegularExpressions.Regex.Replace(If(dane.Nazwa, "szablon"), "[^\w\-]+", "_").Trim("_"c) & ".mapotero.json"
             If dlg.ShowDialog(Me) <> DialogResult.OK Then Exit Sub
             Try
                 File.WriteAllText(dlg.FileName, PrzekazZestawu.DoTekstu(dane), New System.Text.UTF8Encoding(False))
             Catch ex As Exception
-                MessageBox.Show(Me, "Nie udało się zapisać pliku: " & OpisBledu.Z(ex), "Eksport szablonu", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+                MessageBox.Show(Me, "Nie udało się zapisać pliku: " & OpisBledu.Z(ex), "Eksport stylu", MessageBoxButtons.OK, MessageBoxIcon.Warning)
             End Try
         End Using
     End Sub
@@ -2468,19 +2486,19 @@ Public Class FormKreatorMapy
         Try
             Clipboard.SetText(PrzekazZestawu.DoTekstu(dane))
         Catch ex As Exception
-            MessageBox.Show(Me, "Nie udało się skopiować przepisu do schowka: " & OpisBledu.Z(ex), "Eksport szablonu", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+            MessageBox.Show(Me, "Nie udało się skopiować stylu do schowka: " & OpisBledu.Z(ex), "Eksport stylu", MessageBoxButtons.OK, MessageBoxIcon.Warning)
         End Try
     End Sub
 
     Private Sub mnuImportujStylPlik_Click(sender As Object, e As EventArgs)
         Using dlg As New OpenFileDialog()
-            dlg.Title = "Importuj szablon mapy"
+            dlg.Title = "Importuj styl mapy"
             dlg.Filter = "Przepis zestawu MapoTero (*.mapotero.json;*.mapotero)|*.mapotero.json;*.mapotero;*.json|Wszystkie pliki (*.*)|*.*"
             If dlg.ShowDialog(Me) <> DialogResult.OK Then Exit Sub
             Try
                 ImportujPrzepisStylu(File.ReadAllText(dlg.FileName, System.Text.Encoding.UTF8))
             Catch ex As Exception
-                MessageBox.Show(Me, "Nie udało się wczytać szablonu: " & OpisBledu.Z(ex), "Import szablonu", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+                MessageBox.Show(Me, "Nie udało się wczytać stylu: " & OpisBledu.Z(ex), "Import stylu", MessageBoxButtons.OK, MessageBoxIcon.Warning)
             End Try
         End Using
     End Sub
@@ -2488,12 +2506,12 @@ Public Class FormKreatorMapy
     Private Sub mnuWklejStylSchowek_Click(sender As Object, e As EventArgs)
         Try
             If Not Clipboard.ContainsText() Then
-                MessageBox.Show(Me, "Schowek nie zawiera tekstu z przepisem JSON.", "Import szablonu", MessageBoxButtons.OK, MessageBoxIcon.Information)
+                MessageBox.Show(Me, "Schowek nie zawiera stylu w formacie JSON.", "Import stylu", MessageBoxButtons.OK, MessageBoxIcon.Information)
                 Exit Sub
             End If
             ImportujPrzepisStylu(Clipboard.GetText())
         Catch ex As Exception
-            MessageBox.Show(Me, "Nie udało się wczytać szablonu ze schowka: " & OpisBledu.Z(ex), "Import szablonu", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+            MessageBox.Show(Me, "Nie udało się wczytać stylu ze schowka: " & OpisBledu.Z(ex), "Import stylu", MessageBoxButtons.OK, MessageBoxIcon.Warning)
         End Try
     End Sub
 
@@ -2522,14 +2540,14 @@ Public Class FormKreatorMapy
 
         If styl Is Nothing Then
             Dim szczegoly = If(pominiete.Count > 0, " (" & String.Join(", ", pominiete) & ")", "")
-            MessageBox.Show(Me, "Nie rozpoznano żadnej warstwy z przepisu" & szczegoly & ".", "Import szablonu", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+            MessageBox.Show(Me, "Nie rozpoznano żadnej warstwy stylu" & szczegoly & ".", "Import stylu", MessageBoxButtons.OK, MessageBoxIcon.Warning)
             Exit Sub
         End If
 
         Dim lista = ZarzadcaSzablonow.PobierzWlasne().ToList()
         Dim istniejacy = lista.FindIndex(Function(x) String.Equals(x.Nazwa, styl.Nazwa, StringComparison.CurrentCultureIgnoreCase))
         If istniejacy >= 0 Then
-            If MessageBox.Show(Me, "Szablon '" & styl.Nazwa & "' już istnieje. Zastąpić go?", "Import szablonu",
+            If MessageBox.Show(Me, "Styl '" & styl.Nazwa & "' już istnieje. Zastąpić go?", "Import stylu",
                                MessageBoxButtons.YesNo, MessageBoxIcon.Question) <> DialogResult.Yes Then Exit Sub
             lista(istniejacy) = styl
         Else
@@ -2542,8 +2560,8 @@ Public Class FormKreatorMapy
         _poczatkowyPlanWlasny = If(planWlasny IsNot Nothing AndAlso planWlasny.Count > 1, planWlasny, Nothing)
         OdswiezListeSzablonow()
         If pominiete.Count > 0 Then
-            MessageBox.Show(Me, "Zaimportowano szablon '" & styl.Nazwa & "', ale pominięto niedostępne warstwy: " & String.Join(", ", pominiete),
-                            "Import szablonu", MessageBoxButtons.OK, MessageBoxIcon.Information)
+            MessageBox.Show(Me, "Zaimportowano styl '" & styl.Nazwa & "', ale pominięto niedostępne warstwy: " & String.Join(", ", pominiete),
+                            "Import stylu", MessageBoxButtons.OK, MessageBoxIcon.Information)
         End If
     End Sub
 

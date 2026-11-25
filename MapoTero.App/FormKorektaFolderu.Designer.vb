@@ -60,7 +60,7 @@ Partial Class FormKorektaFolderu
         Me.btnWybierzZrodlo.Name = "btnWybierzZrodlo"
         Me.btnWybierzZrodlo.Size = New System.Drawing.Size(85, 23)
         Me.btnWybierzZrodlo.TabIndex = 2
-        Me.btnWybierzZrodlo.Text = "Przeglądaj..."
+        Me.btnWybierzZrodlo.Text = "Wybierz..."
         Me.btnWybierzZrodlo.UseVisualStyleBackColor = True
         '
         'lblFolderCel
@@ -85,7 +85,7 @@ Partial Class FormKorektaFolderu
         Me.btnWybierzCel.Name = "btnWybierzCel"
         Me.btnWybierzCel.Size = New System.Drawing.Size(85, 23)
         Me.btnWybierzCel.TabIndex = 5
-        Me.btnWybierzCel.Text = "Przeglądaj..."
+        Me.btnWybierzCel.Text = "Wybierz..."
         Me.btnWybierzCel.UseVisualStyleBackColor = True
         '
         'grpParametry

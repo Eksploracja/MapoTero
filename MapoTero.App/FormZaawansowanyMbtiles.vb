@@ -79,7 +79,7 @@ Public Class FormZaawansowanyMbtiles
             Dim ext As String = If(_wybranyFormat = RodzajEksportu.GeoPackage, ".gpkg", ".mbtiles")
             Dim domyslnaNazwa As String = "mapa_wielowarstwowa_" & DateTime.Now.ToString("yyyyMMdd_HHmm") & ext
             txtPlikWynikowy.Text = Path.Combine(FolderDownload, domyslnaNazwa)
-            txtNazwaMapy.Text = "Mapa wielowarstwowa"
+            txtNazwaMapy.Text = "Mapa wieloskalowa"
 
             ' Na wstępie wczytaj wszystkie katalogi z mapami w download (oraz bieżącą sesję)
             WczytajWszystkieKatalogiDownload()
@@ -502,7 +502,7 @@ Public Class FormZaawansowanyMbtiles
         ElseIf chkWypelnijLuki.Checked Then
             opisWarstw = "(Wypełnienie przeskalowaną warstwą niższą)"
         Else
-            opisWarstw = "(Brak warstwy na poziomie Zoom " & z & " - kafel pusty)"
+            opisWarstw = "(Brak warstwy na poziomie powiększenia " & z & " - kafel pusty)"
         End If
 
         Dim pikselMetry = WebMercator.RozmiarPiksela(_srodekGeo.Szerokosc, z)
@@ -875,11 +875,11 @@ Public Class FormZaawansowanyMbtiles
         ' Sprawdzenie luk w zoomie
         Dim luki = KompilatorMbtiles.SprawdzLukiPoziomow(_warstwy, opcje.PoziomMin, opcje.PoziomMax)
         If luki.Count > 0 AndAlso Not opcje.WypelnijLukiWarstwaNizsza Then
-            Dim odp = MessageBox.Show("W projekcie wykryto poziomy zoom bez przypisanej warstwy: " &
+            Dim odp = MessageBox.Show("Te poziomy powiększenia nie mają przypisanej warstwy: " &
                                       String.Join(", ", luki) & "." & vbCrLf & vbCrLf &
                                       "Czy chcesz automatycznie wypełnić te luki przeskalowaną warstwą niższą?" & vbCrLf &
                                       "(Kliknij 'Tak', aby wypełnić luki, lub 'Nie', aby pozostawić te poziomy puste).",
-                                      "Wykryto luki w zoomie", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question)
+                                      "Brakujące powiększenia", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question)
             If odp = DialogResult.Cancel Then Exit Sub
             If odp = DialogResult.Yes Then
                 opcje.WypelnijLukiWarstwaNizsza = True
@@ -930,7 +930,7 @@ Public Class FormZaawansowanyMbtiles
                                       "Rozmiar: " & rozmiarMb.ToString("0.0") & " MB" & vbCrLf &
                                       "Czas: " & CzasTrwania(st.Elapsed) & vbCrLf & vbCrLf &
                                       "Czy chcesz otworzyć folder i zaznaczyć gotowy plik w Eksploratorze Windows?",
-                                      "Kompilacja zakończona sukcesem", MessageBoxButtons.YesNo, MessageBoxIcon.Information)
+                                      "Mapa zapisana", MessageBoxButtons.YesNo, MessageBoxIcon.Information)
             If odp = DialogResult.Yes Then
                 OtworzIZaznaczPlik(plik)
             End If

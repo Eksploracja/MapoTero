@@ -273,8 +273,7 @@ Public Class Form1
         txtKomunikaty.AccessibleName = "Komunikaty"
         btnWpiszWspolrzedne.AccessibleName = "Wpisz współrzędne zasięgu XY"
         cmbRozmiarPiksela.AccessibleName = "Typowe rozdzielczości piksela"
-        cmbFormatDocelowy.AccessibleName = "Format docelowy mapy"
-        btnPrzejdzDoEksportu.AccessibleName = "Otwórz eksport dla wybranego formatu"
+        btnPrzejdzDoEksportu.AccessibleName = "Eksportuj pobraną mapę"
         btnPodgladZaawansowane.AccessibleName = "Mikser warstw i krycia"
     End Sub
 
@@ -321,7 +320,7 @@ Public Class Form1
         Ustawienia.EdycjaXY = wlaczona
         UstawEdycjeXY(wlaczona)
         If wlaczona Then
-            Komunikat("Wpisz współrzędne XY zasięgu pobierania w pola schematu siatki. Zaznaczanie obszaru prawym przyciskiem " &
+            Komunikat("Wpisz współrzędne zasięgu (Obszar pobierania → Zmień → Wpisz współrzędne…). Zaznaczanie obszaru prawym przyciskiem " &
                       "myszy i uchwyty na mapie są wyłączone, dopóki pole przy współrzędnych jest zaznaczone.", Color.Green)
         Else
             Komunikat("Zaznacz na mapie prawym przyciskiem myszy obszar do pobrania.", Color.Green)
@@ -542,6 +541,9 @@ Public Class Form1
                               End Sub
         End If
         AddHandler mapa.Paint, AddressOf RysujPodzialke
+
+        'błędy startu (brak zbiorów map, uszkodzony lastsettings.txt) - od razu widoczna zakładka z ich opisem (audyt ER-01)
+        If _liczbaBledowSesji > 0 AndAlso _zakladkiPracy IsNot Nothing Then _zakladkiPracy.SelectedTab = _zakladkaKomunikatow
 
         _zaladowany = True
     End Sub
@@ -901,7 +903,7 @@ Public Class Form1
                 File.Delete(plikKorytarza)
             End If
         Catch ex As Exception
-            Komunikat("Nie udało się zapisać pliku conf.txt: " & OpisBledu.Z(ex), Color.Red)
+            PokazBladSesji("Nie udało się zapisać pliku conf.txt: " & OpisBledu.Z(ex))
             Exit Sub
         End Try
 
@@ -1015,7 +1017,7 @@ Public Class Form1
             FolderSesji = nowyFolder
             Return True
         Catch ex As Exception
-            Komunikat("Nie udało się utworzyć folderu sesji " & nowyFolder & ": " & OpisBledu.Z(ex), Color.Red)
+            PokazBladSesji("Nie udało się utworzyć folderu sesji " & nowyFolder & ": " & OpisBledu.Z(ex))
             Return False
         End Try
     End Function
@@ -1506,13 +1508,13 @@ Public Class Form1
             pozycjeKrycia.Add(poz)
             _menuWarstwy.Items.Add(poz)
         Next
-        Dim miZaaw = New ToolStripMenuItem("Krycie - zaawansowane...", Nothing, Sub() OtworzWarstwyZaawansowane())
+        Dim miZaaw = New ToolStripMenuItem("Mikser warstw...", Nothing, Sub() OtworzWarstwyZaawansowane())
         Dim sepUsun As New ToolStripSeparator()
         Dim miUsun = New ToolStripMenuItem("Usuń warstwę", My.Resources.kosz, Sub() UsunZaznaczonaWarstwe())
         Dim sepKanapka As New ToolStripSeparator()
-        Dim miKopiujKanapke = New ToolStripMenuItem("Kopiuj kanapkę (JSON)", Nothing, Sub() KopiujKanapkeDoSchowka())
-        Dim miWklejKanapke = New ToolStripMenuItem("Wklej kanapkę ze schowka", Nothing, Sub() WklejKanapkeZeSchowka())
-        Dim miWczytajKanapke = New ToolStripMenuItem("Wczytaj kanapkę z pliku...", Nothing, Sub() WczytajKanapkeZPliku())
+        Dim miKopiujKanapke = New ToolStripMenuItem("Kopiuj zestaw warstw (JSON)", Nothing, Sub() KopiujKanapkeDoSchowka())
+        Dim miWklejKanapke = New ToolStripMenuItem("Wklej zestaw warstw ze schowka", Nothing, Sub() WklejKanapkeZeSchowka())
+        Dim miWczytajKanapke = New ToolStripMenuItem("Wczytaj zestaw warstw z pliku...", Nothing, Sub() WczytajKanapkeZPliku())
         _menuWarstwy.Items.AddRange({miZaaw, sepUsun, miUsun, sepKanapka, miKopiujKanapke, miWklejKanapke, miWczytajKanapke})
 
         AddHandler _menuWarstwy.Opening,
@@ -1578,6 +1580,7 @@ Public Class Form1
 
     ''' <summary>Po zmianie listy warstw: widok, nazwa paczki TrekBuddy.</summary>
     Private Sub PoZmianieWarstw(zaznacz As Integer)
+        WyczyscBladSesji()
         PokazWarstwy()
         lstWybraneWarstwy.Zaznaczona = zaznacz
         OdswiezPrzyciskiWarstw()
@@ -1611,7 +1614,7 @@ Public Class Form1
         If PobieranieTrwa("Zmiana listy warstw") Then Exit Sub
         Dim zbior As ZbiorMapy = w.Zbior
         If zbior.Plik.Adres = "" Then
-            Komunikat("Zbiór map " & zbior.Nazwa & " nie ma adresu serwera.", Color.Red) : Exit Sub
+            PokazBladSesji("Zbiór map " & zbior.Nazwa & " nie ma adresu serwera.") : Exit Sub
         End If
         Dim zWarstwy = zbior.Plik.Znajdz(w.Warstwa)
         Dim zalecany As Double = If(zWarstwy IsNot Nothing, Wartosc(zWarstwy.RozmiarPiksela), 0)
@@ -1652,7 +1655,7 @@ Public Class Form1
         Dim infoWstawienia As String = If(indeksNowej < _zestaw.Liczba - 1, " (umieszczono pod nakładką)", "")
         Dim ostrzezenieFormat As String = If(_zestaw.CzySameNakladki() AndAlso Not Wms.CzyFormatZPrzezroczystoscia(Ustawienia.Format),
                                              " Uwaga: wybrano same nakładki, a format pobierania to ." & Ustawienia.Format & " (bez przezroczystości). " &
-                                             "Zmień go w oknie Ustawienia - kliknij format na pasku stanu u dołu okna.", "")
+                                             "Wybierz format PNG w karcie Parametry segmentów (Zmień…).", "")
         Komunikat("Wskazano warstwę: " & w.Nazwa & infoWstawienia & "." & If(opisPiksela <> "", " " & opisPiksela, "") & ostrzezenieFormat, Color.Green)
     End Sub
 
@@ -1771,7 +1774,8 @@ Public Class Form1
 
 #Region "Bieżący podgląd zestawu warstw"
 
-    Private Sub btnPodgladZaawansowane_Click(sender As Object, e As EventArgs) Handles btnPodgladZaawansowane.Click, picPodglad.Click
+    ' Podwójne kliknięcie próbki - pojedyncze otwierało okno modalne, gdy użytkownik chciał tylko kliknąć podgląd (audyt ER-25).
+    Private Sub btnPodgladZaawansowane_Click(sender As Object, e As EventArgs) Handles btnPodgladZaawansowane.Click, picPodglad.DoubleClick
         OtworzWarstwyZaawansowane()
     End Sub
 
@@ -2088,6 +2092,8 @@ Public Class Form1
     ''' z których część korzystała z nieaktualnych jeszcze wartości).
     ''' </summary>
     Friend Sub PrzeliczSiatke()
+        'zmiana obszaru lub parametrów mogła usunąć przyczynę błędu pokazywanego w karcie „Stan sesji”
+        WyczyscBladSesji()
         Dim s = BiezacaSiatka()
         'jednostki układu na 1 km w kierunku północ-południe i wschód-zachód
         Dim kmSz As Double = 1000, kmDl As Double = 1000
@@ -2151,7 +2157,8 @@ Public Class Form1
             End If
 
             ' Szacunek rozmiaru i czasu pobierania
-            Dim formatEksportu As RodzajEksportu = WybranyRodzajEksportuKokpitu()
+            'szacunek pobieranych segmentów (format wyniku wybiera się dopiero w oknie eksportu)
+            Dim formatEksportu As RodzajEksportu = RodzajEksportu.GeoTiff
             Dim liczbaZrodel As Integer = If(_zestaw IsNot Nothing, ZarzadcaSzablonow.LiczbaZrodel(_zestaw), 1)
             Dim szacunek = ZarzadcaSzablonow.SzacujParametry(s.Obszar, s.RozmiarPiksela, s.BokSegmentuPx,
                                                             _korytarz, Ustawienia.Uklad, formatEksportu,
@@ -2173,7 +2180,7 @@ Public Class Form1
                 lblBadgeSegmenty.Text = "Brak zaznaczenia"
             End If
             lblWymiaryTerenu.ForeColor = Color.DimGray
-            lblWymiaryTerenu.Text = "Zaznacz prawym przyciskiem myszy"
+            lblWymiaryTerenu.Text = "Brak obszaru - kliknij Zaznacz obszar"
             If lblPowierzchniaTerenu IsNot Nothing Then
                 lblPowierzchniaTerenu.Text = ""
                 lblPowierzchniaTerenu.Visible = False
@@ -2498,15 +2505,41 @@ Public Class Form1
         cmbRozmiarPiksela.Items.Add("10.0 m/px (bardzo niska, ~1:35 000)")
         cmbRozmiarPiksela.Items.Add("Własna wartość...")
 
-        cmbFormatDocelowy.Items.Clear()
-        cmbFormatDocelowy.Items.Add("GeoTIFF (arkusz scalony)")
-        cmbFormatDocelowy.Items.Add("MBTiles (mobilne i GIS)")
-        cmbFormatDocelowy.Items.Add("KMZ (Google Earth / Garmin)")
-        cmbFormatDocelowy.Items.Add("JPEG + World file (.jgw)")
-        cmbFormatDocelowy.Items.Add("PNG + World file (.pgw)")
-        cmbFormatDocelowy.Items.Add("OruxMaps (baza SQLite)")
-        cmbFormatDocelowy.Items.Add("CAD (DXF + SCR/LISP)")
-        cmbFormatDocelowy.SelectedIndex = 0
+        'dawne pole „Format docelowy” (format eksportu) zastąpił format segmentów - eksport wybiera format we własnym
+        'oknie i go pamięta (audyt ER-03); pole zostaje w projekcie formularza jako ukryte
+        cmbFormatDocelowy.Visible = False
+    End Sub
+
+    ''' <summary>Formaty segmentów z opisem dla pola „Format segmentów” w karcie parametrów (wartość, opis).</summary>
+    Friend Shared ReadOnly OpisyFormatowSegmentow As (Format As String, Opis As String)() = {
+        ("jpeg", "JPEG - mniejsze pliki"), ("png", "PNG - przezroczystość"), ("png8", "PNG 8-bit"), ("png24", "PNG 24-bit"),
+        ("png32", "PNG 32-bit z przezroczystością"), ("gif", "GIF"), ("tiff", "TIFF - bez kompresji stratnej")}
+
+    Private _synchronizacjaFormatu As Boolean
+
+    ''' <summary>Pole formatu pokazuje format sesji (ustawiany też w oknie Ustawienia i przy wczytaniu conf.txt).</summary>
+    Private Sub PokazFormatSegmentow()
+        If _poleFormatuSegmentow Is Nothing Then Return
+        Dim indeks = Array.FindIndex(OpisyFormatowSegmentow, Function(f) f.Format = UstawieniaProgramu.NormalizujFormat(Ustawienia.Format))
+        If indeks < 0 OrElse _poleFormatuSegmentow.SelectedIndex = indeks Then Return
+        _synchronizacjaFormatu = True
+        Try
+            _poleFormatuSegmentow.SelectedIndex = indeks
+        Finally
+            _synchronizacjaFormatu = False
+        End Try
+    End Sub
+
+    Private Sub PoleFormatuSegmentow_Zmiana(sender As Object, e As EventArgs)
+        If _synchronizacjaFormatu OrElse _poleFormatuSegmentow.SelectedIndex < 0 Then Return
+        If PobieranieTrwa("Zmiana formatu segmentów") Then
+            PokazFormatSegmentow()
+            Return
+        End If
+        Ustawienia.Format = OpisyFormatowSegmentow(_poleFormatuSegmentow.SelectedIndex).Format
+        If Not Wms.CzyFormatZPrzezroczystoscia(Ustawienia.Format) Then Ustawienia.Przezroczystosc = False
+        stFormat.Text = "." & Ustawienia.Format
+        PrzeliczSiatke()
     End Sub
 
     ''' <summary>Synchronizuje listę typowych rozdzielczości z wartością w polu tekstowym piksela.</summary>
@@ -2560,32 +2593,6 @@ Public Class Form1
         End Try
     End Sub
 
-    Private Sub cmbFormatDocelowy_SelectedIndexChanged(sender As Object, e As EventArgs) Handles cmbFormatDocelowy.SelectedIndexChanged
-        PrzeliczSiatke()
-    End Sub
-
-    Private Function WybranyRodzajEksportuKokpitu() As RodzajEksportu
-        If cmbFormatDocelowy Is Nothing Then Return RodzajEksportu.GeoTiff
-        Select Case cmbFormatDocelowy.SelectedIndex
-            Case 0 ' GeoTIFF
-                Return RodzajEksportu.GeoTiff
-            Case 1 ' MBTiles
-                Return RodzajEksportu.MBTiles
-            Case 2 ' KMZ
-                Return RodzajEksportu.KmzGarmin
-            Case 3 ' JPEG
-                Return RodzajEksportu.GeoTiff
-            Case 4 ' PNG
-                Return RodzajEksportu.GeoTiff
-            Case 5 ' OruxMaps
-                Return RodzajEksportu.OruxMaps
-            Case 6 ' CAD
-                Return RodzajEksportu.GeoTiff
-            Case Else
-                Return RodzajEksportu.GeoTiff
-        End Select
-    End Function
-
     ''' <summary>Otwiera okno ręcznego wpisywania i zaokrąglania współrzędnych obszaru pobierania.</summary>
     Private Sub btnWpiszWspolrzedne_Click(sender As Object, e As EventArgs) Handles btnWpiszWspolrzedne.Click
         If PobieranieTrwa("Wpisywanie współrzędnych") Then Return
@@ -2615,36 +2622,10 @@ Public Class Form1
     ''' <summary>Otwiera okno eksportu lub scalania z formatem wybranym w kokpicie.</summary>
     Private Sub btnPrzejdzDoEksportu_Click(sender As Object, e As EventArgs) Handles btnPrzejdzDoEksportu.Click
         If PobieranieTrwa("Eksport") Then Exit Sub
-        Select Case cmbFormatDocelowy.SelectedIndex
-            Case 0 ' GeoTIFF (arkusz scalony)
-                Using f As New FormEksport() With {.FormatPoczatkowy = RodzajEksportu.GeoTiff, .FormatArkuszaPoczatkowy = FormatArkusza.GeoTiff}
-                    f.ShowDialog(Me)
-                End Using
-            Case 1 ' MBTiles (mobilne i GIS)
-                Using f As New FormEksport() With {.FormatPoczatkowy = RodzajEksportu.MBTiles}
-                    f.ShowDialog(Me)
-                End Using
-            Case 2 ' KMZ (Google Earth / Garmin)
-                Using f As New FormEksport() With {.FormatPoczatkowy = RodzajEksportu.KmzGarmin}
-                    f.ShowDialog(Me)
-                End Using
-            Case 3 ' JPEG + World file
-                Using f As New FormEksport() With {.FormatPoczatkowy = RodzajEksportu.GeoTiff, .FormatArkuszaPoczatkowy = FormatArkusza.Jpeg}
-                    f.ShowDialog(Me)
-                End Using
-            Case 4 ' PNG + World file
-                Using f As New FormEksport() With {.FormatPoczatkowy = RodzajEksportu.GeoTiff, .FormatArkuszaPoczatkowy = FormatArkusza.Png}
-                    f.ShowDialog(Me)
-                End Using
-            Case 5 ' OruxMaps (baza SQLite)
-                Using f As New FormEksport() With {.FormatPoczatkowy = RodzajEksportu.OruxMaps}
-                    f.ShowDialog(Me)
-                End Using
-            Case 6 ' CAD (DXF + SCR/LISP)
-                EksportCadToolStripMenuItem.PerformClick()
-            Case Else
-                btnScalanie.PerformClick()
-        End Select
+        'okno eksportu otwiera się z ostatnio używanym formatem (Ustawienia.OstatniEksport)
+        Using f As New FormEksport()
+            f.ShowDialog(Me)
+        End Using
     End Sub
 
     Friend Structure WynikPobieraniaInfo
@@ -2656,6 +2637,23 @@ Public Class Form1
     End Structure
     Friend _ostatniWynikPobierania As WynikPobieraniaInfo? = Nothing
     Friend _podswietlEksport As Boolean = False
+    ''' <summary>
+    ''' Folder sesji ma segmenty bieżącej mapy, choć nie wszystkie (przerwane pobieranie, braki). Przycisk eksportu jest
+    ''' wtedy widoczny bez wyróżnienia - dawniej znikał, a eksport z białymi polami był dostępny tylko z menu (ER-05).
+    ''' </summary>
+    Friend _czesciowoPobrana As Boolean = False
+
+    ''' <summary>Czy w folderze sesji jest choć jeden plik segmentu w formacie sesji (bez wyliczania wszystkich plików).</summary>
+    Private Function FolderSesjiMaSegmenty() As Boolean
+        Try
+            If String.IsNullOrWhiteSpace(FolderSesji) OrElse Not Directory.Exists(FolderSesji) Then Return False
+            Return Directory.EnumerateFiles(FolderSesji, "*." & Wms.RozszerzeniePliku(Ustawienia.Format)).Any()
+        Catch ex As IOException
+            Return False
+        Catch ex As UnauthorizedAccessException
+            Return False
+        End Try
+    End Function
 
     ''' <summary>Unieważnia zapamiętany stan pobrania po zmianie geometrii, warstw, parametrów lub folderu sesji.</summary>
     Friend Sub UniewaznijWynikPobierania()
@@ -2666,6 +2664,7 @@ Public Class Form1
     ''' <summary>Aktualizuje etykietę stanu sesji i przycisk eksportu na dolnej belce.</summary>
     Friend Sub AktualizujStanBelki()
         If lblStatusSesji Is Nothing Then Exit Sub
+        _czesciowoPobrana = False
 
         ' 1. Trwające pobieranie
         If _przerwanie IsNot Nothing Then
@@ -2692,7 +2691,8 @@ Public Class Form1
                 lblStatusSesji.Text = "Pobieranie przerwane"
                 lblStatusSesji.ForeColor = Color.FromArgb(185, 28, 28)
                 lnkSzczegoly.Visible = False
-                btnPobierz.Text = "Pobierz segmenty"
+                btnPobierz.Text = "Dokończ pobieranie"
+                _czesciowoPobrana = FolderSesjiMaSegmenty()
                 UstawWyroznienieEksportu(False)
                 Exit Sub
             ElseIf w.Nieudane > 0 Then
@@ -2709,6 +2709,7 @@ Public Class Form1
                     btnPobierz.Text = "Pobierz brakujące"
                 End If
                 lblStatusSesji.ForeColor = Color.FromArgb(185, 28, 28)
+                _czesciowoPobrana = w.Wszystkie > w.Nieudane
                 UstawWyroznienieEksportu(False)
                 Exit Sub
             Else
@@ -2764,6 +2765,7 @@ Public Class Form1
                             UstawWyroznienieEksportu(True)
                             Exit Sub
                         End If
+                        _czesciowoPobrana = liczbaPlikow > 0
                     End If
                 End If
             End If
@@ -2914,26 +2916,26 @@ Public Class Form1
         Dim piksel As Double = Wartosc(txtRozmiarPiksela.Text)
         Dim bok As Integer = WartoscCalkowita(txtBokSegmentu.Text)
         If txtRozmiarPiksela.Text.Trim() = "" Then
-            Komunikat("Nie podano rozmiaru pojedynczego piksela segmentu", Color.Red) : Exit Sub
+            PokazBladSesji("Nie podano rozmiaru pojedynczego piksela segmentu") : Exit Sub
         ElseIf piksel <= 0 Then
-            Komunikat("Rozmiar pojedynczego piksela segmentu musi być większy od zera", Color.Red) : Exit Sub
+            PokazBladSesji("Rozmiar pojedynczego piksela segmentu musi być większy od zera") : Exit Sub
         End If
         If txtBokSegmentu.Text.Trim() = "" Then
-            Komunikat("Nie podano długości boku segmentu.", Color.Red) : Exit Sub
+            PokazBladSesji("Nie podano długości boku segmentu.") : Exit Sub
         ElseIf bok < 1 Then
-            Komunikat("Długość boku segmentu musi być większa od zera.", Color.Red) : Exit Sub
+            PokazBladSesji("Długość boku segmentu musi być większa od zera.") : Exit Sub
         ElseIf bok > 2048 Then
-            Komunikat("Długość boku segmentu nie może przekraczać 2048 px.", Color.Red) : Exit Sub
+            PokazBladSesji("Długość boku segmentu nie może przekraczać 2048 px.") : Exit Sub
         End If
         Dim siatka = BiezacaSiatka()
         If Not siatka.Poprawna Then
-            Komunikat("Niepoprawny zasięg pobierania: " & siatka.PowodNiepoprawnosci & ".", Color.Red) : Exit Sub
+            PokazBladSesji("Niepoprawny zasięg pobierania: " & siatka.PowodNiepoprawnosci & ".") : Exit Sub
         End If
         If _zestaw.Liczba = 0 Then
-            Komunikat("Nie wybrano żadnej warstwy. Aby wybrać warstwę kliknij w jej nazwę.", Color.Red) : Exit Sub
+            PokazBladSesji("Nie wybrano żadnej warstwy. Aby wybrać warstwę kliknij w jej nazwę.") : Exit Sub
         End If
         If _zestaw.Warstwy.Any(Function(w) w.Adres = "") Then
-            Komunikat("Nie znam serwera którejś z wybranych warstw - usuń ją i wybierz ponownie ze zbioru map.", Color.Red) : Exit Sub
+            PokazBladSesji("Nie znam serwera którejś z wybranych warstw - usuń ją i wybierz ponownie ze zbioru map.") : Exit Sub
         End If
         Dim przykryta = _zestaw.ZnajdzPrzykrytaNakladke()
         If przykryta IsNot Nothing Then
@@ -3001,21 +3003,21 @@ Public Class Form1
         'przedrostek także z wczytanego conf.txt - sprawdzany przed pobraniem pierwszego segmentu
         Dim bladPrzedrostka As String = KonfiguracjaSesji.BladPrzedrostka(Ustawienia.Prefiks)
         If bladPrzedrostka <> "" Then
-            Komunikat(bladPrzedrostka & " Popraw go w oknie Ustawienia.", Color.Red) : Exit Sub
+            PokazBladSesji(bladPrzedrostka & " Popraw go w oknie Ustawienia.") : Exit Sub
         End If
 
         'limit wielkości pobierania - przy kilkudziesięciu milionach segmentów brakowało pamięci na ich wykaz
         Dim liczbaSegmentow As Long = siatka.LiczbaSegmentow
         If _korytarz IsNot Nothing Then liczbaSegmentow = CLng(Math.Min(liczbaSegmentow, _korytarz.SzacowanaLiczbaSegmentow(siatka, Ustawienia.Uklad)))
         If siatka.ZbytDuza OrElse liczbaSegmentow > MaksSegmentowPobierania Then
-            Komunikat("Zbyt wiele segmentów do pobrania (" & If(_korytarz IsNot Nothing, "ok. ", "") & liczbaSegmentow.ToString("N0") &
+            PokazBladSesji("Zbyt wiele segmentów do pobrania (" & If(_korytarz IsNot Nothing, "ok. ", "") & liczbaSegmentow.ToString("N0") &
                       ", najwięcej " & MaksSegmentowPobierania.ToString("N0") &
-                      ") - zmniejsz obszar albo zwiększ rozmiar piksela lub bok segmentu.", Color.Red) : Exit Sub
+                      ") - zmniejsz obszar albo zwiększ rozmiar piksela lub bok segmentu.") : Exit Sub
         End If
         If _korytarz IsNot Nothing Then
             liczbaSegmentow = _korytarz.Segmenty(siatka, Ustawienia.Uklad).Count
             If liczbaSegmentow = 0 Then
-                Komunikat("Trasa nie przecina obszaru pobierania - wybierz trasę ponownie albo usuń obszar wzdłuż trasy (Sesja pobierania > Usuń obszar wzdłuż trasy).", Color.Red) : Exit Sub
+                PokazBladSesji("Trasa nie przecina obszaru pobierania - wybierz trasę ponownie albo usuń obszar wzdłuż trasy (Sesja pobierania > Usuń obszar wzdłuż trasy).") : Exit Sub
             End If
         End If
 
@@ -3052,6 +3054,7 @@ Public Class Form1
         OdswiezToolStripMenuItem.Enabled = False
         KorytarzToolStripMenuItem.Enabled = False
         chkEdycjaXY.Enabled = False
+        WyczyscBladSesji()
         Komunikat(If(odswiez, "Trwa odświeżanie segmentów (", "Trwa pobieranie segmentów (") & liczbaSegmentow & ")", Color.Black)
 
         'własna kopia - zwalniane jest zawsze źródło tego pobierania, nawet gdyby pole wskazywało już inne
@@ -3067,7 +3070,7 @@ Public Class Form1
             wynik = Await PobieranieSegmentow.PobierzAsync(zadanie, postep, przerwanie.Token)
         Catch ex As Exception
             If Not IsDisposed AndAlso Not Disposing Then
-                Komunikat("Błąd pobierania: " & MetadaneMapy.MaskujSekrety(OpisBledu.Z(ex)), Color.Red)
+                PokazBladSesji("Błąd pobierania: " & MetadaneMapy.MaskujSekrety(OpisBledu.Z(ex)))
             End If
         Finally
             _cacheConfSciezka = ""
@@ -3245,7 +3248,7 @@ Public Class Form1
             If CDbl(s.SzerokoscPx) * s.WysokoscPx < 5000000000.0 Then
                 Komunikat("Zaznaczyłeś obszar do pobrania o powierzchni " & Liczba(Math.Round(km2, 3)) & " km2", Color.Green)
             Else
-                Komunikat("Zaznaczyłeś obszar do pobrania o powierzchni " & Liczba(Math.Round(km2, 3)) & " km2. To dużo. Poradzę sobie. Jednak uzbroj się lepiej w kubek gorącej kawy :)", Color.Red)
+                Komunikat("Zaznaczyłeś obszar do pobrania o powierzchni " & Liczba(Math.Round(km2, 3)) & " km2. To bardzo duży obszar - pobieranie może trwać wiele godzin.", Color.Green)
             End If
         End If
     End Sub
@@ -3354,12 +3357,8 @@ Public Class Form1
             RozpocznijPrzeciaganie(_uchwytPodKursorem, e.Location)
             Exit Sub
         End If
-        If e.Button = MouseButtons.Right Then
-            If _siatkaWidoczna Then
-                WyczyscZnaczniki()
-                btnZnaczniki.Enabled = True
-            End If
-        End If
+        'prawy przycisk bez przeciągania nie chowa już siatki obszaru - siatkę usuwa dopiero początek nowego zaznaczenia
+        '(mapa_MouseMove), bo samo kliknięcie zostawiało obszar bez widocznego obrysu (audyt ER-09)
     End Sub
 
     ''' <summary>Znaczniki i siatka segmentów po zakończeniu zaznaczania obszaru pobierania (puszczenie prawego przycisku).</summary>
@@ -3842,12 +3841,12 @@ Public Class Form1
                     Dim dane = PrzekazZestawu.ZTekstu(tresc)
                     Dim wynik = ZastosujPrzepisZestawu(dane, "z pliku " & Path.GetFileName(plik))
                     If Not wynik.Ok Then
-                        MsgBox(wynik.Komunikat, MsgBoxStyle.Exclamation, "Kanapka warstw")
+                        MsgBox(wynik.Komunikat, MsgBoxStyle.Exclamation, "Zestaw warstw")
                     End If
                     Exit Sub
                 End If
             Catch ex As Exception
-                MsgBox("Nie udało się wczytać kanapki warstw: " & OpisBledu.Z(ex), MsgBoxStyle.Critical, "Kanapka warstw")
+                MsgBox("Nie udało się wczytać zestawu warstw: " & OpisBledu.Z(ex), MsgBoxStyle.Critical, "Zestaw warstw")
                 Exit Sub
             End Try
         End If
@@ -4001,7 +4000,7 @@ Public Class Form1
         If PobieranieTrwa("Usunięcie pobranych map") Then Exit Sub
         Dim folder = If(Not String.IsNullOrWhiteSpace(FolderSesji), FolderSesji, FolderDownload)
         If Not Directory.Exists(folder) Then
-            Komunikat("Folder bieżącej sesji nie istnieje: " & folder, Color.Red)
+            PokazBladSesji("Folder bieżącej sesji nie istnieje: " & folder)
             Exit Sub
         End If
 
@@ -4055,7 +4054,7 @@ Public Class Form1
                     Komunikat("Przeniesiono do Kosza folder sesji: " & folder, Color.Green)
                 End If
             Catch ex As Exception
-                Komunikat("Nie udało się przenieść sesji do Kosza: " & OpisBledu.Z(ex), Color.Red)
+                PokazBladSesji("Nie udało się przenieść sesji do Kosza: " & OpisBledu.Z(ex))
             End Try
         End If
     End Sub
@@ -4090,7 +4089,7 @@ Public Class Form1
             Directory.CreateDirectory(folder)
             OtworzFolder(folder)
         Catch ex As Exception
-            Komunikat("Nie udało się otworzyć folderu własnych warstw: " & OpisBledu.Z(ex), Color.Red)
+            PokazBladSesji("Nie udało się otworzyć folderu własnych warstw: " & OpisBledu.Z(ex))
         End Try
     End Sub
 
@@ -4135,6 +4134,11 @@ Public Class Form1
     Public Const UrlPomocyOnline As String = "https://eksploracja.github.io/MapoTero/pomoc/"
 
     Private Sub PomocOnlineToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles PomocOnlineToolStripMenuItem.Click
+        'bez sieci F1 otwiera wbudowaną instrukcję zamiast strony, która się nie wczyta (audyt ER-33)
+        If Not Net.NetworkInformation.NetworkInterface.GetIsNetworkAvailable() Then
+            InstrukcjaObslugiToolStripMenuItem_Click(sender, e)
+            Return
+        End If
         OtworzPomocOnline()
     End Sub
 
@@ -4283,7 +4287,7 @@ Public Class Form1
     End Function
 
     Private Function ZastosujPrzepisZestawu(dane As DaneZestawuGalerii, Optional zrodloOpis As String = "z galerii") As WynikMostkaGalerii
-        If dane Is Nothing Then Return WynikMostkaGalerii.Blad("blad_parametrow", "Pusty przepis kanapki.")
+        If dane Is Nothing Then Return WynikMostkaGalerii.Blad("blad_parametrow", "Pusty zestaw warstw.")
 
         If dane.Skale IsNot Nothing AndAlso dane.Skale.Count > 1 Then
             Dim punkt As PunktXY, piksel As Double
@@ -4292,7 +4296,7 @@ Public Class Form1
             Dim wynikWieloskalowy = PrzekazZestawu.ZbudujSzablonWieloskalowy(dane, ZrodlaMapSesji(), geo.Szerokosc, geo.Dlugosc)
             If wynikWieloskalowy.Szablon Is Nothing Then
                 Dim szczegoly = If(wynikWieloskalowy.Pominiete.Count > 0, " (" & String.Join(", ", wynikWieloskalowy.Pominiete) & ")", "")
-                Return WynikMostkaGalerii.Blad("nie_znaleziono", "Nie rozpoznano żadnej warstwy z przepisu wieloskalowego" & szczegoly & ".")
+                Return WynikMostkaGalerii.Blad("nie_znaleziono", "Nie rozpoznano żadnej warstwy stylu wieloskalowego" & szczegoly & ".")
             End If
             ZapiszGotowyStylDoPliku(wynikWieloskalowy.Szablon)
             Dim info = "Wczytano styl wieloskalowy '" & wynikWieloskalowy.Szablon.Nazwa & "' (" & wynikWieloskalowy.Szablon.StopnieSkali.Count & " skale)."
@@ -4306,7 +4310,7 @@ Public Class Form1
         Dim wynikBudowy = PrzekazZestawu.ZbudujZestaw(dane, ZrodlaMapSesji(), _zestaw)
         If wynikBudowy.Zestaw.Liczba = 0 Then
             Dim szczegoly = If(wynikBudowy.Pominiete.Count > 0, " (" & String.Join(", ", wynikBudowy.Pominiete) & ")", "")
-            Return WynikMostkaGalerii.Blad("nie_znaleziono", "Nie rozpoznano żadnej warstwy z przepisu" & szczegoly & ".")
+            Return WynikMostkaGalerii.Blad("nie_znaleziono", "Nie rozpoznano żadnej warstwy stylu" & szczegoly & ".")
         End If
 
         Dim ustawionoObszar As Boolean = False
@@ -4358,9 +4362,9 @@ Public Class Form1
 
         Dim czesci As New List(Of String)()
         If wynikBudowy.Cel = "kreator" Then
-            czesci.Add("Zapisano kanapkę jako styl kreatora" & If(zapisanyStyl IsNot Nothing, " '" & zapisanyStyl.Nazwa & "'", "") & " (" & wynikBudowy.Zestaw.Liczba & " warstw)")
+            czesci.Add("Zapisano zestaw warstw jako styl kreatora" & If(zapisanyStyl IsNot Nothing, " '" & zapisanyStyl.Nazwa & "'", "") & " (" & wynikBudowy.Zestaw.Liczba & " warstw)")
         Else
-            czesci.Add("Wczytano kanapkę " & zrodloOpis & " (" & wynikBudowy.Zestaw.Liczba & " warstw)")
+            czesci.Add("Wczytano zestaw warstw " & zrodloOpis & " (" & wynikBudowy.Zestaw.Liczba & " warstw)")
             If zapisanyStyl IsNot Nothing Then czesci.Add("zapisano też styl '" & zapisanyStyl.Nazwa & "'")
         End If
         If ustawionoObszar Then czesci.Add("ustawiono obszar z galerii")
@@ -4542,40 +4546,40 @@ Public Class Form1
         Try
             Dim tekst = PrzekazZestawu.DoTekstu(PrzekazZestawu.ZZestawuWarstw(_zestaw, OpisWarstw()))
             Clipboard.SetText(tekst)
-            Komunikat("Skopiowano przepis kanapki (" & _zestaw.Liczba & " warstw) do schowka.", Color.Green)
+            Komunikat("Skopiowano zestaw warstw (" & _zestaw.Liczba & " warstw) do schowka.", Color.Green)
         Catch ex As Exception
-            MsgBox("Nie udało się skopiować kanapki do schowka: " & OpisBledu.Z(ex), MsgBoxStyle.Exclamation, "Kanapka warstw")
+            MsgBox("Nie udało się skopiować zestawu warstw do schowka: " & OpisBledu.Z(ex), MsgBoxStyle.Exclamation, "Zestaw warstw")
         End Try
     End Sub
 
     Private Sub WklejKanapkeZeSchowka()
-        If PobieranieTrwa("Wklejenie kanapki warstw") Then Exit Sub
+        If PobieranieTrwa("Wklejenie zestawu warstw") Then Exit Sub
         Try
             If Not Clipboard.ContainsText() Then
-                MsgBox("W schowku nie ma tekstu z przepisem kanapki.", MsgBoxStyle.Information, "Kanapka warstw")
+                MsgBox("W schowku nie ma zestawu warstw w formacie JSON.", MsgBoxStyle.Information, "Zestaw warstw")
                 Exit Sub
             End If
             Dim dane = PrzekazZestawu.ZTekstu(Clipboard.GetText())
             Dim wynik = ZastosujPrzepisZestawu(dane, "ze schowka")
-            If Not wynik.Ok Then MsgBox(wynik.Komunikat, MsgBoxStyle.Exclamation, "Kanapka warstw")
+            If Not wynik.Ok Then MsgBox(wynik.Komunikat, MsgBoxStyle.Exclamation, "Zestaw warstw")
         Catch ex As Exception
-            MsgBox("Nie udało się wkleić kanapki ze schowka: " & OpisBledu.Z(ex), MsgBoxStyle.Exclamation, "Kanapka warstw")
+            MsgBox("Nie udało się wkleić zestawu warstw ze schowka: " & OpisBledu.Z(ex), MsgBoxStyle.Exclamation, "Zestaw warstw")
         End Try
     End Sub
 
     Private Sub WczytajKanapkeZPliku()
-        If PobieranieTrwa("Wczytanie kanapki warstw") Then Exit Sub
+        If PobieranieTrwa("Wczytanie zestawu warstw") Then Exit Sub
         Using dlg As New OpenFileDialog With {
-            .Title = "Wczytaj kanapkę warstw z galerii",
-            .Filter = "Przepis kanapki MapoTero (*.mapotero;*.json)|*.mapotero;*.json|Wszystkie pliki (*.*)|*.*"
+            .Title = "Wczytaj zestaw warstw z galerii",
+            .Filter = "Zestaw warstw MapoTero (*.mapotero;*.json)|*.mapotero;*.json|Wszystkie pliki (*.*)|*.*"
         }
             If dlg.ShowDialog(Me) <> DialogResult.OK Then Exit Sub
             Try
                 Dim dane = PrzekazZestawu.ZTekstu(File.ReadAllText(dlg.FileName, System.Text.Encoding.UTF8))
                 Dim wynik = ZastosujPrzepisZestawu(dane, "z pliku " & Path.GetFileName(dlg.FileName))
-                If Not wynik.Ok Then MsgBox(wynik.Komunikat, MsgBoxStyle.Exclamation, "Kanapka warstw")
+                If Not wynik.Ok Then MsgBox(wynik.Komunikat, MsgBoxStyle.Exclamation, "Zestaw warstw")
             Catch ex As Exception
-                MsgBox("Nie udało się wczytać pliku kanapki: " & OpisBledu.Z(ex), MsgBoxStyle.Exclamation, "Kanapka warstw")
+                MsgBox("Nie udało się wczytać pliku zestawu warstw: " & OpisBledu.Z(ex), MsgBoxStyle.Exclamation, "Zestaw warstw")
             End Try
         End Using
     End Sub
@@ -4774,8 +4778,8 @@ Public Class Form1
         If PobieranieTrwa("Rozpoczęcie nowej sesji") Then Exit Sub
         If pytaj AndAlso (_zestaw.Liczba > 0 OrElse BiezacaSiatka().Poprawna OrElse _korytarz IsNot Nothing) Then
             If MessageBox.Show("Rozpocząć nową sesję?" & vbCrLf & vbCrLf &
-                               "Wybrane warstwy, zasięg pobierania, obszar wzdłuż trasy i widok mapy zostaną wyczyszczone. " &
-                               "Pobrane pliki zostają na dysku - do pobranej lub zapisanej sesji wrócisz poleceniem Sesja pobierania > Wczytaj.",
+                               "Wybrane warstwy, obszar pobierania i obszar wzdłuż trasy zostaną wyczyszczone; widok mapy zostaje. " &
+                               "Pobrane pliki zostają na dysku - do sesji wrócisz poleceniem Sesja pobierania > Ostatnie sesje albo Otwórz sesję.",
                                "Nowa sesja", MessageBoxButtons.YesNo, MessageBoxIcon.Question) <> DialogResult.Yes Then Exit Sub
         End If
 
@@ -4831,13 +4835,11 @@ Public Class Form1
         RozwinZbioryWybranych(_biezacyZbior)
         PoZmianieWarstw(-1)
 
-        'widok całej Polski
-        mapa.Position = New PointLatLng(52.3, 19.2)
-        mapa.Zoom = 6
+        'widok mapy zostaje - druga mapa tego samego rejonu nie wymaga ponownego szukania miejsca (audyt ER-11)
         ZapamietajPolozenieMapy()
         PrzeliczSiatke()
-        Komunikat("Rozpoczęto nową sesję. Wybierz mapę w drzewie warstw i zaznacz obszar prawym przyciskiem myszy; " &
-                  "pobieranie utworzy nowy podfolder sesji w folderze download.", Color.Green)
+        Komunikat("Rozpoczęto nową sesję. Wybierz warstwę w katalogu warstw i zaznacz obszar (przycisk Zaznacz obszar albo " &
+                  "przeciągnięcie prawym przyciskiem myszy); pobieranie utworzy nowy podfolder sesji w folderze download.", Color.Green)
     End Sub
 
 #End Region

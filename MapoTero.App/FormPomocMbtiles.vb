@@ -47,6 +47,12 @@ Public Enum TematPomocy
     KorektaFolderu
     Kreator
     WarstwyZaawansowane
+    ''' <summary>Konwerter map GeoTIFF (audyt ER-33: okno nie miało pomocy).</summary>
+    KonwerterGeoTiff
+    ''' <summary>Przesyłanie mapy na telefon (Wi-Fi) i kopiowanie do Garmina (USB).</summary>
+    PrzeslijMape
+    ''' <summary>Okno współrzędnych zasięgu pobierania.</summary>
+    Wspolrzedne
 End Enum
 
 ''' <summary>
@@ -120,6 +126,9 @@ Public Class FormPomocMbtiles
             Case TematPomocy.KorektaFolderu : PomocKorektaFolderu()
             Case TematPomocy.Kreator : PomocKreator()
             Case TematPomocy.WarstwyZaawansowane : PomocWarstwyZaawansowane()
+            Case TematPomocy.KonwerterGeoTiff : PomocKonwerterGeoTiff()
+            Case TematPomocy.PrzeslijMape : PomocPrzeslijMape()
+            Case TematPomocy.Wspolrzedne : PomocWspolrzedne()
             Case Else : PomocMbtiles()
         End Select
     End Sub
@@ -169,7 +178,7 @@ Public Class FormPomocMbtiles
         DodajPunktor("Arkusz (scalanie segmentów): jeden plik GeoTIFF, JPEG albo PNG z georeferencją dla Avenza Maps, QGIS i programów CAD, z plikami world file i .prj, .map, .tab, .kml.")
         DodajPunktor("TrekBuddy / Locus Map: archiwum .tar z kaflami 512 px, plikiem .map i listą .set - z dowolnej pobranej sesji.")
 
-        DodajNaglowek1("2. Piramida powiększeń (Zoom Od - Zoom Do)")
+        DodajNaglowek1("2. Piramida powiększeń (powiększenie od - do)")
         DodajPunktor("Dla formatów kafelkowych (JNX, MBTiles, GeoPackage, SQLiteDB) program generuje automatyczną piramidę powiększeń od poziomu przeglądowego do szczegółowego.")
         DodajPunktor("Suwakiem jakości możesz dobrać optymalny kompromis między ostrością a rozmiarem pliku (zalecane 75-85%).")
 
@@ -311,6 +320,54 @@ Public Class FormPomocMbtiles
         DodajStopkeOnline(_urlOnline)
     End Sub
 
+    Private Sub PomocKonwerterGeoTiff()
+        Me.Text = "Pomoc i instrukcja - Konwerter map GeoTIFF"
+        _urlOnline = "https://eksploracja.github.io/MapoTero/pomoc/narzedzia/#konwerter-map-geotiff"
+
+        DodajTytul("Konwerter map GeoTIFF")
+        DodajAkapit("Zamienia jeden plik GeoTIFF (.tif, .tiff) - np. arkusz wyeksportowany z MapoTero albo mapę z QGIS - na mapę dla " &
+                    "telefonu albo odbiornika Garmin.")
+        DodajPunktor("Program odczytuje zasięg, rozdzielczość i układ współrzędnych z pliku (albo z plików .tfw i .prj). " &
+                     "Gdy plik nie ma kodu układu, wybierz układ z listy.")
+        DodajPunktor("Formaty wynikowe: KMZ (Garmin Custom Maps, z podziałem na tomy po 100 kafli), JNX (Garmin BirdsEye), " &
+                     "MBTiles, GeoPackage, SQLiteDB i OruxMaps.")
+        DodajPunktor("Zakres powiększeń (od-do) decyduje o tym, przy jakim przybliżeniu mapa jest widoczna; więcej poziomów to większy plik.")
+        DodajPunktor("Skan z plikiem kalibracji OziExplorer (.map) konwertuje drugie okno z tego samego podmenu: Narzędzia > Konwertuj gotową mapę.")
+
+        DodajStopkeOnline(_urlOnline)
+    End Sub
+
+    Private Sub PomocPrzeslijMape()
+        Me.Text = "Pomoc i instrukcja - Przesyłanie mapy na telefon i do Garmina"
+        _urlOnline = "https://eksploracja.github.io/MapoTero/pomoc/narzedzia/#przesyłanie-mapy-na-telefon-przez-wi-fi-i-kod-qr"
+
+        DodajTytul("Przesyłanie mapy na telefon i do Garmina")
+        DodajNaglowek1("Telefon przez Wi-Fi")
+        DodajPunktor("Program uruchamia na chwilę serwer w sieci lokalnej i pokazuje kod QR. Telefon musi być w tej samej sieci Wi-Fi co komputer.")
+        DodajPunktor("Zeskanuj kod aparatem telefonu i pobierz plik; potem otwórz go w aplikacji (Locus Map, QField, OsmAnd, OruxMaps, Avenza Maps).")
+        DodajPunktor("Przerwane pobieranie można wznowić. Link działa tylko, dopóki okno jest otwarte.")
+        DodajNaglowek1("Garmin przez USB")
+        DodajPunktor("Program wykrywa odbiornik Garmin lub kartę microSD podłączoną jako pamięć masowa i kopiuje plik KMZ do Garmin/CustomMaps, " &
+                     "a plik JNX do Garmin/BirdsEye.")
+        DodajPunktor("Odbiornik widoczny jako odtwarzacz przenośny (tryb MTP) trzeba przełączyć w tryb pamięci masowej w ustawieniach urządzenia.")
+
+        DodajStopkeOnline(_urlOnline)
+    End Sub
+
+    Private Sub PomocWspolrzedne()
+        Me.Text = "Pomoc i instrukcja - Współrzędne zasięgu pobierania"
+        _urlOnline = "https://eksploracja.github.io/MapoTero/pomoc/obszar/zaznaczanie/"
+
+        DodajTytul("Współrzędne zasięgu pobierania")
+        DodajAkapit("Wpisz granice prostokąta w układzie współrzędnych bieżącej sesji. Pola są ułożone jak strony świata: północ u góry, " &
+                    "zachód po lewej, wschód po prawej, południe na dole.")
+        DodajPunktor("W układach PL-1992, PL-2000 i UTM X oznacza północ, a Y wschód (konwencja geodezyjna), w metrach.")
+        DodajPunktor("W WGS84 wpisujesz stopnie: X - szerokość geograficzną, Y - długość geograficzną.")
+        DodajPunktor("'Zaokrąglij do km' wyrównuje granice do pełnych kilometrów (nie działa w WGS84).")
+
+        DodajStopkeOnline(_urlOnline)
+    End Sub
+
     Private Sub PomocKorektaFolderu()
         Me.Text = "Pomoc i instrukcja - Korekta obrazów w folderze"
         _urlOnline = "https://eksploracja.github.io/MapoTero/pomoc/narzedzia/#korekta-obrazów-w-folderze"
@@ -359,7 +416,7 @@ Public Class FormPomocMbtiles
         DodajPunktor("Mapę TrekBuddy / Locus Map (.tar) tworzy okno Eksport mapy - okno Ustawienia nie ma już trybu TrekBuddy.")
 
         DodajNaglowek1("4. Otwieranie okna")
-        DodajPunktor("Okno otwiera menu Ustawienia oraz kliknięcie formatu segmentów na pasku stanu.")
+        DodajPunktor("Okno otwiera pozycja Narzędzia > Ustawienia... (Ctrl+,). Format segmentów zmienisz też w karcie Parametry segmentów (Zmień...).")
         DodajPunktor("W trakcie pobierania można zmienić tylko widok współrzędnych i układ nowej sesji; pozostałe opcje są wyłączone do końca pobierania.")
 
         DodajStopkeOnline(_urlOnline)
@@ -382,16 +439,16 @@ Public Class FormPomocMbtiles
         DodajNaglowek1("2. Dodawanie warstw do projektu")
         DodajPunktor("Kliknij 'Dodaj folder sesji...' i wskaż folder z sesją mapy pobraną wcześniej w oknie głównym.")
         DodajPunktor("Możesz także wskazać folder nadrzędny (np. 'download') - program wykryje wszystkie podfoldery z sesjami i zaproponuje dodanie ich wszystkich naraz.")
-        DodajPunktor("Program automatycznie odczyta rozdzielczość piksela i zaproponuje optymalne poziomy powiększeń (Zoom Od - Zoom Do).")
+        DodajPunktor("Program automatycznie odczyta rozdzielczość piksela i zaproponuje optymalne poziomy powiększeń (powiększenie od - do).")
 
-        DodajNaglowek1("3. Zakresy wyświetlania (Zoom Od – Zoom Do)")
-        DodajPunktor("W kolumnach 'Zoom Od' i 'Zoom Do' precyzyjnie wskaż, w jakim przedziale powiększeń dana warstwa ma być widoczna.")
+        DodajNaglowek1("3. Zakresy wyświetlania (powiększenie od – do)")
+        DodajPunktor("W kolumnach 'Powiększenie od' i 'Powiększenie do' precyzyjnie wskaż, w jakim przedziale powiększeń dana warstwa ma być widoczna.")
         DodajPunktor("Przykładowa konfiguracja wieloskalowa:" & vbCrLf &
                      "  • Poziom 11 - 13: Mapa topograficzna ogólna 1:100 000" & vbCrLf &
                      "  • Poziom 14 - 15: Mapa topograficzna 1:25 000" & vbCrLf &
                      "  • Poziom 16 - 17: Mapa topograficzna 1:10 000" & vbCrLf &
                      "  • Poziom 18 - 19: Ortofotomapa o wysokiej rozdzielczości")
-        DodajPunktor("Dwie lub więcej warstw mogą mieć ten sam zakres zoom - zostaną wtedy zblendowane (nałożone na siebie).")
+        DodajPunktor("Dwie lub więcej warstw mogą mieć ten sam zakres powiększeń - zostaną wtedy wymieszane (nałożone na siebie).")
 
         DodajNaglowek1("4. Hierarchia i kolejność warstw (Stos warstw)")
         DodajPunktor("GÓRA TABELI = WIERZCH MAPY (tak samo jak w programach GIS, np. QGIS czy Photoshopie).")
@@ -415,7 +472,7 @@ Public Class FormPomocMbtiles
                      "  • 7 Rzeźba terenu - dedykowany dla cieniowania rzeźby NMT: jasność 180 płaskiego terenu jest neutralna, stoki ciemnieją/jaśnieją bez szarej zasłony.")
 
         DodajNaglowek1("6. Symulator podglądu na żywo")
-        DodajPunktor("Przesuwaj suwak 'Poziom zoom' w prawym panelu, aby podejrzeć kafel podglądu dla każdego powiększenia.")
+        DodajPunktor("Przesuwaj suwak 'Powiększenie' w prawym panelu, aby podejrzeć kafel podglądu dla każdego powiększenia.")
         DodajPunktor("Podgląd uwzględnia kolejność warstw, przezroczystości, krycie oraz tryb mnożenia w czasie rzeczywistym.")
 
         DodajNaglowek1("7. Parametry kompresji i zapis pliku")
@@ -455,7 +512,7 @@ Public Class FormPomocMbtiles
     End Sub
 
     Private Sub PomocWarstwyZaawansowane()
-        Me.Text = "Pomoc i instrukcja - Warstwy zaawansowane (krycie i mieszanie)"
+        Me.Text = "Pomoc i instrukcja - Mikser warstw (krycie i mieszanie)"
         _urlOnline = "https://eksploracja.github.io/MapoTero/pomoc/pobieranie/kompozycje/"
 
         DodajTytul("Zaawansowane zarządzanie warstwami, kryciem i trybami mieszania")

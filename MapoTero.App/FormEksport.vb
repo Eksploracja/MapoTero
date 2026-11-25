@@ -113,7 +113,7 @@ Public Class FormEksport
 
     ''' <summary>Rozmiar obszaru roboczego formularza w projekcie (jednostki projektanta, przed skalowaniem czcionki).</summary>
     Private Const ProjektSzerokoscKlienta As Integer = 510
-    Private Const ProjektWysokoscKlienta As Integer = 842
+    Private Const ProjektWysokoscKlienta As Integer = 872
 
     ''' <summary>
     ''' Rozmiar obszaru roboczego po skalowaniu okna do bieżącej czcionki. Dawniej używano wprost wartości z projektu,
@@ -135,7 +135,7 @@ Public Class FormEksport
     Private Sub FormEksport_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         PomocProgramu.ZamykanieKlawiszemEsc(Me)
         'okno otwarte jako scalanie segmentów - pomoc o arkuszu
-        PomocProgramu.DodajPrzyciskPomocy(Me, If(ArkuszDomyslnie, TematPomocy.Scalanie, TematPomocy.Eksport), 12, 802)
+        PomocProgramu.DodajPrzyciskPomocy(Me, If(ArkuszDomyslnie, TematPomocy.Scalanie, TematPomocy.Eksport), 12, 832)
         DopasujDoWysokosciEkranu()
         If cboKolejnoscGarmin.Items.Count > 0 AndAlso cboKolejnoscGarmin.SelectedIndex < 0 Then
             cboKolejnoscGarmin.SelectedIndex = 0
@@ -172,6 +172,19 @@ Public Class FormEksport
             End Select
         ElseIf ArkuszDomyslnie Then
             rbGeoTiff.Checked = True
+        Else
+            'ostatnio używany format (dawniej wybierany polem „Format docelowy” w oknie głównym, bez zapamiętywania)
+            Select Case Ustawienia.OstatniEksport
+                Case RodzajEksportu.GeoTiff : rbGeoTiff.Checked = True
+                Case RodzajEksportu.MBTiles : rbMBTiles.Checked = True
+                Case RodzajEksportu.KmzGarmin : rbKmzGarmin.Checked = True
+                Case RodzajEksportu.Kmz : rbKmz.Checked = True
+                Case RodzajEksportu.SQLiteDB : rbSQLiteDB.Checked = True
+                Case RodzajEksportu.OruxMaps : rbOruxMaps.Checked = True
+                Case RodzajEksportu.Jnx : rbJnx.Checked = True
+                Case RodzajEksportu.GeoPackage : rbGeoPackage.Checked = True
+                Case RodzajEksportu.TrekBuddy : rbTrekBuddy.Checked = True
+            End Select
         End If
         WczytajSesje()
         UsunNiepasujaceNakladki()
@@ -357,26 +370,58 @@ Public Class FormEksport
         End Get
     End Property
 
+    ''' <summary>Folder i podstawa nazwy wybrane przyciskiem „Zmień...” (puste - folder sesji i nazwa domyślna).</summary>
+    Private _folderWyniku As String = ""
+    Private _podstawaWyniku As String = ""
+
+    ''' <summary>
+    ''' Pełna ścieżka pliku wynikowego dla wybranego formatu. Dawniej zawsze „_eksport_KxW” w folderze sesji (audyt ER-10);
+    ''' arkusz zachowuje przedrostek, po którym rozpoznają go korekta obrazów w folderze i eksport CAD.
+    ''' </summary>
+    Private Function SciezkaWyniku() As String
+        If _sesja Is Nothing Then Return ""
+        Dim rodzaj = WybranyRodzaj
+        Dim folder = If(_folderWyniku <> "", _folderWyniku, _folder)
+        Dim podstawa = If(_podstawaWyniku <> "", _podstawaWyniku,
+                          NazwaPlikuEksportu.PodstawaDomyslna(_folder, rodzaj, _sesja.Siatka.LiczbaKolumn, _sesja.Siatka.LiczbaWierszy,
+                                                              FormKorektaFolderu.PrzedrostekArkusza))
+        Return Path.Combine(folder, podstawa & NazwaPlikuEksportu.Przyrostek(rodzaj, WybranyFormatArkusza))
+    End Function
+
+    Private Sub OdswiezPlikWyniku()
+        Dim sciezka = SciezkaWyniku()
+        txtPlikWyniku.Text = sciezka
+        ToolTip1.SetToolTip(txtPlikWyniku, sciezka)
+        If sciezka <> "" Then
+            'koniec ścieżki (nazwa pliku) widoczny bez przewijania pola
+            txtPlikWyniku.SelectionStart = sciezka.Length
+            txtPlikWyniku.ScrollToCaret()
+        End If
+    End Sub
+
+    Private Sub btnPlikWyniku_Click(sender As Object, e As EventArgs) Handles btnPlikWyniku.Click
+        If _sesja Is Nothing Then Return
+        Dim sciezka = SciezkaWyniku()
+        Dim przyrostek = NazwaPlikuEksportu.Przyrostek(WybranyRodzaj, WybranyFormatArkusza)
+        Using okno As New SaveFileDialog With {
+            .Title = "Plik wynikowy eksportu", .InitialDirectory = Path.GetDirectoryName(sciezka),
+            .FileName = NazwaPlikuEksportu.PodstawaZeSciezki(sciezka), .OverwritePrompt = False, .AddExtension = False,
+            .Filter = "Mapa (*" & przyrostek & ")|*" & przyrostek & "|Wszystkie pliki|*.*"}
+            If okno.ShowDialog(Me) <> DialogResult.OK Then Return
+            _folderWyniku = Path.GetDirectoryName(okno.FileName)
+            _podstawaWyniku = NazwaPlikuEksportu.PodstawaZeSciezki(okno.FileName)
+        End Using
+        OdswiezPlikWyniku()
+    End Sub
+
+    ''' <summary>Czy plik (folder OruxMaps, tomy KMZ) wynikowy już istnieje - pytanie o zastąpienie przed eksportem.</summary>
+    Private Shared Function WynikIstnieje(plik As String) As Boolean
+        Return File.Exists(plik) OrElse Directory.Exists(plik) OrElse
+               (plik.EndsWith(".kmz", StringComparison.OrdinalIgnoreCase) AndAlso EksportMapy.IstniejaceTomyKmz(plik).Any())
+    End Function
+
     Private Function UtworzZadanie() As ZadanieEksportu
         Dim rodzaj As RodzajEksportu = WybranyRodzaj
-        Dim nazwa As String = "_eksport_" & _sesja.Siatka.LiczbaKolumn & "x" & _sesja.Siatka.LiczbaWierszy
-        Dim rozszerzenie As String
-        Select Case rodzaj
-            Case RodzajEksportu.Jnx : rozszerzenie = ".jnx"
-            Case RodzajEksportu.MBTiles : rozszerzenie = ".mbtiles"
-            Case RodzajEksportu.GeoPackage : rozszerzenie = ".gpkg"
-            Case RodzajEksportu.SQLiteDB : rozszerzenie = ".sqlitedb"
-            Case RodzajEksportu.OruxMaps : rozszerzenie = "_oruxmaps"
-            Case RodzajEksportu.GeoTiff
-                'nazwa jak dawniej w oknie scalania - korekta obrazów w folderze pomija arkusze po przedrostku
-                nazwa = FormKorektaFolderu.PrzedrostekArkusza & _sesja.Siatka.LiczbaKolumn & "x" & _sesja.Siatka.LiczbaWierszy
-                rozszerzenie = "." & ZapisRastra.Rozszerzenie(WybranyFormatArkusza)
-            Case RodzajEksportu.TrekBuddy
-                nazwa = "_trekbuddy_" & _sesja.Siatka.LiczbaKolumn & "x" & _sesja.Siatka.LiczbaWierszy
-                rozszerzenie = ".tar"
-            Case RodzajEksportu.KmzGarmin : rozszerzenie = "_garmin.kmz"
-            Case Else : rozszerzenie = ".kmz"
-        End Select
         _sesja.Zrodlo.BialePrzezroczyste = chkBialePodstawa.Checked
         Dim kOrder As Integer = 50
         If cboKolejnoscGarmin.SelectedIndex = 1 Then
@@ -385,7 +430,7 @@ Public Class FormEksport
             kOrder = 75
         End If
         Dim z As New ZadanieEksportu With {
-            .Rodzaj = rodzaj, .Zrodlo = _sesja.Zrodlo, .Uklad = _sesja.Uklad, .Plik = _folder & nazwa & rozszerzenie,
+            .Rodzaj = rodzaj, .Zrodlo = _sesja.Zrodlo, .Uklad = _sesja.Uklad, .Plik = SciezkaWyniku(),
             .JakoscJpeg = CInt(nudJakosc.Value), .MaksKafli = CInt(nudMaksKafli.Value), .PodzialNaTomy = chkPodzialNaTomy.Checked AndAlso rodzaj = RodzajEksportu.KmzGarmin,
             .KolejnoscRysowania = kOrder,
             .PoziomMin = CInt(Math.Min(nudPoziomMin.Value, nudPoziomMax.Value)), .PoziomMax = CInt(nudPoziomMax.Value), .KaflePng = chkPng.Checked,
@@ -513,6 +558,8 @@ Public Class FormEksport
         nudKrycie.Enabled = zaznaczona IsNot Nothing
         chkBialeNakladka.Enabled = zaznaczona IsNot Nothing
         btnEksportuj.Enabled = _sesja IsNot Nothing AndAlso wolny
+        btnPlikWyniku.Enabled = _sesja IsNot Nothing AndAlso wolny
+        OdswiezPlikWyniku()
         lblPlan.Text = ""
         If _sesja Is Nothing Then Exit Sub
         Dim z = UtworzZadanie()
@@ -582,6 +629,9 @@ Public Class FormEksport
         dlgFolder.SelectedPath = _folder
         If dlgFolder.ShowDialog = DialogResult.OK Then
             _folder = dlgFolder.SelectedPath & "\"
+            'inna sesja - nazwa i folder wyniku znów domyślne (z nowej sesji)
+            _folderWyniku = ""
+            _podstawaWyniku = ""
             WczytajSesje()
             UsunNiepasujaceNakladki()
             UstawWidok()
@@ -761,6 +811,15 @@ Public Class FormEksport
     Private Async Sub btnEksportuj_Click(sender As Object, e As EventArgs) Handles btnEksportuj.Click
         If _sesja Is Nothing OrElse _przerwanie IsNot Nothing Then Exit Sub
         Dim z = UtworzZadanie()
+        'ponowny eksport (np. po zmianie powiększeń) nadpisywał poprzedni plik bez pytania (audyt ER-10)
+        If WynikIstnieje(z.Plik) Then
+            If MessageBox.Show("Plik " & z.Plik & " już istnieje." & vbCrLf & vbCrLf &
+                               "Zastąpić go? Wybierz Nie, aby zmienić nazwę przyciskiem „Zmień...”” przy polu Plik wynikowy.",
+                               "Eksport mapy", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2) <> DialogResult.Yes Then
+                btnPlikWyniku.Focus()
+                Exit Sub
+            End If
+        End If
         If z.Piramida AndAlso EksportMapy.LiczbaKafliMBTiles(z) > 2000000 Then
             If MessageBox.Show("Eksport obejmie ponad 2 mln kafli i może trwać bardzo długo. Kontynuować?", "Eksport kafli",
                                MessageBoxButtons.YesNo, MessageBoxIcon.Question) <> DialogResult.Yes Then Exit Sub
@@ -1011,6 +1070,7 @@ Public Class FormEksport
     Private Sub FormEksport_FormClosed(sender As Object, e As FormClosedEventArgs) Handles MyBase.FormClosed
         Ustawienia.ZapamietajKorekte(_opcjeMip)
         Ustawienia.FormatArkusza = WybranyFormatArkusza
+        If Not ArkuszDomyslnie Then Ustawienia.OstatniEksport = WybranyRodzaj
         Ustawienia.ScalanieWorldFile = chkArkuszWorldFile.Checked
         Ustawienia.ScalanieMap = chkArkuszMap.Checked
         Ustawienia.ScalanieTab = chkArkuszTab.Checked

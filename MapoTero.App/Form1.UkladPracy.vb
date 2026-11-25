@@ -185,21 +185,124 @@ Partial Public Class Form1
         OdswiezZakladkeSesji()
     End Sub
 
+    Private _menuPobierz As ToolStripMenuItem
+    Private _menuOstatnie As ToolStripMenuItem
+
+    ''' <summary>
+    ''' Menu „Sesja pobierania” w kolejności pracy: sesja (nowa, otwórz, ostatnie, zapisz) → obszar → pobieranie i eksport
+    ''' → pliki. Dawniej menu nie miało pobierania, zaznaczania ani eksportu (eksport był w Narzędziach obok konwerterów),
+    ''' a zapis i odczyt sesji miały skróty Alt+Z / Alt+W, które w Windows otwierają menu z klawiatury (audyt ER-06, ER-12).
+    ''' </summary>
     Private Sub UlozMenuPracy()
-        Dim pobrane As New ToolStripMenuItem("Otwórz folder pobrań", ZarejestrujIkone(IkonaOkna.Sesja, KolorAkcjiOkna), Sub() OtworzFolder(FolderDownload))
-        Dim siatka As New ToolStripMenuItem("Pokaż siatkę na mapie", Nothing, AddressOf btnZnaczniki_Click)
-        SesjaToolStripMenuItem.DropDownItems.Insert(1, pobrane)
-        SesjaToolStripMenuItem.DropDownItems.Insert(2, siatka)
+        Dim sesja = SesjaToolStripMenuItem.DropDownItems
+        ' Alt+S na pozycji głównej menu też kolidował z mnemonikami - menu otwiera Alt i klawisz podkreślonej litery.
+        SesjaToolStripMenuItem.ShortcutKeys = Keys.None
+        _menuNowaSesja.ShortcutKeys = Keys.Control Or Keys.N
+        WczytajToolStripMenuItem1.Text = "Otwórz sesję..."
+        WczytajToolStripMenuItem1.ToolTipText = "Wczytaj sesję z jej folderu (plik conf.txt): warstwy, obszar i parametry pobierania"
+        WczytajToolStripMenuItem1.ShortcutKeys = Keys.Control Or Keys.O
+        ZapiszToolStripMenuItem.Text = "Zapisz sesję w folderze..."
+        ZapiszToolStripMenuItem.ToolTipText = "Zapisz warstwy, obszar i parametry bieżącej sesji (plik conf.txt) we wskazanym folderze"
+        ZapiszToolStripMenuItem.ShortcutKeys = Keys.Control Or Keys.S
+        _menuOstatnie = New ToolStripMenuItem("Ostatnie sesje") With {.Name = "OstatnieSesjeToolStripMenuItem"}
+        _menuOstatnie.DropDownItems.Add(New ToolStripMenuItem("(brak)") With {.Enabled = False})
+        AddHandler _menuOstatnie.DropDownOpening, Sub() WypelnijOstatnieSesje()
+
+        Dim zaznacz As New ToolStripMenuItem("Zaznacz obszar na mapie", ZarejestrujIkone(IkonaOkna.Obszar, KolorAkcjiOkna),
+                                             Sub() PrzelaczZaznaczanieObszaru()) With {.Name = "ZaznaczObszarToolStripMenuItem"}
+        Dim wspolrzedne As New ToolStripMenuItem("Wpisz współrzędne obszaru...", Nothing,
+                                                 Sub() btnWpiszWspolrzedne_Click(btnWpiszWspolrzedne, EventArgs.Empty)) With {.Name = "WspolrzedneToolStripMenuItem"}
         KorytarzToolStripMenuItem.Text = "Obszar pobierania wzdłuż trasy (GPX, KML, KMZ, GPKG)..."
         ' Poligon tuż pod trasą - oba wyznaczają obszar pobierania z pliku (tak samo jak w menu „Zmień ▾” karty obszaru).
         Dim poligon As New ToolStripMenuItem("Obszar pobierania z poligonu (KML, GeoJSON, GPKG)...", Nothing, Sub() WybierzPlikPoligonu()) With {
             .Name = "PoligonToolStripMenuItem",
             .ToolTipText = "Prostokąt obejmujący poligon z pliku, np. granicę gminy albo działki narysowaną w QGIS lub Google Earth"}
-        SesjaToolStripMenuItem.DropDownItems.Insert(SesjaToolStripMenuItem.DropDownItems.IndexOf(KorytarzToolStripMenuItem) + 1, poligon)
+        Dim siatka As New ToolStripMenuItem("Pokaż obszar i siatkę na mapie", Nothing, Sub() PokazObszarNaMapie())
+
+        _menuPobierz = New ToolStripMenuItem("Pobierz segmenty", Nothing, Sub() PobierzZMenu()) With {
+            .Name = "PobierzToolStripMenuItem", .ShortcutKeys = Keys.F5}
+        OdswiezToolStripMenuItem.Text = "Pobierz ponownie wszystkie segmenty..."
+        ' Eksport należy do sesji (tworzy plik z jej segmentów), więc stoi tu, a nie w Narzędziach obok konwerterów.
+        NarzedziaToolStripMenuItem.DropDownItems.Remove(EksportToolStripMenuItem)
+        EksportToolStripMenuItem.Text = "Eksportuj mapę..."
+        EksportToolStripMenuItem.ToolTipText = "Utwórz plik mapy (MBTiles, KMZ, JNX, GeoTIFF…) z segmentów pobranych do folderu sesji"
+
+        Dim folderSesji As New ToolStripMenuItem("Otwórz folder sesji", ZarejestrujIkone(IkonaOkna.Sesja, KolorAkcjiOkna),
+                                                 Sub() btnOtworzFolder_Click(btnOtworzFolderDolny, EventArgs.Empty))
+        Dim pobrane As New ToolStripMenuItem("Otwórz folder pobrań (wszystkie sesje)", ZarejestrujIkone(IkonaOkna.Pobrane, KolorAkcjiOkna),
+                                             Sub() OtworzFolder(FolderDownload))
+        UsunPobraneToolStripMenuItem.Text = "Usuń pobrane pliki sesji... (do Kosza)"
+
+        sesja.Clear()
+        sesja.AddRange(New ToolStripItem() {
+            _menuNowaSesja, WczytajToolStripMenuItem1, _menuOstatnie, ZapiszToolStripMenuItem, New ToolStripSeparator(),
+            zaznacz, wspolrzedne, KorytarzToolStripMenuItem, poligon, UsunKorytarzToolStripMenuItem, siatka, New ToolStripSeparator(),
+            _menuPobierz, OdswiezToolStripMenuItem, EksportToolStripMenuItem, New ToolStripSeparator(),
+            folderSesji, pobrane, UsunPobraneToolStripMenuItem})
+        AddHandler SesjaToolStripMenuItem.DropDownOpening,
+            Sub()
+                Dim trwa = _przerwanie IsNot Nothing
+                _menuPobierz.Text = If(trwa, "Przerwij pobieranie", If(btnPobierz.Text <> "", btnPobierz.Text, "Pobierz segmenty"))
+                zaznacz.Text = If(_trybZaznaczania, "Anuluj zaznaczanie", "Zaznacz obszar na mapie")
+                siatka.Enabled = BiezacaSiatka().Poprawna
+            End Sub
+
+        ' Dwa konwertery robią to samo dla dwóch rodzajów kalibracji - jedno podmenu zamiast dwóch pozycji obok siebie (ER-28).
+        Dim narzedzia = NarzedziaToolStripMenuItem.DropDownItems
+        Dim miejsce = narzedzia.IndexOf(KonwertujOziToolStripMenuItem)
+        narzedzia.Remove(KonwertujOziToolStripMenuItem)
+        narzedzia.Remove(KonwertujGeoTiffToolStripMenuItem)
+        KonwertujOziToolStripMenuItem.Text = "Skan OziExplorer z plikiem kalibracji (.map)..."
+        KonwertujGeoTiffToolStripMenuItem.Text = "Mapa GeoTIFF (.tif)..."
+        Dim konwertery As New ToolStripMenuItem("Konwertuj gotową mapę") With {
+            .Name = "KonwertujMapeToolStripMenuItem",
+            .ToolTipText = "Zamienia gotową, skalibrowaną mapę (OziExplorer .map albo GeoTIFF) na JNX, KMZ, MBTiles, GeoPackage, SQLiteDB lub OruxMaps"}
+        konwertery.DropDownItems.AddRange({KonwertujOziToolStripMenuItem, KonwertujGeoTiffToolStripMenuItem})
+        narzedzia.Insert(Math.Max(0, miejsce), konwertery)
+
         MenuStrip1.Items.Remove(UstawieniaToolStripMenuItem)
+        UstawieniaToolStripMenuItem.Text = "Ustawienia..."
+        UstawieniaToolStripMenuItem.ShortcutKeys = Keys.Control Or Keys.Oemcomma
+        UstawieniaToolStripMenuItem.ShortcutKeyDisplayString = "Ctrl+,"
         NarzedziaToolStripMenuItem.DropDownItems.Add(New ToolStripSeparator())
         NarzedziaToolStripMenuItem.DropDownItems.Add(UstawieniaToolStripMenuItem)
-        EksportToolStripMenuItem.Text = "Eksport z pobranych segmentów…"
+    End Sub
+
+    ''' <summary>„Pobierz segmenty” z menu (F5): to samo co przycisk w karcie „Stan sesji”, a w trakcie pobierania - przerwanie.</summary>
+    Private Sub PobierzZMenu()
+        If _przerwanie IsNot Nothing Then
+            btnPrzerwij_Click(btnPrzerwij, EventArgs.Empty)
+            Return
+        End If
+        If _zestaw.Liczba = 0 Then
+            PokazBladSesji("Najpierw wybierz warstwę w katalogu warstw po prawej.", "Brak warstwy")
+        ElseIf Not BiezacaSiatka().Poprawna Then
+            PokazBladSesji("Najpierw zaznacz obszar na mapie albo wpisz współrzędne (Obszar pobierania → Zmień ▾).", "Brak obszaru")
+        Else
+            btnPobierz_Click(btnPobierz, EventArgs.Empty)
+        End If
+    End Sub
+
+    ''' <summary>Podmenu „Ostatnie sesje”: foldery z conf.txt w folderze pobrań, od najnowszej.</summary>
+    Private Sub WypelnijOstatnieSesje()
+        _menuOstatnie.DropDownItems.Clear()
+        Dim foldery = KonfiguracjaSesji.OstatnieFolderySesji(FolderDownload, 10)
+        If foldery.Count = 0 Then
+            _menuOstatnie.DropDownItems.Add(New ToolStripMenuItem("(brak zapisanych sesji)") With {.Enabled = False})
+            Return
+        End If
+        For Each folder In foldery
+            Dim f = folder
+            Dim nazwa = NazwaPlikuEksportu.NazwaSesji(f)
+            Dim data = File.GetLastWriteTime(Path.Combine(f, "conf.txt")).ToString("d MMM HH:mm", _kulturaPl)
+            Dim pozycja As New ToolStripMenuItem(nazwa & "   (" & data & ")", Nothing,
+                                                 Sub()
+                                                     If PobieranieTrwa("Wczytanie innej sesji") Then Return
+                                                     WczytajConfZFolderu(f, wybranyPrzezUzytkownika:=True)
+                                                 End Sub) With {.ToolTipText = f}
+            If String.Equals(f.TrimEnd("\"c), If(FolderSesji, "").TrimEnd("\"c), StringComparison.OrdinalIgnoreCase) Then pozycja.Checked = True
+            _menuOstatnie.DropDownItems.Add(pozycja)
+        Next
     End Sub
 
     ''' <summary>Wysokość nagłówka kart prawego panelu (pas z ikoną, tytułem i akcją karty).</summary>
@@ -504,7 +607,8 @@ Partial Public Class Form1
         filtr.Margin = Padding.Empty
         tvWarstwy.Margin = Padding.Empty
         Label29.Visible = False
-        grpDaneZrodlowe.Text = "Warstwy do pobrania"
+        ' „Katalog warstw”, a nie „Warstwy do pobrania” - pobierane są warstwy z karty „Wybrane warstwy” (audyt ER-08)
+        grpDaneZrodlowe.Text = "Katalog warstw"
         grpDaneZrodlowe.Font = _czcionkaNaglowka
         grpDaneZrodlowe.ForeColor = Atrament
         grpDaneZrodlowe.BackColor = Color.White
@@ -629,7 +733,7 @@ Partial Public Class Form1
             If opcja.Checked Then _polePodkladuMapy.SelectedIndex = indeks
         Next
         Dim folderPobran As New Button With {.Name = "btnFolderPobran", .Text = "Folder pobrań",
-                                            .Image = ZarejestrujIkone(IkonaOkna.Sesja, KolorAkcjiOkna), .TextImageRelation = TextImageRelation.ImageBeforeText}
+                                            .Image = ZarejestrujIkone(IkonaOkna.Pobrane, KolorAkcjiOkna), .TextImageRelation = TextImageRelation.ImageBeforeText}
         AddHandler folderPobran.Click, Sub() OtworzFolder(FolderDownload)
         ToolTip1.SetToolTip(folderPobran, "Otwórz folder download ze wszystkimi pobranymi sesjami.")
         _btnNowaSesja.Text = "Nowa sesja"
@@ -744,7 +848,7 @@ Partial Public Class Form1
             Return
         End If
         If Ustawienia.EdycjaXY Then
-            Komunikat("Wyłącz ręczną edycję XY w ustawieniach albo wpisz współrzędne.", Color.Red)
+            PokazBladSesji("Zaznaczanie jest wyłączone, bo włączono ręczne wpisywanie XY. Wpisz współrzędne: Obszar pobierania → Zmień ▾.")
             _podpowiedzZaznaczenia.Text = "Włączona edycja XY · Obszar pobierania → Zmień → Wpisz współrzędne…"
             Return
         End If
@@ -1238,8 +1342,15 @@ Partial Public Class Form1
         picPodglad.Dock = DockStyle.Fill
         picPodglad.BorderStyle = BorderStyle.None
         picPodglad.Cursor = Cursors.Hand
-        ToolTip1.SetToolTip(picPodglad, "Kółko myszy: przybliż lub oddal próbkę (tak jak − i + powyżej). Kliknięcie otwiera mikser warstw.")
-        _pustyPodglad = New Label With {.Text = "Tu pojawi się próbka wybranych warstw.", .Dock = DockStyle.Fill,
+        ToolTip1.SetToolTip(picPodglad, "Kółko myszy: przybliż lub oddal próbkę (tak jak − i + powyżej). Podwójne kliknięcie otwiera Mikser warstw.")
+        ' Pusta próbka mówi, jak zacząć - pierwsze uruchomienie i nowa sesja nie miały żadnej wskazówki poza kartą stanu (ER-13).
+        _pustyPodglad = New Label With {.Text = "Tu pojawi się próbka wybranych warstw." & vbCrLf & vbCrLf &
+                                                "Jak zacząć:" & vbCrLf &
+                                                "1. Wybierz warstwę w katalogu warstw powyżej." & vbCrLf &
+                                                "2. Zaznacz obszar na mapie (przycisk Zaznacz obszar)." & vbCrLf &
+                                                "3. Kliknij Pobierz segmenty, potem Eksportuj." & vbCrLf & vbCrLf &
+                                                "Gotową mapę w kilku krokach utworzy Szybki kreator (Ctrl+K).",
+                                        .Dock = DockStyle.Fill,
                                         .TextAlign = ContentAlignment.MiddleCenter, .Font = _czcionkaRobocza,
                                         .ForeColor = KolorPomocniczy, .BackColor = TloPaneli, .Padding = New Padding(Px(5))}
         lblPodgladStan.Dock = DockStyle.Bottom
@@ -1358,10 +1469,10 @@ Partial Public Class Form1
                                             .Font = _czcionkaRobocza, .BackColor = Color.White, .ForeColor = Atrament}
         _informacjeOPlikach = New Label With {.AutoSize = True, .Font = _czcionkaRobocza,
                                               .ForeColor = KolorPomocniczy, .Margin = New Padding(0, Px(5), 0, Px(6))}
-        Dim zapisz As New Button With {.Text = "Zapisz ustawienia…"}
+        Dim zapisz As New Button With {.Text = "Zapisz sesję w folderze…"}
         AddHandler zapisz.Click, Sub() ZapiszToolStripMenuItem.PerformClick()
 
-        btnOtworzFolderDolny.Text = "Otwórz folder"
+        btnOtworzFolderDolny.Text = "Otwórz folder sesji"
         btnOtworzFolderDolny.Image = ZarejestrujIkone(IkonaOkna.Sesja, KolorAkcjiOkna)
         btnOtworzFolderDolny.TextImageRelation = TextImageRelation.ImageBeforeText
 
@@ -1445,7 +1556,7 @@ Partial Public Class Form1
                     grpRozdzielczoscFormat.Invalidate()
                 End If
             End Sub
-        ToolTip1.SetToolTip(_lnkParametry, "Rozdzielczość, bok segmentu, układ współrzędnych i format plików.")
+        ToolTip1.SetToolTip(_lnkParametry, "Rozdzielczość, bok segmentu, układ współrzędnych i format pobieranych segmentów.")
         AddHandler _lnkPokazObszar.LinkClicked, Sub() _menuObszaru.Show(_lnkPokazObszar, New Point(0, _lnkPokazObszar.Height))
         ToolTip1.SetToolTip(_lnkPokazObszar, "Pokaż obszar na mapie, zaznacz go, wpisz współrzędne albo wczytaj z pliku trasy lub poligonu.")
         ' Kliknięcie wymiaru obszaru pokazuje obszar na mapie - skrót do pierwszej pozycji menu.
@@ -1653,7 +1764,7 @@ Partial Public Class Form1
     Private Sub PokazObszarNaMapie()
         Dim s = BiezacaSiatka()
         If Not s.Poprawna Then
-            Komunikat("Nie ma obszaru pobierania. Zaznacz go na mapie albo wybierz Obszar pobierania → Zmień.", Color.Red)
+            PokazBladSesji("Nie ma obszaru pobierania. Kliknij Zaznacz obszar albo wybierz Obszar pobierania → Zmień ▾.", "Brak obszaru")
             Return
         End If
         WyczyscZnaczniki()
@@ -1681,6 +1792,8 @@ Partial Public Class Form1
         Return prostokat.Width >= Px(16) AndAlso prostokat.Height >= Px(16) AndAlso mapa.ClientRectangle.IntersectsWith(prostokat)
     End Function
 
+    Private _poleFormatuSegmentow As ComboBox
+
     Private Sub UlozUstawieniaBelki()
         Dim uklad As New TableLayoutPanel With {.ColumnCount = 4, .RowCount = 3, .Dock = DockStyle.Fill, .BackColor = Color.White,
                                                 .Padding = New Padding(Px(8), Px(3), Px(8), Px(3))}
@@ -1691,12 +1804,24 @@ Partial Public Class Form1
         uklad.RowStyles.Add(New RowStyle(SizeType.Absolute, Px(32)))
         uklad.RowStyles.Add(New RowStyle(SizeType.Percent, 100))
         For Each para In {(lblOpisPiksela, "Rozdzielczość"), (lblOpisSegmentu, "Bok segmentu [px]"),
-                          (lblUklad, "Układ współrzędnych"), (lblOpisFormatu, "Format docelowy")}
+                          (lblUklad, "Układ współrzędnych"), (lblOpisFormatu, "Format segmentów")}
             para.Item1.Text = para.Item2
             para.Item1.Font = _czcionkaNaglowka
             para.Item1.ForeColor = KolorPomocniczy
         Next
-        For Each kontrolka As Control In {CType(txtRozmiarPiksela, Control), cmbRozmiarPiksela, txtBokSegmentu, cmbUklad, cmbFormatDocelowy}
+        ' Format pobieranych segmentów obok pozostałych parametrów pobierania - dawniej był tylko w oknie Ustawienia,
+        ' a w tym miejscu stał format eksportu (audyt ER-03, ER-04).
+        _poleFormatuSegmentow = New ComboBox With {.Name = "cmbFormatSegmentow", .DropDownStyle = ComboBoxStyle.DropDownList,
+                                                   .AccessibleName = "Format segmentów"}
+        For Each f In OpisyFormatowSegmentow
+            _poleFormatuSegmentow.Items.Add(f.Opis)
+        Next
+        ToolTip1.SetToolTip(_poleFormatuSegmentow, "Format plików pobieranych segmentów. JPEG daje mniejsze pliki; PNG zachowuje przezroczystość nakładek. " &
+                            "Format pliku mapy (MBTiles, KMZ, GeoTIFF…) wybierasz w oknie eksportu.")
+        AddHandler _poleFormatuSegmentow.SelectedIndexChanged, AddressOf PoleFormatuSegmentow_Zmiana
+        AddHandler stFormat.TextChanged, Sub() PokazFormatSegmentow()
+        PokazFormatSegmentow()
+        For Each kontrolka As Control In {CType(txtRozmiarPiksela, Control), cmbRozmiarPiksela, txtBokSegmentu, cmbUklad, _poleFormatuSegmentow}
             kontrolka.Font = _czcionkaRobocza
         Next
         Dim rozdzielczosc As New TableLayoutPanel With {.ColumnCount = 2, .RowCount = 1}
@@ -1714,7 +1839,7 @@ Partial Public Class Form1
         DolozKomorke(uklad, rozdzielczosc, 0, 1)
         DolozKomorke(uklad, txtBokSegmentu, 1, 1)
         DolozKomorke(uklad, cmbUklad, 2, 1)
-        DolozKomorke(uklad, cmbFormatDocelowy, 3, 1)
+        DolozKomorke(uklad, _poleFormatuSegmentow, 3, 1)
         DolozKomorke(uklad, lblBokKm, 1, 2)
         DolozKomorke(uklad, _lnkOstrzezenieSegmentu, 2, 2)
         uklad.SetColumnSpan(_lnkOstrzezenieSegmentu, 2)
@@ -1823,6 +1948,37 @@ Partial Public Class Form1
         DopasujSzerokoscZakladek()
     End Sub
 
+    ''' <summary>Błąd ostatniej czynności użytkownika pokazywany w karcie „Stan sesji” do najbliższej zmiany obszaru, warstw lub parametrów.</summary>
+    Private _bladSesji As String = ""
+    Private _naglowekBleduSesji As String = ""
+
+    ''' <summary>
+    ''' Błąd, który zatrzymał czynność użytkownika (np. start pobierania). Dawniej trafiał tylko do zakładki „Komunikaty”,
+    ''' więc przy otwartym podglądzie po kliknięciu „Pobierz segmenty” nic się nie działo (audyt ER-01). Teraz karta
+    ''' „Stan sesji” pokazuje go na czerwono, a dziennik zachowuje historię.
+    ''' </summary>
+    Friend Sub PokazBladSesji(tekst As String, Optional naglowek As String = "Nie można kontynuować")
+        Komunikat(tekst, Color.Red)
+        _bladSesji = tekst
+        _naglowekBleduSesji = naglowek
+        OdswiezPodpowiedzBelki()
+    End Sub
+
+    ''' <summary>Usuwa z karty „Stan sesji” błąd poprzedniej czynności (po zmianie, która mogła go usunąć).</summary>
+    Friend Sub WyczyscBladSesji()
+        If _bladSesji = "" Then Return
+        _bladSesji = ""
+        _naglowekBleduSesji = ""
+        OdswiezPodpowiedzBelki()
+    End Sub
+
+    ''' <summary>Tekst błędu pokazywanego w karcie „Stan sesji” (pusty - brak błędu).</summary>
+    Friend ReadOnly Property BladSesji As String
+        Get
+            Return _bladSesji
+        End Get
+    End Property
+
     Private Sub OdswiezPodpowiedzBelki()
         If _podpowiedzBelki Is Nothing Then Return
         Dim trwa = _przerwanie IsNot Nothing
@@ -1839,7 +1995,7 @@ Partial Public Class Form1
                 End If
             Else
                 tekst = "Zaznacz obszar"
-                szczegoly = "Zaznacz go na mapie albo kliknij Zmień ▾."
+                szczegoly = "Kliknij Zaznacz obszar albo przeciągnij prawym przyciskiem myszy na mapie."
             End If
         ElseIf tekst.StartsWith("Zmieniono ", StringComparison.Ordinal) Then
             Dim kropka = tekst.IndexOf("."c)
@@ -1852,16 +2008,24 @@ Partial Public Class Form1
         ElseIf trwa Then
             szczegoly = stSegment.Text
         ElseIf _ostatniWynikPobierania.HasValue AndAlso _ostatniWynikPobierania.Value.Nieudane > 0 Then
-            szczegoly = "Wykaz błędów w zakładce Komunikaty."
+            szczegoly = "Pobierz brakujące albo eksportuj mapę z białymi polami. Wykaz błędów: zakładka Komunikaty."
+        ElseIf _czesciowoPobrana Then
+            szczegoly = "Część segmentów jest pobrana - dokończ pobieranie albo eksportuj to, co jest."
+        End If
+        Dim blad = Not trwa AndAlso _bladSesji <> ""
+        If blad Then
+            tekst = _naglowekBleduSesji
+            szczegoly = _bladSesji
         End If
         _podpowiedzBelki.Text = tekst.TrimEnd("."c)
-        _podpowiedzBelki.ForeColor = If(lblStatusSesji.Text = "", Atrament, lblStatusSesji.ForeColor)
+        _podpowiedzBelki.ForeColor = If(blad, Color.Firebrick, If(lblStatusSesji.Text = "", Atrament, lblStatusSesji.ForeColor))
+        _szczegolyStanuBelki.ForeColor = If(blad, Color.Firebrick, KolorPomocniczy)
         _szczegolyStanuBelki.Text = szczegoly
         ToolTip1.SetToolTip(_szczegolyStanuBelki, szczegoly)
         _postepBelki.Visible = trwa
         btnPrzerwij.Visible = trwa
         btnPobierz.Visible = Not trwa
-        btnPrzejdzDoEksportu.Visible = Not trwa AndAlso _podswietlEksport
+        btnPrzejdzDoEksportu.Visible = Not trwa AndAlso (_podswietlEksport OrElse _czesciowoPobrana)
         btnPobierz.Enabled = Not trwa AndAlso _zestaw.Liczba > 0 AndAlso BiezacaSiatka().Poprawna
         OdswiezWygladPobierania()
         _szczegolyBledow.Visible = Not trwa AndAlso Not String.IsNullOrWhiteSpace(FolderSesji) AndAlso

@@ -121,7 +121,8 @@ Partial Class FormZaawansowanyMbtiles
         '
         'colWlaczona
         '
-        Me.colWlaczona.HeaderText = "Wł."
+        Me.colWlaczona.HeaderText = "✓"
+        Me.colWlaczona.ToolTipText = "Warstwa włączona do pliku mapy"
         Me.colWlaczona.Name = "colWlaczona"
         Me.colWlaczona.Width = 30
         '
@@ -133,13 +134,13 @@ Partial Class FormZaawansowanyMbtiles
         '
         'colPoziomMin
         '
-        Me.colPoziomMin.HeaderText = "Zoom Od"
+        Me.colPoziomMin.HeaderText = "Powiększenie od"
         Me.colPoziomMin.Name = "colPoziomMin"
         Me.colPoziomMin.Width = 50
         '
         'colPoziomMax
         '
-        Me.colPoziomMax.HeaderText = "Zoom Do"
+        Me.colPoziomMax.HeaderText = "Powiększenie do"
         Me.colPoziomMax.Name = "colPoziomMax"
         Me.colPoziomMax.Width = 50
         '
@@ -168,6 +169,7 @@ Partial Class FormZaawansowanyMbtiles
         'colBiale
         '
         Me.colBiale.HeaderText = "Białe przezr."
+        Me.colBiale.ToolTipText = "Białe tło warstwy przezroczyste"
         Me.colBiale.Name = "colBiale"
         Me.colBiale.Width = 65
         '
@@ -213,7 +215,7 @@ Partial Class FormZaawansowanyMbtiles
         Me.btnRozlaczneZakresy.Size = New System.Drawing.Size(125, 26)
         Me.btnRozlaczneZakresy.TabIndex = 3
         Me.btnRozlaczneZakresy.Text = "Rozłączne skale"
-        Me.ToolTip1.SetToolTip(Me.btnRozlaczneZakresy, "Automatycznie dopasowuje rozłączne, niepokrywające się zakresy powiększeń (zoom) dla wszystkich warstw w oparciu o ich rozdzielczość.")
+        Me.ToolTip1.SetToolTip(Me.btnRozlaczneZakresy, "Automatycznie dopasowuje rozłączne, niepokrywające się zakresy powiększeń dla wszystkich warstw w oparciu o ich rozdzielczość.")
         Me.btnRozlaczneZakresy.UseVisualStyleBackColor = True
         '
         'btnGora
@@ -247,7 +249,7 @@ Partial Class FormZaawansowanyMbtiles
         Me.grpPodglad.Size = New System.Drawing.Size(320, 435)
         Me.grpPodglad.TabIndex = 1
         Me.grpPodglad.TabStop = False
-        Me.grpPodglad.Text = "Symulacja i podgląd zoomu"
+        Me.grpPodglad.Text = "Podgląd przy wybranym powiększeniu"
         '
         'lblPodgladInfo
         '
@@ -300,7 +302,7 @@ Partial Class FormZaawansowanyMbtiles
         Me.lblZoom.Name = "lblZoom"
         Me.lblZoom.Size = New System.Drawing.Size(71, 13)
         Me.lblZoom.TabIndex = 1
-        Me.lblZoom.Text = "Poziom zoom:"
+        Me.lblZoom.Text = "Powiększenie:"
         '
         'btnCentrumMapy
         '
@@ -358,7 +360,7 @@ Partial Class FormZaawansowanyMbtiles
         Me.btnWybierzPlik.Name = "btnWybierzPlik"
         Me.btnWybierzPlik.Size = New System.Drawing.Size(75, 23)
         Me.btnWybierzPlik.TabIndex = 2
-        Me.btnWybierzPlik.Text = "Wybierz..."
+        Me.btnWybierzPlik.Text = "Zmień..."
         Me.btnWybierzPlik.UseVisualStyleBackColor = True
         '
         'btnPokazWFolderze
@@ -386,7 +388,7 @@ Partial Class FormZaawansowanyMbtiles
         Me.txtNazwaMapy.Name = "txtNazwaMapy"
         Me.txtNazwaMapy.Size = New System.Drawing.Size(240, 20)
         Me.txtNazwaMapy.TabIndex = 4
-        Me.txtNazwaMapy.Text = "Mapa wielowarstwowa"
+        Me.txtNazwaMapy.Text = "Mapa wieloskalowa"
         '
         'lblTypBazy
         '
@@ -453,7 +455,7 @@ Partial Class FormZaawansowanyMbtiles
         Me.chkPiramida.Name = "chkPiramida"
         Me.chkPiramida.Size = New System.Drawing.Size(395, 17)
         Me.chkPiramida.TabIndex = 9
-        Me.chkPiramida.Text = "Szybka piramida w pasmach warstw (zapis do ~70% szybszy)"
+        Me.chkPiramida.Text = "Szybszy zapis (piramida w pasmach, do ~70% szybciej)"
         Me.chkPiramida.UseVisualStyleBackColor = True
         '
         'chkWypelnijLuki
@@ -497,7 +499,7 @@ Partial Class FormZaawansowanyMbtiles
         Me.grpSzacunek.Size = New System.Drawing.Size(940, 155)
         Me.grpSzacunek.TabIndex = 3
         Me.grpSzacunek.TabStop = False
-        Me.grpSzacunek.Text = "Szacunek rozmiaru pliku i parametrów poziomów zoom"
+        Me.grpSzacunek.Text = "Szacunek rozmiaru pliku i poziomów powiększenia"
         '
         'lvwPoziomy
         '
@@ -591,7 +593,7 @@ Partial Class FormZaawansowanyMbtiles
         Me.btnKompiluj.Name = "btnKompiluj"
         Me.btnKompiluj.Size = New System.Drawing.Size(120, 28)
         Me.btnKompiluj.TabIndex = 6
-        Me.btnKompiluj.Text = "Kompiluj MBTiles"
+        Me.btnKompiluj.Text = "Utwórz plik mapy"
         Me.btnKompiluj.UseVisualStyleBackColor = True
         '
         'btnPrzerwij

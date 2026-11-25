@@ -122,6 +122,10 @@ Imports MapoTero.Core
                 lblNazwa, _txtNazwaDocelowa, panelMtp,
                 _pasekPostepu, _lblStatus, _btnPokazWFolderze, _btnKopiuj, _btnZamknij
             })
+            'przycisk Pomoc i F1 (audyt ER-33); okno budowane w kodzie, więc położenie ustawiane wprost
+            Dim pomoc = PomocProgramu.DodajPrzyciskPomocy(Me, TematPomocy.PrzeslijMape)
+            pomoc.Anchor = AnchorStyles.Top Or AnchorStyles.Left
+            pomoc.SetBounds(164, 352, 82, 28)
         End Sub
 
         Protected Overrides Sub OnFormClosing(e As FormClosingEventArgs)

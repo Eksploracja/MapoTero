@@ -23,6 +23,8 @@ Public Enum FormatKonwersjiOzi
     Mbtiles
     SQLiteDB
     OruxMaps
+    ''' <summary>GeoPackage z kaflami (QField, Mergin Maps, QGIS) - jak w oknie eksportu (audyt ER-27).</summary>
+    GeoPackage
 End Enum
 
 Public Class RaportPostepuWsadowego
@@ -95,6 +97,7 @@ Public Class FormImportOzi
         If rbKmz.Checked Then Return FormatKonwersjiOzi.Kmz
         If rbSqlitedb.Checked Then Return FormatKonwersjiOzi.SQLiteDB
         If rbOruxMaps.Checked Then Return FormatKonwersjiOzi.OruxMaps
+        If rbGeoPackage.Checked Then Return FormatKonwersjiOzi.GeoPackage
         Return FormatKonwersjiOzi.Mbtiles
     End Function
 
@@ -105,6 +108,7 @@ Public Class FormImportOzi
             Case FormatKonwersjiOzi.Kmz : Return ".kmz"
             Case FormatKonwersjiOzi.SQLiteDB : Return ".sqlitedb"
             Case FormatKonwersjiOzi.OruxMaps : Return ""
+            Case FormatKonwersjiOzi.GeoPackage : Return ".gpkg"
             Case Else : Return ".mbtiles"
         End Select
     End Function
@@ -118,6 +122,7 @@ Public Class FormImportOzi
             Case FormatKonwersjiOzi.Jnx : KonwertujDoJnx(ozi, sciezka, kolejnosc, jakosc, postep, token, korekta)
             Case FormatKonwersjiOzi.SQLiteDB : KonwertujDoBazyKafli(ozi, RodzajEksportu.SQLiteDB, sciezka, jakosc, postep, token, korekta)
             Case FormatKonwersjiOzi.OruxMaps : KonwertujDoBazyKafli(ozi, RodzajEksportu.OruxMaps, sciezka, jakosc, postep, token, korekta)
+            Case FormatKonwersjiOzi.GeoPackage : KonwertujDoBazyKafli(ozi, RodzajEksportu.GeoPackage, sciezka, jakosc, postep, token, korekta)
             Case Else : KonwertujDoBazyKafli(ozi, RodzajEksportu.MBTiles, sciezka, jakosc, postep, token, korekta)
         End Select
     End Sub
@@ -364,7 +369,7 @@ Public Class FormImportOzi
         End Select
     End Function
 
-    Private Sub rbFormat_CheckedChanged(sender As Object, e As EventArgs) Handles rbKmz.CheckedChanged, rbJnx.CheckedChanged, rbMbtiles.CheckedChanged, rbSqlitedb.CheckedChanged, rbOruxMaps.CheckedChanged
+    Private Sub rbFormat_CheckedChanged(sender As Object, e As EventArgs) Handles rbKmz.CheckedChanged, rbJnx.CheckedChanged, rbMbtiles.CheckedChanged, rbSqlitedb.CheckedChanged, rbOruxMaps.CheckedChanged, rbGeoPackage.CheckedChanged
         chkPodzialKmz.Enabled = rbKmz.Checked
     End Sub
 
@@ -417,6 +422,7 @@ Public Class FormImportOzi
                 Case FormatKonwersjiOzi.Jnx : dlgZapisz.Filter = "Garmin BirdsEye (*.jnx)|*.jnx"
                 Case FormatKonwersjiOzi.Kmz : dlgZapisz.Filter = "Garmin Custom Maps (*.kmz)|*.kmz"
                 Case FormatKonwersjiOzi.SQLiteDB : dlgZapisz.Filter = "Baza SQLiteDB (*.sqlitedb)|*.sqlitedb"
+                Case FormatKonwersjiOzi.GeoPackage : dlgZapisz.Filter = "GeoPackage (*.gpkg)|*.gpkg"
                 Case Else : dlgZapisz.Filter = "Baza MBTiles (*.mbtiles)|*.mbtiles"
             End Select
             dlgZapisz.DefaultExt = rozszerzenie.TrimStart("."c)

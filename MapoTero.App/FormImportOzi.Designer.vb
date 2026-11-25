@@ -34,6 +34,7 @@ Partial Class FormImportOzi
         Me.rbMbtiles = New System.Windows.Forms.RadioButton()
         Me.rbSqlitedb = New System.Windows.Forms.RadioButton()
         Me.rbOruxMaps = New System.Windows.Forms.RadioButton()
+        Me.rbGeoPackage = New System.Windows.Forms.RadioButton()
         Me.chkKorekta = New System.Windows.Forms.CheckBox()
         Me.btnKorekta = New System.Windows.Forms.Button()
         Me.rbKmz = New System.Windows.Forms.RadioButton()
@@ -74,25 +75,25 @@ Partial Class FormImportOzi
         Me.txtPlikMap.Location = New System.Drawing.Point(15, 28)
         Me.txtPlikMap.Name = "txtPlikMap"
         Me.txtPlikMap.ReadOnly = True
-        Me.txtPlikMap.Size = New System.Drawing.Size(356, 20)
+        Me.txtPlikMap.Size = New System.Drawing.Size(316, 20)
         Me.txtPlikMap.TabIndex = 1
         '
         'btnWybierzMap
         '
-        Me.btnWybierzMap.Location = New System.Drawing.Point(377, 26)
+        Me.btnWybierzMap.Location = New System.Drawing.Point(337, 26)
         Me.btnWybierzMap.Name = "btnWybierzMap"
-        Me.btnWybierzMap.Size = New System.Drawing.Size(76, 24)
+        Me.btnWybierzMap.Size = New System.Drawing.Size(96, 24)
         Me.btnWybierzMap.TabIndex = 2
-        Me.btnWybierzMap.Text = "Plik(i)..."
+        Me.btnWybierzMap.Text = "Wybierz pliki..."
         Me.btnWybierzMap.UseVisualStyleBackColor = True
         '
         'btnWybierzFolder
         '
-        Me.btnWybierzFolder.Location = New System.Drawing.Point(457, 26)
+        Me.btnWybierzFolder.Location = New System.Drawing.Point(437, 26)
         Me.btnWybierzFolder.Name = "btnWybierzFolder"
-        Me.btnWybierzFolder.Size = New System.Drawing.Size(79, 24)
+        Me.btnWybierzFolder.Size = New System.Drawing.Size(99, 24)
         Me.btnWybierzFolder.TabIndex = 3
-        Me.btnWybierzFolder.Text = "Folder..."
+        Me.btnWybierzFolder.Text = "Wybierz folder..."
         Me.btnWybierzFolder.UseVisualStyleBackColor = True
         '
         'lblPlikObrazu
@@ -118,7 +119,7 @@ Partial Class FormImportOzi
         Me.btnWybierzObraz.Name = "btnWybierzObraz"
         Me.btnWybierzObraz.Size = New System.Drawing.Size(85, 24)
         Me.btnWybierzObraz.TabIndex = 5
-        Me.btnWybierzObraz.Text = "Przeglądaj..."
+        Me.btnWybierzObraz.Text = "Wybierz..."
         Me.btnWybierzObraz.UseVisualStyleBackColor = True
         '
         'grpInfo
@@ -183,13 +184,14 @@ Partial Class FormImportOzi
         'grpFormat
         '
         Me.grpFormat.Controls.Add(Me.rbOruxMaps)
+        Me.grpFormat.Controls.Add(Me.rbGeoPackage)
         Me.grpFormat.Controls.Add(Me.rbSqlitedb)
         Me.grpFormat.Controls.Add(Me.rbMbtiles)
         Me.grpFormat.Controls.Add(Me.rbKmz)
         Me.grpFormat.Controls.Add(Me.rbJnx)
         Me.grpFormat.Location = New System.Drawing.Point(15, 226)
         Me.grpFormat.Name = "grpFormat"
-        Me.grpFormat.Size = New System.Drawing.Size(521, 130)
+        Me.grpFormat.Size = New System.Drawing.Size(521, 152)
         Me.grpFormat.TabIndex = 7
         Me.grpFormat.TabStop = False
         Me.grpFormat.Text = "Docelowy format mapy"
@@ -197,32 +199,42 @@ Partial Class FormImportOzi
         'rbMbtiles
         '
         Me.rbMbtiles.AutoSize = True
-        Me.rbMbtiles.Location = New System.Drawing.Point(13, 62)
+        Me.rbMbtiles.Location = New System.Drawing.Point(13, 63)
         Me.rbMbtiles.Name = "rbMbtiles"
         Me.rbMbtiles.Size = New System.Drawing.Size(401, 17)
         Me.rbMbtiles.TabIndex = 2
-        Me.rbMbtiles.Text = "Kafle MBTiles (SQLite) - dla aplikacji mobilnych (Locus Map, OsmAnd, QField)"
+        Me.rbMbtiles.Text = "MBTiles - Locus Map, OsmAnd, OruxMaps, QField"
         Me.rbMbtiles.UseVisualStyleBackColor = True
         '
         'rbSqlitedb
         '
         Me.rbSqlitedb.AutoSize = True
-        Me.rbSqlitedb.Location = New System.Drawing.Point(13, 84)
+        Me.rbSqlitedb.Location = New System.Drawing.Point(13, 107)
         Me.rbSqlitedb.Name = "rbSqlitedb"
         Me.rbSqlitedb.Size = New System.Drawing.Size(330, 17)
-        Me.rbSqlitedb.TabIndex = 3
-        Me.rbSqlitedb.Text = "SQLiteDB - OsmAnd, Locus Map (format RMaps, kafle Web Mercator)"
+        Me.rbSqlitedb.TabIndex = 4
+        Me.rbSqlitedb.Text = "SQLiteDB - OsmAnd, Locus Map (format RMaps)"
         Me.rbSqlitedb.UseVisualStyleBackColor = True
         '
         'rbOruxMaps
         '
         Me.rbOruxMaps.AutoSize = True
-        Me.rbOruxMaps.Location = New System.Drawing.Point(13, 106)
+        Me.rbOruxMaps.Location = New System.Drawing.Point(13, 129)
         Me.rbOruxMaps.Name = "rbOruxMaps"
         Me.rbOruxMaps.Size = New System.Drawing.Size(420, 17)
-        Me.rbOruxMaps.TabIndex = 4
-        Me.rbOruxMaps.Text = "OruxMaps - mapa offline (folder z bazą OruxMapsImages.db i kalibracją .otrk2.xml)"
+        Me.rbOruxMaps.TabIndex = 5
+        Me.rbOruxMaps.Text = "OruxMaps - folder z bazą OruxMapsImages.db i kalibracją"
         Me.rbOruxMaps.UseVisualStyleBackColor = True
+        '
+        'rbGeoPackage
+        '
+        Me.rbGeoPackage.AutoSize = True
+        Me.rbGeoPackage.Location = New System.Drawing.Point(13, 85)
+        Me.rbGeoPackage.Name = "rbGeoPackage"
+        Me.rbGeoPackage.Size = New System.Drawing.Size(300, 17)
+        Me.rbGeoPackage.TabIndex = 3
+        Me.rbGeoPackage.Text = "GeoPackage (.gpkg) - QField, Mergin Maps, QGIS"
+        Me.rbGeoPackage.UseVisualStyleBackColor = True
         '
         'chkKorekta
         '
@@ -246,23 +258,23 @@ Partial Class FormImportOzi
         'rbKmz
         '
         Me.rbKmz.AutoSize = True
-        Me.rbKmz.Location = New System.Drawing.Point(13, 40)
+        Me.rbKmz.Location = New System.Drawing.Point(13, 19)
         Me.rbKmz.Name = "rbKmz"
         Me.rbKmz.Size = New System.Drawing.Size(447, 17)
-        Me.rbKmz.TabIndex = 1
-        Me.rbKmz.Text = "Garmin Custom Maps (KMZ) - dla wszystkich odbiorników Garmin (z opcją podziału na tomy)"
+        Me.rbKmz.TabIndex = 0
+        Me.rbKmz.Text = "KMZ - Garmin Custom Maps (podział na tomy po 100 kafli)"
         Me.rbKmz.UseVisualStyleBackColor = True
         '
         'rbJnx
         '
         Me.rbJnx.AutoSize = True
         Me.rbJnx.Checked = True
-        Me.rbJnx.Location = New System.Drawing.Point(13, 19)
+        Me.rbJnx.Location = New System.Drawing.Point(13, 41)
         Me.rbJnx.Name = "rbJnx"
         Me.rbJnx.Size = New System.Drawing.Size(477, 17)
-        Me.rbJnx.TabIndex = 0
+        Me.rbJnx.TabIndex = 1
         Me.rbJnx.TabStop = True
-        Me.rbJnx.Text = "Garmin BirdsEye (JNX v4) - zalecane dla Garmin (bez limitu 100 kafli, płynne powiększanie)"
+        Me.rbJnx.Text = "JNX - Garmin BirdsEye (wiele powiększeń, bez limitu kafli)"
         Me.rbJnx.UseVisualStyleBackColor = True
         '
         'grpOpcje
@@ -274,7 +286,7 @@ Partial Class FormImportOzi
         Me.grpOpcje.Controls.Add(Me.lblJakosc)
         Me.grpOpcje.Controls.Add(Me.nudKolejnosc)
         Me.grpOpcje.Controls.Add(Me.lblKolejnosc)
-        Me.grpOpcje.Location = New System.Drawing.Point(15, 362)
+        Me.grpOpcje.Location = New System.Drawing.Point(15, 384)
         Me.grpOpcje.Name = "grpOpcje"
         Me.grpOpcje.Size = New System.Drawing.Size(521, 82)
         Me.grpOpcje.TabIndex = 8
@@ -291,7 +303,7 @@ Partial Class FormImportOzi
         Me.chkPodzialKmz.Name = "chkPodzialKmz"
         Me.chkPodzialKmz.Size = New System.Drawing.Size(199, 17)
         Me.chkPodzialKmz.TabIndex = 4
-        Me.chkPodzialKmz.Text = "Podział KMZ na tomy (max 100 kafli)"
+        Me.chkPodzialKmz.Text = "Podział KMZ na tomy (100 kafli)"
         Me.chkPodzialKmz.UseVisualStyleBackColor = True
         '
         'nudJakosc
@@ -331,11 +343,11 @@ Partial Class FormImportOzi
         Me.lblKolejnosc.Name = "lblKolejnosc"
         Me.lblKolejnosc.Size = New System.Drawing.Size(79, 13)
         Me.lblKolejnosc.TabIndex = 0
-        Me.lblKolejnosc.Text = "Kolejność (z-o):"
+        Me.lblKolejnosc.Text = "Kolejność w Garminie:"
         '
         'prgPostep
         '
-        Me.prgPostep.Location = New System.Drawing.Point(15, 454)
+        Me.prgPostep.Location = New System.Drawing.Point(15, 476)
         Me.prgPostep.Name = "prgPostep"
         Me.prgPostep.Size = New System.Drawing.Size(521, 16)
         Me.prgPostep.TabIndex = 9
@@ -343,7 +355,7 @@ Partial Class FormImportOzi
         'lblStatus
         '
         Me.lblStatus.AutoEllipsis = True
-        Me.lblStatus.Location = New System.Drawing.Point(15, 475)
+        Me.lblStatus.Location = New System.Drawing.Point(15, 497)
         Me.lblStatus.Name = "lblStatus"
         Me.lblStatus.Size = New System.Drawing.Size(521, 18)
         Me.lblStatus.TabIndex = 10
@@ -352,7 +364,7 @@ Partial Class FormImportOzi
         'btnKonwertuj
         '
         Me.btnKonwertuj.Enabled = False
-        Me.btnKonwertuj.Location = New System.Drawing.Point(265, 504)
+        Me.btnKonwertuj.Location = New System.Drawing.Point(265, 526)
         Me.btnKonwertuj.Name = "btnKonwertuj"
         Me.btnKonwertuj.Size = New System.Drawing.Size(180, 28)
         Me.btnKonwertuj.TabIndex = 12
@@ -362,7 +374,7 @@ Partial Class FormImportOzi
         'btnZamknij
         '
         Me.btnZamknij.DialogResult = System.Windows.Forms.DialogResult.Cancel
-        Me.btnZamknij.Location = New System.Drawing.Point(451, 504)
+        Me.btnZamknij.Location = New System.Drawing.Point(451, 526)
         Me.btnZamknij.Name = "btnZamknij"
         Me.btnZamknij.Size = New System.Drawing.Size(85, 28)
         Me.btnZamknij.TabIndex = 13
@@ -393,7 +405,7 @@ Partial Class FormImportOzi
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.CancelButton = Me.btnZamknij
-        Me.ClientSize = New System.Drawing.Size(550, 544)
+        Me.ClientSize = New System.Drawing.Size(550, 566)
         Me.Controls.Add(Me.btnZamknij)
         Me.Controls.Add(Me.btnKonwertuj)
         Me.Controls.Add(Me.lblStatus)
@@ -448,6 +460,7 @@ Partial Class FormImportOzi
     Friend WithEvents rbMbtiles As System.Windows.Forms.RadioButton
     Friend WithEvents rbSqlitedb As System.Windows.Forms.RadioButton
     Friend WithEvents rbOruxMaps As System.Windows.Forms.RadioButton
+    Friend WithEvents rbGeoPackage As System.Windows.Forms.RadioButton
     Friend WithEvents chkKorekta As System.Windows.Forms.CheckBox
     Friend WithEvents btnKorekta As System.Windows.Forms.Button
     Friend WithEvents grpOpcje As System.Windows.Forms.GroupBox

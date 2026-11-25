@@ -493,7 +493,7 @@ Partial Class FormKreatorMapy
         Me.lblNaglowekSzablonow.Font = New System.Drawing.Font("Segoe UI", 9.5!, System.Drawing.FontStyle.Bold)
         Me.lblNaglowekSzablonow.ForeColor = System.Drawing.Color.FromArgb(40, 40, 40)
         Me.lblNaglowekSzablonow.Location = New System.Drawing.Point(16, 10)
-        Me.lblNaglowekSzablonow.Text = "Dostępne szablony mapy:"
+        Me.lblNaglowekSzablonow.Text = "Dostępne style mapy:"
 
         Me.lstSzablony.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed
         Me.lstSzablony.ItemHeight = 46
@@ -514,14 +514,14 @@ Partial Class FormKreatorMapy
         Me.lblNazwaSzablonu.Location = New System.Drawing.Point(14, 16)
         Me.lblNazwaSzablonu.Name = "lblNazwaSzablonu"
         Me.lblNazwaSzablonu.Size = New System.Drawing.Size(374, 22)
-        Me.lblNazwaSzablonu.Text = "Nazwa szablonu"
+        Me.lblNazwaSzablonu.Text = "Nazwa stylu"
 
         Me.lblOpisSzablonu.Font = New System.Drawing.Font("Segoe UI", 8.5!)
         Me.lblOpisSzablonu.ForeColor = System.Drawing.Color.FromArgb(60, 60, 60)
         Me.lblOpisSzablonu.Location = New System.Drawing.Point(14, 38)
         Me.lblOpisSzablonu.Name = "lblOpisSzablonu"
         Me.lblOpisSzablonu.Size = New System.Drawing.Size(374, 32)
-        Me.lblOpisSzablonu.Text = "Opis szablonu"
+        Me.lblOpisSzablonu.Text = "Opis stylu"
 
         Me.lblSkladnikiNaglowek.AutoSize = True
         Me.lblSkladnikiNaglowek.Font = New System.Drawing.Font("Segoe UI", 8.5!, System.Drawing.FontStyle.Bold)
@@ -574,7 +574,7 @@ Partial Class FormKreatorMapy
         Me.lblZoomStyl.Location = New System.Drawing.Point(237, 159)
         Me.lblZoomStyl.Name = "lblZoomStyl"
         Me.lblZoomStyl.Size = New System.Drawing.Size(32, 20)
-        Me.lblZoomStyl.Text = "1:1"
+        Me.lblZoomStyl.Text = "100%"
         Me.lblZoomStyl.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
 
         Me.btnZoomPlusStyl.Location = New System.Drawing.Point(270, 158)
@@ -586,13 +586,13 @@ Partial Class FormKreatorMapy
         Me.btnZoomResetStyl.Location = New System.Drawing.Point(298, 158)
         Me.btnZoomResetStyl.Name = "btnZoomResetStyl"
         Me.btnZoomResetStyl.Size = New System.Drawing.Size(34, 22)
-        Me.btnZoomResetStyl.Text = "1:1"
+        Me.btnZoomResetStyl.Text = "100%"
         Me.btnZoomResetStyl.UseVisualStyleBackColor = True
 
         Me.btnOdswiezStyl.Location = New System.Drawing.Point(334, 158)
         Me.btnOdswiezStyl.Name = "btnOdswiezStyl"
         Me.btnOdswiezStyl.Size = New System.Drawing.Size(54, 22)
-        Me.btnOdswiezStyl.Text = "Odśw."
+        Me.btnOdswiezStyl.Text = "Odśwież"
         Me.btnOdswiezStyl.UseVisualStyleBackColor = True
 
         Me.picPodgladStylu.BackColor = System.Drawing.Color.White
@@ -739,7 +739,7 @@ Partial Class FormKreatorMapy
         Me.btnWybierzTrase.Location = New System.Drawing.Point(0, 4)
         Me.btnWybierzTrase.Name = "btnWybierzTrase"
         Me.btnWybierzTrase.Size = New System.Drawing.Size(140, 28)
-        Me.btnWybierzTrase.Text = "Wskaż plik trasy..."
+        Me.btnWybierzTrase.Text = "Wybierz plik trasy..."
         Me.btnWybierzTrase.UseVisualStyleBackColor = True
 
         Me.lblKorytarzOpis.AutoSize = True
@@ -792,7 +792,7 @@ Partial Class FormKreatorMapy
         Me.lblZoomObszar.Location = New System.Drawing.Point(155, 17)
         Me.lblZoomObszar.Name = "lblZoomObszar"
         Me.lblZoomObszar.Size = New System.Drawing.Size(32, 20)
-        Me.lblZoomObszar.Text = "1:1"
+        Me.lblZoomObszar.Text = "100%"
         Me.lblZoomObszar.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
 
         Me.btnZoomPlusObszar.Location = New System.Drawing.Point(188, 16)
@@ -804,7 +804,7 @@ Partial Class FormKreatorMapy
         Me.btnZoomResetObszar.Location = New System.Drawing.Point(216, 16)
         Me.btnZoomResetObszar.Name = "btnZoomResetObszar"
         Me.btnZoomResetObszar.Size = New System.Drawing.Size(34, 22)
-        Me.btnZoomResetObszar.Text = "1:1"
+        Me.btnZoomResetObszar.Text = "100%"
         Me.btnZoomResetObszar.UseVisualStyleBackColor = True
 
         Me.picPodgladObszaru.BackColor = System.Drawing.Color.White
@@ -952,7 +952,7 @@ Partial Class FormKreatorMapy
         Me.chkKorektaObrazu.Location = New System.Drawing.Point(16, 22)
         Me.chkKorektaObrazu.Name = "chkKorektaObrazu"
         Me.chkKorektaObrazu.Size = New System.Drawing.Size(350, 19)
-        Me.chkKorektaObrazu.Text = "Korekta rastra (filtr MIP / wyostrzanie / kontrast / nasycenie)"
+        Me.chkKorektaObrazu.Text = "Korekta obrazu (MIP, wyostrzanie, kontrast, nasycenie)"
         Me.chkKorektaObrazu.UseVisualStyleBackColor = True
 
         Me.lblProfil.AutoSize = True
@@ -985,14 +985,14 @@ Partial Class FormKreatorMapy
         Me.chkWlasnyZoom.Location = New System.Drawing.Point(16, 78)
         Me.chkWlasnyZoom.Name = "chkWlasnyZoom"
         Me.chkWlasnyZoom.Size = New System.Drawing.Size(305, 19)
-        Me.chkWlasnyZoom.Text = "Własny zakres poziomów zoom (MBTiles / Garmin):"
+        Me.chkWlasnyZoom.Text = "Własny zakres powiększeń (MBTiles / Garmin):"
         Me.chkWlasnyZoom.UseVisualStyleBackColor = True
 
         Me.lblZoomMin.AutoSize = True
         Me.lblZoomMin.Location = New System.Drawing.Point(330, 80)
         Me.lblZoomMin.Name = "lblZoomMin"
         Me.lblZoomMin.Size = New System.Drawing.Size(64, 15)
-        Me.lblZoomMin.Text = "Zoom min:"
+        Me.lblZoomMin.Text = "Powiększenie od:"
 
         Me.numZoomMin.Location = New System.Drawing.Point(398, 77)
         Me.numZoomMin.Maximum = New Decimal(New Integer() {20, 0, 0, 0})
@@ -1005,7 +1005,7 @@ Partial Class FormKreatorMapy
         Me.lblZoomMax.Location = New System.Drawing.Point(465, 80)
         Me.lblZoomMax.Name = "lblZoomMax"
         Me.lblZoomMax.Size = New System.Drawing.Size(66, 15)
-        Me.lblZoomMax.Text = "Zoom max:"
+        Me.lblZoomMax.Text = "do:"
 
         Me.numZoomMax.Location = New System.Drawing.Point(535, 77)
         Me.numZoomMax.Maximum = New Decimal(New Integer() {22, 0, 0, 0})
@@ -1018,7 +1018,7 @@ Partial Class FormKreatorMapy
         Me.lblDrawOrder.Location = New System.Drawing.Point(16, 144)
         Me.lblDrawOrder.Name = "lblDrawOrder"
         Me.lblDrawOrder.Size = New System.Drawing.Size(268, 15)
-        Me.lblDrawOrder.Text = "Kolejność wyświetlania Garmin (DrawOrder 10-100):"
+        Me.lblDrawOrder.Text = "Kolejność warstwy w Garminie (10-100):"
 
         '
         ' lblRozmiarPiksela / numRozmiarPiksela / lblPikselJednostka
@@ -1096,7 +1096,7 @@ Partial Class FormKreatorMapy
         Me.btnOtworzWieloskalowy.Location = New System.Drawing.Point(16, 175)
         Me.btnOtworzWieloskalowy.Name = "btnOtworzWieloskalowy"
         Me.btnOtworzWieloskalowy.Size = New System.Drawing.Size(280, 30)
-        Me.btnOtworzWieloskalowy.Text = "Podgląd kafli i mieszania warstw..."
+        Me.btnOtworzWieloskalowy.Text = "Zakresy powiększeń i warstwy..."
         Me.btnOtworzWieloskalowy.UseVisualStyleBackColor = True
 
         Me.lblWieloskalowyOpis.Font = New System.Drawing.Font("Segoe UI", 8.5!)
@@ -1104,7 +1104,7 @@ Partial Class FormKreatorMapy
         Me.lblWieloskalowyOpis.Location = New System.Drawing.Point(305, 179)
         Me.lblWieloskalowyOpis.Name = "lblWieloskalowyOpis"
         Me.lblWieloskalowyOpis.Size = New System.Drawing.Size(425, 30)
-        Me.lblWieloskalowyOpis.Text = "Podgląd kompozycji na różnych zoomach, regulacja krycia i trybów mieszania warstw."
+        Me.lblWieloskalowyOpis.Text = "Okno MBTiles wieloskalowego: zakresy powiększeń warstw, krycie, mieszanie i podgląd kafli."
 
         Me.grpZaawansowane.Controls.Add(Me.chkKorektaObrazu)
         Me.grpZaawansowane.Controls.Add(Me.lblProfil)

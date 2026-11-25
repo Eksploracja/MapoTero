@@ -144,6 +144,11 @@ Public Class UstawieniaProgramu
     Public Property ScalanieTab As Boolean
     ''' <summary>Format scalonego arkusza.</summary>
     Public Property FormatArkusza As FormatArkusza = FormatArkusza.GeoTiff
+    ''' <summary>
+    ''' Format ostatniego eksportu - okno Eksport mapy otwiera się z nim. Zastąpił pole „Format docelowy” okna głównego,
+    ''' które nie było zapamiętywane i myliło się z formatem segmentów (audyt ER-03).
+    ''' </summary>
+    Public Property OstatniEksport As RodzajEksportu = RodzajEksportu.MBTiles
 #End Region
 
 #Region "Eksport do CAD"
@@ -243,8 +248,13 @@ Public Class UstawieniaProgramu
         KursorISrodekMapy = u.Logiczna("kursor_i_srodek", KursorISrodekMapy)
         KursorWgs84 = u.Logiczna("kursor_wgs84", KursorWgs84)
         ZaznaczenieWgs84 = u.Logiczna("zaznaczenie_wgs84", ZaznaczenieWgs84)
-        EdycjaXY = u.Logiczna("edycja_xy", EdycjaXY)
+        ' Wpis „edycja_xy” z dawnych wersji nie jest wczytywany: pole przełączające ten tryb nie jest już widoczne,
+        ' a zapamiętane True blokowało zaznaczanie obszaru bez możliwości wyłączenia (audyt ER-02). Współrzędne
+        ' wpisuje się w oknie „Wpisz współrzędne…”.
+        EdycjaXY = False
         SzerokoscPanelu = Math.Max(0, u.Calkowita("szerokosc_panelu", SzerokoscPanelu))
+        Dim ostatni = u.Calkowita("ostatni_eksport", CInt(OstatniEksport))
+        If [Enum].IsDefined(GetType(RodzajEksportu), ostatni) Then OstatniEksport = CType(ostatni, RodzajEksportu)
         WysokoscWybranych = Math.Max(0, u.Calkowita("wysokosc_wybranych", WysokoscWybranych))
         WysokoscZakladek = Math.Max(0, u.Calkowita("wysokosc_zakladek", WysokoscZakladek))
         'opcje okna eksportu do CAD
@@ -334,6 +344,7 @@ Public Class UstawieniaProgramu
         u.Ustaw("korekta_wlaczona", KorektaWlaczona)
         u.Ustaw("korekta_profil", CInt(KorektaProfil))
         u.Ustaw("szerokosc_panelu", SzerokoscPanelu)
+        u.Ustaw("ostatni_eksport", CInt(OstatniEksport))
         u.Ustaw("korekta_gamma", KorektaGamma)
         u.Ustaw("korekta_kontrast", KorektaKontrast)
         u.Ustaw("korekta_nasycenie", KorektaNasycenie)

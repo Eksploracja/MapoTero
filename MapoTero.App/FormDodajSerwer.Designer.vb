@@ -250,7 +250,7 @@ Partial Class FormDodajSerwer
         Me.lblZoomZakres.Name = "lblZoomZakres"
         Me.lblZoomZakres.Size = New System.Drawing.Size(37, 13)
         Me.lblZoomZakres.TabIndex = 15
-        Me.lblZoomZakres.Text = "Zoom:"
+        Me.lblZoomZakres.Text = "Powiększenie:"
         Me.lblZoomZakres.Visible = False
         '
         'nudZMin

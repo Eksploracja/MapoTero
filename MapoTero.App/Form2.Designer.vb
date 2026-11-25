@@ -167,7 +167,7 @@ Partial Class Form2
         Me.chkPrzezroczystosc.Name = "chkPrzezroczystosc"
         Me.chkPrzezroczystosc.Size = New System.Drawing.Size(196, 17)
         Me.chkPrzezroczystosc.TabIndex = 2
-        Me.chkPrzezroczystosc.Text = "przezroczyste tło (tylko PNG i GIF)"
+        Me.chkPrzezroczystosc.Text = "Przezroczyste tło (tylko PNG i GIF)"
         Me.ToolTip1.SetToolTip(Me.chkPrzezroczystosc, "Segmenty PNG / GIF z przezroczystym tłem (parametr TRANSPARENT=TRUE zapytania WMS) - do warstw nakładanych na inne mapy, np. granic działek, obszarów chronionych czy map historycznych. W eksporcie wybierz opcję 'nakładka' albo dodaj tę mapę jako warstwę nakładaną.")
         Me.chkPrzezroczystosc.UseVisualStyleBackColor = True
         '
@@ -221,7 +221,7 @@ Partial Class Form2
         Me.chkKursorISrodek.Name = "chkKursorISrodek"
         Me.chkKursorISrodek.Size = New System.Drawing.Size(200, 17)
         Me.chkKursorISrodek.TabIndex = 0
-        Me.chkKursorISrodek.Text = "współrzędne kursora i środka mapy"
+        Me.chkKursorISrodek.Text = "Współrzędne kursora i środka mapy"
         Me.ToolTip1.SetToolTip(Me.chkKursorISrodek, "Pokazuje pod mapą współrzędne kursora myszy i środka mapy.")
         '
         'chkKursorWgs
@@ -232,7 +232,7 @@ Partial Class Form2
         Me.chkKursorWgs.Name = "chkKursorWgs"
         Me.chkKursorWgs.Size = New System.Drawing.Size(200, 17)
         Me.chkKursorWgs.TabIndex = 1
-        Me.chkKursorWgs.Text = "współrzędne kursora w WGS84"
+        Me.chkKursorWgs.Text = "Współrzędne kursora w WGS84"
         Me.ToolTip1.SetToolTip(Me.chkKursorWgs, "Pokazuje przy kursorze na mapie jego współrzędne w stopniach WGS84 (szerokość i długość geograficzna). Współrzędne w układzie pobierania pod mapą pozostają bez zmian.")
         '
         'chkZaznaczenieWgs
@@ -243,7 +243,7 @@ Partial Class Form2
         Me.chkZaznaczenieWgs.Name = "chkZaznaczenieWgs"
         Me.chkZaznaczenieWgs.Size = New System.Drawing.Size(200, 17)
         Me.chkZaznaczenieWgs.TabIndex = 2
-        Me.chkZaznaczenieWgs.Text = "współrzędne zaznaczenia w WGS84"
+        Me.chkZaznaczenieWgs.Text = "Współrzędne zaznaczenia w WGS84"
         Me.ToolTip1.SetToolTip(Me.chkZaznaczenieWgs, "Pokazuje współrzędne granic zaznaczonego obszaru w stopniach WGS84.")
         '
         'chkSiatkaSegmentow
@@ -254,7 +254,7 @@ Partial Class Form2
         Me.chkSiatkaSegmentow.Name = "chkSiatkaSegmentow"
         Me.chkSiatkaSegmentow.Size = New System.Drawing.Size(200, 17)
         Me.chkSiatkaSegmentow.TabIndex = 3
-        Me.chkSiatkaSegmentow.Text = "siatka segmentów na mapie"
+        Me.chkSiatkaSegmentow.Text = "Siatka segmentów na mapie"
         Me.ToolTip1.SetToolTip(Me.chkSiatkaSegmentow, "Wyświetla na mapie siatkę kafelków (segmentów) w granicach zaznaczonego obszaru pobierania.")
         '
         'grpKalibracja
@@ -281,7 +281,7 @@ Partial Class Form2
         Me.chkMap.Name = "chkMap"
         Me.chkMap.Size = New System.Drawing.Size(210, 17)
         Me.chkMap.TabIndex = 0
-        Me.chkMap.Text = "plik .map / OziExplorer"
+        Me.chkMap.Text = "Plik .map / OziExplorer"
         Me.ToolTip1.SetToolTip(Me.chkMap, "OziExplorer oraz wiele aplikacji mobilnych (format kalibracji OziExplorer).")
         '
         'chkKml
@@ -292,7 +292,7 @@ Partial Class Form2
         Me.chkKml.Name = "chkKml"
         Me.chkKml.Size = New System.Drawing.Size(210, 17)
         Me.chkKml.TabIndex = 1
-        Me.chkKml.Text = "plik .kml / Google Earth"
+        Me.chkKml.Text = "Plik .kml / Google Earth"
         Me.ToolTip1.SetToolTip(Me.chkKml, "Google Earth - dokładne narożniki obrazu (gx:LatLonQuad) i prostokąt z obrotem dla starszych programów.")
         '
         'chkWorldFile
@@ -303,7 +303,7 @@ Partial Class Form2
         Me.chkWorldFile.Name = "chkWorldFile"
         Me.chkWorldFile.Size = New System.Drawing.Size(210, 17)
         Me.chkWorldFile.TabIndex = 2
-        Me.chkWorldFile.Text = "world file i .prj / QGIS, ArcGIS"
+        Me.chkWorldFile.Text = "World file i .prj / QGIS, ArcGIS"
         Me.ToolTip1.SetToolTip(Me.chkWorldFile, "Plik world file z rozszerzeniem zależnym od formatu (.jgw, .pngw, .tifw ...) oraz plik .prj z opisem układu współrzędnych - QGIS, ArcGIS, Global Mapper.")
         '
         'chkTab
@@ -314,7 +314,7 @@ Partial Class Form2
         Me.chkTab.Name = "chkTab"
         Me.chkTab.Size = New System.Drawing.Size(210, 17)
         Me.chkTab.TabIndex = 3
-        Me.chkTab.Text = "plik .tab / MapInfo"
+        Me.chkTab.Text = "Plik .tab / MapInfo"
         Me.ToolTip1.SetToolTip(Me.chkTab, "MapInfo Professional.")
         '
         'chkWldPoints
@@ -325,7 +325,7 @@ Partial Class Form2
         Me.chkWldPoints.Name = "chkWldPoints"
         Me.chkWldPoints.Size = New System.Drawing.Size(210, 17)
         Me.chkWldPoints.TabIndex = 4
-        Me.chkWldPoints.Text = "pliki .wld i .points"
+        Me.chkWldPoints.Text = "Pliki .wld i .points"
         Me.ToolTip1.SetToolTip(Me.chkWldPoints, "Plik .wld (world file z rozszerzeniem .wld) i plik .points z punktami dopasowania georeferencera QGIS.")
         '
         'chkGmi
@@ -336,7 +336,7 @@ Partial Class Form2
         Me.chkGmi.Name = "chkGmi"
         Me.chkGmi.Size = New System.Drawing.Size(210, 17)
         Me.chkGmi.TabIndex = 5
-        Me.chkGmi.Text = "plik .gmi / GPS Tuner 5.x"
+        Me.chkGmi.Text = "Plik .gmi / GPS Tuner 5.x"
         Me.ToolTip1.SetToolTip(Me.chkGmi, "GPS Tuner 5.x.")
         '
         'grpPobieranie
@@ -453,7 +453,7 @@ Partial Class Form2
         Me.chkZachowajKafle.Name = "chkZachowajKafle"
         Me.chkZachowajKafle.Size = New System.Drawing.Size(230, 17)
         Me.chkZachowajKafle.TabIndex = 0
-        Me.chkZachowajKafle.Text = "zachowuj pobrane kafle w folderze sesji"
+        Me.chkZachowajKafle.Text = "Zachowuj pobrane kafle w folderze sesji"
         Me.ToolTip1.SetToolTip(Me.chkZachowajKafle, "Pobrane kafle WMTS/XYZ/TMS pozostają w podfolderze _kafle_wmts folderu sesji - ponowne pobranie tego samego obszaru (np. z innym bokiem segmentu) nie wymaga łączenia z serwerem. Kafle zajmują miejsce na dysku.")
         '
         'lblJakoscWmts

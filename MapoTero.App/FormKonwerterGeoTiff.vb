@@ -24,6 +24,8 @@ Public Class FormKonwerterGeoTiff
     End Sub
 
     Private Sub FormKonwerterGeoTiff_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+        'przycisk Pomoc i F1 - okno ich nie miało (audyt ER-33)
+        PomocProgramu.DodajPrzyciskPomocy(Me, TematPomocy.KonwerterGeoTiff, 12, 385)
         WyborUkladuGeoTiff.WypelnijListeCrs(cmbUkladCrs, Nothing, lblCrsStatus)
     End Sub
 

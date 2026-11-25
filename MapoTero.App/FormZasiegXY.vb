@@ -77,6 +77,7 @@ Public Class FormZasiegXY
     End Property
 
     Private Sub FormZasiegXY_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+        PomocProgramu.DodajPrzyciskPomocy(Me, TematPomocy.Wspolrzedne, 12, 254)
         btnZaokraglijKm.Enabled = Not _czyGeograficzny
         btnZaokraglijKm.Visible = Not _czyGeograficzny
         txtXGora.SelectAll()

@@ -1,4 +1,4 @@
-<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()>
+﻿<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()>
 Partial Class FormEksport
     Inherits System.Windows.Forms.Form
 
@@ -25,6 +25,9 @@ Partial Class FormEksport
         Me.components = New System.ComponentModel.Container()
         Me.lblFolder = New System.Windows.Forms.Label()
         Me.txtFolder = New System.Windows.Forms.TextBox()
+        Me.lblPlikWyniku = New System.Windows.Forms.Label()
+        Me.txtPlikWyniku = New System.Windows.Forms.TextBox()
+        Me.btnPlikWyniku = New System.Windows.Forms.Button()
         Me.btnFolder = New System.Windows.Forms.Button()
         Me.lblInfo = New System.Windows.Forms.Label()
         Me.grpFormat = New System.Windows.Forms.GroupBox()
@@ -197,7 +200,7 @@ Partial Class FormEksport
         Me.rbJnx.Name = "rbJnx"
         Me.rbJnx.Size = New System.Drawing.Size(460, 17)
         Me.rbJnx.TabIndex = 2
-        Me.rbJnx.Text = "JNX - Garmin BirdsEye (wielopoziomowy raster bez limitu kafli dla odblokowanych)"
+        Me.rbJnx.Text = "JNX - Garmin BirdsEye (wiele powiększeń, bez limitu kafli)"
         Me.ToolTip1.SetToolTip(Me.rbJnx, "Format Garmin BirdsEye z piramidą powiększeń dla urządzeń z odblokowanym oprogramowaniem. Plik .jnx skopiuj do Garmin/BirdsEye.")
         Me.rbJnx.UseVisualStyleBackColor = True
         '
@@ -208,7 +211,7 @@ Partial Class FormEksport
         Me.lblKolejnoscGarmin.Name = "lblKolejnoscGarmin"
         Me.lblKolejnoscGarmin.Size = New System.Drawing.Size(142, 13)
         Me.lblKolejnoscGarmin.TabIndex = 3
-        Me.lblKolejnoscGarmin.Text = "Kolejność w Garmin (z-order):"
+        Me.lblKolejnoscGarmin.Text = "Kolejność warstwy w Garminie:"
         '
         'cboKolejnoscGarmin
         '
@@ -228,7 +231,7 @@ Partial Class FormEksport
         Me.chkPodzialNaTomy.Name = "chkPodzialNaTomy"
         Me.chkPodzialNaTomy.Size = New System.Drawing.Size(125, 17)
         Me.chkPodzialNaTomy.TabIndex = 5
-        Me.chkPodzialNaTomy.Text = "podział na tomy"
+        Me.chkPodzialNaTomy.Text = "Podział na tomy"
         Me.ToolTip1.SetToolTip(Me.chkPodzialNaTomy, "Dzieli dużą mapę na osobne pliki KMZ (paczki do limitu kafli) z zachowaniem pełnej ostrości bez pomniejszania.")
         Me.chkPodzialNaTomy.UseVisualStyleBackColor = True
         '
@@ -322,7 +325,7 @@ Partial Class FormEksport
         Me.chkArkuszWorldFile.Name = "chkArkuszWorldFile"
         Me.chkArkuszWorldFile.Size = New System.Drawing.Size(105, 17)
         Me.chkArkuszWorldFile.TabIndex = 12
-        Me.chkArkuszWorldFile.Text = "world file i .prj"
+        Me.chkArkuszWorldFile.Text = "World file i .prj"
         Me.ToolTip1.SetToolTip(Me.chkArkuszWorldFile, "World file (.tifw i .tfw, .jpgw, .pngw) i .prj - QGIS, ArcGIS, programy CAD.")
         Me.chkArkuszWorldFile.UseVisualStyleBackColor = True
         '
@@ -368,7 +371,7 @@ Partial Class FormEksport
         Me.chkGeoTiffPiramidy.Name = "chkGeoTiffPiramidy"
         Me.chkGeoTiffPiramidy.Size = New System.Drawing.Size(120, 17)
         Me.chkGeoTiffPiramidy.TabIndex = 16
-        Me.chkGeoTiffPiramidy.Text = "piramidy w GeoTIFF"
+        Me.chkGeoTiffPiramidy.Text = "Piramidy w GeoTIFF"
         Me.ToolTip1.SetToolTip(Me.chkGeoTiffPiramidy, "Tworzy wewnętrzne piramidy (overviews) w pliku GeoTIFF - natychmiastowe otwieranie dużych map w QGIS i Avenza Maps.")
         Me.chkGeoTiffPiramidy.UseVisualStyleBackColor = True
         '
@@ -425,7 +428,7 @@ Partial Class FormEksport
         Me.chkPng.Name = "chkPng"
         Me.chkPng.Size = New System.Drawing.Size(185, 17)
         Me.chkPng.TabIndex = 4
-        Me.chkPng.Text = "kafle PNG (przezroczyste brzegi)"
+        Me.chkPng.Text = "Kafle PNG (przezroczyste brzegi)"
         Me.chkPng.UseVisualStyleBackColor = True
         '
         'nudPoziomMax
@@ -568,7 +571,7 @@ Partial Class FormEksport
         Me.chkBialeNakladka.Name = "chkBialeNakladka"
         Me.chkBialeNakladka.Size = New System.Drawing.Size(220, 17)
         Me.chkBialeNakladka.TabIndex = 8
-        Me.chkBialeNakladka.Text = "białe tło zaznaczonej warstwy przezroczyste"
+        Me.chkBialeNakladka.Text = "Białe tło zaznaczonej warstwy przezroczyste"
         Me.chkBialeNakladka.UseVisualStyleBackColor = True
         '
         'nudKrycie
@@ -637,7 +640,7 @@ Partial Class FormEksport
         Me.chkBialePodstawa.Name = "chkBialePodstawa"
         Me.chkBialePodstawa.Size = New System.Drawing.Size(260, 17)
         Me.chkBialePodstawa.TabIndex = 1
-        Me.chkBialePodstawa.Text = "białe tło mapy z tego folderu przezroczyste"
+        Me.chkBialePodstawa.Text = "Białe tło mapy z tego folderu przezroczyste"
         Me.ToolTip1.SetToolTip(Me.chkBialePodstawa, "Dla serwerów, które nie obsługują przezroczystego tła (TRANSPARENT=TRUE), i segmentów JPEG.")
         Me.chkBialePodstawa.UseVisualStyleBackColor = True
         '
@@ -648,7 +651,7 @@ Partial Class FormEksport
         Me.chkNakladka.Name = "chkNakladka"
         Me.chkNakladka.Size = New System.Drawing.Size(460, 17)
         Me.chkNakladka.TabIndex = 0
-        Me.chkNakladka.Text = "nakładka - przezroczysta warstwa wyświetlana nad mapą podkładową aplikacji (kafle PNG)"
+        Me.chkNakladka.Text = "Nakładka - przezroczysta warstwa wyświetlana nad mapą podkładową aplikacji (kafle PNG)"
         Me.ToolTip1.SetToolTip(Me.chkNakladka, "Np. granice działek, obszary chronione lub mapa historyczna nad mapą OpenStreetMap w Locus Map, OsmAnd czy OruxMaps.")
         Me.chkNakladka.UseVisualStyleBackColor = True
         '
@@ -739,9 +742,37 @@ Partial Class FormEksport
         Me.lblPlan.Size = New System.Drawing.Size(348, 30)
         Me.lblPlan.TabIndex = 10
         '
+        'lblPlikWyniku
+        '
+        Me.lblPlikWyniku.AutoSize = True
+        Me.lblPlikWyniku.Location = New System.Drawing.Point(12, 736)
+        Me.lblPlikWyniku.Name = "lblPlikWyniku"
+        Me.lblPlikWyniku.Size = New System.Drawing.Size(73, 13)
+        Me.lblPlikWyniku.TabIndex = 20
+        Me.lblPlikWyniku.Text = "Plik wynikowy:"
+        '
+        'txtPlikWyniku
+        '
+        Me.txtPlikWyniku.Location = New System.Drawing.Point(90, 733)
+        Me.txtPlikWyniku.Name = "txtPlikWyniku"
+        Me.txtPlikWyniku.ReadOnly = True
+        Me.txtPlikWyniku.Size = New System.Drawing.Size(322, 20)
+        Me.txtPlikWyniku.TabIndex = 21
+        Me.txtPlikWyniku.AccessibleName = "Plik wynikowy"
+        '
+        'btnPlikWyniku
+        '
+        Me.btnPlikWyniku.Location = New System.Drawing.Point(418, 731)
+        Me.btnPlikWyniku.Name = "btnPlikWyniku"
+        Me.btnPlikWyniku.Size = New System.Drawing.Size(80, 23)
+        Me.btnPlikWyniku.TabIndex = 22
+        Me.btnPlikWyniku.Text = "Zmień..."
+        Me.ToolTip1.SetToolTip(Me.btnPlikWyniku, "Nazwa i folder pliku mapy. Domyślnie plik trafia do folderu sesji pod nazwą sesji.")
+        Me.btnPlikWyniku.UseVisualStyleBackColor = True
+        '
         'txtKomunikaty
         '
-        Me.txtKomunikaty.Location = New System.Drawing.Point(12, 730)
+        Me.txtKomunikaty.Location = New System.Drawing.Point(12, 760)
         Me.txtKomunikaty.Name = "txtKomunikaty"
         Me.txtKomunikaty.ReadOnly = True
         Me.txtKomunikaty.Size = New System.Drawing.Size(486, 44)
@@ -750,7 +781,7 @@ Partial Class FormEksport
         '
         'prgEksport
         '
-        Me.prgEksport.Location = New System.Drawing.Point(12, 778)
+        Me.prgEksport.Location = New System.Drawing.Point(12, 808)
         Me.prgEksport.Name = "prgEksport"
         Me.prgEksport.Size = New System.Drawing.Size(486, 14)
         Me.prgEksport.TabIndex = 12
@@ -758,7 +789,7 @@ Partial Class FormEksport
         'btnPokazPlik
         '
         Me.btnPokazPlik.Enabled = False
-        Me.btnPokazPlik.Location = New System.Drawing.Point(95, 800)
+        Me.btnPokazPlik.Location = New System.Drawing.Point(95, 830)
         Me.btnPokazPlik.Name = "btnPokazPlik"
         Me.btnPokazPlik.Size = New System.Drawing.Size(110, 30)
         Me.btnPokazPlik.TabIndex = 13
@@ -769,7 +800,7 @@ Partial Class FormEksport
         'btnWyslijNaTelefon
         '
         Me.btnWyslijNaTelefon.Enabled = False
-        Me.btnWyslijNaTelefon.Location = New System.Drawing.Point(212, 800)
+        Me.btnWyslijNaTelefon.Location = New System.Drawing.Point(212, 830)
         Me.btnWyslijNaTelefon.Name = "btnWyslijNaTelefon"
         Me.btnWyslijNaTelefon.Size = New System.Drawing.Size(120, 30)
         Me.btnWyslijNaTelefon.TabIndex = 14
@@ -779,7 +810,7 @@ Partial Class FormEksport
         '
         'btnEksportuj
         '
-        Me.btnEksportuj.Location = New System.Drawing.Point(339, 800)
+        Me.btnEksportuj.Location = New System.Drawing.Point(339, 830)
         Me.btnEksportuj.Name = "btnEksportuj"
         Me.btnEksportuj.Size = New System.Drawing.Size(80, 30)
         Me.btnEksportuj.TabIndex = 15
@@ -789,7 +820,7 @@ Partial Class FormEksport
         'btnPrzerwij
         '
         Me.btnPrzerwij.Enabled = False
-        Me.btnPrzerwij.Location = New System.Drawing.Point(425, 800)
+        Me.btnPrzerwij.Location = New System.Drawing.Point(425, 830)
         Me.btnPrzerwij.Name = "btnPrzerwij"
         Me.btnPrzerwij.Size = New System.Drawing.Size(73, 30)
         Me.btnPrzerwij.TabIndex = 16
@@ -800,13 +831,16 @@ Partial Class FormEksport
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(510, 842)
+        Me.ClientSize = New System.Drawing.Size(510, 872)
         Me.Controls.Add(Me.btnWyslijNaTelefon)
         Me.Controls.Add(Me.btnPokazPlik)
         Me.Controls.Add(Me.btnPrzerwij)
         Me.Controls.Add(Me.btnEksportuj)
         Me.Controls.Add(Me.prgEksport)
         Me.Controls.Add(Me.txtKomunikaty)
+        Me.Controls.Add(Me.btnPlikWyniku)
+        Me.Controls.Add(Me.txtPlikWyniku)
+        Me.Controls.Add(Me.lblPlikWyniku)
         Me.Controls.Add(Me.lblPlan)
         Me.Controls.Add(Me.nudJakosc)
         Me.Controls.Add(Me.lblJakosc)
@@ -847,6 +881,9 @@ Partial Class FormEksport
 
     Friend WithEvents lblFolder As System.Windows.Forms.Label
     Friend WithEvents txtFolder As System.Windows.Forms.TextBox
+    Friend WithEvents lblPlikWyniku As System.Windows.Forms.Label
+    Friend WithEvents txtPlikWyniku As System.Windows.Forms.TextBox
+    Friend WithEvents btnPlikWyniku As System.Windows.Forms.Button
     Friend WithEvents btnFolder As System.Windows.Forms.Button
     Friend WithEvents lblInfo As System.Windows.Forms.Label
     Friend WithEvents grpFormat As System.Windows.Forms.GroupBox

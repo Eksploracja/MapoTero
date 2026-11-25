@@ -229,7 +229,8 @@ Public Class Form2
         Form1.UstawWidokWspolrzednych(True)
         Form1.UstawZbiorMap("skany_map_topograficznych")
         Form1.BokSegmentu = "2000"
-        Form1.RozmiarPiksela = "2"
+        'ta sama wartość co w nowej sesji (dawniej 2 m/px tutaj i 1 m/px w nowej sesji - audyt ER-15)
+        Form1.RozmiarPiksela = "1"
         Form1.stFormat.Text = "." & Ustawienia.Format
         Form1.OdswiezOpisUkladu()
         OdswiezNazweTrekBuddy()

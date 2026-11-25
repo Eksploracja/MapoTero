@@ -169,11 +169,11 @@ Partial Class FormKonwerterGeoTiff
         'rbGeoPackage
         '
         Me.rbGeoPackage.AutoSize = True
-        Me.rbGeoPackage.Location = New System.Drawing.Point(15, 66)
+        Me.rbGeoPackage.Location = New System.Drawing.Point(280, 20)
         Me.rbGeoPackage.Name = "rbGeoPackage"
         Me.rbGeoPackage.Size = New System.Drawing.Size(242, 17)
-        Me.rbGeoPackage.TabIndex = 5
-        Me.rbGeoPackage.Text = "GeoPackage (.gpkg) - QField, Mergin Maps"
+        Me.rbGeoPackage.TabIndex = 3
+        Me.rbGeoPackage.Text = "GeoPackage - QField, Mergin Maps"
         Me.rbGeoPackage.UseVisualStyleBackColor = True
         '
         'rbOruxMaps
@@ -182,7 +182,7 @@ Partial Class FormKonwerterGeoTiff
         Me.rbOruxMaps.Location = New System.Drawing.Point(280, 66)
         Me.rbOruxMaps.Name = "rbOruxMaps"
         Me.rbOruxMaps.Size = New System.Drawing.Size(175, 17)
-        Me.rbOruxMaps.TabIndex = 4
+        Me.rbOruxMaps.TabIndex = 5
         Me.rbOruxMaps.Text = "OruxMaps (folder z bazą)"
         Me.rbOruxMaps.UseVisualStyleBackColor = True
         '
@@ -192,30 +192,30 @@ Partial Class FormKonwerterGeoTiff
         Me.rbSqlitedb.Location = New System.Drawing.Point(280, 43)
         Me.rbSqlitedb.Name = "rbSqlitedb"
         Me.rbSqlitedb.Size = New System.Drawing.Size(201, 17)
-        Me.rbSqlitedb.TabIndex = 3
-        Me.rbSqlitedb.Text = "SQLiteDB (.sqlitedb) - OsmAnd"
+        Me.rbSqlitedb.TabIndex = 4
+        Me.rbSqlitedb.Text = "SQLiteDB - OsmAnd"
         Me.rbSqlitedb.UseVisualStyleBackColor = True
         '
         'rbMbtiles
         '
         Me.rbMbtiles.AutoSize = True
         Me.rbMbtiles.Checked = True
-        Me.rbMbtiles.Location = New System.Drawing.Point(15, 20)
+        Me.rbMbtiles.Location = New System.Drawing.Point(15, 66)
         Me.rbMbtiles.Name = "rbMbtiles"
         Me.rbMbtiles.Size = New System.Drawing.Size(217, 17)
-        Me.rbMbtiles.TabIndex = 0
+        Me.rbMbtiles.TabIndex = 2
         Me.rbMbtiles.TabStop = True
-        Me.rbMbtiles.Text = "MBTiles (.mbtiles) - Locus Map, OsmAnd"
+        Me.rbMbtiles.Text = "MBTiles - Locus Map, OsmAnd"
         Me.rbMbtiles.UseVisualStyleBackColor = True
         '
         'rbKmz
         '
         Me.rbKmz.AutoSize = True
-        Me.rbKmz.Location = New System.Drawing.Point(280, 20)
+        Me.rbKmz.Location = New System.Drawing.Point(15, 20)
         Me.rbKmz.Name = "rbKmz"
         Me.rbKmz.Size = New System.Drawing.Size(215, 17)
-        Me.rbKmz.TabIndex = 1
-        Me.rbKmz.Text = "KMZ (.kmz) - Garmin Custom Maps"
+        Me.rbKmz.TabIndex = 0
+        Me.rbKmz.Text = "KMZ - Garmin Custom Maps"
         Me.rbKmz.UseVisualStyleBackColor = True
         '
         'rbJnx
@@ -224,8 +224,8 @@ Partial Class FormKonwerterGeoTiff
         Me.rbJnx.Location = New System.Drawing.Point(15, 43)
         Me.rbJnx.Name = "rbJnx"
         Me.rbJnx.Size = New System.Drawing.Size(211, 17)
-        Me.rbJnx.TabIndex = 2
-        Me.rbJnx.Text = "JNX (.jnx) - Garmin BirdsEye"
+        Me.rbJnx.TabIndex = 1
+        Me.rbJnx.Text = "JNX - Garmin BirdsEye"
         Me.rbJnx.UseVisualStyleBackColor = True
         '
         'grpOpcje
@@ -270,7 +270,7 @@ Partial Class FormKonwerterGeoTiff
         Me.lblZoomOd.Name = "lblZoomOd"
         Me.lblZoomOd.Size = New System.Drawing.Size(52, 13)
         Me.lblZoomOd.TabIndex = 4
-        Me.lblZoomOd.Text = "Zoom od:"
+        Me.lblZoomOd.Text = "Powiększenie od:"
         '
         'nudZoomOd
         '
@@ -289,7 +289,7 @@ Partial Class FormKonwerterGeoTiff
         Me.chkPodzialKmz.Name = "chkPodzialKmz"
         Me.chkPodzialKmz.Size = New System.Drawing.Size(161, 17)
         Me.chkPodzialKmz.TabIndex = 2
-        Me.chkPodzialKmz.Text = "Dziel KMZ na tomy (100 kafli)"
+        Me.chkPodzialKmz.Text = "Podział KMZ na tomy (100 kafli)"
         Me.chkPodzialKmz.UseVisualStyleBackColor = True
         Me.chkPodzialKmz.Visible = False
         '

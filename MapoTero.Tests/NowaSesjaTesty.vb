@@ -76,9 +76,8 @@ Public Class NowaSesjaTesty
                     Assert.Equal("1", Kontrolka(Of TextBox)(f, "txtRozmiarPiksela").Text)
                     Assert.Equal("", Kontrolka(Of TextBox)(f, "txtSzukajWarstwy").Text)
                     Assert.Equal(MapoTero.FolderDownload, f.FolderSesji)
-                    Assert.Equal(6.0, CDbl(mapa.GetType().GetProperty("Zoom").GetValue(mapa)))
-                    Dim pozycja As Object = mapa.GetType().GetProperty("Position").GetValue(mapa)
-                    Assert.Equal(52.3, CDbl(pozycja.GetType().GetProperty("Lat").GetValue(pozycja)), 1)
+                    'widok mapy zostaje - druga mapa tego samego rejonu (audyt ER-11)
+                    Assert.Equal(14.0, CDbl(mapa.GetType().GetProperty("Zoom").GetValue(mapa)))
                     Assert.Null(typ.GetField("_korytarz", flagi).GetValue(f))
                     Assert.Null(typ.GetField("_dzialkaKatastralna", flagi).GetValue(f))
 

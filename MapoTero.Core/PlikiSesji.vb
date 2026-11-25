@@ -451,6 +451,28 @@ Public Class KonfiguracjaSesji
     ''' sprawdza czy w samym katalogu nadrzędnym znajduje się conf.txt (zgodność ze starszymi wersjami).
     ''' Zwraca pusty ciąg, jeśli nie znaleziono żadnej sesji.
     ''' </summary>
+    ''' <summary>
+    ''' Ostatnie sesje z katalogu download (podfoldery z conf.txt i sam katalog dawnej wersji), od najnowszej wg daty
+    ''' zapisu conf.txt - menu „Ostatnie sesje” (audyt ER-12: powrót do sesji wymagał szukania folderu w oknie wyboru).
+    ''' </summary>
+    Public Shared Function OstatnieFolderySesji(katalogNadrzedny As String, liczba As Integer) As List(Of String)
+        Dim kandydaci As New List(Of KeyValuePair(Of String, DateTime))()
+        If String.IsNullOrWhiteSpace(katalogNadrzedny) OrElse Not Directory.Exists(katalogNadrzedny) OrElse liczba <= 0 Then Return New List(Of String)()
+        Try
+            For Each pod In Directory.GetDirectories(katalogNadrzedny)
+                Dim plikConf = Path.Combine(pod, "conf.txt")
+                If File.Exists(plikConf) Then kandydaci.Add(New KeyValuePair(Of String, DateTime)(pod.TrimEnd("\"c, "/"c) & "\", File.GetLastWriteTimeUtc(plikConf)))
+            Next
+            Dim glownyConf = Path.Combine(katalogNadrzedny, "conf.txt")
+            If File.Exists(glownyConf) Then
+                kandydaci.Add(New KeyValuePair(Of String, DateTime)(katalogNadrzedny.TrimEnd("\"c, "/"c) & "\", File.GetLastWriteTimeUtc(glownyConf)))
+            End If
+        Catch ex As IOException
+        Catch ex As UnauthorizedAccessException
+        End Try
+        Return kandydaci.OrderByDescending(Function(k) k.Value).Take(liczba).Select(Function(k) k.Key).ToList()
+    End Function
+
     Public Shared Function NajnowszyFolderSesji(katalogNadrzedny As String) As String
         If String.IsNullOrWhiteSpace(katalogNadrzedny) OrElse Not Directory.Exists(katalogNadrzedny) Then Return ""
 

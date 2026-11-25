@@ -66,6 +66,8 @@ Public Class FormPodgladMip
     End Sub
 
     Private Sub FormPodgladMip_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+        'F1 otwiera pomoc korekty obrazu; przycisku nie ma, bo dolny wiersz zajmują przyciski profilu (audyt ER-33)
+        PomocProgramu.DodajPrzyciskPomocy(Me, TematPomocy.KorektaFolderu).Visible = False
         ' Przycisk resetu: korekta wyłączona i neutralne suwaki - powrót do obrazu bez zmian
         Dim btnResetuj As New Button With {.Name = "btnResetuj", .Text = "Resetuj korektę", .Location = New Point(150, 295),
                                            .Size = New Size(130, 26), .UseVisualStyleBackColor = True}

@@ -18,6 +18,8 @@ Partial Public Class Form1
         Sesja
         Kosz
         Odswiez
+        ''' <summary>Folder pobrań ze wszystkimi sesjami - inna ikona niż folder bieżącej sesji (audyt ER-14).</summary>
+        Pobrane
     End Enum
 
     ''' <summary>Stan sesji pokazywany ikoną karty „Stan sesji” i kropką na pasku stanu.</summary>
@@ -127,6 +129,18 @@ Partial Public Class Form1
                     g.DrawArc(pioro, ramka, 30.0F, 290.0F)
                     g.DrawLines(pioro, {New PointF(x + s * 0.57F, y + s * 0.3F), New PointF(x + s * 0.78F, y + s * 0.27F),
                                         New PointF(x + s * 0.79F, y + s * 0.08F)})
+                Case IkonaOkna.Pobrane
+                    'dwa foldery jeden za drugim i strzałka w dół (pobrane mapy)
+                    g.DrawLines(pioro, {New PointF(x + s * 0.18F, y + s * 0.2F), New PointF(x + s * 0.42F, y + s * 0.2F),
+                                        New PointF(x + s * 0.5F, y + s * 0.3F), New PointF(x + s * 0.94F, y + s * 0.3F),
+                                        New PointF(x + s * 0.94F, y + s * 0.72F)})
+                    g.DrawLines(pioro, {New PointF(x + s * 0.06F, y + s * 0.92F), New PointF(x + s * 0.06F, y + s * 0.36F),
+                                        New PointF(x + s * 0.32F, y + s * 0.36F), New PointF(x + s * 0.4F, y + s * 0.46F),
+                                        New PointF(x + s * 0.82F, y + s * 0.46F), New PointF(x + s * 0.82F, y + s * 0.92F),
+                                        New PointF(x + s * 0.06F, y + s * 0.92F)})
+                    g.DrawLine(pioro, x + s * 0.44F, y + s * 0.56F, x + s * 0.44F, y + s * 0.84F)
+                    g.DrawLines(pioro, {New PointF(x + s * 0.34F, y + s * 0.74F), New PointF(x + s * 0.44F, y + s * 0.84F),
+                                        New PointF(x + s * 0.54F, y + s * 0.74F)})
             End Select
         End Using
         g.SmoothingMode = tryb

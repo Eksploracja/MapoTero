@@ -271,7 +271,7 @@ Public Class FormEksportCad
             If istniejace > EksportCad.ZalecanaLiczbaRastrow Then
                 Dim komunikatRastrow As String = "Wybrana sesja zawiera " & istniejace & " pojedynczych segmentów rastrowych." & vbCrLf & vbCrLf &
                                                  "Wstawienie ponad 1 000 rastrów do rysunku może drastycznie spowolnić lub zawiesić program CAD." & vbCrLf &
-                                                 "Zalecane jest wcześniejsze scalenie segmentów w jeden arkusz (przycisk 'Scal segmenty…')." & vbCrLf & vbCrLf &
+                                                 "Zalecane jest wcześniejsze scalenie segmentów w jeden arkusz (przycisk 'Utwórz arkusz…')." & vbCrLf & vbCrLf &
                                                  "Czy na pewno chcesz kontynuować eksport pojedynczych segmentów?"
                 If MessageBox.Show(komunikatRastrow, "Duża liczba rastrów w CAD", MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2) <> DialogResult.Yes Then
                     Exit Sub

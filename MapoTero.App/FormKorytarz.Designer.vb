@@ -92,7 +92,7 @@ Partial Class FormKorytarz
         Me.chkBuforAdaptacyjny.Name = "chkBuforAdaptacyjny"
         Me.chkBuforAdaptacyjny.Size = New System.Drawing.Size(430, 17)
         Me.chkBuforAdaptacyjny.TabIndex = 5
-        Me.chkBuforAdaptacyjny.Text = "Bufor adaptacyjny dla zoom (węższy dla zbliżeń, szerszy w oddaleniu)"
+        Me.chkBuforAdaptacyjny.Text = "Bufor zależny od powiększenia (węższy dla zbliżeń, szerszy w oddaleniu)"
         Me.ToolTip1.SetToolTip(Me.chkBuforAdaptacyjny, "Automatycznie różnicuje szerokość korytarza dla poszczególnych poziomów powiększenia (np. w MBTiles): szeroki bufor dla podglądu i wąski dla detali.")
         Me.chkBuforAdaptacyjny.UseVisualStyleBackColor = True
         '

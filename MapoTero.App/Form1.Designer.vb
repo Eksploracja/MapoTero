@@ -868,7 +868,7 @@ Partial Class Form1
         Me.btnWarstwyZaawansowane.Size = New System.Drawing.Size(22, 23)
         Me.btnWarstwyZaawansowane.TabIndex = 307
         Me.btnWarstwyZaawansowane.Text = "…"
-        Me.ToolTip1.SetToolTip(Me.btnWarstwyZaawansowane, "Warstwy - zaawansowane: suwaki krycia i podgląd kanapki")
+        Me.ToolTip1.SetToolTip(Me.btnWarstwyZaawansowane, "Mikser warstw: krycie, kolejność i tryby mieszania z podglądem")
         Me.btnWarstwyZaawansowane.UseVisualStyleBackColor = True
         '
         'btnPowieksz

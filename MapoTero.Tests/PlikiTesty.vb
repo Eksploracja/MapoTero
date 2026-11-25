@@ -224,6 +224,20 @@ Public Class PlikiSesjiTesty
         End Try
     End Sub
 
+    <Fact>
+    Public Sub DawnaEdycjaXYNieBlokujeZaznaczania()
+        'lastsettings.txt z wersji, w której pole edycji XY było widoczne - zapamiętane True blokowało zaznaczanie (ER-02)
+        Dim plik = Path.GetTempFileName()
+        Try
+            File.WriteAllText(plik, "edycja_xy" & vbCrLf & "True" & vbCrLf)
+            Dim w As New MapoTero.UstawieniaProgramu()
+            w.Wczytaj(plik)
+            Assert.False(w.EdycjaXY)
+        Finally
+            File.Delete(plik)
+        End Try
+    End Sub
+
     ''' <summary>Pomocnik: odczyt konfiguracji z tekstu przez plik tymczasowy.</summary>
     Private Class CzytnikPlikuVbTest
         Private ReadOnly _tekst As String
@@ -287,6 +301,29 @@ Public Class PlikiSesjiTesty
             ' Sesja w folderze głównym nowsza od podfolderów - wygrywa mimo istnienia podfolderów
             File.SetLastWriteTimeUtc(staryConf, DateTime.UtcNow.AddMinutes(5))
             Assert.Equal(tempDir.TrimEnd("\"c) & "\", KonfiguracjaSesji.NajnowszyFolderSesji(tempDir))
+        Finally
+            If Directory.Exists(tempDir) Then Directory.Delete(tempDir, True)
+        End Try
+    End Sub
+
+    <Fact>
+    Public Sub OstatnieFolderySesji_OdNajnowszejZLimitem()
+        Dim tempDir = Path.Combine(Path.GetTempPath(), "MapoTero_TestOstatnich_" & Guid.NewGuid().ToString("N"))
+        Directory.CreateDirectory(tempDir)
+        Try
+            Assert.Empty(KonfiguracjaSesji.OstatnieFolderySesji(tempDir, 5))
+            For i = 1 To 4
+                Dim pod = Path.Combine(tempDir, "sesja_" & i)
+                Directory.CreateDirectory(pod)
+                Dim conf = Path.Combine(pod, "conf.txt")
+                File.WriteAllText(conf, "sesja " & i)
+                File.SetLastWriteTimeUtc(conf, DateTime.UtcNow.AddMinutes(i))
+            Next
+            'folder bez conf.txt nie jest sesją
+            Directory.CreateDirectory(Path.Combine(tempDir, "inny"))
+            Dim lista = KonfiguracjaSesji.OstatnieFolderySesji(tempDir, 3)
+            Assert.Equal({"sesja_4", "sesja_3", "sesja_2"}, lista.Select(Function(f) Path.GetFileName(f.TrimEnd("\"c))).ToArray())
+            Assert.All(lista, Sub(f) Assert.EndsWith("\", f))
         Finally
             If Directory.Exists(tempDir) Then Directory.Delete(tempDir, True)
         End Try

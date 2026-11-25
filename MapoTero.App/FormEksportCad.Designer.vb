@@ -120,7 +120,7 @@ Partial Class FormEksportCad
         Me.rbSegmenty.Size = New System.Drawing.Size(300, 17)
         Me.rbSegmenty.TabIndex = 0
         Me.rbSegmenty.TabStop = True
-        Me.rbSegmenty.Text = "pobrane segmenty (osobny obraz dla każdego segmentu)"
+        Me.rbSegmenty.Text = "Pobrane segmenty (osobny obraz dla każdego segmentu)"
         Me.ToolTip1.SetToolTip(Me.rbSegmenty, "Każdy plik segmentu wstawiany jest jako osobny obraz na swoim miejscu (przy setkach segmentów lepiej wstawić scalony arkusz).")
         Me.rbSegmenty.UseVisualStyleBackColor = True
         '
@@ -131,7 +131,7 @@ Partial Class FormEksportCad
         Me.rbArkusz.Name = "rbArkusz"
         Me.rbArkusz.Size = New System.Drawing.Size(100, 17)
         Me.rbArkusz.TabIndex = 1
-        Me.rbArkusz.Text = "scalony arkusz:"
+        Me.rbArkusz.Text = "Scalony arkusz:"
         Me.ToolTip1.SetToolTip(Me.rbArkusz, "Arkusz utworzony poleceniem Scalanie segmentów (GeoTIFF albo JPEG / PNG z plikiem world file).")
         Me.rbArkusz.UseVisualStyleBackColor = True
         '
@@ -158,7 +158,7 @@ Partial Class FormEksportCad
         Me.btnScal.Name = "btnScal"
         Me.btnScal.Size = New System.Drawing.Size(90, 23)
         Me.btnScal.TabIndex = 5
-        Me.btnScal.Text = "Scal segmenty..."
+        Me.btnScal.Text = "Utwórz arkusz..."
         Me.ToolTip1.SetToolTip(Me.btnScal, "Scalanie segmentów tej sesji w jeden arkusz (z plikiem world file) - po scaleniu arkusz zostanie wybrany do wstawienia.")
         Me.btnScal.UseVisualStyleBackColor = True
         '
@@ -179,7 +179,7 @@ Partial Class FormEksportCad
         Me.rbBezRastrow.Name = "rbBezRastrow"
         Me.rbBezRastrow.Size = New System.Drawing.Size(330, 17)
         Me.rbBezRastrow.TabIndex = 4
-        Me.rbBezRastrow.Text = "bez rastrów - tylko obrys i siatka segmentów (np. przed pobraniem)"
+        Me.rbBezRastrow.Text = "Bez rastrów - tylko obrys i siatka segmentów (np. przed pobraniem)"
         Me.rbBezRastrow.UseVisualStyleBackColor = True
         '
         'grpWektory
@@ -205,7 +205,7 @@ Partial Class FormEksportCad
         Me.chkObrys.Name = "chkObrys"
         Me.chkObrys.Size = New System.Drawing.Size(92, 17)
         Me.chkObrys.TabIndex = 0
-        Me.chkObrys.Text = "obrys zasięgu"
+        Me.chkObrys.Text = "Obrys zasięgu"
         Me.ToolTip1.SetToolTip(Me.chkObrys, "Czerwony - zasięg siatki (pełne segmenty); zielony - obszar zaznaczony na mapie, gdy jest mniejszy od siatki.")
         Me.chkObrys.UseVisualStyleBackColor = True
         '
@@ -218,7 +218,7 @@ Partial Class FormEksportCad
         Me.chkSiatka.Name = "chkSiatka"
         Me.chkSiatka.Size = New System.Drawing.Size(108, 17)
         Me.chkSiatka.TabIndex = 1
-        Me.chkSiatka.Text = "siatka segmentów"
+        Me.chkSiatka.Text = "Siatka segmentów"
         Me.chkSiatka.UseVisualStyleBackColor = True
         '
         'chkNumery
@@ -230,7 +230,7 @@ Partial Class FormEksportCad
         Me.chkNumery.Name = "chkNumery"
         Me.chkNumery.Size = New System.Drawing.Size(170, 17)
         Me.chkNumery.TabIndex = 2
-        Me.chkNumery.Text = "numery segmentów (DXF, LISP)"
+        Me.chkNumery.Text = "Numery segmentów (DXF, LISP)"
         Me.chkNumery.UseVisualStyleBackColor = True
         '
         'chkTrasa
@@ -242,7 +242,7 @@ Partial Class FormEksportCad
         Me.chkTrasa.Name = "chkTrasa"
         Me.chkTrasa.Size = New System.Drawing.Size(103, 17)
         Me.chkTrasa.TabIndex = 3
-        Me.chkTrasa.Text = "trasa (korytarz)"
+        Me.chkTrasa.Text = "Trasa (korytarz)"
         Me.ToolTip1.SetToolTip(Me.chkTrasa, "Linia trasy GPX / KML sesji pobranej wzdłuż trasy.")
         Me.chkTrasa.UseVisualStyleBackColor = True
         '
@@ -255,7 +255,7 @@ Partial Class FormEksportCad
         Me.chkOpis.Name = "chkOpis"
         Me.chkOpis.Size = New System.Drawing.Size(270, 17)
         Me.chkOpis.TabIndex = 4
-        Me.chkOpis.Text = "opis mapy: źródło, data pobrania, układ (DXF, LISP)"
+        Me.chkOpis.Text = "Opis mapy: źródło, data pobrania, układ (DXF, LISP)"
         Me.chkOpis.UseVisualStyleBackColor = True
         '
         'grpPliki
@@ -280,7 +280,7 @@ Partial Class FormEksportCad
         Me.chkDxf.Name = "chkDxf"
         Me.chkDxf.Size = New System.Drawing.Size(330, 17)
         Me.chkDxf.TabIndex = 0
-        Me.chkDxf.Text = "rysunek DXF (otwórz w programie CAD)"
+        Me.chkDxf.Text = "Rysunek DXF (otwórz w programie CAD)"
         Me.ToolTip1.SetToolTip(Me.chkDxf, "DXF R2000 - AutoCAD 2000 i nowsze, AutoCAD LT, BricsCAD, ZWCAD, GstarCAD, progeCAD i inne.")
         Me.chkDxf.UseVisualStyleBackColor = True
         '
@@ -293,7 +293,7 @@ Partial Class FormEksportCad
         Me.chkSciezkiWzgledne.Name = "chkSciezkiWzgledne"
         Me.chkSciezkiWzgledne.Size = New System.Drawing.Size(390, 17)
         Me.chkSciezkiWzgledne.TabIndex = 1
-        Me.chkSciezkiWzgledne.Text = "ścieżki rastrów względem pliku DXF (folder z mapą można przenieść)"
+        Me.chkSciezkiWzgledne.Text = "Ścieżki rastrów względem pliku DXF (folder z mapą można przenieść)"
         Me.ToolTip1.SetToolTip(Me.chkSciezkiWzgledne, "Rastry leżące w folderze pliku DXF zapisywane są jako .\nazwa_pliku - rysunek działa po skopiowaniu całego folderu.")
         Me.chkSciezkiWzgledne.UseVisualStyleBackColor = True
         '
@@ -306,7 +306,7 @@ Partial Class FormEksportCad
         Me.chkScr.Name = "chkScr"
         Me.chkScr.Size = New System.Drawing.Size(420, 17)
         Me.chkScr.TabIndex = 2
-        Me.chkScr.Text = "skrypt SCR (wstawia mapę do otwartego rysunku poleceniem SCRIPT)"
+        Me.chkScr.Text = "Skrypt SCR (wstawia mapę do otwartego rysunku poleceniem SCRIPT)"
         Me.ToolTip1.SetToolTip(Me.chkScr, "AutoCAD, AutoCAD LT, BricsCAD, ZWCAD - rastry, obrys, siatka i trasa na właściwych współrzędnych w bieżącym rysunku.")
         Me.chkScr.UseVisualStyleBackColor = True
         '
@@ -317,7 +317,7 @@ Partial Class FormEksportCad
         Me.chkLsp.Name = "chkLsp"
         Me.chkLsp.Size = New System.Drawing.Size(420, 17)
         Me.chkLsp.TabIndex = 3
-        Me.chkLsp.Text = "program LISP (APPLOAD): przywraca ustawienia rysunku, dodaje numery i opis"
+        Me.chkLsp.Text = "Program LISP (APPLOAD): przywraca ustawienia rysunku, dodaje numery i opis"
         Me.ToolTip1.SetToolTip(Me.chkLsp, "AutoCAD, AutoCAD LT 2024 i nowsze, BricsCAD, ZWCAD - jak skrypt SCR, ale po wstawieniu przywraca bieżącą warstwę, INSUNITS i FILEDIA, nie zmienia UCS i pomija brakujące pliki.")
         Me.chkLsp.UseVisualStyleBackColor = True
         '

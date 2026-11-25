@@ -58,7 +58,7 @@ Public Class KokpitDolnaBelkaTesty
                     Assert.NotNull(Kontrolka(Of ComboBox)(f, "cmbRozmiarPiksela"))
                     Assert.NotNull(Kontrolka(Of TextBox)(f, "txtBokSegmentu"))
                     Assert.NotNull(Kontrolka(Of Label)(f, "lblBokKm"))
-                    Assert.NotNull(Kontrolka(Of ComboBox)(f, "cmbFormatDocelowy"))
+                    Assert.NotNull(Kontrolka(Of ComboBox)(f, "cmbFormatSegmentow"))
                     Assert.NotNull(Kontrolka(Of Button)(f, "btnPrzejdzDoEksportu"))
 
                     ' Karta 3: Podgląd

@@ -43,6 +43,7 @@ Public Class FormWyslijNaTelefon
     End Sub
 
     Private Sub FormWyslijNaTelefon_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+        PomocProgramu.DodajPrzyciskPomocy(Me, TematPomocy.PrzeslijMape, 12, 485)
         Try
             Dim fi As New FileInfo(_sciezkaPliku)
             lblPlikInfo.Text = $"Plik: {fi.Name} ({SzacunekRozmiaru.Tekst(fi.Length)})"

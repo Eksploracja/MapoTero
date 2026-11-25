@@ -79,7 +79,8 @@ Public Class FormWarstwyZaawansowane
         _silnik = silnik
         _czekajNaPobieranie = czekajNaPobieranie
         _zaznaczona = zaznaczona
-        Text = "Warstwy - zaawansowane"
+        ' Jedna nazwa okna: przyciski i menu mówią „Mikser warstw” (dawniej tytuł „Warstwy - zaawansowane”, audyt ER-25).
+        Text = "Mikser warstw"
         FormBorderStyle = FormBorderStyle.FixedDialog
         MaximizeBox = False
         MinimizeBox = False
@@ -103,7 +104,7 @@ Public Class FormWarstwyZaawansowane
 
         Dim lblOpis As New Label With {
             .Location = New Point(lewa, 8), .Size = New Size(SzerokoscListy, 38), .TextAlign = ContentAlignment.BottomLeft,
-            .Text = "Kanapka warstw: na górze warstwa najwyższa, na dole podkład (1). Krycie poniżej 100% i tryby mieszania sprawiają, że warstwy łączą się z podkładem."}
+            .Text = "Zestaw warstw: na górze warstwa najwyższa, na dole podkład (1). Krycie poniżej 100% i tryby mieszania sprawiają, że warstwy łączą się z podkładem."}
         Controls.Add(lblOpis)
 
         _wiersze.Location = New Point(lewa, gora)
@@ -136,7 +137,7 @@ Public Class FormWarstwyZaawansowane
         _btnUlozAutomatycznie.Location = New Point(_btnDodajWarstwe.Right + 6, pasekDolny)
         _btnUlozAutomatycznie.Size = New Size(155, WysokoscPrzycisku)
         _btnUlozAutomatycznie.Text = "⚡ Ułóż automatycznie"
-        _podpowiedz.SetToolTip(_btnUlozAutomatycznie, "Porządkuje kanapkę (podkłady → cieniowanie → hipsometria → nakładki) i dobiera domyślne krycie oraz tryb mieszania.")
+        _podpowiedz.SetToolTip(_btnUlozAutomatycznie, "Porządkuje zestaw warstw (podkłady → cieniowanie → hipsometria → nakładki) i dobiera domyślne krycie oraz tryb mieszania.")
         AddHandler _btnUlozAutomatycznie.Click,
             Sub(s, e)
                 If _zestaw.UlozAutomatycznie() Then
@@ -158,7 +159,7 @@ Public Class FormWarstwyZaawansowane
 
         Dim lblPodglad As New Label With {.Location = New Point(prawa, 8), .Size = New Size(BokPodgladu, 38),
                                           .TextAlign = ContentAlignment.BottomLeft,
-                                          .Text = "Podgląd kanapki - ta sama próbka co w oknie głównym:"}
+                                          .Text = "Podgląd zestawu warstw - ta sama próbka co w oknie głównym:"}
         Controls.Add(lblPodglad)
         _podglad.Location = New Point(prawa, gora)
         _podglad.Size = New Size(BokPodgladu, BokPodgladu)
@@ -169,7 +170,7 @@ Public Class FormWarstwyZaawansowane
         AddHandler _podglad.MouseEnter, Sub(s, e) _podglad.Focus()
         AddHandler _podglad.MouseWheel, AddressOf Podglad_MouseWheel
         AddHandler _podglad.Paint, AddressOf RysujStanPodgladu
-        _podpowiedz.SetToolTip(_podglad, "Podgląd kanapki. Kółko myszy: przybliż/oddal.")
+        _podpowiedz.SetToolTip(_podglad, "Podgląd zestawu warstw. Kółko myszy: przybliż/oddal.")
         Controls.Add(_podglad)
 
         ' Lupa przy lewej krawędzi podglądu, odświeżenie przy prawej - w jednym wierszu pod podglądem
@@ -184,9 +185,9 @@ Public Class FormWarstwyZaawansowane
 
         _btnZoomReset.Location = New Point(_btnZoomMinus.Right + 4, wierszPodPodgladem)
         _btnZoomReset.Size = New Size(40, WysokoscPrzycisku)
-        _btnZoomReset.Text = "1:1"
+        _btnZoomReset.Text = "100%"
         _btnZoomReset.Enabled = False
-        _podpowiedz.SetToolTip(_btnZoomReset, "Przywróć skalę 1:1 (100%)")
+        _podpowiedz.SetToolTip(_btnZoomReset, "Rzeczywista wielkość pikseli podglądu (100%)")
         AddHandler _btnZoomReset.Click, AddressOf ZoomReset_Click
         Controls.Add(_btnZoomReset)
 
@@ -202,7 +203,7 @@ Public Class FormWarstwyZaawansowane
         _lblZoom.Location = New Point(_btnZoomPlus.Right + 6, wierszPodPodgladem)
         _lblZoom.Size = New Size(40, WysokoscPrzycisku)
         _lblZoom.TextAlign = ContentAlignment.MiddleLeft
-        _lblZoom.Text = "1:1"
+        _lblZoom.Text = "100%"
         _lblZoom.ForeColor = SystemColors.ControlDarkDark
         Controls.Add(_lblZoom)
 
@@ -574,13 +575,13 @@ Public Class FormWarstwyZaawansowane
         Dim staryImg = _podglad.Image
         _podglad.Image = powiekszony
         staryImg?.Dispose()
-        _lblZoom.Text = If(zoom > 1.001, "×" & CInt(zoom), "1:1")
+        _lblZoom.Text = If(zoom > 1.001, "×" & CInt(zoom), "100%")
         AktualizujStanPrzyciskowZoomu()
     End Sub
 
     Private Sub Korekta_Click(sender As Object, e As EventArgs)
         If _bazaPodgladu Is Nothing Then
-            MessageBox.Show("Najpierw pobierz podgląd kanapki warstw przyciskiem 'Odśwież podgląd'.", "Brak podglądu", MessageBoxButtons.OK, MessageBoxIcon.Information)
+            MessageBox.Show("Najpierw pobierz podgląd zestawu warstw przyciskiem 'Odśwież podgląd'.", "Brak podglądu", MessageBoxButtons.OK, MessageBoxIcon.Information)
             Return
         End If
         Using dlg As New FormPodgladMip(_opcjeKorekty, _bazaPodgladu)

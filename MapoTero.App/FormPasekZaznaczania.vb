@@ -58,7 +58,7 @@ Public Class FormPasekZaznaczania
         Me.KeyPreview = True
 
         _lblInfo = New Label With {
-            .Text = "Zaznacz obszar prawym przyciskiem myszy na mapie poniżej:",
+            .Text = "Zaznacz obszar: przeciągnij prawym przyciskiem myszy",
             .Location = New Point(12, 16),
             .AutoSize = True,
             .Font = New Font("Segoe UI", 9.0!, FontStyle.Regular),

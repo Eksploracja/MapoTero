@@ -59,14 +59,14 @@ Partial Class FormZasiegXY
         Me.grpWspolrzedne.Controls.Add(Me.lblXGora)
         Me.grpWspolrzedne.Location = New System.Drawing.Point(12, 34)
         Me.grpWspolrzedne.Name = "grpWspolrzedne"
-        Me.grpWspolrzedne.Size = New System.Drawing.Size(340, 160)
+        Me.grpWspolrzedne.Size = New System.Drawing.Size(340, 210)
         Me.grpWspolrzedne.TabIndex = 1
         Me.grpWspolrzedne.TabStop = False
         Me.grpWspolrzedne.Text = "Współrzędne granic zasięgu"
         '
         'btnZaokraglijKm
         '
-        Me.btnZaokraglijKm.Location = New System.Drawing.Point(180, 122)
+        Me.btnZaokraglijKm.Location = New System.Drawing.Point(180, 172)
         Me.btnZaokraglijKm.Name = "btnZaokraglijKm"
         Me.btnZaokraglijKm.Size = New System.Drawing.Size(145, 26)
         Me.btnZaokraglijKm.TabIndex = 8
@@ -80,7 +80,7 @@ Partial Class FormZasiegXY
         Me.txtYPrawy.Location = New System.Drawing.Point(180, 88)
         Me.txtYPrawy.Name = "txtYPrawy"
         Me.txtYPrawy.Size = New System.Drawing.Size(145, 23)
-        Me.txtYPrawy.TabIndex = 7
+        Me.txtYPrawy.TabIndex = 5
         '
         'lblYPrawy
         '
@@ -88,7 +88,7 @@ Partial Class FormZasiegXY
         Me.lblYPrawy.Location = New System.Drawing.Point(180, 72)
         Me.lblYPrawy.Name = "lblYPrawy"
         Me.lblYPrawy.Size = New System.Drawing.Size(117, 13)
-        Me.lblYPrawy.TabIndex = 6
+        Me.lblYPrawy.TabIndex = 4
         Me.lblYPrawy.Text = "Wschód (Y prawy / E):"
         '
         'txtYLewy
@@ -97,7 +97,7 @@ Partial Class FormZasiegXY
         Me.txtYLewy.Location = New System.Drawing.Point(15, 88)
         Me.txtYLewy.Name = "txtYLewy"
         Me.txtYLewy.Size = New System.Drawing.Size(145, 23)
-        Me.txtYLewy.TabIndex = 5
+        Me.txtYLewy.TabIndex = 3
         '
         'lblYLewy
         '
@@ -105,30 +105,30 @@ Partial Class FormZasiegXY
         Me.lblYLewy.Location = New System.Drawing.Point(15, 72)
         Me.lblYLewy.Name = "lblYLewy"
         Me.lblYLewy.Size = New System.Drawing.Size(115, 13)
-        Me.lblYLewy.TabIndex = 4
+        Me.lblYLewy.TabIndex = 2
         Me.lblYLewy.Text = "Zachód (Y lewy / W):"
         '
         'txtXDol
         '
         Me.txtXDol.Font = New System.Drawing.Font("Consolas", 9.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
-        Me.txtXDol.Location = New System.Drawing.Point(180, 38)
+        Me.txtXDol.Location = New System.Drawing.Point(97, 138)
         Me.txtXDol.Name = "txtXDol"
         Me.txtXDol.Size = New System.Drawing.Size(145, 23)
-        Me.txtXDol.TabIndex = 3
+        Me.txtXDol.TabIndex = 7
         '
         'lblXDol
         '
         Me.lblXDol.AutoSize = True
-        Me.lblXDol.Location = New System.Drawing.Point(180, 22)
+        Me.lblXDol.Location = New System.Drawing.Point(97, 122)
         Me.lblXDol.Name = "lblXDol"
         Me.lblXDol.Size = New System.Drawing.Size(118, 13)
-        Me.lblXDol.TabIndex = 2
+        Me.lblXDol.TabIndex = 6
         Me.lblXDol.Text = "Południe (X dolny / S):"
         '
         'txtXGora
         '
         Me.txtXGora.Font = New System.Drawing.Font("Consolas", 9.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
-        Me.txtXGora.Location = New System.Drawing.Point(15, 38)
+        Me.txtXGora.Location = New System.Drawing.Point(97, 38)
         Me.txtXGora.Name = "txtXGora"
         Me.txtXGora.Size = New System.Drawing.Size(145, 23)
         Me.txtXGora.TabIndex = 1
@@ -136,7 +136,7 @@ Partial Class FormZasiegXY
         'lblXGora
         '
         Me.lblXGora.AutoSize = True
-        Me.lblXGora.Location = New System.Drawing.Point(15, 22)
+        Me.lblXGora.Location = New System.Drawing.Point(97, 22)
         Me.lblXGora.Name = "lblXGora"
         Me.lblXGora.Size = New System.Drawing.Size(114, 13)
         Me.lblXGora.TabIndex = 0
@@ -144,7 +144,7 @@ Partial Class FormZasiegXY
         '
         'btnZastosuj
         '
-        Me.btnZastosuj.Location = New System.Drawing.Point(176, 204)
+        Me.btnZastosuj.Location = New System.Drawing.Point(176, 254)
         Me.btnZastosuj.Name = "btnZastosuj"
         Me.btnZastosuj.Size = New System.Drawing.Size(85, 26)
         Me.btnZastosuj.TabIndex = 2
@@ -154,7 +154,7 @@ Partial Class FormZasiegXY
         'btnAnuluj
         '
         Me.btnAnuluj.DialogResult = System.Windows.Forms.DialogResult.Cancel
-        Me.btnAnuluj.Location = New System.Drawing.Point(267, 204)
+        Me.btnAnuluj.Location = New System.Drawing.Point(267, 254)
         Me.btnAnuluj.Name = "btnAnuluj"
         Me.btnAnuluj.Size = New System.Drawing.Size(85, 26)
         Me.btnAnuluj.TabIndex = 3
@@ -167,7 +167,7 @@ Partial Class FormZasiegXY
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.CancelButton = Me.btnAnuluj
-        Me.ClientSize = New System.Drawing.Size(364, 240)
+        Me.ClientSize = New System.Drawing.Size(364, 290)
         Me.Controls.Add(Me.btnAnuluj)
         Me.Controls.Add(Me.btnZastosuj)
         Me.Controls.Add(Me.grpWspolrzedne)
