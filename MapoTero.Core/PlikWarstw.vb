@@ -387,7 +387,7 @@ Public Class PlikWarstw
                 w.WriteEndArray()
                 w.WriteEndObject()
             End Using
-            File.WriteAllBytes(sciezka, ms.ToArray())
+            ZapisAtomowy.Bajty(sciezka, ms.ToArray())
         End Using
     End Sub
 

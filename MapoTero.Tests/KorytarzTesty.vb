@@ -222,6 +222,22 @@ Public Class KorytarzTesty
         Assert.False(New Korytarz().Poprawny)
     End Sub
 
+
+    <Fact>
+    Public Sub WczytajTrase_GpxWIso88592ZachowujePolskieZnakiWNazwie()
+        Encoding.RegisterProvider(CodePagesEncodingProvider.Instance)
+        Dim xml = "<?xml version=""1.0"" encoding=""ISO-8859-2""?><gpx version=""1.1""><trk><name>Łódź - Żółć</name><trkseg>" &
+                  "<trkpt lat=""51.7"" lon=""19.4""/><trkpt lat=""51.8"" lon=""19.5""/></trkseg></trk></gpx>"
+        Dim sciezka = Path.Combine(Path.GetTempPath(), "mt_" & Guid.NewGuid().ToString("N") & ".gpx")
+        Try
+            File.WriteAllBytes(sciezka, Encoding.GetEncoding("ISO-8859-2").GetBytes(xml))
+            Dim k = Korytarz.WczytajTrase(sciezka)
+            Assert.Equal("Łódź - Żółć", k.Nazwa)
+            Assert.True(k.Poprawny)
+        Finally
+            File.Delete(sciezka)
+        End Try
+    End Sub
 End Class
 
 Public Class MetadaneTesty

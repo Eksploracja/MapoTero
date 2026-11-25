@@ -285,4 +285,40 @@ Public Class JnxTesty
         End Try
     End Sub
 
+
+    <Fact>
+    Public Sub Jnx_ZapisStrumieniowyDajeTenSamPlikCoZapisZPamieci()
+        Dim jpegA = New Byte() {&HFF, &HD8, 1, 2, 3, 4}
+        Dim jpegB = New Byte() {&HFF, &HD8, 9, 8, 7}
+        Dim zasA As New ProstokatGeo(52.1, 52.0, 21.1, 21.0)
+        Dim zasB As New ProstokatGeo(52.2, 52.1, 21.1, 21.0)
+        Dim wPamieci As New PoziomJnx(1000)
+        wPamieci.Kafle.Add(New KafelJnx(zasA, jpegA))
+        wPamieci.Kafle.Add(New KafelJnx(zasB, jpegB))
+        Dim strumien As New PoziomJnx(1000)
+        strumien.Kafle.Add(New KafelJnx With {.Zasieg = zasA, .DlugoscZapisu = jpegA.Length - 2})
+        strumien.Kafle.Add(New KafelJnx With {.Zasieg = zasB, .DlugoscZapisu = jpegB.Length - 2})
+        Dim p1 = Path.GetTempFileName(), p2 = Path.GetTempFileName()
+        Try
+            ZapisJnx.Zapisz(p1, "Test", 30, New List(Of PoziomJnx) From {wPamieci})
+            ZapisJnx.Zapisz(p2, "Test", 30, New List(Of PoziomJnx) From {strumien}, {jpegA, jpegB})
+            Assert.Equal(File.ReadAllBytes(p1), File.ReadAllBytes(p2))
+            Assert.Equal(jpegB, ZapisJnx.OdczytajKafel(p2, 0, 1))
+        Finally
+            File.Delete(p1) : File.Delete(p2)
+        End Try
+    End Sub
+
+    <Fact>
+    Public Sub Jnx_PlikPonad4GBOdrzucanyPrzedZapisem()
+        Dim poziom As New PoziomJnx(1000)
+        For i = 1 To 3
+            poziom.Kafle.Add(New KafelJnx With {.Zasieg = New ProstokatGeo(52.1, 52.0, 21.1, 21.0), .DlugoscZapisu = 1500000000})
+        Next
+        Dim sciezka = Path.Combine(Path.GetTempPath(), "mt_" & Guid.NewGuid().ToString("N") & ".jnx")
+        Dim ex = Assert.Throws(Of InvalidOperationException)(
+            Sub() ZapisJnx.Zapisz(sciezka, "Test", 30, New List(Of PoziomJnx) From {poziom}, Enumerable.Empty(Of Byte())()))
+        Assert.Contains("4 GB", ex.Message)
+        Assert.False(File.Exists(sciezka))
+    End Sub
 End Class

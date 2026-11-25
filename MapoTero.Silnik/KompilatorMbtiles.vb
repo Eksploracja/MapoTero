@@ -593,13 +593,8 @@ Public NotInheritable Class KompilatorMbtiles
                     End If
                 End If
 
-                ' Przygotowanie listy współrzędnych do przetworzenia na tym poziomie
-                Dim kaflePoziomu As New List(Of KafelXYZ)
-                For ty = zakres.Item2 To zakres.Item4
-                    For tx = zakres.Item1 To zakres.Item3
-                        kaflePoziomu.Add(New KafelXYZ(tx, ty, poziom))
-                    Next
-                Next
+                ' Kafle poziomu wyznaczane z numeru (dawniej lista wszystkich kafli poziomu w pamięci)
+                Dim kaflePoziomu As New EksportMapy.KafleZakresu(zakres, poziom)
 
                 Const RozmiarPaczki As Integer = 128
                 Dim po As New ParallelOptions With {
@@ -609,10 +604,10 @@ Public NotInheritable Class KompilatorMbtiles
 
                 magazyn.RozpocznijPoziom(poziom)
 
-                For offset = 0 To kaflePoziomu.Count - 1 Step RozmiarPaczki
+                For offset As Long = 0 To kaflePoziomu.Liczba - 1 Step RozmiarPaczki
                     token.ThrowIfCancellationRequested()
                     Dim biezacyOffset = offset
-                    Dim liczbaWPaczce = Math.Min(RozmiarPaczki, kaflePoziomu.Count - biezacyOffset)
+                    Dim liczbaWPaczce = CInt(Math.Min(RozmiarPaczki, kaflePoziomu.Liczba - biezacyOffset))
                     Dim daneKafli As Byte()() = New Byte(liczbaWPaczce - 1)() {}
 
                     If moznaPiramida Then

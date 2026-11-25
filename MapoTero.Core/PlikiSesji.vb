@@ -101,6 +101,43 @@ Public Class CzytnikPlikuVb
 
 End Class
 
+''' <summary>
+''' Zapis pliku tekstowego przez plik tymczasowy w tym samym folderze i podmianę na końcu. Dawniej conf.txt,
+''' lastsettings.txt i pliki zbiorów map zapisywano wprost (File.WriteAllText), więc brak miejsca na dysku albo
+''' zamknięcie programu w trakcie zapisu zostawiały plik obcięty: lastsettings.txt uznawany potem za uszkodzony,
+''' a conf.txt sesji - nieczytelny.
+''' </summary>
+Public NotInheritable Class ZapisAtomowy
+
+    Private Sub New()
+    End Sub
+
+    Public Shared Sub Tekst(sciezka As String, tresc As String, kodowanie As Encoding)
+        Bajty(sciezka, kodowanie.GetPreamble().Concat(kodowanie.GetBytes(If(tresc, ""))).ToArray())
+    End Sub
+
+    Public Shared Sub Bajty(sciezka As String, dane() As Byte)
+        Dim tymczasowy As String = sciezka & "." & Guid.NewGuid().ToString("N").Substring(0, 8) & ".tmp"
+        Try
+            File.WriteAllBytes(tymczasowy, dane)
+        Catch ex As UnauthorizedAccessException
+            'folder bez prawa tworzenia plików, choć sam plik można nadpisać - zapis bezpośredni jak dawniej
+            File.WriteAllBytes(sciezka, dane)
+            Return
+        End Try
+        Try
+            File.Move(tymczasowy, sciezka, overwrite:=True)
+        Catch
+            Try
+                File.Delete(tymczasowy)
+            Catch
+            End Try
+            Throw
+        End Try
+    End Sub
+
+End Class
+
 ''' <summary>Zapis w formacie instrukcji WriteLine języka Visual Basic (każde pole w osobnym wierszu).</summary>
 Public Class ZapisPlikuVb
 
@@ -123,7 +160,7 @@ Public Class ZapisPlikuVb
     End Function
 
     Public Sub Zapisz(sciezka As String, kodowanie As Encoding)
-        File.WriteAllText(sciezka, _sb.ToString(), kodowanie)
+        ZapisAtomowy.Tekst(sciezka, _sb.ToString(), kodowanie)
     End Sub
 
 End Class
@@ -265,7 +302,7 @@ Public Class KonfiguracjaSesji
     End Function
 
     Public Sub Zapisz(sciezka As String, kodowanie As Encoding)
-        File.WriteAllText(sciezka, DoTekstu(), kodowanie)
+        ZapisAtomowy.Tekst(sciezka, DoTekstu(), kodowanie)
     End Sub
 
     ''' <summary>Siatka segmentów sesji (pola zasięgu, rozmiaru piksela i boku segmentu).</summary>
@@ -506,7 +543,8 @@ Public Class PlikUstawien
 
     Public Sub Ustaw(nazwa As String, wartosc As String)
         If Not _wartosci.ContainsKey(nazwa) Then _kolejnosc.Add(nazwa)
-        _wartosci(nazwa) = If(wartosc, "")
+        'plik to pary wierszy "nazwa" / "wartość" - znak końca wiersza w wartości przesunąłby wszystkie dalsze pary
+        _wartosci(nazwa) = If(wartosc, "").Replace(ChrW(13), " ").Replace(ChrW(10), " ")
     End Sub
 
     Public Sub Ustaw(nazwa As String, wartosc As Boolean)
@@ -565,7 +603,7 @@ Public Class PlikUstawien
     End Function
 
     Public Sub Zapisz(sciezka As String, kodowanie As Encoding)
-        File.WriteAllText(sciezka, DoTekstu(), kodowanie)
+        ZapisAtomowy.Tekst(sciezka, DoTekstu(), kodowanie)
     End Sub
 
 End Class

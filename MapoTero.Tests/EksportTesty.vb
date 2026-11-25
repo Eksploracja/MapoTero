@@ -440,6 +440,8 @@ Public Class EksportTesty
                 Dim wpis = r.GetNextEntry()
                 While wpis IsNot Nothing
                     nazwy.Add(wpis.Name.Replace("\"c, "/"c))
+                    'ustar jak w dawnej wersji (SharpZipLib) - bez wpisów PAX przed każdym plikiem
+                    Assert.Equal(System.Formats.Tar.TarEntryFormat.Ustar, wpis.Format)
                     wpis = r.GetNextEntry()
                 End While
             End Using

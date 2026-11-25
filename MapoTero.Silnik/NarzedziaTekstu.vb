@@ -71,7 +71,10 @@ Public Module NarzedziaTekstu
         If String.IsNullOrWhiteSpace(tekst) Then Return domyslna
         Dim wynik As Double
         'NaN i nieskończoność ("nan", "1e999") nie są liczbami dla użytkownika - dawniej kończyły się wyjątkiem przy zaokrąglaniu
-        If Double.TryParse(tekst.Trim().Replace(","c, "."c), NumberStyles.Float, CultureInfo.InvariantCulture, wynik) AndAlso
+        'spacja (także twarda) przed grupą trzech cyfr to separator tysięcy - współrzędne kopiowane z dokumentacji
+        'geodezyjnej mają postać "500 000,25"; dawniej taki tekst nie był liczbą i pole zasięgu przyjmowało 0
+        Dim bezSpacji = System.Text.RegularExpressions.Regex.Replace(tekst.Trim(), "(?<=\d)\p{Zs}(?=\d{3}(?!\d))", "")
+        If Double.TryParse(bezSpacji.Replace(","c, "."c), NumberStyles.Float, CultureInfo.InvariantCulture, wynik) AndAlso
            Not Double.IsNaN(wynik) AndAlso Not Double.IsInfinity(wynik) Then Return wynik
         Return domyslna
     End Function

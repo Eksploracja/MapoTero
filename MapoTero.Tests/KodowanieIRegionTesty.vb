@@ -102,6 +102,9 @@ Public Class KodowanieIRegionTesty
                     Assert.Equal(0.5, Global.MapoTero.NarzedziaTekstu.Wartosc("0,5"))
                     Assert.Equal(0.5, Global.MapoTero.NarzedziaTekstu.Wartosc("0.5"))
                     Assert.Equal(1234.5, Global.MapoTero.NarzedziaTekstu.Wartosc(" 1234.5 "))
+                    Assert.Equal(500000.25, Global.MapoTero.NarzedziaTekstu.Wartosc("500 000,25"))
+                    Assert.Equal(5500000.0, Global.MapoTero.NarzedziaTekstu.Wartosc("5" & ChrW(&HA0) & "500" & ChrW(&HA0) & "000"))
+                    Assert.Equal(7.0, Global.MapoTero.NarzedziaTekstu.Wartosc("1 2", 7))
                 End Sub)
         Next
     End Sub

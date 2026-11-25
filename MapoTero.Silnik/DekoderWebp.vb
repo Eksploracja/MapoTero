@@ -134,14 +134,20 @@ Public NotInheritable Class DekoderWebp
             converter.Initialize(DirectCast(frame, IWICBitmapSource), dstFormat, 0, IntPtr.Zero, 0.0, 0)
 
             Dim bmp As New Bitmap(CInt(w), CInt(h), PixelFormat.Format32bppPArgb)
-            Dim rect As New Rectangle(0, 0, CInt(w), CInt(h))
-            Dim bd = bmp.LockBits(rect, ImageLockMode.WriteOnly, PixelFormat.Format32bppPArgb)
             Try
-                Dim stride = CUInt(Math.Abs(bd.Stride))
-                Dim rozmiar = stride * h
-                converter.CopyPixels(IntPtr.Zero, stride, rozmiar, bd.Scan0)
-            Finally
-                bmp.UnlockBits(bd)
+                Dim rect As New Rectangle(0, 0, CInt(w), CInt(h))
+                Dim bd = bmp.LockBits(rect, ImageLockMode.WriteOnly, PixelFormat.Format32bppPArgb)
+                Try
+                    Dim stride = CUInt(Math.Abs(bd.Stride))
+                    Dim rozmiar = stride * h
+                    converter.CopyPixels(IntPtr.Zero, stride, rozmiar, bd.Scan0)
+                Finally
+                    bmp.UnlockBits(bd)
+                End Try
+            Catch
+                'uszkodzony obraz - bitmapa nie wraca do wywołującego, więc nikt inny jej nie zwolni
+                bmp.Dispose()
+                Throw
             End Try
             Return bmp
         Catch ex As COMException When ex.ErrorCode = WINCODEC_ERR_COMPONENTNOTFOUND OrElse CzySygnaturaWebp(dane)

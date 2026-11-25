@@ -56,4 +56,22 @@ Public Class WspolrzedneTekstuTesty
     Public Sub NieWspolrzedne_ZwracaNothing(tekst As String)
         Assert.Null(WspolrzedneTekstu.Rozpoznaj(tekst))
     End Sub
+
+    <Theory>
+    <InlineData(False)>
+    <InlineData(True)>
+    Public Sub Pl2000Strefa5_KolejnoscYXRozpoznana(odwrotnie As Boolean)
+        'Szczecin: Y strefy 5 (ok. 5,46 mln) mieści się w zakresie wartości X, więc o kolejności decyduje odległość od południka osiowego
+        Dim xy = UkladWspolrzednych.PL2000Strefa5.ZWgs84(53.43, 14.55)
+        Dim tekst = If(odwrotnie, Wspolrzedna(xy.Y) & " " & Wspolrzedna(xy.X), Wspolrzedna(xy.X) & " " & Wspolrzedna(xy.Y))
+        Dim p = WspolrzedneTekstu.Rozpoznaj(tekst)
+        Assert.NotNull(p)
+        Assert.Equal("PL-2000 strefa 5", p.Uklad)
+        Assert.Equal(53.43, p.Punkt.Szerokosc, 3)
+        Assert.Equal(14.55, p.Punkt.Dlugosc, 3)
+    End Sub
+
+    Private Shared Function Wspolrzedna(v As Double) As String
+        Return v.ToString("0.00", Globalization.CultureInfo.InvariantCulture)
+    End Function
 End Class

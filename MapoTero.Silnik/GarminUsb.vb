@@ -241,6 +241,14 @@ Imports System.Threading.Tasks
                 Throw New IOException(String.Format("Nośnik {0} przestał być dostępny.", dysk.LiteraDysku))
             End If
 
+            'karty pamięci i pamięć odbiorników Garmin mają zwykle FAT32 (plik najwyżej 4 GB - 1 bajt): kopiowanie
+            'większego pliku kończyło się błędem zapisu dopiero po przesłaniu 4 GB
+            If infoPliku.Length > UInteger.MaxValue AndAlso CzyFat(aktualnyDysk) Then
+                Throw New IOException(
+                    String.Format("Nośnik {0} ma system plików {1}, który nie mieści plików większych niż 4 GB, a plik mapy ma {2}. Zmniejsz mapę albo podziel ją na części.",
+                                  dysk.LiteraDysku, aktualnyDysk.DriveFormat, DyskGarmina.FormatujRozmiar(infoPliku.Length)))
+            End If
+
             Dim wymaganeMiejsce As Long = infoPliku.Length + MarginesWolnegoMiejscaBajty
             If aktualnyDysk.AvailableFreeSpace < wymaganeMiejsce Then
                 Throw New IOException(
@@ -290,6 +298,14 @@ Imports System.Threading.Tasks
                 Catch
                 End Try
                 Throw
+            End Try
+        End Function
+
+        Private Shared Function CzyFat(d As DriveInfo) As Boolean
+            Try
+                Return d.DriveFormat.StartsWith("FAT", StringComparison.OrdinalIgnoreCase)
+            Catch
+                Return False
             End Try
         End Function
 

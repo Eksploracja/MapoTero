@@ -257,7 +257,11 @@ Public Class MagazynPodgladuGalerii
         End If
 
         Dim wzgledna = pozycja.Obrazek.Replace("\"c, "/"c).TrimStart("/"c)
-        Dim sciezkaCacheObrazu = Path.Combine(_folderCache, wzgledna.Replace("/"c, Path.DirectorySeparatorChar))
+        Dim sciezkaCacheObrazu = SciezkaWewnatrz(_folderCache, wzgledna)
+        If sciezkaCacheObrazu Is Nothing Then
+            wynik.Komunikat = "Nieprawidłowa ścieżka próbki podglądu w spisie galerii."
+            Return wynik
+        End If
         Dim dane As Byte() = Nothing
 
         If File.Exists(sciezkaCacheObrazu) Then
@@ -287,8 +291,8 @@ Public Class MagazynPodgladuGalerii
         End If
 
         If (dane Is Nothing OrElse dane.Length = 0) AndAlso Not String.IsNullOrWhiteSpace(_folderLokalnyPomoc) Then
-            Dim lokalnyObraz = Path.Combine(_folderLokalnyPomoc, wzgledna.Replace("/"c, Path.DirectorySeparatorChar))
-            If File.Exists(lokalnyObraz) Then
+            Dim lokalnyObraz = SciezkaWewnatrz(_folderLokalnyPomoc, wzgledna)
+            If lokalnyObraz IsNot Nothing AndAlso File.Exists(lokalnyObraz) Then
                 Try
                     dane = File.ReadAllBytes(lokalnyObraz)
                 Catch
@@ -312,10 +316,35 @@ Public Class MagazynPodgladuGalerii
             Return wynik
         End If
 
-        DodajDoKolejkiCache(_cacheProbek, _kolejnoscProbek, klucz, bmp)
         wynik.Sukces = True
-        wynik.Obraz = CType(bmp.Clone(), Bitmap)
+        wynik.Obraz = KopiaIDodanieDoCache(_cacheProbek, _kolejnoscProbek, klucz, bmp)
         Return wynik
+    End Function
+
+    ''' <summary>
+    ''' Ścieżka pliku wskazanego w spisie galerii, jeśli leży wewnątrz podanego folderu; inaczej Nothing. Spis
+    ''' warstwy.json pobierany jest z internetu - wpis „obrazek” z „..\” zapisałby pobrany plik poza folderem podręcznym.
+    ''' </summary>
+    Friend Shared Function SciezkaWewnatrz(folder As String, wzgledna As String) As String
+        If String.IsNullOrWhiteSpace(folder) OrElse String.IsNullOrWhiteSpace(wzgledna) Then Return Nothing
+        Try
+            Dim baza = Path.GetFullPath(folder).TrimEnd(Path.DirectorySeparatorChar) & Path.DirectorySeparatorChar
+            Dim pelna = Path.GetFullPath(Path.Combine(baza, wzgledna.Replace("/"c, Path.DirectorySeparatorChar)))
+            Return If(pelna.StartsWith(baza, StringComparison.OrdinalIgnoreCase), pelna, Nothing)
+        Catch
+            Return Nothing
+        End Try
+    End Function
+
+    ''' <summary>
+    ''' Kopia bitmapy dla wywołującego i zapis oryginału w pamięci podręcznej. Kopia powstaje, zanim oryginał trafi
+    ''' do pamięci - dawniej Clone() po dodaniu mógł trafić na jednoczesne Clone() tej samej bitmapy w innym wątku
+    ''' (GDI+: „obiekt jest używany w innym miejscu”), a bitmapa, której klucz był już w pamięci, nie była zwalniana.
+    ''' </summary>
+    Private Function KopiaIDodanieDoCache(slownik As Dictionary(Of String, Bitmap), kolejka As Queue(Of String), klucz As String, bmp As Bitmap) As Bitmap
+        Dim kopia = CType(bmp.Clone(), Bitmap)
+        If Not DodajDoKolejkiCache(slownik, kolejka, klucz, bmp) Then bmp.Dispose()
+        Return kopia
     End Function
 
     ''' <summary>
@@ -342,9 +371,8 @@ Public Class MagazynPodgladuGalerii
         End If
 
         Dim bmp = RendererZasieguGalerii.Renderuj(pozycja, szerokosc, wysokosc)
-        DodajDoKolejkiCache(_cacheZasiegow, _kolejnoscZasiegow, klucz, bmp)
         wynik.Sukces = True
-        wynik.Obraz = CType(bmp.Clone(), Bitmap)
+        wynik.Obraz = KopiaIDodanieDoCache(_cacheZasiegow, _kolejnoscZasiegow, klucz, bmp)
         Return wynik
     End Function
 
@@ -358,10 +386,11 @@ Public Class MagazynPodgladuGalerii
         Return Nothing
     End Function
 
-    Private Sub DodajDoKolejkiCache(slownik As Dictionary(Of String, Bitmap), kolejka As Queue(Of String), klucz As String, bmp As Bitmap)
-        If bmp Is Nothing Then Exit Sub
+    ''' <summary>Dodaje bitmapę do pamięci podręcznej; False - klucz już był (bitmapa nie została zapamiętana).</summary>
+    Private Function DodajDoKolejkiCache(slownik As Dictionary(Of String, Bitmap), kolejka As Queue(Of String), klucz As String, bmp As Bitmap) As Boolean
+        If bmp Is Nothing Then Return False
         SyncLock _blokada
-            If slownik.ContainsKey(klucz) Then Exit Sub
+            If slownik.ContainsKey(klucz) Then Return False
             While kolejka.Count >= MaksRozmiarCachePamieci
                 Dim najstarszy = kolejka.Dequeue()
                 Dim stary As Bitmap = Nothing
@@ -373,7 +402,8 @@ Public Class MagazynPodgladuGalerii
             slownik(klucz) = bmp
             kolejka.Enqueue(klucz)
         End SyncLock
-    End Sub
+        Return True
+    End Function
 
     Private Shared Sub ZapiszDoCache(sciezka As String, dane As Byte())
         Try

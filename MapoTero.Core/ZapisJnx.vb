@@ -14,6 +14,7 @@
 'along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 Imports System.IO
+Imports System.Linq
 Imports System.Text
 
 ''' <summary>Dane pojedynczego kafla w formacie JNX.</summary>
@@ -22,6 +23,11 @@ Imports System.Text
         Public Property Szerokosc As Short = 256
         Public Property Wysokosc As Short = 256
         Public Property ObrazJpeg As Byte()
+        ''' <summary>
+        ''' Liczba bajtów kafla w pliku (JPEG bez znacznika SOI), gdy dane podaje osobno strumieniowy zapis
+        ''' (ObrazJpeg = Nothing) - zob. drugą wersję <see cref="ZapisJnx.Zapisz"/> z parametrem dane.
+        ''' </summary>
+        Public Property DlugoscZapisu As Integer
 
         Public Sub New()
         End Sub
@@ -102,6 +108,19 @@ Imports System.Text
             If poziomy Is Nothing OrElse poziomy.Count = 0 Then
                 Throw New ArgumentException("Plik JNX musi zawierać co najmniej jeden poziom powiększenia.", NameOf(poziomy))
             End If
+            Zapisz(sciezka, nazwa, zOrder, poziomy, poziomy.SelectMany(Function(p) p.Kafle).Select(Function(k) k.ObrazJpeg), productId, grupa)
+        End Sub
+
+        ''' <summary>
+        ''' Zapis strumieniowy: kafle poziomów niosą tylko zasięg, wymiary i <see cref="KafelJnx.DlugoscZapisu"/>,
+        ''' a <paramref name="dane"/> podaje kolejno obrazy JPEG kafli (w kolejności poziomów i kafli). Dzięki temu
+        ''' eksport z bazy kafli nie trzyma całej mapy w pamięci - dawniej plik JNX bliski 4 GB wymagał tyle samo RAM-u.
+        ''' </summary>
+        Public Shared Sub Zapisz(sciezka As String, nazwa As String, zOrder As Integer, poziomy As IList(Of PoziomJnx),
+                                 dane As IEnumerable(Of Byte()), Optional productId As Short = 0, Optional grupa As String = "")
+            If poziomy Is Nothing OrElse poziomy.Count = 0 Then
+                Throw New ArgumentException("Plik JNX musi zawierać co najmniej jeden poziom powiększenia.", NameOf(poziomy))
+            End If
 
             Dim liczbaPoziomow As Integer = poziomy.Count
             Dim lacznaLiczbaKafli As Integer = 0
@@ -120,6 +139,20 @@ Imports System.Text
 
             If lacznaLiczbaKafli = 0 Then
                 Throw New InvalidOperationException("Plik JNX nie może być pusty (brak kafli we wszystkich poziomach).")
+            End If
+
+            'przesunięcia w pliku JNX są 32-bitowe (UInt32): kafle poza 4 GB nie mają adresu. Dawniej CUInt przy zapisie
+            'opisów kafli przerywał eksport wyjątkiem przepełnienia dopiero po wyrenderowaniu wszystkich kafli
+            Dim rozmiarPliku As Long = RozmiarNaglowka + CLng(RozmiarOpisuPoziomu) * liczbaPoziomow + 4096 +
+                                       CLng(RozmiarOpisuKafla) * lacznaLiczbaKafli
+            For Each p In poziomy
+                For Each k In p.Kafle
+                    rozmiarPliku += DlugoscKafla(k)
+                Next
+            Next
+            If rozmiarPliku > UInteger.MaxValue Then
+                Throw New InvalidOperationException("Plik JNX przekroczyłby 4 GB (limit formatu Garmin BirdsEye). " &
+                                                    "Zmniejsz obszar, najwyższy poziom szczegółowości albo jakość JPEG.")
             End If
 
             Dim idProd As Short = If(productId > 0, productId, GenerujProductId(nazwa))
@@ -194,7 +227,7 @@ Imports System.Text
                         bw.Write(StopnieDoSemicircles(k.Zasieg.Zachod))
                         bw.Write(k.Szerokosc)
                         bw.Write(k.Wysokosc)
-                        Dim dlugosc = DlugoscDanychKafla(k.ObrazJpeg)
+                        Dim dlugosc = DlugoscKafla(k)
                         bw.Write(dlugosc)
                         bw.Write(CUInt(biezacyOffsetDanychJpeg))
                         biezacyOffsetDanychJpeg += dlugosc
@@ -202,15 +235,26 @@ Imports System.Text
                 Next
 
                 ' 6. Zapis surowych danych JPEG kafli
-                For Each p In poziomy
-                    For Each k In p.Kafle
-                        If k.ObrazJpeg Is Nothing OrElse k.ObrazJpeg.Length = 0 Then Continue For
-                        Dim pominiete = k.ObrazJpeg.Length - DlugoscDanychKafla(k.ObrazJpeg)
-                        bw.Write(k.ObrazJpeg, pominiete, k.ObrazJpeg.Length - pominiete)
+                Using kolejne = dane.GetEnumerator()
+                    For Each p In poziomy
+                        For Each k In p.Kafle
+                            If Not kolejne.MoveNext() Then Throw New InvalidOperationException("Brak danych kafla JNX.")
+                            Dim obraz = kolejne.Current
+                            Dim dlugosc = DlugoscDanychKafla(obraz)
+                            'opis kafla zapisany wyżej wskazuje dane kolejnego kafla - inna długość przesunęłaby wszystkie dalsze
+                            If dlugosc <> DlugoscKafla(k) Then Throw New InvalidDataException("Dane kafla JNX mają inną długość niż w opisie kafla.")
+                            If dlugosc = 0 Then Continue For
+                            bw.Write(obraz, obraz.Length - dlugosc, dlugosc)
+                        Next
                     Next
-                Next
+                End Using
             End Using
         End Sub
+
+        ''' <summary>Liczba bajtów kafla w pliku: z obrazu albo - przy zapisie strumieniowym - z <see cref="KafelJnx.DlugoscZapisu"/>.</summary>
+        Private Shared Function DlugoscKafla(k As KafelJnx) As Integer
+            Return If(k.ObrazJpeg IsNot Nothing, DlugoscDanychKafla(k.ObrazJpeg), k.DlugoscZapisu)
+        End Function
 
         ''' <summary>
         ''' Liczba bajtów kafla zapisywana w pliku: JNX przechowuje JPEG bez początkowego znacznika SOI (FF D8) -

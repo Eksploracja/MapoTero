@@ -103,11 +103,17 @@ Public Class Korytarz
 
     ''' <summary>Wczytuje trasę z pliku GPX, KML albo KMZ (rozpoznanie po rozszerzeniu, a gdy nieznane - po treści).</summary>
     Public Shared Function WczytajTrase(sciezka As String) As Korytarz
+        'deklaracja encoding="ISO-8859-2" / "windows-1250" wymaga stron kodowych spoza .NET
+        Encoding.RegisterProvider(CodePagesEncodingProvider.Instance)
         Dim k As Korytarz
         If Path.GetExtension(sciezka).Equals(".kmz", StringComparison.OrdinalIgnoreCase) Then
             k = ZKmz(File.ReadAllBytes(sciezka))
         Else
-            k = ZTekstu(File.ReadAllText(sciezka))
+            'odczyt wg deklaracji encoding dokumentu - File.ReadAllText zakładał UTF-8, więc nazwy tras z plików GPX/KML
+            'zapisanych w ISO-8859-2 lub Windows-1250 traciły polskie znaki
+            Using fs = File.OpenRead(sciezka)
+                k = ZDokumentu(XDocument.Load(fs))
+            End Using
         End If
         If k.Nazwa = "" Then k.Nazwa = Path.GetFileNameWithoutExtension(sciezka)
         Return k
@@ -115,7 +121,10 @@ Public Class Korytarz
 
     ''' <summary>Trasa z dokumentu GPX albo KML.</summary>
     Public Shared Function ZTekstu(tekst As String) As Korytarz
-        Dim doc = XDocument.Parse(tekst)
+        Return ZDokumentu(XDocument.Parse(tekst))
+    End Function
+
+    Private Shared Function ZDokumentu(doc As XDocument) As Korytarz
         If doc.Root Is Nothing Then Throw New InvalidDataException("Pusty dokument")
         Select Case doc.Root.Name.LocalName.ToLowerInvariant()
             Case "gpx" : Return ZGpx(doc)
@@ -134,8 +143,8 @@ Public Class Korytarz
                 End If
             Next
             If wpis Is Nothing Then Throw New InvalidDataException("Archiwum KMZ nie zawiera dokumentu KML")
-            Using s = wpis.Open(), r As New StreamReader(s, Encoding.UTF8, True)
-                Return ZTekstu(r.ReadToEnd())
+            Using s = wpis.Open()
+                Return ZDokumentu(XDocument.Load(s))
             End Using
         End Using
     End Function
@@ -360,7 +369,7 @@ Public Class Korytarz
     End Function
 
     Public Sub Zapisz(sciezka As String)
-        File.WriteAllText(sciezka, DoTekstu(), New UTF8Encoding(False))
+        ZapisAtomowy.Tekst(sciezka, DoTekstu(), New UTF8Encoding(False))
     End Sub
 
     Public Shared Function Wczytaj(sciezka As String) As Korytarz

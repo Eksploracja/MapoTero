@@ -324,6 +324,42 @@ Public Class PlikiSesjiTesty
         Assert.Contains("Point01,xy,    0,    0,in, deg,  34, 0,S,  58, 30,W, grid,   ,           ,           ,S", tresc)
     End Sub
 
+
+    <Fact>
+    Public Sub PlikUstawien_ZnakKoncaWierszaWWartosciNiePrzesuwaPar()
+        Dim u As New PlikUstawien()
+        u.Ustaw("przedrostek", "ab" & vbCrLf & "cd")
+        u.Ustaw("format", "png")
+        Dim sciezka = Path.Combine(Path.GetTempPath(), "mt_ustawienia_" & Guid.NewGuid().ToString("N") & ".txt")
+        Try
+            u.Zapisz(sciezka, Encoding.UTF8)
+            Dim w = PlikUstawien.Wczytaj(sciezka, Encoding.UTF8)
+            Assert.Equal("ab  cd", w.Tekst("przedrostek", ""))
+            Assert.Equal("png", w.Tekst("format", ""))
+        Finally
+            File.Delete(sciezka)
+        End Try
+    End Sub
+
+    <Fact>
+    Public Sub ZapisAtomowy_ZastepujePlikINieZostawiaPlikowTymczasowych()
+        Dim folder = Path.Combine(Path.GetTempPath(), "mt_zapis_" & Guid.NewGuid().ToString("N"))
+        Directory.CreateDirectory(folder)
+        Try
+            Dim sciezka = Path.Combine(folder, "conf.txt")
+            File.WriteAllText(sciezka, "stara treść, dłuższa niż nowa")
+            Dim kodowanie = Encoding.GetEncoding(1250)
+            ZapisAtomowy.Tekst(sciezka, "Łódź", kodowanie)
+            Assert.Equal("Łódź", File.ReadAllText(sciezka, kodowanie))
+            Assert.Equal(4, File.ReadAllBytes(sciezka).Length)
+            Assert.Single(Directory.GetFiles(folder))
+            'kodowanie z preambułą zachowuje znacznik BOM, jak dawniej File.WriteAllText
+            ZapisAtomowy.Tekst(sciezka, "a", New UTF8Encoding(True))
+            Assert.Equal(New Byte() {&HEF, &HBB, &HBF, AscW("a"c)}, File.ReadAllBytes(sciezka))
+        Finally
+            Directory.Delete(folder, True)
+        End Try
+    End Sub
 End Class
 
 Public Class GeoreferencjaTesty

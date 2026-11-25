@@ -101,7 +101,10 @@ Public Module WspolrzedneTekstu
     ''' <summary>PL-2000 (Y z numerem strefy 5-8 na początku) albo PL-1992; X jest współrzędną północną.</summary>
     Private Function ZUkladuPlaskiego(a As Double, b As Double) As PunktZTekstu
         Dim jestX2000 = Function(v As Double) v >= 5300000 AndAlso v <= 6200000
-        Dim jestY2000 = Function(v As Double) v >= 5200000 AndAlso v <= 8800000 AndAlso Math.Floor(v / 1000000) >= 5
+        'Y strefy: numer strefy, a dalej najwyżej ok. 200 km od południka osiowego (500 000). Bez tego warunku Y strefy 5
+        '(5,4-5,6 mln) mieścił się też w zakresie X, więc para wklejona w kolejności „Y X” dawała punkt o 300 km obok
+        Dim jestY2000 = Function(v As Double) v >= 5200000 AndAlso v <= 8800000 AndAlso Math.Floor(v / 1000000) >= 5 AndAlso
+                                              Math.Abs(v - Math.Floor(v / 1000000) * 1000000 - 500000) <= 200000
         Dim x As Double, y As Double
         If jestX2000(a) AndAlso jestY2000(b) Then
             x = a : y = b

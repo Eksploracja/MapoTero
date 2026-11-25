@@ -308,4 +308,15 @@ Public Class PodgladGaleriiTesty
         End If
     End Sub
 
+
+    <Fact>
+    Public Sub SciezkaWewnatrz_OdrzucaWyjscieZFolderuPodrecznego()
+        Dim folder = Path.Combine(Path.GetTempPath(), "galeria_cache")
+        Assert.Equal(Path.Combine(folder, "galeria", "probki", "a.webp"),
+                     MagazynPodgladuGalerii.SciezkaWewnatrz(folder, "galeria/probki/a.webp"))
+        Assert.Null(MagazynPodgladuGalerii.SciezkaWewnatrz(folder, "../../Autostart/x.exe"))
+        Assert.Null(MagazynPodgladuGalerii.SciezkaWewnatrz(folder, "galeria/../../x.webp"))
+        Assert.Null(MagazynPodgladuGalerii.SciezkaWewnatrz(folder, "C:/Windows/x.webp"))
+        Assert.Null(MagazynPodgladuGalerii.SciezkaWewnatrz(folder, ""))
+    End Sub
 End Class

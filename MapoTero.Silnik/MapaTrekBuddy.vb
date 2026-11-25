@@ -95,14 +95,14 @@ Public Class MapaTrekBuddy
         File.WriteAllLines(PlikSet, pliki, KodowanieSystemowe())
     End Sub
 
-    ''' <summary>Archiwum .tar mapy (TrekBuddy, Locus Map); standardowy zapis TAR z wbudowanej biblioteki .NET (System.Formats.Tar).</summary>
+    ''' <summary>Archiwum .tar mapy (TrekBuddy, Locus Map) w formacie ustar (<see cref="UtworzTar"/>).</summary>
     Public Sub UtworzArchiwumTar()
         Dim nazwaTar As String = NazwaMapy & ".tar"
         Dim plikTar As String = Path.Combine(_z.Folder, nazwaTar)
         Dim plikTmp As String = plikTar & ".tmp"
         Try
             If File.Exists(plikTmp) Then File.Delete(plikTmp)
-            TarFile.CreateFromDirectory(FolderMapy, plikTmp, includeBaseDirectory:=False)
+            UtworzTar(FolderMapy, plikTmp)
             File.Move(plikTmp, plikTar, overwrite:=True)
         Catch ex As Exception
             Try
@@ -111,6 +111,28 @@ Public Class MapaTrekBuddy
             End Try
             Throw New IOException("Nie udało się utworzyć archiwum TAR (" & plikTar & "): " & OpisBledu.Z(ex), ex)
         End Try
+    End Sub
+
+    ''' <summary>
+    ''' Archiwum TAR w formacie ustar - folder mapy bez folderu nadrzędnego, ścieżki z ukośnikiem „/”.
+    ''' TarFile.CreateFromDirectory zapisuje format PAX, w którym przed każdym plikiem stoi dodatkowy wpis
+    ''' „PaxHeaders…” z czasami pliku; dawna biblioteka SharpZipLib (i programy, które czytają mapy TrekBuddy)
+    ''' używały zwykłego ustar. Nazwy kafli są krótkie, więc ograniczenia ustar (100 + 155 znaków) nie przeszkadzają.
+    ''' </summary>
+    Friend Shared Sub UtworzTar(folder As String, plikTar As String)
+        Using fs = File.Create(plikTar), w As New TarWriter(fs, TarEntryFormat.Ustar, leaveOpen:=False)
+            DodajFolderDoTar(w, folder, "")
+        End Using
+    End Sub
+
+    Private Shared Sub DodajFolderDoTar(w As TarWriter, folder As String, prefiks As String)
+        For Each plik In Directory.GetFiles(folder).OrderBy(Function(p) p, StringComparer.OrdinalIgnoreCase)
+            w.WriteEntry(plik, prefiks & Path.GetFileName(plik))
+        Next
+        For Each podfolder In Directory.GetDirectories(folder).OrderBy(Function(p) p, StringComparer.OrdinalIgnoreCase)
+            'same pliki, bez wpisów folderów - tak jak archiwa z dawnej wersji (SharpZipLib)
+            DodajFolderDoTar(w, podfolder, prefiks & Path.GetFileName(podfolder) & "/")
+        Next
     End Sub
 End Class
 
@@ -220,7 +242,7 @@ Public Class ZapisKafliTrekBuddy
         Dim plikTmp As String = plikTar & ".tmp"
         Try
             If File.Exists(plikTmp) Then File.Delete(plikTmp)
-            TarFile.CreateFromDirectory(folderMapy, plikTmp, includeBaseDirectory:=False)
+            MapaTrekBuddy.UtworzTar(folderMapy, plikTmp)
             File.Move(plikTmp, plikTar, overwrite:=True)
         Catch
             Try

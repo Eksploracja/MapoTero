@@ -888,27 +888,7 @@ Public NotInheritable Class EksportMapy
 
     ''' <summary>Koduje bitmapę: JPEG (na białym tle) albo PNG (z przezroczystością).</summary>
     Public Shared Function Koduj(bmp As Bitmap, png As Boolean, jakosc As Integer) As Byte()
-        Using ms As New MemoryStream()
-            If png Then
-                bmp.Save(ms, ImageFormat.Png)
-            Else
-                Using tlo As New Bitmap(bmp.Width, bmp.Height, PixelFormat.Format24bppRgb)
-                    Using g = Graphics.FromImage(tlo)
-                        g.Clear(Color.White)
-                        g.DrawImage(bmp, 0, 0, bmp.Width, bmp.Height)
-                    End Using
-                    If KoderJpeg IsNot Nothing Then
-                        Using parametry As New EncoderParameters(1)
-                            parametry.Param(0) = New EncoderParameter(Imaging.Encoder.Quality, CLng(Math.Max(1, Math.Min(100, jakosc))))
-                            tlo.Save(ms, KoderJpeg, parametry)
-                        End Using
-                    Else
-                        tlo.Save(ms, ImageFormat.Jpeg)
-                    End If
-                End Using
-            End If
-            Return ms.ToArray()
-        End Using
+        Return Koduj(bmp, png, jakosc, Color.White)
     End Function
 
     ''' <summary>Koduje bitmapę z określonym kolorem tła dla JPEG.</summary>
@@ -1509,6 +1489,25 @@ Public Shared Function NazwaPlikuTomu(sciezkaBazowa As String, numerTomu As Inte
 
 #Region "Kafle Web Mercator (MBTiles, SQLiteDB, OruxMaps)"
 
+    ''' <summary>Kafle prostokątnego zakresu jednego poziomu, numerowane wierszami (bez listy wszystkich kafli w pamięci).</summary>
+    Friend NotInheritable Class KafleZakresu
+        Private ReadOnly _x0 As Integer, _y0 As Integer, _szer As Integer, _poziom As Integer
+        Public ReadOnly Property Liczba As Long
+
+        ''' <param name="zakres">(xMin, yMin, xMax, yMax) jak w <see cref="WebMercator.ZakresKafli"/>.</param>
+        Public Sub New(zakres As Tuple(Of Integer, Integer, Integer, Integer), poziom As Integer)
+            _x0 = zakres.Item1 : _y0 = zakres.Item2 : _poziom = poziom
+            _szer = Math.Max(0, zakres.Item3 - zakres.Item1 + 1)
+            Liczba = CLng(_szer) * Math.Max(0, zakres.Item4 - zakres.Item2 + 1)
+        End Sub
+
+        Default Public ReadOnly Property Kafel(numer As Long) As KafelXYZ
+            Get
+                Return New KafelXYZ(_x0 + CInt(numer Mod _szer), _y0 + CInt(numer \ _szer), _poziom)
+            End Get
+        End Property
+    End Class
+
     Public Shared Function UtworzMagazyn(z As ZadanieEksportu, obszar As ProstokatGeo) As MagazynKafli
         Select Case z.Rodzaj
             Case RodzajEksportu.SQLiteDB : Return New MagazynSQLiteDB(z)
@@ -1549,17 +1548,13 @@ Public Shared Function NazwaPlikuTomu(sciezkaBazowa As String, numerTomu As Inte
                         Continue For
                     End If
                     Dim nadprobkowanie = LiczbaProbek(warstwy, WebMercator.RozmiarPiksela(srodekSz, poziom))
-                    Dim kaflePoziomu As New List(Of KafelXYZ)()
-                    For ty = rp.Item2 To rp.Item4
-                        For tx = rp.Item1 To rp.Item3
-                            kaflePoziomu.Add(New KafelXYZ(tx, ty, poziom))
-                        Next
-                    Next
+                    'kafel wyznaczany z numeru - dawniej lista wszystkich kafli poziomu (na poziomie 18 dużej mapy miliony)
+                    Dim kaflePoziomu As New KafleZakresu(rp, poziom)
 
                     m.RozpocznijPoziom(poziom)
-                    For offset = 0 To kaflePoziomu.Count - 1 Step RozmiarPaczki
+                    For offset As Long = 0 To kaflePoziomu.Liczba - 1 Step RozmiarPaczki
                         token.ThrowIfCancellationRequested()
-                        Dim ile = Math.Min(RozmiarPaczki, kaflePoziomu.Count - offset)
+                        Dim ile = CInt(Math.Min(RozmiarPaczki, kaflePoziomu.Liczba - offset))
                         Dim daneKafli(ile - 1)() As Byte
                         Dim biezacyOffset = offset
 
@@ -2376,7 +2371,9 @@ Friend Class MagazynJnx
         Dim poziomy As New List(Of PoziomJnx)
         Dim srodekSz As Double = (_obszar.Polnoc + _obszar.Poludnie) / 2.0
 
-        Using cmd As New SQLiteCommand("SELECT zoom_level, tile_column, tile_row, tile_data FROM tiles ORDER BY zoom_level ASC, tile_row ASC, tile_column ASC;", Polaczenie),
+        'pierwszy przebieg: same opisy kafli (długość danych bez znacznika SOI liczy SQLite) - obrazy czyta dopiero zapis
+        'pliku, kafel po kafelku; dawniej wszystkie kafle mapy trafiały naraz do pamięci
+        Using cmd As New SQLiteCommand("SELECT zoom_level, tile_column, tile_row, length(tile_data), hex(substr(tile_data, 1, 2)) FROM tiles " & PorzadekKafli, Polaczenie),
               r = cmd.ExecuteReader()
 
             Dim biezacyPoziom As PoziomJnx = Nothing
@@ -2386,7 +2383,8 @@ Friend Class MagazynJnx
                 Dim z = r.GetInt32(0)
                 Dim x = r.GetInt32(1)
                 Dim y = r.GetInt32(2)
-                Dim dane = DirectCast(r(3), Byte())
+                Dim dlugosc = If(r.IsDBNull(3), 0, Convert.ToInt32(r.GetValue(3)))
+                If dlugosc >= 2 AndAlso String.Equals(Convert.ToString(r.GetValue(4)), "FFD8", StringComparison.OrdinalIgnoreCase) Then dlugosc -= 2
 
                 If biezacyPoziom Is Nothing OrElse biezacyZ <> z Then
                     biezacyZ = z
@@ -2400,7 +2398,7 @@ Friend Class MagazynJnx
                 Dim zachod As Double = WebMercator.Dlugosc(x * CDbl(WebMercator.RozmiarKafla), z)
                 Dim wschod As Double = WebMercator.Dlugosc((x + 1) * CDbl(WebMercator.RozmiarKafla), z)
 
-                Dim kafel As New KafelJnx(New ProstokatGeo(polnoc, poludnie, wschod, zachod), dane)
+                Dim kafel As New KafelJnx With {.Zasieg = New ProstokatGeo(polnoc, poludnie, wschod, zachod), .DlugoscZapisu = dlugosc}
                 biezacyPoziom.Kafle.Add(kafel)
             End While
         End Using
@@ -2409,8 +2407,20 @@ Friend Class MagazynJnx
             Throw New InvalidOperationException("Brak kafli do zapisania w formacie JNX.")
         End If
 
-        ZapisJnx.Zapisz(Zadanie.Plik, Zadanie.Nazwa, Zadanie.KolejnoscRysowania, poziomy)
+        ZapisJnx.Zapisz(Zadanie.Plik, Zadanie.Nazwa, Zadanie.KolejnoscRysowania, poziomy, ObrazyKafli())
     End Sub
+
+    'ta sama kolejność w obu przebiegach - opisy kafli i dane muszą sobie odpowiadać
+    Private Const PorzadekKafli As String = "ORDER BY zoom_level ASC, tile_row ASC, tile_column ASC;"
+
+    ''' <summary>Obrazy kafli w kolejności opisów (drugi przebieg, czytany w trakcie zapisu pliku).</summary>
+    Private Iterator Function ObrazyKafli() As IEnumerable(Of Byte())
+        Using cmd As New SQLiteCommand("SELECT tile_data FROM tiles " & PorzadekKafli, Polaczenie), r = cmd.ExecuteReader()
+            While r.Read()
+                Yield If(r.IsDBNull(0), Array.Empty(Of Byte)(), DirectCast(r(0), Byte()))
+            End While
+        End Using
+    End Function
 
     Public Overrides Sub Dispose()
         Try
