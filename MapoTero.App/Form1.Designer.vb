@@ -81,6 +81,7 @@ Partial Class Form1
         Me.btnDodajSerwer = New System.Windows.Forms.Button()
         Me.ScalanieToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.EksportToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.MbtilesWieloskalowyToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.EksportCadToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.KorektaFolderuToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.NarzedziaSeparator2 = New System.Windows.Forms.ToolStripSeparator()
@@ -482,7 +483,7 @@ Partial Class Form1
         '
         'NarzedziaToolStripMenuItem
         '
-        Me.NarzedziaToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.DodajSerwerToolStripMenuItem, Me.FolderWlasnychWarstwToolStripMenuItem, Me.ZnajdzDzialkeToolStripMenuItem, Me.KonwertujOziToolStripMenuItem, Me.KonwertujGeoTiffToolStripMenuItem, Me.ProfilNmtToolStripMenuItem, Me.NarzedziaSeparator1, Me.ScalanieToolStripMenuItem, Me.EksportToolStripMenuItem, Me.EksportCadToolStripMenuItem, Me.KorektaFolderuToolStripMenuItem, Me.NarzedziaSeparator2, Me.PrzeslijNaTelefonToolStripMenuItem, Me.KopiujNaGarminaToolStripMenuItem})
+        Me.NarzedziaToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.DodajSerwerToolStripMenuItem, Me.FolderWlasnychWarstwToolStripMenuItem, Me.ZnajdzDzialkeToolStripMenuItem, Me.KonwertujOziToolStripMenuItem, Me.KonwertujGeoTiffToolStripMenuItem, Me.ProfilNmtToolStripMenuItem, Me.NarzedziaSeparator1, Me.ScalanieToolStripMenuItem, Me.EksportToolStripMenuItem, Me.MbtilesWieloskalowyToolStripMenuItem, Me.EksportCadToolStripMenuItem, Me.KorektaFolderuToolStripMenuItem, Me.NarzedziaSeparator2, Me.PrzeslijNaTelefonToolStripMenuItem, Me.KopiujNaGarminaToolStripMenuItem})
         Me.NarzedziaToolStripMenuItem.Name = "NarzedziaToolStripMenuItem"
         Me.NarzedziaToolStripMenuItem.Size = New System.Drawing.Size(70, 20)
         Me.NarzedziaToolStripMenuItem.Text = "Narzędzia"
@@ -549,6 +550,13 @@ Partial Class Form1
         Me.EksportToolStripMenuItem.ShortcutKeys = CType((System.Windows.Forms.Keys.Control Or System.Windows.Forms.Keys.E), System.Windows.Forms.Keys)
         Me.EksportToolStripMenuItem.Size = New System.Drawing.Size(315, 22)
         Me.EksportToolStripMenuItem.Text = "Eksport mapy (JNX, KMZ, MBTiles, SQLiteDB, OruxMaps, arkusz, TrekBuddy)"
+        '
+        'MbtilesWieloskalowyToolStripMenuItem
+        '
+        Me.MbtilesWieloskalowyToolStripMenuItem.Name = "MbtilesWieloskalowyToolStripMenuItem"
+        Me.MbtilesWieloskalowyToolStripMenuItem.Size = New System.Drawing.Size(315, 22)
+        Me.MbtilesWieloskalowyToolStripMenuItem.Text = "MBTiles / GeoPackage wieloskalowy (łącz sesje)..."
+        Me.MbtilesWieloskalowyToolStripMenuItem.ToolTipText = "Łączy pobrane wcześniej sesje mapowe różnych skal w jeden plik MBTiles lub GeoPackage (np. topo z daleka, ortofotomapa z bliska)"
         '
         'EksportCadToolStripMenuItem
         '
@@ -2159,6 +2167,7 @@ Partial Class Form1
     Friend WithEvents Label67 As System.Windows.Forms.Label
     Friend WithEvents ScalanieToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents EksportToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
+    Friend WithEvents MbtilesWieloskalowyToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents EksportCadToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents grpRozmiarSiatki As System.Windows.Forms.GroupBox
     Friend WithEvents txtLiczbaWierszy As System.Windows.Forms.TextBox

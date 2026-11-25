@@ -85,7 +85,7 @@ Public Class FormSkaleMapy
         dgvSkale.Columns.Add(New DataGridViewTextBoxColumn With {.Name = "Piksel", .HeaderText = "Piksel [m]", .FillWeight = 70})
         dgvSkale.Columns.Add(New DataGridViewTextBoxColumn With {.Name = "ZoomOd", .HeaderText = "Zoom od", .FillWeight = 60})
         dgvSkale.Columns.Add(New DataGridViewTextBoxColumn With {.Name = "ZoomDo", .HeaderText = "Zoom do", .FillWeight = 60})
-        dgvSkale.Columns.Add(New DataGridViewTextBoxColumn With {.Name = "Warstwy", .HeaderText = "Warstwy", .ReadOnly = True, .FillWeight = 70})
+        dgvSkale.Columns.Add(New DataGridViewTextBoxColumn With {.Name = "Warstwy", .HeaderText = "Wł. warstwy", .ReadOnly = True, .FillWeight = 75})
         AddHandler dgvSkale.SelectionChanged, Sub()
                                                   PokazWarstwy()
                                                   AktualizujPrzyciskiSkal()
@@ -224,8 +224,9 @@ Public Class FormSkaleMapy
     Private Sub DodajWierszDoTabeli(w As PlanStopnia, uzyj As Boolean)
         _wiersze.Add(w)
         _uzyte.Add(uzyj)
-        dgvSkale.Rows.Add(uzyj, w.Stopien.Opis, w.Piksel.ToString("0.##", CultureInfo.CurrentCulture),
-                          w.PoziomMin, w.PoziomMax, OpisWarstw(w))
+        Dim idx = dgvSkale.Rows.Add(uzyj, w.Stopien.Opis, w.Piksel.ToString("0.##", CultureInfo.CurrentCulture),
+                                    w.PoziomMin, w.PoziomMax, OpisWarstw(w))
+        dgvSkale.Rows(idx).Cells("Warstwy").ToolTipText = TooltipWarstw(w)
     End Sub
 
     Private Sub AktualizujPrzyciskiSkal()
@@ -400,6 +401,7 @@ Public Class FormSkaleMapy
                     w.Stopien.Warstwy.AddRange(noweWarstwy)
                     w.Warstwy = New List(Of WarstwaSzablonu)(noweWarstwy)
                     dgvSkale.Rows(idx).Cells("Warstwy").Value = OpisWarstw(w)
+                    dgvSkale.Rows(idx).Cells("Warstwy").ToolTipText = TooltipWarstw(w)
                     PokazWarstwy()
                 End If
             End Using
@@ -407,7 +409,13 @@ Public Class FormSkaleMapy
     End Sub
 
     Private Shared Function OpisWarstw(w As PlanStopnia) As String
-        Return $"{w.WarstwyEfektywne.Count} z {w.Stopien.Warstwy.Count}"
+        Return $"{w.WarstwyEfektywne.Count} / {w.Stopien.Warstwy.Count} wł."
+    End Function
+
+    Private Shared Function TooltipWarstw(w As PlanStopnia) As String
+        Dim aktywne = w.WarstwyEfektywne
+        If aktywne.Count = 0 Then Return "Brak włączonych warstw"
+        Return "Włączone: " & String.Join(", ", aktywne.Select(Function(ws) ws.Etykieta))
     End Function
 
     Private Function WybranyIndeks() As Integer
@@ -441,6 +449,7 @@ Public Class FormSkaleMapy
         Dim wybrane = w.Stopien.Warstwy.Where(Function(x, k) If(k = e.Index, e.NewValue = CheckState.Checked, w.WarstwyEfektywne.Contains(x))).ToList()
         w.Warstwy = wybrane
         dgvSkale.Rows(i).Cells("Warstwy").Value = OpisWarstw(w)
+        dgvSkale.Rows(i).Cells("Warstwy").ToolTipText = TooltipWarstw(w)
     End Sub
 
     Private Shared Function CzytajLiczbe(v As Object, ByRef wynik As Double) As Boolean

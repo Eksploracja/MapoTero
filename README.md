@@ -80,6 +80,7 @@ Program działa w trybie **portable (bez instalacji)** jako pojedynczy plik `Map
 4. **Pobierz segmenty:** kliknij **„Pobierz”**. Pliki trafią do osobnego podfolderu sesji wewnątrz katalogu `download` (ponowne kliknięcie wznawia sesję i dociąga wyłącznie brakujące segmenty).
 5. **Wyeksportuj lub scal mapę:**
    * **Telefon, Garmin lub scalony arkusz:** otwórz *Narzędzia > Eksport mapy* (`Ctrl+E`), aby zapisać mapę jako MBTiles, OGC GeoPackage (`.gpkg`), Garmin JNX/KMZ, SQLiteDB, OruxMaps albo scalony arkusz *GeoTIFF / JPEG / PNG* (format *Arkusz*). Z tego okna możesz także wysłać plik na telefon przez **Wi-Fi (kod QR)** lub zapisać prosto na podłączony **Garmin USB**.
+   * **Łączenie pobranych sesji w mapę wieloskalową:** jeśli pobrałeś różne mapy dla tego samego terenu do osobnych folderów sesji, wybierz *Narzędzia > MBTiles / GeoPackage wieloskalowy (łącz sesje)...* (lub kliknij *Wieloskalowy...* w oknie eksportu).
    * **Programy CAD:** wybierz *Narzędzia > Eksport do CAD*, aby utworzyć rysunek DXF, skrypt `SCRIPT` (`.scr`) lub program LISP (`APPLOAD`) wstawiający mapę na warstwy `MAPOTERO_...` (przy dużej liczbie segmentów skorzystaj w tym oknie z przycisku *Scal segmenty…*).
 
 ![Bezpośredni transfer mapy na telefon przez Wi-Fi i kod QR](pomoc/obrazy/16-wyslij-telefon.png)

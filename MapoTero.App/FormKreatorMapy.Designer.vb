@@ -1096,7 +1096,7 @@ Partial Class FormKreatorMapy
         Me.btnOtworzWieloskalowy.Location = New System.Drawing.Point(16, 175)
         Me.btnOtworzWieloskalowy.Name = "btnOtworzWieloskalowy"
         Me.btnOtworzWieloskalowy.Size = New System.Drawing.Size(280, 30)
-        Me.btnOtworzWieloskalowy.Text = "Otwórz narzędzie MBTiles wieloskalowy..."
+        Me.btnOtworzWieloskalowy.Text = "Podgląd kafli i mieszania warstw..."
         Me.btnOtworzWieloskalowy.UseVisualStyleBackColor = True
 
         Me.lblWieloskalowyOpis.Font = New System.Drawing.Font("Segoe UI", 8.5!)
@@ -1104,7 +1104,7 @@ Partial Class FormKreatorMapy
         Me.lblWieloskalowyOpis.Location = New System.Drawing.Point(305, 179)
         Me.lblWieloskalowyOpis.Name = "lblWieloskalowyOpis"
         Me.lblWieloskalowyOpis.Size = New System.Drawing.Size(425, 30)
-        Me.lblWieloskalowyOpis.Text = "Pozwala na pełną edycję tabeli warstw, poziomów powiększeń i korektę każdego poziomu."
+        Me.lblWieloskalowyOpis.Text = "Podgląd kompozycji na różnych zoomach, regulacja krycia i trybów mieszania warstw."
 
         Me.grpZaawansowane.Controls.Add(Me.chkKorektaObrazu)
         Me.grpZaawansowane.Controls.Add(Me.lblProfil)

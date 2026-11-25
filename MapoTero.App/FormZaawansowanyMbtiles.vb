@@ -54,7 +54,7 @@ Public Class FormZaawansowanyMbtiles
     Private Sub AktualizujTytulOkna()
         If Not _trybKreatora Then
             Dim nazwa = If(_wybranyFormat = RodzajEksportu.GeoPackage, "GeoPackage", "MBTiles")
-            Me.Text = $"Zaawansowany eksport wielowarstwowy ({nazwa})"
+            Me.Text = $"{nazwa} wieloskalowy (łączenie pobranych sesji)"
             If grpUstawienia IsNot Nothing Then grpUstawienia.Text = $"Parametry pliku {nazwa} i kompresji"
         End If
     End Sub
@@ -84,10 +84,15 @@ Public Class FormZaawansowanyMbtiles
             ' Na wstępie wczytaj wszystkie katalogi z mapami w download (oraz bieżącą sesję)
             WczytajWszystkieKatalogiDownload()
 
+            If _warstwy.Count <= 1 Then
+                Loguj("Wskazówka: to narzędzie łączy mapy już pobrane na dysk (nie pobiera z internetu). Pobierz w oknie głównym każdą skalę do osobnego folderu i kliknij ""Dodaj folder sesji..."", albo użyj Szybkiego kreatora (Ctrl+K).", Color.FromArgb(60, 70, 90))
+            End If
+
             ' Domyślna lokalizacja środka mapy (po wczytaniu warstw wyznacza środek z ich zasięgu)
             InicjalizujSrodekZMapyGlownej()
         Else
-            Me.Text = "MBTiles wieloskalowy - dopasowanie warstw i powiększeń kreatora"
+            Me.Text = "Podgląd kafli i dopasowanie warstw kreatora"
+            If grpWarstwy IsNot Nothing Then grpWarstwy.Text = "Warstwy i zakresy wyświetlania (góra listy = wierzch mapy)"
             btnZastosujKreator.Visible = True
             btnZamknij.Text = "Anuluj"
             ' Pobieranie i zapis robi kreator - przycisk tylko wracał do kreatora, dublował „Zastosuj i wróć” i miał ucięty
@@ -263,9 +268,9 @@ Public Class FormZaawansowanyMbtiles
         Catch
         End Try
         If podkatalogi.Count > 0 Then
-            Dim odp = MessageBox.Show("W wybranym folderze znaleziono " & podkatalogi.Count & " warstw mapowych:" & vbCrLf &
+            Dim odp = MessageBox.Show("W wybranym folderze znaleziono " & podkatalogi.Count & " sesji mapowych:" & vbCrLf &
                                       String.Join(vbCrLf, podkatalogi.Select(Function(p) "• " & Path.GetFileName(p))) & vbCrLf & vbCrLf &
-                                      "Czy chcesz dodać je wszystkie do projektu wielowarstwowego?",
+                                      "Czy chcesz dodać je wszystkie do mapy wieloskalowej?",
                                       "Wykryto sesje w podfolderach", MessageBoxButtons.YesNo, MessageBoxIcon.Question)
             If odp = DialogResult.Yes Then
                 For Each pod In podkatalogi
@@ -358,7 +363,7 @@ Public Class FormZaawansowanyMbtiles
 
     Private Sub btnDodajSesje_Click(sender As Object, e As EventArgs) Handles btnDodajSesje.Click
         dlgFolder.SelectedPath = FolderDownload
-        dlgFolder.Description = "Wskaż folder z pobraną warstwą mapy (zawierający plik conf.txt i segmenty):"
+        dlgFolder.Description = "Wskaż folder z sesją mapy pobraną wcześniej w oknie głównym (zawierający plik conf.txt i segmenty):"
         If dlgFolder.ShowDialog(Me) = DialogResult.OK Then
             DodajFolderSesji(dlgFolder.SelectedPath)
         End If

@@ -309,15 +309,15 @@ Public Class FormKreatorMapy
             _topyWierszaStanu(c) = c.Top
         Next
         btnDostosujWarstwy.Text = "Dostosuj warstwy..."
-        btnDostosujWarstwy.Width = 132
-        btnSkaleStylu = New Button With {.Name = "btnSkaleStylu", .Text = "Skale...",
-                                         .Location = New Point(150, 386), .Size = New Size(68, 25),
+        btnDostosujWarstwy.Width = 124
+        btnSkaleStylu = New Button With {.Name = "btnSkaleStylu", .Text = "Edytuj skale...",
+                                         .Location = New Point(142, 386), .Size = New Size(88, 25),
                                          .UseVisualStyleBackColor = True}
         AddHandler btnSkaleStylu.Click, Sub() OtworzUstawieniaSkal()
         grpSzczegolySzablonu.Controls.Add(btnSkaleStylu)
-        _podpowiedzi.SetToolTip(btnSkaleStylu, "Dodawanie i edycja stopni skali (mapy wieloskalowe) oraz ich warstw.")
+        _podpowiedzi.SetToolTip(btnSkaleStylu, "Konfiguracja skal mapy wieloskalowej (dodawanie i edycja stopni skali oraz ich warstw).")
         cboSkalaPodgladu = New ComboBox With {.Name = "cboSkalaPodgladu", .AccessibleName = "Skala podglądu",
-            .DropDownStyle = ComboBoxStyle.DropDownList, .Location = New Point(222, 387), .Size = New Size(136, 23), .Visible = False}
+            .DropDownStyle = ComboBoxStyle.DropDownList, .Location = New Point(234, 387), .Size = New Size(124, 23), .Visible = False}
         AddHandler cboSkalaPodgladu.SelectionChangeCommitted,
             Sub()
                 _stopienPodgladu = TryCast(cboSkalaPodgladu.SelectedItem, StopienSkali)
@@ -348,7 +348,7 @@ Public Class FormKreatorMapy
         _podpowiedzi.SetToolTip(btnZapiszStyl, "Zapisuje bieżący skład warstw z kryciem, trybami mieszania i skalami jako własny szablon na liście - także po ponownym uruchomieniu programu.")
         _podpowiedzi.SetToolTip(btnUsunStyl, "Usuwa zaznaczony szablon zapisany przez Ciebie (wbudowanych szablonów nie można usunąć).")
         _podpowiedzi.SetToolTip(btnUdostepnijStyl, "Eksportuje albo importuje szablon (także wieloskalowy) w formacie .mapotero.json przez plik lub schowek.")
-        _podpowiedzi.SetToolTip(cboSkalaPodgladu, "Wybierz stopień skali, aby zobaczyć jego warstwy w granicach zaznaczenia.")
+        _podpowiedzi.SetToolTip(cboSkalaPodgladu, "Przełącza skalę wyświetlaną wyłącznie w podglądzie powyżej (nie zmienia skal pliku wynikowego).")
 
         ' Uwagi o pokryciu map (np. arkusze 1:25 000 tylko dla części kraju) pod treścią kroków 2, 3 i 4
         ClientSize = New Size(ClientSize.Width, ClientSize.Height + 40)
@@ -389,7 +389,7 @@ Public Class FormKreatorMapy
         btnUstawieniaSkal = New Button With {.Name = "btnUstawieniaSkal", .Text = "Ustawienia skal...", .Location = New Point(588, 62),
                                              .Size = New Size(146, 25), .Visible = False, .UseVisualStyleBackColor = True}
         AddHandler btnUstawieniaSkal.Click, AddressOf btnUstawieniaSkal_Click
-        _podpowiedzi.SetToolTip(btnUstawieniaSkal, "Włączanie skal, ich rozmiar piksela, zakresy powiększeń i warstwy każdej skali.")
+        _podpowiedzi.SetToolTip(btnUstawieniaSkal, "Włączanie skal, ich rozmiar piksela, zakresy powiększeń i warstwy każdej skali (pozwala też przekształcić zwykłą mapę w wieloskalową).")
         grpSzczegolowosc.Controls.AddRange({lblRozmiarPiksela, numRozmiarPiksela, lblPikselJednostka, lnkPikselZalecany, chkWieloskalowa, chkOrtofotomapa, btnUstawieniaSkal})
         pnlKrok4.Controls.Add(grpSzczegolowosc)
         lblNazwaWyniku = New Label With {.Name = "lblNazwaWyniku", .Location = New Point(14, 17),
@@ -591,6 +591,7 @@ Public Class FormKreatorMapy
         lblSkladnikiSzablonu.Text = _styl.OpisSkladu()
         _podpowiedzi.SetToolTip(lblOpisSzablonu, s.Opis)
         _podpowiedzi.SetToolTip(lblSkladnikiSzablonu, lblSkladnikiSzablonu.Text)
+        btnSkaleStylu.Text = If(_styl.CzyWieloskalowy, "Edytuj skale...", "Dodaj skale...")
         OdswiezSkalePodgladu()
 
         ' Suwaki krycia grup warstw: ze szablonu (krycie proporcjonalne w stopniach skali) albo z zestawu własnego
@@ -647,7 +648,7 @@ Public Class FormKreatorMapy
 
     Private Sub OdswiezSkalePodgladu()
         cboSkalaPodgladu.Items.Clear()
-        cboSkalaPodgladu.Items.Add("Skala automatyczna")
+        cboSkalaPodgladu.Items.Add("Podgląd: auto")
         cboSkalaPodgladu.Items.AddRange(_styl.StopniePodgladu().Cast(Of Object)().ToArray())
         cboSkalaPodgladu.Visible = cboSkalaPodgladu.Items.Count > 1
         cboSkalaPodgladu.SelectedIndex = Math.Max(0, If(_stopienPodgladu Is Nothing, 0, cboSkalaPodgladu.Items.IndexOf(_stopienPodgladu)))
@@ -799,12 +800,12 @@ Public Class FormKreatorMapy
         ' Mapa wieloskalowa: MBTiles (kompilator łączy osobno pobrane stopnie skali), SQLiteDB i JNX (każdy poziom ze źródła swojej skali)
         Dim mozliwaWieloskalowa = _styl.MozliwaWieloskalowa(_formatDocelowy)
         chkWieloskalowa.Visible = mozliwaWieloskalowa
-        btnUstawieniaSkal.Visible = mozliwaWieloskalowa
+        btnUstawieniaSkal.Visible = StylKreatora.FormatWieloskalowy(_formatDocelowy)
         Dim wieloskalowa = CzyWieloskalowaAktywna()
-        btnUstawieniaSkal.Enabled = wieloskalowa
+        btnUstawieniaSkal.Enabled = If(mozliwaWieloskalowa, wieloskalowa, True)
         ' Własny plan skal ma własne piksele - pole piksela nie zmienia wtedy mapy wieloskalowej
         numRozmiarPiksela.Enabled = Not (wieloskalowa AndAlso _styl.PlanWlasny IsNot Nothing)
-        btnUstawieniaSkal.Text = If(_styl.PlanWlasny IsNot Nothing, "Ustawienia skal (własne)", "Ustawienia skal...")
+        btnUstawieniaSkal.Text = _styl.EtykietaPrzyciskuSkal()
         ' Własny plan skal sam decyduje o ortofotomapie (wiersz w oknie „Ustawienia skal”)
         Dim opcjonalny = If(_styl.Szablon IsNot Nothing, _styl.Szablon.StopienOpcjonalny, Nothing)
         _ortofotomapaMozliwa = mozliwaWieloskalowa AndAlso opcjonalny IsNot Nothing
@@ -938,7 +939,7 @@ Public Class FormKreatorMapy
         btnOtworzWieloskalowy.Visible = mbtiles AndAlso Not mozliwaWieloskalowa
         lblWieloskalowyOpis.Visible = mbtiles AndAlso Not mozliwaWieloskalowa
         If mbtiles Then
-            lblWieloskalowyOpis.Text = "Warstwy: " & StylKreatora.OpisZestawu(zestaw) & vbCrLf & "Osobne warstwy dla zakresów powiększeń i mieszanie."
+            lblWieloskalowyOpis.Text = "Warstwy: " & StylKreatora.OpisZestawu(zestaw) & vbCrLf & "Podgląd kafli na różnych zoomach, krycie i tryby mieszania warstw."
         End If
 
         UstawSciezkeDocelowa()
@@ -1172,7 +1173,10 @@ Public Class FormKreatorMapy
             End If
             ' Linia 2: składniki z wielokropkiem na szerokości pozycji (dawniej obcinane po 50 znakach)
             Dim opisTekst = If(s.Warstwy.Count > 0, s.OpisSkladnikow(), "Warstwy wybrane w oknie głównym")
-            If s.Wieloskalowy Then opisTekst = $"[{s.StopnieGlowne.Count} skale] " & opisTekst
+            If s.Wieloskalowy Then
+                Dim n = s.StopnieGlowne.Count
+                opisTekst = $"[wieloskalowa: {n} {Odmiana(n, "skala", "skale", "skal")}] " & opisTekst
+            End If
             TextRenderer.DrawText(e.Graphics, opisTekst, fOpis, New Rectangle(e.Bounds.X + 14, e.Bounds.Y + 25, e.Bounds.Width - 22, 16),
                                   Color.FromArgb(95, 100, 110), TextFormatFlags.Left Or TextFormatFlags.EndEllipsis)
         End Using
@@ -2694,7 +2698,7 @@ Public Class FormKreatorMapy
                 End Try
                 PrzygotujPodsumowanie()
 
-                MessageBox.Show("Zastosowano parametry warstw i powiększeń z narzędzia wieloskalowego.", "Kreator mapy", MessageBoxButtons.OK, MessageBoxIcon.Information)
+                MessageBox.Show("Zastosowano parametry warstw i powiększeń z podglądu kafli.", "Kreator mapy", MessageBoxButtons.OK, MessageBoxIcon.Information)
             End If
         End Using
     End Sub
@@ -2776,6 +2780,7 @@ Public Class FormKreatorMapy
             If okno.ShowDialog(Me) = DialogResult.OK Then
                 _styl.PlanWlasny = okno.Wynik
                 _styl.ZestawNiestandardowy = Nothing
+                If okno.Wynik.Count > 1 Then chkWieloskalowa.Checked = True
                 PokazSzczegolySzablonu(_styl.Szablon, True)
                 If _biezacyKrok = 4 Then PrzygotujPodsumowanie()
             End If

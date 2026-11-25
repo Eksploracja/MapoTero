@@ -380,7 +380,7 @@ Public Class FormPomocMbtiles
         DodajPunktor("Kreator nie pobiera kafelków z internetu - kompiluje lokalnie pobrane sesje w jedną zoptymalizowaną bazę SQLite MBTiles.")
 
         DodajNaglowek1("2. Dodawanie warstw do projektu")
-        DodajPunktor("Kliknij 'Dodaj warstwę...' i wskaż folder z pobraną warstwą mapy.")
+        DodajPunktor("Kliknij 'Dodaj folder sesji...' i wskaż folder z sesją mapy pobraną wcześniej w oknie głównym.")
         DodajPunktor("Możesz także wskazać folder nadrzędny (np. 'download') - program wykryje wszystkie podfoldery z sesjami i zaproponuje dodanie ich wszystkich naraz.")
         DodajPunktor("Program automatycznie odczyta rozdzielczość piksela i zaproponuje optymalne poziomy powiększeń (Zoom Od - Zoom Do).")
 
@@ -444,7 +444,7 @@ Public Class FormPomocMbtiles
         DodajPunktor("Garmin: KMZ wymaga obsługi Custom Maps. Większość zgodnych urządzeń obsługuje do 100 obrazów JPEG, wybrane modele do 500. Przy większym obszarze zmniejsz rozdzielczość albo wybierz JNX, jeśli urządzenie obsługuje ten format.")
         DodajPunktor("Każde powiększenie gotowej mapy ma ten sam wybrany zasięg. W MBTiles i SQLiteDB fragmenty kafli poza nim są przezroczyste. Kafle JPEG dla Garmina mieszczą się w prostokącie wpisanym w obszar.")
         DodajPunktor("Wydruk: kreator podaje rozmiar arkusza GeoTIFF w centymetrach i najmniejszy format papieru A. Po zakończeniu przycisk Otwórz mapę otwiera plik w programie przypisanym w Windows.")
-        DodajPunktor("Mapa wieloskalowa (MBTiles, SQLiteDB i Garmin JNX): style topograficzne i historyczne przy oddalaniu przełączają się na mapy w mniejszej skali, np. 1:10 000, 1:50 000, 1:100 000. Kreator pobiera każdą skalę osobno. Przycisk Ustawienia skal pozwala wyłączyć skalę, zmienić jej piksel, powiększenia i warstwy.")
+        DodajPunktor("Mapa wieloskalowa (MBTiles, SQLiteDB i Garmin JNX): style topograficzne i historyczne przy oddalaniu przełączają się na mapy w mniejszej skali, np. 1:10 000, 1:50 000, 1:100 000. Kreator pobiera każdą skalę osobno. Przycisk Ustawienia skal... (lub Dodaj skale... dla stylów jednoskalowych i własnych warstw) pozwala dodać lub wyłączyć skalę, zmienić jej piksel, powiększenia i warstwy.")
         DodajPunktor("Opcje zaawansowane (korekta obrazu, zakres powiększeń, ustawienia Garmin, MBTiles wieloskalowy) są zwinięte - zwykle nie trzeba ich zmieniać.")
         DodajPunktor("Podczas pobierania kreator pokazuje pozostały czas liczony z rzeczywistej prędkości pobierania.")
         DodajPunktor("Gdy części fragmentów nie uda się pobrać, przycisk Ponów pobieranie pobierze tylko brakujące i zapisze plik ponownie. Wstecz wraca do ustawień bez utraty wyborów.")

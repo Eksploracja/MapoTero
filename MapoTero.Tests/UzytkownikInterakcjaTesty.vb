@@ -413,7 +413,7 @@ Public Class UzytkownikInterakcjaTesty
     End Sub
 
     <Fact>
-    Public Sub TestUzytkownik_FormEksport_PrzyciskWieloskalowyTylkoDlaMbtiles()
+    Public Sub TestUzytkownik_FormEksport_PrzyciskWieloskalowyZawszeDostepny()
         UruchomWWatkuSta(
             Sub()
                 Using f As New Global.MapoTero.FormEksport()
@@ -425,20 +425,18 @@ Public Class UzytkownikInterakcjaTesty
                     Dim rbSQLiteDB = DirectCast(f.Controls.Find("rbSQLiteDB", True)(0), RadioButton)
                     Dim btnWielowarstwowyMbtiles = DirectCast(f.Controls.Find("btnWielowarstwowyMbtiles", True)(0), Button)
 
-                    ' 1. Na start przy domyślnym formacie (nie MBTiles): przycisk zablokowany
+                    ' Przycisk Wieloskalowy... pozostaje dostępny przy każdym wybranym formacie (gdy eksport nie trwa)
                     rbKmzGarmin.Checked = True
                     Application.DoEvents()
-                    Assert.False(btnWielowarstwowyMbtiles.Enabled)
+                    Assert.True(btnWielowarstwowyMbtiles.Enabled)
 
-                    ' 2. Po zaznaczeniu MBTiles: przycisk aktywny
                     rbMBTiles.Checked = True
                     Application.DoEvents()
                     Assert.True(btnWielowarstwowyMbtiles.Enabled)
 
-                    ' 3. Po przełączeniu na inny format (np. SQLiteDB): przycisk ponownie zablokowany
                     rbSQLiteDB.Checked = True
                     Application.DoEvents()
-                    Assert.False(btnWielowarstwowyMbtiles.Enabled)
+                    Assert.True(btnWielowarstwowyMbtiles.Enabled)
 
                     f.Close()
                 End Using

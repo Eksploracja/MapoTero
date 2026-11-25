@@ -103,7 +103,7 @@ Partial Class FormZaawansowanyMbtiles
         Me.grpWarstwy.Size = New System.Drawing.Size(610, 240)
         Me.grpWarstwy.TabIndex = 0
         Me.grpWarstwy.TabStop = False
-        Me.grpWarstwy.Text = "Warstwy i zakresy wyświetlania (góra listy = wierzch mapy)"
+        Me.grpWarstwy.Text = "Pobrane sesje mapowe i zakresy powiększeń (góra listy = wierzch mapy)"
         '
         'dgvWarstwy
         '
@@ -182,32 +182,33 @@ Partial Class FormZaawansowanyMbtiles
         '
         Me.btnDodajSesje.Location = New System.Drawing.Point(10, 204)
         Me.btnDodajSesje.Name = "btnDodajSesje"
-        Me.btnDodajSesje.Size = New System.Drawing.Size(105, 26)
+        Me.btnDodajSesje.Size = New System.Drawing.Size(130, 26)
         Me.btnDodajSesje.TabIndex = 1
-        Me.btnDodajSesje.Text = "Dodaj warstwę..."
+        Me.btnDodajSesje.Text = "Dodaj folder sesji..."
+        Me.ToolTip1.SetToolTip(Me.btnDodajSesje, "Wskaż folder z mapą pobraną wcześniej w oknie głównym (zawierający plik conf.txt) lub folder nadrzędny z kilkoma sesjami.")
         Me.btnDodajSesje.UseVisualStyleBackColor = True
         '
         'btnUsunSesje
         '
-        Me.btnUsunSesje.Location = New System.Drawing.Point(120, 204)
+        Me.btnUsunSesje.Location = New System.Drawing.Point(146, 204)
         Me.btnUsunSesje.Name = "btnUsunSesje"
-        Me.btnUsunSesje.Size = New System.Drawing.Size(85, 26)
+        Me.btnUsunSesje.Size = New System.Drawing.Size(65, 26)
         Me.btnUsunSesje.TabIndex = 2
         Me.btnUsunSesje.Text = "Usuń"
         Me.btnUsunSesje.UseVisualStyleBackColor = True
         '
         'btnWyczyscSesje
         '
-        Me.btnWyczyscSesje.Location = New System.Drawing.Point(210, 204)
+        Me.btnWyczyscSesje.Location = New System.Drawing.Point(217, 204)
         Me.btnWyczyscSesje.Name = "btnWyczyscSesje"
-        Me.btnWyczyscSesje.Size = New System.Drawing.Size(70, 26)
+        Me.btnWyczyscSesje.Size = New System.Drawing.Size(65, 26)
         Me.btnWyczyscSesje.TabIndex = 6
         Me.btnWyczyscSesje.Text = "Wyczyść"
         Me.btnWyczyscSesje.UseVisualStyleBackColor = True
         '
         'btnRozlaczneZakresy
         '
-        Me.btnRozlaczneZakresy.Location = New System.Drawing.Point(286, 204)
+        Me.btnRozlaczneZakresy.Location = New System.Drawing.Point(288, 204)
         Me.btnRozlaczneZakresy.Name = "btnRozlaczneZakresy"
         Me.btnRozlaczneZakresy.Size = New System.Drawing.Size(125, 26)
         Me.btnRozlaczneZakresy.TabIndex = 3
@@ -643,7 +644,7 @@ Partial Class FormZaawansowanyMbtiles
         Me.MaximizeBox = False
         Me.Name = "FormZaawansowanyMbtiles"
         Me.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent
-        Me.Text = "MBTiles wieloskalowy - różne mapy dla różnych powiększeń"
+        Me.Text = "MBTiles wieloskalowy (łączenie pobranych sesji)"
         Me.grpWarstwy.ResumeLayout(False)
         CType(Me.dgvWarstwy, System.ComponentModel.ISupportInitialize).EndInit()
         Me.grpPodglad.ResumeLayout(False)

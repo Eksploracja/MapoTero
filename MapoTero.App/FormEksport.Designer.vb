@@ -244,13 +244,13 @@ Partial Class FormEksport
         '
         'rbMBTiles
         '
-        Me.btnWielowarstwowyMbtiles.Enabled = False
+        Me.btnWielowarstwowyMbtiles.Enabled = True
         Me.btnWielowarstwowyMbtiles.Location = New System.Drawing.Point(345, 111)
         Me.btnWielowarstwowyMbtiles.Name = "btnWielowarstwowyMbtiles"
         Me.btnWielowarstwowyMbtiles.Size = New System.Drawing.Size(130, 23)
         Me.btnWielowarstwowyMbtiles.TabIndex = 7
         Me.btnWielowarstwowyMbtiles.Text = "Wieloskalowy..."
-        Me.ToolTip1.SetToolTip(Me.btnWielowarstwowyMbtiles, "MBTiles wieloskalowy: jeden plik z różnych map - każda widoczna w wybranym zakresie powiększeń (np. topo 1:50k z daleka, ortofotomapa w zbliżeniu).")
+        Me.ToolTip1.SetToolTip(Me.btnWielowarstwowyMbtiles, "Łączy wcześniej pobrane sesje mapowe w jeden plik MBTiles lub GeoPackage wieloskalowy (różne mapy dla różnych powiększeń).")
         Me.btnWielowarstwowyMbtiles.UseVisualStyleBackColor = True
         Me.rbMBTiles.AutoSize = True
         Me.rbMBTiles.Location = New System.Drawing.Point(10, 114)

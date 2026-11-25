@@ -483,7 +483,7 @@ Public Class FormEksport
         chkGeoTiffPiramidy.Enabled = wolny AndAlso geotiff AndAlso tiff
         chkKorekcjaMip.Enabled = wolny
         btnPodgladMip.Enabled = wolny AndAlso chkKorekcjaMip.Checked
-        btnWielowarstwowyMbtiles.Enabled = wolny AndAlso (rbMBTiles.Checked OrElse rbGeoPackage.Checked)
+        btnWielowarstwowyMbtiles.Enabled = wolny
         grpFormat.Enabled = wolny
         grpWarstwy.Enabled = wolny
         grpRozmiar.Enabled = wolny AndAlso _sesja IsNot Nothing

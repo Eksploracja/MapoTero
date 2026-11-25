@@ -149,6 +149,17 @@ Public Class StylKreatoraTesty
         Assert.False(wig.WieloskalowaAktywna(RodzajEksportu.MBTiles, False))
         Assert.False(wig.WieloskalowaAktywna(RodzajEksportu.GeoTiff, True))
         Assert.False(New StylKreatora().MozliwaWieloskalowa(RodzajEksportu.MBTiles))
+        Assert.Equal("Ustawienia skal...", wig.EtykietaPrzyciskuSkal())
+
+        Dim jedno = Styl("dzialki")
+        Assert.False(jedno.MozliwaWieloskalowa(RodzajEksportu.MBTiles))
+        Assert.Equal("Dodaj skale...", jedno.EtykietaPrzyciskuSkal())
+        jedno.PlanWlasny = New List(Of PlanStopnia) From {
+            New PlanStopnia With {.Piksel = 0.5, .PoziomMin = 16, .PoziomMax = 18},
+            New PlanStopnia With {.Piksel = 5.0, .PoziomMin = 12, .PoziomMax = 15}
+        }
+        Assert.True(jedno.MozliwaWieloskalowa(RodzajEksportu.MBTiles))
+        Assert.Equal("Ustawienia skal (własne)", jedno.EtykietaPrzyciskuSkal())
     End Sub
 
     <Fact>

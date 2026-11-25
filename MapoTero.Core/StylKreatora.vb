@@ -355,6 +355,13 @@ Public Class StylKreatora
         Return wlaczona AndAlso MozliwaWieloskalowa(format)
     End Function
 
+    ''' <summary>Tekst przycisku konfiguracji skal w kroku 4 (widocznego dla każdego formatu wielopoziomowego).</summary>
+    Public Function EtykietaPrzyciskuSkal() As String
+        If PlanWlasny IsNot Nothing Then Return "Ustawienia skal (własne)"
+        If CzyWieloskalowy Then Return "Ustawienia skal..."
+        Return "Dodaj skale..."
+    End Function
+
     Public Function PlanAutomatyczny(piksel As Double, szerokoscGeo As Double, zOrtofotomapa As Boolean) As List(Of PlanStopnia)
         Return ZarzadcaSzablonow.PlanStopni(Szablon, piksel, szerokoscGeo, zOrtofotomapa)
     End Function

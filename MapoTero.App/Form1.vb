@@ -4101,6 +4101,13 @@ Public Class Form1
         End Using
     End Sub
 
+    Private Sub MbtilesWieloskalowyToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles MbtilesWieloskalowyToolStripMenuItem.Click
+        If PobieranieTrwa("Eksport wieloskalowy") Then Exit Sub
+        Using f As New FormZaawansowanyMbtiles()
+            f.ShowDialog(Me)
+        End Using
+    End Sub
+
     ''' <summary>Otwiera okno eksportu mapy z opcjonalnym domyślnym rodzajem eksportu.</summary>
     Friend Sub OtworzOknoEksportu(Optional rodzaj As RodzajEksportu = RodzajEksportu.MBTiles)
         If PobieranieTrwa("Eksport") Then Exit Sub
