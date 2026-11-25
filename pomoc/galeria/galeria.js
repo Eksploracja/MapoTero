@@ -611,6 +611,70 @@
     };
   }
 
+  function budujBboxZDwochPunktow(lon1, lat1, lon2, lat2, minRozmiarStopnie) {
+    const minSpan = Number(minRozmiarStopnie) > 0 ? Number(minRozmiarStopnie) : 0.0002;
+    let minLon = Math.min(lon1, lon2);
+    let maxLon = Math.max(lon1, lon2);
+    let minLat = Math.min(lat1, lat2);
+    let maxLat = Math.max(lat1, lat2);
+    if (maxLon - minLon < minSpan) {
+      if (lon2 >= lon1) maxLon = minLon + minSpan;
+      else minLon = maxLon - minSpan;
+    }
+    if (maxLat - minLat < minSpan) {
+      if (lat2 >= lat1) maxLat = minLat + minSpan;
+      else minLat = maxLat - minSpan;
+    }
+    return [
+      Math.round(minLon * 100000) / 100000,
+      Math.round(minLat * 100000) / 100000,
+      Math.round(maxLon * 100000) / 100000,
+      Math.round(maxLat * 100000) / 100000
+    ];
+  }
+
+  function obliczNaroznikiBbox(bbox) {
+    if (!Array.isArray(bbox) || bbox.length !== 4) return [];
+    const minLon = Math.min(bbox[0], bbox[2]);
+    const maxLon = Math.max(bbox[0], bbox[2]);
+    const minLat = Math.min(bbox[1], bbox[3]);
+    const maxLat = Math.max(bbox[1], bbox[3]);
+    return [
+      { id: "nw", lon: minLon, lat: maxLat, kotwicaLon: maxLon, kotwicaLat: minLat },
+      { id: "ne", lon: maxLon, lat: maxLat, kotwicaLon: minLon, kotwicaLat: minLat },
+      { id: "se", lon: maxLon, lat: minLat, kotwicaLon: minLon, kotwicaLat: maxLat },
+      { id: "sw", lon: minLon, lat: minLat, kotwicaLon: maxLon, kotwicaLat: maxLat }
+    ];
+  }
+
+  function znajdzNaroznikPodKursorem(pxX, pxY, bbox, cX, cY, z, szer, wys, progPx) {
+    const narozniki = obliczNaroznikiBbox(bbox);
+    if (narozniki.length === 0) return null;
+    const limit = Number(progPx) > 0 ? Number(progPx) : 18;
+    let najlepszy = null;
+    let minDyst = limit + 0.001;
+    narozniki.forEach(function (n) {
+      const pt = latLonDoKafelka(n.lat, n.lon, z);
+      const x = szer / 2 + (pt.x - cX) * 256;
+      const y = wys / 2 + (pt.y - cY) * 256;
+      const d = Math.hypot(pxX - x, pxY - y);
+      if (d <= minDyst) {
+        minDyst = d;
+        najlepszy = {
+          id: n.id,
+          x: x,
+          y: y,
+          lon: n.lon,
+          lat: n.lat,
+          kotwicaLon: n.kotwicaLon,
+          kotwicaLat: n.kotwicaLat,
+          dystans: d
+        };
+      }
+    });
+    return najlepszy;
+  }
+
   if (typeof module !== "undefined" && module.exports) {
     module.exports = {
       MAKS_WARSTW_KANAPKI,
@@ -645,7 +709,10 @@
       czySynchronizowacKanapkeWUrl,
       wykryjKierunekSwipe,
       obliczKrokPinch,
-      obliczNoweCentrumPoPinch
+      obliczNoweCentrumPoPinch,
+      budujBboxZDwochPunktow,
+      obliczNaroznikiBbox,
+      znajdzNaroznikPodKursorem
     };
   }
 
@@ -690,6 +757,8 @@
     podgladPiksel: 0,
     ostatniPikselRenderu: 2.0,
     zaznaczonyBbox: null,
+    punktStartuZaznaczania: null,
+    aktywnyNaroznikId: null,
     przekazObszarDoMapoTero: true,
     dokZwiniety: false,
     zakladkaMiksera: "podglad",
@@ -1794,6 +1863,8 @@
     stan.kanapkaUrlStart = "";
     stan.nazwaKanapki = "";
     stan.zaznaczonyBbox = null;
+    stan.punktStartuZaznaczania = null;
+    stan.aktywnyNaroznikId = null;
     stan.podgladPiksel = 0;
     stan.zapiszJakoStyl = false;
     if (ref.mikserInputNazwa) ref.mikserInputNazwa.value = "";
@@ -1932,14 +2003,14 @@
       if (czyPolaczonoZProgramem()) {
         ostrz.push(
           dotyk
-            ? "⚠️ Nie zaznaczono jeszcze obszaru na mapie. Przejdź do „📍 Miejsce i obszar”, przełącz na „⬜ Zaznacz obszar” i przeciągnij palcem."
-            : "⚠️ Nie zaznaczono jeszcze obszaru na mapie (ani w MapoTero, ani tutaj w mikserze). Przejdź do „📍 Miejsce i obszar” i zaznacz teren prawym przyciskiem myszy (PPM), albo zaznacz obszar w MapoTero."
+            ? "⚠️ Nie zaznaczono jeszcze obszaru na mapie. Przejdź do „📍 Miejsce i obszar”, kliknij „⬜ Zaznacz obszar” i wskaż 2 narożniki (albo przeciągnij palcem)."
+            : "⚠️ Nie zaznaczono jeszcze obszaru na mapie (ani w MapoTero, ani tutaj w mikserze). Przejdź do „📍 Miejsce i obszar” i kliknij „⬜ Zaznacz obszar” (2 kliknięcia lub przeciągnięcie) albo użyj PPM."
         );
       } else {
         ostrz.push(
           dotyk
-            ? "⚠️ Nie zaznaczono jeszcze obszaru dla pliku .mapotero — możesz to zrobić w zakładce „📍 Miejsce i obszar” przyciskiem „⬜ Zaznacz obszar”."
-            : "⚠️ Nie zaznaczono jeszcze obszaru dla pliku .mapotero — możesz zaznaczyć teren prawym przyciskiem myszy (PPM) w zakładce „📍 Miejsce i obszar”."
+            ? "⚠️ Nie zaznaczono jeszcze obszaru dla pliku .mapotero — możesz wskazać 2 narożniki w zakładce „📍 Miejsce i obszar” przyciskiem „⬜ Zaznacz obszar”."
+            : "⚠️ Nie zaznaczono jeszcze obszaru dla pliku .mapotero — przejdź do „📍 Miejsce i obszar” i kliknij „⬜ Zaznacz obszar” (2 kliknięcia lub przeciągnięcie)."
         );
       }
     }
@@ -2470,10 +2541,15 @@
             ? "Próbka (czerwona): " + stan.podgladLat.toFixed(4) + ", " + stan.podgladLon.toFixed(4)
             : "⚠️ Brak zaznaczonego obszaru · Środek: " + stan.podgladLat.toFixed(4) + ", " + stan.podgladLon.toFixed(4))
         : "Obszar do pliku .mapotero";
-      if (stan.zaznaczonyBbox) {
+      if (stan.punktStartuZaznaczania) {
+        txt = "📍 Wybrano 1. narożnik — kliknij lub tapnij 2. narożnik prostokąta (tapnięcie w to samo miejsce anuluje)";
+      } else if (stan.mapaTryb === "zaznacz") {
+        txt = "⬜ Stuknij/kliknij 1. narożnik (potem 2.) albo przeciągnij, aby narysować prostokąt";
+      } else if (stan.zaznaczonyBbox) {
         const pxAuto = obliczPikselDlaBbox(stan.zaznaczonyBbox, 360);
         const bokKm = ((pxAuto * 360) / 1000).toFixed(1).replace(".", ",");
         txt += (czyPolaczonoZProgramem() ? " · Obszar dla MapoTero: ~" : ": ~") + bokKm + " km";
+        txt += " · Przeciągnij białe narożniki, aby zmienić zasięg";
         if (!czyPolaczonoZProgramem()) {
           txt += " (zapisze się w linku i pliku .mapotero)";
         } else if (pxAuto > MAKS_PIKSEL_DOPASOWANIA_BBOX) {
@@ -2482,11 +2558,11 @@
       } else if (stan.obszarProgramu && stan.obszarProgramu.maSiatke) {
         txt += " · Niebieska ramka: obszar z MapoTero";
       } else if (dotyk) {
-        txt += " · Przesuwaj i przybliżaj dwoma palcami; wybierz „⬜ Zaznacz obszar”, aby narysować ramkę";
+        txt += " · Przesuwaj i przybliżaj dwoma palcami; kliknij „⬜ Zaznacz obszar”, aby wskazać 2 narożniki";
       } else {
         txt += czyPolaczonoZProgramem()
-          ? " · Zaznacz prawym przyciskiem myszy (PPM) lub wybierz obszar w MapoTero"
-          : " · Brak obszaru — zaznacz prawym przyciskiem (PPM) lub przyciskiem „Zaznacz obszar”";
+          ? " · Kliknij „⬜ Zaznacz obszar” (2 kliknięcia lub przeciągnięcie) albo użyj PPM"
+          : " · Kliknij „⬜ Zaznacz obszar” (2 kliknięcia lub przeciągnięcie) albo użyj PPM";
       }
       ref.minimapaInfo.textContent = txt;
     }
@@ -2554,9 +2630,41 @@
       rysujBboxNaMapie(ctx, stan.obszarProgramu.bboxWgs84, cX, cY, z, szer, wys, "#0284c7", "rgba(2, 132, 199, 0.12)", true);
     }
 
-    // 2. Obszar zaznaczony na mapce w galerii (fioletowa ramka)
+    // 2. Obszar zaznaczony na mapce w galerii (fioletowa ramka + przesuwalne węzły w narożnikach)
     if (Array.isArray(stan.zaznaczonyBbox)) {
       rysujBboxNaMapie(ctx, stan.zaznaczonyBbox, cX, cY, z, szer, wys, "#7253ed", "rgba(114, 83, 237, 0.18)", false);
+      const narozniki = obliczNaroznikiBbox(stan.zaznaczonyBbox);
+      narozniki.forEach(function (n) {
+        const ptN = latLonDoKafelka(n.lat, n.lon, z);
+        const nx = szer / 2 + (ptN.x - cX) * 256;
+        const ny = wys / 2 + (ptN.y - cY) * 256;
+        const czyAktywny = stan.aktywnyNaroznikId === n.id;
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(nx, ny, czyAktywny ? 7.5 : 5.8, 0, Math.PI * 2);
+        ctx.fillStyle = czyAktywny ? "#7253ed" : "#ffffff";
+        ctx.fill();
+        ctx.lineWidth = 2.2;
+        ctx.strokeStyle = czyAktywny ? "#ffffff" : "#5b3fd4";
+        ctx.stroke();
+        ctx.restore();
+      });
+    }
+
+    // 2b. Pierwszy narożnik zaznaczania (w trybie 2 kliknięć/tapnięć)
+    if (stan.punktStartuZaznaczania) {
+      const ptStart = latLonDoKafelka(stan.punktStartuZaznaczania.lat, stan.punktStartuZaznaczania.lon, z);
+      const pxStart = szer / 2 + (ptStart.x - cX) * 256;
+      const pyStart = wys / 2 + (ptStart.y - cY) * 256;
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(pxStart, pyStart, 6.5, 0, Math.PI * 2);
+      ctx.fillStyle = "#7253ed";
+      ctx.fill();
+      ctx.lineWidth = 2.2;
+      ctx.strokeStyle = "#ffffff";
+      ctx.stroke();
+      ctx.restore();
     }
 
     // 3. Aktualny obszar próbki podglądu 360x360 px (czerwona ramka + celownik)
@@ -2854,13 +2962,11 @@
     const btnTrybPrzesun = el("button", "aktywny", "🖐 Przesuń / Punkt");
     btnTrybPrzesun.type = "button";
     btnTrybPrzesun.title = jestDotykowy()
-      ? "Przesuwaj mapę palcem lub stuknij punkt próbki"
+      ? "Przesuwaj mapę palcem lub stuknij punkt próbki (białe narożniki prostokąta można przesuwać)"
       : "Lewy: przesuwaj mapę lub kliknij punkt próbki. Prawy przycisk (PPM): od razu zaznacz obszar";
     const btnTrybZaznacz = el("button", null, "⬜ Zaznacz obszar");
     btnTrybZaznacz.type = "button";
-    btnTrybZaznacz.title = jestDotykowy()
-      ? "Przeciągnij palcem po mapie, aby zaznaczyć prostokąt obszaru"
-      : "Zaznacz obszar lewym przyciskiem myszy (prawym przyciskiem zaznaczasz zawsze od razu)";
+    btnTrybZaznacz.title = "Stuknij/kliknij 1. narożnik, a potem 2. narożnik prostokąta — albo przeciągnij";
     const btnWyczyscZazn = el("button", null, "✕ Wyczyść");
     btnWyczyscZazn.type = "button";
     btnWyczyscZazn.title = "Usuń zaznaczony obszar";
@@ -2874,17 +2980,22 @@
         minimapaCanvas.classList.remove("tryb-przesun");
         minimapaCanvas.classList.add("tryb-zaznacz");
       } else {
+        stan.punktStartuZaznaczania = null;
         btnTrybPrzesun.classList.add("aktywny");
         btnTrybZaznacz.classList.remove("aktywny");
         minimapaCanvas.classList.remove("tryb-zaznacz");
         minimapaCanvas.classList.add("tryb-przesun");
       }
+      minimapaCanvas.style.cursor = "";
+      rysujMinimape();
     }
 
     btnTrybPrzesun.addEventListener("click", function () { ustawTrybMapy("przesun"); });
     btnTrybZaznacz.addEventListener("click", function () { ustawTrybMapy("zaznacz"); });
     btnWyczyscZazn.addEventListener("click", function () {
       stan.zaznaczonyBbox = null;
+      stan.punktStartuZaznaczania = null;
+      stan.aktywnyNaroznikId = null;
       stan.podgladPiksel = 0;
       zsynchronizujSelectSkali(0);
       rysujMinimape();
@@ -2975,6 +3086,34 @@
       };
     }
 
+    function zaktualizujSkalePoZmianieBbox() {
+      const wyborPx = wybierzPikselPoZaznaczeniuBbox(stan.zaznaczonyBbox, parseFloat(selSkala.value) || 0);
+      if (czyPolaczonoZProgramem()) {
+        if (!wyborPx.rozdzielony) {
+          stan.podgladPiksel = wyborPx.piksel;
+          stan.ostatniPikselRenderu = wyborPx.piksel;
+          zsynchronizujSelectSkali(wyborPx.piksel);
+        } else {
+          stan.podgladPiksel = wyborPx.piksel;
+          zsynchronizujSelectSkali(wyborPx.piksel);
+        }
+      }
+    }
+
+    function zastosujZaznaczonyBbox(nowyBbox, zTrybuZaznaczania) {
+      stan.zaznaczonyBbox = nowyBbox;
+      stan.punktStartuZaznaczania = null;
+      stan.podgladLat = Math.round(((nowyBbox[1] + nowyBbox[3]) / 2) * 100000) / 100000;
+      stan.podgladLon = Math.round(((nowyBbox[0] + nowyBbox[2]) / 2) * 100000) / 100000;
+      zaktualizujSkalePoZmianieBbox();
+      if (zTrybuZaznaczania && stan.mapaTryb === "zaznacz") {
+        ustawTrybMapy("przesun");
+      } else {
+        rysujMinimape();
+      }
+      zglosOdswiezeniePodgladuMiksera(true);
+    }
+
     minimapaCanvas.addEventListener("contextmenu", function (e) {
       e.preventDefault();
     });
@@ -2992,6 +3131,7 @@
       if (aktywneWskazniki.size >= 2) {
         bylMultiTouchWGescie = true;
         gest = null;
+        stan.aktywnyNaroznikId = null;
         minimapaCanvas.classList.remove("przeciaga");
         const para = odczytajParePinch();
         if (para) {
@@ -3005,6 +3145,41 @@
 
       bylMultiTouchWGescie = false;
       pinchStan = null;
+
+      // Chwytanie przesuwalnego węzła w narożniku istniejącego prostokąta (lewy klik lub dotyk)
+      if (e.button !== 2 && !e.shiftKey && Array.isArray(stan.zaznaczonyBbox) && !stan.punktStartuZaznaczania) {
+        const z = Math.max(5, Math.min(16, stan.mapaZoom));
+        const cTile = latLonDoKafelka(stan.mapaCenterLat, stan.mapaCenterLon, z);
+        const prog = e.pointerType === "touch" || jestDotykowy() ? 22 : 14;
+        const trafiony = znajdzNaroznikPodKursorem(
+          pt.x,
+          pt.y,
+          stan.zaznaczonyBbox,
+          cTile.x,
+          cTile.y,
+          z,
+          MINIMAPA_SZER,
+          MINIMAPA_WYS,
+          prog
+        );
+        if (trafiony) {
+          stan.aktywnyNaroznikId = trafiony.id;
+          gest = {
+            id: e.pointerId,
+            przycisk: e.button,
+            tryb: "naroznik",
+            naroznikId: trafiony.id,
+            kotwicaLon: trafiony.kotwicaLon,
+            kotwicaLat: trafiony.kotwicaLat,
+            startX: pt.x,
+            startY: pt.y,
+            przeciagano: false
+          };
+          rysujMinimape();
+          return;
+        }
+      }
+
       const czyZaznaczanie = e.button === 2 || stan.mapaTryb === "zaznacz" || e.shiftKey;
       gest = {
         id: e.pointerId,
@@ -3021,8 +3196,45 @@
     });
 
     minimapaCanvas.addEventListener("pointermove", function (e) {
-      if (!aktywneWskazniki.has(e.pointerId)) return;
       const pt = wspolrzedneCanvasaMapy(e);
+
+      // Podgląd prostokąta po 1. kliknięciu oraz kursor zmiany rozmiaru nad narożnikami (dla myszy/gładzika)
+      if (!aktywneWskazniki.has(e.pointerId)) {
+        if (e.pointerType === "mouse" && aktywneWskazniki.size === 0) {
+          if (stan.punktStartuZaznaczania) {
+            const z = Math.max(5, Math.min(16, stan.mapaZoom));
+            const cTile = latLonDoKafelka(stan.mapaCenterLat, stan.mapaCenterLon, z);
+            const ptS = latLonDoKafelka(stan.punktStartuZaznaczania.lat, stan.punktStartuZaznaczania.lon, z);
+            zglosRysowanieMinimapy({
+              x1: MINIMAPA_SZER / 2 + (ptS.x - cTile.x) * 256,
+              y1: MINIMAPA_WYS / 2 + (ptS.y - cTile.y) * 256,
+              x2: pt.x,
+              y2: pt.y
+            });
+          } else if (Array.isArray(stan.zaznaczonyBbox)) {
+            const z = Math.max(5, Math.min(16, stan.mapaZoom));
+            const cTile = latLonDoKafelka(stan.mapaCenterLat, stan.mapaCenterLon, z);
+            const trafiony = znajdzNaroznikPodKursorem(
+              pt.x,
+              pt.y,
+              stan.zaznaczonyBbox,
+              cTile.x,
+              cTile.y,
+              z,
+              MINIMAPA_SZER,
+              MINIMAPA_WYS,
+              14
+            );
+            minimapaCanvas.style.cursor = trafiony
+              ? (trafiony.id === "nw" || trafiony.id === "se" ? "nwse-resize" : "nesw-resize")
+              : "";
+          } else if (minimapaCanvas.style.cursor) {
+            minimapaCanvas.style.cursor = "";
+          }
+        }
+        return;
+      }
+
       aktywneWskazniki.set(e.pointerId, pt);
 
       if (aktywneWskazniki.size >= 2 && pinchStan) {
@@ -3056,7 +3268,13 @@
       const dy = pt.y - gest.startY;
       if (Math.hypot(dx, dy) > 4) gest.przeciagano = true;
 
-      if (gest.tryb === "przesun") {
+      if (gest.tryb === "naroznik") {
+        const geo = pikselCanvasaNaGeo(pt.x, pt.y);
+        stan.zaznaczonyBbox = budujBboxZDwochPunktow(gest.kotwicaLon, gest.kotwicaLat, geo.lon, geo.lat);
+        stan.podgladLat = Math.round(((stan.zaznaczonyBbox[1] + stan.zaznaczonyBbox[3]) / 2) * 100000) / 100000;
+        stan.podgladLon = Math.round(((stan.zaznaczonyBbox[0] + stan.zaznaczonyBbox[2]) / 2) * 100000) / 100000;
+        zglosRysowanieMinimapy();
+      } else if (gest.tryb === "przesun") {
         if (gest.przeciagano) {
           const nowyCenter = kafelekDoLatLon(
             gest.startCenterTile.x - dx / 256,
@@ -3068,6 +3286,9 @@
           zglosRysowanieMinimapy();
         }
       } else {
+        if (gest.przeciagano && stan.punktStartuZaznaczania) {
+          stan.punktStartuZaznaczania = null;
+        }
         gest.aktX = pt.x;
         gest.aktY = pt.y;
         zglosRysowanieMinimapy({ x1: gest.startX, y1: gest.startY, x2: gest.aktX, y2: gest.aktY });
@@ -3116,6 +3337,16 @@
       minimapaCanvas.classList.remove("przeciaga");
 
       const pt = wspolrzedneCanvasaMapy(e);
+      if (aktGest.tryb === "naroznik") {
+        stan.aktywnyNaroznikId = null;
+        if (Array.isArray(stan.zaznaczonyBbox)) {
+          zastosujZaznaczonyBbox(stan.zaznaczonyBbox, false);
+        } else {
+          rysujMinimape();
+        }
+        return;
+      }
+
       if (aktGest.tryb === "zaznacz" && aktGest.przeciagano) {
         const x1 = Math.min(aktGest.startX, pt.x);
         const x2 = Math.max(aktGest.startX, pt.x);
@@ -3124,33 +3355,42 @@
         if (x2 - x1 >= 8 && y2 - y1 >= 8) {
           const nw = pikselCanvasaNaGeo(x1, y1);
           const se = pikselCanvasaNaGeo(x2, y2);
-          stan.zaznaczonyBbox = [
-            Math.round(nw.lon * 100000) / 100000,
-            Math.round(se.lat * 100000) / 100000,
-            Math.round(se.lon * 100000) / 100000,
-            Math.round(nw.lat * 100000) / 100000
-          ];
-          stan.podgladLat = Math.round(((nw.lat + se.lat) / 2) * 100000) / 100000;
-          stan.podgladLon = Math.round(((nw.lon + se.lon) / 2) * 100000) / 100000;
-
-          const wyborPx = wybierzPikselPoZaznaczeniuBbox(stan.zaznaczonyBbox, parseFloat(selSkala.value) || 0);
-          if (czyPolaczonoZProgramem()) {
-            if (!wyborPx.rozdzielony) {
-              stan.podgladPiksel = wyborPx.piksel;
-              stan.ostatniPikselRenderu = wyborPx.piksel;
-              zsynchronizujSelectSkali(wyborPx.piksel);
-            } else {
-              stan.podgladPiksel = wyborPx.piksel;
-              zsynchronizujSelectSkali(wyborPx.piksel);
-            }
-          }
-          if (jestDotykowy() && stan.mapaTryb === "zaznacz") {
-            ustawTrybMapy("przesun");
-          }
-          rysujMinimape();
-          zglosOdswiezeniePodgladuMiksera(true);
+          zastosujZaznaczonyBbox(
+            budujBboxZDwochPunktow(nw.lon, nw.lat, se.lon, se.lat),
+            aktGest.przycisk !== 2
+          );
           return;
         }
+      }
+
+      // Zaznaczanie dwoma kliknięciami / tapnięciami (bez przeciągania i bez PPM) w trybie „⬜ Zaznacz obszar”
+      if (aktGest.tryb === "zaznacz" && !aktGest.przeciagano && !bylMulti && aktGest.przycisk !== 2) {
+        if (!stan.punktStartuZaznaczania) {
+          stan.punktStartuZaznaczania = pikselCanvasaNaGeo(pt.x, pt.y);
+          rysujMinimape();
+          return;
+        }
+        const z = Math.max(5, Math.min(16, stan.mapaZoom));
+        const cTile = latLonDoKafelka(stan.mapaCenterLat, stan.mapaCenterLon, z);
+        const ptS = latLonDoKafelka(stan.punktStartuZaznaczania.lat, stan.punktStartuZaznaczania.lon, z);
+        const sx = MINIMAPA_SZER / 2 + (ptS.x - cTile.x) * 256;
+        const sy = MINIMAPA_WYS / 2 + (ptS.y - cTile.y) * 256;
+        if (Math.hypot(pt.x - sx, pt.y - sy) < 6) {
+          stan.punktStartuZaznaczania = null;
+          rysujMinimape();
+          return;
+        }
+        const geo2 = pikselCanvasaNaGeo(pt.x, pt.y);
+        zastosujZaznaczonyBbox(
+          budujBboxZDwochPunktow(
+            stan.punktStartuZaznaczania.lon,
+            stan.punktStartuZaznaczania.lat,
+            geo2.lon,
+            geo2.lat
+          ),
+          true
+        );
+        return;
       }
 
       if (!aktGest.przeciagano && !bylMulti) {
@@ -4015,6 +4255,11 @@
 
     document.addEventListener("keydown", function (e) {
       if (stan.mikserOtwarty && e.key === "Escape") {
+        if (stan.zakladkaMiksera === "mapa" && stan.punktStartuZaznaczania) {
+          stan.punktStartuZaznaczania = null;
+          rysujMinimape();
+          return;
+        }
         zamknijMikser();
         return;
       }
