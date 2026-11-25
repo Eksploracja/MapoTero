@@ -2,6 +2,7 @@
 title: Usługi kafelkowe (WMTS, XYZ, TMS)
 nav_order: 3
 parent: Pobieranie map
+description: "Z usług kafelkowych WMTS, XYZ i TMS program sam wybiera poziom kafli, składa z nich segmenty i zapisuje je z takimi samymi plikami kalibracji jak przy WMS."
 ---
 
 # Usługi kafelkowe (WMTS, XYZ, TMS)

@@ -1,6 +1,7 @@
 ---
 title: Ustawienia
 nav_order: 9
+description: "Wszystkie opcje okna Ustawienia: co robi każda, jaka jest wartość domyślna i kiedy warto ją zmienić."
 ---
 
 # Ustawienia
@@ -21,7 +22,7 @@ Wszystkie opcje okna *Ustawienia*: co robi każda, jaka jest wartość domyślna
 
 ## Jak działa okno
 
-![Okno Ustawienia z ponumerowanymi grupami opcji]({{ '/pomoc/obrazy/07-ustawienia.png' | relative_url }})
+![Okno Ustawienia z ponumerowanymi grupami opcji]({{ '/pomoc/obrazy/07-ustawienia.png' | relative_url }}){: loading="lazy" width="782" height="458"}
 
 *Rysunek 1. Okno Ustawienia programu MapoTero z ponumerowanymi grupami opcji.*
 

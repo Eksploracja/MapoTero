@@ -2,6 +2,7 @@
 title: Mapa w telefonie i odbiorniku GPS
 nav_order: 4
 parent: Eksport mapy
+description: "Jak wgrać wyeksportowaną mapę do najpopularniejszych aplikacji i urządzeń."
 ---
 
 # Mapa w telefonie i odbiorniku GPS
@@ -29,7 +30,7 @@ typowe. Jeśli coś wygląda inaczej, sprawdź pomoc aplikacji, hasło „mapy o
 * **Kabel USB:** podłącz telefon do komputera, wybierz w telefonie tryb *Przesyłanie plików (MTP)* i skopiuj plik do wskazanego folderu aplikacji.
 * **Chmura lub komunikator:** prześlij plik na telefon przez własną chmurę (Dysk Google, OneDrive, Dropbox, Nextcloud) albo komunikator i otwórz go w aplikacji poleceniem *Otwórz za pomocą* / *Udostępnij*.
 
-![Okno bezpośredniego transferu mapy na telefon przez Wi-Fi i kod QR]({{ '/pomoc/obrazy/16-wyslij-telefon.png' | relative_url }})
+![Okno bezpośredniego transferu mapy na telefon przez Wi-Fi i kod QR]({{ '/pomoc/obrazy/16-wyslij-telefon.png' | relative_url }}){: loading="lazy" width="462" height="557"}
 
 *Rysunek 1. Bezpośredni transfer mapy na telefon: program wyświetla kod QR w lokalnej sieci Wi-Fi.*
 
@@ -65,7 +66,7 @@ Mapę rastrową włącza się w ustawieniach mapy jako *mapę podkładową* albo
 
 | Format | Jak wgrać |
 |---|---|
-| **OruxMaps** (folder) | skopiuj **cały folder** `_eksport_…_oruxmaps` do folderu `oruxmaps/mapfiles` w telefonie |
+| **OruxMaps** (folder) | skopiuj **cały folder** `<nazwa sesji>_oruxmaps` do folderu `oruxmaps/mapfiles` w telefonie |
 | **MBTiles** | skopiuj plik do folderu `oruxmaps/mapfiles` |
 | **GeoPackage (.gpkg)** | skopiuj plik do folderu `oruxmaps/mapfiles` |
 | **KMZ** | skopiuj do folderu map albo otwórz w aplikacji |

@@ -1,6 +1,7 @@
 ---
 title: Formaty plików
 nav_order: 20
+description: "Dla zaawansowanych: budowa plików tekstowych i konfiguracyjnych zapisywanych oraz odczytywanych przez MapoTero."
 ---
 
 # Formaty plików
@@ -81,7 +82,7 @@ Pozwala to sprawdzić aktualność kafli przy ponownym pobieraniu bez przesyłan
 * **`warstwy\*.txt`**: pojedyncze zbiory map w formacie klasycznym (Windows-1250) lub JSON (UTF-8), opisane szczegółowo
   w rozdziale [Plik zbioru map](../serwery/plik-zbioru-map/).
 * **`warstwy\warstwy.txt`**: indeks zbiorów wczytywanych do programu (jedna nazwa pliku bez `.txt` w wierszu).
-* **`warstwy\katalog.txt`** (UTF-8): buduje grupy drzewa *Warstwy do pobrania* i przypisuje warstwom czytelne nazwy:
+* **`warstwy\katalog.txt`** (UTF-8): buduje grupy drzewa *Katalog warstw* i przypisuje warstwom czytelne nazwy:
   `> Grupa`, `>> Podgrupa`, `zbiór | warstwa | nazwa wyświetlana` (wiersze zaczynające się od `#` to komentarze).
 
 ---
@@ -97,8 +98,25 @@ oraz kompletnym planem stopni dla map wieloskalowych. Usunięcie szablonu przyci
 
 ## Przepisy kompozycji (.mapotero)
 
-Pliki `.mapotero` (oraz kompatybilne `.json` z formatem `mapotero-zestaw`) służą do zapisywania i udostępniania gotowych kanapek warstw utworzonych w [Mikserze warstw](../galeria-i-mikser/) lub skopiowanych z listy *Wybrane warstwy* w programie.
-Przechowują listę warstw z nazwami zbiorów, stopniem krycia, trybem mieszania oraz opcjonalnym obszarem zasięgu. Taki plik możesz wczytać przez menu kontekstowe listy *Wybrane warstwy* (*Wczytaj kanapkę z pliku...*) albo przeciągając go myszą na okno programu.
+Pliki `.mapotero` (oraz kompatybilne `.json` z formatem `mapotero-zestaw` w wersji 1 oraz 2) służą do zapisywania i udostępniania gotowych kanapek warstw utworzonych w [Mikserze warstw](../galeria-i-mikser/) lub skopiowanych z listy *Wybrane warstwy* w programie.
+Przechowują listę warstw z nazwami zbiorów, stopniem krycia, trybem mieszania oraz opcjonalnym obszarem zasięgu; przepisy w wersji 2 mogą dodatkowo zawierać tablicę `skale` dla map wieloskalowych. Taki plik możesz wczytać przez menu kontekstowe listy *Wybrane warstwy* (*Wczytaj zestaw warstw z pliku...*) albo przeciągając go myszą na okno programu.
+
+---
+
+## Tryb wiersza poleceń (CLI)
+
+Program `MapoTero.exe` można uruchomić z wiersza poleceń bez otwierania okna graficznego, aby zautomatyzować pobieranie lub eksport zapisanej sesji:
+
+| Parametr | Znaczenie |
+|---|---|
+| `--sesja`, `-s` | ścieżka do folderu sesji zawierającego plik `conf.txt` |
+| `--eksport`, `-e` | format eksportu (np. `mbtiles`, `gpkg`, `kmz`, `jnx`, `geotiff`) |
+| `--wyjscie`, `-o` | ścieżka pliku wynikowego |
+| `--poligon`, `-p` | plik z poligonem lub korytarzem zasięgu (KML, GeoJSON, GPX, GPKG) |
+| `--bez-pobierania` | pomija pobieranie z sieci i eksportuje z istniejących segmentów |
+| `--nadpisz` | nadpisuje istniejący plik wynikowy bez pytania |
+| `--cicho`, `-q` | ogranicza komunikaty wyjściowe |
+| `--pomoc`, `--help`, `-h` | wyświetla listę obsługiwanych parametrów wiersza poleceń |
 
 ---
 

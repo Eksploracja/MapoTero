@@ -11,6 +11,7 @@ remote_theme: just-the-docs/just-the-docs@v0.12.0
 plugins:
   - jekyll-remote-theme
   - jekyll-seo-tag
+  - jekyll-sitemap
   - jekyll-include-cache
   - jekyll-relative-links
   - jekyll-optional-front-matter
@@ -44,7 +45,7 @@ aux_links_new_tab: true
 
 nav_external_links:
   - title: Historia wersji
-    url: https://github.com/Eksploracja/MapoTero#aktualności
+    url: https://github.com/Eksploracja/MapoTero/releases
     hide_icon: false
   - title: Forum (pomoc, dyskusja)
     url: https://forum.eksploracja.pl/viewforum.php?f=205
@@ -80,6 +81,7 @@ defaults:
       path: ""
     values:
       layout: default
+      image: /pomoc/obrazy/03-okno-glowne.png
 
 # Foldery i pliki, które nie są stroną. Lista zastępuje domyślne wykluczenia Jekylla, więc zawiera też je.
 # Pliki dla asystentów AI nie są w repozytorium, ale wykluczone na wypadek podglądu lokalnego.

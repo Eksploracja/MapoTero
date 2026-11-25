@@ -1,6 +1,7 @@
 ---
 title: Katalog zbiorów map
 nav_order: 17
+description: "Opis 71 zbiorów map dostarczanych z programem: skąd pochodzą, w jakich grupach drzewa je znaleźć, jakiego są typu (WMS / WMTS / XYZ) i jaki mają zalecany…"
 ---
 
 # Katalog zbiorów map
@@ -9,7 +10,7 @@ nav_order: 17
 Opis 71 zbiorów map dostarczanych z programem: skąd pochodzą, w jakich grupach drzewa je znaleźć, jakiego są typu (WMS / WMTS / XYZ) i jaki mają zalecany rozmiar piksela.
 {: .fs-5 .fw-300 }
 
-**Gdzie w programie:** karta *Warstwy do pobrania* w oknie głównym (zobacz też [Galerię warstw online](../galeria-warstw/))  
+**Gdzie w programie:** karta *Katalog warstw* w oknie głównym (zobacz też [Galerię warstw online](../galeria-warstw/))  
 **Dotyczy wersji:** {{ site.wersja_programu }}
 
 <details open markdown="block">
@@ -21,7 +22,7 @@ Opis 71 zbiorów map dostarczanych z programem: skąd pochodzą, w jakich grupac
 
 ## Jak czytać katalog
 
-W drzewie *Warstwy do pobrania* warstwy nie są ułożone według surowych nazw plików, lecz pogrupowane tematycznie przez plik `warstwy\katalog.txt` (UTF-8) i opatrzone czytelnymi nazwami. Wiersz `> Grupa` otwiera grupę, `>> Podgrupa` otwiera podgrupę, a wiersz `zbiór | warstwa | nazwa` dodaje do niej warstwę ze zbioru map, np.:
+W drzewie *Katalog warstw* warstwy nie są ułożone według surowych nazw plików, lecz pogrupowane tematycznie przez plik `warstwy\katalog.txt` (UTF-8) i opatrzone czytelnymi nazwami. Wiersz `> Grupa` otwiera grupę, `>> Podgrupa` otwiera podgrupę, a wiersz `zbiór | warstwa | nazwa` dodaje do niej warstwę ze zbioru map, np.:
 
 ```text
 > Przyroda i środowisko
@@ -106,7 +107,7 @@ Zbiory i warstwy niewymienione w `katalog.txt` (np. dodane [kreatorem serwerów]
 | `zabytki_unesco_NID` | NID | WMS | 1 | 4 m/px |
 | `zabytki_zasiegi_NID` | NID | WMS | 1 | 1 m/px |
 
-## Mapy topograficzne
+### Pozostałe mapy topograficzne i ogólnogeograficzne (GUGiK)
 
 ### Skany map topograficznych GUGiK
 
@@ -140,7 +141,7 @@ Warstwy *Waymarked Trails* są przezroczystymi nakładkami. Po dodaniu mapy podk
 | Trasy rolkowe – nakładka (Waymarked Trails) | `Waymarked_Trails` | `skating` | XYZ | 2 m/px |
 | Trasy narciarskie – nakładka (Waymarked Trails) | `Waymarked_Trails` | `slopes` | XYZ | 2 m/px |
 
-## Mapy topograficzne
+### Pozostałe mapy topograficzne i ogólnogeograficzne (GUGiK)
 
 | Nazwa w drzewie | Zbiór map | Warstwa na serwerze | Typ | Piksel |
 |---|---|---|---|---|
@@ -308,7 +309,7 @@ Warstwy *Waymarked Trails* są przezroczystymi nakładkami. Po dodaniu mapy podk
 
 ### Lasy Państwowe (BDL)
 
-### > Leśny podział terytorialny (BDL)
+#### Leśny podział terytorialny (BDL)
 
 | Nazwa w drzewie | Zbiór map | Warstwa na serwerze | Typ | Piksel |
 |---|---|---|---|---|
@@ -320,7 +321,7 @@ Warstwy *Waymarked Trails* są przezroczystymi nakładkami. Po dodaniu mapy podk
 | Oddziały poza Lasami Państwowymi | `Lasy_Panstwowe_BDL` | `2` | WMS | 4 m/px |
 | Wydzielenia poza Lasami Państwowymi | `Lasy_Panstwowe_BDL` | `0` | WMS | 4 m/px |
 
-### > Turystyka w lasach (BDL)
+#### Turystyka w lasach (BDL)
 
 | Nazwa w drzewie | Zbiór map | Warstwa na serwerze | Typ | Piksel |
 |---|---|---|---|---|
@@ -331,7 +332,7 @@ Warstwy *Waymarked Trails* są przezroczystymi nakładkami. Po dodaniu mapy podk
 | Ścieżki konne | `Lasy_Panstwowe_Turystyka` | `4` | WMS | 4 m/px |
 | Ośrodki edukacyjne i izby leśne | `Lasy_Panstwowe_Turystyka` | `13` | WMS | 2 m/px |
 
-### > Drogi leśne i dojazdy pożarowe (BDL)
+#### Drogi leśne i dojazdy pożarowe (BDL)
 
 | Nazwa w drzewie | Zbiór map | Warstwa na serwerze | Typ | Piksel |
 |---|---|---|---|---|
@@ -339,7 +340,7 @@ Warstwy *Waymarked Trails* są przezroczystymi nakładkami. Po dodaniu mapy podk
 | Punkty czerpania wody | `Lasy_Panstwowe_Dojazdy_Ppoz` | `1` | WMS | 4 m/px |
 | Lokalizacje pożarów | `Lasy_Panstwowe_Dojazdy_Ppoz` | `2` | WMS | 4 m/px |
 
-### > Drzewostany i siedliska leśne (BDL)
+#### Drzewostany i siedliska leśne (BDL)
 
 | Nazwa w drzewie | Zbiór map | Warstwa na serwerze | Typ | Piksel |
 |---|---|---|---|---|
@@ -351,7 +352,7 @@ Warstwy *Waymarked Trails* są przezroczystymi nakładkami. Po dodaniu mapy podk
 | Wydzielenia niezalesione (poza LP) | `Lasy_Panstwowe_Drzewostany` | `4` | WMS | 2 m/px |
 | Siedliska leśne (typy TSL) | `Lasy_Panstwowe_Siedliska` | `0` | WMS | 4 m/px |
 
-### > Własność i ochrona lasów (BDL)
+#### Własność i ochrona lasów (BDL)
 
 | Nazwa w drzewie | Zbiór map | Warstwa na serwerze | Typ | Piksel |
 |---|---|---|---|---|
@@ -367,7 +368,7 @@ Warstwy *Waymarked Trails* są przezroczystymi nakładkami. Po dodaniu mapy podk
 | Powierzchnie badawcze i doświadczalne | `Lasy_Panstwowe_Ochronnosc` | `8` | WMS | 4 m/px |
 | Drzewostany nasienne (WDN/GDN) | `Lasy_Panstwowe_Ochronnosc` | `9` | WMS | 2 m/px |
 
-### > Obwody łowieckie (BDL)
+#### Obwody łowieckie (BDL)
 
 | Nazwa w drzewie | Zbiór map | Warstwa na serwerze | Typ | Piksel |
 |---|---|---|---|---|

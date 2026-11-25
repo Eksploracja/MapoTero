@@ -1,6 +1,7 @@
 ---
 title: Scalanie segmentów
 nav_order: 11
+description: "Złączenie pobranych segmentów w jeden duży arkusz GeoTIFF, JPEG lub PNG z plikami kalibracji (format Arkusz w oknie Eksport mapy)."
 ---
 
 # Scalanie segmentów

@@ -2,6 +2,7 @@
 title: Pierwsza mapa krok po kroku
 nav_order: 3
 parent: Pierwsze kroki
+description: "Praktyczny samouczek: pobierzesz fragment mapy topograficznej 1:25 000, a następnie przygotujesz z niego plik dla telefonu oraz arkusz GeoTIFF dla programu GIS."
 ---
 
 # Pierwsza mapa krok po kroku
@@ -36,7 +37,7 @@ W tym samouczku pobierzemy obszar o wymiarach około 8 × 8 km, złożony z siat
 
 ## Krok 1: Wybór mapy i warstwy
 
-1. W prawym panelu, w karcie **Warstwy do pobrania**, rozwiń grupę:  
+1. W prawym panelu, w karcie **Katalog warstw**, rozwiń grupę:  
    **Mapy topograficzne** > **Skany map topograficznych GUGiK**.
 2. Zaznacz pole wyboru przy pozycji **1:25 000, układ 1965** (nazwa techniczna na serwerze: *Raster_25_1965*).
 3. Wybrana warstwa pojawi się na liście *Wybrane warstwy* z numerem `1)`. W karcie *Parametry segmentów* program automatycznie podpowie optymalną wartość piksela: **2,00 m/px**.
@@ -63,14 +64,14 @@ Jeśli chcesz zmienić te wartości, wystarczy kliknąć odnośnik **Zmień…**
 2. Wciśnij **prawy przycisk myszy** w jednym narożniku planowanego obszaru, przeciągnij prostokąt i puść przycisk (albo kliknij przycisk **Zaznacz obszar** na pasku narzędzi i kliknij dwa przeciwległe narożniki).
 3. Na mapie pojawi się siatka segmentów z uchwytami regulacji. W karcie *Obszar pobierania* pod mapą zobaczysz wymiar `8 × 8 km` oraz `4 segmenty`.
 
-![Okno główne po wybraniu warstwy i zaznaczeniu obszaru]({{ '/pomoc/obrazy/01-pierwsza-mapa-wybor.png' | relative_url }})
+![Okno główne po wybraniu warstwy i zaznaczeniu obszaru]({{ '/pomoc/obrazy/01-pierwsza-mapa-wybor.png' | relative_url }}){: loading="lazy" width="1266" height="721"}
 
 *Rysunek 1. Okno główne po wybraniu warstwy i wyznaczeniu siatki segmentów na mapie.*
 
 {: .informacja }
 Siatka zaokrągla zasięg do pełnych segmentów, więc może być nieco większa od narysowanego prostokąta. Jej granice możesz precyzyjnie dopasować, przeciągając białe uchwyty na krawędziach i narożnikach lewym przyciskiem myszy.
 
-![Szczegół siatki segmentów z widocznymi uchwytami regulacji]({{ '/pomoc/obrazy/01-pierwsza-mapa-siatka.png' | relative_url }})
+![Szczegół siatki segmentów z widocznymi uchwytami regulacji]({{ '/pomoc/obrazy/01-pierwsza-mapa-siatka.png' | relative_url }}){: loading="lazy" width="1266" height="721"}
 
 *Rysunek 2. Uchwyty pozwalają przesuwać krawędzie, narożniki i całą siatkę.*
 

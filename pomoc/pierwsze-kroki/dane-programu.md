@@ -2,6 +2,7 @@
 title: Gdzie program zapisuje dane
 nav_order: 2
 parent: Pierwsze kroki
+description: "Program zapisuje ustawienia i pobrane mapy obok siebie, a gdy tam nie może, w folderze użytkownika."
 ---
 
 # Gdzie program zapisuje dane
@@ -29,7 +30,7 @@ Przy każdym uruchomieniu program sprawdza możliwość zapisu plików w swoim f
 {: .wskazowka }
 Aby otworzyć folder użytkownika, wpisz `%LocalAppData%\MapoTero` w pasku adresu Eksploratora plików i naciśnij Enter.
 
-Folder bieżącej sesji jest widoczny na pasku stanu u dołu okna głównego.
+Folder bieżącej sesji jest widoczny w zakładce *Sesja* okna głównego (nazwa sesji także na pasku stanu).
 
 ---
 

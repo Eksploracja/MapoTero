@@ -1,6 +1,7 @@
 ---
 title: Pomoc programu
 nav_order: 2
+description: "Pełny opis programu: każde okno, każda opcja i gotowe sposoby pracy dla najczęstszych zadań."
 ---
 
 # Pomoc programu MapoTero
@@ -14,14 +15,13 @@ Pełny opis programu: każde okno, każda opcja i gotowe sposoby pracy dla najcz
 [Pobierz program](https://github.com/Eksploracja/MapoTero/releases/latest){: .btn .btn-primary .fs-4 .mb-2 }
 
 {: .informacja }
-Skrócony opis obsługi znajdziesz również w [skróconej instrukcji]({{ '/#skrócona-instrukcja-obsługi' | relative_url }})
-na stronie głównej oraz w samym programie (menu *Pomoc > Krótka instrukcja (bez internetu)*).
+Skrócony opis obsługi znajdziesz również bezpośrednio w programie (menu *Pomoc > Krótka instrukcja (bez internetu)*), a pełne wprowadzenie w rozdziale [Pierwsze kroki](pierwsze-kroki/).
 
 ---
 
 ## Od czego zacząć
 
-* **Szukasz najkrótszej drogi?** Uruchom program i wciśnij <kbd>Ctrl</kbd>+<kbd>K</kbd> (lub kliknij ikonę różdżki pod powiększeniem mapy), aby otworzyć [Szybki kreator mapy](narzedzia/#szybki-kreator-mapy). W 4 prostych krokach przygotujesz gotową mapę na telefon, odbiornik Garmin, do wydruku lub projektu inżynierskiego.
+* **Szukasz najkrótszej drogi?** Uruchom program i wciśnij <kbd>Ctrl</kbd>+<kbd>K</kbd> (lub kliknij przycisk **Szybki kreator…** na górnym pasku narzędzi nad mapą), aby otworzyć [Szybki kreator mapy](narzedzia/#szybki-kreator-mapy). W 4 prostych krokach przygotujesz gotową mapę na telefon, odbiornik Garmin, do wydruku lub projektu inżynierskiego.
 * **Chcesz poznać możliwości programu?** Zobacz rozdział [Do czego służy MapoTero](do-czego-sluzy/). Opisuje cztery główne zastosowania: od poszukiwań historycznych i turystyki po przygotowanie podkładów w CAD i GIS.
 * **Wolisz pełną ręczną kontrolę?** Przejdź do rozdziału [Pierwsze kroki](pierwsze-kroki/) i samouczka [Pierwsza mapa krok po kroku](pierwsze-kroki/pierwsza-mapa/). Warto też przejrzeć [Pojęcia podstawowe](pojecia/): rozmiar piksela, segment i kanapka warstw decydują o czytelności oraz wielkości plików.
 

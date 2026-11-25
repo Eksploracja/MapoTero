@@ -1,4 +1,5 @@
 <!-- Nowoczesna stylizacja MapoTero (kartograficzno-szmaragdowa paleta GIS & Slate) -->
+<link rel="icon" type="image/x-icon" href="{{ '/favicon.ico' | relative_url }}">
 <style>
 /* === TYPOGRAFIA I PODSTAWA STRONY === */
 body, .main-content {
@@ -206,9 +207,9 @@ a.btn-primary:active,
   align-items: center !important;
 }
 
-/* Odznaka aktualnej wersji v3.19 przy nazwie programu */
+/* Odznaka aktualnej wersji przy nazwie programu */
 .site-title::after {
-  content: "v3.19";
+  content: "v{{ site.wersja_programu }}";
   display: inline-block;
   font-size: 0.7rem;
   font-weight: 600;
@@ -1010,7 +1011,12 @@ document.addEventListener("DOMContentLoaded", function () {
       if (e.target === lbTlo || e.target === lbObszar) zamknijLb();
     });
     document.addEventListener("keydown", function (e) {
-      if (!lbTlo.hidden && e.key === "Escape") zamknijLb();
+      if (lbTlo.hidden) return;
+      if (e.key === "Escape") zamknijLb();
+      else if (e.key === "Tab") {
+        e.preventDefault();
+        lbZamknij.focus({ preventScroll: true });
+      }
     });
 
     obrazy.forEach(function (img) {

@@ -2,6 +2,7 @@
 title: Poziomy powiększenia i rozmiar pliku
 nav_order: 2
 parent: Eksport mapy
+description: "Jak dobrać zakres powiększeń, format kafli i jakość, żeby mapa była czytelna, a plik nie był za duży. Dotyczy MBTiles, GeoPackage, SQLiteDB i OruxMaps."
 ---
 
 # Poziomy powiększenia i rozmiar pliku
@@ -101,4 +102,4 @@ Jeśli limit przekracza już sam najniższy poziom, program o tym informuje. Zwi
 
 ➡️ **Kolejny krok:** [Nakładki i łączenie warstw w eksporcie →](../nakladki/)
 
-*Zobacz też: [Wybór formatu](../formaty/) · [Mapa w telefonie i odbiorniku GPS](../aplikacje/) · [Wielowarstwowy MBTiles](../../mbtiles-wielowarstwowy/)*
+*Zobacz też: [Wybór formatu](../formaty/) · [Mapa w telefonie i odbiorniku GPS](../aplikacje/) · [MBTiles wieloskalowy (łączenie sesji)](../../mbtiles-wielowarstwowy/)*

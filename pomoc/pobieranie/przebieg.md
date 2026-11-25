@@ -2,6 +2,7 @@
 title: Przebieg pobierania
 nav_order: 1
 parent: Pobieranie map
+description: "Program pobiera kilka segmentów jednocześnie i zapisuje je w folderze sesji. Pobieranie można w każdej chwili przerwać i później wznowić."
 ---
 
 # Przebieg pobierania
@@ -28,7 +29,7 @@ a czerwony komunikat mówi, co poprawić:
 
 | Komunikat | Co zrobić |
 |---|---|
-| *Nie wybrano żadnej warstwy…* | zaznacz warstwę w karcie *Warstwy do pobrania* |
+| *Nie wybrano żadnej warstwy…* | zaznacz warstwę w karcie *Katalog warstw* |
 | *Nie podano rozmiaru pojedynczego piksela…* / *…musi być większy od zera* | wpisz piksel, np. `1` w oknie *Parametry segmentów > Zmień…* |
 | *Długość boku segmentu nie może przekraczać 2048 px.* | zmniejsz bok segmentu (*Parametry segmentów > Zmień…*) |
 | *Niepoprawne współrzędne X, Y.* | zaznacz obszar albo popraw współrzędne (*Obszar pobierania > Zmień ▾ > Wpisz współrzędne…*) |
@@ -87,7 +88,7 @@ Pobieranie przerywa też zamknięcie programu. Brakujące segmenty można dopobr
 Aby dokończyć przerwane lub niepełne pobieranie:
 
 1. Jeśli program był zamknięty, uruchom go. Ostatnia sesja (z podfolderu `download\sesja_...`) wczyta się automatycznie. Sesję z innego folderu
-   wczytaj z menu *Sesja pobierania > Wczytaj ustawienia sesji (conf.txt)*.
+   wczytaj z menu *Sesja pobierania > Otwórz sesję...*.
 2. Nie zmieniaj zasięgu, segmentu, piksela, układu ani warstw.
 3. Kliknij **Pobierz segmenty**.
 

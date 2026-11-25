@@ -1,6 +1,7 @@
 ---
 title: Słownik pojęć
 nav_order: 21
+description: "Krótkie objaśnienia najważniejszych terminów używanych w programie MapoTero i w tej pomocy."
 ---
 
 # Słownik pojęć
@@ -21,7 +22,7 @@ Krótkie objaśnienia najważniejszych terminów używanych w programie MapoTero
 | **GetCapabilities** | Dokument XML udostępniany przez serwer WMS lub WMTS z listą wszystkich dostępnych warstw, obsługiwanych układów i zakresów skal. |
 | **Kafel (tile)** | Mały fragment mapy (zwykle `256 × 256 px`) udostępniany w gotowej formie przez usługi kafelkowe (WMTS, XYZ, TMS) lub zapisywany wewnątrz baz MBTiles/SQLiteDB. |
 | **Kanapka warstw** | Kilka warstw nałożonych jedna na drugą na liście *Wybrane warstwy* (warstwa na dole listy to podkład, warstwy wyższe leżą nad nią). |
-| **Katalog warstw (`katalog.txt`)** | Plik konfiguracyjny w folderze `warstwy\`, który tworzy logiczne grupy tematyczne w drzewie *Warstwy do pobrania* i przypisuje warstwom czytelne nazwy zamiast kodów technicznych serwerów. |
+| **Katalog warstw (`katalog.txt`)** | Plik konfiguracyjny w folderze `warstwy\`, który tworzy logiczne grupy tematyczne w drzewie *Katalog warstw* i przypisuje warstwom czytelne nazwy zamiast kodów technicznych serwerów. |
 | **Korytarz** | Pobieranie ograniczone do pasa o zadanej szerokości wokół wczytanej trasy GPX, KML lub KMZ (zamiast całego prostokąta). |
 | **Krycie (%)** | Stopień nieprzezroczystości warstwy (`5–100%`). Mniejsze krycie pozwala prześwitywać warstwie znajdującej się niżej. |
 | **LISP (`.lsp`)** | Program automatyzacji w środowisku CAD (AutoCAD, BricsCAD, ZWCAD itp.) wczytywany poleceniem `APPLOAD`, który wstawia podkłady rastrowe MapoTero pod istniejące obiekty rysunku poleceniem `MAPOTERO_WSTAW`. |

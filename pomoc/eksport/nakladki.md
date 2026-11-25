@@ -2,6 +2,7 @@
 title: Nakładki i łączenie warstw
 nav_order: 3
 parent: Eksport mapy
+description: "Przezroczysta nakładka nad mapą aplikacji oraz łączenie kilku pobranych map w jedną, z regulacją krycia."
 ---
 
 # Nakładki i łączenie warstw
@@ -63,7 +64,7 @@ Po zmianie mapy podstawowej (*Zmień folder*) program usuwa z listy warstwy, kt�
 Najwyższy poziom powiększenia program dobiera do najdokładniejszej z warstw, a opis mapy w pliku wymienia
 wszystkie warstwy i ich źródła.
 
-![Sekcja Warstwy i przezroczystość w oknie eksportu]({{ '/pomoc/obrazy/10-eksport-nakladki.png' | relative_url }})
+![Sekcja Warstwy i przezroczystość w oknie eksportu]({{ '/pomoc/obrazy/10-eksport-nakladki.png' | relative_url }}){: loading="lazy" width="501" height="450"}
 
 *Rysunek 1. Sekcja warstw i przezroczystości w oknie eksportu.*
 
@@ -92,7 +93,7 @@ wszystkie warstwy i ich źródła.
 
 {: .informacja }
 Kilka warstw z jednego albo z **różnych** serwerów (WMS, WMTS, XYZ/TMS) możesz też połączyć od razu **podczas pobierania**
-w oknie głównym ([Warstwy do pobrania i wybrane warstwy](../../okno-glowne/#katalog-map-i-lista-warstw), okno *Mikser...* oraz poradnik [Kompozycje warstw i plastyczna rzeźba](../../pobieranie/kompozycje/)).
+w oknie głównym ([Katalog warstw i wybrane warstwy](../../okno-glowne/#katalog-map-i-lista-warstw), okno *Mikser...* oraz poradnik [Kompozycje warstw i plastyczna rzeźba](../../pobieranie/kompozycje/)).
 Łączenie w oknie eksportu przydaje się wtedy, gdy sesje były już pobrane osobno, powstały w różnych układach
 współrzędnych albo wymagają usunięcia białego tła z gotowych segmentów JPEG.
 Mapę, która przy różnych przybliżeniach pokazuje różne warstwy, tworzy

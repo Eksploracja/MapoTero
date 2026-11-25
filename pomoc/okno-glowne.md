@@ -1,6 +1,7 @@
 ---
 title: Okno główne
 nav_order: 5
+description: "Opis każdego elementu nowoczesnego okna głównego: paska narzędziowego, mapy podglądu, kart obszaru i parametrów pod mapą, katalogu map, warstw oraz panelu…"
 ---
 
 # Okno główne
@@ -21,7 +22,7 @@ Opis każdego elementu nowoczesnego okna głównego: paska narzędziowego, mapy 
 
 ## Widok całego okna
 
-![Okno główne programu MapoTero]({{ '/pomoc/obrazy/03-okno-glowne.png' | relative_url }})
+![Okno główne programu MapoTero]({{ '/pomoc/obrazy/03-okno-glowne.png' | relative_url }}){: loading="lazy" width="1266" height="721"}
 
 *Rysunek 1. Okno główne programu MapoTero: mapa podglądu z siatką segmentów, katalog warstw, kompozycja warstw z podglądem na żywo oraz karty obszaru, parametrów i stanu sesji.*
 
@@ -30,7 +31,7 @@ Opis każdego elementu nowoczesnego okna głównego: paska narzędziowego, mapy 
 | **1** | Pasek menu | menu *Sesja pobierania* (<kbd>Alt</kbd>+<kbd>S</kbd>), menu *Narzędzia* oraz menu *Pomoc* (pełna lista poleceń i skrótów poniżej) |
 | **2** | Górny pasek narzędzi | trzy grupy: **Nowa sesja** i **Szybki kreator…** (<kbd>Ctrl</kbd>+<kbd>K</kbd>), **Zaznacz obszar** i wyszukiwarka **Szukaj miejsca lub działki…** (<kbd>Ctrl</kbd>+<kbd>F</kbd>), **Folder pobrań**, a po prawej lista **Podkład** (OpenStreetMap, Google Maps, Bing) |
 | **3** | Mapa podglądu | interaktywny podkład orientacyjny do wyboru obszaru, siatka segmentów z białymi uchwytami regulacji, przyciski **+** / **-** oraz podziałka liniowa w prawym dolnym rogu |
-| **4** | Karta *Warstwy do pobrania* | tematyczny katalog zbiorów i warstw, filtr *Szukaj warstwy…*, przycisk **Zwiń / Rozwiń**, ikona galerii warstw online oraz przycisk **+ Serwer…** |
+| **4** | Karta *Katalog warstw* | tematyczny katalog zbiorów i warstw, filtr *Szukaj warstwy…*, przycisk **Zwiń / Rozwiń**, ikona galerii warstw online oraz przycisk **+ Serwer…** |
 | **5** | Karta *Wybrane warstwy* | stos wybranych warstw (do 12), pole liczbowe krycia (`%`) w wierszu wybranej warstwy, krzyżyk `✕` do usuwania, zmiana kolejności myszą lub <kbd>Ctrl</kbd>+<kbd>↑</kbd>/<kbd>↓</kbd> oraz przycisk **Mikser…** |
 | **6** | Karta *Obszar pobierania* | wymiary terenu (np. `8 × 8 km`) i liczba segmentów. Kliknięcie wymiarów wraca do siatki na mapie, a **Zmień ▾** otwiera menu metod wyznaczania obszaru |
 | **7** | Karta *Parametry segmentów* | rozmiar piksela (np. `2 m/px`), układ współrzędnych, bok segmentu i format plików. Odnośnik **Zmień…** rozwija panel edycji parametrów |
@@ -41,7 +42,7 @@ Opis każdego elementu nowoczesnego okna głównego: paska narzędziowego, mapy 
 <details markdown="block">
 <summary><b>Pokaż schemat okna z ponumerowanymi sekcjami (1–10)</b></summary>
 
-![Okno główne programu MapoTero z ponumerowanymi sekcjami]({{ '/pomoc/obrazy/03-okno-glowne-sekcje.png' | relative_url }})
+![Okno główne programu MapoTero z ponumerowanymi sekcjami]({{ '/pomoc/obrazy/03-okno-glowne-sekcje.png' | relative_url }}){: loading="lazy" width="1266" height="721"}
 
 *Schemat rozmieszczenia sekcji okna głównego opisanych w tabeli powyżej (1–10).*
 
@@ -49,7 +50,7 @@ Opis każdego elementu nowoczesnego okna głównego: paska narzędziowego, mapy 
 
 Układ okna dzieli się na dwie główne kolumny:
 * **po lewej**: mapa podglądu z górnym paskiem narzędzi oraz trzema kartami pod mapą (*Obszar pobierania*, *Parametry segmentów*, *Stan sesji*),
-* **po prawej**: regulowany panel z kartami *Warstwy do pobrania*, *Wybrane warstwy* i dolnymi zakładkami. Szerokość prawego panelu i wysokość jego sekcji można płynnie regulować, przeciągając dzielniki (dwuklik przywraca domyślny podział).
+* **po prawej**: regulowany panel z kartami *Katalog warstw*, *Wybrane warstwy* i dolnymi zakładkami. Szerokość prawego panelu i wysokość jego sekcji można płynnie regulować, przeciągając dzielniki (dwuklik przywraca domyślny podział).
 
 Program uruchamia się domyślnie w pełnym oknie zmaksymalizowanym.
 
@@ -59,30 +60,35 @@ Program uruchamia się domyślnie w pełnym oknie zmaksymalizowanym.
 
 | Menu | Polecenie | Skrót | Opis |
 |---|---|---|---|
-| **Sesja pobierania** | Nowa sesja | | czyści wybrane warstwy, zasięg, zaznaczenie i siatkę, obszar wzdłuż trasy i kontur działki, przywracając domyślny stan programu (zob. [Sesje pobierania](../sesje/)) |
-| | Otwórz folder pobrań | | otwiera w Eksploratorze Windows bieżący folder sesji z pobranymi segmentami |
-| | Pokaż siatkę na mapie | | włącza lub ukrywa siatkę segmentów na mapie podglądu |
-| | Zapisz ustawienia sesji (conf.txt) | <kbd>Alt</kbd>+<kbd>Z</kbd> | zapisuje parametry bieżącej sesji we wskazanym folderze. Wybrany folder staje się folderem sesji |
-| | Wczytaj ustawienia sesji (conf.txt) | <kbd>Alt</kbd>+<kbd>W</kbd> | wczytuje sesję ze wskazanego folderu (wymaga pliku `conf.txt`) |
+| **Sesja pobierania** | Nowa sesja | <kbd>Ctrl</kbd>+<kbd>N</kbd> | czyści wybrane warstwy, obszar pobierania, obszar wzdłuż trasy i kontur działki; widok mapy zostaje (zob. [Sesje pobierania](../sesje/)) |
+| | Otwórz sesję... | <kbd>Ctrl</kbd>+<kbd>O</kbd> | wczytuje sesję ze wskazanego folderu (wymaga pliku `conf.txt`) |
+| | Ostatnie sesje | | lista ostatnich sesji z folderu pobrań - jedno kliknięcie wczytuje sesję |
+| | Zapisz sesję w folderze... | <kbd>Ctrl</kbd>+<kbd>S</kbd> | zapisuje parametry bieżącej sesji we wskazanym folderze. Wybrany folder staje się folderem sesji |
+| | Zaznacz obszar na mapie | | dwa kliknięcia na mapie wyznaczają narożniki obszaru (tak samo jak przycisk **Zaznacz obszar**) |
+| | Wpisz współrzędne obszaru... | | okno [współrzędnych zasięgu](../obszar/wspolrzedne/) |
 | | Obszar pobierania wzdłuż trasy (GPX, KML, KMZ, GPKG)... | | [Obszar wzdłuż trasy](../obszar/korytarz/), pobieranie segmentów tylko w zadanym pasie wzdłuż śladu trasy |
 | | Obszar pobierania z poligonu (KML, GeoJSON, GPKG)... | | [Obszar z poligonu](../obszar/zaznaczanie/#obszar-z-poligonu-kml-geojson-geopackage), automatyczny prostokąt wokół wektora |
 | | Usuń obszar wzdłuż trasy (pobieranie całego prostokąta) | | usuwa korytarz i wraca do pobierania pełnego prostokąta |
-| | Odśwież mapę (pobierz ponownie wszystkie segmenty) | | [Odświeżanie mapy](../pobieranie/odswiezanie/), bezpieczne dociąganie nowych kafelków |
-| | Usuń pobrane pliki bieżącej sesji... (do Kosza) | | przenosi pobrane segmenty bieżącej sesji do Kosza (zob. [Dane programu](../pierwsze-kroki/dane-programu/)) |
+| | Pokaż obszar i siatkę na mapie | | przybliża mapę do obszaru pobierania i rysuje siatkę segmentów |
+| | Pobierz segmenty | <kbd>F5</kbd> | to samo co przycisk w karcie *Stan sesji*; w trakcie pobierania - **Przerwij pobieranie** |
+| | Pobierz ponownie wszystkie segmenty... | | [Odświeżanie mapy](../pobieranie/odswiezanie/), bezpieczne dociąganie nowych kafelków |
+| | Eksportuj mapę... | <kbd>Ctrl</kbd>+<kbd>E</kbd> | [Eksport mapy](../eksport/) do formatów mobilnych (JNX, KMZ, MBTiles, GeoPackage, SQLiteDB, OruxMaps, TrekBuddy) i arkuszy; okno pamięta ostatni format |
+| | Otwórz folder sesji / Otwórz folder pobrań (wszystkie sesje) | | otwiera w Eksploratorze Windows folder bieżącej sesji albo folder `download` |
+| | Usuń pobrane pliki sesji... (do Kosza) | | przenosi pobrane segmenty bieżącej sesji do Kosza (zob. [Dane programu](../pierwsze-kroki/dane-programu/)) |
 | **Narzędzia** | Szybki kreator mapy... | <kbd>Ctrl</kbd>+<kbd>K</kbd> | [Szybki kreator mapy](../narzedzia/#szybki-kreator-mapy), przygotowanie gotowej mapy w 4 krokach od celu do pliku |
 | | Dodaj nowy serwer WMS / WMTS... | | [Kreator serwerów](../serwery/kreator/), dodawanie usług WMS, WMTS oraz kafelków XYZ/TMS |
 | | Otwórz folder własnych warstw... | | otwiera folder `warstwy` w katalogu danych programu |
 | | Wyszukaj miejscowość lub działkę... | <kbd>Ctrl</kbd>+<kbd>F</kbd> | [Wyszukiwarka miejscowości i działek ULDK](../obszar/zaznaczanie/#wyszukiwarka-miejscowości-adresów-i-działek-katastralnych) (<kbd>Ctrl</kbd>+<kbd>D</kbd> dla działek) |
-| | Konwertuj mapę OziExplorer (.map)... | | [Konwerter map OziExplorer](../narzedzia/#konwerter-map-oziexplorer-map), kalibrowane skany do JNX, KMZ, MBTiles i GeoPackage |
-| | Konwertuj mapę GeoTIFF... | | [Konwerter map GeoTIFF](../narzedzia/#konwerter-map-geotiff), konwersja pliku GeoTIFF do MBTiles, GeoPackage, KMZ, JNX, SQLiteDB lub OruxMaps |
+| | Konwertuj gotową mapę > Skan OziExplorer z plikiem kalibracji (.map)... | | [Konwerter map OziExplorer](../narzedzia/#konwerter-map-oziexplorer-map), kalibrowane skany do JNX, KMZ, MBTiles i GeoPackage |
+| | Konwertuj gotową mapę > Mapa GeoTIFF (.tif)... | | [Konwerter map GeoTIFF](../narzedzia/#konwerter-map-geotiff), konwersja pliku GeoTIFF do MBTiles, GeoPackage, KMZ, JNX, SQLiteDB lub OruxMaps |
 | | Profil wysokościowy trasy (GPX, KML)... | | [Profil wysokościowy trasy](../narzedzia/#profil-wysokościowy-trasy), rzędne z laserowego skaningu NMT/LIDAR i wzbogacanie GPX |
 | | Scalanie segmentów | <kbd>Ctrl</kbd>+<kbd>L</kbd> | okno [Eksport mapy](../eksport/) z wybranym formatem *Arkusz*, zobacz [Scalanie segmentów](../scalanie/) |
-| | Eksport z pobranych segmentów… | <kbd>Ctrl</kbd>+<kbd>E</kbd> | [Eksport mapy](../eksport/) do formatów mobilnych (JNX, KMZ, MBTiles, GeoPackage, SQLiteDB, OruxMaps, TrekBuddy) i arkuszy |
+| | MBTiles / GeoPackage wieloskalowy (łącz sesje)... | | [MBTiles wieloskalowy](../mbtiles-wielowarstwowy/), łączenie pobranych sesji w jedną mapę wieloskalową |
 | | Eksport do CAD (DXF, skrypt SCR, LISP)... | | [Eksport do CAD](../cad/), rysunek DXF, skrypt SCR i program LISP dla programów CAD |
 | | Korekta obrazów w folderze... | | [Korekta obrazów w folderze](../narzedzia/#korekta-obrazów-w-folderze), wsadowa optymalizacja kontrastu, gamma i filtr MIP |
 | | Prześlij mapę na telefon (Wi-Fi)... | | [Transfer mapy na telefon](../narzedzia/#przesyłanie-mapy-na-telefon-przez-wi-fi-i-kod-qr), lokalny serwer Wi-Fi i kod QR |
 | | Kopiuj mapę do Garmina (USB)... | | [Kopiowanie do Garmina](../narzedzia/#kopiowanie-mapy-do-odbiornika-garmin-usb), wykrywanie odbiornika w trybie pamięci masowej |
-| | Ustawienia | | okno [Ustawienia programu](../ustawienia/) |
+| | Ustawienia... | <kbd>Ctrl</kbd>+<kbd>,</kbd> | okno [Ustawienia programu](../ustawienia/) |
 | **Pomoc** | Podręcznik użytkownika (online) | <kbd>F1</kbd> | otwiera ten podręcznik w przeglądarce internetowej |
 | | Galeria warstw map (podgląd online) | | [Galeria warstw map online](../galeria-warstw/) z bezpośrednim dodawaniem warstw do programu |
 | | Krótka instrukcja (bez internetu) | | skrócona instrukcja wbudowana w plik programu |
@@ -160,28 +166,29 @@ Pod mapą znajdują się trzy karty w jednolitym, przejrzystym stylu:
 
 Prawy panel programu organizuje źródła danych i kompozycję wielowarstwową:
 
-* **Warstwy do pobrania (katalog tematyczny):**
+* **Katalog warstw (katalog tematyczny):**
   * Grupy tematyczne: *Mapy topograficzne*, *Rzeźba terenu (cieniowanie, hipsometria)*, *Ortofotomapy*, *Mapy historyczne i zabytki*, *Ewidencja, geodezja i uzbrojenie (EGiB, GESUT)*, *Granice i adresy (PRG, PRNG)*, *Przyroda i środowisko (GDOŚ, BDL)*, *Geologia (PIG-PIB)*, *Kraje sąsiednie i strefa przygraniczna (Czechy, Słowacja, Niemcy, Litwa, Bałtyk)* oraz serwery dodane przez użytkownika.
   * Zaznaczenie pola wyboru dodaje warstwę do listy wybranych. Odznaczenie ją usuwa.
   * Pole wyszukiwarki pozwala przefiltrować drzewo według dowolnych słów kluczowych. Klawisz <kbd>Esc</kbd> czyści filtr.
   * Przycisk **Zwiń / Rozwiń** zwija lub rozwija wszystkie grupy w katalogu, ikona galerii otwiera [Galerię warstw map online](../galeria-warstw/) (zob. też [poradnik Galerii i Miksera](../galeria-i-mikser/)), a przycisk **+ Serwer…** w nagłówku karty uruchamia kreator usług WMS, WMTS i kafelkowych XYZ/TMS.
-  * **Szybki podgląd po najechaniu myszą:** gdy zatrzymasz kursor na warstwie w drzewie *Warstwy do pobrania*, po prawej stronie wiersza pojawią się dwie małe ikony: **próbka mapy** oraz **zasięg przestrzenny**. Kliknięcie ikony otwiera okienko podglądu z rzeczywistym fragmentem mapy lub jej zasięgiem na tle Polski, jeszcze zanim dodasz warstwę do listy.
+  * **Szybki podgląd po najechaniu myszą:** gdy zatrzymasz kursor na warstwie w drzewie *Katalog warstw*, po prawej stronie wiersza pojawią się dwie małe ikony: **próbka mapy** oraz **zasięg przestrzenny**. Kliknięcie ikony otwiera okienko podglądu z rzeczywistym fragmentem mapy lub jej zasięgiem na tle Polski, jeszcze zanim dodasz warstwę do listy.
 
 * **Wybrane warstwy:**
   * Lista mieści do 12 warstw ułożonych w kanapkę (warstwa na dole listy to podkład, warstwy wyżej leżą na wierzchu).
   * **Krycie bezpośrednio w wierszu:** zaznaczenie warstwy wyświetla pole liczbowe do zmiany przezroczystości (5–100%).
   * **Usuwanie i kolejność:** przycisk **✕** w wierszu usuwa warstwę. Kolejność zmienisz, przeciągając wiersz myszą lub skrótem <kbd>Ctrl</kbd>+<kbd>↑</kbd>/<kbd>↓</kbd>.
-  * **Menu kontekstowe i przepisy `.mapotero`:** kliknięcie prawym przyciskiem myszy na liście *Wybrane warstwy* pozwala wybrać **Kopiuj kanapkę (JSON)**, **Wklej kanapkę ze schowka** lub **Wczytaj kanapkę z pliku...**. Możesz też przeciągnąć plik `.mapotero` lub `.json` z Eksploratora Windows wprost na okno programu, aby natychmiast wczytać zapisaną kompozycję.
-  * Przycisk **Mikser…** w nagłówku karty otwiera okno *Warstwy - zaawansowane*.
+  * **Menu kontekstowe i przepisy `.mapotero`:** kliknięcie prawym przyciskiem myszy na liście *Wybrane warstwy* pozwala wybrać **Kopiuj zestaw warstw (JSON)**, **Wklej zestaw warstw ze schowka** lub **Wczytaj zestaw warstw z pliku...**. Możesz też przeciągnąć plik `.mapotero` lub `.json` z Eksploratora Windows wprost na okno programu, aby natychmiast wczytać zapisaną kompozycję.
+  * Przycisk **Mikser…** w nagłówku karty otwiera okno *Mikser warstw*.
 
-### Okno *Warstwy - zaawansowane* (Mikser)
+### Okno *Mikser warstw*
 
-![Okno Warstwy - zaawansowane: mapa topograficzna 1:10 000 z cieniowaniem LiDAR w trybie mnożenia]({{ '/pomoc/obrazy/03-warstwy-zaawansowane.png' | relative_url }})
+![Okno Mikser warstw: mapa topograficzna 1:10 000 z cieniowaniem LiDAR w trybie mnożenia]({{ '/pomoc/obrazy/03-warstwy-zaawansowane.png' | relative_url }}){: loading="lazy" width="878" height="504"}
 
 *Rysunek 2. Okno zaawansowanego miksera warstw: mapa topograficzna 1:10 000 połączona z cieniowaniem NMT LiDAR w trybie mnożenia (pełne krycie 100%).*
 
 * Pozwala przypisać każdej warstwie niezależny tryb mieszania: **1 Zwykły**, **2 Mnożenie**, **3 Ciemniej**, **4 Jaśniej**, **5 Ekran**, **6 Nakładka** oraz **7 Rzeźba terenu**.
 * **Tryb „Rzeźba terenu”:** eliminuje problem szarej zasłony przy nakładaniu cieniowania NMT LiDAR. Płaski teren pozostaje neutralny, stoki w cieniu ciemnieją, a zbocza oświetlone delikatnie jaśnieją.
+* **Przyciski zarządzania kompozycją:** **➕ Dodaj warstwę...** pozwala dołożyć kolejną warstwę z katalogu bez zamykania miksera, a **⚡ Ułóż automatycznie** sortuje wybrane warstwy w zalecanej kolejności (podkłady na dole, nakładki na górze).
 * Wyświetla podgląd złożenia warstw na żywo z lupą powiększającą oraz przycisk *Korekta obrazu...* (filtr MIP, wyostrzanie krawędzi, rozjaśnienie lasów).
 
 ---

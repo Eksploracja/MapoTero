@@ -2,6 +2,7 @@
 layout: default
 title: Galeria i Mikser warstw
 nav_order: 17.6
+description: "Galeria warstw to przeglądarkowy katalog wszystkich zbiorów map dostępnych w MapoTero. Pozwala obejrzeć próbki map na żywo, sprawdzić ich zasięg…"
 ---
 
 # Galeria i Mikser warstw
@@ -12,11 +13,12 @@ nav_order: 17.6
 
 ---
 
-## Spis treści
-{: .no_toc .text-delta }
-
-1. TOC
+<details open markdown="block">
+<summary>Na tej stronie</summary>
+{: .text-delta }
+- TOC
 {:toc}
+</details>
 
 ---
 
@@ -24,7 +26,7 @@ nav_order: 17.6
 
 Galerię możesz uruchomić na dwa sposoby:
 
-* **Z programu MapoTero:** kliknij ikonę galerii (stos kart) w nagłówku karty *Warstwy do pobrania* albo wybierz z menu **Narzędzia > Galeria warstw map online**. Program otworzy stronę w przeglądarce z aktywnym połączeniem do działającego okna MapoTero.
+* **Z programu MapoTero:** kliknij ikonę galerii (stos kart) w nagłówku karty *Katalog warstw* albo wybierz z menu **Pomoc > Galeria warstw map (podgląd online)**. Program otworzy stronę w przeglądarce z aktywnym połączeniem do działającego okna MapoTero.
 * **Bezpośrednio w przeglądarce:** wejdź na stronę [Galeria warstw map](../galeria-warstw/). W tym trybie możesz przeglądać katalog, testować kompozycje w Mikserze oraz zapisywać przepisy do pliku `.mapotero` i schowka, a po uruchomieniu MapoTero jednym kliknięciem przesłać gotową kanapkę do programu.
 
 {: .uwaga }
@@ -36,7 +38,7 @@ Gdy pierwszy raz wyślesz warstwę lub zestaw z przeglądarki do MapoTero, przeg
 
 Każda karta w galerii prezentuje jedną warstwę mapową wraz z jej miniaturą, źródłem danych, rodzajem usługi (`WMS`, `WMTS` lub `XYZ`) oraz informacją o rozdzielczości.
 
-![Widok Galerii warstw w przeglądarce z kartami map i paskiem Miksera na dole](../obrazy/17-galeria-warstw.png)
+![Widok Galerii warstw w przeglądarce z kartami map i paskiem Miksera na dole](../obrazy/17-galeria-warstw.png){: loading="lazy" width="1360" height="920"}
 
 *Rysunek 1. Galeria warstw online: wyszukiwarka, filtry grup tematycznych, karty warstw i dolny pasek Miksera.*
 
@@ -56,7 +58,7 @@ Aby dodać warstwę do kompozycji, kliknij **Dodaj do miksu** na jej karcie w ga
 
 ### Prawa kolumna: kolejność, krycie i tryby mieszania
 
-![Okno Miksera warstw z podglądem na żywo oraz stosem warstw i trybami mieszania po prawej stronie](../obrazy/17-mikser-podglad.png)
+![Okno Miksera warstw z podglądem na żywo oraz stosem warstw i trybami mieszania po prawej stronie](../obrazy/17-mikser-podglad.png){: loading="lazy" width="1360" height="920"}
 
 *Rysunek 2. Mikser warstw: po lewej podgląd kompozycji na żywo, po prawej stos warstw z suwakami krycia i trybami mieszania.*
 
@@ -75,7 +77,7 @@ Lewa część okna Miksera ma dwie zakładki przełączane u góry:
 1. **Podgląd wyniku:** pokazuje złożoną kompozycję w wybranym miejscu. Możesz przełączać źródło podglądu między rzeczywistymi kafelkami **na żywo** z serwerów a lekką symulacją offline (przydatną przy wolnym łączu), zmieniać skalę podglądu (`Auto` albo od `0,5` do `25 m/px`) oraz przybliżać i oddalać kółkiem myszy.
 2. **Miejsce i obszar:** wyświetla interaktywną mini-mapę, na której sprawdzisz i zmienisz lokalizację próbki oraz zaznaczysz gotowy obszar do pobrania w programie.
 
-![Zakładka Miejsce i obszar w Mikserze warstw z mini-mapą i zaznaczonym obszarem](../obrazy/17-mikser-mapa.png)
+![Zakładka Miejsce i obszar w Mikserze warstw z mini-mapą i zaznaczonym obszarem](../obrazy/17-mikser-mapa.png){: loading="lazy" width="1360" height="920"}
 
 *Rysunek 3. Zakładka Miejsce i obszar w Mikserze warstw: wybór miejsca próbki oraz zaznaczanie prostokąta obszaru prawym przyciskiem myszy.*
 
@@ -92,7 +94,7 @@ Gdy kompozycja wygląda tak, jak trzeba, możesz ją wykorzystać na kilka sposo
 * **Wyślij do MapoTero:** przekazuje cały stos warstw (wraz z kolejnością, kryciem i trybami mieszania) wprost na listę *Wybrane warstwy* w otwartym programie. Jeśli w Mikserze zaznaczyłeś także obszar na mini-mapie, program przejmie również ten zasięg.
 * **Otwórz w Szybkim Kreatorze:** uruchamia w MapoTero [Szybki kreator mapy](../narzedzia/#szybki-kreator-mapy) z przygotowanym już własnym zestawem warstw. Jeśli w miksie łączysz mapy o dużej rozpiętości skal (np. mapę przeglądową, topograficzną i ortofotomapę), MapoTero zaproponuje automatyczne rozdzielenie ich na osobne stopnie skali (mapę wieloskalową MBTiles). W kreatorze możesz zapisać taki zestaw jako swój stały szablon albo wyeksportować go (wraz z zakresami zoom) do pliku `.mapotero.json`.
 * **Zapisz jako plik `.mapotero`:** pobiera niewielki plik przepisu w formacie JSON (`mapotero-zestaw`). Taki plik możesz zachować na dysku, wysłać znajomym albo przeciągnąć myszą z Eksploratora Windows wprost na okno MapoTero (Drag & Drop), aby natychmiast wczytać całą kompozycję.
-* **Kopiuj link lub JSON:** kopiuje adres URL galerii z zakodowaną kompozycją (`?kanapka=...`) albo surowy tekst JSON do schowka. W programie MapoTero wystarczy kliknąć prawym przyciskiem myszy na liście *Wybrane warstwy* i wybrać **Wklej kanapkę ze schowka**.
+* **Kopiuj link lub JSON:** kopiuje adres URL galerii z zakodowaną kompozycją (`?kanapka=...`) albo surowy tekst JSON do schowka. W programie MapoTero wystarczy kliknąć prawym przyciskiem myszy na liście *Wybrane warstwy* i wybrać **Wklej zestaw warstw ze schowka**.
 
 {: .wskazowka }
-Jeśli chcesz przenieść gotową kompozycję z okna MapoTero do Miksera lub zapisać ją dla kolegi, kliknij prawym przyciskiem myszy na liście *Wybrane warstwy* w programie i wybierz **Kopiuj kanapkę (JSON)**.
+Jeśli chcesz przenieść gotową kompozycję z okna MapoTero do Miksera lub zapisać ją dla kolegi, kliknij prawym przyciskiem myszy na liście *Wybrane warstwy* w programie i wybierz **Kopiuj zestaw warstw (JSON)**.

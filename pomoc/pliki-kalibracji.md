@@ -1,6 +1,7 @@
 ---
 title: Pliki kalibracji
 nav_order: 10
+description: "Pliki georeferencji zapisywane obok segmentów i scalonych arkuszy: który program czyta dany format."
 ---
 
 # Pliki kalibracji

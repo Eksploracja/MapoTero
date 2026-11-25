@@ -16,7 +16,7 @@ Darmowy, otwartoźródłowy program dla systemu Windows do pobierania map rastro
 {: .mb-2 }
 
 Darmowy program na Windows (64-bit) · Bez instalacji (portable, pojedynczy plik .exe) · Licencja wolnego oprogramowania GPLv3
-{: .fs-3 .text-grey-dk-000 .d-block .mb-4 }
+{: .fs-3 .text-grey-dk-200 .d-block .mb-4 }
 
 ![Główne okno programu MapoTero]({{ '/pomoc/obrazy/03-okno-glowne.png' | relative_url }})
 
@@ -39,7 +39,7 @@ Darmowy program na Windows (64-bit) · Bez instalacji (portable, pojedynczy plik
 * **Transfer na telefon przez Wi-Fi i kod QR:** bez kabla USB i bez chmury – wystarczy zeskanować kod QR aparatem telefonu w sieci lokalnej, aby pobrać mapę bezpośrednio na smartfon.
 * **Własne kompozycje warstw:** łączenie warstw z różnych serwerów (WMS, WMTS i XYZ razem), regulacja krycia, tryby mieszania (w tym dedykowany tryb *7 Rzeźba terenu* dla cieniowania LiDAR) oraz podgląd efektu na żywo przed pobieraniem.
 * **Pobieranie tylko potrzebnego obszaru:** siatka segmentów (do 2048×2048 px) z przesuwanymi uchwytami, korytarz wzdłuż trasy GPX/KML/KMZ, obrys z pliku `.gpkg` oraz wyszukiwarka miejscowości, adresów i działek ULDK (`Ctrl+F`).
-* **Układy współrzędnych i konwertery:** precyzyjne przeliczenia w locie dla PL-1992, PL-2000 (strefy 5–8), UTM (33N–35N) i WGS84 oraz wbudowany konwerter starych map OziExplorer (`.map`) do formatów JNX, KMZ i MBTiles.
+* **Układy współrzędnych i konwertery:** przeliczenia współrzędnych między układami PL-1992, PL-2000 (strefy 5–8), UTM (33N–35N) i WGS84 oraz wbudowany konwerter starych map OziExplorer (`.map`) do formatów JNX, KMZ i MBTiles.
 
 ---
 
@@ -53,7 +53,7 @@ Program działa w trybie **portable (bez instalacji)** – pobierz i rozpakuj ar
 
 Więcej informacji, tryb ręczny z pełną kontrolą warstw oraz szczegółowe poradniki znajdziesz w dokumentacji:
 
-* 📖 **[Podręcznik użytkownika online](pomoc/):** 42 rozdziały instrukcji krok po kroku opisujące każde narzędzie i format.
+* 📖 **[Podręcznik użytkownika online](pomoc/):** instrukcja krok po kroku opisująca każde narzędzie, okno i format pliku.
 * 🗺️ **[Galeria warstw i usług](pomoc/galeria-warstw/):** zestawienie polecanych serwisów (ortofotomapy, NMT/LiDAR, mapy archiwalne WIG i pruskie, zabytki NID, bazy EZiUDP).
 * 💬 **[Społeczność i forum](https://forum.eksploracja.pl/viewforum.php?f=205):** dyskusje, pomoc i zgłaszanie propozycji na forum eksploracja.pl.
 * 💻 **[Projekt na GitHubie](https://github.com/Eksploracja/MapoTero):** repozytorium kodu, historia wydań i zgłaszanie błędów (Issues).

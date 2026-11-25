@@ -2,6 +2,7 @@
 title: Pierwsze kroki
 nav_order: 3
 has_children: true
+description: "Instalacja programu, miejsca zapisu danych i samouczek, który prowadzi od pustego okna do gotowej mapy w 5 minut."
 ---
 
 # Pierwsze kroki

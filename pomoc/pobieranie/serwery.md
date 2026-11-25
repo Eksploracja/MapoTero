@@ -2,6 +2,7 @@
 title: Ochrona serwerów map
 nav_order: 4
 parent: Pobieranie map
+description: "Zbyt intensywne pobieranie może doprowadzić do czasowego zablokowania adresu IP przez dostawcę map. Odpowiednie limity zapytań zapobiegają błędom połączenia…"
 ---
 
 # Ochrona serwerów map

@@ -1,6 +1,7 @@
 ---
 title: Sesje pobierania
 nav_order: 8
+description: "Każde pobieranie tworzy sesję: folder z segmentami, plikami kalibracji i plikiem conf.txt, z którego korzystają scalanie i eksport."
 ---
 
 # Sesje pobierania
@@ -9,7 +10,7 @@ nav_order: 8
 Każde pobieranie tworzy sesję: folder z segmentami, plikami kalibracji i plikiem `conf.txt`, z którego korzystają scalanie i eksport.
 {: .fs-5 .fw-300 }
 
-**Gdzie w programie:** menu *Sesja pobierania > Zapisz / Wczytaj ustawienia sesji (conf.txt)*  
+**Gdzie w programie:** menu *Sesja pobierania > Zapisz / Otwórz sesję...*  
 **Dotyczy wersji:** {{ site.wersja_programu }}
 
 <details open markdown="block">
@@ -22,10 +23,10 @@ Każde pobieranie tworzy sesję: folder z segmentami, plikami kalibracji i pliki
 ## Folder sesji i jego zawartość
 
 Każda nowa sesja pobierania zapisuje się automatycznie do dedykowanego podfolderu w katalogu `download\`:
-`download\sesja_<nazwa_zbioru>_<RRRR-MM-DD_GGMMSS>\` (ścieżkę aktywnego folderu widać na pasku stanu u dołu okna).
+`download\sesja_<nazwa_zbioru>_<RRRR-MM-DD_GGMMSS>\` (ścieżkę aktywnego folderu widać w zakładce *Sesja*, a nazwę sesji na pasku stanu).
 Różne sesje i pobrane mapy leżą w osobnych folderach i nie mieszają się ze sobą w głównym katalogu `download\`.
 Kiedy wznawiasz pobieranie tej samej mapy, program kontynuuje zapis w tym samym podfolderze i dociąga brakujące kafle.
-Możesz także zapisać sesję w wybranym przez siebie miejscu na dysku (*Sesja pobierania > Zapisz ustawienia sesji*).
+Możesz także zapisać sesję w wybranym przez siebie miejscu na dysku (*Sesja pobierania > Zapisz sesję w folderze*).
 
 | Plik lub podfolder | Kiedy powstaje | Zawartość |
 |---|---|---|
@@ -36,7 +37,7 @@ Możesz także zapisać sesję w wybranym przez siebie miejscu na dysku (*Sesja 
 | `korytarz.txt` | gdy włączono obszar wzdłuż trasy | geometria trasy i szerokość pasa korytarza |
 | `error.txt` | w trakcie lub po błędach pobierania | wykaz brakujących segmentów z przyczyną błędu (znika po kompletnym pobraniu) |
 | `_kafle_wmts\` | usługi WMTS / XYZ / TMS | bufor pobranych kafli (domyślnie usuwany po komplecie segmentów) |
-| `_scalone_segmenty_…`, `_eksport_…`, `_cad_…` | po scaleniu lub eksporcie | pliki wynikowe utworzone z tej sesji |
+| `_scalone_segmenty_…`, `<nazwa sesji>.mbtiles` (i inne formaty eksportu), `_cad_…` | po scaleniu lub eksporcie | pliki wynikowe utworzone z tej sesji |
 
 ---
 
@@ -57,7 +58,7 @@ Pliki `conf.txt` zapisane w starszych wersjach MapoTero wczytują się poprawnie
 ## Zapisywanie i wczytywanie sesji
 
 * **Automatycznie przy starcie:** program przywraca ostatnio używany folder sesji z pliku `lastsettings.txt` (lub najnowszy podfolder w `download\`, jeśli zawiera `conf.txt`), więc możesz od razu kontynuować pracę, scalić arkusz albo wyeksportować mapę.
-* **Zapisz ustawienia sesji (`Alt`+`Z`):** *Sesja pobierania > Zapisz ustawienia sesji (conf.txt)* pozwala wskazać dowolny
+* **Zapisz sesję w folderze (`Alt`+`Z`):** *Sesja pobierania > Zapisz sesję w folderze...* pozwala wskazać dowolny
   folder (np. `D:\Mapy\Okolica_topo\`), zapisać tam `conf.txt` (i ewentualnie `korytarz.txt`) i od razu przestawić
   program na zapis kolejnych segmentów do tego folderu. Jeśli w wybranym folderze leżą segmenty innej sesji, program
   wyświetli ostrzeżenie.
@@ -66,7 +67,7 @@ Pliki `conf.txt` zapisane w starszych wersjach MapoTero wczytują się poprawnie
   program dobierze zalecany), zwija drzewo warstw z rozwiniętymi skanami map topograficznych GUGiK i pokazuje całą Polskę.
   Ustawienia programu i pobrane pliki zostają, a następne pobieranie trafi do nowego podfolderu sesji w `download\`.
   Gdy są wybrane warstwy lub zasięg, program prosi o potwierdzenie.
-* **Wczytaj ustawienia sesji (`Alt`+`W`):** *Sesja pobierania > Wczytaj ustawienia sesji (conf.txt)* odtwarza cały stan
+* **Otwórz sesję (`Alt`+`W`):** *Sesja pobierania > Otwórz sesję...* odtwarza cały stan
   z wybranego folderu (musi zawierać `conf.txt`): warstwy, krycia, zasięg, piksel, korytarz oraz rysuje siatkę na mapie.
   Przydaje się do dopobrania braków lub odświeżenia starej mapy.
 

@@ -2,6 +2,7 @@
 title: Odświeżanie mapy
 nav_order: 2
 parent: Pobieranie map
+description: "Ponowne pobranie wszystkich segmentów sesji, np. gdy serwer udostępnił nowszą ortofotomapę albo zaktualizowane dane."
 ---
 
 # Odświeżanie mapy
@@ -25,7 +26,7 @@ Do zwykłego dokończenia przerwanego pobierania odświeżanie nie jest potrzebn
 
 ## Jak odświeżyć
 
-1. Wczytaj sesję, którą chcesz odświeżyć (*Sesja pobierania > Wczytaj ustawienia sesji (conf.txt)*), jeśli nie jest
+1. Wczytaj sesję, którą chcesz odświeżyć (*Sesja pobierania > Otwórz sesję...*), jeśli nie jest
    bieżącą sesją.
 2. Wybierz *Sesja pobierania > Odśwież mapę (pobierz ponownie wszystkie segmenty)*.
 3. Potwierdź pytanie *Pobrać ponownie wszystkie segmenty mapy do folderu…?*

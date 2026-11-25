@@ -1,6 +1,7 @@
 ---
 title: Problemy i najczęstsze pytania
 nav_order: 19
+description: "Objaw, najczęstsza przyczyna i sprawdzony sposób rozwiązania."
 ---
 
 # Problemy i najczęstsze pytania
@@ -96,7 +97,7 @@ Zapisz sesję w nowym folderze (<kbd>Alt</kbd>+<kbd>Z</kbd>) przed pobieraniem a
 
 **Czy mogę połączyć dwie mapy z różnych serwerów?**  
 Tak, bezpośrednio na karcie *Wybrane warstwy* w oknie głównym (z regulacją krycia i podglądem w oknie **Mikser…**)
-albo później z gotowych sesji w oknie [Eksport mapy](../eksport/nakladki/) czy [Wielowarstwowy MBTiles](../mbtiles-wielowarstwowy/).
+albo później z gotowych sesji w oknie [Eksport mapy](../eksport/nakladki/) czy [MBTiles wieloskalowy (łączenie sesji)](../mbtiles-wielowarstwowy/).
 
 **Jak najszybciej przygotować gotową mapę bez ręcznego ustawiania siatki i układu?**  
 Wciśnij skrót <kbd>Ctrl</kbd>+<kbd>K</kbd> albo kliknij ikonę różdżki pod przyciskami powiększenia mapy. [Szybki kreator mapy](../narzedzia/#szybki-kreator-mapy) poprowadzi Cię w 4 krokach: wybierzesz cel (telefon, Garmin, wydruk, GIS, CAD), wskażesz obszar (miejscowość, działkę lub trasę), wybierzesz szablon i jednym kliknięciem wygenerujesz gotowy plik.

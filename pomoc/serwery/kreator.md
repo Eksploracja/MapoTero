@@ -2,6 +2,7 @@
 title: Kreator serwerów WMS, WMTS, XYZ i TMS
 nav_order: 1
 parent: Dodawanie serwerów map
+description: "Kreator pobiera opis usługi (GetCapabilities, TileJSON, tilemapresource.xml lub szablon kafelków), pozwala sprawdzić próbkę obrazu i zapisuje nowy zbiór map…"
 ---
 
 # Kreator serwerów WMS, WMTS, XYZ i TMS
@@ -11,7 +12,7 @@ Kreator pobiera opis usługi (`GetCapabilities`, `TileJSON`, `tilemapresource.xm
 próbkę obrazu i zapisuje nowy zbiór map na liście programu.
 {: .fs-5 .fw-300 }
 
-**Gdzie w programie:** przycisk **+ Serwer…** w nagłówku karty *Warstwy do pobrania* (prawy panel) lub menu *Narzędzia > Dodaj nowy serwer WMS / WMTS...*  
+**Gdzie w programie:** przycisk **+ Serwer…** w nagłówku karty *Katalog warstw* (prawy panel) lub menu *Narzędzia > Dodaj nowy serwer WMS / WMTS...*  
 **Dotyczy wersji:** {{ site.wersja_programu }}
 
 <details open markdown="block">
@@ -21,7 +22,7 @@ próbkę obrazu i zapisuje nowy zbiór map na liście programu.
 {:toc}
 </details>
 
-![Okno Kreator dodawania serwera mapowego]({{ '/pomoc/obrazy/13-kreator-serwerow.png' | relative_url }})
+![Okno Kreator dodawania serwera mapowego]({{ '/pomoc/obrazy/13-kreator-serwerow.png' | relative_url }}){: loading="lazy" width="862" height="617"}
 
 *Rysunek 1. Okno kreatora dodawania serwerów WMS, WMTS, XYZ i TMS.*
 
@@ -50,7 +51,7 @@ Okno otwiera się od razu na **Katalogu publicznych usług mapowych** z czterema
 3. **EZiUDP: usługi centralne i wojewódzkie (online)**: rejestr usług urzędów centralnych i marszałkowskich (WODGiK).
 4. **EZiUDP: powiaty i gminy (szukaj po nazwie / TERYT)**: wyszukiwarka lokalnych serwerów powiatowych (ODGiK) i gminnych (np. wpisz `Kraków`, `poznański` lub kod TERYT `1261`, `3021` i naciśnij Enter).
 
-![Okno Katalog publicznych usług mapowych]({{ '/pomoc/obrazy/13-katalog-uslug.png' | relative_url }})
+![Okno Katalog publicznych usług mapowych]({{ '/pomoc/obrazy/13-katalog-uslug.png' | relative_url }}){: loading="lazy" width="862" height="617"}
 
 *Rysunek 2. Wbudowany katalog publicznych usług mapowych.*
 
@@ -118,7 +119,7 @@ Przycisk **Pomoc** w prawym dolnym rogu okna (oraz klawisz <kbd>F1</kbd>) otwier
 2. Kliknij **Dodaj zbiór do MapoTero**.
 
 Program zapisze plik zbioru w folderze `warstwy\` (obok `MapoTero.exe`, a przy braku uprawnień do zapisu w folderze `%LocalAppData%\MapoTero\warstwy`),
-dopisze go do `warstwy.txt` i od razu pokaże w karcie *Warstwy do pobrania* w grupie **Dodane serwery**.
+dopisze go do `warstwy.txt` i od razu pokaże w karcie *Katalog warstw* w grupie **Dodane serwery**.
 Warstwy zapisane kreatorem zachowują w grupie *Dodane serwery* oraz na liście wybranych warstw swoje czytelne nazwy
 pobrane z metadanych serwera. Jeśli usługa wymagała dodatkowych parametrów (XYZ/TMS, subdomeny, limit zapytań, nagłówek referer),
 plik zbioru zostanie automatycznie sformatowany jako UTF-8 JSON.

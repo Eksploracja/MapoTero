@@ -2,6 +2,7 @@
 title: Wpisywanie współrzędnych
 nav_order: 2
 parent: Wybór obszaru
+description: "Dokładny zasięg można wpisać z klawiatury, np. narożniki arkusza mapy, działki albo obszaru opracowania."
 ---
 
 # Wpisywanie współrzędnych

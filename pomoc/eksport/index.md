@@ -2,6 +2,7 @@
 title: Eksport mapy
 nav_order: 12
 has_children: true
+description: "Zapis pobranej mapy w formatach dla odbiorników GPS i aplikacji mobilnych, kafelkowanego GeoTIFF, a także bezpośredni transfer przez Wi-Fi z kodem QR lub USB."
 ---
 
 # Eksport mapy
@@ -10,7 +11,7 @@ has_children: true
 Zapis pobranej mapy w formatach dla odbiorników GPS i aplikacji mobilnych, kafelkowanego GeoTIFF, a także bezpośredni transfer przez Wi-Fi z kodem QR lub USB.
 {: .fs-5 .fw-300 }
 
-**Gdzie w programie:** menu *Narzędzia > Eksport z pobranych segmentów…* (<kbd>Ctrl</kbd>+<kbd>E</kbd>) albo przycisk **Eksportuj pobraną mapę…** w karcie *Stan sesji* okna głównego  
+**Gdzie w programie:** menu *Sesja pobierania > Eksportuj mapę...* (<kbd>Ctrl</kbd>+<kbd>E</kbd>) albo przycisk **Eksportuj pobraną mapę…** w karcie *Stan sesji* okna głównego  
 **Dotyczy wersji:** {{ site.wersja_programu }}
 
 <details open markdown="block">
@@ -28,7 +29,7 @@ Zapis pobranej mapy w formatach dla odbiorników GPS i aplikacji mobilnych, kafe
 4. Kliknij **Eksportuj**.
 5. Po zakończeniu kliknij **Wyślij na telefon...** (dla kodów QR przez Wi-Fi albo wysyłki na Garmina przez USB). Pliki dla Garmina skopiujesz też przez *Narzędzia > Kopiuj mapę do Garmina (USB)...*.
 
-![Okno eksportu mapy z ponumerowanymi sekcjami]({{ '/pomoc/obrazy/10-eksport-mapy.png' | relative_url }})
+![Okno eksportu mapy z ponumerowanymi sekcjami]({{ '/pomoc/obrazy/10-eksport-mapy.png' | relative_url }}){: loading="lazy" width="529" height="874"}
 
 *Rysunek 1. Okno eksportu mapy programu MapoTero z ponumerowanymi sekcjami parametrów.*
 
@@ -43,13 +44,13 @@ Zapis pobranej mapy w formatach dla odbiorników GPS i aplikacji mobilnych, kafe
 
 ---
 
-## Nowe funkcje eksportu
+## Kluczowe możliwości eksportu
 
 * **Bezpośredni transfer Wi-Fi z kodem QR:** po wygenerowaniu mapy przycisk **Wyślij na telefon...** uruchamia lokalny serwer i wyświetla kod QR. Skieruj aparat smartfona na ekran, aby pobrać mapę do telefonu bez kabla USB i bez wysyłania plików do chmury.
 * **Wykrywanie odbiorników Garmin przez USB:** dla wyeksportowanych plików `.jnx` i `.kmz` przycisk **Wyślij na telefon...** (oraz polecenie *Narzędzia > Kopiuj mapę do Garmina (USB)...*) wykrywa podłączony odbiornik w trybie pamięci masowej USB i kopiuje plik do odpowiedniego folderu (`Garmin/CustomMaps` lub `Garmin/BirdsEye`).
 * **Format OGC GeoPackage (.gpkg):** standard otwartej bazy danych kafelków Web Mercator (EPSG:3857), obsługiwany bezpośrednio przez aplikacje mobilne GIS (QField, Mergin Maps) oraz turystyczne (Locus Map, OruxMaps, QGIS).
 * **Kafelkowany GeoTIFF z piramidami (Cloud-Optimized GeoTIFF):** po wybraniu *Arkusz > GeoTIFF* i zaznaczeniu *piramidy w GeoTIFF* powstaje plik z kafelkowaniem 256×256 i wewnętrznym łańcuchem pomniejszeń (IFD reduced overviews), który w QGIS, ArcGIS czy Avenza Maps otwiera się bez wczytywania całego obrazu do RAM.
-* **Automatyczny podział KMZ na tomy:** przy eksporcie map przekraczających limit 100 kafli odbiornika Garmin program dzieli wynik na tomy (`_tom1.kmz`, `_tom2.kmz`) bez obniżania rozdzielczości.
+* **Automatyczny podział KMZ na tomy:** przy eksporcie map przekraczających limit 100 kafli odbiornika Garmin program dzieli wynik na tomy (`_garmin_tom01_z_03.kmz`, `_garmin_tom02_z_03.kmz` itd.) bez obniżania rozdzielczości.
 * **Dopasowanie do mniejszych ekranów:** na mniejszych ekranach laptopów okno eksportu wyświetla pionowy pasek przewijania z pełnym dostępem do wszystkich opcji i przycisków.
 
 ---
@@ -64,27 +65,27 @@ Zapis pobranej mapy w formatach dla odbiorników GPS i aplikacji mobilnych, kafe
 
 ## Pliki wynikowe
 
-Plik mapy zapisywany jest bezpośrednio **w folderze bieżącej sesji**:
+Domyślna nazwa pliku wynikowego (pole **Plik wynikowy** z przyciskiem **Zmień...**) pochodzi z nazwy folderu sesji (np. dla folderu `sesja_ortofotomapa_2026-11-25_101233`), dzięki czemu mapy zapisywane są od razu w folderze bieżącej sesji pod czytelnymi nazwami:
 
 | Format | Przykładowa nazwa pliku |
 |---|---|
-| KMZ dla Garmin | `_eksport_10x8_garmin.kmz` (lub `..._tom1.kmz`) |
-| KMZ | `_eksport_10x8.kmz` |
-| Garmin BirdsEye | `_eksport_10x8.jnx` |
-| MBTiles | `_eksport_10x8.mbtiles` |
-| OGC GeoPackage | `_eksport_10x8.gpkg` |
-| SQLiteDB | `_eksport_10x8.sqlitedb` |
-| OruxMaps | folder `_eksport_10x8_oruxmaps` |
+| KMZ dla Garmin | `ortofotomapa_2026-11-25_101233_garmin.kmz` (lub `..._garmin_tom01_z_03.kmz`) |
+| KMZ | `ortofotomapa_2026-11-25_101233.kmz` |
+| Garmin BirdsEye | `ortofotomapa_2026-11-25_101233.jnx` |
+| MBTiles | `ortofotomapa_2026-11-25_101233.mbtiles` |
+| OGC GeoPackage | `ortofotomapa_2026-11-25_101233.gpkg` |
+| SQLiteDB | `ortofotomapa_2026-11-25_101233.sqlitedb` |
+| OruxMaps | folder `ortofotomapa_2026-11-25_101233_oruxmaps` |
 | Arkusz GeoTIFF | `_scalone_segmenty_10x8.tif` |
-| Paczka TrekBuddy | `_eksport_10x8.tar` |
+| Paczka TrekBuddy | `ortofotomapa_2026-11-25_101233_trekbuddy.tar` |
 
-Kolejny eksport tego samego formatu w tym samym folderze **zastępuje** poprzedni plik. Jeśli chcesz zachować kilka wariantów, zmień nazwę pliku po zakończeniu eksportu.
+W polu **Plik wynikowy** możesz przed eksportem wpisać własną nazwę lub wskazać inną lokalizację przyciskiem **Zmień...**.
 
 ---
 
 ## Czas trwania eksportu
 
-Eksport trwa zazwyczaj od kilkunastu sekund do kilku minut, w zależności od liczby generowanych kafelków i wybranego formatu kompresji. Gdy plan przekracza 2 miliony kafli, program wyświetla ostrzeżenie z pytaniem o potwierdzenie. Puste kafle (np. poza wyznaczonym korytarzem trasy) są automatycznie pomijane, co drastycznie oszczędza czas i miejsce na dysku.
+Eksport trwa zazwyczaj od kilkunastu sekund do kilku minut, w zależności od liczby generowanych kafelków i wybranego formatu kompresji. Gdy plan przekracza 2 miliony kafli, program wyświetla ostrzeżenie z pytaniem o potwierdzenie. Puste kafle (np. poza wyznaczonym korytarzem trasy) są automatycznie pomijane, co znacząco skraca czas eksportu i zmniejsza rozmiar pliku.
 
 ---
 

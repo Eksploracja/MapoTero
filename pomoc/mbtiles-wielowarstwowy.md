@@ -1,16 +1,17 @@
 ---
-title: Wielowarstwowy MBTiles
+title: MBTiles wieloskalowy (łączenie sesji)
 nav_order: 13
+description: "Kompilacja kilku pobranych sesji do jednego pliku MBTiles lub OGC GeoPackage (.gpkg): każda warstwa może być widoczna w swoim zakresie powiększeń albo…"
 ---
 
-# Wielowarstwowy MBTiles
+# MBTiles wieloskalowy (łączenie pobranych sesji)
 {: .no_toc }
 
 Kompilacja kilku pobranych sesji do jednego pliku MBTiles lub OGC GeoPackage (.gpkg): każda warstwa może być widoczna w swoim zakresie
 powiększeń albo mieszać się z warstwami leżącymi pod nią.
 {: .fs-5 .fw-300 }
 
-**Gdzie w programie:** przycisk *Wieloskalowy...* w oknie *Eksport mapy* (od wersji 3.19 bez osobnej pozycji w menu *Narzędzia*)  
+**Gdzie w programie:** menu *Narzędzia > MBTiles / GeoPackage wieloskalowy (łącz sesje)...*, przycisk *Wieloskalowy...* w oknie *Eksport mapy* (aktywny przy każdym formacie) oraz przycisk *Zakresy powiększeń i warstwy...* w kroku 4 *Szybkiego kreatora mapy*  
 **Dotyczy wersji:** {{ site.wersja_programu }}
 
 <details open markdown="block">
@@ -30,23 +31,26 @@ przełącza mapę wraz z przybliżaniem (np. w Locus Map, OruxMaps, OsmAnd, Guru
 * z bliska (zoom `17–19`): ortofotomapa o wysokiej rozdzielczości (opcjonalnie z nałożoną półprzezroczystą mapą topo
   lub granicami działek w trybie *Mnożenie*).
 
-![Przykład działania mapy wieloskalowej w telefonie (Góra Ślęża)]({{ '/pomoc/obrazy/11-mapa-wieloskalowa-przyklad.gif' | relative_url }})
+![Przykład działania mapy wieloskalowej w telefonie (Góra Ślęża)]({{ '/pomoc/obrazy/11-mapa-wieloskalowa-przyklad.gif' | relative_url }}){: loading="lazy" width="600" height="380"}
 
 *Rysunek 1. Przykład działania mapy wieloskalowej w telefonie: wraz z przybliżaniem ekranu mapa automatycznie zmienia treść (od skali 1:50 000 przez 1:25 000 i 1:10 000 po cieniowanie rzeźby LiDAR i ortofotomapę wysokiej rozdzielczości).*
 
-Kreator łączy wyłącznie **wcześniej pobrane sesje** (foldery z `conf.txt`), bez pobierania nowych danych z sieci.
+Kreator łączy wyłącznie **wcześniej pobrane sesje** (foldery z `conf.txt`) – narzędzie samo niczego nie pobiera z sieci (przy próbie dodania jednej lub zera sesji dziennik ostrzega o potrzebie wskazania gotowych folderów sesji).
 
-![Zaawansowany kreator wielowarstwowego / wieloskalowego MBTiles]({{ '/pomoc/obrazy/11-mbtiles-wielowarstwowy.png' | relative_url }})
+![Zaawansowany kreator wielowarstwowego / wieloskalowego MBTiles]({{ '/pomoc/obrazy/11-mbtiles-wielowarstwowy.png' | relative_url }}){: loading="lazy" width="983" height="731"}
 
-*Rysunek 2. Kreator wielowarstwowego i wieloskalowego pliku MBTiles.*
+*Rysunek 2. Okno „MBTiles wieloskalowy (łączenie pobranych sesji)”.*
 
 ---
 
-## Lista warstw i zakresy powiększeń
+## Pobrane sesje mapowe i zakresy powiększeń
 
-1. Kliknij **Dodaj warstwę...** i wskaż folder pobranej sesji (możesz też wskazać nadrzędny folder `download`,
+1. Kliknij **Dodaj folder sesji...** i wskaż folder pobranej sesji (możesz też wskazać nadrzędny folder `download`,
    z którego program sam wykryje wszystkie podfoldery sesji, albo przeciągnąć foldery myszą wprost do listy).
 2. Program odczyta `conf.txt` każdej warstwy i automatycznie podpowie zakres **Zoom Od** do **Zoom Do**.
+
+{: .informacja }
+**Tryb otwierany z Szybkiego kreatora mapy:** gdy uruchomisz to okno z kroku 4 kreatora (przycisk *Zakresy powiększeń i warstwy...*), okno otwiera się pod tytułem **Podgląd kafli i dopasowanie warstw kreatora**, sekcja zapisu pliku jest ukryta, a na dole pojawiają się przyciski **✓ Zastosuj i wróć do kreatora** oraz **Anuluj**. Ustawione zakresy zoom, krycie i tryby mieszania wracają bezpośrednio do kreatora przed pobraniem mapy.
 
 {: .uwaga }
 Kolejność w tym kreatorze działa jak w programach GIS (QGIS, Photoshop): **góra tabeli = wierzch mapy**, a **dół tabeli = podkład**.
@@ -86,7 +90,7 @@ Po prawej stronie okna znajduje się panel **Symulacja i podgląd zoomu**:
 
 ---
 
-## Parametry pliku
+## Parametry pliku wynikowego i kompresji
 
 * **Format pliku:**
   * **MBTiles (`.mbtiles`):** klasyczna baza kafelkowa dla Locus Map, OsmAnd, OruxMaps, Guru Maps,
@@ -108,7 +112,7 @@ Po prawej stronie okna znajduje się panel **Symulacja i podgląd zoomu**:
 
 ## Szacowanie rozmiaru
 
-Przed kliknięciem **Kompiluj MBTiles** użyj przycisku **Oszacuj rozmiar i liczbę kafli**. Program obliczy przewidywaną
+Przed kliknięciem **Utwórz plik mapy** użyj przycisku **Oszacuj rozmiar i liczbę kafli**. Program obliczy przewidywaną
 wagę każdego poziomu zoom oraz sprawdzi zgodność z limitem **4 GB** (maksymalny rozmiar pojedynczego pliku na kartach pamięci
 sformatowanych w systemie plików FAT32 w starszych telefonach i odbiornikach GPS).
 

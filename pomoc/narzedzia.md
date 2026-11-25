@@ -1,6 +1,7 @@
 ---
 title: Narzędzia dodatkowe
 nav_order: 16
+description: "Szybki kreator mapy, wyszukiwarka działek i miejscowości ULDK, transfer Wi-Fi z kodem QR, konwertery OziExplorer i GeoTIFF, profil wysokościowy NMT oraz…"
 ---
 
 # Narzędzia dodatkowe
@@ -21,9 +22,9 @@ Szybki kreator mapy, wyszukiwarka działek i miejscowości ULDK, transfer Wi-Fi 
 
 ## Szybki kreator mapy
 
-**Gdzie:** menu *Narzędzia > Szybki kreator mapy...*, skrót <kbd>Ctrl</kbd>+<kbd>K</kbd> albo przycisk **Szybki kreator…** na pasku nad mapą.
+**Gdzie:** menu *Narzędzia > Szybki kreator mapy...*, skrót <kbd>Ctrl</kbd>+<kbd>K</kbd> albo przycisk **Szybki kreator…** na górnym pasku narzędzi nad mapą.
 
-![Szybki kreator generowania mapy w 4 krokach]({{ '/pomoc/obrazy/16-szybki-kreator.png' | relative_url }})
+![Szybki kreator generowania mapy w 4 krokach]({{ '/pomoc/obrazy/16-szybki-kreator.png' | relative_url }}){: loading="lazy" width="776" height="632"}
 
 *Rysunek 1. Szybki kreator generowania mapy prowadzi krok po kroku od wyboru celu i obszaru przez dobór szablonu po gotowy plik.*
 
@@ -48,17 +49,18 @@ Kreator prowadzi w czterech krokach od pomysłu do gotowego pliku mapy, bez ręc
    * **Mapy niemieckie do 1945:** *Messtischblatt* 1:25 000 i *Karte des Deutschen Reiches* 1:100 000,
    * **Działka i granice katastralne:** ortofotomapa z granicami i numerami działek EGiB (oraz warianty dla CAD/GIS),
    * **Moje warstwy z okna głównego:** kompozycja wybrana aktualnie w oknie głównym programu.
-   * Suwaki w panelu po prawej regulują krycie warstw (np. cieniowania i szlaków), przycisk **Dostosuj warstwy...** otwiera pełny mikser, a przycisk **Zapisz jako szablon...** utrwala własny zestaw na liście szablonów (**Usuń szablon** go usuwa).
+   * Suwaki w panelu po prawej regulują krycie warstw (np. cieniowania i szlaków), przycisk **Mikser warstw w oknie zaawansowanym...** otwiera pełny mikser, a przycisk **Zapisz jako szablon...** utrwala własny zestaw na liście szablonów (**Usuń szablon** go usuwa).
 4. **Zapis:** sprawdzenie szacunków i generowanie mapy:
-   * Wybierasz szczegółowość mapy, strukturę pliku (wielopoziomowa piramida powiększeń albo pojedynczy raster), folder docelowy oraz ewentualne opcje zaawansowane (korektę obrazu, własny zakres powiększeń, rozmiar piksela, układ CAD czy podział KMZ na tomy),
+   * Wybierasz szczegółowość mapy, strukturę pliku (wielopoziomowa piramida powiększeń albo pojedynczy raster), folder docelowy oraz ewentualne opcje zaawansowane (korektę obrazu, własny zakres powiększeń, rozmiar piksela, układ CAD, podział KMZ na tomy, a dla formatów wieloskalowych przycisk **Dodaj skale...** / **Ustawienia skal...** oraz **Zakresy powiększeń i warstwy...**),
    * Program szacuje liczbę segmentów, rozmiar i czas,
    * Kliknięcie **Generuj mapę** pobiera dane i zapisuje wynik z szacowanym czasem do końca, a po ukończeniu udostępnia przyciski **Pokaż w folderze** oraz **Przejdź do mapy w oknie głównym**.
 
 ### Mapy wieloskalowe (Multi-Scale)
-W szablonach turystycznych i historycznych formaty MBTiles, GeoPackage, SQLiteDB i JNX tworzone są jako **mapy wieloskalowe**:
+Formaty MBTiles, GeoPackage, SQLiteDB i JNX mogą być tworzone jako **mapy wieloskalowe** – gotowe plany skal mają szablony turystyczne i historyczne, a do każdego stylu jednoskalowego możesz dodać własne skale przyciskiem **Dodaj skale...** (w kroku 4 zmienia on napis na **Ustawienia skal...** lub **Ustawienia skal (własne)**):
 * Przy dużym zbliżeniu widoczna jest mapa szczegółowa 1:10 000,
 * W miarę oddalania widok płynnie przełącza się na mapy 1:25 000, 1:50 000, 1:100 000 aż po mapę przeglądową, bez zlewających się napisów.
-* Opcja w kroku 4 pozwala dołączyć na dużym zbliżeniu ortofotomapę ze szlakami albo otworzyć pełne okno **MBTiles wieloskalowy**, jeśli chcesz ręcznie zmienić zakresy poziomów powiększeń.
+* Okno **Ustawienia skal mapy wieloskalowej** wyświetla tabelę poziomów z kolumnami *Użyj*, *Skala*, *Piksel [m]*, *Powiększenie od*, *Zoom do* i *Wł. warstwy* oraz przyciski **Dodaj skalę**, **Usuń skalę**, **Edytuj warstwy skali...** i **Dobierz automatycznie**.
+* Przycisk **Zakresy powiększeń i warstwy...** w kroku 4 otwiera okno *Podgląd kafli i dopasowanie warstw kreatora*, w którym sprawdzisz gotowe kafle na różnych poziomach zoom oraz zmienisz krycie i tryby mieszania przed pobraniem.
 
 ---
 
@@ -66,15 +68,11 @@ W szablonach turystycznych i historycznych formaty MBTiles, GeoPackage, SQLiteDB
 
 **Gdzie:** menu *Narzędzia > Wyszukaj miejscowość lub działkę...*, skróty **Ctrl+F** (miejscowość/adres) i **Ctrl+D** (działka) lub pole wyszukiwania na pasku nad mapą.
 
-![Wyszukiwarka miejscowości i działek katastralnych ULDK]({{ '/pomoc/obrazy/16-szukaj-dzialki.png' | relative_url }})
+![Wyszukiwarka miejscowości i działek katastralnych ULDK]({{ '/pomoc/obrazy/16-szukaj-dzialki.png' | relative_url }}){: loading="lazy" width="562" height="454"}
 
 *Rysunek 2. Okno zintegrowanej wyszukiwarki miejscowości, adresów i działek ewidencyjnych ULDK.*
 
-* **Miejscowość / Adres**: korzysta z geokodera OpenStreetMap Nominatim. Wpisz dowolne miasto, wieś, osadę lub konkretny adres z numerem domu. Program natychmiast centruje mapę podglądu z optymalnym powiększeniem.
-* **Działka katastralna (ULDK)**: bezpośrednia integracja z krajową usługą Usługi Lokalizacji Działek Katastralnych (GUGiK).
-  * Wyszukiwanie po pełnym identyfikatorze TERYT (np. `320302_5.0001.123/4`) lub po nazwie województwa, powiatu, gminy, obrębu i numerze działki,
-  * Program pobiera oficjalną geometrię wektorową działki z państwowego rejestru, rysuje jej kontur na mapie i ustawia siatkę pobierania z regulowanym buforem (np. 50 m, 150 m),
-  * Przycisk jednym kliknięciem aktywuje ortofotomapę wysokiej rozdzielczości oraz warstwę granic i numerów działek EGiB.
+Wyszukiwarka pozwala szybko ustawić mapę i siatkę pobierania na miejscowości, adresie (Nominatim), współrzędnych (WGS84, PL-1992, PL-2000) albo wybranej działce ewidencyjnej ULDK GUGiK (z obrysem działki i regulowanym buforem). Szczegółową instrukcję wyszukiwania i przykłady zapytań opisuje rozdział [Wyszukiwarka miejscowości i działek katastralnych](../obszar/zaznaczanie/#wyszukiwarka-miejscowości-adresów-i-działek-katastralnych).
 
 ---
 
@@ -82,7 +80,7 @@ W szablonach turystycznych i historycznych formaty MBTiles, GeoPackage, SQLiteDB
 
 **Gdzie:** menu *Narzędzia > Prześlij mapę na telefon (Wi-Fi)...* oraz przycisk **Wyślij na telefon...** w oknie eksportu mapy.
 
-![Bezpośredni transfer mapy na telefon przez sieć Wi-Fi i kod QR]({{ '/pomoc/obrazy/16-wyslij-telefon.png' | relative_url }})
+![Bezpośredni transfer mapy na telefon przez sieć Wi-Fi i kod QR]({{ '/pomoc/obrazy/16-wyslij-telefon.png' | relative_url }}){: loading="lazy" width="462" height="557"}
 
 *Rysunek 3. Wbudowany serwer Wi-Fi wyświetla kod QR umożliwiający natychmiastowe pobranie mapy na smartfon.*
 
@@ -96,9 +94,9 @@ Narzędzie rozwiązuje problem niewygodnego podłączania kabli USB i wysyłania
 
 ## Konwerter map OziExplorer (.map)
 
-**Gdzie:** menu *Narzędzia > Konwertuj mapę OziExplorer (.map)...* albo przeciągnięcie pliku `.map` lub całego folderu na okno programu (Drag & Drop).
+**Gdzie:** menu *Narzędzia > Konwertuj gotową mapę > Skan OziExplorer z plikiem kalibracji (.map)...* albo przeciągnięcie pliku `.map` lub całego folderu na okno programu (Drag & Drop).
 
-![Konwerter kalibrowanych map OziExplorer]({{ '/pomoc/obrazy/16-konwerter-ozi.png' | relative_url }})
+![Konwerter kalibrowanych map OziExplorer]({{ '/pomoc/obrazy/16-konwerter-ozi.png' | relative_url }}){: loading="lazy" width="552" height="576"}
 
 *Rysunek 4. Konwerter kalibrowanych map OziExplorer do formatów mobilnych i GPS.*
 
@@ -107,7 +105,7 @@ Narzędzie przetwarza kalibrowane skany papierowych map turystycznych i archiwal
   * **Borowa Góra** (mapy Wojskowego Instytutu Geograficznego WIG 1:100 000 i 1:25 000),
   * **Potsdam / Rauenberg** (niemieckie mapy Messtischblatt 1:25 000 i Grossblatt),
   * **Pulkovo 1942 / Układ 1965 / Układ 1942** (mapy topograficzne z okresu PRL).
-  Eliminuje to uciążliwe przesunięcie arkusza o 100–200 metrów względem śladu GPS.
+  Zapobiega to przesunięciu arkusza o 100–200 m względem śladu GPS.
 * **Modele kalibracji nieliniowej:** dla dużych arkuszy stosowany jest model rzutowy (4–6 punktów) lub wielomian 2. stopnia (7+ punktów), korygujący zniekształcenia skanera papieru.
 * **Pełna piramida powiększeń:** bazy JNX i MBTiles tworzone są z kompletem 5 poziomów skali.
 * **Praca wsadowa (Batch):** po wskazaniu całego folderu program automatycznie przetwarza dziesiątki arkuszy jeden po drugim.
@@ -116,9 +114,9 @@ Narzędzie przetwarza kalibrowane skany papierowych map turystycznych i archiwal
 
 ## Konwerter map GeoTIFF
 
-**Gdzie:** menu *Narzędzia > Konwertuj mapę GeoTIFF...*
+**Gdzie:** menu *Narzędzia > Konwertuj gotową mapę > Mapa GeoTIFF (.tif)...*
 
-![Okno konwertera map GeoTIFF]({{ '/pomoc/obrazy/16-konwerter-geotiff.png' | relative_url }})
+![Okno konwertera map GeoTIFF]({{ '/pomoc/obrazy/16-konwerter-geotiff.png' | relative_url }}){: loading="lazy" width="556" height="457"}
 
 *Rysunek 5. Okno konwersji pliku GeoTIFF do formatów map mobilnych i odbiorników Garmin.*
 
@@ -126,7 +124,7 @@ Przekształca pojedynczy plik GeoTIFF (`.tif` lub `.tiff`, na przykład arkusz w
 
 * **Wczytywanie georeferencji:** program automatycznie odczytuje zasięg, rozdzielczość oraz układ współrzędnych z nagłówka GeoTIFF (albo z plików `.tfw` / `.prj`), a gdy brakuje kodu EPSG, pozwala wybrać układ z listy.
 * **Obsługiwane formaty wynikowe:** **MBTiles** (Locus Map, OsmAnd), **GeoPackage (`.gpkg`)** (QField, Mergin Maps), **KMZ** (Garmin Custom Maps, z opcją podziału na tomy po 100 kafli), **JNX** (Garmin BirdsEye), **SQLiteDB** (OsmAnd) oraz **OruxMaps**.
-* **Parametry konwersji:** ustawisz tu zakres poziomów powiększeń (**Zoom od–do**) i **jakość JPEG**.
+* **Parametry konwersji:** ustawisz tu zakres poziomów powiększeń (**powiększenie od–do**) i **jakość JPEG**.
 
 {: .wskazowka }
 Aby zapisać kafelkowany plik GeoTIFF z wewnętrznymi piramidami powiększeń (Cloud-Optimized GeoTIFF), wybierz w oknie [Eksport mapy]({{ '/pomoc/eksport/' | relative_url }}) format **Arkusz** i zaznacz opcję *piramidy w GeoTIFF*.
@@ -137,7 +135,7 @@ Aby zapisać kafelkowany plik GeoTIFF z wewnętrznymi piramidami powiększeń (C
 
 **Gdzie:** menu *Narzędzia > Profil wysokościowy trasy (GPX, KML)...*
 
-![Profil wysokościowy trasy z NMT LIDAR]({{ '/pomoc/obrazy/16-profil-nmt.png' | relative_url }})
+![Profil wysokościowy trasy z NMT LIDAR]({{ '/pomoc/obrazy/16-profil-nmt.png' | relative_url }}){: loading="lazy" width="562" height="405"}
 
 *Rysunek 6. Profil wysokościowy trasy ze skaningu laserowego NMT LIDAR GUGiK.*
 
@@ -152,7 +150,7 @@ Aby zapisać kafelkowany plik GeoTIFF z wewnętrznymi piramidami powiększeń (C
 
 **Gdzie:** menu *Narzędzia > Korekta obrazów w folderze...* albo przycisk w oknie [Eksport do CAD](../cad/).
 
-![Korekta i optymalizacja obrazów w folderze]({{ '/pomoc/obrazy/16-korekta-folderu.png' | relative_url }})
+![Korekta i optymalizacja obrazów w folderze]({{ '/pomoc/obrazy/16-korekta-folderu.png' | relative_url }}){: loading="lazy" width="552" height="360"}
 
 *Rysunek 7. Wsadowa korekta i optymalizacja kontrastu, gamma i wyostrzania dla całego katalogu obrazów.*
 
@@ -170,13 +168,13 @@ Narzędzie przetwarza wsadowo wszystkie pliki rastrowe (PNG, JPEG, TIFF) znajduj
 
 ## Podgląd MIP (ekrany Garmin Memory-In-Pixel)
 
-**Gdzie:** okno [Warstwy - zaawansowane](../okno-glowne/#okno-warstwy---zaawansowane-mikser), [Eksport mapy](../eksport/) oraz [Szybki kreator mapy](#szybki-kreator-mapy).
+**Gdzie:** okno [Mikser warstw](../okno-glowne/#okno-mikser-warstw), [Eksport mapy](../eksport/) oraz [Szybki kreator mapy](#szybki-kreator-mapy).
 
-![Podgląd MIP dla odbiorników Garmin]({{ '/pomoc/obrazy/10-podglad-mip.png' | relative_url }})
+![Podgląd MIP dla odbiorników Garmin]({{ '/pomoc/obrazy/10-podglad-mip.png' | relative_url }}){: loading="lazy" width="526" height="367"}
 
 *Rysunek 8. Moduł podglądu post-processingu MIP z symulacją czytelności w ostrym świetle słonecznym.*
 
-Ekrany transrefleksyjne Garmin Memory-In-Pixel (seria Fenix, Epix, Forerunner, Edge, GPSMAP, Montana) doskonale spisują się w słońcu, lecz standardowe rastry komputerowe wyglądają na nich blado. Moduł MIP stosuje zoptymalizowaną krzywą gamma, podbicie nasycenia barw oraz filtr wyostrzający krawędzie bez artefaktów na brzegach kafelków, gwarantując maksymalną czytelność mapy w trudnych warunkach terenowych.
+Ekrany transrefleksyjne Garmin Memory-In-Pixel (seria Fenix, Epix, Forerunner, Edge, GPSMAP, Montana) są dobrze czytelne w słońcu, lecz standardowe rastry komputerowe wyglądają na nich blado. Moduł MIP stosuje krzywą gamma, podbicie nasycenia barw oraz filtr wyostrzający krawędzie bez artefaktów na brzegach kafelków, poprawiając czytelność mapy w terenie.
 
 ---
 

@@ -2,6 +2,7 @@
 title: Kompozycje warstw i plastyczna rzeźba
 nav_order: 2.5
 parent: Pobieranie map
+description: "Łączenie wielu warstw w jeden gotowy arkusz: plastyczne cieniowanie NMT, dynamiczna hipsometria, ortofotomapa 3D oraz granice działek katastralnych."
 ---
 
 # Kompozycje warstw i plastyczna rzeźba
@@ -35,7 +36,7 @@ Gdy wszystkie warstwy pochodzą z tego samego serwera WMS i mają krycie 100%, �
 
 ## Tryby nakładania i dobór krycia
 
-Do dokładnego zestrojenia kompozycji służy okno **Warstwy - zaawansowane** (mikser warstw), otwierane przyciskiem **Mikser…** w nagłówku karty *Wybrane warstwy* (albo kliknięciem próbki podglądu). Znajdziesz w nim suwaki krycia dla każdej warstwy, wybór trybu mieszania, podgląd na żywo na rzeczywistej próbce terenu (300 × 300 px) z lupą rastrową (`-`, `1:1`, `+` lub kółko myszy), przycisk *Korekta obrazu...* oraz podręczną instrukcję (przycisk **Pomoc** i klawisz <kbd>F1</kbd>).
+Do dokładnego zestrojenia kompozycji służy okno **Mikser warstw**, otwierane przyciskiem **Mikser…** w nagłówku karty *Wybrane warstwy* (albo kliknięciem próbki podglądu). Znajdziesz w nim suwaki krycia dla każdej warstwy, wybór trybu mieszania, przyciski **➕ Dodaj warstwę...** oraz **⚡ Ułóż automatycznie**, podgląd na żywo na rzeczywistej próbce terenu (300 × 300 px) z lupą rastrową (`-`, `1:1`, `+` lub kółko myszy), przycisk *Korekta obrazu...* oraz podręczną instrukcję (przycisk **Pomoc** i klawisz <kbd>F1</kbd>).
 
 Jeśli wolisz układać i sprawdzać warstwy na dużym ekranie przed dodaniem ich do programu, skorzystaj z przeglądarkowego [Miksera warstw w Galerii online](../../galeria-i-mikser/). Gotową kanapkę prześlesz jednym kliknięciem do MapoTero albo zapiszesz jako plik `.mapotero`, który wczytasz przeciągając go na okno programu.
 
@@ -59,7 +60,7 @@ Poniższe przykłady przedstawiają przetestowane zestawienia map z Geoportalu n
 
 Połączenie aktualnego zdjęcia lotniczego z numerycznym modelem terenu (NMT 1 m). Cieniowanie wydobywa krawędzie wzniesień, zbocza leśne i wąwozy, które na płaskiej fotografii z góry zlewają się z otoczeniem.
 
-![Plastyczna ortofotomapa 3D z cieniowaniem NMT]({{ '/pomoc/obrazy/kompozycja-1-plastyczna-orto.jpg' | relative_url }})
+![Plastyczna ortofotomapa 3D z cieniowaniem NMT]({{ '/pomoc/obrazy/kompozycja-1-plastyczna-orto.jpg' | relative_url }}){: loading="lazy" width="836" height="365"}
 
 *Rysunek 1. Plastyczna ortofotomapa 3D: podkład lotniczy 25 cm z nałożonym cieniowaniem NMT w trybie Nakładka.*
 
@@ -77,7 +78,7 @@ Tryb **Rzeźba terenu** (oraz Nakładka) zachowuje naturalne nasycenie zieleni l
 
 Klasyczny styl wojskowych i turystycznych map sztabowych. Plastyczny światłocień z rzeźby terenu układa się pod siatką ulic, poziomicami i obrysami budynków.
 
-![Mapa topograficzna 1:10 000 z cieniowaniem rzeźby NMT w trybie Mnożenie]({{ '/pomoc/obrazy/kompozycja-2-topo-cieniowanie.jpg' | relative_url }})
+![Mapa topograficzna 1:10 000 z cieniowaniem rzeźby NMT w trybie Mnożenie]({{ '/pomoc/obrazy/kompozycja-2-topo-cieniowanie.jpg' | relative_url }}){: loading="lazy" width="836" height="365"}
 
 *Rysunek 2. Mapa topograficzna 1:10 000 (układ 1965) z cieniowaniem NMT 1 m w trybie Mnożenie (krycie 90%).*
 
@@ -95,7 +96,7 @@ Dzięki zastosowaniu trybu Mnożenie białe tło papierowej mapy staje się cał
 
 Wielowarstwowa kompozycja krajobrazowa. Łączy treść mapy topograficznej z głębokim cieniem zboczy oraz barwną skalą wysokościową generowaną na żywo przez usługę ISOK.
 
-![Kompozycja Topo 1965 z cieniowaniem 90% i dynamiczną hipsometrią ISOK 50%]({{ '/pomoc/obrazy/kompozycja-2a-topo-dynamiczna-hipsometria.jpg' | relative_url }})
+![Kompozycja Topo 1965 z cieniowaniem 90% i dynamiczną hipsometrią ISOK 50%]({{ '/pomoc/obrazy/kompozycja-2a-topo-dynamiczna-hipsometria.jpg' | relative_url }}){: loading="lazy" width="836" height="365"}
 
 *Rysunek 3. Kompozycja trójwarstwowa: Topo 1:10 000, cieniowanie NMT (90%) oraz dynamiczna hipsometria ISOK (50%).*
 
@@ -114,7 +115,7 @@ Sama dynamiczna hipsometria ma intensywne, nasycone barwy. Nałożenie jej w try
 
 Zestawienie niezbędne przy pracach projektowych, analizach nieruchomości i lokalizacji granic w terenie. Na zdjęcie lotnicze nanoszone są wektorowe granice parceli oraz ich oficjalne numery ewidencyjne z Krajowej Integracji Ewidencji Gruntów (KIEG).
 
-![Ortofotomapa z granicami i numerami działek ewidencyjnych]({{ '/pomoc/obrazy/kompozycja-3-orto-dzialki.jpg' | relative_url }})
+![Ortofotomapa z granicami i numerami działek ewidencyjnych]({{ '/pomoc/obrazy/kompozycja-3-orto-dzialki.jpg' | relative_url }}){: loading="lazy" width="836" height="365"}
 
 *Rysunek 4. Podkład terenowy: ortofotomapa standardowa z nałożonymi działkami i numeracją EGiB.*
 
@@ -134,7 +135,7 @@ Działki ewidencyjne i numery działek są udostępniane przez serwer KIEG w pos
 1. **Dobór piksela siatki:** Program po wybraniu kilku warstw automatycznie ustawia najmniejszy zalecany piksel spośród nich. Łącząc ortofotomapę (0,25 m) z cieniowaniem NMT (1 m), program przyjmie 0,25 m. Cieniowanie zostanie gładko przeskalowane, a zdjęcie lotnicze zachowa maksymalną ostrość.
 2. **Kolejność w kanapce:** Podkład powinien znajdować się na samym dole listy. Jeśli przez pomyłkę dodasz nieprzezroczystą mapę na górę, zasłoni warstwy leżące pod nią. Przeciągnij ją wtedy w dół myszą, użyj skrótu <kbd>Ctrl</kbd>+<kbd>↓</kbd> albo kliknij prawym przyciskiem myszy i wybierz *Przesuń niżej*.
 3. **Format segmentów przy nakładkach:** Jeśli przygotowujesz mapę, która ma służyć jako przezroczysta warstwa w telefonie (np. same granice działek nad mapą wektorową w Locus Map lub OsmAnd), w oknie *Ustawienia* wybierz format **PNG** z opcją *przezroczyste tło*. Format JPEG nie obsługuje przezroczystości i zamieni puste tło na białe.
-4. **Zapis sesji:** Każdą udaną kompozycję warto zapisać poleceniem *Sesja pobierania > Zapisz ustawienia sesji (conf.txt)*. Plik sesji zapamiętuje wszystkie wybrane warstwy wraz z ich kolejnością i wartościami krycia.
+4. **Zapis sesji:** Każdą udaną kompozycję warto zapisać poleceniem *Sesja pobierania > Zapisz sesję w folderze...*. Plik sesji zapamiętuje wszystkie wybrane warstwy wraz z ich kolejnością i wartościami krycia.
 
 ---
 

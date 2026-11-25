@@ -2,6 +2,7 @@
 title: Eksport do CAD
 nav_order: 14
 has_children: true
+description: "Mapa jako podkład w rysunku CAD: rysunek DXF, skrypt SCR albo program LISP, z rastrami umieszczonymi na właściwych współrzędnych."
 ---
 
 # Eksport do CAD
@@ -28,7 +29,7 @@ Mapa jako podkład w rysunku CAD: rysunek DXF, skrypt SCR albo program LISP, z r
 4. Zaznacz pliki wynikowe (`rysunek DXF`, `skrypt SCR`, opcjonalnie `program LISP`) i kliknij **Eksportuj**.
 5. Otwórz utworzony plik `_cad_<kol>x<wier>.dxf` bezpośrednio w programie CAD albo wstaw mapę do istniejącego rysunku poleceniem `SCRIPT` / `APPLOAD` ([Wstawianie w programach CAD](programy/)).
 
-![Okno Eksport do CAD (DXF, skrypt SCR, LISP)]({{ '/pomoc/obrazy/12-eksport-cad.png' | relative_url }})
+![Okno Eksport do CAD (DXF, skrypt SCR, LISP)]({{ '/pomoc/obrazy/12-eksport-cad.png' | relative_url }}){: loading="lazy" width="522" height="626"}
 
 *Rysunek 1. Okno eksportu do CAD: wybór rastrów, elementów wektorowych i formatów.*
 

@@ -2,6 +2,7 @@
 title: Instalacja i uruchomienie
 nav_order: 1
 parent: Pierwsze kroki
+description: "MapoTero nie wymaga instalatora: to jeden plik MapoTero.exe dla 64-bitowego Windows, dostarczany w paczce ZIP razem z folderem warstwy."
 ---
 
 # Instalacja i uruchomienie

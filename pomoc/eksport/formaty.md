@@ -2,6 +2,7 @@
 title: Wybór formatu
 nav_order: 1
 parent: Eksport mapy
+description: "Który format wybrać dla której aplikacji lub urządzenia."
 ---
 
 # Wybór formatu

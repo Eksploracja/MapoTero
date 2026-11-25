@@ -2,6 +2,7 @@
 title: Obszar wzdłuż trasy
 nav_order: 3
 parent: Wybór obszaru
+description: "Zamiast całego prostokąta program pobiera tylko segmenty leżące w pasie wzdłuż trasy. Przy trasie ukośnej lub krętej to wielokrotnie mniej danych."
 ---
 
 # Obszar wzdłuż trasy
@@ -49,7 +50,7 @@ Takie pliki generują serwisy i aplikacje turystyczne (np. Mapy.com, Komoot, Loc
 
 ## Okno Obszar pobierania wzdłuż trasy
 
-![Okno Obszar pobierania wzdłuż trasy i wyznaczone segmenty na mapie]({{ '/pomoc/obrazy/04-korytarz.png' | relative_url }})
+![Okno Obszar pobierania wzdłuż trasy i wyznaczone segmenty na mapie]({{ '/pomoc/obrazy/04-korytarz.png' | relative_url }}){: loading="lazy" width="1090" height="504"}
 
 *Rysunek 1. Okno wyboru trasy i szerokości pasa z niebieskimi segmentami wyznaczonymi wzdłuż trasy.*
 

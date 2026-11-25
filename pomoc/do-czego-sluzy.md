@@ -1,6 +1,7 @@
 ---
 title: Do czego służy MapoTero
 nav_order: 2.5
+description: "Przeglądarki internetowe pozwalają oglądać mapy z państwowych serwerów tylko na ekranie komputera. MapoTero służy do tego, żeby te same mapy pobrać na dysk,…"
 ---
 
 # Do czego służy MapoTero

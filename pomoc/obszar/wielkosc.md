@@ -2,6 +2,7 @@
 title: Jak duży obszar pobrać
 nav_order: 4
 parent: Wybór obszaru
+description: "Liczba pikseli rośnie z kwadratem dokładności: dwa razy mniejszy piksel to cztery razy więcej danych. Warto oszacować czas pobierania i miejsce na dysku…"
 ---
 
 # Jak duży obszar pobrać

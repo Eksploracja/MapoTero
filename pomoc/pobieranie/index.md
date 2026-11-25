@@ -2,6 +2,7 @@
 title: Pobieranie map
 nav_order: 7
 has_children: true
+description: "Jak przebiega pobieranie segmentów, jak je przerwać i wznowić oraz co zrobić, gdy serwer odmawia współpracy."
 ---
 
 # Pobieranie map

@@ -2,6 +2,7 @@
 title: Wybór obszaru
 nav_order: 6
 has_children: true
+description: "Obszar pobierania można zaznaczyć na mapie, wpisać współrzędnymi albo wyznaczyć jako pas wzdłuż trasy."
 ---
 
 # Wybór obszaru

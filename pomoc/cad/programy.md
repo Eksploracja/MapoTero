@@ -2,6 +2,7 @@
 title: Wstawianie w programach CAD
 nav_order: 1
 parent: Eksport do CAD
+description: "Krok po kroku: jak wstawić wyeksportowaną mapę jako podkład do konkretnego programu CAD."
 ---
 
 # Wstawianie w programach CAD

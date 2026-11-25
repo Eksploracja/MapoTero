@@ -2,6 +2,7 @@
 title: Zaznaczanie na mapie
 nav_order: 1
 parent: Wybór obszaru
+description: "Prostokąt zaznaczony prawym przyciskiem myszy, siatka segmentów na mapie i zmiana zasięgu uchwytami."
 ---
 
 # Zaznaczanie na mapie
@@ -73,7 +74,7 @@ Program automatycznie przesunie mapę podglądu i ustawi optymalny poziom powię
 4. Opcja **Włącz warstwy: Ortofotomapa i Działki ewidencyjne (EGiB GUGiK)** automatycznie zaznacza w drzewie map fotomapę lotniczą oraz urzędowe granice i numery działek.
 5. Kliknij **Zaznacz na mapie**.
 
-![Okno wyszukiwania działki katastralnej ULDK]({{ '/pomoc/obrazy/16-szukaj-dzialki.png' | relative_url }})
+![Okno wyszukiwania działki katastralnej ULDK]({{ '/pomoc/obrazy/16-szukaj-dzialki.png' | relative_url }}){: loading="lazy" width="562" height="454"}
 
 *Rysunek 1. Wyszukiwarka działek katastralnych ULDK: wyszukiwanie parceli po numerze i obrębie z automatycznym marginesem.*
 
@@ -113,7 +114,7 @@ narożnika z uwzględnieniem pełnych segmentów (rzeczywisty zasięg pobieranej
 
 Uchwyty zmieniają zasięg o **pełne segmenty**, co pozwala łatwo dodać brakujący rząd bez ponownego zaznaczania całego obszaru.
 
-![Siatka segmentów na mapie z uchwytami narożników, boków i środka]({{ '/pomoc/obrazy/04-uchwyty-siatki.png' | relative_url }})
+![Siatka segmentów na mapie z uchwytami narożników, boków i środka]({{ '/pomoc/obrazy/04-uchwyty-siatki.png' | relative_url }}){: loading="lazy" width="516" height="415"}
 
 *Rysunek 2. Uchwyty siatki segmentów: narożniki, środki boków oraz uchwyt centralny do przesuwania całego obszaru.*
 

@@ -1,6 +1,7 @@
 ---
 title: Pojęcia podstawowe
 nav_order: 4
+description: "Kilka pojęć, bez których trudno świadomie dobrać ustawienia: segment, piksel, siatka, sesja i układ współrzędnych."
 ---
 
 # Pojęcia podstawowe
@@ -20,7 +21,7 @@ Kilka pojęć, bez których trudno świadomie dobrać ustawienia: segment, pikse
 
 ## Zbiór map i warstwa
 
-**Zbiór map** to plik tekstowy w folderze `warstwy`, który opisuje jeden serwer map: jego adres i listę dostępnych warstw. Zbiory to np. *skany_map_topograficznych*, *ortofotomapa*, *geologiczna_50_SMGP*. W drzewie *Warstwy do pobrania* warstwy są pogrupowane tematycznie i mają czytelne nazwy (np. *Mapy topograficzne > Skany map topograficznych GUGiK > 1:25 000, układ 1965*).
+**Zbiór map** to plik tekstowy w folderze `warstwy`, który opisuje jeden serwer map: jego adres i listę dostępnych warstw. Zbiory to np. *skany_map_topograficznych*, *ortofotomapa*, *geologiczna_50_SMGP*. W drzewie *Katalog warstw* warstwy są pogrupowane tematycznie i mają czytelne nazwy (np. *Mapy topograficzne > Skany map topograficznych GUGiK > 1:25 000, układ 1965*).
 
 **Warstwa** to jedna mapa udostępniana przez serwer, np. *Raster_25_1965* (mapa topograficzna 1:25 000) w zbiorze skanów map topograficznych. Przy każdej warstwie zbiór podaje zalecany rozmiar piksela.
 

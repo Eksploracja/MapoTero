@@ -2,6 +2,7 @@
 title: Błędy pobierania
 nav_order: 5
 parent: Pobieranie map
+description: "Co oznaczają nieudane, puste lub białe segmenty i jak je naprawić."
 ---
 
 # Błędy pobierania
