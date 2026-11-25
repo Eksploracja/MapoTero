@@ -503,6 +503,19 @@ p.w_przygotowaniu-title > p:first-child, blockquote.w_przygotowaniu-title > p:fi
 }
 
 /* === TABELE === */
+.table-wrapper {
+  display: block !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow-x: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  margin: 1.5rem 0 !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 8px !important;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.03) !important;
+  background-color: #ffffff !important;
+}
+
 .main-content table {
   width: 100% !important;
   border-collapse: separate !important;
@@ -513,6 +526,14 @@ p.w_przygotowaniu-title > p:first-child, blockquote.w_przygotowaniu-title > p:fi
   margin: 1.5rem 0 !important;
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.03) !important;
   display: table !important;
+}
+
+.main-content .table-wrapper > table {
+  margin: 0 !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  overflow: visible !important;
 }
 
 .main-content table th {
@@ -574,12 +595,23 @@ kbd {
   padding: 0.15em 0.4em !important;
   font-size: 0.875em !important;
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
+  overflow-wrap: anywhere !important;
+  word-break: break-word !important;
+}
+
+pre,
+div.highlighter-rouge,
+figure.highlight {
+  max-width: 100% !important;
 }
 
 pre {
   border-radius: 8px !important;
   border: 1px solid #334155 !important;
   padding: 1rem 1.25rem !important;
+  overflow-x: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  max-width: 100% !important;
 }
 
 /* === ZDJĘCIA, ZRZUTY EKRANU I PODPISY === */
@@ -596,6 +628,10 @@ img {
   margin-bottom: 0.5rem !important;
   background-color: #ffffff !important;
   transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+}
+
+.main-content img.mt-lightbox-gotowy {
+  cursor: zoom-in !important;
 }
 
 .main-content img:hover {
@@ -657,4 +693,356 @@ p:has(> em:only-child) {
 .site-footer a:hover {
   color: #059669 !important;
 }
+
+/* === LIGHTBOX ZRZUTÓW EKRANU === */
+.mt-lightbox-tlo {
+  position: fixed;
+  inset: 0;
+  z-index: 10050;
+  background: rgba(15, 23, 42, 0.92);
+  display: flex;
+  flex-direction: column;
+  padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px);
+}
+
+.mt-lightbox-tlo[hidden] {
+  display: none !important;
+}
+
+.mt-lightbox-pasek {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.65rem 1rem;
+  color: #f8fafc;
+  font-size: 0.88rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  flex-shrink: 0;
+}
+
+.mt-lightbox-podpis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+  color: #e2e8f0;
+}
+
+.mt-lightbox-zamknij {
+  background: rgba(255, 255, 255, 0.14);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 6px;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 0.85rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.mt-lightbox-zamknij:hover {
+  background: rgba(255, 255, 255, 0.24);
+}
+
+.mt-lightbox-obszar {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem;
+  touch-action: pinch-zoom pan-x pan-y;
+  -webkit-overflow-scrolling: touch;
+}
+
+.mt-lightbox-obszar img {
+  margin: 0 !important;
+  border: none !important;
+  border-radius: 4px !important;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.5) !important;
+  background-color: #ffffff !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
+  width: auto !important;
+  height: auto !important;
+  object-fit: contain !important;
+  transition: none !important;
+}
+
+.mt-lightbox-podpowiedz {
+  text-align: center;
+  color: #94a3b8;
+  font-size: 0.76rem;
+  padding: 0.45rem 0.75rem 0.65rem;
+  flex-shrink: 0;
+}
+
+/* Pływający przycisk powrotu na górę (tylko mobile) */
+.mt-scroll-top-mobile {
+  display: none;
+  position: fixed;
+  right: 0.9rem;
+  bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+  z-index: 90;
+  width: 44px;
+  height: 44px;
+  border-radius: 9999px;
+  border: 1px solid #cbd5e1;
+  background: rgba(255, 255, 255, 0.94);
+  color: #047857;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.16);
+  font-size: 1.2rem;
+  font-weight: 700;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(4px);
+}
+
+/* === RESPONSYWNOŚĆ MOBILE (< 50rem / 800px) === */
+@media (max-width: 49.99rem) {
+  body, .main-content {
+    font-size: 15.5px !important;
+    line-height: 1.62 !important;
+  }
+
+  .site-header {
+    min-height: 3.5rem !important;
+    padding-right: 0.5rem !important;
+  }
+
+  .site-title {
+    font-size: 1.12rem !important;
+    white-space: nowrap !important;
+  }
+
+  #menu-button {
+    min-width: 44px !important;
+    min-height: 44px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  .search-input-wrap {
+    height: 2.85rem !important;
+  }
+
+  /* Zapobieganie automatycznemu powiększaniu strony na iOS Safari */
+  .search-input {
+    font-size: 16px !important;
+  }
+
+  .search-result {
+    padding: 0.65rem 0.75rem !important;
+  }
+
+  .aux-nav-list-item a.site-button {
+    min-height: 40px !important;
+    padding: 0.4rem 0.75rem !important;
+  }
+
+  .main-content h1 {
+    font-size: 1.65rem !important;
+    line-height: 1.25 !important;
+    margin-top: 0.25rem !important;
+    margin-bottom: 0.65rem !important;
+  }
+
+  .main-content h2 {
+    font-size: 1.28rem !important;
+    margin-top: 1.75rem !important;
+    margin-bottom: 0.7rem !important;
+  }
+
+  .main-content h3 {
+    font-size: 1.08rem !important;
+    margin-top: 1.35rem !important;
+  }
+
+  .main-content p.fs-6,
+  .main-content p.fs-5 {
+    font-size: 1rem !important;
+    margin-bottom: 1.1rem !important;
+  }
+
+  .main-content a.btn,
+  a.btn,
+  .btn {
+    min-height: 44px !important;
+    padding: 0.55rem 1rem !important;
+  }
+
+  p.informacja, blockquote.informacja, p.informacja-title, blockquote.informacja-title,
+  p.wskazowka, blockquote.wskazowka, p.wskazowka-title, blockquote.wskazowka-title,
+  p.uwaga, blockquote.uwaga, p.uwaga-title, blockquote.uwaga-title,
+  p.nowosc, blockquote.nowosc, p.nowosc-title, blockquote.nowosc-title,
+  p.w_przygotowaniu, blockquote.w_przygotowaniu, p.w_przygotowaniu-title, blockquote.w_przygotowaniu-title,
+  .callout {
+    padding: 0.8rem 0.95rem !important;
+    margin: 1rem 0 !important;
+    font-size: 0.9rem !important;
+  }
+
+  .table-wrapper {
+    margin: 1.15rem 0 !important;
+  }
+
+  .main-content table th {
+    padding: 0.55rem 0.65rem !important;
+    font-size: 0.72rem !important;
+  }
+
+  .main-content table td {
+    padding: 0.55rem 0.65rem !important;
+    font-size: 0.84rem !important;
+    line-height: 1.45 !important;
+  }
+
+  .main-content table code {
+    overflow-wrap: anywhere !important;
+    word-break: break-word !important;
+  }
+
+  pre {
+    padding: 0.8rem 0.95rem !important;
+    font-size: 0.84rem !important;
+  }
+
+  .mt-scroll-top-mobile.widoczny {
+    display: inline-flex;
+  }
+}
 </style>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  var main = document.querySelector(".main-content");
+  if (!main) return;
+
+  // 1. Zapewnienie przewijania poziomego tabel także bez wrappera motywu
+  main.querySelectorAll("table").forEach(function (tbl) {
+    if (tbl.closest("#galeria-warstw-app") || tbl.closest(".table-wrapper")) return;
+    var wrap = document.createElement("div");
+    wrap.className = "table-wrapper";
+    tbl.parentNode.insertBefore(wrap, tbl);
+    wrap.appendChild(tbl);
+  });
+
+  // 2. Zwijanie długiego spisu treści na mobile, aby nie zasłaniał treści na starcie
+  if (window.matchMedia && window.matchMedia("(max-width: 799px)").matches) {
+    main.querySelectorAll("details[open]").forEach(function (det) {
+      var toc = det.querySelector("#markdown-toc, .markdown-toc, ul");
+      if (toc && toc.querySelectorAll("li").length > 8) {
+        det.removeAttribute("open");
+      }
+    });
+  }
+
+  // 3. Lightbox powiększenia dla zrzutów ekranu i schematów dokumentacji
+  var obrazy = Array.prototype.filter.call(main.querySelectorAll("img"), function (img) {
+    if (img.closest("#galeria-warstw-app") || img.closest("a") || img.classList.contains("no-lightbox")) {
+      return false;
+    }
+    return true;
+  });
+
+  if (obrazy.length > 0) {
+    var lbTlo = document.createElement("div");
+    lbTlo.className = "mt-lightbox-tlo";
+    lbTlo.hidden = true;
+    lbTlo.setAttribute("role", "dialog");
+    lbTlo.setAttribute("aria-modal", "true");
+    lbTlo.setAttribute("aria-label", "Powiększenie ilustracji");
+
+    var lbPasek = document.createElement("div");
+    lbPasek.className = "mt-lightbox-pasek";
+    var lbPodpis = document.createElement("span");
+    lbPodpis.className = "mt-lightbox-podpis";
+    var lbZamknij = document.createElement("button");
+    lbZamknij.type = "button";
+    lbZamknij.className = "mt-lightbox-zamknij";
+    lbZamknij.textContent = "Zamknij ×";
+    lbPasek.appendChild(lbPodpis);
+    lbPasek.appendChild(lbZamknij);
+
+    var lbObszar = document.createElement("div");
+    lbObszar.className = "mt-lightbox-obszar";
+    var lbImg = document.createElement("img");
+    lbObszar.appendChild(lbImg);
+
+    var lbPodp = document.createElement("div");
+    lbPodp.className = "mt-lightbox-podpowiedz";
+    lbPodp.textContent = "Rozsuń dwoma palcami, aby przybliżyć szczegóły";
+
+    lbTlo.appendChild(lbPasek);
+    lbTlo.appendChild(lbObszar);
+    lbTlo.appendChild(lbPodp);
+    document.body.appendChild(lbTlo);
+
+    var ostatniFocus = null;
+    function zamknijLb() {
+      if (lbTlo.hidden) return;
+      lbTlo.hidden = true;
+      document.documentElement.style.overflow = "";
+      if (ostatniFocus && typeof ostatniFocus.focus === "function") {
+        try { ostatniFocus.focus({ preventScroll: true }); } catch (e) {}
+      }
+      ostatniFocus = null;
+    }
+
+    function otworzLb(img) {
+      ostatniFocus = document.activeElement;
+      lbImg.src = img.currentSrc || img.src;
+      lbImg.alt = img.alt || "";
+      lbPodpis.textContent = img.alt || "Podgląd ilustracji";
+      lbTlo.hidden = false;
+      document.documentElement.style.overflow = "hidden";
+      lbZamknij.focus({ preventScroll: true });
+    }
+
+    lbZamknij.addEventListener("click", zamknijLb);
+    lbTlo.addEventListener("click", function (e) {
+      if (e.target === lbTlo || e.target === lbObszar) zamknijLb();
+    });
+    document.addEventListener("keydown", function (e) {
+      if (!lbTlo.hidden && e.key === "Escape") zamknijLb();
+    });
+
+    obrazy.forEach(function (img) {
+      img.classList.add("mt-lightbox-gotowy");
+      img.title = img.title || "Kliknij, aby powiększyć";
+      img.addEventListener("click", function () {
+        otworzLb(img);
+      });
+    });
+  }
+
+  // 4. Pływający przycisk "Na górę" na długich stronach mobilnych (poza Galerią z dokiem)
+  if (!document.getElementById("galeria-warstw-app")) {
+    var btnTop = document.createElement("button");
+    btnTop.type = "button";
+    btnTop.className = "mt-scroll-top-mobile";
+    btnTop.setAttribute("aria-label", "Przewiń na górę strony");
+    btnTop.textContent = "↑";
+    btnTop.addEventListener("click", function () {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+    document.body.appendChild(btnTop);
+
+    var tickScroll = false;
+    window.addEventListener("scroll", function () {
+      if (tickScroll) return;
+      tickScroll = true;
+      requestAnimationFrame(function () {
+        tickScroll = false;
+        btnTop.classList.toggle("widoczny", window.scrollY > 420);
+      });
+    }, { passive: true });
+  }
+});
+</script>

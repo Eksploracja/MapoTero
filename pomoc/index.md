@@ -9,7 +9,9 @@ nav_order: 2
 Pełny opis programu: każde okno, każda opcja i gotowe sposoby pracy dla najczęstszych zadań.
 {: .fs-6 .fw-300 }
 
-**Dotyczy wersji:** {{ site.wersja_programu }} · [Pobierz program](https://github.com/Eksploracja/MapoTero/releases/latest){: .btn .btn-primary .fs-4 .ml-2 }
+**Dotyczy wersji:** {{ site.wersja_programu }}
+
+[Pobierz program](https://github.com/Eksploracja/MapoTero/releases/latest){: .btn .btn-primary .fs-4 .mb-2 }
 
 {: .informacja }
 Skrócony opis obsługi znajdziesz również w [skróconej instrukcji]({{ '/#skrócona-instrukcja-obsługi' | relative_url }})

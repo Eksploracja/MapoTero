@@ -285,8 +285,8 @@
           String(rozpietosc.maxPx).replace(".", ",") +
           " m/px) — w jednej płaskiej mapie stracisz szczegóły albo pobierzesz zbędnie duży plik. " +
           (polaczono
-            ? "Kliknij „✨ Otwórz w Szybkim Kreatorze” i rozdziel je na osobne skale (tryb wieloskalowy)."
-            : "Po wczytaniu do Szybkiego Kreatora w MapoTero rozdziel je na osobne skale (tryb wieloskalowy).")
+            ? "Kliknij „✨ Otwórz w Szybkim Kreatorze” — program zaproponuje automatyczny podział na osobne skale (tryb wieloskalowy)."
+            : "Po wczytaniu do Szybkiego Kreatora w MapoTero program zaproponuje automatyczny podział na osobne skale (tryb wieloskalowy).")
       );
     }
 
@@ -675,6 +675,11 @@
     return najlepszy;
   }
 
+  function formatujLicznikPozycjiModala(indeks, suma) {
+    if (!Number.isFinite(indeks) || !Number.isFinite(suma) || suma <= 0 || indeks < 0) return "";
+    return (indeks + 1) + " / " + suma;
+  }
+
   if (typeof module !== "undefined" && module.exports) {
     module.exports = {
       MAKS_WARSTW_KANAPKI,
@@ -712,7 +717,8 @@
       obliczNoweCentrumPoPinch,
       budujBboxZDwochPunktow,
       obliczNaroznikiBbox,
-      znajdzNaroznikPodKursorem
+      znajdzNaroznikPodKursorem,
+      formatujLicznikPozycjiModala
     };
   }
 
@@ -1750,15 +1756,28 @@
     const brak = utworzPlaceholder(w.zbior);
     brak.hidden = true;
     if (w.obrazek) {
+      const srcObrazka = sciezkaObrazka(w.obrazek);
       const img = document.createElement("img");
-      img.src = sciezkaObrazka(w.obrazek);
+      img.src = srcObrazka;
       img.alt = "Powiększony podgląd warstwy: " + w.nazwa;
       img.decoding = "async";
+      img.title = "Kliknij, aby powiększyć próbkę na cały ekran";
+
+      const btnPowieksz = el("button", "gw-btn-powieksz-probke", "🔍 Powiększ próbkę");
+      btnPowieksz.type = "button";
+      const otworzZoomProbki = function () {
+        if (ref.otworzZoomProbki) ref.otworzZoomProbki(srcObrazka, w.nazwa);
+      };
+      img.addEventListener("click", otworzZoomProbki);
+      btnPowieksz.addEventListener("click", otworzZoomProbki);
+
       img.addEventListener("error", function () {
         img.hidden = true;
+        btnPowieksz.hidden = true;
         brak.hidden = false;
       });
       ref.modalPanelProbka.appendChild(img);
+      ref.modalPanelProbka.appendChild(btnPowieksz);
     } else {
       brak.hidden = false;
     }
@@ -1773,6 +1792,9 @@
 
     ref.modalTytul.textContent = w.nazwa;
     if (ref.modalMobileTytul) ref.modalMobileTytul.textContent = w.nazwa;
+    if (ref.modalMobileLicznik) {
+      ref.modalMobileLicznik.textContent = formatujLicznikPozycjiModala(indeks, stan.widoczne.length);
+    }
     const sciezkaCzesci = ["Wybierz mapy", w.grupa];
     if (w.podgrupa) sciezkaCzesci.push(w.podgrupa);
     sciezkaCzesci.push(w.nazwa);
@@ -1835,6 +1857,7 @@
   }
 
   function zamknijModal(bezHistorii) {
+    if (ref.zamknijZoomProbki) ref.zamknijZoomProbki();
     if (ref.modalTlo.hidden && stan.indeksModala < 0) return;
     ref.modalTlo.hidden = true;
     stan.indeksModala = -1;
@@ -2940,11 +2963,14 @@
     const btnPodgladZwin = el("button", "gw-btn-prosty gw-mikser-btn-zwin-podglad", "▴ Ukryj podgląd");
     btnPodgladZwin.type = "button";
     btnPodgladZwin.setAttribute("aria-expanded", "true");
-    btnPodgladZwin.addEventListener("click", function () {
-      stan.podgladMikseraZwiniety = !stan.podgladMikseraZwiniety;
+    function ustawPodgladMikseraZwiniety(zwiniety) {
+      stan.podgladMikseraZwiniety = Boolean(zwiniety);
       mikserModal.classList.toggle("gw-mikser-podglad-zwiniety", stan.podgladMikseraZwiniety);
       btnPodgladZwin.textContent = stan.podgladMikseraZwiniety ? "▾ Pokaż podgląd" : "▴ Ukryj podgląd";
       btnPodgladZwin.setAttribute("aria-expanded", stan.podgladMikseraZwiniety ? "false" : "true");
+    }
+    btnPodgladZwin.addEventListener("click", function () {
+      ustawPodgladMikseraZwiniety(!stan.podgladMikseraZwiniety);
     });
     sterowaniePodgladu.appendChild(btnPodgladZwin);
 
@@ -3571,6 +3597,11 @@
       zapiszKanapkeLocalStorage();
       odswiezDokKanapki();
     });
+    inputNazwa.addEventListener("focus", function () {
+      if (typeof window !== "undefined" && window.innerWidth <= 860 && !stan.podgladMikseraZwiniety) {
+        ustawPodgladMikseraZwiniety(true);
+      }
+    });
     nazwaWiersz.appendChild(inputNazwa);
 
     const akcjeGlowne = el("div", "gw-mikser-akcje-glowne");
@@ -3955,6 +3986,15 @@
       renderujSiatke();
     });
 
+    function odswiezCienPaskaGrup() {
+      const naKoncu = pasekGrup.scrollLeft + pasekGrup.clientWidth >= pasekGrup.scrollWidth - 8;
+      pasekGrup.classList.toggle("na-koncu", naKoncu);
+    }
+    pasekGrup.addEventListener("scroll", odswiezCienPaskaGrup, { passive: true });
+    if (typeof window !== "undefined") {
+      window.addEventListener("resize", odswiezCienPaskaGrup, { passive: true });
+    }
+
     const wyniki = el("div", "gw-wyniki");
     wyniki.addEventListener("click", function (e) {
       const btnKanapka = e.target.closest(".gw-btn-kanapka");
@@ -3995,15 +4035,52 @@
 
     const modal = el("div", "gw-modal");
 
-    // Stały pasek górny na mobile (tytuł + Zamknij zawsze widoczne u góry ekranu)
+    // Stały pasek górny na mobile (tytuł + licznik + Zamknij zawsze widoczne u góry ekranu)
     const modalMobileTop = el("div", "gw-modal-mobile-top");
     const modalMobileTytul = el("span", "gw-modal-mobile-tytul");
+    const modalMobileLicznik = el("span", "gw-modal-mobile-licznik");
     const modalZamknijMobile = el("button", "gw-modal-zamknij", "×");
     modalZamknijMobile.type = "button";
     modalZamknijMobile.setAttribute("aria-label", "Zamknij podgląd");
     modalZamknijMobile.addEventListener("click", function () { zamknijModal(); });
     modalMobileTop.appendChild(modalMobileTytul);
+    modalMobileTop.appendChild(modalMobileLicznik);
     modalMobileTop.appendChild(modalZamknijMobile);
+
+    // Pełnoekranowe powiększenie próbki w modalu (z obsługą pinch-to-zoom)
+    const probkaZoomTlo = el("div", "gw-probka-zoom-tlo");
+    probkaZoomTlo.hidden = true;
+    probkaZoomTlo.setAttribute("role", "dialog");
+    probkaZoomTlo.setAttribute("aria-modal", "true");
+    probkaZoomTlo.setAttribute("aria-label", "Powiększona próbka mapy");
+    const probkaZoomPasek = el("div", "gw-probka-zoom-pasek");
+    const probkaZoomTytul = el("span", "gw-probka-zoom-tytul");
+    const probkaZoomZamknij = el("button", "gw-probka-zoom-zamknij", "Zamknij ×");
+    probkaZoomZamknij.type = "button";
+    probkaZoomPasek.appendChild(probkaZoomTytul);
+    probkaZoomPasek.appendChild(probkaZoomZamknij);
+    const probkaZoomObszar = el("div", "gw-probka-zoom-obszar");
+    const probkaZoomImg = document.createElement("img");
+    probkaZoomObszar.appendChild(probkaZoomImg);
+    const probkaZoomPodp = el("div", "gw-probka-zoom-podpowiedz", "Rozsuń dwoma palcami, aby przybliżyć szczegóły");
+    probkaZoomTlo.appendChild(probkaZoomPasek);
+    probkaZoomTlo.appendChild(probkaZoomObszar);
+    probkaZoomTlo.appendChild(probkaZoomPodp);
+
+    function zamknijZoomProbki() {
+      probkaZoomTlo.hidden = true;
+    }
+    function otworzZoomProbki(src, tytul) {
+      probkaZoomImg.src = src;
+      probkaZoomImg.alt = "Powiększona próbka: " + (tytul || "");
+      probkaZoomTytul.textContent = tytul || "Próbka mapy";
+      probkaZoomTlo.hidden = false;
+      probkaZoomZamknij.focus({ preventScroll: true });
+    }
+    probkaZoomZamknij.addEventListener("click", zamknijZoomProbki);
+    probkaZoomTlo.addEventListener("click", function (e) {
+      if (e.target === probkaZoomTlo || e.target === probkaZoomObszar) zamknijZoomProbki();
+    });
 
     const modalCialo = el("div", "gw-modal-cialo");
     const modalObrazKol = el("div", "gw-modal-obraz-kol");
@@ -4254,6 +4331,10 @@
     const mikserUi = zbudujMikserUi();
 
     document.addEventListener("keydown", function (e) {
+      if (!probkaZoomTlo.hidden && e.key === "Escape") {
+        zamknijZoomProbki();
+        return;
+      }
       if (stan.mikserOtwarty && e.key === "Escape") {
         if (stan.zakladkaMiksera === "mapa" && stan.punktStartuZaznaczania) {
           stan.punktStartuZaznaczania = null;
@@ -4312,6 +4393,7 @@
     kontener.appendChild(wyniki);
     kontener.appendChild(mikserUi.mikserDok);
     kontener.appendChild(modalTlo);
+    kontener.appendChild(probkaZoomTlo);
     kontener.appendChild(mikserUi.mikserTlo);
 
     if (stan.dane && stan.dane.wygenerowano) {
@@ -4337,7 +4419,10 @@
       modalTlo: modalTlo,
       modalCialo: modalCialo,
       modalMobileTytul: modalMobileTytul,
+      modalMobileLicznik: modalMobileLicznik,
       modalZamknijMobile: modalZamknijMobile,
+      otworzZoomProbki: otworzZoomProbki,
+      zamknijZoomProbki: zamknijZoomProbki,
       modalObrazKol: modalObrazKol,
       modalPanelProbka: modalPanelProbka,
       modalPanelZasieg: modalPanelZasieg,
@@ -4363,6 +4448,7 @@
 
     renderujSiatke();
     odswiezDokKanapki();
+    odswiezCienPaskaGrup();
     if (stan.mikserOtwarty) {
       otworzMikser();
     } else if (stan.warstwaUrlStart) {
