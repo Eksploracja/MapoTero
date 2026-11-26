@@ -122,6 +122,8 @@
 
    Prawy panel można poszerzyć, żeby widzieć długie nazwy warstw: przeciągnij myszą w lewo pasek między mapą a panelem. Panel da się poszerzyć tylko w oknie szerszym od najmniejszego (np. zmaksymalizowanym); w węższym oknie panel zwęża się sam, żeby zmieściła się mapa i schemat siatki. Program zapamiętuje szerokość panelu.
 
+   Po zmianie skali ekranu w ustawieniach Windows podczas pracy uruchom MapoTero ponownie, aby okno zostało przeliczone dla nowej skali.
+
    Możesz wybrać do 12 warstw - pierwsza (na dole listy) jest podkładem, kolejne kładą się na niej. Górna warstwa listy leży na wierzchu (przypomina o tym dopisek "↑ na wierzchu" w nagłówku). Kliknij warstwę na tej liście, aby ją zaznaczyć: w jej wierszu pojawia się pole krycia, które nadaje warstwie przezroczystość - np. przy 50% widać przez nią warstwę leżącą niżej; pozostałe warstwy pokazują krycie w ramce. Krzyżyk ✕ na końcu wiersza (albo klawisz Delete) usuwa warstwę, a przeciągnięcie myszą lub Ctrl+strzałka zmienia jej miejsce w kanapce. Prawy przycisk myszy na warstwie otwiera menu z tymi samymi poleceniami. Przycisk "Mikser…" w nagłówku karty otwiera mikser warstw z suwakami krycia i podglądem kanapki. Wysokość kart w prawym panelu zmienisz, przeciągając uchwyt "═" między nimi; dwuklik na uchwycie przywraca podział domyślny. Warstwy o kryciu mniejszym niż 100% pobierane są z serwera WMS osobnymi zapytaniami, więc pobieranie trwa wtedy dłużej.
 
    Warstwy mogą pochodzić z różnych zbiorów map (serwerów WMS, usług WMTS oraz serwerów kafli XYZ/TMS - np. OSMapa.pl, UMP-pcPL i szlaki Waymarked Trails): rozwiń kolejną grupę i zaznacz jej warstwę - wcześniej wybrane warstwy zostają na liście. Sprawdzone kompozycje wielowarstwowe:

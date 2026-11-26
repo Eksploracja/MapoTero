@@ -13,6 +13,11 @@ Ustawienia i zbiory map z poprzednich wersji (plik `lastsettings.txt`, folder `w
 
 ## Zmiany w wersji 3.19
 
+* **Czytelniejsze czcionki w Katalogu warstw i polach wyszukiwania (poprawka 3.19, 26.11.2026):**
+  * Drzewo *Katalog warstw* i pola wyszukiwania miejsc i warstw dobierają wielkość czcionki do skali ekranu, a na Windows 11 podpowiedź w pustym polu jest wyśrodkowana i nie jest przycinana.
+  * Lista podpowiedzi wyszukiwarki miejsc nie ucina już dolnego wiersza opisu na Windows 11.
+  * Po zmianie skali ekranu w ustawieniach Windows podczas pracy uruchom MapoTero ponownie, aby okno zostało przeliczone dla nowej skali.
+
 * **Czytelniejsze okno główne i eksport z wyborem pliku (poprawka 3.19, 25.11.2026):**
   * Gdy pobieranie nie może się zacząć (brak warstwy, obszaru, zbyt wiele segmentów), karta *Stan sesji* pokazuje powód na czerwono - dawniej opis trafiał tylko do zakładki *Komunikaty*.
   * Okno *Eksport mapy* ma pole **Plik wynikowy**: domyślna nazwa pochodzi od sesji (zamiast `_eksport_6x6`), przycisk *Zmień...* pozwala wybrać nazwę i folder, a przed zastąpieniem istniejącego pliku program pyta o zgodę. Okno pamięta ostatnio wybrany format.

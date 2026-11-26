@@ -45,6 +45,8 @@ Partial Public Class Form1
     Private _opcjeKompozycji As TableLayoutPanel
     Private _ukladRozdzielczosci As TableLayoutPanel
     Private _czcionkaRobocza As Font
+    Private _czcionkaKatalogu As Font
+    Private _czcionkaPolSzukania As Font
     Private _czcionkaNaglowka As Font
     Private _czcionkaWartosci As Font
     Private _czcionkaAkcji As Font
@@ -97,11 +99,18 @@ Partial Public Class Form1
             sekcja.SuspendLayout()
         Next
         _czcionkaRobocza = New Font("Segoe UI", 9.25F)
+        _czcionkaKatalogu = New Font(_czcionkaRobocza.FontFamily, _czcionkaRobocza.SizeInPoints * DeviceDpi / 72.0F,
+                                    _czcionkaRobocza.Style, GraphicsUnit.Pixel)
+        Dim rozmiarPolSzukania = PoleWyszukiwaniaMiejsca.RozmiarCzcionkiPola(DeviceDpi, _czcionkaRobocza.SizeInPoints,
+                                                                          OperatingSystem.IsWindowsVersionAtLeast(10, 0, 22000))
+        _czcionkaPolSzukania = New Font(_czcionkaRobocza.FontFamily, rozmiarPolSzukania, _czcionkaRobocza.Style, GraphicsUnit.Pixel)
         _czcionkaNaglowka = New Font("Segoe UI", 9.25F, FontStyle.Bold)
         _czcionkaWartosci = New Font("Segoe UI", 11.0F, FontStyle.Bold)
         _czcionkaAkcji = New Font("Segoe UI", 9.75F, FontStyle.Bold)
         AddHandler Disposed, Sub()
                                  _czcionkaRobocza.Dispose()
+                                 _czcionkaKatalogu.Dispose()
+                                 _czcionkaPolSzukania.Dispose()
                                  _czcionkaNaglowka.Dispose()
                                  _czcionkaWartosci.Dispose()
                                  _czcionkaAkcji.Dispose()
@@ -530,8 +539,8 @@ Partial Public Class Form1
                                            .Font = _czcionkaRobocza, .AccessibleRole = AccessibleRole.PushButton}
         Dim lupaWarstw = UtworzIkoneLupy(16)
         _zasobyUkladu.Add(lupaWarstw)
-        txtSzukajWarstwy.Font = _czcionkaRobocza
-        txtSzukajWarstwy.PlaceholderText = "Szukaj warstwy…"
+        txtSzukajWarstwy.Font = _czcionkaPolSzukania
+        txtSzukajWarstwy.AutoSize = False
         txtSzukajWarstwy.BorderStyle = BorderStyle.None
         txtSzukajWarstwy.BackColor = Color.White
         txtSzukajWarstwy.Anchor = AnchorStyles.None
@@ -539,6 +548,10 @@ Partial Public Class Form1
         txtSzukajWarstwy.Margin = Padding.Empty
         pnlSzukaj.Controls.Add(txtSzukajWarstwy)
         pnlSzukaj.Controls.Add(ikonaSzukaj)
+        Dim podpowiedzSzukaj = PoleWyszukiwaniaMiejsca.DodajPodpowiedzPola(txtSzukajWarstwy, "Szukaj warstwy…")
+        If podpowiedzSzukaj IsNot Nothing Then
+            ToolTip1.SetToolTip(podpowiedzSzukaj, ToolTip1.GetToolTip(txtSzukajWarstwy))
+        End If
         Dim odswiezIkoneSzukania As Action =
             Sub()
                 If txtSzukajWarstwy.TextLength = 0 Then
@@ -574,8 +587,7 @@ Partial Public Class Form1
             Sub()
                 Dim lewa = pnlSzukaj.Padding.Left
                 Dim prawa = ikonaSzukaj.Left
-                txtSzukajWarstwy.SetBounds(lewa, Math.Max(0, (pnlSzukaj.ClientSize.Height - txtSzukajWarstwy.Height) \ 2),
-                                           Math.Max(10, prawa - lewa - 2), txtSzukajWarstwy.Height)
+                PoleWyszukiwaniaMiejsca.UlozPoleTekstowe(txtSzukajWarstwy, lewa, prawa, pnlSzukaj.ClientSize.Height, podpowiedzSzukaj)
             End Sub
         AddHandler pnlSzukaj.Resize, Sub() pnlSzukaj.Invalidate()
         AddHandler pnlSzukaj.Paint,
@@ -586,8 +598,8 @@ Partial Public Class Form1
                 End Using
             End Sub
 
-        tvWarstwy.Font = _czcionkaRobocza
-        tvWarstwy.ItemHeight = _czcionkaRobocza.Height + Px(5)
+        tvWarstwy.Font = _czcionkaKatalogu
+        tvWarstwy.ItemHeight = _czcionkaKatalogu.Height + Px(5)
         tvWarstwy.ShowLines = False
         tvWarstwy.BorderStyle = BorderStyle.None
         StylPrzycisku(btnZwinRozwin)
@@ -683,11 +695,11 @@ Partial Public Class Form1
         ' z tym samym wyszukiwaniem; to okno zostaje w menu Narzędzia (i pod Ctrl+D) dla wyszukiwania działek.
         Dim lupaPaska = UtworzIkoneLupy(Px(16))
         _zasobyUkladu.Add(lupaPaska)
-        _poleSzukaniaMiejsca = New PoleWyszukiwaniaMiejsca(lupaPaska, _czcionkaRobocza) With {
+        _poleSzukaniaMiejsca = New PoleWyszukiwaniaMiejsca(lupaPaska, _czcionkaKatalogu, _czcionkaPolSzukania) With {
             .Name = "poleSzukaniaMiejsca", .Size = New Size(Px(200), Px(28)),
             .SrodekMapy = Function() (mapa.Position.Lat, mapa.Position.Lng)}
-        ToolTip1.SetToolTip(_poleSzukaniaMiejsca.Pole, "Wpisz miejscowość, adres, działkę (np. działka Wieliczka 123/4) " &
-                            "albo współrzędne. Podpowiedzi pojawiają się w trakcie pisania, Enter wybiera wynik (Ctrl+F przenosi tu kursor).")
+        _poleSzukaniaMiejsca.UstawDymekPola(ToolTip1, "Wpisz miejscowość, adres, działkę (np. działka Wieliczka 123/4) " &
+                                         "albo współrzędne. Podpowiedzi pojawiają się w trakcie pisania, Enter wybiera wynik (Ctrl+F przenosi tu kursor).")
         AddHandler _poleSzukaniaMiejsca.Wybrano, AddressOf PokazWynikWyszukiwania
         btnSzukajDzialki.Visible = False
         ' Wpisywanie współrzędnych jest w menu „Zmień ▾” karty „Obszar pobierania”, obok innych sposobów wskazania obszaru.

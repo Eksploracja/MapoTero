@@ -85,6 +85,8 @@ Program działa w trybie **portable (bez instalacji)** jako pojedynczy plik `Map
 
    Okno eksportu pamięta ostatnio wybrany format i ma pole **Plik wynikowy**: domyślna nazwa pochodzi od sesji (zamiast dawnego `_eksport_6x6`), przycisk *Zmień...* pozwala wybrać inną nazwę i folder, a przed zastąpieniem istniejącego pliku program pyta o zgodę.
 
+Po zmianie skali ekranu w ustawieniach Windows podczas pracy uruchom MapoTero ponownie, aby okno zostało przeliczone dla nowej skali.
+
 ![Bezpośredni transfer mapy na telefon przez Wi-Fi i kod QR](pomoc/obrazy/16-wyslij-telefon.png)
 
 <details markdown="block">

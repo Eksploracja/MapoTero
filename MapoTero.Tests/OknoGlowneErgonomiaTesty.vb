@@ -281,11 +281,45 @@ Public Class OknoGlowneErgonomiaTesty
     End Sub
 
     <Fact>
+    Public Sub WyszukiwarkiIZawartoscKatalogu_DopasowujaCzcionkeIWysokoscWiersza()
+        WWatkuSta(
+            Sub(f)
+                Dim drzewo = Kontrolka(Of TreeView)(f, "tvWarstwy")
+                Dim szukajMiejsca = Kontrolka(Of TextBox)(f, "txtSzukajMiejsca")
+                Dim szukajWarstwy = Kontrolka(Of TextBox)(f, "txtSzukajWarstwy")
+                Dim oczekiwanyRozmiarDrzewa = 9.25F * f.DeviceDpi / 72.0F
+                Dim oczekiwanyRozmiarPol = MapoTero.PoleWyszukiwaniaMiejsca.RozmiarCzcionkiPola(
+                    f.DeviceDpi, 9.25F, OperatingSystem.IsWindowsVersionAtLeast(10, 0, 22000))
+                Assert.Equal(Drawing.GraphicsUnit.Pixel, drzewo.Font.Unit)
+                Assert.InRange(drzewo.Font.Size, oczekiwanyRozmiarDrzewa - 0.1F, oczekiwanyRozmiarDrzewa + 0.1F)
+
+                For Each pole In {szukajMiejsca, szukajWarstwy}
+                    Assert.Equal(Drawing.GraphicsUnit.Pixel, pole.Font.Unit)
+                    Assert.InRange(pole.Font.Size, oczekiwanyRozmiarPol - 0.1F, oczekiwanyRozmiarPol + 0.1F)
+                    Assert.False(pole.AutoSize)
+                    Assert.True(pole.Height > pole.PreferredHeight, pole.Name)
+                    Dim podpowiedz = TryCast(pole.Parent.Controls(pole.Name & "Podpowiedz"), Label)
+                    Dim wysrodkowana As Control = If(DirectCast(podpowiedz, Control), pole)
+                    Assert.InRange(Math.Abs(wysrodkowana.Top - (pole.Parent.ClientSize.Height - wysrodkowana.Bottom)), 0, 1)
+                    If OperatingSystem.IsWindowsVersionAtLeast(10, 0, 22000) Then
+                        Assert.NotNull(podpowiedz)
+                        Assert.Empty(pole.PlaceholderText)
+                        Assert.Equal(pole.Parent.ClientSize.Height - 1, podpowiedz.Bottom)
+                        Assert.True(podpowiedz.UseCompatibleTextRendering)
+                        Assert.True(podpowiedz.Height > pole.Height)
+                    End If
+                Next
+            End Sub)
+    End Sub
+
+    <Fact>
     Public Sub PoleSzukania_TekstNaSrodkuWysokosci_PoligonWMenuSesji_UkladWKarcieParametrow()
         WWatkuSta(
             Sub(f)
                 Dim pole = DirectCast(Assert.Single(f.Controls.Find("poleSzukaniaMiejsca", True)), MapoTero.PoleWyszukiwaniaMiejsca)
-                Dim gora = pole.Pole.Top, dol = pole.ClientSize.Height - pole.Pole.Bottom
+                Dim podpowiedz = pole.Controls(pole.Pole.Name & "Podpowiedz")
+                Dim wysrodkowana As Control = If(podpowiedz, pole.Pole)
+                Dim gora = wysrodkowana.Top, dol = pole.ClientSize.Height - wysrodkowana.Bottom
                 Assert.True(Math.Abs(gora - dol) <= 1, $"Pole tekstu nie jest na środku: góra {gora}, dół {dol}")
 
                 Dim sesja = DirectCast(Assert.Single(f.MainMenuStrip.Items.Find("SesjaToolStripMenuItem", False)), ToolStripMenuItem)

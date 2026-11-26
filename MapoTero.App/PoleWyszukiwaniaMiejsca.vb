@@ -21,7 +21,9 @@ End Class
 Friend Class PoleWyszukiwaniaMiejsca
     Inherits Panel
 
-    Private ReadOnly _pole As New TextBox With {.BorderStyle = BorderStyle.None, .Name = "txtSzukajMiejsca"}
+    Private Shared ReadOnly CzyWindows11 As Boolean = OperatingSystem.IsWindowsVersionAtLeast(10, 0, 22000)
+
+    Private ReadOnly _pole As New TextBox With {.BorderStyle = BorderStyle.None, .AutoSize = False, .Name = "txtSzukajMiejsca"}
     Private ReadOnly _ikona As New Label With {.Cursor = Cursors.Hand, .TextAlign = ContentAlignment.MiddleCenter,
                                                .Dock = DockStyle.Right, .AccessibleRole = AccessibleRole.PushButton}
     Private ReadOnly _lista As New ListBox With {.Name = "lstWynikiSzukania", .DrawMode = DrawMode.OwnerDrawFixed,
@@ -31,6 +33,7 @@ Friend Class PoleWyszukiwaniaMiejsca
                                               .TextAlign = ContentAlignment.MiddleLeft, .Padding = New Padding(6, 0, 6, 0)}
     Private ReadOnly _zegar As New System.Windows.Forms.Timer With {.Interval = 400}
     Private ReadOnly _lupa As Bitmap
+    Private ReadOnly _podpowiedz As Label
     Private _cts As CancellationTokenSource
     Private _wyszukanaFraza As String = ""
 
@@ -41,24 +44,24 @@ Friend Class PoleWyszukiwaniaMiejsca
     ''' <summary>Wybrany wynik (miejsce, punkt ze współrzędnych albo działka).</summary>
     Public Event Wybrano(wynik As WynikWyszukiwania)
 
-    Public Sub New(lupa As Bitmap, czcionka As Font)
+    Public Sub New(lupa As Bitmap, czcionka As Font, czcionkaPola As Font)
         _lupa = lupa
         BackColor = Color.White
         Font = czcionka
         Padding = New Padding(6, 1, 2, 1)
-        _pole.Font = czcionka
-        _pole.PlaceholderText = "Szukaj miejsca lub działki…"
+        _pole.Font = czcionkaPola
         _pole.AccessibleName = "Szukaj miejsca lub działki"
-        ' Pole bez ramki ma wysokość jednej linii tekstu - kładziemy je na środku wysokości (OnLayout). Zadokowane
-        ' z górnym dopełnieniem stało przy górnej krawędzi, więc tekst nie był w linii z napisami przycisków paska.
+        ' Wyśrodkowanie w OnLayout ustawia tekst na wysokości napisów przycisków paska.
         _pole.Dock = DockStyle.None
         _ikona.Width = 24
         _lista.Font = czcionka
-        _lista.ItemHeight = CInt(czcionka.Height * 2.4)
+        _lista.ItemHeight = If(CzyWindows11, 2 * (czcionka.Height + 4), CInt(czcionka.Height * 2.4))
         _stan.Font = czcionka
+        _stan.UseCompatibleTextRendering = CzyWindows11
         _stan.ForeColor = Color.FromArgb(75, 94, 113)
         Controls.Add(_pole)
         Controls.Add(_ikona)
+        _podpowiedz = DodajPodpowiedzPola(_pole, "Szukaj miejsca lub działki…")
         OdswiezIkone()
 
         AddHandler _pole.GotFocus, Sub() Invalidate()
@@ -102,6 +105,11 @@ Friend Class PoleWyszukiwaniaMiejsca
         End Get
     End Property
 
+    Friend Sub UstawDymekPola(dymki As ToolTip, tekst As String)
+        dymki.SetToolTip(_pole, tekst)
+        If _podpowiedz IsNot Nothing Then dymki.SetToolTip(_podpowiedz, tekst)
+    End Sub
+
     ''' <summary>Lista wyników (testy).</summary>
     Friend ReadOnly Property Lista As ListBox
         Get
@@ -113,8 +121,54 @@ Friend Class PoleWyszukiwaniaMiejsca
         MyBase.OnLayout(levent)
         Dim lewa = Padding.Left
         Dim prawa = If(_ikona.Visible, _ikona.Left, ClientSize.Width - Padding.Right)
-        _pole.SetBounds(lewa, Math.Max(0, (ClientSize.Height - _pole.Height) \ 2), Math.Max(10, prawa - lewa - 2), _pole.Height)
+        UlozPoleTekstowe(_pole, lewa, prawa, ClientSize.Height, _podpowiedz)
     End Sub
+
+    Friend Shared Sub UlozPoleTekstowe(pole As TextBox, lewa As Integer, prawa As Integer, wysokoscPanelu As Integer,
+                                     podpowiedz As Label)
+        ' Dla pola bez ramki WinForms sprowadza PreferredHeight do wysokości czcionki. Natywne pole
+        ' potrzebuje dodatkowego miejsca na tekst i podpowiedź, żeby przy większym DPI nie obcinać liter.
+        Dim zapas = CInt(Math.Ceiling(3 * pole.DeviceDpi / 96.0))
+        Dim wysokosc = Math.Min(wysokoscPanelu, pole.PreferredHeight + zapas)
+        Dim gora = (wysokoscPanelu - wysokosc) \ 2
+        Dim szerokosc = Math.Max(10, prawa - lewa - 2)
+        If podpowiedz IsNot Nothing Then
+            podpowiedz.SetBounds(lewa, 1, szerokosc, Math.Max(0, wysokoscPanelu - 2))
+        End If
+        pole.SetBounds(lewa, gora, szerokosc, wysokosc)
+    End Sub
+
+    Friend Shared Function DodajPodpowiedzPola(pole As TextBox, tekst As String) As Label
+        If Not CzyWindows11 Then
+            pole.PlaceholderText = tekst
+            Return Nothing
+        End If
+
+        ' WinForms rysuje PlaceholderText wewnątrz natywnego pola. Na Windows 11 dolna część znaków była
+        ' obcinana mimo miejsca w ramce. Etykieta ma do dyspozycji całą wysokość wnętrza ramki.
+        pole.PlaceholderText = ""
+        Dim etykieta As New Label With {
+            .Name = pole.Name & "Podpowiedz", .Text = tekst, .Font = pole.Font, .BackColor = pole.BackColor,
+            .ForeColor = SystemColors.GrayText, .TextAlign = ContentAlignment.MiddleLeft, .AutoEllipsis = True,
+            .UseCompatibleTextRendering = True, .UseMnemonic = False, .Cursor = Cursors.IBeam
+        }
+        Dim odswiez As Action = Sub() etykieta.Visible = pole.TextLength = 0 AndAlso Not pole.Focused
+        AddHandler pole.TextChanged, Sub() odswiez()
+        AddHandler pole.GotFocus, Sub() odswiez()
+        AddHandler pole.LostFocus, Sub() odswiez()
+        AddHandler pole.BackColorChanged, Sub() etykieta.BackColor = pole.BackColor
+        AddHandler etykieta.Click, Sub() pole.Focus()
+        pole.Parent.Controls.Add(etykieta)
+        etykieta.BringToFront()
+        odswiez()
+        Return etykieta
+    End Function
+
+    Friend Shared Function RozmiarCzcionkiPola(dpi As Integer, rozmiarKataloguPkt As Single, windows11 As Boolean) As Single
+        ' Na Windows 11 tekst w obu polach był za duży już przy skali 100%.
+        If windows11 Then Return 8.0F * dpi / 72.0F
+        Return Math.Max(rozmiarKataloguPkt * 96.0F, 8.25F * dpi) / 72.0F
+    End Function
 
     Protected Overrides Sub OnPaint(e As PaintEventArgs)
         MyBase.OnPaint(e)
@@ -287,13 +341,32 @@ Friend Class PoleWyszukiwaniaMiejsca
         End Using
         Dim polowa = e.Bounds.Height \ 2
         Dim naglowek = w.Miejsce.KrotkaNazwa & If(w.Miejsce.TypOpis <> "", "  ·  " & w.Miejsce.TypOpis, "")
-        Using pogrubiona As New Font(_lista.Font, FontStyle.Bold)
-            TextRenderer.DrawText(e.Graphics, naglowek, pogrubiona, New Rectangle(e.Bounds.X + 6, e.Bounds.Y + 2, e.Bounds.Width - 10, polowa),
-                                  Color.FromArgb(30, 45, 61), TextFormatFlags.EndEllipsis Or TextFormatFlags.NoPrefix Or TextFormatFlags.VerticalCenter)
-        End Using
         Dim opis = If(w.Dzialka IsNot Nothing, w.Miejsce.PelnaNazwa, ObszarKreatora.SformatujLokalizacje(w.Miejsce))
         If opis = "" Then opis = w.Miejsce.WspolrzedneTekst
-        TextRenderer.DrawText(e.Graphics, opis, _lista.Font, New Rectangle(e.Bounds.X + 6, e.Bounds.Y + polowa, e.Bounds.Width - 10, polowa - 2),
-                              Color.FromArgb(75, 94, 113), TextFormatFlags.EndEllipsis Or TextFormatFlags.NoPrefix Or TextFormatFlags.VerticalCenter)
+        Dim kolorNaglowka = Color.FromArgb(30, 45, 61)
+        Dim kolorOpisu = Color.FromArgb(75, 94, 113)
+        Dim lewa = e.Bounds.X + 6
+        Dim szerokosc = e.Bounds.Width - 10
+        If szerokosc <= 0 Then Return
+
+        Using pogrubiona As New Font(_lista.Font, FontStyle.Bold)
+            If CzyWindows11 Then
+                ' Rysowanie w GDI+ odpowiada metrykom czcionki, z których obliczono wysokość pozycji.
+                ' TextRenderer z tą czcionką rysował większe litery i przycinał dolną linię na Windows 11.
+                Using format As New StringFormat With {.LineAlignment = StringAlignment.Center,
+                                                       .FormatFlags = StringFormatFlags.NoWrap,
+                                                       .Trimming = StringTrimming.EllipsisCharacter},
+                      pedzelNaglowka As New SolidBrush(kolorNaglowka), pedzelOpisu As New SolidBrush(kolorOpisu)
+                    e.Graphics.DrawString(naglowek, pogrubiona, pedzelNaglowka, New RectangleF(lewa, e.Bounds.Y, szerokosc, polowa), format)
+                    e.Graphics.DrawString(opis, _lista.Font, pedzelOpisu, New RectangleF(lewa, e.Bounds.Y + polowa, szerokosc, polowa), format)
+                End Using
+                Return
+            End If
+
+            TextRenderer.DrawText(e.Graphics, naglowek, pogrubiona, New Rectangle(lewa, e.Bounds.Y + 2, szerokosc, polowa),
+                                  kolorNaglowka, TextFormatFlags.EndEllipsis Or TextFormatFlags.NoPrefix Or TextFormatFlags.VerticalCenter)
+        End Using
+        TextRenderer.DrawText(e.Graphics, opis, _lista.Font, New Rectangle(lewa, e.Bounds.Y + polowa, szerokosc, polowa - 2),
+                              kolorOpisu, TextFormatFlags.EndEllipsis Or TextFormatFlags.NoPrefix Or TextFormatFlags.VerticalCenter)
     End Sub
 End Class
