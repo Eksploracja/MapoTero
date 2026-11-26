@@ -86,7 +86,10 @@ Public Class PodpowiedziTesty
                     'jedno narzędzie wyszukiwania: pole z lupą na pasku; osobny przycisk lupy jest ukryty
                     Assert.False(btn.Visible)
                     Dim pole = Assert.IsType(Of TextBox)(Assert.Single(f.Controls.Find("txtSzukajMiejsca", True)))
-                    Assert.Equal("Szukaj miejsca lub działki…", pole.PlaceholderText)
+                    'na Windows 11 (także Windows Server 2025 w GitHub Actions) podpowiedź jest osobną etykietą nad polem,
+                    'bo natywny PlaceholderText był tam przycinany - zob. PoleWyszukiwaniaMiejsca.DodajPodpowiedzPola
+                    Dim etykieta = TryCast(pole.Parent.Controls(pole.Name & "Podpowiedz"), Label)
+                    Assert.Equal("Szukaj miejsca lub działki…", If(etykieta?.Text, pole.PlaceholderText))
                     Assert.True(pole.Visible)
                     Assert.NotNull(btn.Image)
                     Assert.Equal(16, btn.Image.Width)
